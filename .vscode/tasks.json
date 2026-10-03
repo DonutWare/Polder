@@ -1,0 +1,100 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build web client",
+			"detail": "flutter build web in client/, copied into internal/webui/dist",
+			"type": "shell",
+			"command": "scripts/build-web.sh",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Generate client code",
+			"detail": "build_runner for freezed / json / drift",
+			"type": "shell",
+			"command": "dart run build_runner build --delete-conflicting-outputs",
+			"options": {
+				"cwd": "${workspaceFolder}/client"
+			},
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Generate client API",
+			"detail": "Regenerate the client's API code from this server's OpenAPI document",
+			"type": "shell",
+			"command": "scripts/gen-client.sh",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Watch client code",
+			"detail": "build_runner in watch mode",
+			"type": "shell",
+			"command": "dart run build_runner watch --delete-conflicting-outputs",
+			"options": {
+				"cwd": "${workspaceFolder}/client"
+			},
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Server: test",
+			"type": "shell",
+			"command": "go test ./...",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"problemMatcher": "$go"
+		},
+		{
+			"label": "Server: lint",
+			"type": "shell",
+			"command": "golangci-lint run ./...",
+			"problemMatcher": "$go"
+		},
+		{
+			"label": "Client: analyze",
+			"type": "shell",
+			"command": "flutter analyze",
+			"options": {
+				"cwd": "${workspaceFolder}/client"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Client: test",
+			"detail": "Unit and widget tests, without the real server",
+			"type": "shell",
+			"command": "flutter test --exclude-tags integration",
+			"options": {
+				"cwd": "${workspaceFolder}/client"
+			},
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "Client: integration tests",
+			"detail": "The client's API and sync engine against this server",
+			"type": "shell",
+			"command": "scripts/test-client.sh",
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "Docker: up",
+			"detail": "Build the image with the web app and start it on :6060",
+			"type": "shell",
+			"command": "mkdir -p config data && NOMAD_UID=$(id -u) NOMAD_GID=$(id -g) docker compose up -d --build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Docker: down",
+			"type": "shell",
+			"command": "docker compose down",
+			"problemMatcher": []
+		}
+	]
+}

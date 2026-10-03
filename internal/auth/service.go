@@ -1,0 +1,133 @@
+package auth
+
+import (
+	"context"
+	"sync"
+
+	"nomad-server/internal/apperr"
+	"nomad-server/internal/users"
+)
+
+type TokenPair struct {
+	AccessToken  string     `json:"accessToken"`
+	RefreshToken string     `json:"refreshToken"`
+	ExpiresIn    int        `json:"expiresIn"`
+	User         users.User `json:"user"`
+}
+
+type Service struct {
+	users    *users.Service
+	sessions *Sessions
+	tokens   *AccessTokens
+	hasher   Argon2Hasher
+	setupMu  sync.Mutex
+}
+
+func NewService(userService *users.Service, sessions *Sessions, tokens *AccessTokens) *Service {
+	return &Service{users: userService, sessions: sessions, tokens: tokens}
+}
+
+func (s *Service) NeedsSetup(ctx context.Context) (bool, error) {
+	count, err := s.users.Store().Count(ctx)
+	return count == 0, err
+}
+
+func (s *Service) Setup(ctx context.Context, username, password, deviceName string) (TokenPair, error) {
+	s.setupMu.Lock()
+	defer s.setupMu.Unlock()
+
+	needsSetup, err := s.NeedsSetup(ctx)
+	if err != nil {
+		return TokenPair{}, err
+	}
+	if !needsSetup {
+		return TokenPair{}, apperr.Forbidden("setup has already been completed")
+	}
+	admin, err := s.users.Create(ctx, users.NewUser{Username: username, Password: password, Role: users.RoleAdmin})
+	if err != nil {
+		return TokenPair{}, err
+	}
+	return s.startSession(ctx, admin, deviceName)
+}
+
+func (s *Service) Login(ctx context.Context, username, password, deviceName string) (TokenPair, error) {
+	user, passwordHash, err := s.users.Store().CredentialsByUsername(ctx, username)
+	if apperr.Is(err, apperr.KindNotFound) {
+		s.hasher.Verify(password, dummyHash)
+		return TokenPair{}, apperr.Unauthorized("invalid username or password")
+	}
+	if err != nil {
+		return TokenPair{}, err
+	}
+	if !s.hasher.Verify(password, passwordHash) {
+		return TokenPair{}, apperr.Unauthorized("invalid username or password")
+	}
+	if user.Disabled {
+		return TokenPair{}, apperr.Forbidden("this account is disabled")
+	}
+	return s.startSession(ctx, user, deviceName)
+}
+
+var dummyHash, _ = Argon2Hasher{}.Hash("timing-equalizer")
+
+func (s *Service) Refresh(ctx context.Context, refreshToken string) (TokenPair, error) {
+	userID, rotatedToken, err := s.sessions.Rotate(ctx, refreshToken)
+	if err != nil {
+		return TokenPair{}, err
+	}
+	user, err := s.ActiveUser(ctx, userID)
+	if err != nil {
+		return TokenPair{}, err
+	}
+	return s.tokenPair(user, rotatedToken)
+}
+
+func (s *Service) Logout(ctx context.Context, refreshToken string) error {
+	return s.sessions.Revoke(ctx, refreshToken)
+}
+
+func (s *Service) Authenticate(ctx context.Context, accessToken string) (users.User, error) {
+	userID, err := s.tokens.UserID(accessToken)
+	if err != nil {
+		return users.User{}, apperr.Unauthorized("access token is invalid or expired")
+	}
+	return s.ActiveUser(ctx, userID)
+}
+
+func (s *Service) ActiveUser(ctx context.Context, userID int64) (users.User, error) {
+	user, err := s.users.Store().ByID(ctx, userID)
+	if apperr.Is(err, apperr.KindNotFound) {
+		return users.User{}, apperr.Unauthorized("account no longer exists")
+	}
+	if err != nil {
+		return users.User{}, err
+	}
+	if user.Disabled {
+		return users.User{}, apperr.Forbidden("this account is disabled")
+	}
+	return user, nil
+}
+
+func (s *Service) startSession(ctx context.Context, user users.User, deviceName string) (TokenPair, error) {
+	if deviceName == "" {
+		deviceName = "unknown device"
+	}
+	refreshToken, err := s.sessions.Create(ctx, user.ID, deviceName)
+	if err != nil {
+		return TokenPair{}, err
+	}
+	return s.tokenPair(user, refreshToken)
+}
+
+func (s *Service) tokenPair(user users.User, refreshToken string) (TokenPair, error) {
+	accessToken, err := s.tokens.Issue(user.ID)
+	if err != nil {
+		return TokenPair{}, err
+	}
+	return TokenPair{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresIn:    int(AccessTokenLifetime.Seconds()),
+		User:         user,
+	}, nil
+}

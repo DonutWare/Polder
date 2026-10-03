@@ -1,0 +1,77 @@
+import "package:flutter/foundation.dart";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:go_router/go_router.dart";
+
+import "package:nomad/models/account.dart";
+import "package:nomad/providers/account_provider.dart";
+import "package:nomad/providers/current_user_provider.dart";
+import "package:nomad/routes/app_routes.dart";
+import "package:nomad/screens/admin/admin_overview_screen.dart";
+import "package:nomad/screens/admin/admin_shell.dart";
+import "package:nomad/screens/admin/admin_users_screen.dart";
+import "package:nomad/screens/auto_upload/auto_upload_screen.dart";
+import "package:nomad/screens/browser/browser_screen.dart";
+import "package:nomad/screens/login/login_screen.dart";
+import "package:nomad/screens/settings/settings_screen.dart";
+import "package:nomad/screens/shell/app_shell.dart";
+import "package:nomad/screens/sync/conflict_resolver_screen.dart";
+import "package:nomad/screens/sync/sync_folders_screen.dart";
+import "package:nomad/util/remote_path.dart";
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final account = ValueNotifier<AsyncValue<Account?>>(ref.read(accountProvider));
+  final isAdmin = ValueNotifier<bool>(ref.read(isAdminProvider));
+  ref.listen(accountProvider, (_, next) => account.value = next);
+  ref.listen(isAdminProvider, (_, next) => isAdmin.value = next);
+  final router = GoRouter(
+    initialLocation: AppRoutes.files,
+    refreshListenable: Listenable.merge([account, isAdmin]),
+    redirect: (_, state) => AppRedirect.resolve(account.value, state.uri, isAdmin: isAdmin.value),
+    routes: [
+      GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
+      ShellRoute(
+        builder: (_, state, child) => AppShell(location: state.uri.path, child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.files,
+            builder: (_, state) =>
+                BrowserScreen(path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root),
+          ),
+          GoRoute(
+            path: AppRoutes.sync,
+            builder: (_, _) => const SyncFoldersScreen(),
+            routes: [GoRoute(path: "conflicts", builder: (_, _) => const ConflictResolverScreen())],
+          ),
+          GoRoute(path: AppRoutes.autoUpload, builder: (_, _) => const AutoUploadScreen()),
+          GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsScreen()),
+        ],
+      ),
+      ShellRoute(
+        builder: (_, state, child) => AdminShell(location: state.uri.path, child: child),
+        routes: [
+          GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminOverviewScreen()),
+          GoRoute(path: AppRoutes.adminUsers, builder: (_, _) => const AdminUsersScreen()),
+        ],
+      ),
+    ],
+  );
+  ref.onDispose(() {
+    router.dispose();
+    account.dispose();
+    isAdmin.dispose();
+  });
+  return router;
+});
+
+abstract final class AppRedirect {
+  static String? resolve(AsyncValue<Account?> account, Uri location, {bool isAdmin = false}) {
+    if (account.isLoading && !account.hasValue) return null;
+    final signedIn = account.value != null;
+    final atLogin = location.path == AppRoutes.login;
+    if (!signedIn && !atLogin) return AppRoutes.login;
+    if (signedIn && atLogin) return AppRoutes.files;
+    if (signedIn && !isAdmin && AppRoutes.isAdmin(location.path)) return AppRoutes.files;
+    return null;
+  }
+}

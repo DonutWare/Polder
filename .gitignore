@@ -1,0 +1,9 @@
+/config/
+/data/
+/mariadb/
+/nomad
+*.db
+/internal/webui/dist/*
+!/internal/webui/dist/.gitkeep
+.DS_Store
+__debug_bin*

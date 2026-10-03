@@ -1,0 +1,23 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'account.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_Account _$AccountFromJson(Map<String, dynamic> json) => _Account(
+  serverUrl: json['serverUrl'] as String,
+  deviceName: json['deviceName'] as String,
+  accessToken: json['accessToken'] as String,
+  refreshToken: json['refreshToken'] as String,
+  user: User.fromJson(json['user'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$AccountToJson(_Account instance) => <String, dynamic>{
+  'serverUrl': instance.serverUrl,
+  'deviceName': instance.deviceName,
+  'accessToken': instance.accessToken,
+  'refreshToken': instance.refreshToken,
+  'user': instance.user.toJson(),
+};

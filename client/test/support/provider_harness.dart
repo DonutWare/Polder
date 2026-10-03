@@ -1,0 +1,75 @@
+import "package:flutter/painting.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:flutter_riverpod/misc.dart";
+import "package:http/http.dart" as http;
+
+import "package:nomad/models/account.dart";
+import "package:nomad/models/user.dart";
+import "package:nomad/providers/appearance/appearance_provider.dart";
+import "package:nomad/providers/service_providers.dart";
+import "package:nomad/providers/sync/sync_platform_provider.dart";
+import "package:nomad/services/device/device_conditions.dart";
+import "package:nomad/services/storage/credentials_store.dart";
+import "package:nomad/services/storage/preferences_store.dart";
+
+import "fake_sync_platform.dart";
+
+class FixedDeviceConditions implements DeviceConditions {
+  FixedDeviceConditions({this.unmetered = true, this.charging = true});
+
+  bool unmetered;
+  bool charging;
+
+  @override
+  Future<bool> isOnUnmeteredNetwork() async => unmetered;
+
+  @override
+  Future<bool> isCharging() async => charging;
+}
+
+Account testAccount({String serverUrl = "https://cloud.test", UserRole role = UserRole.user}) => Account(
+  serverUrl: serverUrl,
+  deviceName: "Test",
+  accessToken: "access",
+  refreshToken: "refresh",
+  user: User(id: 1, username: "jop", role: role),
+);
+
+class ProviderHarness {
+  ProviderHarness({
+    this.httpClient,
+    Account? account,
+    PreferencesStore? preferences,
+    this.hostedServerUrl,
+    this.systemAccent,
+  }) : credentials = InMemoryCredentialsStore(account),
+       preferences = preferences ?? InMemoryPreferencesStore() {
+    container = ProviderContainer(retry: (_, _) => null, overrides: overrides);
+  }
+
+  final http.Client? httpClient;
+
+  /// The origin a web client was served from; null behaves like a native app.
+  final String? hostedServerUrl;
+
+  final Color? systemAccent;
+
+  final InMemoryCredentialsStore credentials;
+  final PreferencesStore preferences;
+  final conditions = FixedDeviceConditions();
+  final syncPlatform = FakeSyncPlatform();
+  late final ProviderContainer container;
+
+  List<Override> get overrides => [
+    credentialsStoreProvider.overrideWithValue(credentials),
+    httpClientProvider.overrideWithValue(httpClient),
+    preferencesStoreProvider.overrideWithValue(preferences),
+    deviceNameProvider.overrideWithValue("Test"),
+    deviceConditionsProvider.overrideWithValue(conditions),
+    syncPlatformProvider.overrideWithValue(syncPlatform),
+    hostedServerUrlProvider.overrideWithValue(hostedServerUrl),
+    systemAccentReaderProvider.overrideWithValue(() async => systemAccent),
+  ];
+
+  void dispose() => container.dispose();
+}

@@ -1,0 +1,38 @@
+services:
+  nomad:
+    build:
+      context: .
+      args:
+        # Embeds the web app from client/; set NOMAD_WEB=none for an API-only image.
+        WEB: ${NOMAD_WEB:-client}
+    image: nomad-server:latest
+    restart: unless-stopped
+    ports:
+      - "6060:6060"
+    volumes:
+      - ./config:/config
+      - ./data:/data
+    # Match the owner of ./config and ./data on the host.
+    user: "${NOMAD_UID:-1000}:${NOMAD_GID:-1000}"
+    environment:
+      NOMAD_DB_DRIVER: ${NOMAD_DB_DRIVER:-sqlite}
+      NOMAD_DB_DSN: ${NOMAD_DB_DSN:-}
+
+  # Optional MariaDB: `docker compose --profile mariadb up -d` with
+  # NOMAD_DB_DRIVER=mariadb and
+  # NOMAD_DB_DSN=nomad:change-me@tcp(mariadb:3306)/nomad
+  mariadb:
+    profiles: ["mariadb"]
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: nomad
+      MARIADB_USER: nomad
+      MARIADB_PASSWORD: change-me
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - ./mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      retries: 10

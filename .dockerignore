@@ -1,0 +1,21 @@
+.git
+.github
+.vscode
+*.md
+docker-compose*.yml
+config
+data
+mariadb
+internal/webui/dist/*
+!internal/webui/dist/.gitkeep
+# client/: only the sources the web build needs.
+client/.dart_tool
+client/build
+client/android
+client/ios
+client/macos
+client/windows
+client/linux
+client/.idea
+client/*.iml
+client/test

@@ -1,0 +1,30 @@
+targets:
+  $default:
+    sources:
+      - $package$
+      - lib/$lib$
+      - lib/**
+      - test/**
+      - openapi/**
+      - pubspec.yaml
+    builders:
+      json_serializable:
+        options:
+          explicit_to_json: true
+          include_if_null: false
+      swagger_dart_code_generator:
+        options:
+          input_folder: "openapi/"
+          output_folder: "lib/services/api/generated/"
+          with_base_url: false
+          use_path_for_request_names: false
+          separate_models: true
+          include_if_null: false
+          override_to_string: false
+          response_override_value_map:
+            - url: "/api/v1/files/content"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/files/preview"
+              method: get
+              overridden_value: "Stream<List<int>>"

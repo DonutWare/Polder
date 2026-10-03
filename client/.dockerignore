@@ -1,0 +1,11 @@
+# Used when a Docker build compiles the web client from this directory.
+.dart_tool
+build
+android
+ios
+macos
+windows
+linux
+.idea
+*.iml
+test

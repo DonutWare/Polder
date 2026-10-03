@@ -1,0 +1,77 @@
+import "package:flutter/material.dart";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:go_router/go_router.dart";
+import "package:iconsax_plus/iconsax_plus.dart";
+
+import "package:nomad/models/user.dart";
+import "package:nomad/providers/admin/admin_users_provider.dart";
+import "package:nomad/routes/app_routes.dart";
+import "package:nomad/screens/admin/widgets/admin_stats_grid.dart";
+import "package:nomad/screens/admin/widgets/storage_by_user_card.dart";
+import "package:nomad/screens/admin/widgets/user_form_dialog.dart";
+import "package:nomad/theme/app_theme.dart";
+import "package:nomad/util/localization_helper.dart";
+import "package:nomad/widgets/layout/adaptive.dart";
+import "package:nomad/widgets/layout/app_page.dart";
+import "package:nomad/widgets/shared/async_value_view.dart";
+import "package:nomad/widgets/shared/nav_group.dart";
+
+class AdminOverviewScreen extends ConsumerWidget {
+  const AdminOverviewScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    return AppPage(
+      title: Text(localized.administration),
+      actions: [
+        IconButton(
+          tooltip: localized.refresh,
+          icon: const Icon(IconsaxPlusLinear.refresh),
+          onPressed: () => ref.invalidate(adminUsersProvider),
+        ),
+      ],
+      body: AsyncValueView<List<User>>(
+        value: ref.watch(adminUsersProvider),
+        onRetry: () => ref.invalidate(adminUsersProvider),
+        data: (users) => ReadableWidth(
+          maxWidth: 1080,
+          builder: (context, inset) => RefreshIndicator(
+            edgeOffset: inset.top,
+            onRefresh: () => ref.refresh(adminUsersProvider.future),
+            child: ListView(
+              padding: inset + const EdgeInsets.only(top: 8, bottom: 24),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: AdminStatsGrid(users: users),
+                ),
+                NavGroup(
+                  title: localized.management,
+                  children: [
+                    NavEntry(
+                      icon: IconsaxPlusLinear.profile_2user,
+                      title: localized.users,
+                      subtitle: localized.manageUsersHint,
+                      onTap: () => context.go(AppRoutes.adminUsers),
+                    ),
+                    NavEntry(
+                      icon: IconsaxPlusLinear.user_add,
+                      iconColor: AppColors.of(context).success,
+                      title: localized.addUser,
+                      subtitle: localized.addUserHint,
+                      onTap: () => showUserFormDialog(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                StorageByUserCard(users: users),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

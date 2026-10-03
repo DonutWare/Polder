@@ -1,0 +1,306 @@
+{
+  "@@locale": "en",
+  "about": "About",
+  "aboutLegalese": "Files, sync and auto-upload for your own server.",
+  "accentBlue": "Blue",
+  "accentColor": "Accent color",
+  "accentCustomHint": "Status colors are tuned to match your accent.",
+  "accentGreen": "Green",
+  "accentNoSystemHint": "This device has no accent color to follow, so the default is used.",
+  "accentOrange": "Orange",
+  "accentRose": "Rose",
+  "accentSlate": "Slate",
+  "accentSystemHint": "Follows your device's accent color.",
+  "accentTeal": "Teal",
+  "accentViolet": "Violet",
+  "account": "Account",
+  "add": "Add",
+  "addAutoUploadFolder": "Add folder",
+  "addSyncFolder": "Add sync folder",
+  "addUser": "Add user",
+  "addUserHint": "Create an account with its own storage",
+  "adminAccountsCaption": "{count, plural, =1{1 administrator} other{{count} administrators}}",
+  "@adminAccountsCaption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adminDisabledCaption": "Can't sign in",
+  "administration": "Administration",
+  "administrationHint": "Users and server management",
+  "adminNearQuota": "Near quota",
+  "adminNearQuotaCaption": "Over 90% of their quota",
+  "adminOverview": "Overview",
+  "adminStorageCaption": "Across all accounts",
+  "adminStorageUsed": "Storage used",
+  "appearance": "Appearance",
+  "applyToAll": "Apply my choice to all {count} conflicts",
+  "@applyToAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "appTitle": "Nomad",
+  "autoUploadDescription": "Upload new photos and files from the chosen folders automatically.",
+  "autoUploadEnabled": "Auto-upload",
+  "backToFiles": "Back to files",
+  "cancel": "Cancel",
+  "change": "Change",
+  "chargingOnly": "Only while charging",
+  "choose": "Choose",
+  "chooseServerFolder": "Choose a server folder",
+  "chooseThisFolder": "Choose this folder",
+  "clearFinished": "Clear finished",
+  "collapseSidebar": "Collapse sidebar",
+  "conflictBothCreated": "A different file with this name was created on both sides.",
+  "conflictBothModified": "Changed on this device and on the server.",
+  "conflictLocalDeletedRemoteModified": "Deleted on this device but changed on the server.",
+  "conflictLocalModifiedRemoteDeleted": "Changed on this device but deleted on the server.",
+  "conflicts": "Conflicts",
+  "conflictsWaiting": "{count, plural, =1{1 conflict needs your decision} other{{count} conflicts need your decision}}",
+  "@conflictsWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connect": "Connect",
+  "create": "Create",
+  "createAdmin": "Create administrator",
+  "delete": "Delete",
+  "deleted": "Deleted",
+  "deletedCount": "{count} deleted",
+  "@deletedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteMessage": "It will be moved to the trash on the server.",
+  "deleteTitle": "Delete \"{name}\"?",
+  "@deleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteUserMessage": "The account is removed. Their files are kept on the server disk.",
+  "deleteUserTitle": "Delete user \"{username}\"?",
+  "@deleteUserTitle": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "dimensions": "{width} × {height}",
+  "@dimensions": {
+    "placeholders": {
+      "width": {
+        "type": "int"
+      },
+      "height": {
+        "type": "int"
+      }
+    }
+  },
+  "dimensionsLabel": "Dimensions",
+  "disabled": "Disabled",
+  "done": "Done",
+  "download": "Download",
+  "downloadedCount": "{count} downloaded",
+  "@downloadedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "edit": "Edit",
+  "editUser": "Edit {username}",
+  "@editUser": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "emptyFolder": "This folder is empty",
+  "errorAlreadyExists": "Something with that name already exists.",
+  "errorConflict": "The item was changed by someone else. Refresh and try again.",
+  "errorForbidden": "You are not allowed to do that.",
+  "errorInvalidRequest": "The request was not valid.",
+  "errorLocalFolderMissing": "The local folder {path} is missing.",
+  "@errorLocalFolderMissing": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNetwork": "Could not reach the server.",
+  "errorNotFound": "It no longer exists.",
+  "errorQuotaExceeded": "Your storage quota is full.",
+  "errorUnauthorized": "Your session has expired. Please sign in again.",
+  "errorUnknown": "Something went wrong.",
+  "expandSidebar": "Expand sidebar",
+  "failedCount": "{count} failed",
+  "@failedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "folders": "Folders",
+  "gridView": "Grid view",
+  "keepBoth": "Keep both",
+  "keepMine": "Keep mine",
+  "keepServer": "Keep server's",
+  "lastSynced": "Last synced {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "listView": "List view",
+  "localFolder": "Folder on this device",
+  "loginErrorDisabled": "This account is disabled.",
+  "loginErrorInvalidCredentials": "Wrong username or password.",
+  "loginErrorSetupUnavailable": "This server has already been set up.",
+  "loginErrorUnreachable": "Could not reach a Nomad server at this address.",
+  "loginServerIntro": "Enter the address of your Nomad server.",
+  "management": "Management",
+  "manageUsersHint": "Accounts, roles and quotas",
+  "modified": "Modified",
+  "moreOptions": "More options",
+  "move": "Move",
+  "name": "Name",
+  "navAutoUpload": "Auto-upload",
+  "navFiles": "Files",
+  "navSettings": "Settings",
+  "navSync": "Sync",
+  "newFolder": "New folder",
+  "newPasswordOptional": "New password (leave empty to keep)",
+  "noConflicts": "No conflicts. Everything is in sync.",
+  "noFolders": "No folders yet.",
+  "notChosen": "Not chosen",
+  "noUsers": "No users yet.",
+  "password": "Password",
+  "quota": "Quota",
+  "quotaInvalid": "Enter a number of 0 or more",
+  "quotaUnlimitedHint": "0 means unlimited",
+  "quotaUsedOf": "{used} of {total} used",
+  "@quotaUsedOf": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "quotaUsedUnlimited": "{used} used",
+  "@quotaUsedUnlimited": {
+    "placeholders": {
+      "used": {
+        "type": "String"
+      }
+    }
+  },
+  "refresh": "Refresh",
+  "remove": "Remove",
+  "removeSyncFolderMessage": "The folder stops syncing. No files are deleted.",
+  "removeSyncFolderTitle": "Remove this folder?",
+  "rename": "Rename",
+  "resolve": "Resolve",
+  "retry": "Retry",
+  "revision": "Revision",
+  "revisionShort": "Revision {rev}",
+  "@revisionShort": {
+    "placeholders": {
+      "rev": {
+        "type": "int"
+      }
+    }
+  },
+  "roleAdmin": "Administrator",
+  "roleUser": "User",
+  "rootFolder": "Files",
+  "save": "Save",
+  "server": "Server",
+  "serverFolder": "Folder on the server",
+  "serverUrl": "Server address",
+  "serverUrlHint": "https://cloud.example.com",
+  "setupIntro": "This server has no users yet. Create the first administrator account.",
+  "signIn": "Sign in",
+  "signOut": "Sign out",
+  "signOutMessage": "Sign out {username} from {server}?",
+  "@signOutMessage": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      },
+      "server": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Size",
+  "storageByUser": "Storage by user",
+  "syncedWith": "Synced with {remotePath}",
+  "@syncedWith": {
+    "placeholders": {
+      "remotePath": {
+        "type": "String"
+      }
+    }
+  },
+  "syncError": "Sync finished with errors",
+  "syncFolders": "Sync folders",
+  "syncIdle": "Up to date",
+  "syncNow": "Sync now",
+  "syncRunning": "Syncing…",
+  "syncUnsupported": "Folder sync is not available on this platform.",
+  "systemAccentUnavailable": "System (not available on this device)",
+  "takenAt": "Taken",
+  "theme": "Theme",
+  "themeDark": "Dark",
+  "themeLight": "Light",
+  "themeSystem": "System",
+  "thisDevice": "This device",
+  "transferDone": "Done",
+  "transfers": "Transfers",
+  "type": "Type",
+  "unit": "Unit",
+  "uploadedCount": "{count} uploaded",
+  "@uploadedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "uploadFiles": "Upload files",
+  "username": "Username",
+  "users": "Users",
+  "usersCount": "{count, plural, =1{1 user} other{{count} users}}",
+  "@usersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wifiOnly": "Only on Wi-Fi"
+}

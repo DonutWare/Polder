@@ -1,0 +1,66 @@
+import "package:flutter/material.dart";
+
+import "package:iconsax_plus/iconsax_plus.dart";
+
+import "package:nomad/util/localization_helper.dart";
+import "package:nomad/widgets/layout/adaptive.dart";
+import "package:nomad/widgets/shared/app_bar_fade.dart";
+
+/// A page inside a navigation shell: a transparent app bar over content that scrolls beneath it.
+///
+/// The body extends behind the app bar and the floating navigation bar; lay it out with the
+/// padding from [MediaQuery] (for example through [ReadableWidth]).
+class AppPage extends StatelessWidget {
+  const AppPage({
+    required this.title,
+    required this.body,
+    this.actions,
+    this.bottom,
+    this.floatingActionButton,
+    super.key,
+  });
+
+  final Widget title;
+  final List<Widget>? actions;
+  final PreferredSizeWidget? bottom;
+  final Widget? floatingActionButton;
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) {
+    final isRoot = !(ModalRoute.of(context)?.impliesAppBarDismissal ?? false);
+    final showMenu = isRoot && WindowSize.of(context) == WindowSize.compact && SideSheetDrawer.maybeOf(context) != null;
+    final navigationBarOverlap = MediaQuery.paddingOf(context).bottom - MediaQuery.viewPaddingOf(context).bottom;
+    final fab = floatingActionButton;
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      floatingActionButton: fab == null || navigationBarOverlap <= 0
+          ? fab
+          : Padding(
+              padding: EdgeInsets.only(bottom: navigationBarOverlap),
+              child: fab,
+            ),
+      appBar: AppBar(
+        flexibleSpace: const AppBarFade(),
+        toolbarHeight: isRoot ? 64 : null,
+        leading: showMenu ? const MoreOptionsButton() : null,
+        titleSpacing: showMenu ? 4 : null,
+        title: title,
+        actions: [...?actions, const SizedBox(width: 8)],
+        bottom: bottom,
+      ),
+      body: body,
+    );
+  }
+}
+
+class MoreOptionsButton extends StatelessWidget {
+  const MoreOptionsButton({super.key});
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: context.localized.moreOptions,
+    icon: const Icon(IconsaxPlusLinear.menu),
+    onPressed: () => SideSheetDrawer.of(context).open(),
+  );
+}

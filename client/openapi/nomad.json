@@ -1,0 +1,2056 @@
+{
+  "components": {
+    "schemas": {
+      "Change": {
+        "additionalProperties": false,
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/Entry",
+            "description": "The entry after the change; null for a delete, or when a later change superseded it"
+          },
+          "fromPath": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "seq": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "enum": [
+              "upsert",
+              "delete",
+              "move"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "seq",
+          "type",
+          "path"
+        ],
+        "type": "object"
+      },
+      "ChangePage": {
+        "additionalProperties": false,
+        "properties": {
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/Change"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "cursor": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "changes",
+          "cursor",
+          "hasMore"
+        ],
+        "type": "object"
+      },
+      "Changes": {
+        "additionalProperties": false,
+        "properties": {
+          "disabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "password": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quotaBytes": {
+            "description": "Storage limit in bytes; 0 is unlimited",
+            "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "role": {
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Chunk": {
+        "additionalProperties": false,
+        "properties": {
+          "hash": {
+            "type": "string"
+          },
+          "offset": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "offset",
+          "size",
+          "hash"
+        ],
+        "type": "object"
+      },
+      "ChunkRef": {
+        "additionalProperties": false,
+        "properties": {
+          "hash": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hash",
+          "size"
+        ],
+        "type": "object"
+      },
+      "CredentialsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "deviceName": {
+            "description": "Name of the device the session is for",
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
+      "Entry": {
+        "additionalProperties": false,
+        "properties": {
+          "hash": {
+            "type": "string"
+          },
+          "isDir": {
+            "type": "boolean"
+          },
+          "meta": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "mtime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "previewState": {
+            "enum": [
+              "none",
+              "pending",
+              "ready",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "rev": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "name",
+          "isDir",
+          "size",
+          "mtime",
+          "rev",
+          "hash",
+          "mime",
+          "meta",
+          "previewState"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Machine-readable error code, such as not_found, conflict or invalid_request",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable explanation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "description": "The server's current entry, sent with conflict and already_exists errors"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "type": "object"
+      },
+      "HealthStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "example": "ok",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "ListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "entries"
+        ],
+        "type": "object"
+      },
+      "Manifest": {
+        "additionalProperties": false,
+        "properties": {
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/Chunk"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "rev": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "rev",
+          "size",
+          "hash",
+          "chunks"
+        ],
+        "type": "object"
+      },
+      "MoveRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseRev": {
+            "description": "Revision the client last saw of the source; 0 or -1 skips the check",
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "type": "object"
+      },
+      "NewUser": {
+        "additionalProperties": false,
+        "properties": {
+          "password": {
+            "type": "string"
+          },
+          "quotaBytes": {
+            "description": "Storage limit in bytes; 0 or omitted is unlimited",
+            "format": "int64",
+            "type": "integer"
+          },
+          "role": {
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "role"
+        ],
+        "type": "object"
+      },
+      "PathRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "RefreshRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ],
+        "type": "object"
+      },
+      "SetupStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "needsSetup": {
+            "description": "True until the first administrator account exists",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "needsSetup"
+        ],
+        "type": "object"
+      },
+      "TokenPair": {
+        "additionalProperties": false,
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "expiresIn": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "expiresIn",
+          "user"
+        ],
+        "type": "object"
+      },
+      "UploadRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseRev": {
+            "description": "Revision this upload replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+            "format": "int64",
+            "type": "integer"
+          },
+          "chunks": {
+            "description": "The file's chunks in order",
+            "items": {
+              "$ref": "#/components/schemas/ChunkRef"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "hash": {
+            "description": "Lowercase hex SHA-256 of the whole file",
+            "type": "string"
+          },
+          "mtime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "size",
+          "hash",
+          "chunks"
+        ],
+        "type": "object"
+      },
+      "UploadStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "uploadId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadId",
+          "missing"
+        ],
+        "type": "object"
+      },
+      "User": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "quotaBytes": {
+            "description": "Storage limit in bytes; 0 is unlimited",
+            "format": "int64",
+            "type": "integer"
+          },
+          "role": {
+            "enum": [
+              "admin",
+              "user"
+            ],
+            "type": "string"
+          },
+          "usedBytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "role",
+          "quotaBytes",
+          "usedBytes",
+          "disabled",
+          "createdAt"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "File storage and sync. Log in with POST /auth/login and send the access token as `Authorization: Bearer \u003ctoken\u003e`; renew it with POST /auth/refresh before it expires.",
+    "title": "Nomad API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/admin/users": {
+      "get": {
+        "operationId": "listUsers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all users",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewUser"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a user",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{userID}": {
+      "delete": {
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a user; their files are archived on the server",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Changes"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a user; password changes and disabling log the user out",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPair"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Log in and get a token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Revoke a refresh token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "getMe",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The logged-in user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "refresh",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPair"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Exchange a refresh token for a new token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/files": {
+      "delete": {
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Revision the client last saw; -1 deletes whatever is there",
+            "explode": false,
+            "in": "query",
+            "name": "baseRev",
+            "schema": {
+              "default": -1,
+              "description": "Revision the client last saw; -1 deletes whatever is there",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a file or directory",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/content": {
+      "get": {
+        "operationId": "downloadFile",
+        "parameters": [
+          {
+            "description": "Path inside the user's storage, such as /Photos/cat.jpg",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the user's storage, such as /Photos/cat.jpg",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Byte range to send, such as bytes=0-1023",
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "description": "Byte range to send, such as bytes=0-1023",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Fail with 412 unless the file still has this ETag",
+            "in": "header",
+            "name": "If-Match",
+            "schema": {
+              "description": "Fail with 412 unless the file still has this ETag",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Answer 304 if the file still has this ETag",
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "description": "Answer 304 if the file still has this ETag",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "File content",
+            "headers": {
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "description": "The file's revision, quoted; send it in If-Match or If-None-Match",
+                  "type": "string"
+                }
+              },
+              "X-Nomad-Rev": {
+                "schema": {
+                  "description": "The file's revision",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a file; supports Range and conditional requests",
+        "tags": [
+          "files"
+        ]
+      },
+      "put": {
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "description": "Where to store the file, such as /Photos/cat.jpg",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Where to store the file, such as /Photos/cat.jpg",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+            "explode": false,
+            "in": "query",
+            "name": "baseRev",
+            "schema": {
+              "default": 0,
+              "description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Modification time to record, as RFC 3339; defaults to now",
+            "explode": false,
+            "in": "query",
+            "name": "mtime",
+            "schema": {
+              "description": "Modification time to record, as RFC 3339; defaults to now",
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a whole file as the request body",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/list": {
+      "get": {
+        "operationId": "listFiles",
+        "parameters": [
+          {
+            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a directory",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/mkdir": {
+      "post": {
+        "operationId": "makeDirectory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a directory",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/move": {
+      "post": {
+        "operationId": "moveFile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move or rename a file or directory",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/preview": {
+      "get": {
+        "operationId": "previewFile",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Thumbnail width and height in pixels",
+            "explode": false,
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "default": 256,
+              "description": "Thumbnail width and height in pixels",
+              "enum": [
+                128,
+                256,
+                512
+              ],
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Thumbnail",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a JPEG thumbnail of an image",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/stat": {
+      "get": {
+        "operationId": "statFile",
+        "parameters": [
+          {
+            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get one file or directory",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/setup": {
+      "get": {
+        "operationId": "getSetupStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupStatus"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Whether the server still needs its first account",
+        "tags": [
+          "setup"
+        ]
+      },
+      "post": {
+        "operationId": "setup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPair"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Create the first administrator account",
+        "tags": [
+          "setup"
+        ]
+      }
+    },
+    "/api/v1/sync/changes": {
+      "get": {
+        "operationId": "listChanges",
+        "parameters": [
+          {
+            "description": "Cursor from the previous page; 0 starts from the beginning",
+            "explode": false,
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "default": 0,
+              "description": "Cursor from the previous page; 0 starts from the beginning",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Maximum number of changes to return; the server caps it",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 1000,
+              "description": "Maximum number of changes to return; the server caps it",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Page through changes since a cursor",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/sync/manifest": {
+      "get": {
+        "operationId": "getManifest",
+        "parameters": [
+          {
+            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Manifest"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a file's chunk manifest for delta sync",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/sync/uploads": {
+      "post": {
+        "operationId": "createUpload",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadStatus"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start a chunked upload; returns the chunks the server is missing",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/sync/uploads/{uploadID}": {
+      "delete": {
+        "operationId": "abortUpload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uploadID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel an upload",
+        "tags": [
+          "sync"
+        ]
+      },
+      "get": {
+        "operationId": "getUpload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uploadID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadStatus"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get the chunks an upload is still missing",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/sync/uploads/{uploadID}/chunks/{chunkHash}": {
+      "put": {
+        "operationId": "putChunk",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uploadID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Lowercase hex SHA-256 of the chunk",
+            "in": "path",
+            "name": "chunkHash",
+            "required": true,
+            "schema": {
+              "description": "Lowercase hex SHA-256 of the chunk",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send one chunk as the request body",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/api/v1/sync/uploads/{uploadID}/commit": {
+      "post": {
+        "operationId": "commitUpload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uploadID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assemble the uploaded chunks into the file",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthStatus"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Health check",
+        "tags": [
+          "server"
+        ]
+      }
+    }
+  }
+}

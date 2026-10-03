@@ -1,0 +1,41 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: testpass
+          MARIADB_DATABASE: nomad
+        ports: ["3306:3306"]
+        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: golangci/golangci-lint-action@v8
+      - run: go test -race ./...
+        env:
+          NOMAD_TEST_MARIADB_DSN: root:testpass@tcp(127.0.0.1:3306)/nomad
+
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        web: [none, client]
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --build-arg WEB=${{ matrix.web }} -t nomad-server:${{ matrix.web }} .
+
+  client-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go run ./cmd/nomad openapi | diff -u client/openapi/nomad.json -

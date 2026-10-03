@@ -1,0 +1,12 @@
+import "dart:typed_data";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "package:nomad/models/thumbnail_request.dart";
+import "package:nomad/providers/nomad_api_provider.dart";
+import "package:nomad/util/ref_cache.dart";
+
+final thumbnailProvider = FutureProvider.autoDispose.family<Uint8List?, ThumbnailRequest>((ref, request) async {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(nomadApiProvider).preview(request.path, size: request.size);
+});

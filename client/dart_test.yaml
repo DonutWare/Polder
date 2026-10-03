@@ -1,0 +1,4 @@
+tags:
+  integration:
+    # Starts a real nomad server from NOMAD_SERVER_DIR (needs Go) or NOMAD_SERVER_BIN. Skip with --exclude-tags integration.
+    timeout: 3x
