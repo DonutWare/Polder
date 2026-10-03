@@ -1,7 +1,7 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
 import "package:nomad/models/account.dart";
 import "package:nomad/models/login_state.dart";
+import "package:nomad/models/setup_status.dart";
 import "package:nomad/models/token_pair.dart";
 import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/nomad_api_provider.dart";
@@ -53,8 +53,17 @@ class LoginNotifier extends Notifier<LoginState> {
   }
 
   Future<void> connect() => _run(() async {
-    state = state.copyWith(serverUrl: ApiClientFactory.normalizeServerUrl(state.serverUrl));
-    final status = await _api.setupStatus();
+    final input = state.serverUrl.trim();
+    state = state.copyWith(serverUrl: ApiClientFactory.normalizeServerUrl(input));
+    SetupStatus status;
+    try {
+      status = await _api.setupStatus();
+    } catch (error) {
+      final serverAnswered = error is ApiException && error is! NetworkException;
+      if (input.contains("://") || serverAnswered) rethrow;
+      state = state.copyWith(serverUrl: state.serverUrl.replaceFirst("https://", "http://"));
+      status = await _api.setupStatus();
+    }
     state = state.copyWith(step: status.needsSetup ? LoginStep.setup : LoginStep.credentials);
   });
 
