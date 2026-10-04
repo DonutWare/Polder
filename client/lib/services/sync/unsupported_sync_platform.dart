@@ -1,5 +1,6 @@
 import "package:nomad/models/sync/auto_upload_settings.dart";
 import "package:nomad/services/api/nomad_api.dart";
+import "package:nomad/services/sync/sync_activity.dart";
 import "package:nomad/services/sync/sync_platform.dart";
 import "package:nomad/services/sync/sync_service.dart";
 import "package:nomad/services/sync/sync_state_store.dart";
@@ -24,11 +25,15 @@ class UnsupportedSyncPlatform implements SyncPlatform {
   Future<SyncStateStore> openStore() => throw UnsupportedError("Sync is not available on this platform");
 
   @override
-  SyncService createService({required NomadApi api, required SyncStateStore store, required String deviceName}) =>
-      throw UnsupportedError("Sync is not available on this platform");
+  SyncService createService({
+    required NomadApi api,
+    required SyncStateStore store,
+    required String deviceName,
+    SyncActivity? activity,
+  }) => throw UnsupportedError("Sync is not available on this platform");
 
   @override
-  Stream<void> watchFolder(String localPath) => const Stream.empty();
+  Stream<String> watchFolder(String localPath) => const Stream.empty();
 
   @override
   Future<void> scheduleAutoUpload(AutoUploadSettings settings) async {}

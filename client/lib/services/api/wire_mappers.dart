@@ -1,8 +1,10 @@
+import "package:nomad/models/activity.dart";
 import "package:nomad/models/admin_user_requests.dart";
 import "package:nomad/models/change.dart";
 import "package:nomad/models/directory_listing.dart";
 import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/manifest.dart";
+import "package:nomad/models/server_event.dart";
 import "package:nomad/models/server_settings.dart";
 import "package:nomad/models/setup_status.dart";
 import "package:nomad/models/token_pair.dart";
@@ -183,5 +185,100 @@ extension UploadRequestToWire on UploadRequest {
     hash: hash,
     mtime: mtime,
     chunks: [for (final chunk in chunks) wire.ChunkRef(hash: chunk.hash, size: chunk.size)],
+  );
+}
+
+extension LogEntryToModel on wire.LogEntry {
+  ActivityEntry toModel() => ActivityEntry(
+    id: id,
+    userId: userId,
+    username: username,
+    device: device,
+    kind: switch (kind) {
+      wire.LogEntryKind.upload => ActivityKind.upload,
+      wire.LogEntryKind.download => ActivityKind.download,
+      wire.LogEntryKind.mkdir => ActivityKind.mkdir,
+      wire.LogEntryKind.move => ActivityKind.move,
+      wire.LogEntryKind.delete => ActivityKind.delete,
+      wire.LogEntryKind.restore => ActivityKind.restore,
+      wire.LogEntryKind.trashdelete => ActivityKind.trashDelete,
+      wire.LogEntryKind.trashempty => ActivityKind.trashEmpty,
+      wire.LogEntryKind.trashexpire => ActivityKind.trashExpire,
+      wire.LogEntryKind.rescan => ActivityKind.rescan,
+      wire.LogEntryKind.login => ActivityKind.login,
+      wire.LogEntryKind.logout => ActivityKind.logout,
+      wire.LogEntryKind.swaggerGeneratedUnknown => ActivityKind.unknown,
+    },
+    path: path,
+    fromPath: fromPath,
+    isDir: isDir,
+    size: size,
+    bytes: bytes,
+    durationMs: durationMs,
+    count: count,
+    status: switch (status) {
+      wire.LogEntryStatus.failed => ActivityStatus.failed,
+      wire.LogEntryStatus.cancelled => ActivityStatus.cancelled,
+      wire.LogEntryStatus.ok || wire.LogEntryStatus.swaggerGeneratedUnknown => ActivityStatus.ok,
+    },
+    detail: detail,
+    createdAt: createdAt,
+  );
+}
+
+extension LogPageToModel on wire.LogPage {
+  ActivityPage toModel() => ActivityPage(
+    entries: [for (final entry in entries ?? <wire.LogEntry>[]) entry.toModel()],
+    nextCursor: nextCursor,
+  );
+}
+
+extension LiveTransferToModel on wire.LiveTransfer {
+  LiveTransfer toModel() => LiveTransfer(
+    id: id,
+    userId: userId,
+    username: username,
+    direction: direction == wire.LiveTransferDirection.download
+        ? TransferDirectionKind.download
+        : TransferDirectionKind.upload,
+    path: path,
+    device: device,
+    clientId: clientId,
+    bytes: bytes,
+    total: total,
+    rate: rate,
+    startedAt: startedAt,
+  );
+}
+
+extension EventMessageToModel on wire.EventMessage {
+  ServerEvent? toModel() => switch (type) {
+    wire.EventMessageType.ready => const ServerEvent.ready(),
+    wire.EventMessageType.snapshot => ServerEvent.snapshot([...?transfers?.map((transfer) => transfer.toModel())]),
+    wire.EventMessageType.transferStarted => _transfer(TransferPhase.started),
+    wire.EventMessageType.transferProgress => _transfer(TransferPhase.progress),
+    wire.EventMessageType.transferFinished => _transfer(TransferPhase.finished),
+    wire.EventMessageType.activityCreated => entry == null ? null : ServerEvent.activityCreated(entry!.toModel()),
+    wire.EventMessageType.filesChanged => ServerEvent.filesChanged(userId, dirs ?? const []),
+    wire.EventMessageType.error => ServerEvent.error(code ?? "", message ?? ""),
+    wire.EventMessageType.swaggerGeneratedUnknown => null,
+  };
+
+  ServerEvent? _transfer(TransferPhase phase) =>
+      transfer == null ? null : ServerEvent.transfer(phase, transfer!.toModel());
+}
+
+extension ActivityScopeToWire on ActivityScope {
+  wire.ClientMessage toSubscribeMessage() => wire.ClientMessage(
+    type: wire.ClientMessageType.subscribe,
+    scope: switch (this) {
+      ActivityScopeMe() => wire.ClientMessageScope.me,
+      ActivityScopeAll() => wire.ClientMessageScope.all,
+      ActivityScopeUser() => wire.ClientMessageScope.user,
+    },
+    userId: switch (this) {
+      ActivityScopeUser(:final id) => id,
+      _ => null,
+    },
   );
 }

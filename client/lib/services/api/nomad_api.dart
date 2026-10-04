@@ -2,6 +2,7 @@ import "dart:typed_data";
 
 import "package:chopper/chopper.dart" as chopper;
 
+import "package:nomad/models/activity.dart";
 import "package:nomad/models/admin_user_requests.dart";
 import "package:nomad/models/change.dart";
 import "package:nomad/models/directory_listing.dart";
@@ -97,6 +98,7 @@ class NomadApi {
     required int length,
     int baseRev = 0,
     DateTime? mtime,
+    String? transferId,
     void Function(int sent, int total)? onProgress,
   }) async {
     var sent = 0;
@@ -109,6 +111,7 @@ class NomadApi {
       path: path,
       baseRev: baseRev,
       mtime: mtime?.toUtc(),
+      xNomadTransferId: transferId,
       body: PendingUpload(counted, length),
     );
     return response.body!.toModel();
@@ -164,6 +167,15 @@ class NomadApi {
       (await _service.commitUpload(uploadID: uploadId)).body!.toModel();
 
   Future<void> abortUpload(String uploadId) => _service.abortUpload(uploadID: uploadId);
+
+  Future<ActivityPage> activity({required ActivityScope scope, int? before, int limit = 50}) async =>
+      (await _service.listActivity(user: scope.query, before: before, limit: limit)).body!.toModel();
+
+  Future<List<LiveTransfer>> liveTransfers({required ActivityScope scope}) async => [
+    for (final transfer
+        in (await _service.listLiveTransfers(user: scope.query)).body!.transfers ?? <wire.LiveTransfer>[])
+      transfer.toModel(),
+  ];
 
   Future<TrashListing> listTrash() async => (await _service.listTrash()).body!.toModel();
 

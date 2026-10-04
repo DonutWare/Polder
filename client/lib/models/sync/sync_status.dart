@@ -4,7 +4,7 @@ import "package:nomad/models/sync/conflict.dart";
 
 part "sync_status.freezed.dart";
 
-enum SyncPhase { idle, syncing, error }
+enum SyncPhase { idle, syncing, error, paused }
 
 @freezed
 abstract class SyncRunReport with _$SyncRunReport {
@@ -16,6 +16,8 @@ abstract class SyncRunReport with _$SyncRunReport {
     @Default(0) int deleted,
     @Default(0) int moved,
     @Default(0) int failed,
+
+    @Default(0) int deferred,
     @Default(<Conflict>[]) List<Conflict> conflicts,
     @Default(<String>[]) List<String> errors,
   }) = _SyncRunReport;
@@ -32,6 +34,7 @@ abstract class SyncRunReport with _$SyncRunReport {
     deleted: deleted + other.deleted,
     moved: moved + other.moved,
     failed: failed + other.failed,
+    deferred: deferred + other.deferred,
     conflicts: [...conflicts, ...other.conflicts],
     errors: [...errors, ...other.errors],
   );

@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"nomad-server/internal/activity"
 	"nomad-server/internal/auth"
 	"nomad-server/internal/config"
 	"nomad-server/internal/database"
@@ -28,6 +29,7 @@ import (
 const (
 	uploadCleanupInterval = time.Hour
 	trashPurgeInterval    = time.Hour
+	activityPurgeInterval = time.Hour
 )
 
 type App struct {
@@ -36,6 +38,7 @@ type App struct {
 	Files    *files.Service
 	Users    *users.Store
 	Settings *settings.Store
+	Activity *activity.Hub
 	db       *sql.DB
 	scanner  *scanner.Scanner
 	previews *preview.Worker
@@ -74,19 +77,26 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	previews := preview.NewWorker(fileService, userStore, cfg.PreviewCacheDir())
 	fileService.OnContentChanged(previews.Enqueue)
 	fileService.OnContentRemoved(previews.RequestCleanup)
+	activityHub := activity.NewHub(activity.NewStore(db))
+	fileService.OnMutation(activityHub.FileMutation)
+	authService := auth.NewService(userService, sessions, tokens)
+	authService.OnSession(func(ctx context.Context, user users.User, session auth.Session, event auth.SessionEvent) {
+		activityHub.Session(ctx, user, session.ID, session.DeviceName, event == auth.SessionStarted)
+	})
 	web, err := webClient(cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	handler := httpapi.NewRouter(httpapi.Dependencies{
-		Auth:                   auth.NewService(userService, sessions, tokens),
+		Auth:                   authService,
 		Sessions:               sessions,
 		Users:                  userService,
 		Files:                  fileService,
 		Settings:               serverSettings,
 		Sync:                   syncService,
 		Previews:               previews,
+		Activity:               activityHub,
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		Web:                    web,
 	})
@@ -96,6 +106,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Files:    fileService,
 		Users:    userStore,
 		Settings: serverSettings,
+		Activity: activityHub,
 		db:       db,
 		scanner:  scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles),
 		previews: previews,
@@ -137,6 +148,11 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	go repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads)
 	go repeat(ctx, trashPurgeInterval, "purge expired trash", func(ctx context.Context) error {
 		return a.PurgeExpiredTrash(ctx, time.Now())
+	})
+	go a.Activity.Run(ctx)
+	go repeat(ctx, activityPurgeInterval, "purge old activity", func(ctx context.Context) error {
+		_, err := a.Activity.Store().PurgeOlderThan(ctx, time.Now().Add(-activity.Retention))
+		return err
 	})
 }
 

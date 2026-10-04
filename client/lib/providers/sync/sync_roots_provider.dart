@@ -2,7 +2,9 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:nomad/models/sync/sync_root.dart";
 import "package:nomad/providers/account_provider.dart";
+import "package:nomad/providers/sync/sync_activity_provider.dart";
 import "package:nomad/providers/sync/sync_platform_provider.dart";
+import "package:nomad/services/sync/sync_activity.dart";
 import "package:nomad/services/sync/sync_state_store.dart";
 
 final syncRootsProvider = AsyncNotifierProvider<SyncRootsNotifier, List<SyncRoot>>(SyncRootsNotifier.new);
@@ -38,6 +40,7 @@ class SyncRootsNotifier extends AsyncNotifier<List<SyncRoot>> {
   }
 
   Future<void> setEnabled(SyncRoot root, bool enabled) async {
+    if (!enabled) ref.read(syncActivityProvider).cancelRoot(root.id, CancelReason.stopped);
     final updated = root.copyWith(enabled: enabled);
     await (await _store).saveRoot(updated);
     state = AsyncData([
@@ -46,6 +49,7 @@ class SyncRootsNotifier extends AsyncNotifier<List<SyncRoot>> {
   }
 
   Future<void> remove(SyncRoot root) async {
+    ref.read(syncActivityProvider).cancelRoot(root.id, CancelReason.stopped);
     await (await _store).deleteRoot(root.id);
     state = AsyncData((state.value ?? []).where((existing) => existing.id != root.id).toList());
   }

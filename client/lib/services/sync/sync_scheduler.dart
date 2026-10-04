@@ -4,7 +4,7 @@ class SyncScheduler {
   SyncScheduler({
     required this.onTrigger,
     this.interval = const Duration(minutes: 5),
-    this.debounce = const Duration(seconds: 3),
+    this.debounce = const Duration(seconds: 1),
   });
 
   final void Function() onTrigger;
@@ -13,9 +13,9 @@ class SyncScheduler {
 
   Timer? _periodic;
   Timer? _debounced;
-  final List<StreamSubscription<void>> _watchers = [];
+  final List<StreamSubscription<Object?>> _watchers = [];
 
-  void start(Iterable<Stream<void>> folderEvents) {
+  void start(Iterable<Stream<Object?>> folderEvents) {
     stop();
     _periodic = Timer.periodic(interval, (_) => onTrigger());
     _watchers.addAll(folderEvents.map((events) => events.listen((_) => requestRun())));

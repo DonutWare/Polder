@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"sync"
+	"time"
 
 	"nomad-server/internal/apperr"
 	"nomad-server/internal/users"
@@ -15,16 +16,37 @@ type TokenPair struct {
 	User         users.User `json:"user"`
 }
 
+type Identity struct {
+	User      users.User
+	SessionID int64
+	Device    string
+	ExpiresAt time.Time
+}
+
+type SessionEvent string
+
+const (
+	SessionStarted SessionEvent = "started"
+	SessionEnded   SessionEvent = "ended"
+)
+
+type SessionFunc func(ctx context.Context, user users.User, session Session, event SessionEvent)
+
 type Service struct {
-	users    *users.Service
-	sessions *Sessions
-	tokens   *AccessTokens
-	hasher   Argon2Hasher
-	setupMu  sync.Mutex
+	users     *users.Service
+	sessions  *Sessions
+	tokens    *AccessTokens
+	hasher    Argon2Hasher
+	setupMu   sync.Mutex
+	onSession SessionFunc
 }
 
 func NewService(userService *users.Service, sessions *Sessions, tokens *AccessTokens) *Service {
-	return &Service{users: userService, sessions: sessions, tokens: tokens}
+	return &Service{users: userService, sessions: sessions, tokens: tokens, onSession: func(context.Context, users.User, Session, SessionEvent) {}}
+}
+
+func (s *Service) OnSession(callback SessionFunc) {
+	s.onSession = callback
 }
 
 func (s *Service) NeedsSetup(ctx context.Context) (bool, error) {
@@ -71,27 +93,42 @@ func (s *Service) Login(ctx context.Context, username, password, deviceName stri
 var dummyHash, _ = Argon2Hasher{}.Hash("timing-equalizer")
 
 func (s *Service) Refresh(ctx context.Context, refreshToken string) (TokenPair, error) {
-	userID, rotatedToken, err := s.sessions.Rotate(ctx, refreshToken)
+	session, rotatedToken, err := s.sessions.Rotate(ctx, refreshToken)
 	if err != nil {
 		return TokenPair{}, err
 	}
-	user, err := s.ActiveUser(ctx, userID)
+	user, err := s.ActiveUser(ctx, session.UserID)
 	if err != nil {
 		return TokenPair{}, err
 	}
-	return s.tokenPair(user, rotatedToken)
+	return s.tokenPair(user, session, rotatedToken)
 }
 
 func (s *Service) Logout(ctx context.Context, refreshToken string) error {
-	return s.sessions.Revoke(ctx, refreshToken)
+	session, revoked, err := s.sessions.Revoke(ctx, refreshToken)
+	if err != nil || !revoked {
+		return err
+	}
+	if user, err := s.users.Store().ByID(ctx, session.UserID); err == nil {
+		s.onSession(ctx, user, session, SessionEnded)
+	}
+	return nil
 }
 
-func (s *Service) Authenticate(ctx context.Context, accessToken string) (users.User, error) {
-	userID, err := s.tokens.UserID(accessToken)
+func (s *Service) Authenticate(ctx context.Context, accessToken string) (Identity, error) {
+	claims, err := s.tokens.Parse(accessToken)
 	if err != nil {
-		return users.User{}, apperr.Unauthorized("access token is invalid or expired")
+		return Identity{}, apperr.Unauthorized("access token is invalid or expired")
 	}
-	return s.ActiveUser(ctx, userID)
+	user, err := s.ActiveUser(ctx, claims.UserID)
+	if err != nil {
+		return Identity{}, err
+	}
+	device := claims.Device
+	if device == "" {
+		device = unknownDevice
+	}
+	return Identity{User: user, SessionID: claims.SessionID, Device: device, ExpiresAt: claims.ExpiresAt}, nil
 }
 
 func (s *Service) ActiveUser(ctx context.Context, userID int64) (users.User, error) {
@@ -110,17 +147,23 @@ func (s *Service) ActiveUser(ctx context.Context, userID int64) (users.User, err
 
 func (s *Service) startSession(ctx context.Context, user users.User, deviceName string) (TokenPair, error) {
 	if deviceName == "" {
-		deviceName = "unknown device"
+		deviceName = unknownDevice
 	}
-	refreshToken, err := s.sessions.Create(ctx, user.ID, deviceName)
+	session, refreshToken, err := s.sessions.Create(ctx, user.ID, deviceName)
 	if err != nil {
 		return TokenPair{}, err
 	}
-	return s.tokenPair(user, refreshToken)
+	pair, err := s.tokenPair(user, session, refreshToken)
+	if err == nil {
+		s.onSession(ctx, user, session, SessionStarted)
+	}
+	return pair, err
 }
 
-func (s *Service) tokenPair(user users.User, refreshToken string) (TokenPair, error) {
-	accessToken, err := s.tokens.Issue(user.ID)
+const unknownDevice = "unknown device"
+
+func (s *Service) tokenPair(user users.User, session Session, refreshToken string) (TokenPair, error) {
+	accessToken, err := s.tokens.Issue(user.ID, session.ID, session.DeviceName)
 	if err != nil {
 		return TokenPair{}, err
 	}

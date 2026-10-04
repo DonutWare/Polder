@@ -4,6 +4,7 @@ import "package:nomad/routes/app_routes.dart";
 
 enum ShellDestination {
   files(AppRoutes.files),
+  activity(AppRoutes.activity),
   sync(AppRoutes.sync),
   autoUpload(AppRoutes.autoUpload),
   trash(AppRoutes.trash),
@@ -27,6 +28,7 @@ final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
   final platform = ref.watch(syncPlatformProvider);
   return [
     ShellDestination.files,
+    ShellDestination.activity,
     if (platform.supportsFolderSync) ShellDestination.sync,
     if (platform.supportsAutoUpload) ShellDestination.autoUpload,
   ];

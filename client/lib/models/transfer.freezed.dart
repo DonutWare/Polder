@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Transfer {
 
- int get id; String get name; TransferDirection get direction; int get transferred; int get total; TransferStatus get status; Object? get error;
+ int get id; String get clientId; String get name; TransferDirection get direction; String? get remotePath; int get transferred; int get total; int get rate; TransferStatus get status; Object? get error;
 /// Create a copy of Transfer
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $TransferCopyWith<Transfer> get copyWith => _$TransferCopyWithImpl<Transfer>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Transfer;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transfer&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.direction, _this.direction) || other.direction == _this.direction)&&(identical(other.transferred, _this.transferred) || other.transferred == _this.transferred)&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.status, _this.status) || other.status == _this.status)&&const DeepCollectionEquality().equals(other.error, _this.error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transfer&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.clientId, _this.clientId) || other.clientId == _this.clientId)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.direction, _this.direction) || other.direction == _this.direction)&&(identical(other.remotePath, _this.remotePath) || other.remotePath == _this.remotePath)&&(identical(other.transferred, _this.transferred) || other.transferred == _this.transferred)&&(identical(other.total, _this.total) || other.total == _this.total)&&(identical(other.rate, _this.rate) || other.rate == _this.rate)&&(identical(other.status, _this.status) || other.status == _this.status)&&const DeepCollectionEquality().equals(other.error, _this.error));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Transfer;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.direction,_this.transferred,_this.total,_this.status,const DeepCollectionEquality().hash(_this.error));
+  return Object.hash(runtimeType,_this.id,_this.clientId,_this.name,_this.direction,_this.remotePath,_this.transferred,_this.total,_this.rate,_this.status,const DeepCollectionEquality().hash(_this.error));
 }
 
 @override
 String toString() {
   final _this = this as Transfer;
-  return 'Transfer(id: ${_this.id}, name: ${_this.name}, direction: ${_this.direction}, transferred: ${_this.transferred}, total: ${_this.total}, status: ${_this.status}, error: ${_this.error})';
+  return 'Transfer(id: ${_this.id}, clientId: ${_this.clientId}, name: ${_this.name}, direction: ${_this.direction}, remotePath: ${_this.remotePath}, transferred: ${_this.transferred}, total: ${_this.total}, rate: ${_this.rate}, status: ${_this.status}, error: ${_this.error})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $TransferCopyWith<$Res>  {
   factory $TransferCopyWith(Transfer value, $Res Function(Transfer) _then) = _$TransferCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, TransferDirection direction, int transferred, int total, TransferStatus status, Object? error
+ int id, String clientId, String name, TransferDirection direction, String? remotePath, int transferred, int total, int rate, TransferStatus status, Object? error
 });
 
 
@@ -68,13 +68,16 @@ class _$TransferCopyWithImpl<$Res>
 
 /// Create a copy of Transfer
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? direction = null,Object? transferred = null,Object? total = null,Object? status = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? clientId = null,Object? name = null,Object? direction = null,Object? remotePath = freezed,Object? transferred = null,Object? total = null,Object? rate = null,Object? status = null,Object? error = freezed,}) {
   return _then(Transfer(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as int,clientId: null == clientId ? _self.clientId : clientId // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
-as TransferDirection,transferred: null == transferred ? _self.transferred : transferred // ignore: cast_nullable_to_non_nullable
+as TransferDirection,remotePath: freezed == remotePath ? _self.remotePath : remotePath // ignore: cast_nullable_to_non_nullable
+as String?,transferred: null == transferred ? _self.transferred : transferred // ignore: cast_nullable_to_non_nullable
 as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,rate: null == rate ? _self.rate : rate // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as TransferStatus,error: freezed == error ? _self.error : error ,
   ));
@@ -161,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  TransferDirection direction,  int transferred,  int total,  TransferStatus status,  Object? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String clientId,  String name,  TransferDirection direction,  String? remotePath,  int transferred,  int total,  int rate,  TransferStatus status,  Object? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Transfer() when $default != null:
-return $default(_that.id,_that.name,_that.direction,_that.transferred,_that.total,_that.status,_that.error);case _:
+return $default(_that.id,_that.clientId,_that.name,_that.direction,_that.remotePath,_that.transferred,_that.total,_that.rate,_that.status,_that.error);case _:
   return orElse();
 
 }
@@ -182,10 +185,10 @@ return $default(_that.id,_that.name,_that.direction,_that.transferred,_that.tota
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  TransferDirection direction,  int transferred,  int total,  TransferStatus status,  Object? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String clientId,  String name,  TransferDirection direction,  String? remotePath,  int transferred,  int total,  int rate,  TransferStatus status,  Object? error)  $default,) {final _that = this;
 switch (_that) {
 case _Transfer():
-return $default(_that.id,_that.name,_that.direction,_that.transferred,_that.total,_that.status,_that.error);case _:
+return $default(_that.id,_that.clientId,_that.name,_that.direction,_that.remotePath,_that.transferred,_that.total,_that.rate,_that.status,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +205,10 @@ return $default(_that.id,_that.name,_that.direction,_that.transferred,_that.tota
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  TransferDirection direction,  int transferred,  int total,  TransferStatus status,  Object? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String clientId,  String name,  TransferDirection direction,  String? remotePath,  int transferred,  int total,  int rate,  TransferStatus status,  Object? error)?  $default,) {final _that = this;
 switch (_that) {
 case _Transfer() when $default != null:
-return $default(_that.id,_that.name,_that.direction,_that.transferred,_that.total,_that.status,_that.error);case _:
+return $default(_that.id,_that.clientId,_that.name,_that.direction,_that.remotePath,_that.transferred,_that.total,_that.rate,_that.status,_that.error);case _:
   return null;
 
 }
@@ -217,14 +220,17 @@ return $default(_that.id,_that.name,_that.direction,_that.transferred,_that.tota
 
 
 class _Transfer extends Transfer {
-  const _Transfer({required this.id, required this.name, required this.direction, this.transferred = 0, this.total = 0, this.status = TransferStatus.running, this.error}): super._();
+  const _Transfer({required this.id, required this.clientId, required this.name, required this.direction, this.remotePath, this.transferred = 0, this.total = 0, this.rate = 0, this.status = TransferStatus.running, this.error}): super._();
   
 
 @override final  int id;
+@override final  String clientId;
 @override final  String name;
 @override final  TransferDirection direction;
+@override final  String? remotePath;
 @override@JsonKey() final  int transferred;
 @override@JsonKey() final  int total;
+@override@JsonKey() final  int rate;
 @override@JsonKey() final  TransferStatus status;
 @override final  Object? error;
 
@@ -238,18 +244,18 @@ _$TransferCopyWith<_Transfer> get copyWith => __$TransferCopyWithImpl<_Transfer>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transfer&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.transferred, transferred) || other.transferred == transferred)&&(identical(other.total, total) || other.total == total)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.error, error));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transfer&&(identical(other.id, id) || other.id == id)&&(identical(other.clientId, clientId) || other.clientId == clientId)&&(identical(other.name, name) || other.name == name)&&(identical(other.direction, direction) || other.direction == direction)&&(identical(other.remotePath, remotePath) || other.remotePath == remotePath)&&(identical(other.transferred, transferred) || other.transferred == transferred)&&(identical(other.total, total) || other.total == total)&&(identical(other.rate, rate) || other.rate == rate)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.error, error));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,direction,transferred,total,status,const DeepCollectionEquality().hash(error));
+    return Object.hash(runtimeType,id,clientId,name,direction,remotePath,transferred,total,rate,status,const DeepCollectionEquality().hash(error));
 }
 
 @override
 String toString() {
-    return 'Transfer(id: $id, name: $name, direction: $direction, transferred: $transferred, total: $total, status: $status, error: $error)';
+    return 'Transfer(id: $id, clientId: $clientId, name: $name, direction: $direction, remotePath: $remotePath, transferred: $transferred, total: $total, rate: $rate, status: $status, error: $error)';
 }
 
 
@@ -260,7 +266,7 @@ abstract mixin class _$TransferCopyWith<$Res> implements $TransferCopyWith<$Res>
   factory _$TransferCopyWith(_Transfer value, $Res Function(_Transfer) _then) = __$TransferCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, TransferDirection direction, int transferred, int total, TransferStatus status, Object? error
+ int id, String clientId, String name, TransferDirection direction, String? remotePath, int transferred, int total, int rate, TransferStatus status, Object? error
 });
 
 
@@ -277,13 +283,16 @@ class __$TransferCopyWithImpl<$Res>
 
 /// Create a copy of Transfer
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? direction = null,Object? transferred = null,Object? total = null,Object? status = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? clientId = null,Object? name = null,Object? direction = null,Object? remotePath = freezed,Object? transferred = null,Object? total = null,Object? rate = null,Object? status = null,Object? error = freezed,}) {
   return _then(_Transfer(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as int,clientId: null == clientId ? _self.clientId : clientId // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,direction: null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
-as TransferDirection,transferred: null == transferred ? _self.transferred : transferred // ignore: cast_nullable_to_non_nullable
+as TransferDirection,remotePath: freezed == remotePath ? _self.remotePath : remotePath // ignore: cast_nullable_to_non_nullable
+as String?,transferred: null == transferred ? _self.transferred : transferred // ignore: cast_nullable_to_non_nullable
 as int,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,rate: null == rate ? _self.rate : rate // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as TransferStatus,error: freezed == error ? _self.error : error ,
   ));

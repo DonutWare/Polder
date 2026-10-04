@@ -36,9 +36,9 @@ void main() {
       scheduler
         ..requestRun()
         ..requestRun();
-      async.elapse(const Duration(seconds: 2));
+      async.elapse(scheduler.debounce - const Duration(milliseconds: 1));
       expect(runs, 1);
-      async.elapse(const Duration(seconds: 1));
+      async.elapse(const Duration(milliseconds: 1));
       expect(runs, 2);
 
       scheduler.stop();

@@ -160,22 +160,34 @@ func (s *Service) applyRescan(ctx context.Context, owner users.User, plan scanPl
 
 	sort.Slice(plan.upserts, func(i, j int) bool { return len(plan.upserts[i].Path) < len(plan.upserts[j].Path) })
 	var changedFiles []string
+	var changes []ScanChange
 	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
+		changes = changes[:0]
 		for _, removedPath := range plan.removals {
 			if !isInternalName(removedPath) && s.existsOnDisk(owner.Username, removedPath) {
 				continue
 			}
-			if err := removeTree(ctx, tx, owner.ID, removedPath); err != nil {
-				return err
-			}
-		}
-		for _, entry := range plan.upserts {
-			saved, err := s.applyScannedEntry(ctx, tx, owner, entry)
+			removed, found, err := findEntry(ctx, tx, owner.ID, removedPath)
 			if err != nil {
 				return err
 			}
-			if saved && !entry.IsDir {
+			if err := removeTree(ctx, tx, owner.ID, removedPath); err != nil {
+				return err
+			}
+			if found && !isInternalName(removedPath) {
+				changes = append(changes, ScanChange{Path: removedPath, IsDir: removed.IsDir, Change: ScanRemoved})
+			}
+		}
+		for _, entry := range plan.upserts {
+			change, err := s.applyScannedEntry(ctx, tx, owner, entry)
+			if err != nil {
+				return err
+			}
+			if change != "" && !entry.IsDir {
 				changedFiles = append(changedFiles, entry.Path)
+			}
+			if change == ScanAdded || (change == ScanChanged && !entry.IsDir) {
+				changes = append(changes, ScanChange{Path: entry.Path, IsDir: entry.IsDir, Change: change})
 			}
 		}
 		return nil
@@ -187,24 +199,32 @@ func (s *Service) applyRescan(ctx context.Context, owner users.User, plan scanPl
 		s.onContentChanged(owner.ID, changedPath)
 	}
 	s.onContentRemoved()
+	if len(changes) > 0 {
+		s.notify(ctx, Mutation{Owner: owner, Kind: MutationRescan, Path: "/", IsDir: true, Changes: changes})
+	}
 	return nil
 }
 
-func (s *Service) applyScannedEntry(ctx context.Context, tx *sql.Tx, owner users.User, entry Entry) (bool, error) {
+func (s *Service) applyScannedEntry(ctx context.Context, tx *sql.Tx, owner users.User, entry Entry) (ScanChangeType, error) {
 	if !s.stillMatchesDisk(owner.Username, entry) {
-		return false, nil
+		return "", nil
 	}
 	known, found, err := findEntry(ctx, tx, owner.ID, entry.Path)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	if found && known.IsDir != entry.IsDir {
 		if err := removeTree(ctx, tx, owner.ID, entry.Path); err != nil {
-			return false, err
+			return "", err
 		}
 	}
-	_, err = saveEntry(ctx, tx, entry)
-	return err == nil, err
+	if _, err = saveEntry(ctx, tx, entry); err != nil {
+		return "", err
+	}
+	if found {
+		return ScanChanged, nil
+	}
+	return ScanAdded, nil
 }
 
 func (s *Service) existsOnDisk(username, cleanPath string) bool {

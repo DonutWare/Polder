@@ -9,6 +9,7 @@ import "package:nomad/widgets/navigation/navigation_shell.dart";
 extension ShellDestinationPresentation on ShellDestination {
   String label(BuildContext context) => switch (this) {
     ShellDestination.files => context.localized.navFiles,
+    ShellDestination.activity => context.localized.navActivity,
     ShellDestination.sync => context.localized.navSync,
     ShellDestination.autoUpload => context.localized.navAutoUpload,
     ShellDestination.trash => context.localized.navTrash,
@@ -17,6 +18,7 @@ extension ShellDestinationPresentation on ShellDestination {
 
   IconData get icon => switch (this) {
     ShellDestination.files => IconsaxPlusLinear.folder_2,
+    ShellDestination.activity => IconsaxPlusLinear.activity,
     ShellDestination.sync => IconsaxPlusLinear.refresh_2,
     ShellDestination.autoUpload => IconsaxPlusLinear.gallery_import,
     ShellDestination.trash => IconsaxPlusLinear.trash,
@@ -25,6 +27,7 @@ extension ShellDestinationPresentation on ShellDestination {
 
   IconData get selectedIcon => switch (this) {
     ShellDestination.files => IconsaxPlusBold.folder_2,
+    ShellDestination.activity => IconsaxPlusBold.activity,
     ShellDestination.sync => IconsaxPlusBold.refresh_2,
     ShellDestination.autoUpload => IconsaxPlusBold.gallery_import,
     ShellDestination.trash => IconsaxPlusBold.trash,

@@ -73,6 +73,7 @@ func (s *Service) Write(ctx context.Context, owner users.User, request WriteRequ
 	if exists && current.Hash != entry.Hash {
 		s.onContentRemoved()
 	}
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationWrite, Path: entry.Path, Size: entry.Size})
 	return entry, nil
 }
 

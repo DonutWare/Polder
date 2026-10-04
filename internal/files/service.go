@@ -29,6 +29,7 @@ type Service struct {
 	locks            userLocks
 	onContentChanged ContentChangedFunc
 	onContentRemoved func()
+	observers        []MutationFunc
 }
 
 func NewService(db *sql.DB, disk *storage.Disk) *Service {
@@ -153,6 +154,9 @@ func (s *Service) Mkdir(ctx context.Context, owner users.User, rawPath string) (
 		created, err = saveEntry(ctx, tx, newDirectoryEntry(owner.ID, cleanPath, modificationTime(absolute)))
 		return err
 	})
+	if err == nil {
+		s.notify(ctx, Mutation{Owner: owner, Kind: MutationMkdir, Path: created.Path, IsDir: true})
+	}
 	return created, err
 }
 
@@ -204,8 +208,10 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 	defer unlock()
 
 	undo := func() {}
+	var current Entry
 	err = s.inTransaction(ctx, func(tx *sql.Tx) error {
-		current, err := s.existingEntry(ctx, tx, owner.ID, cleanPath)
+		var err error
+		current, err = s.existingEntry(ctx, tx, owner.ID, cleanPath)
 		if err != nil {
 			return err
 		}
@@ -220,6 +226,7 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 		return err
 	}
 	s.onContentRemoved()
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationDelete, Path: current.Path, IsDir: current.IsDir, Size: current.Size})
 	return nil
 }
 
@@ -259,10 +266,14 @@ func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo str
 		moved, err = reindexMovedTree(ctx, tx, owner.ID, from, to)
 		return err
 	})
-	if err == nil && !moved.IsDir {
+	if err != nil {
+		return moved, err
+	}
+	if !moved.IsDir {
 		s.onContentChanged(owner.ID, moved.Path)
 	}
-	return moved, err
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationMove, Path: moved.Path, FromPath: from, IsDir: moved.IsDir, Size: moved.Size})
+	return moved, nil
 }
 
 func (s *Service) renameOnDisk(owner users.User, from, to string) error {

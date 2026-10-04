@@ -17,13 +17,14 @@ class Reconciler {
     required Map<String, LocalFileState> local,
     required Map<String, SyncEntry> synced,
     required Map<String, RemoteState> remote,
+    Set<String> pending = const {},
   }) {
-    final paths = {...local.keys, ...synced.keys, if (mode == SyncMode.sync) ...remote.keys};
-    final actions = [for (final path in paths) ?_decide(path, local[path], synced[path], remote[path])];
-    return _ordered(_withoutRedundantDeletes(actions));
+    final paths = {...local.keys, ...synced.keys, if (mode == SyncMode.sync) ...remote.keys}.difference(pending);
+    final actions = [for (final path in paths) ?decide(path, local[path], synced[path], remote[path])];
+    return _ordered(_withoutRedundantDeletes(actions, pending));
   }
 
-  SyncAction? _decide(String path, LocalFileState? local, SyncEntry? synced, RemoteState? remote) {
+  SyncAction? decide(String path, LocalFileState? local, SyncEntry? synced, RemoteState? remote) {
     if (mode == SyncMode.autoUpload) return _decideUploadOnly(path, local, synced);
     if (synced == null) return _decideUntracked(path, local, remote);
     if (synced.isPlaceholder && local == null) return _decidePlaceholder(path, synced, remote);
@@ -111,8 +112,8 @@ class Reconciler {
   bool _sameContent(LocalFileState local, FileEntry remote) =>
       local.isDir == remote.isDir && (local.isDir || local.hash == remote.hash);
 
-  List<SyncAction> _withoutRedundantDeletes(List<SyncAction> actions) {
-    final keptPaths = actions.where((action) => !action.isDelete).map((action) => action.path).toList();
+  List<SyncAction> _withoutRedundantDeletes(List<SyncAction> actions, Set<String> pending) {
+    final keptPaths = [...actions.where((action) => !action.isDelete).map((action) => action.path), ...pending];
     final deletes = {
       for (final action in actions)
         if (action.isDelete && !_hasKeptDescendant(action.path, keptPaths)) action.path: action,

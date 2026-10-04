@@ -2,6 +2,7 @@ import "package:flutter/widgets.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "package:nomad/providers/realtime/directory_refresher_provider.dart";
 import "package:nomad/providers/sync/sync_scheduler_provider.dart";
 
 class SyncBackgroundActivator extends ConsumerWidget {
@@ -12,6 +13,7 @@ class SyncBackgroundActivator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(syncSchedulerProvider);
+    ref.watch(directoryRefresherProvider);
     return child;
   }
 }

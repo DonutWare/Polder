@@ -23,6 +23,10 @@ NOMAD_CONFIG_DIR=./config NOMAD_DATA_DIR=./data go run ./cmd/nomad
 
 The first login creates the admin account.
 
+Clients receive live activity (transfers in progress, folder changes) over a WebSocket at
+`/api/v1/events`. Behind a reverse proxy, let that path upgrade: in nginx, `proxy_http_version 1.1`
+with `Upgrade` and `Connection` headers passed through.
+
 ## Docker image
 
 ```sh

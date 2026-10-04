@@ -67,6 +67,20 @@ Map<String, dynamic> _$ChunkRefToJson(ChunkRef instance) => <String, dynamic>{
   'size': instance.size,
 };
 
+ClientMessage _$ClientMessageFromJson(Map<String, dynamic> json) => ClientMessage(
+  scope: clientMessageScopeNullableFromJson(json['scope']),
+  token: json['token'] as String?,
+  type: clientMessageTypeFromJson(json['type']),
+  userId: (json['userId'] as num?)?.toInt(),
+);
+
+Map<String, dynamic> _$ClientMessageToJson(ClientMessage instance) => <String, dynamic>{
+  'scope': ?clientMessageScopeNullableToJson(instance.scope),
+  'token': ?instance.token,
+  'type': ?clientMessageTypeToJson(instance.type),
+  'userId': ?instance.userId,
+};
+
 CredentialsRequest _$CredentialsRequestFromJson(Map<String, dynamic> json) => CredentialsRequest(
   deviceName: json['deviceName'] as String?,
   password: json['password'] as String,
@@ -121,6 +135,34 @@ Map<String, dynamic> _$ErrorResponseToJson(ErrorResponse instance) => <String, d
   'error': instance.error.toJson(),
 };
 
+EventMessage _$EventMessageFromJson(Map<String, dynamic> json) => EventMessage(
+  code: json['code'] as String?,
+  dirs: (json['dirs'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  entry: json['entry'] == null ? null : LogEntry.fromJson(json['entry'] as Map<String, dynamic>),
+  message: json['message'] as String?,
+  status: eventMessageStatusNullableFromJson(json['status']),
+  transfer: json['transfer'] == null ? null : LiveTransfer.fromJson(json['transfer'] as Map<String, dynamic>),
+  transfers:
+      (json['transfers'] as List<dynamic>?)?.map((e) => LiveTransfer.fromJson(e as Map<String, dynamic>)).toList() ??
+      [],
+  type: eventMessageTypeFromJson(json['type']),
+  user: json['user'] == null ? null : User.fromJson(json['user'] as Map<String, dynamic>),
+  userId: (json['userId'] as num).toInt(),
+);
+
+Map<String, dynamic> _$EventMessageToJson(EventMessage instance) => <String, dynamic>{
+  'code': ?instance.code,
+  'dirs': ?instance.dirs,
+  'entry': ?instance.entry?.toJson(),
+  'message': ?instance.message,
+  'status': ?eventMessageStatusNullableToJson(instance.status),
+  'transfer': ?instance.transfer?.toJson(),
+  'transfers': ?instance.transfers?.map((e) => e.toJson()).toList(),
+  'type': ?eventMessageTypeToJson(instance.type),
+  'user': ?instance.user?.toJson(),
+  'userId': instance.userId,
+};
+
 HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) => HealthStatus(status: json['status'] as String);
 
 Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) => <String, dynamic>{'status': instance.status};
@@ -133,6 +175,90 @@ ListResponse _$ListResponseFromJson(Map<String, dynamic> json) => ListResponse(
 Map<String, dynamic> _$ListResponseToJson(ListResponse instance) => <String, dynamic>{
   'entries': ?instance.entries?.map((e) => e.toJson()).toList(),
   'path': instance.path,
+};
+
+LiveTransfer _$LiveTransferFromJson(Map<String, dynamic> json) => LiveTransfer(
+  bytes: (json['bytes'] as num).toInt(),
+  clientId: json['clientId'] as String?,
+  device: json['device'] as String,
+  direction: liveTransferDirectionFromJson(json['direction']),
+  id: json['id'] as String,
+  path: json['path'] as String,
+  rate: (json['rate'] as num).toInt(),
+  startedAt: DateTime.parse(json['startedAt'] as String),
+  total: (json['total'] as num?)?.toInt(),
+  userId: (json['userId'] as num).toInt(),
+  username: json['username'] as String,
+);
+
+Map<String, dynamic> _$LiveTransferToJson(LiveTransfer instance) => <String, dynamic>{
+  'bytes': instance.bytes,
+  'clientId': ?instance.clientId,
+  'device': instance.device,
+  'direction': ?liveTransferDirectionToJson(instance.direction),
+  'id': instance.id,
+  'path': instance.path,
+  'rate': instance.rate,
+  'startedAt': instance.startedAt.toIso8601String(),
+  'total': ?instance.total,
+  'userId': instance.userId,
+  'username': instance.username,
+};
+
+LiveTransfers _$LiveTransfersFromJson(Map<String, dynamic> json) => LiveTransfers(
+  transfers:
+      (json['transfers'] as List<dynamic>?)?.map((e) => LiveTransfer.fromJson(e as Map<String, dynamic>)).toList() ??
+      [],
+);
+
+Map<String, dynamic> _$LiveTransfersToJson(LiveTransfers instance) => <String, dynamic>{
+  'transfers': ?instance.transfers?.map((e) => e.toJson()).toList(),
+};
+
+LogEntry _$LogEntryFromJson(Map<String, dynamic> json) => LogEntry(
+  bytes: (json['bytes'] as num?)?.toInt(),
+  count: (json['count'] as num?)?.toInt(),
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  detail: json['detail'] as String,
+  device: json['device'] as String,
+  durationMs: (json['durationMs'] as num?)?.toInt(),
+  fromPath: json['fromPath'] as String?,
+  id: (json['id'] as num).toInt(),
+  isDir: json['isDir'] as bool,
+  kind: logEntryKindFromJson(json['kind']),
+  path: json['path'] as String,
+  size: (json['size'] as num?)?.toInt(),
+  status: logEntryStatusFromJson(json['status']),
+  userId: (json['userId'] as num).toInt(),
+  username: json['username'] as String,
+);
+
+Map<String, dynamic> _$LogEntryToJson(LogEntry instance) => <String, dynamic>{
+  'bytes': ?instance.bytes,
+  'count': ?instance.count,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'detail': instance.detail,
+  'device': instance.device,
+  'durationMs': ?instance.durationMs,
+  'fromPath': ?instance.fromPath,
+  'id': instance.id,
+  'isDir': instance.isDir,
+  'kind': ?logEntryKindToJson(instance.kind),
+  'path': instance.path,
+  'size': ?instance.size,
+  'status': ?logEntryStatusToJson(instance.status),
+  'userId': instance.userId,
+  'username': instance.username,
+};
+
+LogPage _$LogPageFromJson(Map<String, dynamic> json) => LogPage(
+  entries: (json['entries'] as List<dynamic>?)?.map((e) => LogEntry.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  nextCursor: (json['nextCursor'] as num).toInt(),
+);
+
+Map<String, dynamic> _$LogPageToJson(LogPage instance) => <String, dynamic>{
+  'entries': ?instance.entries?.map((e) => e.toJson()).toList(),
+  'nextCursor': instance.nextCursor,
 };
 
 Manifest _$ManifestFromJson(Map<String, dynamic> json) => Manifest(

@@ -299,6 +299,74 @@ extension $ChunkRefExtension on ChunkRef {
 }
 
 @JsonSerializable(explicitToJson: true)
+class ClientMessage {
+  const ClientMessage({this.scope, this.token, required this.type, this.userId});
+
+  factory ClientMessage.fromJson(Map<String, dynamic> json) => _$ClientMessageFromJson(json);
+
+  static const toJsonFactory = _$ClientMessageToJson;
+  Map<String, dynamic> toJson() => _$ClientMessageToJson(this);
+
+  @JsonKey(
+    name: 'scope',
+    includeIfNull: false,
+    toJson: clientMessageScopeNullableToJson,
+    fromJson: clientMessageScopeNullableFromJson,
+  )
+  final enums.ClientMessageScope? scope;
+  @JsonKey(name: 'token', includeIfNull: false)
+  final String? token;
+  @JsonKey(name: 'type', includeIfNull: false, toJson: clientMessageTypeToJson, fromJson: clientMessageTypeFromJson)
+  final enums.ClientMessageType type;
+  @JsonKey(name: 'userId', includeIfNull: false)
+  final int? userId;
+  static const fromJsonFactory = _$ClientMessageFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ClientMessage &&
+            (identical(other.scope, scope) || const DeepCollectionEquality().equals(other.scope, scope)) &&
+            (identical(other.token, token) || const DeepCollectionEquality().equals(other.token, token)) &&
+            (identical(other.type, type) || const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(scope) ^
+      const DeepCollectionEquality().hash(token) ^
+      const DeepCollectionEquality().hash(type) ^
+      const DeepCollectionEquality().hash(userId) ^
+      runtimeType.hashCode;
+}
+
+extension $ClientMessageExtension on ClientMessage {
+  ClientMessage copyWith({enums.ClientMessageScope? scope, String? token, enums.ClientMessageType? type, int? userId}) {
+    return ClientMessage(
+      scope: scope ?? this.scope,
+      token: token ?? this.token,
+      type: type ?? this.type,
+      userId: userId ?? this.userId,
+    );
+  }
+
+  ClientMessage copyWithWrapped({
+    Wrapped<enums.ClientMessageScope?>? scope,
+    Wrapped<String?>? token,
+    Wrapped<enums.ClientMessageType>? type,
+    Wrapped<int?>? userId,
+  }) {
+    return ClientMessage(
+      scope: (scope != null ? scope.value : this.scope),
+      token: (token != null ? token.value : this.token),
+      type: (type != null ? type.value : this.type),
+      userId: (userId != null ? userId.value : this.userId),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class CredentialsRequest {
   const CredentialsRequest({this.deviceName, required this.password, required this.username});
 
@@ -571,6 +639,139 @@ extension $ErrorResponseExtension on ErrorResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class EventMessage {
+  const EventMessage({
+    this.code,
+    this.dirs,
+    this.entry,
+    this.message,
+    this.status,
+    this.transfer,
+    this.transfers,
+    required this.type,
+    this.user,
+    required this.userId,
+  });
+
+  factory EventMessage.fromJson(Map<String, dynamic> json) => _$EventMessageFromJson(json);
+
+  static const toJsonFactory = _$EventMessageToJson;
+  Map<String, dynamic> toJson() => _$EventMessageToJson(this);
+
+  @JsonKey(name: 'code', includeIfNull: false)
+  final String? code;
+  @JsonKey(name: 'dirs', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? dirs;
+  @JsonKey(name: 'entry', includeIfNull: false)
+  final LogEntry? entry;
+  @JsonKey(name: 'message', includeIfNull: false)
+  final String? message;
+  @JsonKey(
+    name: 'status',
+    includeIfNull: false,
+    toJson: eventMessageStatusNullableToJson,
+    fromJson: eventMessageStatusNullableFromJson,
+  )
+  final enums.EventMessageStatus? status;
+  @JsonKey(name: 'transfer', includeIfNull: false)
+  final LiveTransfer? transfer;
+  @JsonKey(name: 'transfers', includeIfNull: false, defaultValue: <LiveTransfer>[])
+  final List<LiveTransfer>? transfers;
+  @JsonKey(name: 'type', includeIfNull: false, toJson: eventMessageTypeToJson, fromJson: eventMessageTypeFromJson)
+  final enums.EventMessageType type;
+  @JsonKey(name: 'user', includeIfNull: false)
+  final User? user;
+  @JsonKey(name: 'userId', includeIfNull: false)
+  final int userId;
+  static const fromJsonFactory = _$EventMessageFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is EventMessage &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.dirs, dirs) || const DeepCollectionEquality().equals(other.dirs, dirs)) &&
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.transfer, transfer) || const DeepCollectionEquality().equals(other.transfer, transfer)) &&
+            (identical(other.transfers, transfers) ||
+                const DeepCollectionEquality().equals(other.transfers, transfers)) &&
+            (identical(other.type, type) || const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.user, user) || const DeepCollectionEquality().equals(other.user, user)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(code) ^
+      const DeepCollectionEquality().hash(dirs) ^
+      const DeepCollectionEquality().hash(entry) ^
+      const DeepCollectionEquality().hash(message) ^
+      const DeepCollectionEquality().hash(status) ^
+      const DeepCollectionEquality().hash(transfer) ^
+      const DeepCollectionEquality().hash(transfers) ^
+      const DeepCollectionEquality().hash(type) ^
+      const DeepCollectionEquality().hash(user) ^
+      const DeepCollectionEquality().hash(userId) ^
+      runtimeType.hashCode;
+}
+
+extension $EventMessageExtension on EventMessage {
+  EventMessage copyWith({
+    String? code,
+    List<String>? dirs,
+    LogEntry? entry,
+    String? message,
+    enums.EventMessageStatus? status,
+    LiveTransfer? transfer,
+    List<LiveTransfer>? transfers,
+    enums.EventMessageType? type,
+    User? user,
+    int? userId,
+  }) {
+    return EventMessage(
+      code: code ?? this.code,
+      dirs: dirs ?? this.dirs,
+      entry: entry ?? this.entry,
+      message: message ?? this.message,
+      status: status ?? this.status,
+      transfer: transfer ?? this.transfer,
+      transfers: transfers ?? this.transfers,
+      type: type ?? this.type,
+      user: user ?? this.user,
+      userId: userId ?? this.userId,
+    );
+  }
+
+  EventMessage copyWithWrapped({
+    Wrapped<String?>? code,
+    Wrapped<List<String>?>? dirs,
+    Wrapped<LogEntry?>? entry,
+    Wrapped<String?>? message,
+    Wrapped<enums.EventMessageStatus?>? status,
+    Wrapped<LiveTransfer?>? transfer,
+    Wrapped<List<LiveTransfer>?>? transfers,
+    Wrapped<enums.EventMessageType>? type,
+    Wrapped<User?>? user,
+    Wrapped<int>? userId,
+  }) {
+    return EventMessage(
+      code: (code != null ? code.value : this.code),
+      dirs: (dirs != null ? dirs.value : this.dirs),
+      entry: (entry != null ? entry.value : this.entry),
+      message: (message != null ? message.value : this.message),
+      status: (status != null ? status.value : this.status),
+      transfer: (transfer != null ? transfer.value : this.transfer),
+      transfers: (transfers != null ? transfers.value : this.transfers),
+      type: (type != null ? type.value : this.type),
+      user: (user != null ? user.value : this.user),
+      userId: (userId != null ? userId.value : this.userId),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class HealthStatus {
   const HealthStatus({required this.status});
 
@@ -641,6 +842,402 @@ extension $ListResponseExtension on ListResponse {
     return ListResponse(
       entries: (entries != null ? entries.value : this.entries),
       path: (path != null ? path.value : this.path),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LiveTransfer {
+  const LiveTransfer({
+    required this.bytes,
+    this.clientId,
+    required this.device,
+    required this.direction,
+    required this.id,
+    required this.path,
+    required this.rate,
+    required this.startedAt,
+    this.total,
+    required this.userId,
+    required this.username,
+  });
+
+  factory LiveTransfer.fromJson(Map<String, dynamic> json) => _$LiveTransferFromJson(json);
+
+  static const toJsonFactory = _$LiveTransferToJson;
+  Map<String, dynamic> toJson() => _$LiveTransferToJson(this);
+
+  @JsonKey(name: 'bytes', includeIfNull: false)
+  final int bytes;
+  @JsonKey(name: 'clientId', includeIfNull: false)
+  final String? clientId;
+  @JsonKey(name: 'device', includeIfNull: false)
+  final String device;
+  @JsonKey(
+    name: 'direction',
+    includeIfNull: false,
+    toJson: liveTransferDirectionToJson,
+    fromJson: liveTransferDirectionFromJson,
+  )
+  final enums.LiveTransferDirection direction;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final String id;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  @JsonKey(name: 'rate', includeIfNull: false)
+  final int rate;
+  @JsonKey(name: 'startedAt', includeIfNull: false)
+  final DateTime startedAt;
+  @JsonKey(name: 'total', includeIfNull: false)
+  final int? total;
+  @JsonKey(name: 'userId', includeIfNull: false)
+  final int userId;
+  @JsonKey(name: 'username', includeIfNull: false)
+  final String username;
+  static const fromJsonFactory = _$LiveTransferFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LiveTransfer &&
+            (identical(other.bytes, bytes) || const DeepCollectionEquality().equals(other.bytes, bytes)) &&
+            (identical(other.clientId, clientId) || const DeepCollectionEquality().equals(other.clientId, clientId)) &&
+            (identical(other.device, device) || const DeepCollectionEquality().equals(other.device, device)) &&
+            (identical(other.direction, direction) ||
+                const DeepCollectionEquality().equals(other.direction, direction)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.rate, rate) || const DeepCollectionEquality().equals(other.rate, rate)) &&
+            (identical(other.startedAt, startedAt) ||
+                const DeepCollectionEquality().equals(other.startedAt, startedAt)) &&
+            (identical(other.total, total) || const DeepCollectionEquality().equals(other.total, total)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(bytes) ^
+      const DeepCollectionEquality().hash(clientId) ^
+      const DeepCollectionEquality().hash(device) ^
+      const DeepCollectionEquality().hash(direction) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(path) ^
+      const DeepCollectionEquality().hash(rate) ^
+      const DeepCollectionEquality().hash(startedAt) ^
+      const DeepCollectionEquality().hash(total) ^
+      const DeepCollectionEquality().hash(userId) ^
+      const DeepCollectionEquality().hash(username) ^
+      runtimeType.hashCode;
+}
+
+extension $LiveTransferExtension on LiveTransfer {
+  LiveTransfer copyWith({
+    int? bytes,
+    String? clientId,
+    String? device,
+    enums.LiveTransferDirection? direction,
+    String? id,
+    String? path,
+    int? rate,
+    DateTime? startedAt,
+    int? total,
+    int? userId,
+    String? username,
+  }) {
+    return LiveTransfer(
+      bytes: bytes ?? this.bytes,
+      clientId: clientId ?? this.clientId,
+      device: device ?? this.device,
+      direction: direction ?? this.direction,
+      id: id ?? this.id,
+      path: path ?? this.path,
+      rate: rate ?? this.rate,
+      startedAt: startedAt ?? this.startedAt,
+      total: total ?? this.total,
+      userId: userId ?? this.userId,
+      username: username ?? this.username,
+    );
+  }
+
+  LiveTransfer copyWithWrapped({
+    Wrapped<int>? bytes,
+    Wrapped<String?>? clientId,
+    Wrapped<String>? device,
+    Wrapped<enums.LiveTransferDirection>? direction,
+    Wrapped<String>? id,
+    Wrapped<String>? path,
+    Wrapped<int>? rate,
+    Wrapped<DateTime>? startedAt,
+    Wrapped<int?>? total,
+    Wrapped<int>? userId,
+    Wrapped<String>? username,
+  }) {
+    return LiveTransfer(
+      bytes: (bytes != null ? bytes.value : this.bytes),
+      clientId: (clientId != null ? clientId.value : this.clientId),
+      device: (device != null ? device.value : this.device),
+      direction: (direction != null ? direction.value : this.direction),
+      id: (id != null ? id.value : this.id),
+      path: (path != null ? path.value : this.path),
+      rate: (rate != null ? rate.value : this.rate),
+      startedAt: (startedAt != null ? startedAt.value : this.startedAt),
+      total: (total != null ? total.value : this.total),
+      userId: (userId != null ? userId.value : this.userId),
+      username: (username != null ? username.value : this.username),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LiveTransfers {
+  const LiveTransfers({this.transfers});
+
+  factory LiveTransfers.fromJson(Map<String, dynamic> json) => _$LiveTransfersFromJson(json);
+
+  static const toJsonFactory = _$LiveTransfersToJson;
+  Map<String, dynamic> toJson() => _$LiveTransfersToJson(this);
+
+  @JsonKey(name: 'transfers', includeIfNull: false, defaultValue: <LiveTransfer>[])
+  final List<LiveTransfer>? transfers;
+  static const fromJsonFactory = _$LiveTransfersFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LiveTransfers &&
+            (identical(other.transfers, transfers) ||
+                const DeepCollectionEquality().equals(other.transfers, transfers)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(transfers) ^ runtimeType.hashCode;
+}
+
+extension $LiveTransfersExtension on LiveTransfers {
+  LiveTransfers copyWith({List<LiveTransfer>? transfers}) {
+    return LiveTransfers(transfers: transfers ?? this.transfers);
+  }
+
+  LiveTransfers copyWithWrapped({Wrapped<List<LiveTransfer>?>? transfers}) {
+    return LiveTransfers(transfers: (transfers != null ? transfers.value : this.transfers));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LogEntry {
+  const LogEntry({
+    this.bytes,
+    this.count,
+    required this.createdAt,
+    required this.detail,
+    required this.device,
+    this.durationMs,
+    this.fromPath,
+    required this.id,
+    required this.isDir,
+    required this.kind,
+    required this.path,
+    this.size,
+    required this.status,
+    required this.userId,
+    required this.username,
+  });
+
+  factory LogEntry.fromJson(Map<String, dynamic> json) => _$LogEntryFromJson(json);
+
+  static const toJsonFactory = _$LogEntryToJson;
+  Map<String, dynamic> toJson() => _$LogEntryToJson(this);
+
+  @JsonKey(name: 'bytes', includeIfNull: false)
+  final int? bytes;
+  @JsonKey(name: 'count', includeIfNull: false)
+  final int? count;
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'detail', includeIfNull: false)
+  final String detail;
+  @JsonKey(name: 'device', includeIfNull: false)
+  final String device;
+  @JsonKey(name: 'durationMs', includeIfNull: false)
+  final int? durationMs;
+  @JsonKey(name: 'fromPath', includeIfNull: false)
+  final String? fromPath;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'isDir', includeIfNull: false)
+  final bool isDir;
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: logEntryKindToJson, fromJson: logEntryKindFromJson)
+  final enums.LogEntryKind kind;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  @JsonKey(name: 'size', includeIfNull: false)
+  final int? size;
+  @JsonKey(name: 'status', includeIfNull: false, toJson: logEntryStatusToJson, fromJson: logEntryStatusFromJson)
+  final enums.LogEntryStatus status;
+  @JsonKey(name: 'userId', includeIfNull: false)
+  final int userId;
+  @JsonKey(name: 'username', includeIfNull: false)
+  final String username;
+  static const fromJsonFactory = _$LogEntryFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LogEntry &&
+            (identical(other.bytes, bytes) || const DeepCollectionEquality().equals(other.bytes, bytes)) &&
+            (identical(other.count, count) || const DeepCollectionEquality().equals(other.count, count)) &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.detail, detail) || const DeepCollectionEquality().equals(other.detail, detail)) &&
+            (identical(other.device, device) || const DeepCollectionEquality().equals(other.device, device)) &&
+            (identical(other.durationMs, durationMs) ||
+                const DeepCollectionEquality().equals(other.durationMs, durationMs)) &&
+            (identical(other.fromPath, fromPath) || const DeepCollectionEquality().equals(other.fromPath, fromPath)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(bytes) ^
+      const DeepCollectionEquality().hash(count) ^
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(detail) ^
+      const DeepCollectionEquality().hash(device) ^
+      const DeepCollectionEquality().hash(durationMs) ^
+      const DeepCollectionEquality().hash(fromPath) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(isDir) ^
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(path) ^
+      const DeepCollectionEquality().hash(size) ^
+      const DeepCollectionEquality().hash(status) ^
+      const DeepCollectionEquality().hash(userId) ^
+      const DeepCollectionEquality().hash(username) ^
+      runtimeType.hashCode;
+}
+
+extension $LogEntryExtension on LogEntry {
+  LogEntry copyWith({
+    int? bytes,
+    int? count,
+    DateTime? createdAt,
+    String? detail,
+    String? device,
+    int? durationMs,
+    String? fromPath,
+    int? id,
+    bool? isDir,
+    enums.LogEntryKind? kind,
+    String? path,
+    int? size,
+    enums.LogEntryStatus? status,
+    int? userId,
+    String? username,
+  }) {
+    return LogEntry(
+      bytes: bytes ?? this.bytes,
+      count: count ?? this.count,
+      createdAt: createdAt ?? this.createdAt,
+      detail: detail ?? this.detail,
+      device: device ?? this.device,
+      durationMs: durationMs ?? this.durationMs,
+      fromPath: fromPath ?? this.fromPath,
+      id: id ?? this.id,
+      isDir: isDir ?? this.isDir,
+      kind: kind ?? this.kind,
+      path: path ?? this.path,
+      size: size ?? this.size,
+      status: status ?? this.status,
+      userId: userId ?? this.userId,
+      username: username ?? this.username,
+    );
+  }
+
+  LogEntry copyWithWrapped({
+    Wrapped<int?>? bytes,
+    Wrapped<int?>? count,
+    Wrapped<DateTime>? createdAt,
+    Wrapped<String>? detail,
+    Wrapped<String>? device,
+    Wrapped<int?>? durationMs,
+    Wrapped<String?>? fromPath,
+    Wrapped<int>? id,
+    Wrapped<bool>? isDir,
+    Wrapped<enums.LogEntryKind>? kind,
+    Wrapped<String>? path,
+    Wrapped<int?>? size,
+    Wrapped<enums.LogEntryStatus>? status,
+    Wrapped<int>? userId,
+    Wrapped<String>? username,
+  }) {
+    return LogEntry(
+      bytes: (bytes != null ? bytes.value : this.bytes),
+      count: (count != null ? count.value : this.count),
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      detail: (detail != null ? detail.value : this.detail),
+      device: (device != null ? device.value : this.device),
+      durationMs: (durationMs != null ? durationMs.value : this.durationMs),
+      fromPath: (fromPath != null ? fromPath.value : this.fromPath),
+      id: (id != null ? id.value : this.id),
+      isDir: (isDir != null ? isDir.value : this.isDir),
+      kind: (kind != null ? kind.value : this.kind),
+      path: (path != null ? path.value : this.path),
+      size: (size != null ? size.value : this.size),
+      status: (status != null ? status.value : this.status),
+      userId: (userId != null ? userId.value : this.userId),
+      username: (username != null ? username.value : this.username),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LogPage {
+  const LogPage({this.entries, required this.nextCursor});
+
+  factory LogPage.fromJson(Map<String, dynamic> json) => _$LogPageFromJson(json);
+
+  static const toJsonFactory = _$LogPageToJson;
+  Map<String, dynamic> toJson() => _$LogPageToJson(this);
+
+  @JsonKey(name: 'entries', includeIfNull: false, defaultValue: <LogEntry>[])
+  final List<LogEntry>? entries;
+  @JsonKey(name: 'nextCursor', includeIfNull: false)
+  final int nextCursor;
+  static const fromJsonFactory = _$LogPageFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LogPage &&
+            (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)) &&
+            (identical(other.nextCursor, nextCursor) ||
+                const DeepCollectionEquality().equals(other.nextCursor, nextCursor)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(entries) ^
+      const DeepCollectionEquality().hash(nextCursor) ^
+      runtimeType.hashCode;
+}
+
+extension $LogPageExtension on LogPage {
+  LogPage copyWith({List<LogEntry>? entries, int? nextCursor}) {
+    return LogPage(entries: entries ?? this.entries, nextCursor: nextCursor ?? this.nextCursor);
+  }
+
+  LogPage copyWithWrapped({Wrapped<List<LogEntry>?>? entries, Wrapped<int>? nextCursor}) {
+    return LogPage(
+      entries: (entries != null ? entries.value : this.entries),
+      nextCursor: (nextCursor != null ? nextCursor.value : this.nextCursor),
     );
   }
 }
@@ -1813,6 +2410,125 @@ List<enums.ChangesRole>? changesRoleNullableListFromJson(List? changesRole, [Lis
   return changesRole.map((e) => changesRoleFromJson(e.toString())).toList();
 }
 
+String? clientMessageScopeNullableToJson(enums.ClientMessageScope? clientMessageScope) {
+  return clientMessageScope?.value;
+}
+
+String? clientMessageScopeToJson(enums.ClientMessageScope clientMessageScope) {
+  return clientMessageScope.value;
+}
+
+enums.ClientMessageScope clientMessageScopeFromJson(
+  Object? clientMessageScope, [
+  enums.ClientMessageScope? defaultValue,
+]) {
+  return enums.ClientMessageScope.values.firstWhereOrNull((e) => e.value == clientMessageScope) ??
+      defaultValue ??
+      enums.ClientMessageScope.swaggerGeneratedUnknown;
+}
+
+enums.ClientMessageScope? clientMessageScopeNullableFromJson(
+  Object? clientMessageScope, [
+  enums.ClientMessageScope? defaultValue,
+]) {
+  if (clientMessageScope == null) {
+    return null;
+  }
+  return enums.ClientMessageScope.values.firstWhereOrNull((e) => e.value == clientMessageScope) ?? defaultValue;
+}
+
+String clientMessageScopeExplodedListToJson(List<enums.ClientMessageScope>? clientMessageScope) {
+  return clientMessageScope?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> clientMessageScopeListToJson(List<enums.ClientMessageScope>? clientMessageScope) {
+  if (clientMessageScope == null) {
+    return [];
+  }
+
+  return clientMessageScope.map((e) => e.value!).toList();
+}
+
+List<enums.ClientMessageScope> clientMessageScopeListFromJson(
+  List? clientMessageScope, [
+  List<enums.ClientMessageScope>? defaultValue,
+]) {
+  if (clientMessageScope == null) {
+    return defaultValue ?? [];
+  }
+
+  return clientMessageScope.map((e) => clientMessageScopeFromJson(e.toString())).toList();
+}
+
+List<enums.ClientMessageScope>? clientMessageScopeNullableListFromJson(
+  List? clientMessageScope, [
+  List<enums.ClientMessageScope>? defaultValue,
+]) {
+  if (clientMessageScope == null) {
+    return defaultValue;
+  }
+
+  return clientMessageScope.map((e) => clientMessageScopeFromJson(e.toString())).toList();
+}
+
+String? clientMessageTypeNullableToJson(enums.ClientMessageType? clientMessageType) {
+  return clientMessageType?.value;
+}
+
+String? clientMessageTypeToJson(enums.ClientMessageType clientMessageType) {
+  return clientMessageType.value;
+}
+
+enums.ClientMessageType clientMessageTypeFromJson(Object? clientMessageType, [enums.ClientMessageType? defaultValue]) {
+  return enums.ClientMessageType.values.firstWhereOrNull((e) => e.value == clientMessageType) ??
+      defaultValue ??
+      enums.ClientMessageType.swaggerGeneratedUnknown;
+}
+
+enums.ClientMessageType? clientMessageTypeNullableFromJson(
+  Object? clientMessageType, [
+  enums.ClientMessageType? defaultValue,
+]) {
+  if (clientMessageType == null) {
+    return null;
+  }
+  return enums.ClientMessageType.values.firstWhereOrNull((e) => e.value == clientMessageType) ?? defaultValue;
+}
+
+String clientMessageTypeExplodedListToJson(List<enums.ClientMessageType>? clientMessageType) {
+  return clientMessageType?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> clientMessageTypeListToJson(List<enums.ClientMessageType>? clientMessageType) {
+  if (clientMessageType == null) {
+    return [];
+  }
+
+  return clientMessageType.map((e) => e.value!).toList();
+}
+
+List<enums.ClientMessageType> clientMessageTypeListFromJson(
+  List? clientMessageType, [
+  List<enums.ClientMessageType>? defaultValue,
+]) {
+  if (clientMessageType == null) {
+    return defaultValue ?? [];
+  }
+
+  return clientMessageType.map((e) => clientMessageTypeFromJson(e.toString())).toList();
+}
+
+List<enums.ClientMessageType>? clientMessageTypeNullableListFromJson(
+  List? clientMessageType, [
+  List<enums.ClientMessageType>? defaultValue,
+]) {
+  if (clientMessageType == null) {
+    return defaultValue;
+  }
+
+  return clientMessageType.map((e) => clientMessageTypeFromJson(e.toString())).toList();
+}
+
 String? entryPreviewStateNullableToJson(enums.EntryPreviewState? entryPreviewState) {
   return entryPreviewState?.value;
 }
@@ -1869,6 +2585,293 @@ List<enums.EntryPreviewState>? entryPreviewStateNullableListFromJson(
   }
 
   return entryPreviewState.map((e) => entryPreviewStateFromJson(e.toString())).toList();
+}
+
+String? eventMessageStatusNullableToJson(enums.EventMessageStatus? eventMessageStatus) {
+  return eventMessageStatus?.value;
+}
+
+String? eventMessageStatusToJson(enums.EventMessageStatus eventMessageStatus) {
+  return eventMessageStatus.value;
+}
+
+enums.EventMessageStatus eventMessageStatusFromJson(
+  Object? eventMessageStatus, [
+  enums.EventMessageStatus? defaultValue,
+]) {
+  return enums.EventMessageStatus.values.firstWhereOrNull((e) => e.value == eventMessageStatus) ??
+      defaultValue ??
+      enums.EventMessageStatus.swaggerGeneratedUnknown;
+}
+
+enums.EventMessageStatus? eventMessageStatusNullableFromJson(
+  Object? eventMessageStatus, [
+  enums.EventMessageStatus? defaultValue,
+]) {
+  if (eventMessageStatus == null) {
+    return null;
+  }
+  return enums.EventMessageStatus.values.firstWhereOrNull((e) => e.value == eventMessageStatus) ?? defaultValue;
+}
+
+String eventMessageStatusExplodedListToJson(List<enums.EventMessageStatus>? eventMessageStatus) {
+  return eventMessageStatus?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> eventMessageStatusListToJson(List<enums.EventMessageStatus>? eventMessageStatus) {
+  if (eventMessageStatus == null) {
+    return [];
+  }
+
+  return eventMessageStatus.map((e) => e.value!).toList();
+}
+
+List<enums.EventMessageStatus> eventMessageStatusListFromJson(
+  List? eventMessageStatus, [
+  List<enums.EventMessageStatus>? defaultValue,
+]) {
+  if (eventMessageStatus == null) {
+    return defaultValue ?? [];
+  }
+
+  return eventMessageStatus.map((e) => eventMessageStatusFromJson(e.toString())).toList();
+}
+
+List<enums.EventMessageStatus>? eventMessageStatusNullableListFromJson(
+  List? eventMessageStatus, [
+  List<enums.EventMessageStatus>? defaultValue,
+]) {
+  if (eventMessageStatus == null) {
+    return defaultValue;
+  }
+
+  return eventMessageStatus.map((e) => eventMessageStatusFromJson(e.toString())).toList();
+}
+
+String? eventMessageTypeNullableToJson(enums.EventMessageType? eventMessageType) {
+  return eventMessageType?.value;
+}
+
+String? eventMessageTypeToJson(enums.EventMessageType eventMessageType) {
+  return eventMessageType.value;
+}
+
+enums.EventMessageType eventMessageTypeFromJson(Object? eventMessageType, [enums.EventMessageType? defaultValue]) {
+  return enums.EventMessageType.values.firstWhereOrNull((e) => e.value == eventMessageType) ??
+      defaultValue ??
+      enums.EventMessageType.swaggerGeneratedUnknown;
+}
+
+enums.EventMessageType? eventMessageTypeNullableFromJson(
+  Object? eventMessageType, [
+  enums.EventMessageType? defaultValue,
+]) {
+  if (eventMessageType == null) {
+    return null;
+  }
+  return enums.EventMessageType.values.firstWhereOrNull((e) => e.value == eventMessageType) ?? defaultValue;
+}
+
+String eventMessageTypeExplodedListToJson(List<enums.EventMessageType>? eventMessageType) {
+  return eventMessageType?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> eventMessageTypeListToJson(List<enums.EventMessageType>? eventMessageType) {
+  if (eventMessageType == null) {
+    return [];
+  }
+
+  return eventMessageType.map((e) => e.value!).toList();
+}
+
+List<enums.EventMessageType> eventMessageTypeListFromJson(
+  List? eventMessageType, [
+  List<enums.EventMessageType>? defaultValue,
+]) {
+  if (eventMessageType == null) {
+    return defaultValue ?? [];
+  }
+
+  return eventMessageType.map((e) => eventMessageTypeFromJson(e.toString())).toList();
+}
+
+List<enums.EventMessageType>? eventMessageTypeNullableListFromJson(
+  List? eventMessageType, [
+  List<enums.EventMessageType>? defaultValue,
+]) {
+  if (eventMessageType == null) {
+    return defaultValue;
+  }
+
+  return eventMessageType.map((e) => eventMessageTypeFromJson(e.toString())).toList();
+}
+
+String? liveTransferDirectionNullableToJson(enums.LiveTransferDirection? liveTransferDirection) {
+  return liveTransferDirection?.value;
+}
+
+String? liveTransferDirectionToJson(enums.LiveTransferDirection liveTransferDirection) {
+  return liveTransferDirection.value;
+}
+
+enums.LiveTransferDirection liveTransferDirectionFromJson(
+  Object? liveTransferDirection, [
+  enums.LiveTransferDirection? defaultValue,
+]) {
+  return enums.LiveTransferDirection.values.firstWhereOrNull((e) => e.value == liveTransferDirection) ??
+      defaultValue ??
+      enums.LiveTransferDirection.swaggerGeneratedUnknown;
+}
+
+enums.LiveTransferDirection? liveTransferDirectionNullableFromJson(
+  Object? liveTransferDirection, [
+  enums.LiveTransferDirection? defaultValue,
+]) {
+  if (liveTransferDirection == null) {
+    return null;
+  }
+  return enums.LiveTransferDirection.values.firstWhereOrNull((e) => e.value == liveTransferDirection) ?? defaultValue;
+}
+
+String liveTransferDirectionExplodedListToJson(List<enums.LiveTransferDirection>? liveTransferDirection) {
+  return liveTransferDirection?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> liveTransferDirectionListToJson(List<enums.LiveTransferDirection>? liveTransferDirection) {
+  if (liveTransferDirection == null) {
+    return [];
+  }
+
+  return liveTransferDirection.map((e) => e.value!).toList();
+}
+
+List<enums.LiveTransferDirection> liveTransferDirectionListFromJson(
+  List? liveTransferDirection, [
+  List<enums.LiveTransferDirection>? defaultValue,
+]) {
+  if (liveTransferDirection == null) {
+    return defaultValue ?? [];
+  }
+
+  return liveTransferDirection.map((e) => liveTransferDirectionFromJson(e.toString())).toList();
+}
+
+List<enums.LiveTransferDirection>? liveTransferDirectionNullableListFromJson(
+  List? liveTransferDirection, [
+  List<enums.LiveTransferDirection>? defaultValue,
+]) {
+  if (liveTransferDirection == null) {
+    return defaultValue;
+  }
+
+  return liveTransferDirection.map((e) => liveTransferDirectionFromJson(e.toString())).toList();
+}
+
+String? logEntryKindNullableToJson(enums.LogEntryKind? logEntryKind) {
+  return logEntryKind?.value;
+}
+
+String? logEntryKindToJson(enums.LogEntryKind logEntryKind) {
+  return logEntryKind.value;
+}
+
+enums.LogEntryKind logEntryKindFromJson(Object? logEntryKind, [enums.LogEntryKind? defaultValue]) {
+  return enums.LogEntryKind.values.firstWhereOrNull((e) => e.value == logEntryKind) ??
+      defaultValue ??
+      enums.LogEntryKind.swaggerGeneratedUnknown;
+}
+
+enums.LogEntryKind? logEntryKindNullableFromJson(Object? logEntryKind, [enums.LogEntryKind? defaultValue]) {
+  if (logEntryKind == null) {
+    return null;
+  }
+  return enums.LogEntryKind.values.firstWhereOrNull((e) => e.value == logEntryKind) ?? defaultValue;
+}
+
+String logEntryKindExplodedListToJson(List<enums.LogEntryKind>? logEntryKind) {
+  return logEntryKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> logEntryKindListToJson(List<enums.LogEntryKind>? logEntryKind) {
+  if (logEntryKind == null) {
+    return [];
+  }
+
+  return logEntryKind.map((e) => e.value!).toList();
+}
+
+List<enums.LogEntryKind> logEntryKindListFromJson(List? logEntryKind, [List<enums.LogEntryKind>? defaultValue]) {
+  if (logEntryKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return logEntryKind.map((e) => logEntryKindFromJson(e.toString())).toList();
+}
+
+List<enums.LogEntryKind>? logEntryKindNullableListFromJson(
+  List? logEntryKind, [
+  List<enums.LogEntryKind>? defaultValue,
+]) {
+  if (logEntryKind == null) {
+    return defaultValue;
+  }
+
+  return logEntryKind.map((e) => logEntryKindFromJson(e.toString())).toList();
+}
+
+String? logEntryStatusNullableToJson(enums.LogEntryStatus? logEntryStatus) {
+  return logEntryStatus?.value;
+}
+
+String? logEntryStatusToJson(enums.LogEntryStatus logEntryStatus) {
+  return logEntryStatus.value;
+}
+
+enums.LogEntryStatus logEntryStatusFromJson(Object? logEntryStatus, [enums.LogEntryStatus? defaultValue]) {
+  return enums.LogEntryStatus.values.firstWhereOrNull((e) => e.value == logEntryStatus) ??
+      defaultValue ??
+      enums.LogEntryStatus.swaggerGeneratedUnknown;
+}
+
+enums.LogEntryStatus? logEntryStatusNullableFromJson(Object? logEntryStatus, [enums.LogEntryStatus? defaultValue]) {
+  if (logEntryStatus == null) {
+    return null;
+  }
+  return enums.LogEntryStatus.values.firstWhereOrNull((e) => e.value == logEntryStatus) ?? defaultValue;
+}
+
+String logEntryStatusExplodedListToJson(List<enums.LogEntryStatus>? logEntryStatus) {
+  return logEntryStatus?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> logEntryStatusListToJson(List<enums.LogEntryStatus>? logEntryStatus) {
+  if (logEntryStatus == null) {
+    return [];
+  }
+
+  return logEntryStatus.map((e) => e.value!).toList();
+}
+
+List<enums.LogEntryStatus> logEntryStatusListFromJson(
+  List? logEntryStatus, [
+  List<enums.LogEntryStatus>? defaultValue,
+]) {
+  if (logEntryStatus == null) {
+    return defaultValue ?? [];
+  }
+
+  return logEntryStatus.map((e) => logEntryStatusFromJson(e.toString())).toList();
+}
+
+List<enums.LogEntryStatus>? logEntryStatusNullableListFromJson(
+  List? logEntryStatus, [
+  List<enums.LogEntryStatus>? defaultValue,
+]) {
+  if (logEntryStatus == null) {
+    return defaultValue;
+  }
+
+  return logEntryStatus.map((e) => logEntryStatusFromJson(e.toString())).toList();
 }
 
 String? newUserRoleNullableToJson(enums.NewUserRole? newUserRole) {

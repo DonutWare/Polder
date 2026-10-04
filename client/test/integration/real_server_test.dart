@@ -1,10 +1,15 @@
 @Tags(["integration"])
 library;
 
+import "dart:async";
 import "dart:io";
 import "dart:typed_data";
 
 import "package:flutter_test/flutter_test.dart";
+import "package:web_socket_channel/web_socket_channel.dart";
+
+import "package:nomad/models/activity.dart";
+import "package:nomad/models/server_event.dart";
 
 import "package:nomad/models/admin_user_requests.dart";
 import "package:nomad/models/sync/conflict.dart";
@@ -15,6 +20,7 @@ import "package:nomad/models/trash.dart";
 import "package:nomad/models/user.dart";
 import "package:nomad/services/api/api_exceptions.dart";
 import "package:nomad/services/api/nomad_api.dart";
+import "package:nomad/services/realtime/events_client.dart";
 import "package:nomad/services/sync/in_memory_sync_state_store.dart";
 import "package:nomad/services/sync/sync_engine.dart";
 
@@ -382,6 +388,43 @@ void main() {
       expect(report.uploaded, 1, reason: report.errors.join("\n"));
       expect(await local("remote.jpg").exists(), isFalse);
       expect(await remote("camera.jpg"), isNotEmpty);
+    });
+  });
+
+  group("live activity", () {
+    test("an upload streams over the events socket and lands in the activity log", () async {
+      final alice = server.signedIn(userTokens).api;
+      final events = EventsClient(
+        endpoint: EventsClient.endpointFor(server.url),
+        token: ({required refresh}) async => userTokens.accessToken,
+        connect: WebSocketChannel.connect,
+      );
+      addTearDown(events.dispose);
+      final received = <ServerEvent>[];
+      final snapshot = Completer<void>();
+      final logged = Completer<ActivityEntry>();
+      events.events.listen((event) {
+        received.add(event);
+        if (event is SnapshotEvent && !snapshot.isCompleted) snapshot.complete();
+        if (event case ActivityCreatedEvent(:final entry) when entry.path == "/Live/upload.bin") logged.complete(entry);
+      });
+      events.start();
+      await snapshot.future.timeout(const Duration(seconds: 10));
+
+      final content = Uint8List(1 << 20);
+      await alice.putContent("/Live/upload.bin", Stream.value(content), length: content.length, transferId: "local-42");
+      final entry = await logged.future.timeout(const Duration(seconds: 10));
+
+      expect(entry.kind, ActivityKind.upload);
+      expect(entry.bytes, content.length);
+      expect(entry.device, "Laptop");
+      final started = received.whereType<TransferEvent>().firstWhere((event) => event.phase == TransferPhase.started);
+      expect(started.transfer.clientId, "local-42");
+      expect(started.transfer.total, content.length);
+      expect(received.whereType<FilesChangedEvent>().expand((event) => event.dirs), containsAll(["/", "/Live"]));
+
+      final page = await alice.activity(scope: const ActivityScope.me());
+      expect(page.entries.first.id, entry.id);
     });
   });
 }

@@ -1,3 +1,4 @@
+import "dart:math";
 import "dart:typed_data";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -19,8 +20,10 @@ final transfersProvider = NotifierProvider<TransfersNotifier, List<Transfer>>(Tr
 class TransfersNotifier extends Notifier<List<Transfer>> {
   /// Progress arrives for every few KB sent; rebuilding the transfer list that often makes the UI sluggish.
   static const progressInterval = Duration(milliseconds: 100);
+  static const _rateSmoothing = 0.3;
 
   var _nextId = 0;
+  final _random = Random.secure();
   final Map<int, Stopwatch> _sinceProgress = {};
 
   @override
@@ -33,14 +36,16 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
 
   Future<void> upload(String directory, PickedFile file) async {
     final length = await file.length() ?? 0;
-    final transfer = _start(file.name, TransferDirection.upload, length);
+    final remotePath = RemotePath.join(directory, file.name);
+    final transfer = _start(file.name, TransferDirection.upload, length, remotePath: remotePath);
     await _track(transfer, () async {
       await ref
           .read(nomadApiProvider)
           .putContent(
-            RemotePath.join(directory, file.name),
+            remotePath,
             file.openRead(),
             length: length,
+            transferId: transfer.clientId,
             onProgress: (sent, total) => _progress(transfer.id, sent, total),
           );
       ref.invalidate(directoryProvider(directory));
@@ -78,8 +83,15 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
 
   void clearFinished() => state = state.where((transfer) => transfer.isRunning).toList();
 
-  Transfer _start(String name, TransferDirection direction, int total) {
-    final transfer = Transfer(id: _nextId++, name: name, direction: direction, total: total);
+  Transfer _start(String name, TransferDirection direction, int total, {String? remotePath}) {
+    final transfer = Transfer(
+      id: _nextId++,
+      clientId: _newClientId(),
+      name: name,
+      direction: direction,
+      remotePath: remotePath,
+      total: total,
+    );
     state = [...state, transfer];
     return transfer;
   }
@@ -87,9 +99,12 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
   Future<void> _track(Transfer transfer, Future<void> Function() work) async {
     try {
       await work();
-      _replace(transfer.id, (current) => current.copyWith(status: TransferStatus.done, transferred: current.total));
+      _replace(
+        transfer.id,
+        (current) => current.copyWith(status: TransferStatus.done, transferred: current.total, rate: 0),
+      );
     } on ApiException catch (error) {
-      _replace(transfer.id, (current) => current.copyWith(status: TransferStatus.failed, error: error));
+      _replace(transfer.id, (current) => current.copyWith(status: TransferStatus.failed, error: error, rate: 0));
     } finally {
       _sinceProgress.remove(transfer.id);
     }
@@ -99,8 +114,19 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     final since = _sinceProgress[id];
     if (since != null && since.elapsed < progressInterval && transferred < total) return;
     _sinceProgress[id] = Stopwatch()..start();
-    _replace(id, (current) => current.copyWith(transferred: transferred, total: total > 0 ? total : current.total));
+    final seconds = (since?.elapsedMicroseconds ?? 0) / Duration.microsecondsPerSecond;
+    _replace(id, (current) {
+      final instant = seconds > 0 ? (transferred - current.transferred) / seconds : 0.0;
+      final rate = current.rate == 0 ? instant : _rateSmoothing * instant + (1 - _rateSmoothing) * current.rate;
+      return current.copyWith(
+        transferred: transferred,
+        total: total > 0 ? total : current.total,
+        rate: max(rate, 0).round(),
+      );
+    });
   }
+
+  String _newClientId() => [for (var i = 0; i < 16; i++) _random.nextInt(256).toRadixString(16).padLeft(2, "0")].join();
 
   void _replace(int id, Transfer Function(Transfer current) update) =>
       state = [for (final transfer in state) transfer.id == id ? update(transfer) : transfer];

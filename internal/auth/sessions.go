@@ -23,36 +23,59 @@ func NewSessions(db *sql.DB) *Sessions {
 	return &Sessions{db: db}
 }
 
-func (s *Sessions) Create(ctx context.Context, userID int64, deviceName string) (string, error) {
-	token, tokenHash := newRefreshToken()
-	now := time.Now()
-	_, err := s.db.ExecContext(ctx,
-		`INSERT INTO sessions (user_id, token_hash, device_name, created_at, last_used_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)`,
-		userID, tokenHash, deviceName, now.Unix(), now.Unix(), now.Add(RefreshTokenLifetime).Unix())
-	return token, err
+type Session struct {
+	ID         int64
+	UserID     int64
+	DeviceName string
 }
 
-func (s *Sessions) Rotate(ctx context.Context, refreshToken string) (int64, string, error) {
-	var sessionID, userID, expiresAt int64
-	err := s.db.QueryRowContext(ctx, `SELECT id, user_id, expires_at FROM sessions WHERE token_hash = ?`, hashToken(refreshToken)).
-		Scan(&sessionID, &userID, &expiresAt)
+func (s *Sessions) Create(ctx context.Context, userID int64, deviceName string) (Session, string, error) {
+	token, tokenHash := newRefreshToken()
+	now := time.Now()
+	result, err := s.db.ExecContext(ctx,
+		`INSERT INTO sessions (user_id, token_hash, device_name, created_at, last_used_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)`,
+		userID, tokenHash, deviceName, now.Unix(), now.Unix(), now.Add(RefreshTokenLifetime).Unix())
+	if err != nil {
+		return Session{}, "", err
+	}
+	id, err := result.LastInsertId()
+	return Session{ID: id, UserID: userID, DeviceName: deviceName}, token, err
+}
+
+func (s *Sessions) Rotate(ctx context.Context, refreshToken string) (Session, string, error) {
+	session, expiresAt, err := s.find(ctx, refreshToken)
 	if errors.Is(err, sql.ErrNoRows) || (err == nil && time.Now().Unix() > expiresAt) {
-		return 0, "", apperr.Unauthorized("refresh token is invalid or expired")
+		return Session{}, "", apperr.Unauthorized("refresh token is invalid or expired")
 	}
 	if err != nil {
-		return 0, "", err
+		return Session{}, "", err
 	}
 
 	token, tokenHash := newRefreshToken()
 	now := time.Now()
 	_, err = s.db.ExecContext(ctx, `UPDATE sessions SET token_hash = ?, last_used_at = ?, expires_at = ? WHERE id = ?`,
-		tokenHash, now.Unix(), now.Add(RefreshTokenLifetime).Unix(), sessionID)
-	return userID, token, err
+		tokenHash, now.Unix(), now.Add(RefreshTokenLifetime).Unix(), session.ID)
+	return session, token, err
 }
 
-func (s *Sessions) Revoke(ctx context.Context, refreshToken string) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE token_hash = ?`, hashToken(refreshToken))
-	return err
+func (s *Sessions) Revoke(ctx context.Context, refreshToken string) (Session, bool, error) {
+	session, _, err := s.find(ctx, refreshToken)
+	if errors.Is(err, sql.ErrNoRows) {
+		return Session{}, false, nil
+	}
+	if err != nil {
+		return Session{}, false, err
+	}
+	_, err = s.db.ExecContext(ctx, `DELETE FROM sessions WHERE id = ?`, session.ID)
+	return session, err == nil, err
+}
+
+func (s *Sessions) find(ctx context.Context, refreshToken string) (Session, int64, error) {
+	var session Session
+	var expiresAt int64
+	err := s.db.QueryRowContext(ctx, `SELECT id, user_id, device_name, expires_at FROM sessions WHERE token_hash = ?`, hashToken(refreshToken)).
+		Scan(&session.ID, &session.UserID, &session.DeviceName, &expiresAt)
+	return session, expiresAt, err
 }
 
 func (s *Sessions) RevokeAllForUser(ctx context.Context, userID int64) error {

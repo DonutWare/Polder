@@ -146,6 +146,33 @@ func (s *Service) status(ctx context.Context, owner users.User, target upload) (
 	return UploadStatus{UploadID: target.id, Missing: missing}, nil
 }
 
+func (s *Service) Remaining(ctx context.Context, owner users.User, uploadID string) (string, int64, error) {
+	found, err := s.loadUpload(ctx, owner, uploadID)
+	if err != nil {
+		return "", 0, err
+	}
+	status, err := s.status(ctx, owner, found)
+	if err != nil {
+		return "", 0, err
+	}
+	return found.request.Path, MissingBytes(found.request.Chunks, status.Missing), nil
+}
+
+func MissingBytes(chunks []ChunkRef, missing []string) int64 {
+	wanted := make(map[string]bool, len(missing))
+	for _, hash := range missing {
+		wanted[hash] = true
+	}
+	var total int64
+	for _, chunk := range chunks {
+		if wanted[chunk.Hash] {
+			total += chunk.Size
+			delete(wanted, chunk.Hash)
+		}
+	}
+	return total
+}
+
 func (s *Service) PutChunk(ctx context.Context, owner users.User, uploadID, chunkHash string, body io.Reader) error {
 	target, err := s.loadUpload(ctx, owner, uploadID)
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
+	"nomad-server/internal/activity"
 	"nomad-server/internal/apperr"
 	"nomad-server/internal/users"
 )
@@ -26,12 +27,13 @@ func (a *API) requireUser(api huma.API) func(huma.Context, func(huma.Context)) {
 			writeError(api, ctx, apperr.Unauthorized("missing bearer token"))
 			return
 		}
-		user, err := a.auth.Authenticate(ctx.Context(), token)
+		identity, err := a.auth.Authenticate(ctx.Context(), token)
 		if err != nil {
 			writeError(api, ctx, err)
 			return
 		}
-		next(huma.WithValue(ctx, currentUserKey, user))
+		ctx = huma.WithValue(ctx, currentUserKey, identity.User)
+		next(huma.WithContext(ctx, activity.WithActor(ctx.Context(), activity.Actor{SessionID: identity.SessionID, Device: identity.Device})))
 	}
 }
 

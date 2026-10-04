@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 import "dart:isolate";
 import "dart:typed_data";
@@ -5,6 +6,7 @@ import "dart:typed_data";
 import "package:crypto/crypto.dart";
 
 import "package:nomad/models/manifest.dart";
+import "package:nomad/services/sync/sync_activity.dart";
 
 abstract final class FastCdc {
   static const int minSize = 256 * 1024;
@@ -66,7 +68,66 @@ abstract final class FastCdc {
     return Isolate.run(() => _manifestOfFileSync(File(path)), debugName: "chunk ${file.uri.pathSegments.last}");
   }
 
-  static Manifest _manifestOfFileSync(File file) {
+  static Future<Manifest> manifestOfFileTracked(
+    File file, {
+    required void Function(int bytesRead) onProgress,
+    required CancelToken cancel,
+  }) async {
+    cancel.throwIfCancelled(file.path);
+    final messages = ReceivePort();
+    final result = Completer<Manifest>();
+    // Exit and error notices share the result's port, so they can never overtake the manifest.
+    final isolate = await Isolate.spawn(
+      _manifestWorker,
+      (file.path, messages.sendPort),
+      onExit: messages.sendPort,
+      onError: messages.sendPort,
+      debugName: "chunk ${file.uri.pathSegments.last}",
+    );
+    messages.listen((message) {
+      if (result.isCompleted) return;
+      switch (message) {
+        case final int bytesRead:
+          onProgress(bytesRead);
+        case final Manifest manifest:
+          result.complete(manifest);
+        case [final description, _]:
+          result.completeError(FileSystemException("$description", file.path));
+        default:
+          result.completeError(SyncCancelledException(file.path));
+      }
+    });
+    unawaited(
+      cancel.whenCancelled.then((_) {
+        isolate.kill(priority: Isolate.immediate);
+        if (!result.isCompleted) result.completeError(SyncCancelledException(file.path, cancel.reason!));
+      }),
+    );
+    try {
+      return await result.future;
+    } finally {
+      messages.close();
+    }
+  }
+
+  static const _progressStep = 8 * 1024 * 1024;
+
+  static void _manifestWorker((String, SendPort) arguments) {
+    final (path, replies) = arguments;
+    var reported = 0;
+    replies.send(
+      _manifestOfFileSync(
+        File(path),
+        onProgress: (bytesRead) {
+          if (bytesRead - reported < _progressStep) return;
+          reported = bytesRead;
+          replies.send(bytesRead);
+        },
+      ),
+    );
+  }
+
+  static Manifest _manifestOfFileSync(File file, {void Function(int bytesRead)? onProgress}) {
     final chunks = <ChunkRef>[];
     final fileDigest = _DigestCollector();
     final fileHasher = sha256.startChunkedConversion(fileDigest);
@@ -81,6 +142,7 @@ abstract final class FastCdc {
         fileHasher.add(chunk);
         chunks.add(_chunkRef(chunk, offset));
         offset += cut;
+        onProgress?.call(offset);
         buffer.setRange(0, filled - cut, buffer, cut);
         filled -= cut;
       }

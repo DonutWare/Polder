@@ -45,23 +45,44 @@ func createSigningKey(path string) ([]byte, error) {
 	return key, os.WriteFile(path, key, 0o600)
 }
 
-func (t *AccessTokens) Issue(userID int64) (string, error) {
+type Claims struct {
+	UserID    int64
+	SessionID int64
+	Device    string
+	ExpiresAt time.Time
+}
+
+type accessClaims struct {
+	jwt.RegisteredClaims
+	SessionID int64  `json:"sid,omitempty"`
+	Device    string `json:"dev,omitempty"`
+}
+
+func (t *AccessTokens) Issue(userID, sessionID int64, device string) (string, error) {
 	now := time.Now()
-	claims := jwt.RegisteredClaims{
-		Issuer:    tokenIssuer,
-		Subject:   strconv.FormatInt(userID, 10),
-		IssuedAt:  jwt.NewNumericDate(now),
-		ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenLifetime)),
+	claims := accessClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    tokenIssuer,
+			Subject:   strconv.FormatInt(userID, 10),
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenLifetime)),
+		},
+		SessionID: sessionID,
+		Device:    device,
 	}
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(t.key)
 }
 
-func (t *AccessTokens) UserID(token string) (int64, error) {
-	claims := jwt.RegisteredClaims{}
+func (t *AccessTokens) Parse(token string) (Claims, error) {
+	claims := accessClaims{}
 	_, err := jwt.ParseWithClaims(token, &claims, func(*jwt.Token) (any, error) { return t.key, nil },
 		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}), jwt.WithIssuer(tokenIssuer), jwt.WithExpirationRequired())
 	if err != nil {
-		return 0, err
+		return Claims{}, err
 	}
-	return strconv.ParseInt(claims.Subject, 10, 64)
+	userID, err := strconv.ParseInt(claims.Subject, 10, 64)
+	if err != nil {
+		return Claims{}, err
+	}
+	return Claims{UserID: userID, SessionID: claims.SessionID, Device: claims.Device, ExpiresAt: claims.ExpiresAt.Time}, nil
 }

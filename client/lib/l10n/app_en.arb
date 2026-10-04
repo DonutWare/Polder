@@ -74,14 +74,6 @@
 	"createAdmin": "Create administrator",
 	"delete": "Delete",
 	"deleted": "Deleted",
-	"deletedCount": "{count} deleted",
-	"@deletedCount": {
-		"placeholders": {
-			"count": {
-				"type": "int"
-			}
-		}
-	},
 	"deletePermanently": "Delete permanently",
 	"deletePermanentlyMessage": "It can't be restored afterwards.",
 	"deletePermanentlyTitle": "Delete \"{name}\" permanently?",
@@ -125,14 +117,6 @@
 	"disabled": "Disabled",
 	"done": "Done",
 	"download": "Download",
-	"downloadedCount": "{count} downloaded",
-	"@downloadedCount": {
-		"placeholders": {
-			"count": {
-				"type": "int"
-			}
-		}
-	},
 	"edit": "Edit",
 	"editUser": "Edit {username}",
 	"@editUser": {
@@ -166,14 +150,6 @@
 	"errorUnauthorized": "Your session has expired. Please sign in again.",
 	"errorUnknown": "Something went wrong.",
 	"expandSidebar": "Expand sidebar",
-	"failedCount": "{count} failed",
-	"@failedCount": {
-		"placeholders": {
-			"count": {
-				"type": "int"
-			}
-		}
-	},
 	"folders": "Folders",
 	"gridView": "Grid view",
 	"keepBoth": "Keep both",
@@ -398,14 +374,6 @@
 	},
 	"type": "Type",
 	"unit": "Unit",
-	"uploadedCount": "{count} uploaded",
-	"@uploadedCount": {
-		"placeholders": {
-			"count": {
-				"type": "int"
-			}
-		}
-	},
 	"uploadFiles": "Upload files",
 	"username": "Username",
 	"users": "Users",
@@ -418,5 +386,163 @@
 		}
 	},
 	"userTrashRetentionUsersChoice": "User's choice",
-	"wifiOnly": "Only on Wi-Fi"
+	"wifiOnly": "Only on Wi-Fi",
+	"navActivity": "Activity",
+	"activityNow": "Now",
+	"activityHistory": "History",
+	"activityEmpty": "Nothing has happened yet.",
+	"nothingTransferring": "Nothing is transferring right now.",
+	"activityScopeMe": "Only me",
+	"activityScopeAll": "All users",
+	"activityScopeChooseUser": "Choose a user…",
+	"activityScopeTooltip": "Whose activity to show",
+	"chooseUserTitle": "Show activity of",
+	"activityAllFiles": "All files",
+	"activityKindUpload": "Uploaded",
+	"activityKindDownload": "Downloaded",
+	"activityKindMkdir": "Created folder",
+	"activityKindMove": "Moved",
+	"activityKindDelete": "Moved to trash",
+	"activityKindRestore": "Restored from trash",
+	"activityKindTrashDelete": "Deleted permanently",
+	"activityKindTrashEmpty": "Emptied the trash",
+	"activityKindTrashExpire": "Old items removed from trash",
+	"activityKindLogin": "Signed in",
+	"activityKindLogout": "Signed out",
+	"activityKindUnknown": "Something happened",
+	"activityRescanAdded": "Added on the server",
+	"activityRescanChanged": "Changed on the server",
+	"activityRescanRemoved": "Removed on the server",
+	"activityRescanSummary": "{count, plural, =1{1 change} other{{count} changes}} found on the server",
+	"@activityRescanSummary": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"activityMovedFrom": "from {path}",
+	"@activityMovedFrom": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"activityItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+	"@activityItemCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"activityFailed": "Failed",
+	"activityCancelled": "Cancelled",
+	"durationSeconds": "{count} s",
+	"@durationSeconds": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"durationMinutes": "{count} min",
+	"@durationMinutes": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"transferUploading": "Uploading · {device}",
+	"@transferUploading": {
+		"placeholders": {
+			"device": {
+				"type": "String"
+			}
+		}
+	},
+	"transferDownloading": "Downloading · {device}",
+	"@transferDownloading": {
+		"placeholders": {
+			"device": {
+				"type": "String"
+			}
+		}
+	},
+	"transferProgress": "{done} of {total}",
+	"@transferProgress": {
+		"placeholders": {
+			"done": {
+				"type": "String"
+			},
+			"total": {
+				"type": "String"
+			}
+		}
+	},
+	"folderUploading": "Uploading…",
+	"realtimeOffline": "Live updates paused, reconnecting…",
+	"today": "Today",
+	"yesterday": "Yesterday",
+	"syncWaiting": "Waiting to sync",
+	"syncPreparing": "Preparing to sync",
+	"syncPaused": "Sync paused",
+	"pauseSync": "Pause sync",
+	"resumeSync": "Resume sync",
+	"itemPaused": "Paused",
+	"nowGroupFiles": "{count, plural, =1{1 file} other{{count} files}}",
+	"@nowGroupFiles": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupProgress": "{done} of {total} files",
+	"@nowGroupProgress": {
+		"placeholders": {
+			"done": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupUploading": "{count} uploading",
+	"@nowGroupUploading": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupPreparing": "{count} preparing",
+	"@nowGroupPreparing": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupWaiting": "{count} waiting",
+	"@nowGroupWaiting": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"andMore": "and {count} more",
+	"@andMore": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"showFiles": "Show files",
+	"hideFiles": "Hide files"
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"nomad-server/internal/activity"
 	"nomad-server/internal/apperr"
 	"nomad-server/internal/auth"
 	"nomad-server/internal/files"
@@ -30,6 +31,7 @@ type API struct {
 	settings *settings.Store
 	sync     *syncing.Service
 	previews *preview.Worker
+	activity *activity.Hub
 	limiter  *failedAttemptLimiter
 }
 
@@ -41,6 +43,7 @@ type Dependencies struct {
 	Settings               *settings.Store
 	Sync                   *syncing.Service
 	Previews               *preview.Worker
+	Activity               *activity.Hub
 	LoginAttemptsPerMinute int
 	// Web serves the browser client for every path outside the API; nil serves only the API.
 	Web http.Handler
@@ -55,6 +58,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		settings: deps.Settings,
 		sync:     deps.Sync,
 		previews: deps.Previews,
+		activity: deps.Activity,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 	}
 
@@ -112,6 +116,9 @@ func (a *API) routes(api huma.API) {
 	register(v1, http.MethodPost, "/auth/login", "login", "Log in and get a token pair", a.login)
 	register(v1, http.MethodPost, "/auth/refresh", "refresh", "Exchange a refresh token for a new token pair", a.refresh)
 	register(v1, http.MethodPost, "/auth/logout", "logout", "Revoke a refresh token", a.logout)
+	register(v1, http.MethodGet, "/events", "events", "Live activity over a WebSocket", a.events, withDescription(eventsDescription),
+		withSocketMessages(api), withResponse(http.StatusSwitchingProtocols, "WebSocket connection; every message the server sends has this shape",
+			map[string]*huma.MediaType{"application/json": {Schema: api.OpenAPI().Components.Schemas.Schema(reflect.TypeFor[eventMessage](), true, "")}}))
 
 	user := huma.NewGroup(v1)
 	user.UseMiddleware(a.requireUser(api))
@@ -140,6 +147,9 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/trash/{itemID}/preview", "previewTrashItem", "Get a JPEG thumbnail of a deleted image", a.previewTrashItem,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
 	register(user, http.MethodDelete, "/trash/{itemID}", "deleteTrashItem", "Delete one item in the trash permanently", a.deleteTrashItem)
+
+	register(user, http.MethodGet, "/activity", "listActivity", "Page through what happened to files and sessions, newest first", a.listActivity)
+	register(user, http.MethodGet, "/activity/live", "listLiveTransfers", "Uploads and downloads in progress", a.listLiveTransfers)
 
 	register(user, http.MethodGet, "/sync/changes", "listChanges", "Page through changes since a cursor", a.changes)
 	register(user, http.MethodGet, "/sync/manifest", "getManifest", "Get a file's chunk manifest for delta sync", a.manifest)
@@ -184,9 +194,22 @@ func withRequestBody(content map[string]*huma.MediaType) func(*huma.Operation) {
 	}
 }
 
+func withDescription(description string) func(*huma.Operation) {
+	return func(operation *huma.Operation) { operation.Description = description }
+}
+
 func withResponse(status int, description string, content map[string]*huma.MediaType) func(*huma.Operation) {
 	return func(operation *huma.Operation) {
 		operation.Responses = map[string]*huma.Response{strconv.Itoa(status): {Description: description, Content: content}}
+	}
+}
+
+// withSocketMessages names the schema of what clients send over the events socket. Huma drops
+// schemas nothing references, and a socket message has no request body to reference it from.
+func withSocketMessages(api huma.API) func(*huma.Operation) {
+	schema := api.OpenAPI().Components.Schemas.Schema(reflect.TypeFor[clientMessage](), true, "")
+	return func(operation *huma.Operation) {
+		operation.Extensions = map[string]any{"x-client-message": schema}
 	}
 }
 

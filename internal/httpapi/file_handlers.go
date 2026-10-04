@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
+	"nomad-server/internal/activity"
 	"nomad-server/internal/apperr"
 	"nomad-server/internal/files"
 	"nomad-server/internal/preview"
+	"nomad-server/internal/storage"
+	"nomad-server/internal/users"
 )
 
 type listResponse struct {
@@ -43,14 +47,19 @@ type downloadInput struct {
 }
 
 type uploadInput struct {
-	Path    string `query:"path" doc:"Where to store the file, such as /Photos/cat.jpg"`
-	BaseRev int64  `query:"baseRev" default:"0" doc:"Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there"`
-	Mtime   string `query:"mtime" format:"date-time" doc:"Modification time to record, as RFC 3339; defaults to now"`
-	content io.Reader
+	Path       string `query:"path" doc:"Where to store the file, such as /Photos/cat.jpg"`
+	BaseRev    int64  `query:"baseRev" default:"0" doc:"Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there"`
+	Mtime      string `query:"mtime" format:"date-time" doc:"Modification time to record, as RFC 3339; defaults to now"`
+	TransferID string `header:"X-Nomad-Transfer-Id" doc:"Any ID the client picks; live transfer events echo it back as clientId"`
+	content    io.Reader
+	size       *int64
 }
 
 func (i *uploadInput) Resolve(ctx huma.Context) []error {
 	i.content = ctx.BodyReader()
+	if length, err := strconv.ParseInt(ctx.Header("Content-Length"), 10, 64); err == nil && length >= 0 {
+		i.size = &length
+	}
 	return nil
 }
 
@@ -107,20 +116,83 @@ func (a *API) statFile(ctx context.Context, input *pathQuery) (*jsonBody[files.E
 }
 
 func (a *API) downloadFile(ctx context.Context, input *downloadInput) (*downloadOutput, error) {
-	file, entry, err := a.files.Open(ctx, currentUser(ctx), input.Path)
+	owner := currentUser(ctx)
+	file, entry, err := a.files.Open(ctx, owner, input.Path)
 	if err != nil {
 		return nil, err
 	}
+	ranged := input.Range != ""
 	return &downloadOutput{
 		ETag:        revisionETag(entry.Rev),
 		Rev:         fmt.Sprint(entry.Rev),
 		ContentType: entry.Mime,
-		Body: func(ctx huma.Context) {
+		Body: func(humaCtx huma.Context) {
 			defer file.Close()
-			r, w := humachi.Unwrap(ctx)
-			http.ServeContent(w, r, entry.Name, entry.Mtime, file)
+			r, w := humachi.Unwrap(humaCtx)
+			release := func() {}
+			metered := &meteredResponse{ResponseWriter: w, start: func() *activity.Transfer {
+				transfer := a.startDownload(ctx, owner, entry, ranged)
+				if !ranged {
+					release = transfer.Hold()
+				}
+				return transfer
+			}}
+			http.ServeContent(metered, r, entry.Name, entry.Mtime, file)
+			release()
+			if metered.transfer == nil || ranged {
+				return
+			}
+			var incomplete error
+			if metered.written < entry.Size {
+				incomplete = io.ErrUnexpectedEOF
+			}
+			a.activity.Finish(ctx, metered.transfer, incomplete)
 		},
 	}, nil
+}
+
+// startDownload tracks a whole-file download on its own, and gathers the range reads one session
+// makes of one revision, as sync clients do, into a single transfer.
+func (a *API) startDownload(ctx context.Context, owner users.User, entry files.Entry, ranged bool) *activity.Transfer {
+	spec := activity.TransferSpec{Owner: owner, Direction: activity.DirectionDownload, Path: entry.Path}
+	if !ranged {
+		spec.Total = &entry.Size
+		return a.activity.Start(ctx, spec)
+	}
+	key := fmt.Sprintf("%d:%d:%s:%d", owner.ID, activity.ActorFrom(ctx).SessionID, entry.Path, entry.Rev)
+	return a.activity.Aggregate(ctx, key, spec)
+}
+
+// meteredResponse counts the body bytes of a successful response, starting the transfer on the
+// first one so that 304 and 412 answers are never tracked.
+type meteredResponse struct {
+	http.ResponseWriter
+	status   int
+	written  int64
+	start    func() *activity.Transfer
+	transfer *activity.Transfer
+}
+
+func (m *meteredResponse) WriteHeader(status int) {
+	if m.status == 0 {
+		m.status = status
+	}
+	m.ResponseWriter.WriteHeader(status)
+}
+
+func (m *meteredResponse) Write(p []byte) (int, error) {
+	if m.status == 0 {
+		m.status = http.StatusOK
+	}
+	if m.transfer == nil && (m.status == http.StatusOK || m.status == http.StatusPartialContent) {
+		m.transfer = m.start()
+	}
+	n, err := m.ResponseWriter.Write(p)
+	m.written += int64(n)
+	if m.transfer != nil {
+		m.transfer.Add(int64(n))
+	}
+	return n, err
 }
 
 func (a *API) uploadFile(ctx context.Context, input *uploadInput) (*jsonBody[files.Entry], error) {
@@ -128,12 +200,22 @@ func (a *API) uploadFile(ctx context.Context, input *uploadInput) (*jsonBody[fil
 	if err != nil {
 		return nil, err
 	}
-	entry, err := a.files.Write(ctx, currentUser(ctx), files.WriteRequest{
-		Path:    input.Path,
+	cleanPath, err := storage.CleanPath(input.Path)
+	if err != nil {
+		return nil, err
+	}
+	owner := currentUser(ctx)
+	transfer := a.activity.Start(ctx, activity.TransferSpec{
+		Owner: owner, Direction: activity.DirectionUpload, Path: cleanPath, Total: input.size, ClientID: input.TransferID,
+	})
+	defer transfer.Hold()()
+	entry, err := a.files.Write(activity.WithTransfer(ctx, transfer), owner, files.WriteRequest{
+		Path:    cleanPath,
 		BaseRev: input.BaseRev,
 		Mtime:   mtime,
-		Content: input.content,
+		Content: transfer.Reader(input.content),
 	})
+	a.activity.Finish(ctx, transfer, err)
 	if err != nil {
 		return nil, err
 	}

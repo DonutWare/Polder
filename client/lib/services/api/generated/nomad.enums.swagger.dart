@@ -34,6 +34,36 @@ enum ChangesRole {
   const ChangesRole(this.value);
 }
 
+enum ClientMessageScope {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('me')
+  me('me'),
+  @JsonValue('all')
+  all('all'),
+  @JsonValue('user')
+  user('user');
+
+  final String? value;
+
+  const ClientMessageScope(this.value);
+}
+
+enum ClientMessageType {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('auth')
+  auth('auth'),
+  @JsonValue('subscribe')
+  subscribe('subscribe');
+
+  final String? value;
+
+  const ClientMessageType(this.value);
+}
+
 enum EntryPreviewState {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -50,6 +80,112 @@ enum EntryPreviewState {
   final String? value;
 
   const EntryPreviewState(this.value);
+}
+
+enum EventMessageStatus {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('ok')
+  ok('ok'),
+  @JsonValue('failed')
+  failed('failed'),
+  @JsonValue('cancelled')
+  cancelled('cancelled');
+
+  final String? value;
+
+  const EventMessageStatus(this.value);
+}
+
+enum EventMessageType {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('ready')
+  ready('ready'),
+  @JsonValue('snapshot')
+  snapshot('snapshot'),
+  @JsonValue('error')
+  error('error'),
+  @JsonValue('transfer.started')
+  transferStarted('transfer.started'),
+  @JsonValue('transfer.progress')
+  transferProgress('transfer.progress'),
+  @JsonValue('transfer.finished')
+  transferFinished('transfer.finished'),
+  @JsonValue('activity.created')
+  activityCreated('activity.created'),
+  @JsonValue('files.changed')
+  filesChanged('files.changed');
+
+  final String? value;
+
+  const EventMessageType(this.value);
+}
+
+enum LiveTransferDirection {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('upload')
+  upload('upload'),
+  @JsonValue('download')
+  download('download');
+
+  final String? value;
+
+  const LiveTransferDirection(this.value);
+}
+
+enum LogEntryKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('upload')
+  upload('upload'),
+  @JsonValue('download')
+  download('download'),
+  @JsonValue('mkdir')
+  mkdir('mkdir'),
+  @JsonValue('move')
+  move('move'),
+  @JsonValue('delete')
+  delete('delete'),
+  @JsonValue('restore')
+  restore('restore'),
+  @JsonValue('trashDelete')
+  trashdelete('trashDelete'),
+  @JsonValue('trashEmpty')
+  trashempty('trashEmpty'),
+  @JsonValue('trashExpire')
+  trashexpire('trashExpire'),
+  @JsonValue('rescan')
+  rescan('rescan'),
+  @JsonValue('login')
+  login('login'),
+  @JsonValue('logout')
+  logout('logout');
+
+  final String? value;
+
+  const LogEntryKind(this.value);
+}
+
+enum LogEntryStatus {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('ok')
+  ok('ok'),
+  @JsonValue('failed')
+  failed('failed'),
+  @JsonValue('cancelled')
+  cancelled('cancelled');
+
+  final String? value;
+
+  const LogEntryStatus(this.value);
 }
 
 enum NewUserRole {

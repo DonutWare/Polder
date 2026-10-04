@@ -1,6 +1,8 @@
 import "dart:io";
 
+import "package:nomad/models/manifest.dart";
 import "package:nomad/models/sync/conflict.dart";
+import "package:nomad/models/sync/local_file_state.dart";
 import "package:nomad/models/sync/remote_state.dart";
 import "package:nomad/models/sync/sync_action.dart";
 import "package:nomad/models/sync/sync_entry.dart";
@@ -8,14 +10,17 @@ import "package:nomad/models/sync/sync_root.dart";
 import "package:nomad/models/sync/sync_status.dart";
 import "package:nomad/services/api/api_exceptions.dart";
 import "package:nomad/services/api/nomad_api.dart";
+import "package:nomad/services/sync/chunker.dart";
 import "package:nomad/services/sync/conflict_resolver.dart";
 import "package:nomad/services/sync/local_scanner.dart";
 import "package:nomad/services/sync/reconciler.dart";
+import "package:nomad/services/sync/sync_activity.dart";
 import "package:nomad/services/sync/remote_change_set.dart";
 import "package:nomad/services/sync/sync_exceptions.dart";
 import "package:nomad/services/sync/sync_executor.dart";
 import "package:nomad/services/sync/sync_paths.dart";
 import "package:nomad/services/sync/sync_service.dart";
+import "package:nomad/services/sync/work_queue.dart";
 import "package:nomad/services/sync/sync_state_store.dart";
 import "package:nomad/util/remote_path.dart";
 
@@ -28,39 +33,127 @@ class SyncEngine implements SyncService {
     required NomadApi api,
     required SyncStateStore store,
     required String deviceName,
+    SyncActivity? activity,
     LocalScanner scanner = const LocalScanner(),
     SyncExecutor? executor,
     DateTime Function() clock = DateTime.now,
   }) : _api = api,
        _store = store,
+       _activity = activity,
        _scanner = scanner,
-       _executor = executor ?? SyncExecutor(api: api, store: store) {
+       _clock = clock,
+       _executor = executor ?? SyncExecutor(api: api, store: store, activity: activity) {
     _resolver = ConflictResolver(executor: _executor, scanner: scanner, deviceName: deviceName, clock: clock);
   }
 
   final NomadApi _api;
   final SyncStateStore _store;
+  final SyncActivity? _activity;
   final LocalScanner _scanner;
   final SyncExecutor _executor;
+  final DateTime Function() _clock;
   late final ConflictResolver _resolver;
+
+  static const hashWorkers = 2;
+  static const uploadWorkers = 2;
 
   @override
   Future<SyncRunReport> run(SyncRoot root, {Set<String> pausedPaths = const {}}) async {
     if (!await Directory(root.localPath).exists()) throw LocalRootMissingException(root.localPath);
+    final startedAt = _clock();
+    final run = _activity?.startRun(root.id) ?? CancelToken();
+    try {
+      return await _run(root, pausedPaths, run);
+    } finally {
+      _activity?.endRun(root.id, run);
+      _activity?.settle(root.id, startedAt);
+    }
+  }
+
+  Future<SyncRunReport> _run(SyncRoot root, Set<String> pausedPaths, CancelToken run) async {
     final remote = root.mode == SyncMode.sync ? await _fetchRemote(root, await _store.entries(root.id)) : null;
     var report = remote == null ? const SyncRunReport() : await _applyMoves(root, remote.moves, pausedPaths);
     final synced = await _store.entries(root.id);
-    final local = await _scanner.scan(SyncPaths(root), synced);
-    final actions = Reconciler(
-      rootId: root.id,
-      mode: root.mode,
-    ).reconcile(local: local, synced: synced, remote: remote?.states ?? const {});
-    for (final action in actions.where((action) => !pausedPaths.contains(action.path))) {
-      report += await _executeSafely(root, action, synced);
+    final remoteStates = remote?.states ?? const <String, RemoteState>{};
+    final paths = SyncPaths(root);
+    final reconciler = Reconciler(rootId: root.id, mode: root.mode);
+    final prepared = <String, Manifest>{};
+    final scanner = _activity == null ? _scanner : LocalScanner(hasher: _preparingHasher(root, prepared));
+    final scan = await scanner.quickScan(paths, synced);
+    final deferred = {...scan.deferred};
+    bool skipped(String path) => pausedPaths.contains(path) || deferred.contains(path);
+    final dirty = [...scan.dirty.where((path) => !skipped(path))]..sort();
+    if (!run.isCancelled) _activity?.enqueue(root, dirty);
+
+    Future<void> execute(SyncAction action) async {
+      if (run.isCancelled) {
+        deferred.add(action.path);
+        return;
+      }
+      final outcome = await _executeSafely(root, action, synced, prepared, run);
+      report += outcome;
     }
-    if (remote != null && !report.hasFailures) await _store.saveCursor(root.id, remote.cursor);
+
+    final firstPass = reconciler.reconcile(
+      local: scan.known,
+      synced: synced,
+      remote: remoteStates,
+      pending: {...scan.dirty, ...deferred},
+    );
+    for (final action in firstPass.where((action) => !action.isDelete && !skipped(action.path))) {
+      await execute(action);
+    }
+
+    final hashed = <String, LocalFileState>{};
+    final uploads = AsyncQueue<SyncAction>(capacity: uploadWorkers * 2);
+    final hashing = runPool(dirty, hashWorkers, (path) async {
+      if (run.isCancelled) {
+        deferred.add(path);
+        return;
+      }
+      final state = await scanner.settledState(paths, path, synced: synced[path]);
+      if (state == null) {
+        deferred.add(path);
+        return;
+      }
+      hashed[path] = state;
+      final action = reconciler.decide(path, state, synced[path], remoteStates[path]);
+      if (action != null) await uploads.add(action);
+    }).whenComplete(uploads.close);
+    await Future.wait([hashing, uploads.drain(uploadWorkers, execute)]);
+
+    if (!run.isCancelled) {
+      final lastPass = reconciler.reconcile(
+        local: {...scan.known, ...hashed},
+        synced: synced,
+        remote: remoteStates,
+        pending: {...deferred, ...pausedPaths},
+      );
+      for (final action in lastPass.where((action) => action.isDelete)) {
+        await execute(action);
+      }
+    }
+    report += SyncRunReport(deferred: deferred.length);
+    // Deferred files may hide remote changes to them, so their part of the feed is read again next time.
+    if (remote != null && !report.hasFailures && report.deferred == 0 && !run.isCancelled) {
+      await _store.saveCursor(root.id, remote.cursor);
+    }
     return report;
   }
+
+  FileHasher _preparingHasher(SyncRoot root, Map<String, Manifest> prepared) => (file, relativePath, size) async {
+    final activity = _activity!;
+    if (size <= LocalScanner.backgroundHashThreshold) return LocalScanner.hashFile(file);
+    final cancel = activity.begin(root, relativePath, LocalSyncPhase.preparing, total: size);
+    final manifest = await FastCdc.manifestOfFileTracked(
+      file,
+      onProgress: (bytes) => activity.progress(root.id, relativePath, bytes),
+      cancel: cancel,
+    );
+    activity.progress(root.id, relativePath, manifest.size);
+    prepared[relativePath] = manifest;
+    return manifest.hash;
+  };
 
   @override
   Future<void> resolve(SyncRoot root, Conflict conflict, ConflictResolution resolution) =>
@@ -156,9 +249,19 @@ class SyncEngine implements SyncService {
     return local != null && !local.isDir && local.hash == previous.syncedHash;
   }
 
-  Future<SyncRunReport> _executeSafely(SyncRoot root, SyncAction action, Map<String, SyncEntry> synced) async {
+  Future<SyncRunReport> _executeSafely(
+    SyncRoot root,
+    SyncAction action,
+    Map<String, SyncEntry> synced,
+    Map<String, Manifest> prepared,
+    CancelToken run,
+  ) async {
     try {
-      return await _execute(root, action, synced);
+      return await _execute(root, action, synced, prepared, run);
+    } on SyncCancelledException {
+      return const SyncRunReport(deferred: 1);
+    } on PathNotFoundException {
+      return const SyncRunReport(deferred: 1);
     } on ConflictException catch (error) {
       return SyncRunReport.conflict(_conflictFromRejection(root, action, error));
     } on ApiException catch (error) {
@@ -170,7 +273,13 @@ class SyncEngine implements SyncService {
     }
   }
 
-  Future<SyncRunReport> _execute(SyncRoot root, SyncAction action, Map<String, SyncEntry> synced) async {
+  Future<SyncRunReport> _execute(
+    SyncRoot root,
+    SyncAction action,
+    Map<String, SyncEntry> synced,
+    Map<String, Manifest> prepared,
+    CancelToken run,
+  ) async {
     switch (action) {
       case CreateRemoteDirAction(:final path):
         await _executor.createRemoteDir(root, path);
@@ -179,10 +288,10 @@ class SyncEngine implements SyncService {
         await _executor.createLocalDir(root, path, remote);
         return const SyncRunReport(downloaded: 1);
       case UploadAction(:final path, :final local, :final baseRev):
-        await _executor.upload(root, path, local, baseRev: baseRev);
+        await _executor.upload(root, path, local, baseRev: baseRev, manifest: prepared[path]);
         return const SyncRunReport(uploaded: 1);
       case DownloadAction(:final path, :final remote):
-        await _executor.download(root, path, remote, previous: synced[path]);
+        await _executor.download(root, path, remote, previous: synced[path], cancel: run);
         return const SyncRunReport(downloaded: 1);
       case DeleteLocalAction(:final path):
         await _executor.deleteLocal(root, path);

@@ -5,8 +5,10 @@ import "package:nomad/models/sync/sync_status.dart";
 import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/sync/auto_upload_settings_provider.dart";
 import "package:nomad/providers/sync/conflict_queue_provider.dart";
+import "package:nomad/providers/sync/sync_paused_provider.dart";
 import "package:nomad/providers/sync/sync_platform_provider.dart";
 import "package:nomad/providers/sync/sync_roots_provider.dart";
+import "package:nomad/providers/sync/sync_scheduler_provider.dart";
 import "package:nomad/services/sync/sync_service.dart";
 
 final syncStatusProvider = NotifierProvider<SyncStatusNotifier, SyncStatus>(SyncStatusNotifier.new);
@@ -22,6 +24,10 @@ class SyncStatusNotifier extends Notifier<SyncStatus> {
 
   Future<void> syncNow() async {
     if (!ref.read(syncPlatformProvider).supportsSync) return;
+    if (await ref.read(syncPausedProvider.future)) {
+      if (ref.mounted) markPaused();
+      return;
+    }
     if (state.isSyncing) {
       _rerunRequested = true;
       return;
@@ -31,13 +37,23 @@ class SyncStatusNotifier extends Notifier<SyncStatus> {
     final report = await _runAll();
     if (!ref.mounted) return;
     ref.read(conflictQueueProvider.notifier).enqueue(report.conflicts);
+    final paused = ref.read(syncPausedProvider).value ?? false;
     state = SyncStatus(
-      phase: report.hasFailures ? SyncPhase.error : SyncPhase.idle,
+      phase: paused ? SyncPhase.paused : (report.hasFailures ? SyncPhase.error : SyncPhase.idle),
       lastReport: report,
       lastRunAt: DateTime.now(),
       errorMessage: report.errors.firstOrNull,
     );
-    if (_rerunRequested) await syncNow();
+    if (paused) return;
+    if (_rerunRequested) {
+      await syncNow();
+    } else if (report.deferred > 0) {
+      ref.read(syncSchedulerProvider)?.requestRun();
+    }
+  }
+
+  void markPaused() {
+    if (!state.isSyncing) state = state.copyWith(phase: SyncPhase.paused);
   }
 
   Future<SyncRunReport> _runAll() async {

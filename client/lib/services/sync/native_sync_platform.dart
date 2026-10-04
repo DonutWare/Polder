@@ -7,6 +7,7 @@ import "package:nomad/services/background/auto_upload_scheduler.dart";
 import "package:nomad/services/sync/drift/drift_sync_state_store.dart";
 import "package:nomad/services/sync/drift/sync_database.dart";
 import "package:nomad/services/sync/folder_watcher.dart";
+import "package:nomad/services/sync/sync_activity.dart";
 import "package:nomad/services/sync/sync_engine.dart";
 import "package:nomad/services/sync/sync_platform.dart";
 import "package:nomad/services/sync/sync_service.dart";
@@ -42,11 +43,15 @@ class NativeSyncPlatform implements SyncPlatform {
   Future<SyncStateStore> openStore() async => DriftSyncStateStore(openDatabase());
 
   @override
-  SyncService createService({required NomadApi api, required SyncStateStore store, required String deviceName}) =>
-      SyncEngine(api: api, store: store, deviceName: deviceName);
+  SyncService createService({
+    required NomadApi api,
+    required SyncStateStore store,
+    required String deviceName,
+    SyncActivity? activity,
+  }) => SyncEngine(api: api, store: store, deviceName: deviceName, activity: activity);
 
   @override
-  Stream<void> watchFolder(String localPath) => FolderWatcher.watch(localPath);
+  Stream<String> watchFolder(String localPath) => FolderWatcher.watch(localPath);
 
   @override
   Future<void> scheduleAutoUpload(AutoUploadSettings settings) => AutoUploadScheduler.schedule(settings);

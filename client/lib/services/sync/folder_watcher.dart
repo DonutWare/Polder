@@ -3,12 +3,12 @@ import "dart:io";
 import "package:nomad/services/sync/sync_ignore_rules.dart";
 
 abstract final class FolderWatcher {
-  static Stream<void> watch(String localPath) {
+  static Stream<String> watch(String localPath) {
     if (!FileSystemEntity.isWatchSupported) return const Stream.empty();
     return Directory(localPath)
         .watch(recursive: true)
-        .where((event) => !_isTemporary(event.path))
-        .map((_) {})
+        .expand((event) => [event.path, if (event case FileSystemMoveEvent(:final destination?)) destination])
+        .where((path) => !_isTemporary(path))
         .handleError((Object _) {});
   }
 

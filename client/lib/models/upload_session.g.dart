@@ -6,38 +6,49 @@ part of 'upload_session.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_UploadSession _$UploadSessionFromJson(Map<String, dynamic> json) => _UploadSession(
-  uploadId: json['uploadId'] as String,
-  missing: (json['missing'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const <String>[],
-);
+_UploadSession _$UploadSessionFromJson(Map<String, dynamic> json) =>
+    _UploadSession(
+      uploadId: json['uploadId'] as String,
+      missing:
+          (json['missing'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+    );
 
-Map<String, dynamic> _$UploadSessionToJson(_UploadSession instance) => <String, dynamic>{
-  'uploadId': instance.uploadId,
-  'missing': instance.missing,
-};
+Map<String, dynamic> _$UploadSessionToJson(_UploadSession instance) =>
+    <String, dynamic>{
+      'uploadId': instance.uploadId,
+      'missing': instance.missing,
+    };
 
 _UploadChunkSpec _$UploadChunkSpecFromJson(Map<String, dynamic> json) =>
-    _UploadChunkSpec(hash: json['hash'] as String, size: (json['size'] as num).toInt());
+    _UploadChunkSpec(
+      hash: json['hash'] as String,
+      size: (json['size'] as num).toInt(),
+    );
 
-Map<String, dynamic> _$UploadChunkSpecToJson(_UploadChunkSpec instance) => <String, dynamic>{
-  'hash': instance.hash,
-  'size': instance.size,
-};
+Map<String, dynamic> _$UploadChunkSpecToJson(_UploadChunkSpec instance) =>
+    <String, dynamic>{'hash': instance.hash, 'size': instance.size};
 
-_UploadRequest _$UploadRequestFromJson(Map<String, dynamic> json) => _UploadRequest(
-  path: json['path'] as String,
-  baseRev: (json['baseRev'] as num).toInt(),
-  size: (json['size'] as num).toInt(),
-  hash: json['hash'] as String,
-  mtime: DateTime.parse(json['mtime'] as String),
-  chunks: (json['chunks'] as List<dynamic>).map((e) => UploadChunkSpec.fromJson(e as Map<String, dynamic>)).toList(),
-);
+_UploadRequest _$UploadRequestFromJson(Map<String, dynamic> json) =>
+    _UploadRequest(
+      path: json['path'] as String,
+      baseRev: (json['baseRev'] as num).toInt(),
+      size: (json['size'] as num).toInt(),
+      hash: json['hash'] as String,
+      mtime: DateTime.parse(json['mtime'] as String),
+      chunks: (json['chunks'] as List<dynamic>)
+          .map((e) => UploadChunkSpec.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
-Map<String, dynamic> _$UploadRequestToJson(_UploadRequest instance) => <String, dynamic>{
-  'path': instance.path,
-  'baseRev': instance.baseRev,
-  'size': instance.size,
-  'hash': instance.hash,
-  'mtime': instance.mtime.toIso8601String(),
-  'chunks': instance.chunks.map((e) => e.toJson()).toList(),
-};
+Map<String, dynamic> _$UploadRequestToJson(_UploadRequest instance) =>
+    <String, dynamic>{
+      'path': instance.path,
+      'baseRev': instance.baseRev,
+      'size': instance.size,
+      'hash': instance.hash,
+      'mtime': instance.mtime.toIso8601String(),
+      'chunks': instance.chunks.map((e) => e.toJson()).toList(),
+    };

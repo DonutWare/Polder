@@ -1,6 +1,7 @@
 abstract final class AppRoutes {
   static const login = "/login";
   static const files = "/files";
+  static const activity = "/activity";
   static const sync = "/sync";
   static const conflicts = "/sync/conflicts";
   static const autoUpload = "/auto-upload";

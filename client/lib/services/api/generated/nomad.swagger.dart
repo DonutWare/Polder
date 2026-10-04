@@ -56,6 +56,64 @@ abstract class Nomad extends ChopperService {
     return _$Nomad(newClient);
   }
 
+  ///Page through what happened to files and sessions, newest first
+  ///@param user me, all, or a user id; anything but your own activity needs the administrator role
+  ///@param before Cursor from the previous page; 0 starts at the newest
+  ///@param limit Maximum number of entries to return; the server caps it
+  Future<chopper.Response<LogPage>> listActivity({String? user, int? before, int? limit}) {
+    generatedMapping.putIfAbsent(LogPage, () => LogPage.fromJsonFactory);
+
+    return _listActivity(user: user, before: before, limit: limit);
+  }
+
+  ///Page through what happened to files and sessions, newest first
+  ///@param user me, all, or a user id; anything but your own activity needs the administrator role
+  ///@param before Cursor from the previous page; 0 starts at the newest
+  ///@param limit Maximum number of entries to return; the server caps it
+  @GET(path: '/api/v1/activity')
+  Future<chopper.Response<LogPage>> _listActivity({
+    @Query('user') String? user,
+    @Query('before') int? before,
+    @Query('limit') int? limit,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Page through what happened to files and sessions, newest first',
+      operationId: 'listActivity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["activity"],
+      deprecated: false,
+    ),
+  });
+
+  ///Uploads and downloads in progress
+  ///@param user me, all, or a user id; anything but your own transfers needs the administrator role
+  Future<chopper.Response<LiveTransfers>> listLiveTransfers({String? user}) {
+    generatedMapping.putIfAbsent(LiveTransfers, () => LiveTransfers.fromJsonFactory);
+
+    return _listLiveTransfers(user: user);
+  }
+
+  ///Uploads and downloads in progress
+  ///@param user me, all, or a user id; anything but your own transfers needs the administrator role
+  @GET(path: '/api/v1/activity/live')
+  Future<chopper.Response<LiveTransfers>> _listLiveTransfers({
+    @Query('user') String? user,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Uploads and downloads in progress',
+      operationId: 'listLiveTransfers',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["activity"],
+      deprecated: false,
+    ),
+  });
+
   ///Server-wide settings
   Future<chopper.Response<ServerSettings>> getServerSettings() {
     generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
@@ -294,6 +352,27 @@ abstract class Nomad extends ChopperService {
     ),
   });
 
+  ///Live activity over a WebSocket
+  Future<chopper.Response> events() {
+    return _events();
+  }
+
+  ///Live activity over a WebSocket
+  @GET(path: '/api/v1/events')
+  Future<chopper.Response> _events({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: 'Open a WebSocket here. Send `{"type":"auth","token":"<access token>"}` within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can send `{"type":"subscribe","scope":"me|all|user","userId":1}` to watch other users; every subscribe is answered with a new snapshot. Your own events always arrive. Events are `transfer.started`, `transfer.progress`, `transfer.finished`, `activity.created` and `files.changed`. The connection closes with code 4401 when authentication fails or the token expires without renewal.',
+      summary: 'Live activity over a WebSocket',
+      operationId: 'events',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["events"],
+      deprecated: false,
+    ),
+  });
+
   ///Delete a file or directory
   ///@param path
   ///@param baseRev Revision the client last saw; -1 deletes whatever is there
@@ -368,21 +447,36 @@ abstract class Nomad extends ChopperService {
   ///@param path Where to store the file, such as /Photos/cat.jpg
   ///@param baseRev Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there
   ///@param mtime Modification time to record, as RFC 3339; defaults to now
-  Future<chopper.Response<Entry>> uploadFile({String? path, int? baseRev, DateTime? mtime, required Object? body}) {
+  ///@param X-Nomad-Transfer-Id Any ID the client picks; live transfer events echo it back as clientId
+  Future<chopper.Response<Entry>> uploadFile({
+    String? path,
+    int? baseRev,
+    DateTime? mtime,
+    String? xNomadTransferId,
+    required Object? body,
+  }) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
-    return _uploadFile(path: path, baseRev: baseRev, mtime: mtime, body: body);
+    return _uploadFile(
+      path: path,
+      baseRev: baseRev,
+      mtime: mtime,
+      xNomadTransferId: xNomadTransferId?.toString(),
+      body: body,
+    );
   }
 
   ///Upload a whole file as the request body
   ///@param path Where to store the file, such as /Photos/cat.jpg
   ///@param baseRev Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there
   ///@param mtime Modification time to record, as RFC 3339; defaults to now
+  ///@param X-Nomad-Transfer-Id Any ID the client picks; live transfer events echo it back as clientId
   @PUT(path: '/api/v1/files/content', optionalBody: true)
   Future<chopper.Response<Entry>> _uploadFile({
     @Query('path') String? path,
     @Query('baseRev') int? baseRev,
     @Query('mtime') DateTime? mtime,
+    @Header('X-Nomad-Transfer-Id') String? xNomadTransferId,
     @Body() required Object? body,
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(

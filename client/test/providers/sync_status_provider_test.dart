@@ -7,9 +7,13 @@ import "package:nomad/models/sync/sync_root.dart";
 import "package:nomad/models/sync/sync_status.dart";
 import "package:nomad/providers/sync/auto_upload_settings_provider.dart";
 import "package:nomad/providers/sync/conflict_queue_provider.dart";
+import "package:nomad/providers/sync/sync_activity_provider.dart";
+import "package:nomad/providers/sync/sync_paused_provider.dart";
 import "package:nomad/providers/sync/sync_roots_provider.dart";
 import "package:nomad/providers/sync/sync_status_provider.dart";
 import "package:nomad/services/storage/preferences_store.dart";
+import "package:nomad/services/sync/sync_activity.dart";
+import "package:nomad/services/sync/sync_pause.dart";
 
 import "../support/provider_harness.dart";
 
@@ -105,6 +109,40 @@ void main() {
     final status = slow.container.read(syncStatusProvider);
     expect(status.errorMessage, isNull);
     expect(status.phase, SyncPhase.idle);
+  });
+
+  test("pausing stops runs until resumed, and is remembered", () async {
+    await addRoot(SyncMode.sync);
+    harness.container.listen(syncPausedProvider, (_, _) {});
+    final runs = harness.syncPlatform.service.pausedPathsSeen;
+
+    await harness.container.read(syncPausedProvider.notifier).pause();
+    runs.clear();
+    await harness.container.read(syncStatusProvider.notifier).syncNow();
+
+    expect(runs, isEmpty);
+    expect(harness.container.read(syncStatusProvider).phase, SyncPhase.paused);
+    expect(await SyncPause.read(harness.preferences), isTrue);
+
+    await harness.container.read(syncPausedProvider.notifier).resume();
+
+    expect(runs, hasLength(1));
+    expect(harness.container.read(syncStatusProvider).phase, SyncPhase.idle);
+    expect(await SyncPause.read(harness.preferences), isFalse);
+  });
+
+  test("turning a sync folder off or removing it stops its work", () async {
+    await addRoot(SyncMode.sync);
+    final root = (await harness.container.read(syncRootsProvider.future)).single;
+    final activity = harness.container.read(syncActivityProvider);
+    final run = activity.startRun(root.id);
+    final upload = activity.begin(root, "a.bin", LocalSyncPhase.uploading);
+
+    await harness.container.read(syncRootsProvider.notifier).setEnabled(root, false);
+
+    expect(run.reason, CancelReason.stopped);
+    expect(upload.isCancelled, isTrue);
+    expect(activity.items, isEmpty);
   });
 }
 

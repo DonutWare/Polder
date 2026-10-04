@@ -10,16 +10,23 @@ import "package:nomad/services/api/api_exceptions.dart";
 import "package:nomad/services/api/nomad_api.dart";
 import "package:nomad/services/sync/delta_downloader.dart";
 import "package:nomad/services/sync/delta_uploader.dart";
+import "package:nomad/services/sync/sync_activity.dart";
 import "package:nomad/services/sync/sync_paths.dart";
 import "package:nomad/services/sync/sync_state_store.dart";
 
 class SyncExecutor {
-  SyncExecutor({required this._api, required this._store, DeltaUploader? uploader, DeltaDownloader? downloader})
-    : _uploader = uploader ?? DeltaUploader(_api),
-      _downloader = downloader ?? DeltaDownloader(_api);
+  SyncExecutor({
+    required this._api,
+    required this._store,
+    this._activity,
+    DeltaUploader? uploader,
+    DeltaDownloader? downloader,
+  }) : _uploader = uploader ?? DeltaUploader(_api),
+       _downloader = downloader ?? DeltaDownloader(_api);
 
   final NomadApi _api;
   final SyncStateStore _store;
+  final SyncActivity? _activity;
   final DeltaUploader _uploader;
   final DeltaDownloader _downloader;
 
@@ -31,24 +38,47 @@ class SyncExecutor {
   }
 
   Future<void> createLocalDir(SyncRoot root, String path, FileEntry remote) async {
+    _activity?.expectWrite(root.id, path);
     final directory = await SyncPaths(root).directory(path).create(recursive: true);
     await _store.saveEntry(_directoryEntry(root, path, remote, (await directory.stat()).modified));
   }
 
-  Future<void> upload(SyncRoot root, String path, LocalFileState local, {required int baseRev}) async {
+  Future<void> upload(
+    SyncRoot root,
+    String path,
+    LocalFileState local, {
+    required int baseRev,
+    Manifest? manifest,
+  }) async {
     final paths = SyncPaths(root);
+    final activity = _activity;
     final result = await _uploader.upload(
       source: paths.file(path),
       remotePath: paths.remotePath(path),
       baseRev: baseRev,
       mtime: local.mtime,
+      manifest: manifest,
+      tracking: activity == null
+          ? null
+          : UploadTracking(
+              begin: (phase, total) => activity.begin(root, path, phase, total: total),
+              progress: (bytes) => activity.progress(root.id, path, bytes),
+            ),
     );
     await _store.saveEntry(
       _fileEntry(root, path, result.entry, result.manifest, localSize: local.size, localMtime: local.mtime),
     );
+    activity?.done(root.id, path);
   }
 
-  Future<void> download(SyncRoot root, String path, FileEntry remote, {SyncEntry? previous}) async {
+  Future<void> download(
+    SyncRoot root,
+    String path,
+    FileEntry remote, {
+    SyncEntry? previous,
+    CancelToken? cancel,
+  }) async {
+    _activity?.expectWrite(root.id, path);
     final target = SyncPaths(root).file(path);
     await target.parent.create(recursive: true);
     final manifest = await _downloader.download(
@@ -56,6 +86,7 @@ class SyncExecutor {
       target: target,
       localManifest: _decodeManifest(previous?.manifestJson),
       mtime: remote.mtime,
+      cancel: cancel,
     );
     final stat = await target.stat();
     await _store.saveEntry(_fileEntry(root, path, remote, manifest, localSize: stat.size, localMtime: stat.modified));
@@ -72,6 +103,9 @@ class SyncExecutor {
     required FileEntry remote,
   }) async {
     final target = SyncPaths(toRoot).file(toPath);
+    _activity
+      ?..expectWrite(fromRoot.id, previous.relativePath)
+      ..expectWrite(toRoot.id, toPath);
     await target.parent.create(recursive: true);
     await SyncPaths(fromRoot).file(previous.relativePath).rename(target.path);
     final unchanged = remote.hash == previous.syncedHash;
@@ -86,6 +120,7 @@ class SyncExecutor {
   }
 
   Future<void> deleteLocal(SyncRoot root, String path) async {
+    _activity?.expectWrite(root.id, path);
     final paths = SyncPaths(root);
     final type = await FileSystemEntity.type(paths.localPath(path), followLinks: false);
     if (type == FileSystemEntityType.directory) await paths.directory(path).delete(recursive: true);

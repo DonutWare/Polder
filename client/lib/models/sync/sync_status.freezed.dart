@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SyncRunReport {
 
- int get uploaded; int get downloaded; int get deleted; int get moved; int get failed; List<Conflict> get conflicts; List<String> get errors;
+ int get uploaded; int get downloaded; int get deleted; int get moved; int get failed; int get deferred; List<Conflict> get conflicts; List<String> get errors;
 /// Create a copy of SyncRunReport
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $SyncRunReportCopyWith<SyncRunReport> get copyWith => _$SyncRunReportCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as SyncRunReport;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SyncRunReport&&(identical(other.uploaded, _this.uploaded) || other.uploaded == _this.uploaded)&&(identical(other.downloaded, _this.downloaded) || other.downloaded == _this.downloaded)&&(identical(other.deleted, _this.deleted) || other.deleted == _this.deleted)&&(identical(other.moved, _this.moved) || other.moved == _this.moved)&&(identical(other.failed, _this.failed) || other.failed == _this.failed)&&const DeepCollectionEquality().equals(other.conflicts, _this.conflicts)&&const DeepCollectionEquality().equals(other.errors, _this.errors));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SyncRunReport&&(identical(other.uploaded, _this.uploaded) || other.uploaded == _this.uploaded)&&(identical(other.downloaded, _this.downloaded) || other.downloaded == _this.downloaded)&&(identical(other.deleted, _this.deleted) || other.deleted == _this.deleted)&&(identical(other.moved, _this.moved) || other.moved == _this.moved)&&(identical(other.failed, _this.failed) || other.failed == _this.failed)&&(identical(other.deferred, _this.deferred) || other.deferred == _this.deferred)&&const DeepCollectionEquality().equals(other.conflicts, _this.conflicts)&&const DeepCollectionEquality().equals(other.errors, _this.errors));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SyncRunReport;
-  return Object.hash(runtimeType,_this.uploaded,_this.downloaded,_this.deleted,_this.moved,_this.failed,const DeepCollectionEquality().hash(_this.conflicts),const DeepCollectionEquality().hash(_this.errors));
+  return Object.hash(runtimeType,_this.uploaded,_this.downloaded,_this.deleted,_this.moved,_this.failed,_this.deferred,const DeepCollectionEquality().hash(_this.conflicts),const DeepCollectionEquality().hash(_this.errors));
 }
 
 @override
 String toString() {
   final _this = this as SyncRunReport;
-  return 'SyncRunReport(uploaded: ${_this.uploaded}, downloaded: ${_this.downloaded}, deleted: ${_this.deleted}, moved: ${_this.moved}, failed: ${_this.failed}, conflicts: ${_this.conflicts}, errors: ${_this.errors})';
+  return 'SyncRunReport(uploaded: ${_this.uploaded}, downloaded: ${_this.downloaded}, deleted: ${_this.deleted}, moved: ${_this.moved}, failed: ${_this.failed}, deferred: ${_this.deferred}, conflicts: ${_this.conflicts}, errors: ${_this.errors})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $SyncRunReportCopyWith<$Res>  {
   factory $SyncRunReportCopyWith(SyncRunReport value, $Res Function(SyncRunReport) _then) = _$SyncRunReportCopyWithImpl;
 @useResult
 $Res call({
- int uploaded, int downloaded, int deleted, int moved, int failed, List<Conflict> conflicts, List<String> errors
+ int uploaded, int downloaded, int deleted, int moved, int failed, int deferred, List<Conflict> conflicts, List<String> errors
 });
 
 
@@ -68,13 +68,14 @@ class _$SyncRunReportCopyWithImpl<$Res>
 
 /// Create a copy of SyncRunReport
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uploaded = null,Object? downloaded = null,Object? deleted = null,Object? moved = null,Object? failed = null,Object? conflicts = null,Object? errors = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uploaded = null,Object? downloaded = null,Object? deleted = null,Object? moved = null,Object? failed = null,Object? deferred = null,Object? conflicts = null,Object? errors = null,}) {
   return _then(SyncRunReport(
 uploaded: null == uploaded ? _self.uploaded : uploaded // ignore: cast_nullable_to_non_nullable
 as int,downloaded: null == downloaded ? _self.downloaded : downloaded // ignore: cast_nullable_to_non_nullable
 as int,deleted: null == deleted ? _self.deleted : deleted // ignore: cast_nullable_to_non_nullable
 as int,moved: null == moved ? _self.moved : moved // ignore: cast_nullable_to_non_nullable
 as int,failed: null == failed ? _self.failed : failed // ignore: cast_nullable_to_non_nullable
+as int,deferred: null == deferred ? _self.deferred : deferred // ignore: cast_nullable_to_non_nullable
 as int,conflicts: null == conflicts ? _self.conflicts : conflicts // ignore: cast_nullable_to_non_nullable
 as List<Conflict>,errors: null == errors ? _self.errors : errors // ignore: cast_nullable_to_non_nullable
 as List<String>,
@@ -162,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int uploaded,  int downloaded,  int deleted,  int moved,  int failed,  List<Conflict> conflicts,  List<String> errors)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int uploaded,  int downloaded,  int deleted,  int moved,  int failed,  int deferred,  List<Conflict> conflicts,  List<String> errors)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SyncRunReport() when $default != null:
-return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.failed,_that.conflicts,_that.errors);case _:
+return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.failed,_that.deferred,_that.conflicts,_that.errors);case _:
   return orElse();
 
 }
@@ -183,10 +184,10 @@ return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int uploaded,  int downloaded,  int deleted,  int moved,  int failed,  List<Conflict> conflicts,  List<String> errors)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int uploaded,  int downloaded,  int deleted,  int moved,  int failed,  int deferred,  List<Conflict> conflicts,  List<String> errors)  $default,) {final _that = this;
 switch (_that) {
 case _SyncRunReport():
-return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.failed,_that.conflicts,_that.errors);case _:
+return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.failed,_that.deferred,_that.conflicts,_that.errors);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +204,10 @@ return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int uploaded,  int downloaded,  int deleted,  int moved,  int failed,  List<Conflict> conflicts,  List<String> errors)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int uploaded,  int downloaded,  int deleted,  int moved,  int failed,  int deferred,  List<Conflict> conflicts,  List<String> errors)?  $default,) {final _that = this;
 switch (_that) {
 case _SyncRunReport() when $default != null:
-return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.failed,_that.conflicts,_that.errors);case _:
+return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.failed,_that.deferred,_that.conflicts,_that.errors);case _:
   return null;
 
 }
@@ -218,7 +219,7 @@ return $default(_that.uploaded,_that.downloaded,_that.deleted,_that.moved,_that.
 
 
 class _SyncRunReport extends SyncRunReport {
-  const _SyncRunReport({this.uploaded = 0, this.downloaded = 0, this.deleted = 0, this.moved = 0, this.failed = 0,  List<Conflict> conflicts = const <Conflict>[],  List<String> errors = const <String>[]}): _conflicts = conflicts,_errors = errors,super._();
+  const _SyncRunReport({this.uploaded = 0, this.downloaded = 0, this.deleted = 0, this.moved = 0, this.failed = 0, this.deferred = 0,  List<Conflict> conflicts = const <Conflict>[],  List<String> errors = const <String>[]}): _conflicts = conflicts,_errors = errors,super._();
   
 
 @override@JsonKey() final  int uploaded;
@@ -226,6 +227,7 @@ class _SyncRunReport extends SyncRunReport {
 @override@JsonKey() final  int deleted;
 @override@JsonKey() final  int moved;
 @override@JsonKey() final  int failed;
+@override@JsonKey() final  int deferred;
  final  List<Conflict> _conflicts;
 @override@JsonKey() List<Conflict> get conflicts {
   if (_conflicts is EqualUnmodifiableListView) return _conflicts;
@@ -251,18 +253,18 @@ _$SyncRunReportCopyWith<_SyncRunReport> get copyWith => __$SyncRunReportCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SyncRunReport&&(identical(other.uploaded, uploaded) || other.uploaded == uploaded)&&(identical(other.downloaded, downloaded) || other.downloaded == downloaded)&&(identical(other.deleted, deleted) || other.deleted == deleted)&&(identical(other.moved, moved) || other.moved == moved)&&(identical(other.failed, failed) || other.failed == failed)&&const DeepCollectionEquality().equals(other.conflicts, _conflicts)&&const DeepCollectionEquality().equals(other.errors, _errors));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SyncRunReport&&(identical(other.uploaded, uploaded) || other.uploaded == uploaded)&&(identical(other.downloaded, downloaded) || other.downloaded == downloaded)&&(identical(other.deleted, deleted) || other.deleted == deleted)&&(identical(other.moved, moved) || other.moved == moved)&&(identical(other.failed, failed) || other.failed == failed)&&(identical(other.deferred, deferred) || other.deferred == deferred)&&const DeepCollectionEquality().equals(other.conflicts, _conflicts)&&const DeepCollectionEquality().equals(other.errors, _errors));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,uploaded,downloaded,deleted,moved,failed,const DeepCollectionEquality().hash(_conflicts),const DeepCollectionEquality().hash(_errors));
+    return Object.hash(runtimeType,uploaded,downloaded,deleted,moved,failed,deferred,const DeepCollectionEquality().hash(_conflicts),const DeepCollectionEquality().hash(_errors));
 }
 
 @override
 String toString() {
-    return 'SyncRunReport(uploaded: $uploaded, downloaded: $downloaded, deleted: $deleted, moved: $moved, failed: $failed, conflicts: $conflicts, errors: $errors)';
+    return 'SyncRunReport(uploaded: $uploaded, downloaded: $downloaded, deleted: $deleted, moved: $moved, failed: $failed, deferred: $deferred, conflicts: $conflicts, errors: $errors)';
 }
 
 
@@ -273,7 +275,7 @@ abstract mixin class _$SyncRunReportCopyWith<$Res> implements $SyncRunReportCopy
   factory _$SyncRunReportCopyWith(_SyncRunReport value, $Res Function(_SyncRunReport) _then) = __$SyncRunReportCopyWithImpl;
 @override @useResult
 $Res call({
- int uploaded, int downloaded, int deleted, int moved, int failed, List<Conflict> conflicts, List<String> errors
+ int uploaded, int downloaded, int deleted, int moved, int failed, int deferred, List<Conflict> conflicts, List<String> errors
 });
 
 
@@ -290,13 +292,14 @@ class __$SyncRunReportCopyWithImpl<$Res>
 
 /// Create a copy of SyncRunReport
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uploaded = null,Object? downloaded = null,Object? deleted = null,Object? moved = null,Object? failed = null,Object? conflicts = null,Object? errors = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uploaded = null,Object? downloaded = null,Object? deleted = null,Object? moved = null,Object? failed = null,Object? deferred = null,Object? conflicts = null,Object? errors = null,}) {
   return _then(_SyncRunReport(
 uploaded: null == uploaded ? _self.uploaded : uploaded // ignore: cast_nullable_to_non_nullable
 as int,downloaded: null == downloaded ? _self.downloaded : downloaded // ignore: cast_nullable_to_non_nullable
 as int,deleted: null == deleted ? _self.deleted : deleted // ignore: cast_nullable_to_non_nullable
 as int,moved: null == moved ? _self.moved : moved // ignore: cast_nullable_to_non_nullable
 as int,failed: null == failed ? _self.failed : failed // ignore: cast_nullable_to_non_nullable
+as int,deferred: null == deferred ? _self.deferred : deferred // ignore: cast_nullable_to_non_nullable
 as int,conflicts: null == conflicts ? _self._conflicts : conflicts // ignore: cast_nullable_to_non_nullable
 as List<Conflict>,errors: null == errors ? _self._errors : errors // ignore: cast_nullable_to_non_nullable
 as List<String>,

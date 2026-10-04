@@ -9,6 +9,7 @@ import "package:nomad/providers/appearance/appearance_provider.dart";
 import "package:nomad/providers/service_providers.dart";
 import "package:nomad/providers/sync/sync_platform_provider.dart";
 import "package:nomad/services/device/device_conditions.dart";
+import "package:nomad/services/realtime/events_client.dart";
 import "package:nomad/services/storage/credentials_store.dart";
 import "package:nomad/services/storage/preferences_store.dart";
 
@@ -42,6 +43,7 @@ class ProviderHarness {
     PreferencesStore? preferences,
     this.hostedServerUrl,
     this.systemAccent,
+    this.webSocketConnector,
   }) : credentials = InMemoryCredentialsStore(account),
        preferences = preferences ?? InMemoryPreferencesStore() {
     container = ProviderContainer(retry: (_, _) => null, overrides: overrides);
@@ -53,6 +55,8 @@ class ProviderHarness {
   final String? hostedServerUrl;
 
   final Color? systemAccent;
+
+  final WebSocketConnector? webSocketConnector;
 
   final InMemoryCredentialsStore credentials;
   final PreferencesStore preferences;
@@ -69,6 +73,7 @@ class ProviderHarness {
     syncPlatformProvider.overrideWithValue(syncPlatform),
     hostedServerUrlProvider.overrideWithValue(hostedServerUrl),
     systemAccentReaderProvider.overrideWithValue(() async => systemAccent),
+    webSocketConnectorProvider.overrideWithValue(webSocketConnector),
   ];
 
   void dispose() => container.dispose();

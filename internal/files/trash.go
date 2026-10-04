@@ -192,6 +192,7 @@ func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int
 	if mode == RestoreOverwrite {
 		s.onContentRemoved()
 	}
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationRestore, Path: restored.Path, FromPath: item.OriginalPath, IsDir: restored.IsDir, Size: item.Size})
 	return restored, nil
 }
 
@@ -306,7 +307,11 @@ func (s *Service) DeleteFromTrash(ctx context.Context, owner users.User, id int6
 	if err != nil {
 		return err
 	}
-	return s.purge(ctx, owner, []TrashItem{item})
+	if err := s.purge(ctx, owner, []TrashItem{item}); err != nil {
+		return err
+	}
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashDelete, Path: item.OriginalPath, IsDir: item.IsDir, Size: item.Size, Count: 1})
+	return nil
 }
 
 func (s *Service) EmptyTrash(ctx context.Context, owner users.User) error {
@@ -314,7 +319,11 @@ func (s *Service) EmptyTrash(ctx context.Context, owner users.User) error {
 	if err != nil {
 		return err
 	}
-	return s.purge(ctx, owner, items)
+	if err := s.purge(ctx, owner, items); err != nil || len(items) == 0 {
+		return err
+	}
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashEmpty, Path: "/", IsDir: true, Size: totalSize(items), Count: len(items)})
+	return nil
 }
 
 func (s *Service) PurgeTrash(ctx context.Context, owner users.User, deletedBefore time.Time) (int, error) {
@@ -322,7 +331,19 @@ func (s *Service) PurgeTrash(ctx context.Context, owner users.User, deletedBefor
 	if err != nil {
 		return 0, err
 	}
-	return len(items), s.purge(ctx, owner, items)
+	if err := s.purge(ctx, owner, items); err != nil || len(items) == 0 {
+		return len(items), err
+	}
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashExpire, Path: "/", IsDir: true, Size: totalSize(items), Count: len(items)})
+	return len(items), nil
+}
+
+func totalSize(items []TrashItem) int64 {
+	var total int64
+	for _, item := range items {
+		total += item.Size
+	}
+	return total
 }
 
 func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem) error {

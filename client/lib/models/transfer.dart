@@ -12,10 +12,13 @@ abstract class Transfer with _$Transfer {
 
   const factory Transfer({
     required int id,
+    required String clientId,
     required String name,
     required TransferDirection direction,
+    String? remotePath,
     @Default(0) int transferred,
     @Default(0) int total,
+    @Default(0) int rate,
     @Default(TransferStatus.running) TransferStatus status,
     Object? error,
   }) = _Transfer;

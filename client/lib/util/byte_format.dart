@@ -13,4 +13,6 @@ abstract final class ByteFormat {
     final pattern = unit == 0 || value >= 100 ? "0" : "0.#";
     return "${NumberFormat(pattern, locale).format(value)} ${_units[unit]}";
   }
+
+  static String rate(int bytesPerSecond, {String? locale}) => "${format(bytesPerSecond, locale: locale)}/s";
 }

@@ -7,6 +7,7 @@ import "package:nomad/services/api/nomad_api.dart";
 import "package:nomad/services/sync/chunker.dart";
 import "package:nomad/services/sync/download_plan.dart";
 import "package:nomad/services/sync/local_scanner.dart";
+import "package:nomad/services/sync/sync_activity.dart";
 import "package:nomad/services/sync/sync_exceptions.dart";
 import "package:nomad/services/sync/sync_ignore_rules.dart";
 
@@ -22,22 +23,30 @@ class DeltaDownloader {
     required File target,
     Manifest? localManifest,
     DateTime? mtime,
+    CancelToken? cancel,
   }) async {
     for (var attempt = 1; ; attempt++) {
       try {
-        return await _downloadOnce(remotePath, target, localManifest, mtime);
+        return await _downloadOnce(remotePath, target, localManifest, mtime, cancel);
       } on PreconditionFailedException {
         if (attempt >= maxAttempts) rethrow;
       }
     }
   }
 
-  Future<Manifest> _downloadOnce(String remotePath, File target, Manifest? localManifest, DateTime? mtime) async {
+  Future<Manifest> _downloadOnce(
+    String remotePath,
+    File target,
+    Manifest? localManifest,
+    DateTime? mtime,
+    CancelToken? cancel,
+  ) async {
     final remote = await _api.manifest(remotePath);
     final local = await _localChunks(target, localManifest);
     final temp = _tempFileFor(target);
     try {
-      await _assemble(remotePath, remote, DownloadPlan.build(remote, local), target, temp);
+      await _assemble(remotePath, remote, DownloadPlan.build(remote, local), target, temp, cancel);
+      cancel?.throwIfCancelled(target.path);
       await _verify(temp, remote.hash);
       await temp.rename(target.path);
     } catch (_) {
@@ -60,24 +69,29 @@ class DeltaDownloader {
     );
   }
 
-  Future<void> _assemble(String remotePath, Manifest remote, List<DownloadSegment> plan, File source, File temp) async {
+  Future<void> _assemble(
+    String remotePath,
+    Manifest remote,
+    List<DownloadSegment> plan,
+    File source,
+    File temp,
+    CancelToken? cancel,
+  ) async {
     await temp.parent.create(recursive: true);
     final sink = temp.openWrite();
     final reader = plan.any((segment) => segment is LocalSegment) ? await source.open() : null;
     try {
       for (final segment in plan) {
+        cancel?.throwIfCancelled(source.path);
         switch (segment) {
           case LocalSegment():
             await reader!.setPosition(segment.offset);
             sink.add(await reader.read(segment.size));
           case RemoteSegment():
-            await sink.addStream(
-              await _api.openContent(
-                remotePath,
-                range: ByteRange(segment.offset, segment.size),
-                ifMatchRev: remote.rev,
-              ),
-            );
+            final content = await _api
+                .openContent(remotePath, range: ByteRange(segment.offset, segment.size), ifMatchRev: remote.rev)
+                .unlessCancelled(cancel, source.path);
+            await sink.addStream(content.unlessCancelled(cancel, source.path));
         }
       }
     } finally {

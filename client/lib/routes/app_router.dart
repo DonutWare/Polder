@@ -7,6 +7,7 @@ import "package:nomad/models/account.dart";
 import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/current_user_provider.dart";
 import "package:nomad/routes/app_routes.dart";
+import "package:nomad/screens/activity/activity_screen.dart";
 import "package:nomad/screens/admin/admin_overview_screen.dart";
 import "package:nomad/screens/admin/admin_shell.dart";
 import "package:nomad/screens/admin/admin_users_screen.dart";
@@ -39,6 +40,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, state) =>
                 BrowserScreen(path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root),
           ),
+          GoRoute(path: AppRoutes.activity, builder: (_, _) => const ActivityScreen()),
           GoRoute(
             path: AppRoutes.sync,
             builder: (_, _) => const SyncFoldersScreen(),

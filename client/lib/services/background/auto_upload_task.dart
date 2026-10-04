@@ -8,9 +8,11 @@ import "package:nomad/services/api/api_client_factory.dart";
 import "package:nomad/services/api/nomad_api.dart";
 import "package:nomad/services/api/stored_auth_session.dart";
 import "package:nomad/services/storage/credentials_store.dart";
+import "package:nomad/services/storage/preferences_store.dart";
 import "package:nomad/services/sync/drift/drift_sync_state_store.dart";
 import "package:nomad/services/sync/native_sync_platform.dart";
 import "package:nomad/services/sync/sync_engine.dart";
+import "package:nomad/services/sync/sync_pause.dart";
 import "package:nomad/services/sync/sync_state_store.dart";
 
 @pragma("vm:entry-point")
@@ -31,7 +33,7 @@ class AutoUploadTask {
     final store = DriftSyncStateStore(NativeSyncPlatform.openDatabase());
     try {
       final account = await credentials.load();
-      if (account == null) return;
+      if (account == null || await SyncPause.read(SharedPreferencesStore())) return;
       final engine = _engineFor(account, store);
       for (final root in await _autoUploadRoots(store)) {
         if (root.accountId == account.id) await engine.run(root);

@@ -19,6 +19,64 @@ final class _$Nomad extends Nomad {
   final Type definitionType = Nomad;
 
   @override
+  Future<Response<LogPage>> _listActivity({
+    String? user,
+    int? before,
+    int? limit,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Page through what happened to files and sessions, newest first',
+      operationId: 'listActivity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["activity"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/activity');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'user': user,
+      'before': before,
+      'limit': limit,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<LogPage, LogPage>($request);
+  }
+
+  @override
+  Future<Response<LiveTransfers>> _listLiveTransfers({
+    String? user,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Uploads and downloads in progress',
+      operationId: 'listLiveTransfers',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["activity"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/activity/live');
+    final Map<String, dynamic> $params = <String, dynamic>{'user': user};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<LiveTransfers, LiveTransfers>($request);
+  }
+
+  @override
   Future<Response<ServerSettings>> _getServerSettings({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -269,6 +327,29 @@ final class _$Nomad extends Nomad {
   }
 
   @override
+  Future<Response<dynamic>> _events({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: 'Open a WebSocket here. Send `{"type":"auth","token":"<access token>"}` within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can send `{"type":"subscribe","scope":"me|all|user","userId":1}` to watch other users; every subscribe is answered with a new snapshot. Your own events always arrive. Events are `transfer.started`, `transfer.progress`, `transfer.finished`, `activity.created` and `files.changed`. The connection closes with code 4401 when authentication fails or the token expires without renewal.',
+      summary: 'Live activity over a WebSocket',
+      operationId: 'events',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["events"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/events');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<dynamic>> _deleteFile({
     String? path,
     int? baseRev,
@@ -338,6 +419,7 @@ final class _$Nomad extends Nomad {
     String? path,
     int? baseRev,
     DateTime? mtime,
+    String? xNomadTransferId,
     required Object? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -356,6 +438,9 @@ final class _$Nomad extends Nomad {
       'baseRev': baseRev,
       'mtime': mtime,
     };
+    final Map<String, String> $headers = {
+      if (xNomadTransferId != null) 'X-Nomad-Transfer-Id': xNomadTransferId,
+    };
     final $body = body;
     final Request $request = Request(
       'PUT',
@@ -363,6 +448,7 @@ final class _$Nomad extends Nomad {
       client.baseUrl,
       body: $body,
       parameters: $params,
+      headers: $headers,
       tag: swaggerMetaData,
     );
     return client.send<Entry, Entry>($request);
