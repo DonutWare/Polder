@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- int get id; String get username;@JsonKey(unknownEnumValue: UserRole.user) UserRole get role; int get quotaBytes; int get usedBytes; bool get disabled; DateTime? get createdAt;
+ int get id; String get username;@JsonKey(unknownEnumValue: UserRole.user) UserRole get role; int get quotaBytes; int get usedBytes; bool get disabled; DateTime? get createdAt; int? get trashRetentionOverrideDays;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as User;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes)&&(identical(other.usedBytes, _this.usedBytes) || other.usedBytes == _this.usedBytes)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes)&&(identical(other.usedBytes, _this.usedBytes) || other.usedBytes == _this.usedBytes)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.trashRetentionOverrideDays, _this.trashRetentionOverrideDays) || other.trashRetentionOverrideDays == _this.trashRetentionOverrideDays));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as User;
-  return Object.hash(runtimeType,_this.id,_this.username,_this.role,_this.quotaBytes,_this.usedBytes,_this.disabled,_this.createdAt);
+  return Object.hash(runtimeType,_this.id,_this.username,_this.role,_this.quotaBytes,_this.usedBytes,_this.disabled,_this.createdAt,_this.trashRetentionOverrideDays);
 }
 
 @override
 String toString() {
   final _this = this as User;
-  return 'User(id: ${_this.id}, username: ${_this.username}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes}, usedBytes: ${_this.usedBytes}, disabled: ${_this.disabled}, createdAt: ${_this.createdAt})';
+  return 'User(id: ${_this.id}, username: ${_this.username}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes}, usedBytes: ${_this.usedBytes}, disabled: ${_this.disabled}, createdAt: ${_this.createdAt}, trashRetentionOverrideDays: ${_this.trashRetentionOverrideDays})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, bool disabled, DateTime? createdAt
+ int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, bool disabled, DateTime? createdAt, int? trashRetentionOverrideDays
 });
 
 
@@ -71,7 +71,7 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? disabled = null,Object? createdAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? disabled = null,Object? createdAt = freezed,Object? trashRetentionOverrideDays = freezed,}) {
   return _then(User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -80,7 +80,8 @@ as UserRole,quotaBytes: null == quotaBytes ? _self.quotaBytes : quotaBytes // ig
 as int,usedBytes: null == usedBytes ? _self.usedBytes : usedBytes // ignore: cast_nullable_to_non_nullable
 as int,disabled: null == disabled ? _self.disabled : disabled // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,trashRetentionOverrideDays: freezed == trashRetentionOverrideDays ? _self.trashRetentionOverrideDays : trashRetentionOverrideDays // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  bool disabled,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  bool disabled,  DateTime? createdAt,  int? trashRetentionOverrideDays)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.disabled,_that.createdAt);case _:
+return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.disabled,_that.createdAt,_that.trashRetentionOverrideDays);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBy
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  bool disabled,  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  bool disabled,  DateTime? createdAt,  int? trashRetentionOverrideDays)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.disabled,_that.createdAt);case _:
+return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.disabled,_that.createdAt,_that.trashRetentionOverrideDays);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBy
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  bool disabled,  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  bool disabled,  DateTime? createdAt,  int? trashRetentionOverrideDays)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.disabled,_that.createdAt);case _:
+return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.disabled,_that.createdAt,_that.trashRetentionOverrideDays);case _:
   return null;
 
 }
@@ -221,7 +222,7 @@ return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBy
 @JsonSerializable()
 
 class _User extends User {
-  const _User({required this.id, required this.username, @JsonKey(unknownEnumValue: UserRole.user) this.role = UserRole.user, this.quotaBytes = 0, this.usedBytes = 0, this.disabled = false, this.createdAt}): super._();
+  const _User({required this.id, required this.username, @JsonKey(unknownEnumValue: UserRole.user) this.role = UserRole.user, this.quotaBytes = 0, this.usedBytes = 0, this.disabled = false, this.createdAt, this.trashRetentionOverrideDays}): super._();
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  int id;
@@ -231,6 +232,7 @@ class _User extends User {
 @override@JsonKey() final  int usedBytes;
 @override@JsonKey() final  bool disabled;
 @override final  DateTime? createdAt;
+@override final  int? trashRetentionOverrideDays;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -245,18 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes)&&(identical(other.usedBytes, usedBytes) || other.usedBytes == usedBytes)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes)&&(identical(other.usedBytes, usedBytes) || other.usedBytes == usedBytes)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.trashRetentionOverrideDays, trashRetentionOverrideDays) || other.trashRetentionOverrideDays == trashRetentionOverrideDays));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,username,role,quotaBytes,usedBytes,disabled,createdAt);
+    return Object.hash(runtimeType,id,username,role,quotaBytes,usedBytes,disabled,createdAt,trashRetentionOverrideDays);
 }
 
 @override
 String toString() {
-    return 'User(id: $id, username: $username, role: $role, quotaBytes: $quotaBytes, usedBytes: $usedBytes, disabled: $disabled, createdAt: $createdAt)';
+    return 'User(id: $id, username: $username, role: $role, quotaBytes: $quotaBytes, usedBytes: $usedBytes, disabled: $disabled, createdAt: $createdAt, trashRetentionOverrideDays: $trashRetentionOverrideDays)';
 }
 
 
@@ -267,7 +269,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, bool disabled, DateTime? createdAt
+ int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, bool disabled, DateTime? createdAt, int? trashRetentionOverrideDays
 });
 
 
@@ -284,7 +286,7 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? disabled = null,Object? createdAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? disabled = null,Object? createdAt = freezed,Object? trashRetentionOverrideDays = freezed,}) {
   return _then(_User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -293,7 +295,8 @@ as UserRole,quotaBytes: null == quotaBytes ? _self.quotaBytes : quotaBytes // ig
 as int,usedBytes: null == usedBytes ? _self.usedBytes : usedBytes // ignore: cast_nullable_to_non_nullable
 as int,disabled: null == disabled ? _self.disabled : disabled // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,trashRetentionOverrideDays: freezed == trashRetentionOverrideDays ? _self.trashRetentionOverrideDays : trashRetentionOverrideDays // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type PreviewState string
@@ -15,6 +17,11 @@ const (
 	PreviewReady   PreviewState = "ready"
 	PreviewFailed  PreviewState = "failed"
 )
+
+func (PreviewState) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
+	s.Enum = []any{string(PreviewNone), string(PreviewPending), string(PreviewReady), string(PreviewFailed)}
+	return s
+}
 
 const (
 	directoryMime = "inode/directory"
@@ -40,7 +47,7 @@ type Entry struct {
 	Hash         string         `json:"hash"`
 	Mime         string         `json:"mime"`
 	Meta         map[string]any `json:"meta"`
-	PreviewState PreviewState   `json:"previewState" enum:"none,pending,ready,failed"`
+	PreviewState PreviewState   `json:"previewState"`
 }
 
 func newDirectoryEntry(userID int64, cleanPath string, mtime time.Time) Entry {

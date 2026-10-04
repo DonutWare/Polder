@@ -3,14 +3,28 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/thumbnail_request.dart";
+import "package:nomad/models/trash.dart";
 import "package:nomad/providers/browser/thumbnail_provider.dart";
 import "package:nomad/screens/browser/widgets/file_type_icon.dart";
 import "package:nomad/theme/app_theme.dart";
 
 class FileThumbnail extends StatelessWidget {
-  const FileThumbnail({required this.entry, required this.dimension, this.fill = false, super.key});
+  FileThumbnail({required FileEntry entry, required this.dimension, this.fill = false, super.key})
+    : isDir = entry.isDir,
+      mime = entry.mime,
+      hasPreview = entry.hasPreview,
+      request = ((size) => ThumbnailRequest.file(path: entry.path, rev: entry.rev, size: size));
 
-  final FileEntry entry;
+  FileThumbnail.trashed({required TrashItem item, required this.dimension, this.fill = false, super.key})
+    : isDir = item.isDir,
+      mime = item.mime,
+      hasPreview = item.hasPreview,
+      request = ((size) => ThumbnailRequest.trash(itemId: item.id, size: size));
+
+  final bool isDir;
+  final String mime;
+  final bool hasPreview;
+  final ThumbnailRequest Function(int size) request;
   final double dimension;
 
   final bool fill;
@@ -19,31 +33,35 @@ class FileThumbnail extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox.square(
     dimension: dimension,
     child: Center(
-      child: entry.hasPreview
-          ? _PreviewImage(entry: entry, dimension: dimension)
-          : FileTypeIcon(entry: entry, size: fill ? dimension * 0.45 : dimension),
+      child: hasPreview
+          ? _PreviewImage(thumbnail: this)
+          : FileTypeIcon.of(isDir: isDir, mime: mime, size: fill ? dimension * 0.45 : dimension),
     ),
   );
 }
 
 class _PreviewImage extends ConsumerWidget {
-  const _PreviewImage({required this.entry, required this.dimension});
+  const _PreviewImage({required this.thumbnail});
 
-  final FileEntry entry;
-  final double dimension;
+  final FileThumbnail thumbnail;
 
-  int get _requestSize => dimension <= 64 ? 128 : (dimension <= 192 ? 256 : 512);
+  double get _dimension => thumbnail.dimension;
+
+  int get _requestSize => _dimension <= 64 ? 128 : (_dimension <= 192 ? 256 : 512);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final preview = ref.watch(
-      thumbnailProvider(ThumbnailRequest(path: entry.path, rev: entry.rev, size: _requestSize)),
-    );
-    final bytes = preview.value;
-    if (bytes == null) return FileTypeIcon(entry: entry, size: dimension <= 64 ? dimension : dimension * 0.45);
+    final bytes = ref.watch(thumbnailProvider(thumbnail.request(_requestSize))).value;
+    if (bytes == null) {
+      return FileTypeIcon.of(
+        isDir: thumbnail.isDir,
+        mime: thumbnail.mime,
+        size: _dimension <= 64 ? _dimension : _dimension * 0.45,
+      );
+    }
     return ClipRSuperellipse(
-      borderRadius: BorderRadius.circular(dimension <= 64 ? dimension * 0.34 : AppRadius.inset),
-      child: Image.memory(bytes, width: dimension, height: dimension, fit: BoxFit.cover, gaplessPlayback: true),
+      borderRadius: BorderRadius.circular(_dimension <= 64 ? _dimension * 0.34 : AppRadius.inset),
+      child: Image.memory(bytes, width: _dimension, height: _dimension, fit: BoxFit.cover, gaplessPlayback: true),
     );
   }
 }

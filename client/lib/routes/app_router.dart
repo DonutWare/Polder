@@ -17,6 +17,7 @@ import "package:nomad/screens/settings/settings_screen.dart";
 import "package:nomad/screens/shell/app_shell.dart";
 import "package:nomad/screens/sync/conflict_resolver_screen.dart";
 import "package:nomad/screens/sync/sync_folders_screen.dart";
+import "package:nomad/screens/trash/trash_screen.dart";
 import "package:nomad/util/remote_path.dart";
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -44,6 +45,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [GoRoute(path: "conflicts", builder: (_, _) => const ConflictResolverScreen())],
           ),
           GoRoute(path: AppRoutes.autoUpload, builder: (_, _) => const AutoUploadScreen()),
+          GoRoute(path: AppRoutes.trash, builder: (_, _) => const TrashScreen()),
           GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsScreen()),
         ],
       ),

@@ -12,6 +12,7 @@ import (
 )
 
 const selectUserColumns = `SELECT u.id, u.username, u.role, u.quota_bytes, u.disabled, u.created_at,
+	u.trash_retention_days, u.trash_retention_override_days,
 	COALESCE((SELECT SUM(f.size) FROM files f WHERE f.user_id = u.id), 0) FROM users u`
 
 type Store struct {
@@ -29,9 +30,28 @@ type rowScanner interface {
 func scanUser(row rowScanner) (User, error) {
 	var user User
 	var createdAt int64
-	err := row.Scan(&user.ID, &user.Username, &user.Role, &user.QuotaBytes, &user.Disabled, &createdAt, &user.UsedBytes)
+	var retention, retentionOverride sql.NullInt64
+	err := row.Scan(&user.ID, &user.Username, &user.Role, &user.QuotaBytes, &user.Disabled, &createdAt,
+		&retention, &retentionOverride, &user.UsedBytes)
 	user.CreatedAt = time.Unix(createdAt, 0).UTC()
+	user.TrashRetentionDays = optionalDays(retention)
+	user.TrashRetentionOverrideDays = optionalDays(retentionOverride)
 	return user, err
+}
+
+func optionalDays(value sql.NullInt64) *int {
+	if !value.Valid {
+		return nil
+	}
+	days := int(value.Int64)
+	return &days
+}
+
+func nullableDays(days *int) any {
+	if days == nil {
+		return nil
+	}
+	return *days
 }
 
 func (s *Store) Count(ctx context.Context) (int, error) {
@@ -111,11 +131,22 @@ func (s *Store) Update(ctx context.Context, id int64, changes Changes, passwordH
 	if changes.Disabled != nil {
 		assignments, args = append(assignments, "disabled = ?"), append(args, *changes.Disabled)
 	}
+	if override := changes.TrashRetentionOverrideDays; override != nil {
+		if *override == ClearRetentionOverride {
+			override = nil
+		}
+		assignments, args = append(assignments, "trash_retention_override_days = ?"), append(args, nullableDays(override))
+	}
 	if len(assignments) == 0 {
 		return nil
 	}
 	query := `UPDATE users SET ` + strings.Join(assignments, ", ") + ` WHERE id = ?`
 	_, err := s.db.ExecContext(ctx, query, append(args, id)...)
+	return err
+}
+
+func (s *Store) SetTrashRetention(ctx context.Context, id int64, days *int) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET trash_retention_days = ? WHERE id = ?`, nullableDays(days), id)
 	return err
 }
 

@@ -134,7 +134,7 @@ extension $ChangePageExtension on ChangePage {
 
 @JsonSerializable(explicitToJson: true)
 class Changes {
-  const Changes({this.disabled, this.password, this.quotaBytes, this.role});
+  const Changes({this.disabled, this.password, this.quotaBytes, this.role, this.trashRetentionOverrideDays});
 
   factory Changes.fromJson(Map<String, dynamic> json) => _$ChangesFromJson(json);
 
@@ -149,6 +149,8 @@ class Changes {
   final int? quotaBytes;
   @JsonKey(name: 'role', includeIfNull: false, toJson: changesRoleNullableToJson, fromJson: changesRoleNullableFromJson)
   final enums.ChangesRole? role;
+  @JsonKey(name: 'trashRetentionOverrideDays', includeIfNull: false)
+  final int? trashRetentionOverrideDays;
   static const fromJsonFactory = _$ChangesFromJson;
 
   @override
@@ -159,7 +161,9 @@ class Changes {
             (identical(other.password, password) || const DeepCollectionEquality().equals(other.password, password)) &&
             (identical(other.quotaBytes, quotaBytes) ||
                 const DeepCollectionEquality().equals(other.quotaBytes, quotaBytes)) &&
-            (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)));
+            (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)) &&
+            (identical(other.trashRetentionOverrideDays, trashRetentionOverrideDays) ||
+                const DeepCollectionEquality().equals(other.trashRetentionOverrideDays, trashRetentionOverrideDays)));
   }
 
   @override
@@ -168,16 +172,24 @@ class Changes {
       const DeepCollectionEquality().hash(password) ^
       const DeepCollectionEquality().hash(quotaBytes) ^
       const DeepCollectionEquality().hash(role) ^
+      const DeepCollectionEquality().hash(trashRetentionOverrideDays) ^
       runtimeType.hashCode;
 }
 
 extension $ChangesExtension on Changes {
-  Changes copyWith({bool? disabled, String? password, int? quotaBytes, enums.ChangesRole? role}) {
+  Changes copyWith({
+    bool? disabled,
+    String? password,
+    int? quotaBytes,
+    enums.ChangesRole? role,
+    int? trashRetentionOverrideDays,
+  }) {
     return Changes(
       disabled: disabled ?? this.disabled,
       password: password ?? this.password,
       quotaBytes: quotaBytes ?? this.quotaBytes,
       role: role ?? this.role,
+      trashRetentionOverrideDays: trashRetentionOverrideDays ?? this.trashRetentionOverrideDays,
     );
   }
 
@@ -186,12 +198,16 @@ extension $ChangesExtension on Changes {
     Wrapped<String?>? password,
     Wrapped<int?>? quotaBytes,
     Wrapped<enums.ChangesRole?>? role,
+    Wrapped<int?>? trashRetentionOverrideDays,
   }) {
     return Changes(
       disabled: (disabled != null ? disabled.value : this.disabled),
       password: (password != null ? password.value : this.password),
       quotaBytes: (quotaBytes != null ? quotaBytes.value : this.quotaBytes),
       role: (role != null ? role.value : this.role),
+      trashRetentionOverrideDays: (trashRetentionOverrideDays != null
+          ? trashRetentionOverrideDays.value
+          : this.trashRetentionOverrideDays),
     );
   }
 }
@@ -881,6 +897,183 @@ extension $RefreshRequestExtension on RefreshRequest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class RestoreRequest {
+  const RestoreRequest({this.onConflict});
+
+  factory RestoreRequest.fromJson(Map<String, dynamic> json) => _$RestoreRequestFromJson(json);
+
+  static const toJsonFactory = _$RestoreRequestToJson;
+  Map<String, dynamic> toJson() => _$RestoreRequestToJson(this);
+
+  @JsonKey(
+    name: 'onConflict',
+    includeIfNull: false,
+    toJson: restoreRequestOnConflictNullableToJson,
+    fromJson: restoreRequestOnConflictOnConflictNullableFromJson,
+  )
+  final enums.RestoreRequestOnConflict? onConflict;
+  static enums.RestoreRequestOnConflict? restoreRequestOnConflictOnConflictNullableFromJson(Object? value) =>
+      restoreRequestOnConflictNullableFromJson(value, enums.RestoreRequestOnConflict.fail);
+
+  static const fromJsonFactory = _$RestoreRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is RestoreRequest &&
+            (identical(other.onConflict, onConflict) ||
+                const DeepCollectionEquality().equals(other.onConflict, onConflict)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(onConflict) ^ runtimeType.hashCode;
+}
+
+extension $RestoreRequestExtension on RestoreRequest {
+  RestoreRequest copyWith({enums.RestoreRequestOnConflict? onConflict}) {
+    return RestoreRequest(onConflict: onConflict ?? this.onConflict);
+  }
+
+  RestoreRequest copyWithWrapped({Wrapped<enums.RestoreRequestOnConflict?>? onConflict}) {
+    return RestoreRequest(onConflict: (onConflict != null ? onConflict.value : this.onConflict));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class RetentionRequest {
+  const RetentionRequest({this.days});
+
+  factory RetentionRequest.fromJson(Map<String, dynamic> json) => _$RetentionRequestFromJson(json);
+
+  static const toJsonFactory = _$RetentionRequestToJson;
+  Map<String, dynamic> toJson() => _$RetentionRequestToJson(this);
+
+  @JsonKey(name: 'days', includeIfNull: false)
+  final int? days;
+  static const fromJsonFactory = _$RetentionRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is RetentionRequest &&
+            (identical(other.days, days) || const DeepCollectionEquality().equals(other.days, days)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(days) ^ runtimeType.hashCode;
+}
+
+extension $RetentionRequestExtension on RetentionRequest {
+  RetentionRequest copyWith({int? days}) {
+    return RetentionRequest(days: days ?? this.days);
+  }
+
+  RetentionRequest copyWithWrapped({Wrapped<int?>? days}) {
+    return RetentionRequest(days: (days != null ? days.value : this.days));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ServerSettings {
+  const ServerSettings({required this.trashRetentionDays, required this.trashRetentionEnforced});
+
+  factory ServerSettings.fromJson(Map<String, dynamic> json) => _$ServerSettingsFromJson(json);
+
+  static const toJsonFactory = _$ServerSettingsToJson;
+  Map<String, dynamic> toJson() => _$ServerSettingsToJson(this);
+
+  @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
+  final int trashRetentionDays;
+  @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
+  final bool trashRetentionEnforced;
+  static const fromJsonFactory = _$ServerSettingsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ServerSettings &&
+            (identical(other.trashRetentionDays, trashRetentionDays) ||
+                const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
+            (identical(other.trashRetentionEnforced, trashRetentionEnforced) ||
+                const DeepCollectionEquality().equals(other.trashRetentionEnforced, trashRetentionEnforced)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(trashRetentionDays) ^
+      const DeepCollectionEquality().hash(trashRetentionEnforced) ^
+      runtimeType.hashCode;
+}
+
+extension $ServerSettingsExtension on ServerSettings {
+  ServerSettings copyWith({int? trashRetentionDays, bool? trashRetentionEnforced}) {
+    return ServerSettings(
+      trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
+      trashRetentionEnforced: trashRetentionEnforced ?? this.trashRetentionEnforced,
+    );
+  }
+
+  ServerSettings copyWithWrapped({Wrapped<int>? trashRetentionDays, Wrapped<bool>? trashRetentionEnforced}) {
+    return ServerSettings(
+      trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
+      trashRetentionEnforced: (trashRetentionEnforced != null
+          ? trashRetentionEnforced.value
+          : this.trashRetentionEnforced),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ServerSettingsChanges {
+  const ServerSettingsChanges({this.trashRetentionDays, this.trashRetentionEnforced});
+
+  factory ServerSettingsChanges.fromJson(Map<String, dynamic> json) => _$ServerSettingsChangesFromJson(json);
+
+  static const toJsonFactory = _$ServerSettingsChangesToJson;
+  Map<String, dynamic> toJson() => _$ServerSettingsChangesToJson(this);
+
+  @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
+  final int? trashRetentionDays;
+  @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
+  final bool? trashRetentionEnforced;
+  static const fromJsonFactory = _$ServerSettingsChangesFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ServerSettingsChanges &&
+            (identical(other.trashRetentionDays, trashRetentionDays) ||
+                const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
+            (identical(other.trashRetentionEnforced, trashRetentionEnforced) ||
+                const DeepCollectionEquality().equals(other.trashRetentionEnforced, trashRetentionEnforced)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(trashRetentionDays) ^
+      const DeepCollectionEquality().hash(trashRetentionEnforced) ^
+      runtimeType.hashCode;
+}
+
+extension $ServerSettingsChangesExtension on ServerSettingsChanges {
+  ServerSettingsChanges copyWith({int? trashRetentionDays, bool? trashRetentionEnforced}) {
+    return ServerSettingsChanges(
+      trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
+      trashRetentionEnforced: trashRetentionEnforced ?? this.trashRetentionEnforced,
+    );
+  }
+
+  ServerSettingsChanges copyWithWrapped({Wrapped<int?>? trashRetentionDays, Wrapped<bool?>? trashRetentionEnforced}) {
+    return ServerSettingsChanges(
+      trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
+      trashRetentionEnforced: (trashRetentionEnforced != null
+          ? trashRetentionEnforced.value
+          : this.trashRetentionEnforced),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class SetupStatus {
   const SetupStatus({required this.needsSetup});
 
@@ -977,6 +1170,288 @@ extension $TokenPairExtension on TokenPair {
       expiresIn: (expiresIn != null ? expiresIn.value : this.expiresIn),
       refreshToken: (refreshToken != null ? refreshToken.value : this.refreshToken),
       user: (user != null ? user.value : this.user),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TrashItem {
+  const TrashItem({
+    required this.deletedAt,
+    this.expiresAt,
+    required this.hash,
+    required this.id,
+    required this.isDir,
+    required this.mime,
+    required this.name,
+    required this.originalPath,
+    required this.previewState,
+    required this.size,
+  });
+
+  factory TrashItem.fromJson(Map<String, dynamic> json) => _$TrashItemFromJson(json);
+
+  static const toJsonFactory = _$TrashItemToJson;
+  Map<String, dynamic> toJson() => _$TrashItemToJson(this);
+
+  @JsonKey(name: 'deletedAt', includeIfNull: false)
+  final DateTime deletedAt;
+  @JsonKey(name: 'expiresAt', includeIfNull: false)
+  final DateTime? expiresAt;
+  @JsonKey(name: 'hash', includeIfNull: false)
+  final String hash;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'isDir', includeIfNull: false)
+  final bool isDir;
+  @JsonKey(name: 'mime', includeIfNull: false)
+  final String mime;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  @JsonKey(name: 'originalPath', includeIfNull: false)
+  final String originalPath;
+  @JsonKey(
+    name: 'previewState',
+    includeIfNull: false,
+    toJson: trashItemPreviewStateToJson,
+    fromJson: trashItemPreviewStateFromJson,
+  )
+  final enums.TrashItemPreviewState previewState;
+  @JsonKey(name: 'size', includeIfNull: false)
+  final int size;
+  static const fromJsonFactory = _$TrashItemFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TrashItem &&
+            (identical(other.deletedAt, deletedAt) ||
+                const DeepCollectionEquality().equals(other.deletedAt, deletedAt)) &&
+            (identical(other.expiresAt, expiresAt) ||
+                const DeepCollectionEquality().equals(other.expiresAt, expiresAt)) &&
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.mime, mime) || const DeepCollectionEquality().equals(other.mime, mime)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.originalPath, originalPath) ||
+                const DeepCollectionEquality().equals(other.originalPath, originalPath)) &&
+            (identical(other.previewState, previewState) ||
+                const DeepCollectionEquality().equals(other.previewState, previewState)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(deletedAt) ^
+      const DeepCollectionEquality().hash(expiresAt) ^
+      const DeepCollectionEquality().hash(hash) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(isDir) ^
+      const DeepCollectionEquality().hash(mime) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(originalPath) ^
+      const DeepCollectionEquality().hash(previewState) ^
+      const DeepCollectionEquality().hash(size) ^
+      runtimeType.hashCode;
+}
+
+extension $TrashItemExtension on TrashItem {
+  TrashItem copyWith({
+    DateTime? deletedAt,
+    DateTime? expiresAt,
+    String? hash,
+    int? id,
+    bool? isDir,
+    String? mime,
+    String? name,
+    String? originalPath,
+    enums.TrashItemPreviewState? previewState,
+    int? size,
+  }) {
+    return TrashItem(
+      deletedAt: deletedAt ?? this.deletedAt,
+      expiresAt: expiresAt ?? this.expiresAt,
+      hash: hash ?? this.hash,
+      id: id ?? this.id,
+      isDir: isDir ?? this.isDir,
+      mime: mime ?? this.mime,
+      name: name ?? this.name,
+      originalPath: originalPath ?? this.originalPath,
+      previewState: previewState ?? this.previewState,
+      size: size ?? this.size,
+    );
+  }
+
+  TrashItem copyWithWrapped({
+    Wrapped<DateTime>? deletedAt,
+    Wrapped<DateTime?>? expiresAt,
+    Wrapped<String>? hash,
+    Wrapped<int>? id,
+    Wrapped<bool>? isDir,
+    Wrapped<String>? mime,
+    Wrapped<String>? name,
+    Wrapped<String>? originalPath,
+    Wrapped<enums.TrashItemPreviewState>? previewState,
+    Wrapped<int>? size,
+  }) {
+    return TrashItem(
+      deletedAt: (deletedAt != null ? deletedAt.value : this.deletedAt),
+      expiresAt: (expiresAt != null ? expiresAt.value : this.expiresAt),
+      hash: (hash != null ? hash.value : this.hash),
+      id: (id != null ? id.value : this.id),
+      isDir: (isDir != null ? isDir.value : this.isDir),
+      mime: (mime != null ? mime.value : this.mime),
+      name: (name != null ? name.value : this.name),
+      originalPath: (originalPath != null ? originalPath.value : this.originalPath),
+      previewState: (previewState != null ? previewState.value : this.previewState),
+      size: (size != null ? size.value : this.size),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TrashListing {
+  const TrashListing({this.items, required this.retention, required this.totalBytes});
+
+  factory TrashListing.fromJson(Map<String, dynamic> json) => _$TrashListingFromJson(json);
+
+  static const toJsonFactory = _$TrashListingToJson;
+  Map<String, dynamic> toJson() => _$TrashListingToJson(this);
+
+  @JsonKey(name: 'items', includeIfNull: false, defaultValue: <TrashItem>[])
+  final List<TrashItem>? items;
+  @JsonKey(name: 'retention', includeIfNull: false)
+  final TrashRetention retention;
+  @JsonKey(name: 'totalBytes', includeIfNull: false)
+  final int totalBytes;
+  static const fromJsonFactory = _$TrashListingFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TrashListing &&
+            (identical(other.items, items) || const DeepCollectionEquality().equals(other.items, items)) &&
+            (identical(other.retention, retention) ||
+                const DeepCollectionEquality().equals(other.retention, retention)) &&
+            (identical(other.totalBytes, totalBytes) ||
+                const DeepCollectionEquality().equals(other.totalBytes, totalBytes)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(items) ^
+      const DeepCollectionEquality().hash(retention) ^
+      const DeepCollectionEquality().hash(totalBytes) ^
+      runtimeType.hashCode;
+}
+
+extension $TrashListingExtension on TrashListing {
+  TrashListing copyWith({List<TrashItem>? items, TrashRetention? retention, int? totalBytes}) {
+    return TrashListing(
+      items: items ?? this.items,
+      retention: retention ?? this.retention,
+      totalBytes: totalBytes ?? this.totalBytes,
+    );
+  }
+
+  TrashListing copyWithWrapped({
+    Wrapped<List<TrashItem>?>? items,
+    Wrapped<TrashRetention>? retention,
+    Wrapped<int>? totalBytes,
+  }) {
+    return TrashListing(
+      items: (items != null ? items.value : this.items),
+      retention: (retention != null ? retention.value : this.retention),
+      totalBytes: (totalBytes != null ? totalBytes.value : this.totalBytes),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TrashRetention {
+  const TrashRetention({
+    required this.days,
+    required this.defaultDays,
+    required this.locked,
+    required this.source,
+    this.userDays,
+  });
+
+  factory TrashRetention.fromJson(Map<String, dynamic> json) => _$TrashRetentionFromJson(json);
+
+  static const toJsonFactory = _$TrashRetentionToJson;
+  Map<String, dynamic> toJson() => _$TrashRetentionToJson(this);
+
+  @JsonKey(name: 'days', includeIfNull: false)
+  final int days;
+  @JsonKey(name: 'defaultDays', includeIfNull: false)
+  final int defaultDays;
+  @JsonKey(name: 'locked', includeIfNull: false)
+  final bool locked;
+  @JsonKey(
+    name: 'source',
+    includeIfNull: false,
+    toJson: trashRetentionSourceToJson,
+    fromJson: trashRetentionSourceFromJson,
+  )
+  final enums.TrashRetentionSource source;
+  @JsonKey(name: 'userDays', includeIfNull: false)
+  final int? userDays;
+  static const fromJsonFactory = _$TrashRetentionFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TrashRetention &&
+            (identical(other.days, days) || const DeepCollectionEquality().equals(other.days, days)) &&
+            (identical(other.defaultDays, defaultDays) ||
+                const DeepCollectionEquality().equals(other.defaultDays, defaultDays)) &&
+            (identical(other.locked, locked) || const DeepCollectionEquality().equals(other.locked, locked)) &&
+            (identical(other.source, source) || const DeepCollectionEquality().equals(other.source, source)) &&
+            (identical(other.userDays, userDays) || const DeepCollectionEquality().equals(other.userDays, userDays)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(days) ^
+      const DeepCollectionEquality().hash(defaultDays) ^
+      const DeepCollectionEquality().hash(locked) ^
+      const DeepCollectionEquality().hash(source) ^
+      const DeepCollectionEquality().hash(userDays) ^
+      runtimeType.hashCode;
+}
+
+extension $TrashRetentionExtension on TrashRetention {
+  TrashRetention copyWith({
+    int? days,
+    int? defaultDays,
+    bool? locked,
+    enums.TrashRetentionSource? source,
+    int? userDays,
+  }) {
+    return TrashRetention(
+      days: days ?? this.days,
+      defaultDays: defaultDays ?? this.defaultDays,
+      locked: locked ?? this.locked,
+      source: source ?? this.source,
+      userDays: userDays ?? this.userDays,
+    );
+  }
+
+  TrashRetention copyWithWrapped({
+    Wrapped<int>? days,
+    Wrapped<int>? defaultDays,
+    Wrapped<bool>? locked,
+    Wrapped<enums.TrashRetentionSource>? source,
+    Wrapped<int?>? userDays,
+  }) {
+    return TrashRetention(
+      days: (days != null ? days.value : this.days),
+      defaultDays: (defaultDays != null ? defaultDays.value : this.defaultDays),
+      locked: (locked != null ? locked.value : this.locked),
+      source: (source != null ? source.value : this.source),
+      userDays: (userDays != null ? userDays.value : this.userDays),
     );
   }
 }
@@ -1123,6 +1598,8 @@ class User {
     required this.id,
     required this.quotaBytes,
     required this.role,
+    this.trashRetentionDays,
+    this.trashRetentionOverrideDays,
     required this.usedBytes,
     required this.username,
   });
@@ -1142,6 +1619,10 @@ class User {
   final int quotaBytes;
   @JsonKey(name: 'role', includeIfNull: false, toJson: userRoleToJson, fromJson: userRoleFromJson)
   final enums.UserRole role;
+  @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
+  final int? trashRetentionDays;
+  @JsonKey(name: 'trashRetentionOverrideDays', includeIfNull: false)
+  final int? trashRetentionOverrideDays;
   @JsonKey(name: 'usedBytes', includeIfNull: false)
   final int usedBytes;
   @JsonKey(name: 'username', includeIfNull: false)
@@ -1159,6 +1640,10 @@ class User {
             (identical(other.quotaBytes, quotaBytes) ||
                 const DeepCollectionEquality().equals(other.quotaBytes, quotaBytes)) &&
             (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)) &&
+            (identical(other.trashRetentionDays, trashRetentionDays) ||
+                const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
+            (identical(other.trashRetentionOverrideDays, trashRetentionOverrideDays) ||
+                const DeepCollectionEquality().equals(other.trashRetentionOverrideDays, trashRetentionOverrideDays)) &&
             (identical(other.usedBytes, usedBytes) ||
                 const DeepCollectionEquality().equals(other.usedBytes, usedBytes)) &&
             (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
@@ -1171,6 +1656,8 @@ class User {
       const DeepCollectionEquality().hash(id) ^
       const DeepCollectionEquality().hash(quotaBytes) ^
       const DeepCollectionEquality().hash(role) ^
+      const DeepCollectionEquality().hash(trashRetentionDays) ^
+      const DeepCollectionEquality().hash(trashRetentionOverrideDays) ^
       const DeepCollectionEquality().hash(usedBytes) ^
       const DeepCollectionEquality().hash(username) ^
       runtimeType.hashCode;
@@ -1183,6 +1670,8 @@ extension $UserExtension on User {
     int? id,
     int? quotaBytes,
     enums.UserRole? role,
+    int? trashRetentionDays,
+    int? trashRetentionOverrideDays,
     int? usedBytes,
     String? username,
   }) {
@@ -1192,6 +1681,8 @@ extension $UserExtension on User {
       id: id ?? this.id,
       quotaBytes: quotaBytes ?? this.quotaBytes,
       role: role ?? this.role,
+      trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
+      trashRetentionOverrideDays: trashRetentionOverrideDays ?? this.trashRetentionOverrideDays,
       usedBytes: usedBytes ?? this.usedBytes,
       username: username ?? this.username,
     );
@@ -1203,6 +1694,8 @@ extension $UserExtension on User {
     Wrapped<int>? id,
     Wrapped<int>? quotaBytes,
     Wrapped<enums.UserRole>? role,
+    Wrapped<int?>? trashRetentionDays,
+    Wrapped<int?>? trashRetentionOverrideDays,
     Wrapped<int>? usedBytes,
     Wrapped<String>? username,
   }) {
@@ -1212,6 +1705,10 @@ extension $UserExtension on User {
       id: (id != null ? id.value : this.id),
       quotaBytes: (quotaBytes != null ? quotaBytes.value : this.quotaBytes),
       role: (role != null ? role.value : this.role),
+      trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
+      trashRetentionOverrideDays: (trashRetentionOverrideDays != null
+          ? trashRetentionOverrideDays.value
+          : this.trashRetentionOverrideDays),
       usedBytes: (usedBytes != null ? usedBytes.value : this.usedBytes),
       username: (username != null ? username.value : this.username),
     );
@@ -1423,6 +1920,190 @@ List<enums.NewUserRole>? newUserRoleNullableListFromJson(List? newUserRole, [Lis
   return newUserRole.map((e) => newUserRoleFromJson(e.toString())).toList();
 }
 
+String? restoreRequestOnConflictNullableToJson(enums.RestoreRequestOnConflict? restoreRequestOnConflict) {
+  return restoreRequestOnConflict?.value;
+}
+
+String? restoreRequestOnConflictToJson(enums.RestoreRequestOnConflict restoreRequestOnConflict) {
+  return restoreRequestOnConflict.value;
+}
+
+enums.RestoreRequestOnConflict restoreRequestOnConflictFromJson(
+  Object? restoreRequestOnConflict, [
+  enums.RestoreRequestOnConflict? defaultValue,
+]) {
+  return enums.RestoreRequestOnConflict.values.firstWhereOrNull((e) => e.value == restoreRequestOnConflict) ??
+      defaultValue ??
+      enums.RestoreRequestOnConflict.swaggerGeneratedUnknown;
+}
+
+enums.RestoreRequestOnConflict? restoreRequestOnConflictNullableFromJson(
+  Object? restoreRequestOnConflict, [
+  enums.RestoreRequestOnConflict? defaultValue,
+]) {
+  if (restoreRequestOnConflict == null) {
+    return null;
+  }
+  return enums.RestoreRequestOnConflict.values.firstWhereOrNull((e) => e.value == restoreRequestOnConflict) ??
+      defaultValue;
+}
+
+String restoreRequestOnConflictExplodedListToJson(List<enums.RestoreRequestOnConflict>? restoreRequestOnConflict) {
+  return restoreRequestOnConflict?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> restoreRequestOnConflictListToJson(List<enums.RestoreRequestOnConflict>? restoreRequestOnConflict) {
+  if (restoreRequestOnConflict == null) {
+    return [];
+  }
+
+  return restoreRequestOnConflict.map((e) => e.value!).toList();
+}
+
+List<enums.RestoreRequestOnConflict> restoreRequestOnConflictListFromJson(
+  List? restoreRequestOnConflict, [
+  List<enums.RestoreRequestOnConflict>? defaultValue,
+]) {
+  if (restoreRequestOnConflict == null) {
+    return defaultValue ?? [];
+  }
+
+  return restoreRequestOnConflict.map((e) => restoreRequestOnConflictFromJson(e.toString())).toList();
+}
+
+List<enums.RestoreRequestOnConflict>? restoreRequestOnConflictNullableListFromJson(
+  List? restoreRequestOnConflict, [
+  List<enums.RestoreRequestOnConflict>? defaultValue,
+]) {
+  if (restoreRequestOnConflict == null) {
+    return defaultValue;
+  }
+
+  return restoreRequestOnConflict.map((e) => restoreRequestOnConflictFromJson(e.toString())).toList();
+}
+
+String? trashItemPreviewStateNullableToJson(enums.TrashItemPreviewState? trashItemPreviewState) {
+  return trashItemPreviewState?.value;
+}
+
+String? trashItemPreviewStateToJson(enums.TrashItemPreviewState trashItemPreviewState) {
+  return trashItemPreviewState.value;
+}
+
+enums.TrashItemPreviewState trashItemPreviewStateFromJson(
+  Object? trashItemPreviewState, [
+  enums.TrashItemPreviewState? defaultValue,
+]) {
+  return enums.TrashItemPreviewState.values.firstWhereOrNull((e) => e.value == trashItemPreviewState) ??
+      defaultValue ??
+      enums.TrashItemPreviewState.swaggerGeneratedUnknown;
+}
+
+enums.TrashItemPreviewState? trashItemPreviewStateNullableFromJson(
+  Object? trashItemPreviewState, [
+  enums.TrashItemPreviewState? defaultValue,
+]) {
+  if (trashItemPreviewState == null) {
+    return null;
+  }
+  return enums.TrashItemPreviewState.values.firstWhereOrNull((e) => e.value == trashItemPreviewState) ?? defaultValue;
+}
+
+String trashItemPreviewStateExplodedListToJson(List<enums.TrashItemPreviewState>? trashItemPreviewState) {
+  return trashItemPreviewState?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> trashItemPreviewStateListToJson(List<enums.TrashItemPreviewState>? trashItemPreviewState) {
+  if (trashItemPreviewState == null) {
+    return [];
+  }
+
+  return trashItemPreviewState.map((e) => e.value!).toList();
+}
+
+List<enums.TrashItemPreviewState> trashItemPreviewStateListFromJson(
+  List? trashItemPreviewState, [
+  List<enums.TrashItemPreviewState>? defaultValue,
+]) {
+  if (trashItemPreviewState == null) {
+    return defaultValue ?? [];
+  }
+
+  return trashItemPreviewState.map((e) => trashItemPreviewStateFromJson(e.toString())).toList();
+}
+
+List<enums.TrashItemPreviewState>? trashItemPreviewStateNullableListFromJson(
+  List? trashItemPreviewState, [
+  List<enums.TrashItemPreviewState>? defaultValue,
+]) {
+  if (trashItemPreviewState == null) {
+    return defaultValue;
+  }
+
+  return trashItemPreviewState.map((e) => trashItemPreviewStateFromJson(e.toString())).toList();
+}
+
+String? trashRetentionSourceNullableToJson(enums.TrashRetentionSource? trashRetentionSource) {
+  return trashRetentionSource?.value;
+}
+
+String? trashRetentionSourceToJson(enums.TrashRetentionSource trashRetentionSource) {
+  return trashRetentionSource.value;
+}
+
+enums.TrashRetentionSource trashRetentionSourceFromJson(
+  Object? trashRetentionSource, [
+  enums.TrashRetentionSource? defaultValue,
+]) {
+  return enums.TrashRetentionSource.values.firstWhereOrNull((e) => e.value == trashRetentionSource) ??
+      defaultValue ??
+      enums.TrashRetentionSource.swaggerGeneratedUnknown;
+}
+
+enums.TrashRetentionSource? trashRetentionSourceNullableFromJson(
+  Object? trashRetentionSource, [
+  enums.TrashRetentionSource? defaultValue,
+]) {
+  if (trashRetentionSource == null) {
+    return null;
+  }
+  return enums.TrashRetentionSource.values.firstWhereOrNull((e) => e.value == trashRetentionSource) ?? defaultValue;
+}
+
+String trashRetentionSourceExplodedListToJson(List<enums.TrashRetentionSource>? trashRetentionSource) {
+  return trashRetentionSource?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> trashRetentionSourceListToJson(List<enums.TrashRetentionSource>? trashRetentionSource) {
+  if (trashRetentionSource == null) {
+    return [];
+  }
+
+  return trashRetentionSource.map((e) => e.value!).toList();
+}
+
+List<enums.TrashRetentionSource> trashRetentionSourceListFromJson(
+  List? trashRetentionSource, [
+  List<enums.TrashRetentionSource>? defaultValue,
+]) {
+  if (trashRetentionSource == null) {
+    return defaultValue ?? [];
+  }
+
+  return trashRetentionSource.map((e) => trashRetentionSourceFromJson(e.toString())).toList();
+}
+
+List<enums.TrashRetentionSource>? trashRetentionSourceNullableListFromJson(
+  List? trashRetentionSource, [
+  List<enums.TrashRetentionSource>? defaultValue,
+]) {
+  if (trashRetentionSource == null) {
+    return defaultValue;
+  }
+
+  return trashRetentionSource.map((e) => trashRetentionSourceFromJson(e.toString())).toList();
+}
+
 String? userRoleNullableToJson(enums.UserRole? userRole) {
   return userRole?.value;
 }
@@ -1532,6 +2213,78 @@ List<enums.ApiV1FilesPreviewGetSize>? apiV1FilesPreviewGetSizeNullableListFromJs
   }
 
   return apiV1FilesPreviewGetSize.map((e) => apiV1FilesPreviewGetSizeFromJson(e)).toList();
+}
+
+int? apiV1TrashItemIDPreviewGetSizeNullableToJson(
+  enums.ApiV1TrashItemIDPreviewGetSize? apiV1TrashItemIDPreviewGetSize,
+) {
+  return apiV1TrashItemIDPreviewGetSize?.value;
+}
+
+int? apiV1TrashItemIDPreviewGetSizeToJson(enums.ApiV1TrashItemIDPreviewGetSize apiV1TrashItemIDPreviewGetSize) {
+  return apiV1TrashItemIDPreviewGetSize.value;
+}
+
+enums.ApiV1TrashItemIDPreviewGetSize apiV1TrashItemIDPreviewGetSizeFromJson(
+  Object? apiV1TrashItemIDPreviewGetSize, [
+  enums.ApiV1TrashItemIDPreviewGetSize? defaultValue,
+]) {
+  return enums.ApiV1TrashItemIDPreviewGetSize.values.firstWhereOrNull(
+        (e) => e.value == apiV1TrashItemIDPreviewGetSize,
+      ) ??
+      defaultValue ??
+      enums.ApiV1TrashItemIDPreviewGetSize.swaggerGeneratedUnknown;
+}
+
+enums.ApiV1TrashItemIDPreviewGetSize? apiV1TrashItemIDPreviewGetSizeNullableFromJson(
+  Object? apiV1TrashItemIDPreviewGetSize, [
+  enums.ApiV1TrashItemIDPreviewGetSize? defaultValue,
+]) {
+  if (apiV1TrashItemIDPreviewGetSize == null) {
+    return null;
+  }
+  return enums.ApiV1TrashItemIDPreviewGetSize.values.firstWhereOrNull(
+        (e) => e.value == apiV1TrashItemIDPreviewGetSize,
+      ) ??
+      defaultValue;
+}
+
+String apiV1TrashItemIDPreviewGetSizeExplodedListToJson(
+  List<enums.ApiV1TrashItemIDPreviewGetSize>? apiV1TrashItemIDPreviewGetSize,
+) {
+  return apiV1TrashItemIDPreviewGetSize?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<int> apiV1TrashItemIDPreviewGetSizeListToJson(
+  List<enums.ApiV1TrashItemIDPreviewGetSize>? apiV1TrashItemIDPreviewGetSize,
+) {
+  if (apiV1TrashItemIDPreviewGetSize == null) {
+    return [];
+  }
+
+  return apiV1TrashItemIDPreviewGetSize.map((e) => e.value!).toList();
+}
+
+List<enums.ApiV1TrashItemIDPreviewGetSize> apiV1TrashItemIDPreviewGetSizeListFromJson(
+  List? apiV1TrashItemIDPreviewGetSize, [
+  List<enums.ApiV1TrashItemIDPreviewGetSize>? defaultValue,
+]) {
+  if (apiV1TrashItemIDPreviewGetSize == null) {
+    return defaultValue ?? [];
+  }
+
+  return apiV1TrashItemIDPreviewGetSize.map((e) => apiV1TrashItemIDPreviewGetSizeFromJson(e)).toList();
+}
+
+List<enums.ApiV1TrashItemIDPreviewGetSize>? apiV1TrashItemIDPreviewGetSizeNullableListFromJson(
+  List? apiV1TrashItemIDPreviewGetSize, [
+  List<enums.ApiV1TrashItemIDPreviewGetSize>? defaultValue,
+]) {
+  if (apiV1TrashItemIDPreviewGetSize == null) {
+    return defaultValue;
+  }
+
+  return apiV1TrashItemIDPreviewGetSize.map((e) => apiV1TrashItemIDPreviewGetSizeFromJson(e)).toList();
 }
 
 // ignore: unused_element

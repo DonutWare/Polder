@@ -6,7 +6,9 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/current_user_provider.dart";
+import "package:nomad/providers/shell/shell_destinations_provider.dart";
 import "package:nomad/routes/app_routes.dart";
+import "package:nomad/screens/shell/shell_destination_labels.dart";
 import "package:nomad/theme/app_theme.dart";
 import "package:nomad/util/localization_helper.dart";
 import "package:nomad/widgets/layout/adaptive.dart";
@@ -82,6 +84,13 @@ class MoreOptions extends ConsumerWidget {
             applicationLegalese: localized.aboutLegalese,
           ),
         ),
+        if (!inAdministration)
+          for (final destination in ref.watch(secondaryShellDestinationsProvider))
+            ListTile(
+              leading: Icon(destination.icon),
+              title: Text(destination.label(context)),
+              onTap: () => go(destination.route),
+            ),
         if (account != null) ...[
           const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
           ListTile(

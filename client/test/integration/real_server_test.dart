@@ -11,6 +11,7 @@ import "package:nomad/models/sync/conflict.dart";
 import "package:nomad/models/sync/sync_entry.dart";
 import "package:nomad/models/sync/sync_root.dart";
 import "package:nomad/models/token_pair.dart";
+import "package:nomad/models/trash.dart";
 import "package:nomad/models/user.dart";
 import "package:nomad/services/api/api_exceptions.dart";
 import "package:nomad/services/api/nomad_api.dart";
@@ -129,6 +130,46 @@ void main() {
         tiny.api.putContent("/big.bin", Stream.value(Uint8List(100)), length: 100),
         throwsA(isA<QuotaExceededException>()),
       );
+    });
+
+    test("deleted items can be restored, downloaded and deleted permanently", () async {
+      final api = server.signedIn(userTokens).api;
+      await api.putContent("/trash/notes.txt", Stream.value("old".codeUnits), length: 3);
+      await api.delete("/trash/notes.txt");
+      await api.putContent("/trash/notes.txt", Stream.value("new".codeUnits), length: 3);
+
+      final item = (await api.listTrash()).items.singleWhere((item) => item.originalPath == "/trash/notes.txt");
+      expect(String.fromCharCodes(await api.downloadFromTrash(item.id)), "old");
+      await expectLater(api.restoreFromTrash(item.id), throwsA(isA<AlreadyExistsException>()));
+
+      final kept = await api.restoreFromTrash(item.id, onConflict: RestoreMode.keepBoth);
+      expect(kept.path, "/trash/notes (restored).txt");
+      expect(String.fromCharCodes(await api.downloadBytes("/trash/notes.txt")), "new");
+
+      await api.delete(kept.path);
+      final trashed = (await api.listTrash()).items.firstWhere((item) => item.originalPath == kept.path);
+      await api.deleteFromTrash(trashed.id);
+      await expectLater(api.restoreFromTrash(trashed.id), throwsA(isA<NotFoundException>()));
+    });
+
+    test("an administrator's trash retention wins over the user's", () async {
+      final admin = server.signedIn(adminTokens).api;
+      final api = server.signedIn(userTokens).api;
+      final alice = (await admin.listUsers()).singleWhere((user) => user.username == "alice");
+
+      expect((await api.setTrashRetention(7)).source, RetentionSource.user);
+      await admin.updateUser(alice.id, const UpdateUserRequest(trashRetentionOverrideDays: 3));
+      final overridden = await api.trashRetention();
+      expect((overridden.days, overridden.source, overridden.locked), (3, RetentionSource.admin, true));
+
+      await admin.updateUser(
+        alice.id,
+        const UpdateUserRequest(trashRetentionOverrideDays: UpdateUserRequest.clearTrashRetentionOverride),
+      );
+      expect((await admin.updateServerSettings(trashRetentionEnforced: true)).trashRetentionEnforced, isTrue);
+      expect((await api.trashRetention()).source, RetentionSource.server);
+      await admin.updateServerSettings(trashRetentionEnforced: false);
+      expect((await api.setTrashRetention(null)).source, RetentionSource.serverDefault);
     });
   });
 

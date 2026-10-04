@@ -161,21 +161,24 @@ func (a *API) deleteFile(ctx context.Context, input *deleteInput) (*struct{}, er
 }
 
 func (a *API) previewFile(ctx context.Context, input *previewInput) (*previewOutput, error) {
-	size := int(input.Size)
 	entry, err := a.files.Stat(ctx, currentUser(ctx), input.Path)
 	if err != nil {
 		return nil, err
 	}
-	if entry.PreviewState != files.PreviewReady || !a.previews.HasThumbnail(entry.Hash, size) {
+	return a.thumbnail(entry.Hash, entry.PreviewState, int(input.Size))
+}
+
+func (a *API) thumbnail(contentHash string, state files.PreviewState, size int) (*previewOutput, error) {
+	if state != files.PreviewReady || !a.previews.HasThumbnail(contentHash, size) {
 		return nil, apperr.NotFound("no preview available")
 	}
 	return &previewOutput{
-		ETag:         fmt.Sprintf(`"%s-%d"`, entry.Hash, size),
+		ETag:         fmt.Sprintf(`"%s-%d"`, contentHash, size),
 		CacheControl: "private, max-age=86400",
 		ContentType:  "image/jpeg",
 		Body: func(ctx huma.Context) {
 			r, w := humachi.Unwrap(ctx)
-			http.ServeFile(w, r, a.previews.ThumbnailPath(entry.Hash, size))
+			http.ServeFile(w, r, a.previews.ThumbnailPath(contentHash, size))
 		},
 	}, nil
 }

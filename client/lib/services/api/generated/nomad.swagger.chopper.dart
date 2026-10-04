@@ -19,6 +19,55 @@ final class _$Nomad extends Nomad {
   final Type definitionType = Nomad;
 
   @override
+  Future<Response<ServerSettings>> _getServerSettings({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Server-wide settings',
+      operationId: 'getServerSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/settings');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<ServerSettings, ServerSettings>($request);
+  }
+
+  @override
+  Future<Response<ServerSettings>> _updateServerSettings({
+    required ServerSettingsChanges? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change server-wide settings',
+      operationId: 'updateServerSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/settings');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<ServerSettings, ServerSettings>($request);
+  }
+
+  @override
   Future<Response<List<User>>> _listUsers({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -682,6 +731,203 @@ final class _$Nomad extends Nomad {
       'POST',
       $url,
       client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _emptyTrash({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete everything in the trash permanently',
+      operationId: 'emptyTrash',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<TrashListing>> _listTrash({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List deleted items, most recent first',
+      operationId: 'listTrash',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<TrashListing, TrashListing>($request);
+  }
+
+  @override
+  Future<Response<TrashRetention>> _getTrashRetention({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How long deleted items stay in the trash',
+      operationId: 'getTrashRetention',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash/retention');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<TrashRetention, TrashRetention>($request);
+  }
+
+  @override
+  Future<Response<TrashRetention>> _setTrashRetention({
+    required RetentionRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose how long deleted items stay in the trash',
+      operationId: 'setTrashRetention',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash/retention');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<TrashRetention, TrashRetention>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteTrashItem({
+    required int? itemID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete one item in the trash permanently',
+      operationId: 'deleteTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash/${itemID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadTrashItem({
+    required int? itemID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a deleted item without restoring it; a directory comes as a zip',
+      operationId: 'downloadTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash/${itemID}/content');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _previewTrashItem({
+    required int? itemID,
+    String? size,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a JPEG thumbnail of a deleted image',
+      operationId: 'previewTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash/${itemID}/preview');
+    final Map<String, dynamic> $params = <String, dynamic>{'size': size};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _restoreTrashItem({
+    required int? itemID,
+    required RestoreRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Put a deleted item back where it was',
+      operationId: 'restoreTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/trash/${itemID}/restore');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
       tag: swaggerMetaData,
     );
     return client.send<Entry, Entry>($request);

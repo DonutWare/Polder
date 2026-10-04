@@ -81,7 +81,7 @@ func resetMariaDB(t *testing.T, dsn string) {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	for _, table := range []string{"uploads", "changes", "file_chunks", "files", "sessions", "users", "goose_db_version"} {
+	for _, table := range []string{"trash", "server_settings", "uploads", "changes", "file_chunks", "files", "sessions", "users", "goose_db_version"} {
 		if _, err := db.Exec("DROP TABLE IF EXISTS " + table); err != nil {
 			t.Fatal(err)
 		}

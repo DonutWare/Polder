@@ -1,7 +1,10 @@
+import "dart:typed_data";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/transfer.dart";
+import "package:nomad/models/trash.dart";
 import "package:nomad/providers/nomad_api_provider.dart";
 import "package:nomad/providers/browser/directory_provider.dart";
 import "package:nomad/providers/current_user_provider.dart";
@@ -46,13 +49,30 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     });
   }
 
-  Future<void> download(FileEntry entry) async {
-    final transfer = _start(entry.name, TransferDirection.download, entry.size);
+  Future<void> download(FileEntry entry) => _downloadAndSave(
+    name: entry.name,
+    size: entry.size,
+    mime: entry.mime,
+    fetch: (onProgress) => ref.read(nomadApiProvider).downloadBytes(entry.path, onProgress: onProgress),
+  );
+
+  Future<void> downloadFromTrash(TrashItem item) => _downloadAndSave(
+    name: item.isDir ? "${item.name}.zip" : item.name,
+    size: item.isDir ? 0 : item.size,
+    mime: item.isDir ? "application/zip" : item.mime,
+    fetch: (onProgress) => ref.read(nomadApiProvider).downloadFromTrash(item.id, onProgress: onProgress),
+  );
+
+  Future<void> _downloadAndSave({
+    required String name,
+    required int size,
+    required String mime,
+    required Future<Uint8List> Function(void Function(int received, int total) onProgress) fetch,
+  }) async {
+    final transfer = _start(name, TransferDirection.download, size);
     await _track(transfer, () async {
-      final bytes = await ref
-          .read(nomadApiProvider)
-          .downloadBytes(entry.path, onProgress: (received, total) => _progress(transfer.id, received, total));
-      await ref.read(filePickerServiceProvider).saveFile(name: entry.name, bytes: bytes, mime: entry.mime);
+      final bytes = await fetch((received, total) => _progress(transfer.id, received, total));
+      await ref.read(filePickerServiceProvider).saveFile(name: name, bytes: bytes, mime: mime);
     });
   }
 

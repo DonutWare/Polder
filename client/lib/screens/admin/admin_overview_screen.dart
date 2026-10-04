@@ -9,6 +9,7 @@ import "package:nomad/providers/admin/admin_users_provider.dart";
 import "package:nomad/routes/app_routes.dart";
 import "package:nomad/screens/admin/widgets/admin_stats_grid.dart";
 import "package:nomad/screens/admin/widgets/storage_by_user_card.dart";
+import "package:nomad/screens/admin/widgets/trash_retention_group.dart";
 import "package:nomad/screens/admin/widgets/user_form_dialog.dart";
 import "package:nomad/theme/app_theme.dart";
 import "package:nomad/util/localization_helper.dart";
@@ -65,6 +66,7 @@ class AdminOverviewScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const TrashRetentionGroup(),
                 const SizedBox(height: 8),
                 StorageByUserCard(users: users),
               ],

@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -17,19 +18,24 @@ import (
 	"nomad-server/internal/httpapi"
 	"nomad-server/internal/preview"
 	"nomad-server/internal/scanner"
+	"nomad-server/internal/settings"
 	"nomad-server/internal/storage"
 	"nomad-server/internal/syncing"
 	"nomad-server/internal/users"
 	"nomad-server/internal/webui"
 )
 
-const uploadCleanupInterval = time.Hour
+const (
+	uploadCleanupInterval = time.Hour
+	trashPurgeInterval    = time.Hour
+)
 
 type App struct {
 	Config   config.Config
 	Handler  http.Handler
 	Files    *files.Service
 	Users    *users.Store
+	Settings *settings.Store
 	db       *sql.DB
 	scanner  *scanner.Scanner
 	previews *preview.Worker
@@ -62,10 +68,12 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	userStore := users.NewStore(db)
 	userService := users.NewService(userStore, auth.Argon2Hasher{}, disk)
 	sessions := auth.NewSessions(db)
+	serverSettings := settings.NewStore(db, settings.ServerSettings{TrashRetentionDays: cfg.TrashRetentionDays})
 	fileService := files.NewService(db, disk)
 	syncService := syncing.NewService(db, fileService)
 	previews := preview.NewWorker(fileService, userStore, cfg.PreviewCacheDir())
 	fileService.OnContentChanged(previews.Enqueue)
+	fileService.OnContentRemoved(previews.RequestCleanup)
 	web, err := webClient(cfg)
 	if err != nil {
 		return nil, err
@@ -76,6 +84,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Sessions:               sessions,
 		Users:                  userService,
 		Files:                  fileService,
+		Settings:               serverSettings,
 		Sync:                   syncService,
 		Previews:               previews,
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
@@ -86,6 +95,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Handler:  handler,
 		Files:    fileService,
 		Users:    userStore,
+		Settings: serverSettings,
 		db:       db,
 		scanner:  scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles),
 		previews: previews,
@@ -124,15 +134,18 @@ func (a *App) Close() error {
 func (a *App) StartBackgroundWork(ctx context.Context) {
 	go a.scanner.Run(ctx)
 	go a.previews.Run(ctx)
-	go a.removeExpiredUploadsPeriodically(ctx)
+	go repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads)
+	go repeat(ctx, trashPurgeInterval, "purge expired trash", func(ctx context.Context) error {
+		return a.PurgeExpiredTrash(ctx, time.Now())
+	})
 }
 
-func (a *App) removeExpiredUploadsPeriodically(ctx context.Context) {
-	ticker := time.NewTicker(uploadCleanupInterval)
+func repeat(ctx context.Context, interval time.Duration, task string, work func(context.Context) error) {
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
-		if err := a.sync.RemoveExpiredUploads(ctx); err != nil && ctx.Err() == nil {
-			slog.Warn("remove expired uploads", "error", err)
+		if err := work(ctx); err != nil && ctx.Err() == nil {
+			slog.Warn(task, "error", err)
 		}
 		select {
 		case <-ctx.Done():
@@ -140,4 +153,30 @@ func (a *App) removeExpiredUploadsPeriodically(ctx context.Context) {
 		case <-ticker.C:
 		}
 	}
+}
+
+func (a *App) PurgeExpiredTrash(ctx context.Context, now time.Time) error {
+	server, err := a.Settings.Get(ctx)
+	if err != nil {
+		return err
+	}
+	allUsers, err := a.Users.List(ctx)
+	if err != nil {
+		return err
+	}
+	var failures []error
+	for _, user := range allUsers {
+		cutoff, expires := settings.ResolveTrashRetention(server, user).Cutoff(now)
+		if !expires {
+			continue
+		}
+		purged, err := a.Files.PurgeTrash(ctx, user, cutoff)
+		if err != nil {
+			failures = append(failures, err)
+		}
+		if purged > 0 {
+			slog.Info("purged expired trash", "user", user.Username, "items", purged)
+		}
+	}
+	return errors.Join(failures...)
 }

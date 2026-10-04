@@ -186,6 +186,7 @@ func (s *Service) applyRescan(ctx context.Context, owner users.User, plan scanPl
 	for _, changedPath := range changedFiles {
 		s.onContentChanged(owner.ID, changedPath)
 	}
+	s.onContentRemoved()
 	return nil
 }
 

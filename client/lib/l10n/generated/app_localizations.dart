@@ -416,6 +416,24 @@ abstract class AppLocalizations {
   /// **'{count} deleted'**
   String deletedCount(int count);
 
+  /// No description provided for @deletePermanently.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently'**
+  String get deletePermanently;
+
+  /// No description provided for @deletePermanentlyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'It can\'t be restored afterwards.'**
+  String get deletePermanentlyMessage;
+
+  /// No description provided for @deletePermanentlyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\" permanently?'**
+  String deletePermanentlyTitle(String name);
+
   /// No description provided for @deleteMessage.
   ///
   /// In en, this message translates to:
@@ -493,6 +511,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This folder is empty'**
   String get emptyFolder;
+
+  /// No description provided for @emptyTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty trash'**
+  String get emptyTrash;
+
+  /// No description provided for @emptyTrashMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in the trash is deleted permanently. This can\'t be undone.'**
+  String get emptyTrashMessage;
+
+  /// No description provided for @emptyTrashTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty the trash?'**
+  String get emptyTrashTitle;
+
+  /// No description provided for @enforceTrashRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to every user'**
+  String get enforceTrashRetention;
+
+  /// No description provided for @enforceTrashRetentionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Users can\'t choose their own. A retention set for one user still wins.'**
+  String get enforceTrashRetentionHint;
 
   /// No description provided for @errorAlreadyExists.
   ///
@@ -704,6 +752,12 @@ abstract class AppLocalizations {
   /// **'Sync'**
   String get navSync;
 
+  /// No description provided for @navTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get navTrash;
+
   /// No description provided for @newFolder.
   ///
   /// In en, this message translates to:
@@ -739,6 +793,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No users yet.'**
   String get noUsers;
+
+  /// No description provided for @overwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Overwrite'**
+  String get overwrite;
 
   /// No description provided for @password.
   ///
@@ -812,6 +872,30 @@ abstract class AppLocalizations {
   /// **'Resolve'**
   String get resolve;
 
+  /// No description provided for @restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @restoreConflictMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'There is already something at {path}. Overwrite moves it to the trash, Keep both restores this item next to it under a new name.'**
+  String restoreConflictMessage(String path);
+
+  /// No description provided for @restoreConflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" already exists'**
+  String restoreConflictTitle(String name);
+
+  /// No description provided for @restoredTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored to {path}'**
+  String restoredTo(String path);
+
   /// No description provided for @retry.
   ///
   /// In en, this message translates to:
@@ -865,6 +949,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Folder on the server'**
   String get serverFolder;
+
+  /// No description provided for @serverTrashRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash retention'**
+  String get serverTrashRetention;
+
+  /// No description provided for @serverTrashRetentionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Default for every user: {duration}'**
+  String serverTrashRetentionHint(String duration);
 
   /// No description provided for @serverUrl.
   ///
@@ -1010,6 +1106,78 @@ abstract class AppLocalizations {
   /// **'Transfers'**
   String get transfers;
 
+  /// No description provided for @trashEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The trash is empty'**
+  String get trashEmpty;
+
+  /// No description provided for @trashItemDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {date}'**
+  String trashItemDeleted(String date);
+
+  /// No description provided for @trashItemExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted permanently on {date}'**
+  String trashItemExpires(String date);
+
+  /// No description provided for @trashItemFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From {folder}'**
+  String trashItemFrom(String folder);
+
+  /// No description provided for @trashRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep deleted items'**
+  String get trashRetention;
+
+  /// No description provided for @trashRetentionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String trashRetentionDays(int count);
+
+  /// No description provided for @trashRetentionForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Forever'**
+  String get trashRetentionForever;
+
+  /// No description provided for @trashRetentionForeverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Items stay in the trash until you delete them.'**
+  String get trashRetentionForeverHint;
+
+  /// No description provided for @trashRetentionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Items in the trash are deleted permanently after {duration}.'**
+  String trashRetentionHint(String duration);
+
+  /// No description provided for @trashRetentionServerDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Server default ({duration})'**
+  String trashRetentionServerDefault(String duration);
+
+  /// No description provided for @trashRetentionSetByAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Set by your administrator'**
+  String get trashRetentionSetByAdmin;
+
+  /// No description provided for @trashSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}} · {size}'**
+  String trashSummary(int count, String size);
+
   /// No description provided for @type.
   ///
   /// In en, this message translates to:
@@ -1051,6 +1219,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 user} other{{count} users}}'**
   String usersCount(int count);
+
+  /// No description provided for @userTrashRetentionUsersChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'User\'s choice'**
+  String get userTrashRetentionUsersChoice;
 
   /// No description provided for @wifiOnly.
   ///

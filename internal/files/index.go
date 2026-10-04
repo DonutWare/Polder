@@ -13,13 +13,24 @@ import (
 	"unicode/utf8"
 
 	"nomad-server/internal/storage"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
-const (
-	changeUpsert = "upsert"
-	changeDelete = "delete"
-	changeMove   = "move"
+type ChangeType string
 
+const (
+	changeUpsert ChangeType = "upsert"
+	changeDelete ChangeType = "delete"
+	changeMove   ChangeType = "move"
+)
+
+func (ChangeType) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
+	s.Enum = []any{string(changeUpsert), string(changeDelete), string(changeMove)}
+	return s
+}
+
+const (
 	entryColumns = `f.id, f.user_id, f.path, f.name, f.is_dir, f.size, f.mtime_ns, f.hash, f.rev, f.mime, f.meta_json, f.preview_state`
 )
 
@@ -116,11 +127,11 @@ func sortForListing(entries []Entry) {
 	})
 }
 
-func recordChange(ctx context.Context, q querier, userID int64, cleanPath, changeType string) (int64, error) {
+func recordChange(ctx context.Context, q querier, userID int64, cleanPath string, changeType ChangeType) (int64, error) {
 	return insertChange(ctx, q, userID, cleanPath, changeType, sql.NullString{})
 }
 
-func insertChange(ctx context.Context, q querier, userID int64, cleanPath, changeType string, fromPath sql.NullString) (int64, error) {
+func insertChange(ctx context.Context, q querier, userID int64, cleanPath string, changeType ChangeType, fromPath sql.NullString) (int64, error) {
 	result, err := q.ExecContext(ctx,
 		`INSERT INTO changes (user_id, path, path_key, change_type, from_path, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
 		userID, cleanPath, pathKey(cleanPath), changeType, fromPath, time.Now().Unix())

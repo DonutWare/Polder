@@ -21,10 +21,18 @@ abstract class CreateUserRequest with _$CreateUserRequest {
 abstract class UpdateUserRequest with _$UpdateUserRequest {
   const UpdateUserRequest._();
 
-  const factory UpdateUserRequest({String? password, UserRole? role, int? quotaBytes, bool? disabled}) =
-      _UpdateUserRequest;
+  static const clearTrashRetentionOverride = -1;
+
+  const factory UpdateUserRequest({
+    String? password,
+    UserRole? role,
+    int? quotaBytes,
+    bool? disabled,
+    int? trashRetentionOverrideDays,
+  }) = _UpdateUserRequest;
 
   factory UpdateUserRequest.fromJson(Map<String, dynamic> json) => _$UpdateUserRequestFromJson(json);
 
-  bool get isEmpty => password == null && role == null && quotaBytes == null && disabled == null;
+  bool get isEmpty =>
+      password == null && role == null && quotaBytes == null && disabled == null && trashRetentionOverrideDays == null;
 }

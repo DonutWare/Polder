@@ -188,6 +188,17 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
+  String get deletePermanently => 'Definitief verwijderen';
+
+  @override
+  String get deletePermanentlyMessage => 'Het kan daarna niet meer worden teruggezet.';
+
+  @override
+  String deletePermanentlyTitle(String name) {
+    return '\"$name\" definitief verwijderen?';
+  }
+
+  @override
   String get deleteMessage => 'Het wordt naar de prullenbak op de server verplaatst.';
 
   @override
@@ -236,6 +247,23 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get emptyFolder => 'Deze map is leeg';
+
+  @override
+  String get emptyTrash => 'Prullenbak legen';
+
+  @override
+  String get emptyTrashMessage =>
+      'Alles in de prullenbak wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt.';
+
+  @override
+  String get emptyTrashTitle => 'Prullenbak legen?';
+
+  @override
+  String get enforceTrashRetention => 'Voor alle gebruikers afdwingen';
+
+  @override
+  String get enforceTrashRetentionHint =>
+      'Gebruikers kunnen zelf niets kiezen. Een termijn voor één gebruiker gaat nog steeds voor.';
 
   @override
   String get errorAlreadyExists => 'Er bestaat al iets met die naam.';
@@ -349,6 +377,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get navSync => 'Synchronisatie';
 
   @override
+  String get navTrash => 'Prullenbak';
+
+  @override
   String get newFolder => 'Nieuwe map';
 
   @override
@@ -365,6 +396,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get noUsers => 'Nog geen gebruikers.';
+
+  @override
+  String get overwrite => 'Overschrijven';
 
   @override
   String get password => 'Wachtwoord';
@@ -407,6 +441,24 @@ class AppLocalizationsNl extends AppLocalizations {
   String get resolve => 'Oplossen';
 
   @override
+  String get restore => 'Terugzetten';
+
+  @override
+  String restoreConflictMessage(String path) {
+    return 'Er staat al iets op $path. Overschrijven verplaatst dat naar de prullenbak, Beide behouden zet dit item ernaast terug onder een nieuwe naam.';
+  }
+
+  @override
+  String restoreConflictTitle(String name) {
+    return '\"$name\" bestaat al';
+  }
+
+  @override
+  String restoredTo(String path) {
+    return 'Teruggezet naar $path';
+  }
+
+  @override
   String get retry => 'Opnieuw proberen';
 
   @override
@@ -434,6 +486,14 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get serverFolder => 'Map op de server';
+
+  @override
+  String get serverTrashRetention => 'Bewaartermijn prullenbak';
+
+  @override
+  String serverTrashRetentionHint(String duration) {
+    return 'Standaard voor alle gebruikers: $duration';
+  }
 
   @override
   String get serverUrl => 'Serveradres';
@@ -512,6 +572,58 @@ class AppLocalizationsNl extends AppLocalizations {
   String get transfers => 'Overdrachten';
 
   @override
+  String get trashEmpty => 'De prullenbak is leeg';
+
+  @override
+  String trashItemDeleted(String date) {
+    return 'Verwijderd $date';
+  }
+
+  @override
+  String trashItemExpires(String date) {
+    return 'Definitief verwijderd op $date';
+  }
+
+  @override
+  String trashItemFrom(String folder) {
+    return 'Uit $folder';
+  }
+
+  @override
+  String get trashRetention => 'Verwijderde items bewaren';
+
+  @override
+  String trashRetentionDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count dagen', one: '1 dag');
+    return '$_temp0';
+  }
+
+  @override
+  String get trashRetentionForever => 'Altijd';
+
+  @override
+  String get trashRetentionForeverHint => 'Items blijven in de prullenbak tot je ze verwijdert.';
+
+  @override
+  String trashRetentionHint(String duration) {
+    return 'Items in de prullenbak worden na $duration definitief verwijderd.';
+  }
+
+  @override
+  String trashRetentionServerDefault(String duration) {
+    return 'Serverstandaard ($duration)';
+  }
+
+  @override
+  String get trashRetentionSetByAdmin => 'Ingesteld door je beheerder';
+
+  @override
+  String trashSummary(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count items', one: '1 item');
+    return '$_temp0 · $size';
+  }
+
+  @override
   String get type => 'Type';
 
   @override
@@ -536,6 +648,9 @@ class AppLocalizationsNl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count gebruikers', one: '1 gebruiker');
     return '$_temp0';
   }
+
+  @override
+  String get userTrashRetentionUsersChoice => 'Keuze van gebruiker';
 
   @override
   String get wifiOnly => 'Alleen via wifi';

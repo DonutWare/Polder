@@ -39,6 +39,7 @@ Changes _$ChangesFromJson(Map<String, dynamic> json) => Changes(
   password: json['password'] as String?,
   quotaBytes: (json['quotaBytes'] as num?)?.toInt(),
   role: changesRoleNullableFromJson(json['role']),
+  trashRetentionOverrideDays: (json['trashRetentionOverrideDays'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$ChangesToJson(Changes instance) => <String, dynamic>{
@@ -46,6 +47,7 @@ Map<String, dynamic> _$ChangesToJson(Changes instance) => <String, dynamic>{
   'password': ?instance.password,
   'quotaBytes': ?instance.quotaBytes,
   'role': ?changesRoleNullableToJson(instance.role),
+  'trashRetentionOverrideDays': ?instance.trashRetentionOverrideDays,
 };
 
 Chunk _$ChunkFromJson(Map<String, dynamic> json) =>
@@ -183,6 +185,38 @@ Map<String, dynamic> _$RefreshRequestToJson(RefreshRequest instance) => <String,
   'refreshToken': instance.refreshToken,
 };
 
+RestoreRequest _$RestoreRequestFromJson(Map<String, dynamic> json) =>
+    RestoreRequest(onConflict: RestoreRequest.restoreRequestOnConflictOnConflictNullableFromJson(json['onConflict']));
+
+Map<String, dynamic> _$RestoreRequestToJson(RestoreRequest instance) => <String, dynamic>{
+  'onConflict': ?restoreRequestOnConflictNullableToJson(instance.onConflict),
+};
+
+RetentionRequest _$RetentionRequestFromJson(Map<String, dynamic> json) =>
+    RetentionRequest(days: (json['days'] as num?)?.toInt());
+
+Map<String, dynamic> _$RetentionRequestToJson(RetentionRequest instance) => <String, dynamic>{'days': ?instance.days};
+
+ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) => ServerSettings(
+  trashRetentionDays: (json['trashRetentionDays'] as num).toInt(),
+  trashRetentionEnforced: json['trashRetentionEnforced'] as bool,
+);
+
+Map<String, dynamic> _$ServerSettingsToJson(ServerSettings instance) => <String, dynamic>{
+  'trashRetentionDays': instance.trashRetentionDays,
+  'trashRetentionEnforced': instance.trashRetentionEnforced,
+};
+
+ServerSettingsChanges _$ServerSettingsChangesFromJson(Map<String, dynamic> json) => ServerSettingsChanges(
+  trashRetentionDays: (json['trashRetentionDays'] as num?)?.toInt(),
+  trashRetentionEnforced: json['trashRetentionEnforced'] as bool?,
+);
+
+Map<String, dynamic> _$ServerSettingsChangesToJson(ServerSettingsChanges instance) => <String, dynamic>{
+  'trashRetentionDays': ?instance.trashRetentionDays,
+  'trashRetentionEnforced': ?instance.trashRetentionEnforced,
+};
+
 SetupStatus _$SetupStatusFromJson(Map<String, dynamic> json) => SetupStatus(needsSetup: json['needsSetup'] as bool);
 
 Map<String, dynamic> _$SetupStatusToJson(SetupStatus instance) => <String, dynamic>{'needsSetup': instance.needsSetup};
@@ -199,6 +233,60 @@ Map<String, dynamic> _$TokenPairToJson(TokenPair instance) => <String, dynamic>{
   'expiresIn': instance.expiresIn,
   'refreshToken': instance.refreshToken,
   'user': instance.user.toJson(),
+};
+
+TrashItem _$TrashItemFromJson(Map<String, dynamic> json) => TrashItem(
+  deletedAt: DateTime.parse(json['deletedAt'] as String),
+  expiresAt: json['expiresAt'] == null ? null : DateTime.parse(json['expiresAt'] as String),
+  hash: json['hash'] as String,
+  id: (json['id'] as num).toInt(),
+  isDir: json['isDir'] as bool,
+  mime: json['mime'] as String,
+  name: json['name'] as String,
+  originalPath: json['originalPath'] as String,
+  previewState: trashItemPreviewStateFromJson(json['previewState']),
+  size: (json['size'] as num).toInt(),
+);
+
+Map<String, dynamic> _$TrashItemToJson(TrashItem instance) => <String, dynamic>{
+  'deletedAt': instance.deletedAt.toIso8601String(),
+  'expiresAt': ?instance.expiresAt?.toIso8601String(),
+  'hash': instance.hash,
+  'id': instance.id,
+  'isDir': instance.isDir,
+  'mime': instance.mime,
+  'name': instance.name,
+  'originalPath': instance.originalPath,
+  'previewState': ?trashItemPreviewStateToJson(instance.previewState),
+  'size': instance.size,
+};
+
+TrashListing _$TrashListingFromJson(Map<String, dynamic> json) => TrashListing(
+  items: (json['items'] as List<dynamic>?)?.map((e) => TrashItem.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  retention: TrashRetention.fromJson(json['retention'] as Map<String, dynamic>),
+  totalBytes: (json['totalBytes'] as num).toInt(),
+);
+
+Map<String, dynamic> _$TrashListingToJson(TrashListing instance) => <String, dynamic>{
+  'items': ?instance.items?.map((e) => e.toJson()).toList(),
+  'retention': instance.retention.toJson(),
+  'totalBytes': instance.totalBytes,
+};
+
+TrashRetention _$TrashRetentionFromJson(Map<String, dynamic> json) => TrashRetention(
+  days: (json['days'] as num).toInt(),
+  defaultDays: (json['defaultDays'] as num).toInt(),
+  locked: json['locked'] as bool,
+  source: trashRetentionSourceFromJson(json['source']),
+  userDays: (json['userDays'] as num?)?.toInt(),
+);
+
+Map<String, dynamic> _$TrashRetentionToJson(TrashRetention instance) => <String, dynamic>{
+  'days': instance.days,
+  'defaultDays': instance.defaultDays,
+  'locked': instance.locked,
+  'source': ?trashRetentionSourceToJson(instance.source),
+  'userDays': ?instance.userDays,
 };
 
 UploadRequest _$UploadRequestFromJson(Map<String, dynamic> json) => UploadRequest(
@@ -235,6 +323,8 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
   id: (json['id'] as num).toInt(),
   quotaBytes: (json['quotaBytes'] as num).toInt(),
   role: userRoleFromJson(json['role']),
+  trashRetentionDays: (json['trashRetentionDays'] as num?)?.toInt(),
+  trashRetentionOverrideDays: (json['trashRetentionOverrideDays'] as num?)?.toInt(),
   usedBytes: (json['usedBytes'] as num).toInt(),
   username: json['username'] as String,
 );
@@ -245,6 +335,8 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'id': instance.id,
   'quotaBytes': instance.quotaBytes,
   'role': ?userRoleToJson(instance.role),
+  'trashRetentionDays': ?instance.trashRetentionDays,
+  'trashRetentionOverrideDays': ?instance.trashRetentionOverrideDays,
   'usedBytes': instance.usedBytes,
   'username': instance.username,
 };

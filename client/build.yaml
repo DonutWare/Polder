@@ -28,3 +28,9 @@ targets:
             - url: "/api/v1/files/preview"
               method: get
               overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/trash/{itemID}/content"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/trash/{itemID}/preview"
+              method: get
+              overridden_value: "Stream<List<int>>"

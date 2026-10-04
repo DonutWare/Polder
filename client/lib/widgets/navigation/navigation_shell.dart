@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:nomad/theme/app_theme.dart";
 import "package:nomad/util/localization_helper.dart";
 import "package:nomad/widgets/layout/adaptive.dart";
@@ -28,8 +27,6 @@ class NavAction {
   final VoidCallback onTap;
 }
 
-/// Adapts navigation to the window: a floating bar on phones, a rail on tablets and small
-/// windows, and a sidebar that can collapse to the rail on large screens.
 class NavigationShell extends ConsumerWidget {
   const NavigationShell({
     required this.items,
@@ -39,24 +36,24 @@ class NavigationShell extends ConsumerWidget {
     required this.subtitle,
     required this.markIcon,
     required this.child,
+    this.secondaryItems = const [],
     this.sidebarFooter,
     this.exitAction,
     super.key,
   });
 
   final List<NavItem> items;
+
+  final List<NavItem> secondaryItems;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
-  /// Shown at the top of the sidebar; tapping it opens the side sheet.
   final String title;
   final String subtitle;
   final IconData markIcon;
 
-  /// Extra content at the bottom of the expanded sidebar.
   final Widget? sidebarFooter;
 
-  /// A way out of this shell (for example back from administration), shown in the rail and sidebar.
   final NavAction? exitAction;
 
   final Widget child;
@@ -90,7 +87,7 @@ class NavigationShell extends ConsumerWidget {
                   height: 64,
                   child: _SlidingSelection(
                     axis: Axis.horizontal,
-                    selected: selectedIndex,
+                    selected: _groupSelection(selectedIndex, 0, items.length),
                     indicator: const Center(child: SizedBox(width: 56, height: 44, child: _SelectionSurface())),
                     children: [
                       for (final (i, item) in items.indexed)
@@ -116,6 +113,7 @@ class NavigationShell extends ConsumerWidget {
     final Widget navigation = extended
         ? _Sidebar(
             items: items,
+            secondaryItems: secondaryItems,
             selectedIndex: selectedIndex,
             onSelected: onSelected,
             title: title,
@@ -129,19 +127,9 @@ class NavigationShell extends ConsumerWidget {
             child: Column(
               children: [
                 const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: MoreOptionsButton()),
-                _SlidingSelection(
-                  axis: Axis.vertical,
-                  selected: selectedIndex,
-                  indicator: const Padding(padding: EdgeInsets.symmetric(vertical: 4), child: _SelectionSurface()),
-                  children: [
-                    for (final (i, item) in items.indexed)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: _NavTile(item: item, selected: i == selectedIndex, onTap: () => onSelected(i)),
-                      ),
-                  ],
-                ),
+                _railGroup(items, 0),
                 const Spacer(),
+                if (secondaryItems.isNotEmpty) _railGroup(secondaryItems, items.length),
                 if (exit != null) IconButton(tooltip: exit.label, icon: Icon(exit.icon), onPressed: exit.onTap),
                 if (canExpand)
                   IconButton(
@@ -170,6 +158,24 @@ class NavigationShell extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _railGroup(List<NavItem> group, int offset) => _SlidingSelection(
+    axis: Axis.vertical,
+    selected: _groupSelection(selectedIndex, offset, group.length),
+    indicator: const Padding(padding: EdgeInsets.symmetric(vertical: 4), child: _SelectionSurface()),
+    children: [
+      for (final (i, item) in group.indexed)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: _NavTile(item: item, selected: offset + i == selectedIndex, onTap: () => onSelected(offset + i)),
+        ),
+    ],
+  );
+}
+
+int _groupSelection(int selectedIndex, int offset, int length) {
+  final local = selectedIndex - offset;
+  return local >= 0 && local < length ? local : -1;
 }
 
 class _Sidebar extends ConsumerWidget {
@@ -180,11 +186,13 @@ class _Sidebar extends ConsumerWidget {
     required this.title,
     required this.subtitle,
     required this.markIcon,
+    this.secondaryItems = const [],
     this.footer,
     this.exitAction,
   });
 
   final List<NavItem> items;
+  final List<NavItem> secondaryItems;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
   final String title;
@@ -206,86 +214,87 @@ class _Sidebar extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-            child: Tooltip(
-              message: context.localized.moreOptions,
-              child: Material(
-                color: colors.inset,
-                shape: squircle(AppRadius.inset),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () => SideSheetDrawer.of(context).open(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      children: [
-                        AppMark(icon: markIcon),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(14, 14, 8, 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Tooltip(
+                    message: context.localized.moreOptions,
+                    child: Material(
+                      color: colors.inset,
+                      shape: squircle(AppRadius.inset),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => SideSheetDrawer.of(context).open(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
                             children: [
-                              Text(
-                                title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleSmall,
+                              AppMark(icon: markIcon),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.titleSmall,
+                                    ),
+                                    Text(
+                                      subtitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              Text(
-                                subtitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                              ),
+                              Icon(IconsaxPlusLinear.arrow_swap, size: 16, color: cs.onSurfaceVariant),
                             ],
                           ),
                         ),
-                        Icon(IconsaxPlusLinear.arrow_swap, size: 16, color: cs.onSurfaceVariant),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 4),
+                IconButton(
+                  tooltip: context.localized.collapseSidebar,
+                  icon: Icon(rtl ? IconsaxPlusLinear.sidebar_right : IconsaxPlusLinear.sidebar_left),
+                  onPressed: ref.read(sidebarExpandedProvider.notifier).toggle,
+                ),
+              ],
             ),
           ),
           Divider(color: colors.border),
           const SizedBox(height: 12),
-          _SlidingSelection(
-            axis: Axis.vertical,
-            selected: selectedIndex,
-            indicator: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-              child: _SelectionSurface(),
-            ),
-            children: [
-              for (final (i, item) in items.indexed)
-                _SidebarItem(
-                  icon: i == selectedIndex ? item.selectedIcon : item.icon,
-                  label: item.label,
-                  selected: i == selectedIndex,
-                  badge: item.badge,
-                  onTap: () => onSelected(i),
-                ),
-            ],
-          ),
+          _group(items, 0),
           const Spacer(),
           if (footer != null) Padding(padding: const EdgeInsets.fromLTRB(28, 8, 28, 8), child: footer),
           if (exit != null) _SidebarItem(icon: exit.icon, label: exit.label, selected: false, onTap: exit.onTap),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: IconButton(
-                tooltip: context.localized.collapseSidebar,
-                icon: Icon(rtl ? IconsaxPlusLinear.sidebar_right : IconsaxPlusLinear.sidebar_left),
-                onPressed: ref.read(sidebarExpandedProvider.notifier).toggle,
-              ),
-            ),
-          ),
+          const SizedBox(height: 14),
         ],
       ),
     );
   }
+
+  Widget _group(List<NavItem> group, int offset) => _SlidingSelection(
+    axis: Axis.vertical,
+    selected: _groupSelection(selectedIndex, offset, group.length),
+    indicator: const Padding(padding: EdgeInsets.symmetric(horizontal: 14, vertical: 2), child: _SelectionSurface()),
+    children: [
+      for (final (i, item) in group.indexed)
+        _SidebarItem(
+          icon: offset + i == selectedIndex ? item.selectedIcon : item.icon,
+          label: item.label,
+          selected: offset + i == selectedIndex,
+          badge: item.badge,
+          onTap: () => onSelected(offset + i),
+        ),
+    ],
+  );
 }
 
 class _SidebarItem extends StatelessWidget {
@@ -407,7 +416,6 @@ class _SelectionSurface extends StatelessWidget {
   }
 }
 
-/// Slides one indicator between equally sized children instead of fading it per item.
 class _SlidingSelection extends StatelessWidget {
   const _SlidingSelection({
     required this.axis,

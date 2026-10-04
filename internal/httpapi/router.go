@@ -17,6 +17,7 @@ import (
 	"nomad-server/internal/auth"
 	"nomad-server/internal/files"
 	"nomad-server/internal/preview"
+	"nomad-server/internal/settings"
 	"nomad-server/internal/syncing"
 	"nomad-server/internal/users"
 )
@@ -26,6 +27,7 @@ type API struct {
 	sessions *auth.Sessions
 	users    *users.Service
 	files    *files.Service
+	settings *settings.Store
 	sync     *syncing.Service
 	previews *preview.Worker
 	limiter  *failedAttemptLimiter
@@ -36,6 +38,7 @@ type Dependencies struct {
 	Sessions               *auth.Sessions
 	Users                  *users.Service
 	Files                  *files.Service
+	Settings               *settings.Store
 	Sync                   *syncing.Service
 	Previews               *preview.Worker
 	LoginAttemptsPerMinute int
@@ -49,6 +52,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		sessions: deps.Sessions,
 		users:    deps.Users,
 		files:    deps.Files,
+		settings: deps.Settings,
 		sync:     deps.Sync,
 		previews: deps.Previews,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
@@ -126,6 +130,17 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image", a.previewFile,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
 
+	register(user, http.MethodGet, "/trash", "listTrash", "List deleted items, most recent first", a.listTrash)
+	register(user, http.MethodDelete, "/trash", "emptyTrash", "Delete everything in the trash permanently", a.emptyTrash)
+	register(user, http.MethodGet, "/trash/retention", "getTrashRetention", "How long deleted items stay in the trash", a.getTrashRetention)
+	register(user, http.MethodPut, "/trash/retention", "setTrashRetention", "Choose how long deleted items stay in the trash", a.setTrashRetention)
+	register(user, http.MethodPost, "/trash/{itemID}/restore", "restoreTrashItem", "Put a deleted item back where it was", a.restoreTrashItem)
+	register(user, http.MethodGet, "/trash/{itemID}/content", "downloadTrashItem", "Download a deleted item without restoring it; a directory comes as a zip", a.downloadTrashItem,
+		withResponse(http.StatusOK, "Item content", binaryContent("application/octet-stream")))
+	register(user, http.MethodGet, "/trash/{itemID}/preview", "previewTrashItem", "Get a JPEG thumbnail of a deleted image", a.previewTrashItem,
+		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(user, http.MethodDelete, "/trash/{itemID}", "deleteTrashItem", "Delete one item in the trash permanently", a.deleteTrashItem)
+
 	register(user, http.MethodGet, "/sync/changes", "listChanges", "Page through changes since a cursor", a.changes)
 	register(user, http.MethodGet, "/sync/manifest", "getManifest", "Get a file's chunk manifest for delta sync", a.manifest)
 	register(user, http.MethodPost, "/sync/uploads", "createUpload", "Start a chunked upload; returns the chunks the server is missing", a.createUpload,
@@ -142,6 +157,8 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodGet, "/admin/users", "listUsers", "List all users", a.listUsers)
 	register(admin, http.MethodPost, "/admin/users", "createUser", "Create a user", a.createUser, created)
 	register(admin, http.MethodPatch, "/admin/users/{userID}", "updateUser", "Change a user; password changes and disabling log the user out", a.updateUser)
+	register(admin, http.MethodGet, "/admin/settings", "getServerSettings", "Server-wide settings", a.getServerSettings)
+	register(admin, http.MethodPatch, "/admin/settings", "updateServerSettings", "Change server-wide settings", a.updateServerSettings)
 	register(admin, http.MethodDelete, "/admin/users/{userID}", "deleteUser", "Delete a user; their files are archived on the server", a.deleteUser)
 }
 

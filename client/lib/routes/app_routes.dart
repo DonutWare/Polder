@@ -4,6 +4,7 @@ abstract final class AppRoutes {
   static const sync = "/sync";
   static const conflicts = "/sync/conflicts";
   static const autoUpload = "/auto-upload";
+  static const trash = "/trash";
   static const settings = "/settings";
 
   static const admin = "/admin";

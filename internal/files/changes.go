@@ -9,11 +9,11 @@ import (
 const MaxChangePageSize = 5000
 
 type Change struct {
-	Seq      int64  `json:"seq"`
-	Type     string `json:"type" enum:"upsert,delete,move"`
-	Path     string `json:"path"`
-	FromPath string `json:"fromPath,omitempty"`
-	Entry    *Entry `json:"entry" required:"false" doc:"The entry after the change; null for a delete, or when a later change superseded it"`
+	Seq      int64      `json:"seq"`
+	Type     ChangeType `json:"type"`
+	Path     string     `json:"path"`
+	FromPath string     `json:"fromPath,omitempty"`
+	Entry    *Entry     `json:"entry" required:"false" doc:"The entry after the change; null for a delete, or when a later change superseded it"`
 }
 
 type ChangePage struct {

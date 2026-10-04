@@ -56,6 +56,53 @@ abstract class Nomad extends ChopperService {
     return _$Nomad(newClient);
   }
 
+  ///Server-wide settings
+  Future<chopper.Response<ServerSettings>> getServerSettings() {
+    generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
+
+    return _getServerSettings();
+  }
+
+  ///Server-wide settings
+  @GET(path: '/api/v1/admin/settings')
+  Future<chopper.Response<ServerSettings>> _getServerSettings({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Server-wide settings',
+      operationId: 'getServerSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change server-wide settings
+  Future<chopper.Response<ServerSettings>> updateServerSettings({required ServerSettingsChanges? body}) {
+    generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
+
+    return _updateServerSettings(body: body);
+  }
+
+  ///Change server-wide settings
+  @PATCH(path: '/api/v1/admin/settings', optionalBody: true)
+  Future<chopper.Response<ServerSettings>> _updateServerSettings({
+    @Body() required ServerSettingsChanges? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change server-wide settings',
+      operationId: 'updateServerSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
   ///List all users
   Future<chopper.Response<List<User>>> listUsers() {
     generatedMapping.putIfAbsent(User, () => User.fromJsonFactory);
@@ -703,6 +750,202 @@ abstract class Nomad extends ChopperService {
       produces: [],
       security: ["bearer"],
       tags: ["sync"],
+      deprecated: false,
+    ),
+  });
+
+  ///Delete everything in the trash permanently
+  Future<chopper.Response> emptyTrash() {
+    return _emptyTrash();
+  }
+
+  ///Delete everything in the trash permanently
+  @DELETE(path: '/api/v1/trash')
+  Future<chopper.Response> _emptyTrash({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete everything in the trash permanently',
+      operationId: 'emptyTrash',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///List deleted items, most recent first
+  Future<chopper.Response<TrashListing>> listTrash() {
+    generatedMapping.putIfAbsent(TrashListing, () => TrashListing.fromJsonFactory);
+
+    return _listTrash();
+  }
+
+  ///List deleted items, most recent first
+  @GET(path: '/api/v1/trash')
+  Future<chopper.Response<TrashListing>> _listTrash({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List deleted items, most recent first',
+      operationId: 'listTrash',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///How long deleted items stay in the trash
+  Future<chopper.Response<TrashRetention>> getTrashRetention() {
+    generatedMapping.putIfAbsent(TrashRetention, () => TrashRetention.fromJsonFactory);
+
+    return _getTrashRetention();
+  }
+
+  ///How long deleted items stay in the trash
+  @GET(path: '/api/v1/trash/retention')
+  Future<chopper.Response<TrashRetention>> _getTrashRetention({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How long deleted items stay in the trash',
+      operationId: 'getTrashRetention',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///Choose how long deleted items stay in the trash
+  Future<chopper.Response<TrashRetention>> setTrashRetention({required RetentionRequest? body}) {
+    generatedMapping.putIfAbsent(TrashRetention, () => TrashRetention.fromJsonFactory);
+
+    return _setTrashRetention(body: body);
+  }
+
+  ///Choose how long deleted items stay in the trash
+  @PUT(path: '/api/v1/trash/retention', optionalBody: true)
+  Future<chopper.Response<TrashRetention>> _setTrashRetention({
+    @Body() required RetentionRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose how long deleted items stay in the trash',
+      operationId: 'setTrashRetention',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///Delete one item in the trash permanently
+  ///@param itemID
+  Future<chopper.Response> deleteTrashItem({required int? itemID}) {
+    return _deleteTrashItem(itemID: itemID);
+  }
+
+  ///Delete one item in the trash permanently
+  ///@param itemID
+  @DELETE(path: '/api/v1/trash/{itemID}')
+  Future<chopper.Response> _deleteTrashItem({
+    @Path('itemID') required int? itemID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete one item in the trash permanently',
+      operationId: 'deleteTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///Download a deleted item without restoring it; a directory comes as a zip
+  ///@param itemID
+  Future<chopper.Response<Stream<List<int>>>> downloadTrashItem({required int? itemID}) {
+    return _downloadTrashItem(itemID: itemID);
+  }
+
+  ///Download a deleted item without restoring it; a directory comes as a zip
+  ///@param itemID
+  @GET(path: '/api/v1/trash/{itemID}/content')
+  Future<chopper.Response<Stream<List<int>>>> _downloadTrashItem({
+    @Path('itemID') required int? itemID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a deleted item without restoring it; a directory comes as a zip',
+      operationId: 'downloadTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///Get a JPEG thumbnail of a deleted image
+  ///@param itemID
+  ///@param size Thumbnail width and height in pixels
+  Future<chopper.Response<Stream<List<int>>>> previewTrashItem({
+    required int? itemID,
+    enums.ApiV1TrashItemIDPreviewGetSize? size,
+  }) {
+    return _previewTrashItem(itemID: itemID, size: size?.value?.toString());
+  }
+
+  ///Get a JPEG thumbnail of a deleted image
+  ///@param itemID
+  ///@param size Thumbnail width and height in pixels
+  @GET(path: '/api/v1/trash/{itemID}/preview')
+  Future<chopper.Response<Stream<List<int>>>> _previewTrashItem({
+    @Path('itemID') required int? itemID,
+    @Query('size') String? size,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a JPEG thumbnail of a deleted image',
+      operationId: 'previewTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///Put a deleted item back where it was
+  ///@param itemID
+  Future<chopper.Response<Entry>> restoreTrashItem({required int? itemID, required RestoreRequest? body}) {
+    generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
+
+    return _restoreTrashItem(itemID: itemID, body: body);
+  }
+
+  ///Put a deleted item back where it was
+  ///@param itemID
+  @POST(path: '/api/v1/trash/{itemID}/restore', optionalBody: true)
+  Future<chopper.Response<Entry>> _restoreTrashItem({
+    @Path('itemID') required int? itemID,
+    @Body() required RestoreRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Put a deleted item back where it was',
+      operationId: 'restoreTrashItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["trash"],
       deprecated: false,
     ),
   });

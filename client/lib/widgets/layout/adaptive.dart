@@ -4,9 +4,9 @@ import "dart:math" as math;
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:nomad/theme/app_theme.dart";
 
 enum WindowSize {
@@ -34,7 +34,6 @@ class SidebarExpanded extends Notifier<bool> {
   void toggle() => state = !state;
 }
 
-/// Centers content in a column at most [maxWidth] wide; [builder] gets the side and system insets as padding.
 class ReadableWidth extends StatelessWidget {
   const ReadableWidth({super.key, this.maxWidth = 960, required this.builder});
 

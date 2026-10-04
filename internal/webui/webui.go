@@ -82,7 +82,7 @@ func (h *handler) serveFile(w http.ResponseWriter, r *http.Request, name string)
 		http.NotFound(w, r)
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	info, err := file.Stat()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

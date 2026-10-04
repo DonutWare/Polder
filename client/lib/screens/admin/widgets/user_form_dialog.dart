@@ -10,6 +10,7 @@ import "package:nomad/screens/admin/widgets/role_selector.dart";
 import "package:nomad/util/action_feedback.dart";
 import "package:nomad/util/localization_helper.dart";
 import "package:nomad/widgets/shared/loading_button.dart";
+import "package:nomad/widgets/shared/retention_picker_dialog.dart";
 
 Future<void> showUserFormDialog(BuildContext context, {User? user}) => showDialog<void>(
   context: context,
@@ -56,6 +57,18 @@ class UserFormDialog extends ConsumerWidget {
                 onAmountChanged: notifier.setQuotaAmount,
                 onUnitChanged: notifier.setQuotaUnit,
               ),
+              if (!form.isNew)
+                DropdownButtonFormField<int?>(
+                  initialValue: form.trashRetentionOverrideDays,
+                  decoration: InputDecoration(labelText: localized.serverTrashRetention),
+                  hint: Text(localized.userTrashRetentionUsersChoice),
+                  items: [
+                    DropdownMenuItem(child: Text(localized.userTrashRetentionUsersChoice)),
+                    for (final days in RetentionOptions.including(form.trashRetentionOverrideDays))
+                      DropdownMenuItem(value: days, child: Text(context.retentionDuration(days))),
+                  ],
+                  onChanged: notifier.setTrashRetentionOverride,
+                ),
               if (!form.isNew)
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,

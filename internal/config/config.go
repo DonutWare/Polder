@@ -25,6 +25,8 @@ type Config struct {
 	RescanInterval time.Duration `yaml:"rescanInterval"`
 	WatchFiles     bool          `yaml:"watchFiles"`
 	LoginRateLimit int           `yaml:"loginAttemptsPerMinute"`
+	// TrashRetentionDays is the default until an administrator changes it in the app; 0 keeps the trash forever.
+	TrashRetentionDays int `yaml:"trashRetentionDays"`
 	// WebDir serves the web client from disk instead of the copy built into the binary.
 	WebDir string `yaml:"webDir"`
 	// ServeWeb turns the bundled web client off when false, leaving only the API.
@@ -33,14 +35,15 @@ type Config struct {
 
 func Default() Config {
 	return Config{
-		ListenAddress:  ":6060",
-		ConfigDir:      "/config",
-		DataDir:        "/data",
-		DatabaseDriver: DriverSQLite,
-		RescanInterval: 15 * time.Minute,
-		WatchFiles:     true,
-		LoginRateLimit: 10,
-		ServeWeb:       true,
+		ListenAddress:      ":6060",
+		ConfigDir:          "/config",
+		DataDir:            "/data",
+		DatabaseDriver:     DriverSQLite,
+		RescanInterval:     15 * time.Minute,
+		WatchFiles:         true,
+		LoginRateLimit:     10,
+		TrashRetentionDays: 30,
+		ServeWeb:           true,
 	}
 }
 
@@ -85,6 +88,13 @@ func (cfg *Config) mergeEnvironment() error {
 		}
 		cfg.RescanInterval = interval
 	}
+	if value, ok := os.LookupEnv("NOMAD_TRASH_RETENTION_DAYS"); ok {
+		days, err := strconv.Atoi(value)
+		if err != nil {
+			return fmt.Errorf("NOMAD_TRASH_RETENTION_DAYS: %w", err)
+		}
+		cfg.TrashRetentionDays = days
+	}
 	if value, ok := os.LookupEnv("NOMAD_SERVE_WEB"); ok {
 		serve, err := strconv.ParseBool(value)
 		if err != nil {
@@ -103,6 +113,9 @@ func (cfg *Config) mergeEnvironment() error {
 }
 
 func (cfg Config) validate() error {
+	if cfg.TrashRetentionDays < 0 {
+		return errors.New("trashRetentionDays cannot be negative")
+	}
 	switch cfg.DatabaseDriver {
 	case DriverSQLite:
 		return nil

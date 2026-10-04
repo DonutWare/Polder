@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/shell/shell_destinations_provider.dart";
 import "package:nomad/providers/sync/conflict_queue_provider.dart";
@@ -15,7 +14,6 @@ import "package:nomad/widgets/layout/adaptive.dart";
 import "package:nomad/widgets/navigation/navigation_shell.dart";
 import "package:nomad/widgets/shared/quota_bar.dart";
 
-/// The everyday app: files, sync and settings. Administration lives in [AdminShell].
 class AppShell extends ConsumerWidget {
   const AppShell({required this.location, required this.child, super.key});
 
@@ -25,9 +23,10 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final destinations = ref.watch(shellDestinationsProvider);
+    final secondary = ref.watch(secondaryShellDestinationsProvider);
+    final all = [...destinations, ...secondary];
     final conflicts = ref.watch(conflictQueueProvider.select((queue) => queue.conflicts.length));
     final account = ref.watch(currentAccountProvider);
-    final selected = _selectedIndex(destinations);
     return SyncBackgroundActivator(
       child: SideSheetDrawer(
         title: context.localized.appTitle,
@@ -41,8 +40,9 @@ class AppShell extends ConsumerWidget {
                 badge: destination == ShellDestination.sync && conflicts > 0 ? "$conflicts" : null,
               ),
           ],
-          selectedIndex: selected,
-          onSelected: (index) => context.go(destinations[index].route),
+          secondaryItems: [for (final destination in secondary) destination.item(context)],
+          selectedIndex: all.indexWhere((destination) => location.startsWith(destination.route)),
+          onSelected: (index) => context.go(all[index].route),
           title: account?.user.username ?? context.localized.appTitle,
           subtitle: account == null ? "" : Uri.tryParse(account.serverUrl)?.host ?? account.serverUrl,
           markIcon: IconsaxPlusBold.cloud,
@@ -51,10 +51,5 @@ class AppShell extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  int _selectedIndex(List<ShellDestination> destinations) {
-    final index = destinations.indexWhere((destination) => location.startsWith(destination.route));
-    return index < 0 ? 0 : index;
   }
 }

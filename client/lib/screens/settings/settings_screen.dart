@@ -8,6 +8,7 @@ import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/current_user_provider.dart";
 import "package:nomad/routes/app_routes.dart";
 import "package:nomad/screens/settings/widgets/account_tile.dart";
+import "package:nomad/screens/settings/widgets/trash_retention_tile.dart";
 import "package:nomad/theme/app_theme.dart";
 import "package:nomad/util/localization_helper.dart";
 import "package:nomad/widgets/layout/adaptive.dart";
@@ -35,6 +36,7 @@ class SettingsScreen extends ConsumerWidget {
                 title: localized.account,
                 children: [AccountTile(account: account)],
               ),
+            NavGroup(title: localized.navTrash, children: const [TrashRetentionTile()]),
             NavGroup(
               title: localized.appearance,
               children: const [Padding(padding: EdgeInsets.all(20), child: AppearanceSettings())],

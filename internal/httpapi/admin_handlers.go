@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 
+	"nomad-server/internal/settings"
 	"nomad-server/internal/users"
 )
 
@@ -47,4 +48,20 @@ func (a *API) updateUser(ctx context.Context, input *updateUserInput) (*jsonBody
 
 func (a *API) deleteUser(ctx context.Context, input *userPath) (*struct{}, error) {
 	return nil, a.users.Delete(ctx, currentUser(ctx), input.UserID)
+}
+
+func (a *API) getServerSettings(ctx context.Context, _ *struct{}) (*jsonBody[settings.ServerSettings], error) {
+	current, err := a.settings.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return respond(current), nil
+}
+
+func (a *API) updateServerSettings(ctx context.Context, input *jsonBody[settings.ServerSettingsChanges]) (*jsonBody[settings.ServerSettings], error) {
+	updated, err := a.settings.Update(ctx, input.Body)
+	if err != nil {
+		return nil, err
+	}
+	return respond(updated), nil
 }

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ThumbnailRequest {
 
- String get path; int get rev; int get size;
+ int get size;
 /// Create a copy of ThumbnailRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $ThumbnailRequestCopyWith<ThumbnailRequest> get copyWith => _$ThumbnailRequestCo
 @override
 bool operator ==(Object other) {
   final _this = this as ThumbnailRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThumbnailRequest&&(identical(other.path, _this.path) || other.path == _this.path)&&(identical(other.rev, _this.rev) || other.rev == _this.rev)&&(identical(other.size, _this.size) || other.size == _this.size));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ThumbnailRequest&&(identical(other.size, _this.size) || other.size == _this.size));
 }
 
 
 @override
 int get hashCode {
   final _this = this as ThumbnailRequest;
-  return Object.hash(runtimeType,_this.path,_this.rev,_this.size);
+  return Object.hash(runtimeType,_this.size);
 }
 
 @override
 String toString() {
   final _this = this as ThumbnailRequest;
-  return 'ThumbnailRequest(path: ${_this.path}, rev: ${_this.rev}, size: ${_this.size})';
+  return 'ThumbnailRequest(size: ${_this.size})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $ThumbnailRequestCopyWith<$Res>  {
   factory $ThumbnailRequestCopyWith(ThumbnailRequest value, $Res Function(ThumbnailRequest) _then) = _$ThumbnailRequestCopyWithImpl;
 @useResult
 $Res call({
- String path, int rev, int size
+ int size
 });
 
 
@@ -68,11 +68,9 @@ class _$ThumbnailRequestCopyWithImpl<$Res>
 
 /// Create a copy of ThumbnailRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? path = null,Object? rev = null,Object? size = null,}) {
-  return _then(ThumbnailRequest(
-path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
-as String,rev: null == rev ? _self.rev : rev // ignore: cast_nullable_to_non_nullable
-as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+@pragma('vm:prefer-inline') @override $Res call({Object? size = null,}) {
+  return _then(_self.copyWith(
+size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -94,11 +92,12 @@ extension ThumbnailRequestPatterns on ThumbnailRequest {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ThumbnailRequest value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( FileThumbnailRequest value)?  file,TResult Function( TrashThumbnailRequest value)?  trash,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _ThumbnailRequest() when $default != null:
-return $default(_that);case _:
+case FileThumbnailRequest() when file != null:
+return file(_that);case TrashThumbnailRequest() when trash != null:
+return trash(_that);case _:
   return orElse();
 
 }
@@ -116,14 +115,12 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ThumbnailRequest value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( FileThumbnailRequest value)  file,required TResult Function( TrashThumbnailRequest value)  trash,}){
 final _that = this;
 switch (_that) {
-case _ThumbnailRequest():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
+case FileThumbnailRequest():
+return file(_that);case TrashThumbnailRequest():
+return trash(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -137,11 +134,12 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ThumbnailRequest value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( FileThumbnailRequest value)?  file,TResult? Function( TrashThumbnailRequest value)?  trash,}){
 final _that = this;
 switch (_that) {
-case _ThumbnailRequest() when $default != null:
-return $default(_that);case _:
+case FileThumbnailRequest() when file != null:
+return file(_that);case TrashThumbnailRequest() when trash != null:
+return trash(_that);case _:
   return null;
 
 }
@@ -158,10 +156,11 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String path,  int rev,  int size)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String path,  int rev,  int size)?  file,TResult Function( int itemId,  int size)?  trash,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _ThumbnailRequest() when $default != null:
-return $default(_that.path,_that.rev,_that.size);case _:
+case FileThumbnailRequest() when file != null:
+return file(_that.path,_that.rev,_that.size);case TrashThumbnailRequest() when trash != null:
+return trash(_that.itemId,_that.size);case _:
   return orElse();
 
 }
@@ -179,13 +178,11 @@ return $default(_that.path,_that.rev,_that.size);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String path,  int rev,  int size)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String path,  int rev,  int size)  file,required TResult Function( int itemId,  int size)  trash,}) {final _that = this;
 switch (_that) {
-case _ThumbnailRequest():
-return $default(_that.path,_that.rev,_that.size);case _:
-  throw StateError('Unexpected subclass');
-
-}
+case FileThumbnailRequest():
+return file(_that.path,_that.rev,_that.size);case TrashThumbnailRequest():
+return trash(_that.itemId,_that.size);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -199,10 +196,11 @@ return $default(_that.path,_that.rev,_that.size);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String path,  int rev,  int size)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String path,  int rev,  int size)?  file,TResult? Function( int itemId,  int size)?  trash,}) {final _that = this;
 switch (_that) {
-case _ThumbnailRequest() when $default != null:
-return $default(_that.path,_that.rev,_that.size);case _:
+case FileThumbnailRequest() when file != null:
+return file(_that.path,_that.rev,_that.size);case TrashThumbnailRequest() when trash != null:
+return trash(_that.itemId,_that.size);case _:
   return null;
 
 }
@@ -213,25 +211,25 @@ return $default(_that.path,_that.rev,_that.size);case _:
 /// @nodoc
 
 
-class _ThumbnailRequest implements ThumbnailRequest {
-  const _ThumbnailRequest({required this.path, required this.rev, this.size = 256});
+class FileThumbnailRequest implements ThumbnailRequest {
+  const FileThumbnailRequest({required this.path, required this.rev, this.size = 256});
   
 
-@override final  String path;
-@override final  int rev;
+ final  String path;
+ final  int rev;
 @override@JsonKey() final  int size;
 
 /// Create a copy of ThumbnailRequest
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$ThumbnailRequestCopyWith<_ThumbnailRequest> get copyWith => __$ThumbnailRequestCopyWithImpl<_ThumbnailRequest>(this, _$identity);
+$FileThumbnailRequestCopyWith<FileThumbnailRequest> get copyWith => _$FileThumbnailRequestCopyWithImpl<FileThumbnailRequest>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ThumbnailRequest&&(identical(other.path, path) || other.path == path)&&(identical(other.rev, rev) || other.rev == rev)&&(identical(other.size, size) || other.size == size));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is FileThumbnailRequest&&(identical(other.path, path) || other.path == path)&&(identical(other.rev, rev) || other.rev == rev)&&(identical(other.size, size) || other.size == size));
 }
 
 
@@ -242,15 +240,15 @@ int get hashCode {
 
 @override
 String toString() {
-    return 'ThumbnailRequest(path: $path, rev: $rev, size: $size)';
+    return 'ThumbnailRequest.file(path: $path, rev: $rev, size: $size)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$ThumbnailRequestCopyWith<$Res> implements $ThumbnailRequestCopyWith<$Res> {
-  factory _$ThumbnailRequestCopyWith(_ThumbnailRequest value, $Res Function(_ThumbnailRequest) _then) = __$ThumbnailRequestCopyWithImpl;
+abstract mixin class $FileThumbnailRequestCopyWith<$Res> implements $ThumbnailRequestCopyWith<$Res> {
+  factory $FileThumbnailRequestCopyWith(FileThumbnailRequest value, $Res Function(FileThumbnailRequest) _then) = _$FileThumbnailRequestCopyWithImpl;
 @override @useResult
 $Res call({
  String path, int rev, int size
@@ -261,19 +259,89 @@ $Res call({
 
 }
 /// @nodoc
-class __$ThumbnailRequestCopyWithImpl<$Res>
-    implements _$ThumbnailRequestCopyWith<$Res> {
-  __$ThumbnailRequestCopyWithImpl(this._self, this._then);
+class _$FileThumbnailRequestCopyWithImpl<$Res>
+    implements $FileThumbnailRequestCopyWith<$Res> {
+  _$FileThumbnailRequestCopyWithImpl(this._self, this._then);
 
-  final _ThumbnailRequest _self;
-  final $Res Function(_ThumbnailRequest) _then;
+  final FileThumbnailRequest _self;
+  final $Res Function(FileThumbnailRequest) _then;
 
 /// Create a copy of ThumbnailRequest
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? path = null,Object? rev = null,Object? size = null,}) {
-  return _then(_ThumbnailRequest(
+  return _then(FileThumbnailRequest(
 path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String,rev: null == rev ? _self.rev : rev // ignore: cast_nullable_to_non_nullable
+as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class TrashThumbnailRequest implements ThumbnailRequest {
+  const TrashThumbnailRequest({required this.itemId, this.size = 256});
+  
+
+ final  int itemId;
+@override@JsonKey() final  int size;
+
+/// Create a copy of ThumbnailRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TrashThumbnailRequestCopyWith<TrashThumbnailRequest> get copyWith => _$TrashThumbnailRequestCopyWithImpl<TrashThumbnailRequest>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is TrashThumbnailRequest&&(identical(other.itemId, itemId) || other.itemId == itemId)&&(identical(other.size, size) || other.size == size));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,itemId,size);
+}
+
+@override
+String toString() {
+    return 'ThumbnailRequest.trash(itemId: $itemId, size: $size)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TrashThumbnailRequestCopyWith<$Res> implements $ThumbnailRequestCopyWith<$Res> {
+  factory $TrashThumbnailRequestCopyWith(TrashThumbnailRequest value, $Res Function(TrashThumbnailRequest) _then) = _$TrashThumbnailRequestCopyWithImpl;
+@override @useResult
+$Res call({
+ int itemId, int size
+});
+
+
+
+
+}
+/// @nodoc
+class _$TrashThumbnailRequestCopyWithImpl<$Res>
+    implements $TrashThumbnailRequestCopyWith<$Res> {
+  _$TrashThumbnailRequestCopyWithImpl(this._self, this._then);
+
+  final TrashThumbnailRequest _self;
+  final $Res Function(TrashThumbnailRequest) _then;
+
+/// Create a copy of ThumbnailRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? itemId = null,Object? size = null,}) {
+  return _then(TrashThumbnailRequest(
+itemId: null == itemId ? _self.itemId : itemId // ignore: cast_nullable_to_non_nullable
 as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,
   ));

@@ -1,5 +1,4 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
 import "package:nomad/providers/sync/sync_platform_provider.dart";
 import "package:nomad/routes/app_routes.dart";
 
@@ -7,6 +6,7 @@ enum ShellDestination {
   files(AppRoutes.files),
   sync(AppRoutes.sync),
   autoUpload(AppRoutes.autoUpload),
+  trash(AppRoutes.trash),
   settings(AppRoutes.settings);
 
   const ShellDestination(this.route);
@@ -29,6 +29,9 @@ final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
     ShellDestination.files,
     if (platform.supportsFolderSync) ShellDestination.sync,
     if (platform.supportsAutoUpload) ShellDestination.autoUpload,
-    ShellDestination.settings,
   ];
 });
+
+final secondaryShellDestinationsProvider = Provider<List<ShellDestination>>(
+  (ref) => const [ShellDestination.trash, ShellDestination.settings],
+);

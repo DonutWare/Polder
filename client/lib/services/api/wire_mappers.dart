@@ -3,8 +3,10 @@ import "package:nomad/models/change.dart";
 import "package:nomad/models/directory_listing.dart";
 import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/manifest.dart";
+import "package:nomad/models/server_settings.dart";
 import "package:nomad/models/setup_status.dart";
 import "package:nomad/models/token_pair.dart";
+import "package:nomad/models/trash.dart";
 import "package:nomad/models/upload_session.dart";
 import "package:nomad/models/user.dart";
 import "package:nomad/services/api/generated/nomad.swagger.dart" as wire;
@@ -20,14 +22,11 @@ extension EntryToModel on wire.Entry {
     hash: hash,
     mime: mime,
     meta: meta,
-    previewState: switch (previewState) {
-      wire.EntryPreviewState.pending => PreviewState.pending,
-      wire.EntryPreviewState.ready => PreviewState.ready,
-      wire.EntryPreviewState.failed => PreviewState.failed,
-      wire.EntryPreviewState.none || wire.EntryPreviewState.swaggerGeneratedUnknown => PreviewState.none,
-    },
+    previewState: _previewState(previewState.value),
   );
 }
+
+PreviewState _previewState(String? name) => PreviewState.values.asNameMap()[name] ?? PreviewState.none;
 
 extension ListResponseToModel on wire.ListResponse {
   DirectoryListing toModel() =>
@@ -90,7 +89,60 @@ extension UserToModel on wire.User {
     usedBytes: usedBytes,
     disabled: disabled,
     createdAt: createdAt,
+    trashRetentionOverrideDays: trashRetentionOverrideDays,
   );
+}
+
+extension TrashItemToModel on wire.TrashItem {
+  TrashItem toModel() => TrashItem(
+    id: id,
+    name: name,
+    originalPath: originalPath,
+    isDir: isDir,
+    size: size,
+    mime: mime,
+    hash: hash,
+    previewState: _previewState(previewState.value),
+    deletedAt: deletedAt,
+    expiresAt: expiresAt,
+  );
+}
+
+extension TrashRetentionToModel on wire.TrashRetention {
+  TrashRetention toModel() => TrashRetention(
+    days: days,
+    source: switch (source) {
+      wire.TrashRetentionSource.user => RetentionSource.user,
+      wire.TrashRetentionSource.server => RetentionSource.server,
+      wire.TrashRetentionSource.admin => RetentionSource.admin,
+      wire.TrashRetentionSource.$default ||
+      wire.TrashRetentionSource.swaggerGeneratedUnknown => RetentionSource.serverDefault,
+    },
+    locked: locked,
+    userDays: userDays,
+    defaultDays: defaultDays,
+  );
+}
+
+extension TrashListingToModel on wire.TrashListing {
+  TrashListing toModel() => TrashListing(
+    items: [for (final item in items ?? <wire.TrashItem>[]) item.toModel()],
+    totalBytes: totalBytes,
+    retention: retention.toModel(),
+  );
+}
+
+extension ServerSettingsToModel on wire.ServerSettings {
+  ServerSettings toModel() =>
+      ServerSettings(trashRetentionDays: trashRetentionDays, trashRetentionEnforced: trashRetentionEnforced);
+}
+
+extension RestoreModeToWire on RestoreMode {
+  wire.RestoreRequestOnConflict toWire() => switch (this) {
+    RestoreMode.fail => wire.RestoreRequestOnConflict.fail,
+    RestoreMode.overwrite => wire.RestoreRequestOnConflict.overwrite,
+    RestoreMode.keepBoth => wire.RestoreRequestOnConflict.keepboth,
+  };
 }
 
 extension UploadStatusToModel on wire.UploadStatus {
@@ -119,6 +171,7 @@ extension UpdateUserRequestToWire on UpdateUserRequest {
     },
     quotaBytes: quotaBytes,
     disabled: disabled,
+    trashRetentionOverrideDays: trashRetentionOverrideDays,
   );
 }
 

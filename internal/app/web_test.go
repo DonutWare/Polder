@@ -48,12 +48,12 @@ func TestWebClientIsServedOutsideTheAPI(t *testing.T) {
 func TestAPIStillAnswersNextToTheWebClient(t *testing.T) {
 	server := startServerWithWebClient(t)
 
-	status, contentType, body := fetch(t, server, "/api/v1/setup")
+	status, _, body := fetch(t, server, "/api/v1/setup")
 	if status != http.StatusOK || !strings.Contains(body, "needsSetup") {
 		t.Fatalf("setup status: %d %q", status, body)
 	}
 	for _, path := range []string{"/api/v1/nonexistent", "/api/v2/files"} {
-		status, contentType, _ = fetch(t, server, path)
+		status, contentType, _ := fetch(t, server, path)
 		if status != http.StatusNotFound || !strings.HasPrefix(contentType, "application/json") {
 			t.Errorf("GET %s: %d %s, want a JSON 404", path, status, contentType)
 		}

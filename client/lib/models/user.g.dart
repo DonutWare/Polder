@@ -14,6 +14,7 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   usedBytes: (json['usedBytes'] as num?)?.toInt() ?? 0,
   disabled: json['disabled'] as bool? ?? false,
   createdAt: json['createdAt'] == null ? null : DateTime.parse(json['createdAt'] as String),
+  trashRetentionOverrideDays: (json['trashRetentionOverrideDays'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
@@ -24,6 +25,7 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'usedBytes': instance.usedBytes,
   'disabled': instance.disabled,
   'createdAt': ?instance.createdAt?.toIso8601String(),
+  'trashRetentionOverrideDays': ?instance.trashRetentionOverrideDays,
 };
 
 const _$UserRoleEnumMap = {UserRole.admin: 'admin', UserRole.user: 'user'};

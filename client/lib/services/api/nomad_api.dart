@@ -1,12 +1,16 @@
 import "dart:typed_data";
 
+import "package:chopper/chopper.dart" as chopper;
+
 import "package:nomad/models/admin_user_requests.dart";
 import "package:nomad/models/change.dart";
 import "package:nomad/models/directory_listing.dart";
 import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/manifest.dart";
+import "package:nomad/models/server_settings.dart";
 import "package:nomad/models/setup_status.dart";
 import "package:nomad/models/token_pair.dart";
+import "package:nomad/models/trash.dart";
 import "package:nomad/models/upload_session.dart";
 import "package:nomad/models/user.dart";
 import "package:nomad/services/api/api_exceptions.dart";
@@ -71,8 +75,13 @@ class NomadApi {
     return response.body!.map(_asBytes);
   }
 
-  Future<Uint8List> downloadBytes(String path, {void Function(int received, int total)? onProgress}) async {
-    final response = await _service.downloadFile(path: path);
+  Future<Uint8List> downloadBytes(String path, {void Function(int received, int total)? onProgress}) async =>
+      _collect(await _service.downloadFile(path: path), onProgress);
+
+  Future<Uint8List> _collect(
+    chopper.Response<Stream<List<int>>> response,
+    void Function(int received, int total)? onProgress,
+  ) async {
     final total = int.tryParse(response.headers["content-length"] ?? "") ?? -1;
     final bytes = BytesBuilder(copy: false);
     await for (final chunk in response.body!) {
@@ -115,12 +124,23 @@ class NomadApi {
 
   Future<void> delete(String path, {int baseRev = -1}) => _service.deleteFile(path: path, baseRev: baseRev);
 
-  Future<Uint8List?> preview(String path, {int size = 256}) async {
+  Future<Uint8List?> preview(String path, {int size = 256}) => _thumbnail(
+    () => _service.previewFile(
+      path: path,
+      size: _thumbnailSize(wire.ApiV1FilesPreviewGetSize.values, (option) => option.value, size),
+    ),
+  );
+
+  Future<Uint8List?> trashPreview(int id, {int size = 256}) => _thumbnail(
+    () => _service.previewTrashItem(
+      itemID: id,
+      size: _thumbnailSize(wire.ApiV1TrashItemIDPreviewGetSize.values, (option) => option.value, size),
+    ),
+  );
+
+  Future<Uint8List?> _thumbnail(Future<chopper.Response<Stream<List<int>>>> Function() request) async {
     try {
-      final response = await _service.previewFile(path: path, size: _previewSize(size));
-      final bytes = BytesBuilder(copy: false);
-      await response.body!.forEach(bytes.add);
-      return bytes.takeBytes();
+      return await _collect(await request(), null);
     } on NotFoundException {
       return null;
     }
@@ -145,10 +165,41 @@ class NomadApi {
 
   Future<void> abortUpload(String uploadId) => _service.abortUpload(uploadID: uploadId);
 
+  Future<TrashListing> listTrash() async => (await _service.listTrash()).body!.toModel();
+
+  Future<FileEntry> restoreFromTrash(int id, {RestoreMode onConflict = RestoreMode.fail}) async =>
+      (await _service.restoreTrashItem(
+        itemID: id,
+        body: wire.RestoreRequest(onConflict: onConflict.toWire()),
+      )).body!.toModel();
+
+  Future<Uint8List> downloadFromTrash(int id, {void Function(int received, int total)? onProgress}) async =>
+      _collect(await _service.downloadTrashItem(itemID: id), onProgress);
+
+  Future<void> deleteFromTrash(int id) => _service.deleteTrashItem(itemID: id);
+
+  Future<void> emptyTrash() => _service.emptyTrash();
+
+  Future<TrashRetention> trashRetention() async => (await _service.getTrashRetention()).body!.toModel();
+
+  Future<TrashRetention> setTrashRetention(int? days) async =>
+      (await _service.setTrashRetention(body: wire.RetentionRequest(days: days))).body!.toModel();
+
+  Future<ServerSettings> serverSettings() async => (await _service.getServerSettings()).body!.toModel();
+
+  Future<ServerSettings> updateServerSettings({int? trashRetentionDays, bool? trashRetentionEnforced}) async =>
+      (await _service.updateServerSettings(
+        body: wire.ServerSettingsChanges(
+          trashRetentionDays: trashRetentionDays,
+          trashRetentionEnforced: trashRetentionEnforced,
+        ),
+      )).body!.toModel();
+
   static Uint8List _asBytes(List<int> chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
 
-  static wire.ApiV1FilesPreviewGetSize _previewSize(int size) => wire.ApiV1FilesPreviewGetSize.values.firstWhere(
-    (supported) => supported.value == size,
-    orElse: () => throw ArgumentError.value(size, "size", "not a thumbnail size the server renders"),
-  );
+  static T _thumbnailSize<T extends Object>(List<T> supported, int? Function(T option) sizeOf, int size) =>
+      supported.firstWhere(
+        (option) => sizeOf(option) == size,
+        orElse: () => throw ArgumentError.value(size, "size", "not a thumbnail size the server renders"),
+      );
 }

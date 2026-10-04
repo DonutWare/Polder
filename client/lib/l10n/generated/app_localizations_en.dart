@@ -192,6 +192,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get deletePermanently => 'Delete permanently';
+
+  @override
+  String get deletePermanentlyMessage => 'It can\'t be restored afterwards.';
+
+  @override
+  String deletePermanentlyTitle(String name) {
+    return 'Delete \"$name\" permanently?';
+  }
+
+  @override
   String get deleteMessage => 'It will be moved to the trash on the server.';
 
   @override
@@ -239,6 +250,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emptyFolder => 'This folder is empty';
+
+  @override
+  String get emptyTrash => 'Empty trash';
+
+  @override
+  String get emptyTrashMessage => 'Everything in the trash is deleted permanently. This can\'t be undone.';
+
+  @override
+  String get emptyTrashTitle => 'Empty the trash?';
+
+  @override
+  String get enforceTrashRetention => 'Apply to every user';
+
+  @override
+  String get enforceTrashRetentionHint => 'Users can\'t choose their own. A retention set for one user still wins.';
 
   @override
   String get errorAlreadyExists => 'Something with that name already exists.';
@@ -352,6 +378,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSync => 'Sync';
 
   @override
+  String get navTrash => 'Trash';
+
+  @override
   String get newFolder => 'New folder';
 
   @override
@@ -368,6 +397,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noUsers => 'No users yet.';
+
+  @override
+  String get overwrite => 'Overwrite';
 
   @override
   String get password => 'Password';
@@ -410,6 +442,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resolve => 'Resolve';
 
   @override
+  String get restore => 'Restore';
+
+  @override
+  String restoreConflictMessage(String path) {
+    return 'There is already something at $path. Overwrite moves it to the trash, Keep both restores this item next to it under a new name.';
+  }
+
+  @override
+  String restoreConflictTitle(String name) {
+    return '\"$name\" already exists';
+  }
+
+  @override
+  String restoredTo(String path) {
+    return 'Restored to $path';
+  }
+
+  @override
   String get retry => 'Retry';
 
   @override
@@ -437,6 +487,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serverFolder => 'Folder on the server';
+
+  @override
+  String get serverTrashRetention => 'Trash retention';
+
+  @override
+  String serverTrashRetentionHint(String duration) {
+    return 'Default for every user: $duration';
+  }
 
   @override
   String get serverUrl => 'Server address';
@@ -515,6 +573,58 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transfers => 'Transfers';
 
   @override
+  String get trashEmpty => 'The trash is empty';
+
+  @override
+  String trashItemDeleted(String date) {
+    return 'Deleted $date';
+  }
+
+  @override
+  String trashItemExpires(String date) {
+    return 'Deleted permanently on $date';
+  }
+
+  @override
+  String trashItemFrom(String folder) {
+    return 'From $folder';
+  }
+
+  @override
+  String get trashRetention => 'Keep deleted items';
+
+  @override
+  String trashRetentionDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count days', one: '1 day');
+    return '$_temp0';
+  }
+
+  @override
+  String get trashRetentionForever => 'Forever';
+
+  @override
+  String get trashRetentionForeverHint => 'Items stay in the trash until you delete them.';
+
+  @override
+  String trashRetentionHint(String duration) {
+    return 'Items in the trash are deleted permanently after $duration.';
+  }
+
+  @override
+  String trashRetentionServerDefault(String duration) {
+    return 'Server default ($duration)';
+  }
+
+  @override
+  String get trashRetentionSetByAdmin => 'Set by your administrator';
+
+  @override
+  String trashSummary(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count items', one: '1 item');
+    return '$_temp0 · $size';
+  }
+
+  @override
   String get type => 'Type';
 
   @override
@@ -539,6 +649,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count users', one: '1 user');
     return '$_temp0';
   }
+
+  @override
+  String get userTrashRetentionUsersChoice => 'User\'s choice';
 
   @override
   String get wifiOnly => 'Only on Wi-Fi';

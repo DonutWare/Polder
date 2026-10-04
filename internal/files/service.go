@@ -28,14 +28,36 @@ type Service struct {
 	disk             *storage.Disk
 	locks            userLocks
 	onContentChanged ContentChangedFunc
+	onContentRemoved func()
 }
 
 func NewService(db *sql.DB, disk *storage.Disk) *Service {
-	return &Service{db: db, disk: disk, onContentChanged: func(int64, string) {}}
+	return &Service{db: db, disk: disk, onContentChanged: func(int64, string) {}, onContentRemoved: func() {}}
 }
 
 func (s *Service) OnContentChanged(callback ContentChangedFunc) {
 	s.onContentChanged = callback
+}
+
+func (s *Service) OnContentRemoved(callback func()) {
+	s.onContentRemoved = callback
+}
+
+func (s *Service) HashesInUse(ctx context.Context) (map[string]bool, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT hash FROM files WHERE hash <> '' UNION SELECT hash FROM trash WHERE hash <> ''`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	inUse := map[string]bool{}
+	for rows.Next() {
+		var hash string
+		if err := rows.Scan(&hash); err != nil {
+			return nil, err
+		}
+		inUse[hash] = true
+	}
+	return inUse, rows.Err()
 }
 
 func (s *Service) Disk() *storage.Disk { return s.disk }
@@ -181,7 +203,8 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
 
-	return s.inTransaction(ctx, func(tx *sql.Tx) error {
+	undo := func() {}
+	err = s.inTransaction(ctx, func(tx *sql.Tx) error {
 		current, err := s.existingEntry(ctx, tx, owner.ID, cleanPath)
 		if err != nil {
 			return err
@@ -189,15 +212,15 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 		if baseRev > 0 && current.Rev != baseRev {
 			return apperr.Conflict(current, "%s changed since revision %d", cleanPath, baseRev)
 		}
-		absolute, err := s.disk.Resolve(owner.Username, cleanPath)
-		if err != nil {
-			return err
-		}
-		if err := s.disk.MoveToTrash(owner.Username, absolute, cleanPath); err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return fmt.Errorf("move to trash: %w", err)
-		}
-		return removeTree(ctx, tx, owner.ID, cleanPath)
+		undo, err = s.moveToTrash(ctx, tx, owner, current)
+		return err
 	})
+	if err != nil {
+		undo()
+		return err
+	}
+	s.onContentRemoved()
+	return nil
 }
 
 func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo string, baseRev int64) (Entry, error) {

@@ -2,10 +2,13 @@ package preview
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"nomad-server/internal/files"
@@ -30,10 +33,24 @@ type Worker struct {
 	users    *users.Store
 	cacheDir string
 	queue    chan job
+	cleanups chan struct{}
 }
 
 func NewWorker(fileService *files.Service, userStore *users.Store, cacheDir string) *Worker {
-	return &Worker{files: fileService, users: userStore, cacheDir: cacheDir, queue: make(chan job, queueCapacity)}
+	return &Worker{
+		files:    fileService,
+		users:    userStore,
+		cacheDir: cacheDir,
+		queue:    make(chan job, queueCapacity),
+		cleanups: make(chan struct{}, 1),
+	}
+}
+
+func (w *Worker) RequestCleanup() {
+	select {
+	case w.cleanups <- struct{}{}:
+	default:
+	}
 }
 
 func (w *Worker) Enqueue(userID int64, cleanPath string) {
@@ -46,6 +63,7 @@ func (w *Worker) Enqueue(userID int64, cleanPath string) {
 func (w *Worker) Run(ctx context.Context) {
 	ticker := time.NewTicker(backlogInterval)
 	defer ticker.Stop()
+	w.removeUnusedThumbnails(ctx)
 	w.processBacklog(ctx)
 	for {
 		select {
@@ -53,6 +71,8 @@ func (w *Worker) Run(ctx context.Context) {
 			return
 		case next := <-w.queue:
 			w.process(ctx, next)
+		case <-w.cleanups:
+			w.removeUnusedThumbnails(ctx)
 		case <-ticker.C:
 			w.processBacklog(ctx)
 		}
@@ -105,6 +125,30 @@ func (w *Worker) generate(ctx context.Context, owner users.User, entry files.Ent
 		}
 	}
 	return decoded.meta(), files.PreviewReady
+}
+
+func (w *Worker) removeUnusedThumbnails(ctx context.Context) {
+	inUse, err := w.files.HashesInUse(ctx)
+	if err != nil {
+		slog.Warn("load hashes for thumbnail cleanup", "error", err)
+		return
+	}
+	err = filepath.WalkDir(w.cacheDir, func(current string, entry fs.DirEntry, err error) error {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		if err != nil || entry.IsDir() {
+			return err
+		}
+		contentHash, _, isThumbnail := strings.Cut(entry.Name(), "-")
+		if isThumbnail && !inUse[contentHash] {
+			return os.Remove(current)
+		}
+		return nil
+	})
+	if err != nil {
+		slog.Warn("remove unused thumbnails", "error", err)
+	}
 }
 
 func (w *Worker) ThumbnailPath(contentHash string, size int) string {

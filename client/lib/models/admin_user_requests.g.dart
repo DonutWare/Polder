@@ -27,6 +27,7 @@ _UpdateUserRequest _$UpdateUserRequestFromJson(Map<String, dynamic> json) => _Up
   role: $enumDecodeNullable(_$UserRoleEnumMap, json['role']),
   quotaBytes: (json['quotaBytes'] as num?)?.toInt(),
   disabled: json['disabled'] as bool?,
+  trashRetentionOverrideDays: (json['trashRetentionOverrideDays'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$UpdateUserRequestToJson(_UpdateUserRequest instance) => <String, dynamic>{
@@ -34,4 +35,5 @@ Map<String, dynamic> _$UpdateUserRequestToJson(_UpdateUserRequest instance) => <
   'role': ?_$UserRoleEnumMap[instance.role],
   'quotaBytes': ?instance.quotaBytes,
   'disabled': ?instance.disabled,
+  'trashRetentionOverrideDays': ?instance.trashRetentionOverrideDays,
 };

@@ -8,5 +8,9 @@ import "package:nomad/util/ref_cache.dart";
 
 final thumbnailProvider = FutureProvider.autoDispose.family<Uint8List?, ThumbnailRequest>((ref, request) async {
   ref.cacheFor(const Duration(minutes: 5));
-  return ref.watch(nomadApiProvider).preview(request.path, size: request.size);
+  final api = ref.watch(nomadApiProvider);
+  return switch (request) {
+    FileThumbnailRequest(:final path, :final size) => api.preview(path, size: size),
+    TrashThumbnailRequest(:final itemId, :final size) => api.trashPreview(itemId, size: size),
+  };
 });

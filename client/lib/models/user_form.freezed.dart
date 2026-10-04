@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserForm {
 
- User? get original; String get username; String get password; UserRole get role; String get quotaAmount; QuotaUnit get quotaUnit; bool get disabled; bool get saving;
+ User? get original; String get username; String get password; UserRole get role; String get quotaAmount; QuotaUnit get quotaUnit; bool get disabled; int? get trashRetentionOverrideDays; bool get saving;
 /// Create a copy of UserForm
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $UserFormCopyWith<UserForm> get copyWith => _$UserFormCopyWithImpl<UserForm>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as UserForm;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserForm&&(identical(other.original, _this.original) || other.original == _this.original)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaAmount, _this.quotaAmount) || other.quotaAmount == _this.quotaAmount)&&(identical(other.quotaUnit, _this.quotaUnit) || other.quotaUnit == _this.quotaUnit)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled)&&(identical(other.saving, _this.saving) || other.saving == _this.saving));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserForm&&(identical(other.original, _this.original) || other.original == _this.original)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaAmount, _this.quotaAmount) || other.quotaAmount == _this.quotaAmount)&&(identical(other.quotaUnit, _this.quotaUnit) || other.quotaUnit == _this.quotaUnit)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled)&&(identical(other.trashRetentionOverrideDays, _this.trashRetentionOverrideDays) || other.trashRetentionOverrideDays == _this.trashRetentionOverrideDays)&&(identical(other.saving, _this.saving) || other.saving == _this.saving));
 }
 
 
 @override
 int get hashCode {
   final _this = this as UserForm;
-  return Object.hash(runtimeType,_this.original,_this.username,_this.password,_this.role,_this.quotaAmount,_this.quotaUnit,_this.disabled,_this.saving);
+  return Object.hash(runtimeType,_this.original,_this.username,_this.password,_this.role,_this.quotaAmount,_this.quotaUnit,_this.disabled,_this.trashRetentionOverrideDays,_this.saving);
 }
 
 @override
 String toString() {
   final _this = this as UserForm;
-  return 'UserForm(original: ${_this.original}, username: ${_this.username}, password: ${_this.password}, role: ${_this.role}, quotaAmount: ${_this.quotaAmount}, quotaUnit: ${_this.quotaUnit}, disabled: ${_this.disabled}, saving: ${_this.saving})';
+  return 'UserForm(original: ${_this.original}, username: ${_this.username}, password: ${_this.password}, role: ${_this.role}, quotaAmount: ${_this.quotaAmount}, quotaUnit: ${_this.quotaUnit}, disabled: ${_this.disabled}, trashRetentionOverrideDays: ${_this.trashRetentionOverrideDays}, saving: ${_this.saving})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $UserFormCopyWith<$Res>  {
   factory $UserFormCopyWith(UserForm value, $Res Function(UserForm) _then) = _$UserFormCopyWithImpl;
 @useResult
 $Res call({
- User? original, String username, String password, UserRole role, String quotaAmount, QuotaUnit quotaUnit, bool disabled, bool saving
+ User? original, String username, String password, UserRole role, String quotaAmount, QuotaUnit quotaUnit, bool disabled, int? trashRetentionOverrideDays, bool saving
 });
 
 
@@ -68,7 +68,7 @@ class _$UserFormCopyWithImpl<$Res>
 
 /// Create a copy of UserForm
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? original = freezed,Object? username = null,Object? password = null,Object? role = null,Object? quotaAmount = null,Object? quotaUnit = null,Object? disabled = null,Object? saving = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? original = freezed,Object? username = null,Object? password = null,Object? role = null,Object? quotaAmount = null,Object? quotaUnit = null,Object? disabled = null,Object? trashRetentionOverrideDays = freezed,Object? saving = null,}) {
   return _then(UserForm(
 original: freezed == original ? _self.original : original // ignore: cast_nullable_to_non_nullable
 as User?,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -77,7 +77,8 @@ as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non
 as UserRole,quotaAmount: null == quotaAmount ? _self.quotaAmount : quotaAmount // ignore: cast_nullable_to_non_nullable
 as String,quotaUnit: null == quotaUnit ? _self.quotaUnit : quotaUnit // ignore: cast_nullable_to_non_nullable
 as QuotaUnit,disabled: null == disabled ? _self.disabled : disabled // ignore: cast_nullable_to_non_nullable
-as bool,saving: null == saving ? _self.saving : saving // ignore: cast_nullable_to_non_nullable
+as bool,trashRetentionOverrideDays: freezed == trashRetentionOverrideDays ? _self.trashRetentionOverrideDays : trashRetentionOverrideDays // ignore: cast_nullable_to_non_nullable
+as int?,saving: null == saving ? _self.saving : saving // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -175,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( User? original,  String username,  String password,  UserRole role,  String quotaAmount,  QuotaUnit quotaUnit,  bool disabled,  bool saving)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( User? original,  String username,  String password,  UserRole role,  String quotaAmount,  QuotaUnit quotaUnit,  bool disabled,  int? trashRetentionOverrideDays,  bool saving)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserForm() when $default != null:
-return $default(_that.original,_that.username,_that.password,_that.role,_that.quotaAmount,_that.quotaUnit,_that.disabled,_that.saving);case _:
+return $default(_that.original,_that.username,_that.password,_that.role,_that.quotaAmount,_that.quotaUnit,_that.disabled,_that.trashRetentionOverrideDays,_that.saving);case _:
   return orElse();
 
 }
@@ -196,10 +197,10 @@ return $default(_that.original,_that.username,_that.password,_that.role,_that.qu
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( User? original,  String username,  String password,  UserRole role,  String quotaAmount,  QuotaUnit quotaUnit,  bool disabled,  bool saving)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( User? original,  String username,  String password,  UserRole role,  String quotaAmount,  QuotaUnit quotaUnit,  bool disabled,  int? trashRetentionOverrideDays,  bool saving)  $default,) {final _that = this;
 switch (_that) {
 case _UserForm():
-return $default(_that.original,_that.username,_that.password,_that.role,_that.quotaAmount,_that.quotaUnit,_that.disabled,_that.saving);case _:
+return $default(_that.original,_that.username,_that.password,_that.role,_that.quotaAmount,_that.quotaUnit,_that.disabled,_that.trashRetentionOverrideDays,_that.saving);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -216,10 +217,10 @@ return $default(_that.original,_that.username,_that.password,_that.role,_that.qu
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( User? original,  String username,  String password,  UserRole role,  String quotaAmount,  QuotaUnit quotaUnit,  bool disabled,  bool saving)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( User? original,  String username,  String password,  UserRole role,  String quotaAmount,  QuotaUnit quotaUnit,  bool disabled,  int? trashRetentionOverrideDays,  bool saving)?  $default,) {final _that = this;
 switch (_that) {
 case _UserForm() when $default != null:
-return $default(_that.original,_that.username,_that.password,_that.role,_that.quotaAmount,_that.quotaUnit,_that.disabled,_that.saving);case _:
+return $default(_that.original,_that.username,_that.password,_that.role,_that.quotaAmount,_that.quotaUnit,_that.disabled,_that.trashRetentionOverrideDays,_that.saving);case _:
   return null;
 
 }
@@ -231,7 +232,7 @@ return $default(_that.original,_that.username,_that.password,_that.role,_that.qu
 
 
 class _UserForm extends UserForm {
-  const _UserForm({this.original, this.username = "", this.password = "", this.role = UserRole.user, this.quotaAmount = "0", this.quotaUnit = QuotaUnit.gb, this.disabled = false, this.saving = false}): super._();
+  const _UserForm({this.original, this.username = "", this.password = "", this.role = UserRole.user, this.quotaAmount = "0", this.quotaUnit = QuotaUnit.gb, this.disabled = false, this.trashRetentionOverrideDays, this.saving = false}): super._();
   
 
 @override final  User? original;
@@ -241,6 +242,7 @@ class _UserForm extends UserForm {
 @override@JsonKey() final  String quotaAmount;
 @override@JsonKey() final  QuotaUnit quotaUnit;
 @override@JsonKey() final  bool disabled;
+@override final  int? trashRetentionOverrideDays;
 @override@JsonKey() final  bool saving;
 
 /// Create a copy of UserForm
@@ -253,18 +255,18 @@ _$UserFormCopyWith<_UserForm> get copyWith => __$UserFormCopyWithImpl<_UserForm>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserForm&&(identical(other.original, original) || other.original == original)&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaAmount, quotaAmount) || other.quotaAmount == quotaAmount)&&(identical(other.quotaUnit, quotaUnit) || other.quotaUnit == quotaUnit)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.saving, saving) || other.saving == saving));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserForm&&(identical(other.original, original) || other.original == original)&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaAmount, quotaAmount) || other.quotaAmount == quotaAmount)&&(identical(other.quotaUnit, quotaUnit) || other.quotaUnit == quotaUnit)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.trashRetentionOverrideDays, trashRetentionOverrideDays) || other.trashRetentionOverrideDays == trashRetentionOverrideDays)&&(identical(other.saving, saving) || other.saving == saving));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,original,username,password,role,quotaAmount,quotaUnit,disabled,saving);
+    return Object.hash(runtimeType,original,username,password,role,quotaAmount,quotaUnit,disabled,trashRetentionOverrideDays,saving);
 }
 
 @override
 String toString() {
-    return 'UserForm(original: $original, username: $username, password: $password, role: $role, quotaAmount: $quotaAmount, quotaUnit: $quotaUnit, disabled: $disabled, saving: $saving)';
+    return 'UserForm(original: $original, username: $username, password: $password, role: $role, quotaAmount: $quotaAmount, quotaUnit: $quotaUnit, disabled: $disabled, trashRetentionOverrideDays: $trashRetentionOverrideDays, saving: $saving)';
 }
 
 
@@ -275,7 +277,7 @@ abstract mixin class _$UserFormCopyWith<$Res> implements $UserFormCopyWith<$Res>
   factory _$UserFormCopyWith(_UserForm value, $Res Function(_UserForm) _then) = __$UserFormCopyWithImpl;
 @override @useResult
 $Res call({
- User? original, String username, String password, UserRole role, String quotaAmount, QuotaUnit quotaUnit, bool disabled, bool saving
+ User? original, String username, String password, UserRole role, String quotaAmount, QuotaUnit quotaUnit, bool disabled, int? trashRetentionOverrideDays, bool saving
 });
 
 
@@ -292,7 +294,7 @@ class __$UserFormCopyWithImpl<$Res>
 
 /// Create a copy of UserForm
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? original = freezed,Object? username = null,Object? password = null,Object? role = null,Object? quotaAmount = null,Object? quotaUnit = null,Object? disabled = null,Object? saving = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? original = freezed,Object? username = null,Object? password = null,Object? role = null,Object? quotaAmount = null,Object? quotaUnit = null,Object? disabled = null,Object? trashRetentionOverrideDays = freezed,Object? saving = null,}) {
   return _then(_UserForm(
 original: freezed == original ? _self.original : original // ignore: cast_nullable_to_non_nullable
 as User?,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -301,7 +303,8 @@ as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non
 as UserRole,quotaAmount: null == quotaAmount ? _self.quotaAmount : quotaAmount // ignore: cast_nullable_to_non_nullable
 as String,quotaUnit: null == quotaUnit ? _self.quotaUnit : quotaUnit // ignore: cast_nullable_to_non_nullable
 as QuotaUnit,disabled: null == disabled ? _self.disabled : disabled // ignore: cast_nullable_to_non_nullable
-as bool,saving: null == saving ? _self.saving : saving // ignore: cast_nullable_to_non_nullable
+as bool,trashRetentionOverrideDays: freezed == trashRetentionOverrideDays ? _self.trashRetentionOverrideDays : trashRetentionOverrideDays // ignore: cast_nullable_to_non_nullable
+as int?,saving: null == saving ? _self.saving : saving // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

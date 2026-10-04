@@ -70,6 +70,9 @@ func (s *Service) Write(ctx context.Context, owner users.User, request WriteRequ
 		return Entry{}, err
 	}
 	s.onContentChanged(owner.ID, entry.Path)
+	if exists && current.Hash != entry.Hash {
+		s.onContentRemoved()
+	}
 	return entry, nil
 }
 

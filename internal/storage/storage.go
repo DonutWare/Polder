@@ -93,21 +93,34 @@ func (d *Disk) CreateTempFile(directory string) (*os.File, error) {
 	return os.CreateTemp(directory, tempFilePrefix+"*")
 }
 
-func (d *Disk) MoveToTrash(username, absolutePath, cleanPath string) error {
-	stamp := time.Now().UTC().Format("20060102T150405.000000000")
-	target := filepath.Join(d.trashRoot(), username, stamp, filepath.FromSlash(strings.TrimPrefix(cleanPath, "/")))
+func (d *Disk) TrashItemPath(username, storageID, name string) string {
+	return filepath.Join(d.trashRoot(), username, storageID, name)
+}
+
+func (d *Disk) MoveToTrash(username, absolutePath, storageID, name string) error {
+	target := d.TrashItemPath(username, storageID, name)
 	if err := os.MkdirAll(filepath.Dir(target), dirPermissions); err != nil {
 		return err
 	}
 	return os.Rename(absolutePath, target)
 }
 
+func (d *Disk) RemoveTrashItem(username, storageID string) error {
+	return os.RemoveAll(filepath.Join(d.trashRoot(), username, storageID))
+}
+
 func (d *Disk) ArchiveUserRoot(username string) error {
-	source := d.UserRoot(username)
+	archive := filepath.Join(d.deletedUsersDir(), username+"-"+time.Now().UTC().Format("20060102T150405"))
+	if err := renameIfExists(d.UserRoot(username), archive); err != nil {
+		return err
+	}
+	return renameIfExists(filepath.Join(d.trashRoot(), username), archive+"-trash")
+}
+
+func renameIfExists(source, target string) error {
 	if _, err := os.Stat(source); errors.Is(err, fs.ErrNotExist) {
 		return nil
 	}
-	target := filepath.Join(d.deletedUsersDir(), username+"-"+time.Now().UTC().Format("20060102T150405"))
 	return os.Rename(source, target)
 }
 
