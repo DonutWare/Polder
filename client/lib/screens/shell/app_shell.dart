@@ -7,11 +7,13 @@ import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/activity/live_transfers_provider.dart";
 import "package:nomad/providers/shell/shell_destinations_provider.dart";
 import "package:nomad/providers/sync/conflict_queue_provider.dart";
+import "package:nomad/routes/app_routes.dart";
 import "package:nomad/screens/shell/shell_destination_labels.dart";
 import "package:nomad/screens/shell/sync_background_activator.dart";
 import "package:nomad/screens/shell/widgets/more_options.dart";
 import "package:nomad/util/extensions/num_extensions.dart";
 import "package:nomad/util/localization_helper.dart";
+import "package:nomad/util/remote_path.dart";
 import "package:nomad/widgets/layout/adaptive.dart";
 import "package:nomad/widgets/navigation/navigation_shell.dart";
 import "package:nomad/widgets/shared/quota_bar.dart";
@@ -49,7 +51,11 @@ class AppShell extends ConsumerWidget {
           ],
           secondaryItems: [for (final destination in secondary) destination.item(context)],
           selectedIndex: all.indexWhere((destination) => location.startsWith(destination.route)),
-          onSelected: (index) => context.go(all[index].route),
+          onSelected: (index) {
+            final destination = all[index];
+            final reselectedFiles = destination == ShellDestination.files && location.startsWith(destination.route);
+            context.go(reselectedFiles ? AppRoutes.filesAt(RemotePath.root) : destination.route);
+          },
           title: account?.user.username ?? context.localized.appTitle,
           subtitle: account == null ? "" : Uri.tryParse(account.serverUrl)?.host ?? account.serverUrl,
           markIcon: IconsaxPlusBold.cloud,

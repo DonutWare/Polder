@@ -24,7 +24,11 @@ import "package:nomad/util/remote_path.dart";
 final routerProvider = Provider<GoRouter>((ref) {
   final account = ValueNotifier<AsyncValue<Account?>>(ref.read(accountProvider));
   final isAdmin = ValueNotifier<bool>(ref.read(isAdminProvider));
-  ref.listen(accountProvider, (_, next) => account.value = next);
+  var lastBrowsedPath = RemotePath.root;
+  ref.listen(accountProvider, (previous, next) {
+    if (previous?.value?.id != next.value?.id) lastBrowsedPath = RemotePath.root;
+    account.value = next;
+  });
   ref.listen(isAdminProvider, (_, next) => isAdmin.value = next);
   final router = GoRouter(
     initialLocation: AppRoutes.files,
@@ -37,6 +41,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: AppRoutes.files,
+            redirect: (_, state) {
+              final path = state.uri.queryParameters[AppRoutes.pathParameter];
+              if (path == null) return AppRoutes.filesAt(lastBrowsedPath);
+              lastBrowsedPath = path;
+              return null;
+            },
             builder: (_, state) =>
                 BrowserScreen(path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root),
           ),
