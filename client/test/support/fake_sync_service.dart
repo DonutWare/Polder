@@ -10,6 +10,7 @@ class FakeSyncService implements SyncService {
   SyncRunReport nextReport = const SyncRunReport();
   final List<Set<String>> pausedPathsSeen = [];
   Completer<void>? gate;
+  final List<String> skippedRoots = [];
 
   @override
   Future<SyncRunReport> run(SyncRoot root, {Set<String> pausedPaths = const {}}) async {
@@ -17,6 +18,9 @@ class FakeSyncService implements SyncService {
     await gate?.future;
     return nextReport;
   }
+
+  @override
+  Future<void> skipExisting(SyncRoot root) async => skippedRoots.add(root.id);
 
   @override
   Future<void> resolve(SyncRoot root, Conflict conflict, ConflictResolution resolution) async =>

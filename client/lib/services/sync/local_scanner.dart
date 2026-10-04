@@ -33,7 +33,7 @@ class LocalScanner {
     final result = <String, LocalFileState>{};
     await for (final entity in root.list(recursive: true, followLinks: false)) {
       final relativePath = paths.relativePath(entity.path);
-      if (entity is Link || SyncIgnoreRules.isIgnored(relativePath)) continue;
+      if (entity is Link || SyncIgnoreRules.isIgnored(relativePath, mode: paths.root.mode)) continue;
       if (deferred == null) {
         result[relativePath] = (await _stateOf(entity, relativePath, synced[relativePath]))!;
         continue;
@@ -61,7 +61,7 @@ class LocalScanner {
     final scan = LocalScan();
     await for (final entity in root.list(recursive: true, followLinks: false)) {
       final relativePath = paths.relativePath(entity.path);
-      if (entity is Link || SyncIgnoreRules.isIgnored(relativePath)) continue;
+      if (entity is Link || SyncIgnoreRules.isIgnored(relativePath, mode: paths.root.mode)) continue;
       final stat = await entity.stat();
       if (stat.type == FileSystemEntityType.notFound) {
         scan.deferred.add(relativePath);

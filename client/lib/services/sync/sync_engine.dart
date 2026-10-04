@@ -18,6 +18,7 @@ import "package:nomad/services/sync/sync_activity.dart";
 import "package:nomad/services/sync/remote_change_set.dart";
 import "package:nomad/services/sync/sync_exceptions.dart";
 import "package:nomad/services/sync/sync_executor.dart";
+import "package:nomad/services/sync/sync_ignore_rules.dart";
 import "package:nomad/services/sync/sync_paths.dart";
 import "package:nomad/services/sync/sync_service.dart";
 import "package:nomad/services/sync/work_queue.dart";
@@ -139,6 +140,37 @@ class SyncEngine implements SyncService {
       await _store.saveCursor(root.id, remote.cursor);
     }
     return report;
+  }
+
+  /// Stands in for the hash of files skipped by [skipExisting]; once such a file changes it hashes differently
+  /// and is uploaded like a new one.
+  static const skippedHash = "skipped";
+
+  @override
+  Future<void> skipExisting(SyncRoot root) async {
+    final directory = Directory(root.localPath);
+    if (!await directory.exists()) throw LocalRootMissingException(root.localPath);
+    final paths = SyncPaths(root);
+    final entries = <SyncEntry>[];
+    await for (final entity in directory.list(recursive: true, followLinks: false)) {
+      final relativePath = paths.relativePath(entity.path);
+      if (entity is Link || SyncIgnoreRules.isIgnored(relativePath, mode: root.mode)) continue;
+      final stat = await entity.stat();
+      if (stat.type == FileSystemEntityType.notFound) continue;
+      final isDir = entity is Directory;
+      entries.add(
+        SyncEntry(
+          syncRootId: root.id,
+          relativePath: relativePath,
+          isDir: isDir,
+          localHash: isDir ? null : skippedHash,
+          localSize: isDir ? null : stat.size,
+          localMtime: stat.modified.toUtc(),
+          syncedHash: isDir ? "" : skippedHash,
+        ),
+      );
+    }
+    await _store.saveEntries(entries);
   }
 
   FileHasher _preparingHasher(SyncRoot root, Map<String, Manifest> prepared) => (file, relativePath, size) async {

@@ -12,7 +12,12 @@ abstract class SyncFolderForm with _$SyncFolderForm {
     @Default(SyncMode.sync) SyncMode mode,
     String? localPath,
     @Default("/") String remotePath,
+    @Default(false) bool hasExistingFiles,
+    @Default(true) bool uploadExisting,
+    @Default(false) bool storageDenied,
   }) = _SyncFolderForm;
 
   bool get isComplete => localPath != null && remotePath.startsWith("/");
+
+  bool get skipsExisting => mode == SyncMode.autoUpload && hasExistingFiles && !uploadExisting;
 }

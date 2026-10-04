@@ -22,5 +22,9 @@ abstract interface class SyncPlatform {
 
   Stream<String> watchFolder(String localPath);
 
+  Future<bool> requestStorageAccess();
+
+  Future<bool> containsFiles(String localPath);
+
   Future<void> scheduleAutoUpload(AutoUploadSettings settings);
 }

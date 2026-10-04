@@ -12,6 +12,8 @@ class FakeSyncPlatform implements SyncPlatform {
   final store = InMemorySyncStateStore();
   final service = FakeSyncService();
   final List<AutoUploadSettings> scheduled = [];
+  bool storageAccess = true;
+  bool hasFiles = false;
 
   @override
   bool get supportsSync => true;
@@ -35,6 +37,12 @@ class FakeSyncPlatform implements SyncPlatform {
 
   @override
   Stream<String> watchFolder(String localPath) => const Stream.empty();
+
+  @override
+  Future<bool> requestStorageAccess() async => storageAccess;
+
+  @override
+  Future<bool> containsFiles(String localPath) async => hasFiles;
 
   @override
   Future<void> scheduleAutoUpload(AutoUploadSettings settings) async => scheduled.add(settings);

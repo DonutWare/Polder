@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SyncFolderForm {
 
- SyncMode get mode; String? get localPath; String get remotePath;
+ SyncMode get mode; String? get localPath; String get remotePath; bool get hasExistingFiles; bool get uploadExisting; bool get storageDenied;
 /// Create a copy of SyncFolderForm
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $SyncFolderFormCopyWith<SyncFolderForm> get copyWith => _$SyncFolderFormCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as SyncFolderForm;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SyncFolderForm&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.localPath, _this.localPath) || other.localPath == _this.localPath)&&(identical(other.remotePath, _this.remotePath) || other.remotePath == _this.remotePath));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SyncFolderForm&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.localPath, _this.localPath) || other.localPath == _this.localPath)&&(identical(other.remotePath, _this.remotePath) || other.remotePath == _this.remotePath)&&(identical(other.hasExistingFiles, _this.hasExistingFiles) || other.hasExistingFiles == _this.hasExistingFiles)&&(identical(other.uploadExisting, _this.uploadExisting) || other.uploadExisting == _this.uploadExisting)&&(identical(other.storageDenied, _this.storageDenied) || other.storageDenied == _this.storageDenied));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SyncFolderForm;
-  return Object.hash(runtimeType,_this.mode,_this.localPath,_this.remotePath);
+  return Object.hash(runtimeType,_this.mode,_this.localPath,_this.remotePath,_this.hasExistingFiles,_this.uploadExisting,_this.storageDenied);
 }
 
 @override
 String toString() {
   final _this = this as SyncFolderForm;
-  return 'SyncFolderForm(mode: ${_this.mode}, localPath: ${_this.localPath}, remotePath: ${_this.remotePath})';
+  return 'SyncFolderForm(mode: ${_this.mode}, localPath: ${_this.localPath}, remotePath: ${_this.remotePath}, hasExistingFiles: ${_this.hasExistingFiles}, uploadExisting: ${_this.uploadExisting}, storageDenied: ${_this.storageDenied})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $SyncFolderFormCopyWith<$Res>  {
   factory $SyncFolderFormCopyWith(SyncFolderForm value, $Res Function(SyncFolderForm) _then) = _$SyncFolderFormCopyWithImpl;
 @useResult
 $Res call({
- SyncMode mode, String? localPath, String remotePath
+ SyncMode mode, String? localPath, String remotePath, bool hasExistingFiles, bool uploadExisting, bool storageDenied
 });
 
 
@@ -68,12 +68,15 @@ class _$SyncFolderFormCopyWithImpl<$Res>
 
 /// Create a copy of SyncFolderForm
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? localPath = freezed,Object? remotePath = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? mode = null,Object? localPath = freezed,Object? remotePath = null,Object? hasExistingFiles = null,Object? uploadExisting = null,Object? storageDenied = null,}) {
   return _then(SyncFolderForm(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as SyncMode,localPath: freezed == localPath ? _self.localPath : localPath // ignore: cast_nullable_to_non_nullable
 as String?,remotePath: null == remotePath ? _self.remotePath : remotePath // ignore: cast_nullable_to_non_nullable
-as String,
+as String,hasExistingFiles: null == hasExistingFiles ? _self.hasExistingFiles : hasExistingFiles // ignore: cast_nullable_to_non_nullable
+as bool,uploadExisting: null == uploadExisting ? _self.uploadExisting : uploadExisting // ignore: cast_nullable_to_non_nullable
+as bool,storageDenied: null == storageDenied ? _self.storageDenied : storageDenied // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -158,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SyncMode mode,  String? localPath,  String remotePath)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SyncMode mode,  String? localPath,  String remotePath,  bool hasExistingFiles,  bool uploadExisting,  bool storageDenied)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SyncFolderForm() when $default != null:
-return $default(_that.mode,_that.localPath,_that.remotePath);case _:
+return $default(_that.mode,_that.localPath,_that.remotePath,_that.hasExistingFiles,_that.uploadExisting,_that.storageDenied);case _:
   return orElse();
 
 }
@@ -179,10 +182,10 @@ return $default(_that.mode,_that.localPath,_that.remotePath);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SyncMode mode,  String? localPath,  String remotePath)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SyncMode mode,  String? localPath,  String remotePath,  bool hasExistingFiles,  bool uploadExisting,  bool storageDenied)  $default,) {final _that = this;
 switch (_that) {
 case _SyncFolderForm():
-return $default(_that.mode,_that.localPath,_that.remotePath);case _:
+return $default(_that.mode,_that.localPath,_that.remotePath,_that.hasExistingFiles,_that.uploadExisting,_that.storageDenied);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +202,10 @@ return $default(_that.mode,_that.localPath,_that.remotePath);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SyncMode mode,  String? localPath,  String remotePath)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SyncMode mode,  String? localPath,  String remotePath,  bool hasExistingFiles,  bool uploadExisting,  bool storageDenied)?  $default,) {final _that = this;
 switch (_that) {
 case _SyncFolderForm() when $default != null:
-return $default(_that.mode,_that.localPath,_that.remotePath);case _:
+return $default(_that.mode,_that.localPath,_that.remotePath,_that.hasExistingFiles,_that.uploadExisting,_that.storageDenied);case _:
   return null;
 
 }
@@ -214,12 +217,15 @@ return $default(_that.mode,_that.localPath,_that.remotePath);case _:
 
 
 class _SyncFolderForm extends SyncFolderForm {
-  const _SyncFolderForm({this.mode = SyncMode.sync, this.localPath, this.remotePath = "/"}): super._();
+  const _SyncFolderForm({this.mode = SyncMode.sync, this.localPath, this.remotePath = "/", this.hasExistingFiles = false, this.uploadExisting = true, this.storageDenied = false}): super._();
   
 
 @override@JsonKey() final  SyncMode mode;
 @override final  String? localPath;
 @override@JsonKey() final  String remotePath;
+@override@JsonKey() final  bool hasExistingFiles;
+@override@JsonKey() final  bool uploadExisting;
+@override@JsonKey() final  bool storageDenied;
 
 /// Create a copy of SyncFolderForm
 /// with the given fields replaced by the non-null parameter values.
@@ -231,18 +237,18 @@ _$SyncFolderFormCopyWith<_SyncFolderForm> get copyWith => __$SyncFolderFormCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SyncFolderForm&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.localPath, localPath) || other.localPath == localPath)&&(identical(other.remotePath, remotePath) || other.remotePath == remotePath));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SyncFolderForm&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.localPath, localPath) || other.localPath == localPath)&&(identical(other.remotePath, remotePath) || other.remotePath == remotePath)&&(identical(other.hasExistingFiles, hasExistingFiles) || other.hasExistingFiles == hasExistingFiles)&&(identical(other.uploadExisting, uploadExisting) || other.uploadExisting == uploadExisting)&&(identical(other.storageDenied, storageDenied) || other.storageDenied == storageDenied));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,mode,localPath,remotePath);
+    return Object.hash(runtimeType,mode,localPath,remotePath,hasExistingFiles,uploadExisting,storageDenied);
 }
 
 @override
 String toString() {
-    return 'SyncFolderForm(mode: $mode, localPath: $localPath, remotePath: $remotePath)';
+    return 'SyncFolderForm(mode: $mode, localPath: $localPath, remotePath: $remotePath, hasExistingFiles: $hasExistingFiles, uploadExisting: $uploadExisting, storageDenied: $storageDenied)';
 }
 
 
@@ -253,7 +259,7 @@ abstract mixin class _$SyncFolderFormCopyWith<$Res> implements $SyncFolderFormCo
   factory _$SyncFolderFormCopyWith(_SyncFolderForm value, $Res Function(_SyncFolderForm) _then) = __$SyncFolderFormCopyWithImpl;
 @override @useResult
 $Res call({
- SyncMode mode, String? localPath, String remotePath
+ SyncMode mode, String? localPath, String remotePath, bool hasExistingFiles, bool uploadExisting, bool storageDenied
 });
 
 
@@ -270,12 +276,15 @@ class __$SyncFolderFormCopyWithImpl<$Res>
 
 /// Create a copy of SyncFolderForm
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mode = null,Object? localPath = freezed,Object? remotePath = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? mode = null,Object? localPath = freezed,Object? remotePath = null,Object? hasExistingFiles = null,Object? uploadExisting = null,Object? storageDenied = null,}) {
   return _then(_SyncFolderForm(
 mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as SyncMode,localPath: freezed == localPath ? _self.localPath : localPath // ignore: cast_nullable_to_non_nullable
 as String?,remotePath: null == remotePath ? _self.remotePath : remotePath // ignore: cast_nullable_to_non_nullable
-as String,
+as String,hasExistingFiles: null == hasExistingFiles ? _self.hasExistingFiles : hasExistingFiles // ignore: cast_nullable_to_non_nullable
+as bool,uploadExisting: null == uploadExisting ? _self.uploadExisting : uploadExisting // ignore: cast_nullable_to_non_nullable
+as bool,storageDenied: null == storageDenied ? _self.storageDenied : storageDenied // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

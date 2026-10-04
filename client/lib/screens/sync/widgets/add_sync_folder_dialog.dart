@@ -39,6 +39,14 @@ class AddSyncFolderDialog extends ConsumerWidget {
               subtitle: Text(form.localPath ?? localized.notChosen),
               trailing: TextButton(onPressed: notifier.pickLocalFolder, child: Text(localized.choose)),
             ),
+            if (form.storageDenied)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  localized.storageAccessDenied,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const IconBadge(icon: IconsaxPlusLinear.cloud),
@@ -49,6 +57,14 @@ class AddSyncFolderDialog extends ConsumerWidget {
                 child: Text(localized.choose),
               ),
             ),
+            if (mode == SyncMode.autoUpload && form.hasExistingFiles)
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(localized.uploadExistingFiles),
+                subtitle: Text(localized.uploadExistingFilesHint),
+                value: form.uploadExisting,
+                onChanged: notifier.setUploadExisting,
+              ),
           ],
         ),
       ),

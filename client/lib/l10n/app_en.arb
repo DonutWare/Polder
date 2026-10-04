@@ -544,5 +544,9 @@
 		}
 	},
 	"showFiles": "Show files",
-	"hideFiles": "Hide files"
+	"hideFiles": "Hide files",
+	"uploadExistingFiles": "Upload existing files",
+	"uploadExistingFilesHint": "Otherwise only files added from now on are uploaded",
+	"storageAccessDenied": "Nomad needs access to your files to upload this folder. Allow all files access, or at least photos and videos, in the app settings.",
+	"folderWillBeCreated": "This folder doesn't exist yet. It will be created."
 }

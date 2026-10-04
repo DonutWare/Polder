@@ -12,6 +12,8 @@ abstract interface class SyncStateStore {
 
   Future<void> saveEntry(SyncEntry entry);
 
+  Future<void> saveEntries(Iterable<SyncEntry> entries);
+
   Future<void> deleteEntryTree(String rootId, String relativePath);
 
   Future<int> cursor(String rootId);

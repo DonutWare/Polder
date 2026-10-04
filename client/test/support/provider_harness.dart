@@ -13,6 +13,7 @@ import "package:nomad/services/realtime/events_client.dart";
 import "package:nomad/services/storage/credentials_store.dart";
 import "package:nomad/services/storage/preferences_store.dart";
 
+import "fake_file_picker.dart";
 import "fake_sync_platform.dart";
 
 class FixedDeviceConditions implements DeviceConditions {
@@ -62,6 +63,7 @@ class ProviderHarness {
   final PreferencesStore preferences;
   final conditions = FixedDeviceConditions();
   final syncPlatform = FakeSyncPlatform();
+  final filePicker = FakeFilePickerService();
   late final ProviderContainer container;
 
   List<Override> get overrides => [
@@ -71,6 +73,7 @@ class ProviderHarness {
     deviceNameProvider.overrideWithValue("Test"),
     deviceConditionsProvider.overrideWithValue(conditions),
     syncPlatformProvider.overrideWithValue(syncPlatform),
+    filePickerServiceProvider.overrideWithValue(filePicker),
     hostedServerUrlProvider.overrideWithValue(hostedServerUrl),
     systemAccentReaderProvider.overrideWithValue(() async => systemAccent),
     webSocketConnectorProvider.overrideWithValue(webSocketConnector),

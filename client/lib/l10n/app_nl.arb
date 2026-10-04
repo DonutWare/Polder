@@ -239,5 +239,9 @@
 	"nowGroupWaiting": "{count} wachten",
 	"andMore": "en nog {count}",
 	"showFiles": "Bestanden tonen",
-	"hideFiles": "Bestanden verbergen"
+	"hideFiles": "Bestanden verbergen",
+	"uploadExistingFiles": "Bestaande bestanden uploaden",
+	"uploadExistingFilesHint": "Anders worden alleen bestanden geüpload die vanaf nu worden toegevoegd",
+	"storageAccessDenied": "Nomad heeft toegang tot je bestanden nodig om deze map te uploaden. Sta toegang tot alle bestanden, of in ieder geval foto's en video's, toe in de app-instellingen.",
+	"folderWillBeCreated": "Deze map bestaat nog niet. Hij wordt aangemaakt."
 }

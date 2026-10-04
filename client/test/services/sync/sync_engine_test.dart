@@ -171,6 +171,9 @@ void main() {
     final uploadRoot = root.copyWith(mode: SyncMode.autoUpload);
     server.putFile("/Docs/remote.jpg", "r".codeUnits);
     await local("camera.jpg").writeAsBytes(randomBytes(1000));
+    await Directory("${localRoot.path}/.thumbnails").create();
+    await local(".thumbnails/.nomedia").writeAsString("");
+    await local(".trashed-1760000000-deleted.jpg").writeAsBytes(randomBytes(100));
 
     final report = await engine.run(uploadRoot);
     await local("camera.jpg").delete();
@@ -179,6 +182,26 @@ void main() {
     expect(report.uploaded, 1);
     expect(await local("remote.jpg").exists(), isFalse);
     expect(server.contentOf("/Docs/camera.jpg"), isNotNull);
+    expect(server.nodes.keys.where((path) => path.contains("/.")), isEmpty);
+  });
+
+  test("auto-upload skips existing files but uploads new and edited ones", () async {
+    final uploadRoot = root.copyWith(mode: SyncMode.autoUpload);
+    await Directory("${localRoot.path}/2025").create();
+    await local("2025/old.jpg").writeAsBytes(randomBytes(1000));
+    await local("edited.jpg").writeAsBytes(randomBytes(1000));
+
+    await engine.skipExisting(uploadRoot);
+    await local("new.jpg").writeAsBytes(randomBytes(1000));
+    await local("edited.jpg").writeAsBytes(randomBytes(1200));
+    final report = await engine.run(uploadRoot);
+
+    expect(report.hasFailures, isFalse, reason: report.errors.join("\n"));
+    expect(report.uploaded, 2);
+    expect(server.contentOf("/Docs/new.jpg"), isNotNull);
+    expect(server.contentOf("/Docs/edited.jpg"), isNotNull);
+    expect(server.contentOf("/Docs/2025/old.jpg"), isNull);
+    expect(server.nodes.containsKey("/Docs/2025"), isFalse);
   });
 
   group("remote moves", () {

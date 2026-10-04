@@ -13,6 +13,7 @@ import "package:nomad/services/sync/sync_platform.dart";
 import "package:nomad/services/sync/sync_service.dart";
 import "package:nomad/services/sync/sync_state_store.dart";
 import "package:path_provider/path_provider.dart";
+import "package:permission_handler/permission_handler.dart";
 
 SyncPlatform createSyncPlatform() => const NativeSyncPlatform();
 
@@ -52,6 +53,23 @@ class NativeSyncPlatform implements SyncPlatform {
 
   @override
   Stream<String> watchFolder(String localPath) => FolderWatcher.watch(localPath);
+
+  @override
+  Future<bool> requestStorageAccess() async {
+    if (!Platform.isAndroid) return true;
+    if (await Permission.manageExternalStorage.request().isGranted) return true;
+    final statuses = await [Permission.photos, Permission.videos, Permission.storage].request();
+    bool allowed(Permission permission) =>
+        statuses[permission]?.isGranted == true || statuses[permission]?.isLimited == true;
+    return allowed(Permission.storage) || (allowed(Permission.photos) && allowed(Permission.videos));
+  }
+
+  @override
+  Future<bool> containsFiles(String localPath) async {
+    final directory = Directory(localPath);
+    if (!await directory.exists()) return false;
+    return directory.list(recursive: true, followLinks: false).any((entity) => entity is File);
+  }
 
   @override
   Future<void> scheduleAutoUpload(AutoUploadSettings settings) => AutoUploadScheduler.schedule(settings);

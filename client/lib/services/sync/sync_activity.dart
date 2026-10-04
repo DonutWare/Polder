@@ -148,8 +148,8 @@ class SyncActivity {
   Future<void> observe(SyncRoot root, String absolutePath) async {
     final paths = SyncPaths(root);
     final relativePath = paths.relativePath(absolutePath);
-    if (relativePath.startsWith("..") || relativePath == "." || SyncIgnoreRules.isIgnored(relativePath)) return;
-    if (_isOwnWrite(root.id, relativePath)) return;
+    if (relativePath.startsWith("..") || relativePath == ".") return;
+    if (SyncIgnoreRules.isIgnored(relativePath, mode: root.mode) || _isOwnWrite(root.id, relativePath)) return;
     switch (await FileSystemEntity.type(absolutePath, followLinks: false)) {
       case FileSystemEntityType.file:
         _notice(root, relativePath);
@@ -168,7 +168,7 @@ class SyncActivity {
       await for (final entity in paths.directory(relativePath).list(recursive: true, followLinks: false)) {
         if (entity is! File) continue;
         final child = paths.relativePath(entity.path);
-        if (SyncIgnoreRules.isIgnored(child) || _isOwnWrite(root.id, child)) continue;
+        if (SyncIgnoreRules.isIgnored(child, mode: root.mode) || _isOwnWrite(root.id, child)) continue;
         _notice(root, child, notify: false);
         if (++listed >= _maxListedPerFolder) break;
       }

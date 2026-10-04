@@ -28,6 +28,13 @@ class InMemorySyncStateStore implements SyncStateStore {
   Future<void> saveEntry(SyncEntry entry) async => (_entries[entry.syncRootId] ??= {})[entry.relativePath] = entry;
 
   @override
+  Future<void> saveEntries(Iterable<SyncEntry> entries) async {
+    for (final entry in entries) {
+      await saveEntry(entry);
+    }
+  }
+
+  @override
   Future<void> deleteEntryTree(String rootId, String relativePath) async =>
       _entries[rootId]?.removeWhere((path, _) => path == relativePath || RelativePath.isWithin(path, relativePath));
 

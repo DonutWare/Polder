@@ -25,7 +25,12 @@ class SyncRootsNotifier extends AsyncNotifier<List<SyncRoot>> {
     return (await store.roots()).where((root) => root.accountId == accountId).toList();
   }
 
-  Future<void> add({required String localPath, required String remotePath, required SyncMode mode}) async {
+  Future<void> add({
+    required String localPath,
+    required String remotePath,
+    required SyncMode mode,
+    bool skipExisting = false,
+  }) async {
     final accountId = _accountId;
     if (accountId == null) return;
     final root = SyncRoot(
@@ -35,6 +40,7 @@ class SyncRootsNotifier extends AsyncNotifier<List<SyncRoot>> {
       remotePath: remotePath,
       mode: mode,
     );
+    if (skipExisting) await (await ref.read(syncServiceProvider.future)).skipExisting(root);
     await (await _store).saveRoot(root);
     state = AsyncData([...?state.value, root]);
   }

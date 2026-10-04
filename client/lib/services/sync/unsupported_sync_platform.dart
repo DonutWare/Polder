@@ -36,5 +36,11 @@ class UnsupportedSyncPlatform implements SyncPlatform {
   Stream<String> watchFolder(String localPath) => const Stream.empty();
 
   @override
+  Future<bool> requestStorageAccess() async => false;
+
+  @override
+  Future<bool> containsFiles(String localPath) async => false;
+
+  @override
   Future<void> scheduleAutoUpload(AutoUploadSettings settings) async {}
 }

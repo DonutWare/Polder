@@ -62,6 +62,13 @@ class DriftSyncStateStore implements SyncStateStore {
   );
 
   @override
+  Future<void> saveEntries(Iterable<SyncEntry> entries) => _db.transaction(() async {
+    for (final entry in entries) {
+      await saveEntry(entry);
+    }
+  });
+
+  @override
   Future<void> deleteEntryTree(String rootId, String relativePath) => _db.customUpdate(
     "DELETE FROM sync_entries WHERE sync_root_id = ? AND (relative_path = ? OR substr(relative_path, 1, ?) = ?)",
     variables: [
