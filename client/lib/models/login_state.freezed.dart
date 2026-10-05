@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$LoginState {
 
  LoginStep get step; String get serverUrl; String get username; String get password; bool get loading; bool get completed;/// The server is the one this web client was served from, so it can't be changed.
- bool get serverLocked;/// Checking whether the page's own origin is a Nomad server, before showing any form.
+ bool get serverLocked;/// Checking whether the page's own origin is a Polder server, before showing any form.
  bool get probingHostedServer; LoginFailure? get failure;
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
@@ -233,7 +233,7 @@ class _LoginState extends LoginState {
 @override@JsonKey() final  bool completed;
 /// The server is the one this web client was served from, so it can't be changed.
 @override@JsonKey() final  bool serverLocked;
-/// Checking whether the page's own origin is a Nomad server, before showing any form.
+/// Checking whether the page's own origin is a Polder server, before showing any form.
 @override@JsonKey() final  bool probingHostedServer;
 @override final  LoginFailure? failure;
 

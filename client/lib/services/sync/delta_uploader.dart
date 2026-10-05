@@ -1,13 +1,13 @@
 import "dart:io";
 import "dart:typed_data";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/manifest.dart";
-import "package:nomad/models/upload_session.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/sync/chunker.dart";
-import "package:nomad/services/sync/sync_activity.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/manifest.dart";
+import "package:polder/models/upload_session.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/sync/chunker.dart";
+import "package:polder/services/sync/sync_activity.dart";
 
 class UploadTracking {
   const UploadTracking({required this.begin, required this.progress});
@@ -26,7 +26,7 @@ class UploadResult {
 class DeltaUploader {
   DeltaUploader(this._api);
 
-  final NomadApi _api;
+  final PolderApi _api;
 
   final Map<String, ({String uploadId, String hash})> _paused = {};
 

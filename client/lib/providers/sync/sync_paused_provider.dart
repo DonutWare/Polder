@@ -1,10 +1,10 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/providers/sync/sync_activity_provider.dart";
-import "package:nomad/providers/sync/sync_status_provider.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/sync_pause.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/providers/sync/sync_activity_provider.dart";
+import "package:polder/providers/sync/sync_status_provider.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/sync_pause.dart";
 
 final syncPausedProvider = AsyncNotifierProvider<SyncPausedNotifier, bool>(SyncPausedNotifier.new);
 

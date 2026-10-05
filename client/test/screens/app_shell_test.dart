@@ -2,10 +2,10 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:go_router/go_router.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/shell/app_shell.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
+import "package:polder/models/user.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/shell/app_shell.dart";
+import "package:polder/widgets/layout/adaptive.dart";
 
 import "../support/localized_app.dart";
 import "../support/provider_harness.dart";

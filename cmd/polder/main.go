@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
-	"nomad-server/internal/app"
-	"nomad-server/internal/config"
-	"nomad-server/internal/httpapi"
+	"polder-server/internal/app"
+	"polder-server/internal/config"
+	"polder-server/internal/httpapi"
 )
 
 const shutdownTimeout = 15 * time.Second
@@ -30,13 +30,13 @@ func main() {
 		os.Exit(printOpenAPI())
 	}
 	if err := run(); err != nil {
-		slog.Error("nomad stopped", "error", err)
+		slog.Error("polder stopped", "error", err)
 		os.Exit(1)
 	}
 }
 
 func logLevel() slog.Level {
-	if os.Getenv("NOMAD_DEBUG") != "" {
+	if os.Getenv("POLDER_DEBUG") != "" {
 		return slog.LevelDebug
 	}
 	return slog.LevelInfo
@@ -63,7 +63,7 @@ func serve(ctx context.Context, cfg config.Config, handler http.Handler) error {
 	server := &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: 10 * time.Second}
 	serverErrors := make(chan error, 1)
 	go func() {
-		slog.Info("nomad listening", "address", cfg.ListenAddress, "database", cfg.DatabaseDriver,
+		slog.Info("polder listening", "address", cfg.ListenAddress, "database", cfg.DatabaseDriver,
 			"config", cfg.ConfigDir, "data", cfg.DataDir)
 		serverErrors <- server.ListenAndServe()
 	}()

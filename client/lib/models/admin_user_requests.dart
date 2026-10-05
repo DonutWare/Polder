@@ -1,6 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/user.dart";
+import "package:polder/models/user.dart";
 
 part "admin_user_requests.freezed.dart";
 part "admin_user_requests.g.dart";

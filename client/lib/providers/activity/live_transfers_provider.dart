@@ -1,12 +1,12 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/models/server_event.dart";
-import "package:nomad/providers/activity/activity_scope_provider.dart";
-import "package:nomad/providers/realtime/events_provider.dart";
-import "package:nomad/providers/sync/sync_activity_provider.dart";
-import "package:nomad/util/remote_path.dart";
-import "package:nomad/util/throughput_meter.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/models/server_event.dart";
+import "package:polder/providers/activity/activity_scope_provider.dart";
+import "package:polder/providers/realtime/events_provider.dart";
+import "package:polder/providers/sync/sync_activity_provider.dart";
+import "package:polder/util/remote_path.dart";
+import "package:polder/util/throughput_meter.dart";
 
 final liveTransfersProvider = NotifierProvider<LiveTransfersNotifier, Map<String, LiveTransfer>>(
   LiveTransfersNotifier.new,

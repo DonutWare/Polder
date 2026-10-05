@@ -6,11 +6,11 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"nomad-server/internal/activity"
-	"nomad-server/internal/files"
-	"nomad-server/internal/storage"
-	"nomad-server/internal/syncing"
-	"nomad-server/internal/users"
+	"polder-server/internal/activity"
+	"polder-server/internal/files"
+	"polder-server/internal/storage"
+	"polder-server/internal/syncing"
+	"polder-server/internal/users"
 )
 
 type changesInput struct {

@@ -3,12 +3,12 @@ import "dart:isolate";
 
 import "package:crypto/crypto.dart";
 
-import "package:nomad/models/sync/local_file_state.dart";
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/sync_exceptions.dart";
-import "package:nomad/services/sync/sync_ignore_rules.dart";
-import "package:nomad/services/sync/sync_paths.dart";
+import "package:polder/models/sync/local_file_state.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/sync_exceptions.dart";
+import "package:polder/services/sync/sync_ignore_rules.dart";
+import "package:polder/services/sync/sync_paths.dart";
 
 class LocalScan {
   final Map<String, LocalFileState> known = {};

@@ -4,4 +4,4 @@ set -eu
 
 server_dir=$(cd "$(dirname "$0")/.." && pwd)
 cd "$server_dir/client"
-NOMAD_SERVER_DIR="$server_dir" flutter test --tags integration "$@"
+POLDER_SERVER_DIR="$server_dir" flutter test --tags integration "$@"

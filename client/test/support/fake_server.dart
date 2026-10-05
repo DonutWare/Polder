@@ -5,8 +5,8 @@ import "dart:typed_data";
 import "package:crypto/crypto.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/services/sync/chunker.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/services/sync/chunker.dart";
+import "package:polder/util/remote_path.dart";
 
 import "scripted_client.dart";
 
@@ -40,8 +40,8 @@ class FakeUpload {
   final Map<String, Uint8List> received = {};
 }
 
-class FakeNomadServer extends http.BaseClient {
-  FakeNomadServer() {
+class FakePolderServer extends http.BaseClient {
+  FakePolderServer() {
     nodes["/"] = FakeNode.dir(0, DateTime.utc(2026));
   }
 

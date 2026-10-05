@@ -6,13 +6,13 @@
 			"type": "go",
 			"request": "launch",
 			"mode": "debug",
-			"program": "${workspaceFolder}/cmd/nomad",
+			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
 			"env": {
-				"NOMAD_LISTEN": ":6060",
-				"NOMAD_CONFIG_DIR": "${workspaceFolder}/config",
-				"NOMAD_DATA_DIR": "${workspaceFolder}/data",
-				"NOMAD_DEBUG": "1"
+				"POLDER_LISTEN": ":6060",
+				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
+				"POLDER_DATA_DIR": "${workspaceFolder}/data",
+				"POLDER_DEBUG": "1"
 			}
 		},
 		{
@@ -20,15 +20,15 @@
 			"type": "go",
 			"request": "launch",
 			"mode": "debug",
-			"program": "${workspaceFolder}/cmd/nomad",
+			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
 			"preLaunchTask": "Build web client",
 			"env": {
-				"NOMAD_LISTEN": ":6060",
-				"NOMAD_CONFIG_DIR": "${workspaceFolder}/config",
-				"NOMAD_DATA_DIR": "${workspaceFolder}/data",
-				"NOMAD_WEB_DIR": "${workspaceFolder}/client/build/web",
-				"NOMAD_DEBUG": "1"
+				"POLDER_LISTEN": ":6060",
+				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
+				"POLDER_DATA_DIR": "${workspaceFolder}/data",
+				"POLDER_WEB_DIR": "${workspaceFolder}/client/build/web",
+				"POLDER_DEBUG": "1"
 			}
 		},
 		{
@@ -70,7 +70,7 @@
 			"program": "test/integration/real_server_test.dart",
 			"cwd": "${workspaceFolder}/client",
 			"env": {
-				"NOMAD_SERVER_DIR": "${workspaceFolder}"
+				"POLDER_SERVER_DIR": "${workspaceFolder}"
 			}
 		}
 	],

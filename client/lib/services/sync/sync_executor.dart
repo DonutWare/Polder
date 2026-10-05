@@ -1,18 +1,18 @@
 import "dart:convert";
 import "dart:io";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/manifest.dart";
-import "package:nomad/models/sync/local_file_state.dart";
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/sync/delta_downloader.dart";
-import "package:nomad/services/sync/delta_uploader.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/sync_paths.dart";
-import "package:nomad/services/sync/sync_state_store.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/manifest.dart";
+import "package:polder/models/sync/local_file_state.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/sync/delta_downloader.dart";
+import "package:polder/services/sync/delta_uploader.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/sync_paths.dart";
+import "package:polder/services/sync/sync_state_store.dart";
 
 class SyncExecutor {
   SyncExecutor({
@@ -24,7 +24,7 @@ class SyncExecutor {
   }) : _uploader = uploader ?? DeltaUploader(_api),
        _downloader = downloader ?? DeltaDownloader(_api);
 
-  final NomadApi _api;
+  final PolderApi _api;
   final SyncStateStore _store;
   final SyncActivity? _activity;
   final DeltaUploader _uploader;

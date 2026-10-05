@@ -2,12 +2,12 @@ import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/level_bar.dart";
-import "package:nomad/widgets/shared/section_card.dart";
+import "package:polder/models/user.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/level_bar.dart";
+import "package:polder/widgets/shared/section_card.dart";
 
 /// Who uses the most space. Users with a quota show how full it is; the rest are measured
 /// against the biggest user.

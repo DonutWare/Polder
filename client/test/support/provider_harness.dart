@@ -3,15 +3,15 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_riverpod/misc.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/models/account.dart";
-import "package:nomad/models/user.dart";
-import "package:nomad/providers/appearance/appearance_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/services/device/device_conditions.dart";
-import "package:nomad/services/realtime/events_client.dart";
-import "package:nomad/services/storage/credentials_store.dart";
-import "package:nomad/services/storage/preferences_store.dart";
+import "package:polder/models/account.dart";
+import "package:polder/models/user.dart";
+import "package:polder/providers/appearance/appearance_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/services/device/device_conditions.dart";
+import "package:polder/services/realtime/events_client.dart";
+import "package:polder/services/storage/credentials_store.dart";
+import "package:polder/services/storage/preferences_store.dart";
 
 import "fake_document_scanner.dart";
 import "fake_file_picker.dart";

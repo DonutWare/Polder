@@ -2,19 +2,19 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:nomad/models/trash.dart";
-import "package:nomad/providers/trash/trash_provider.dart";
-import "package:nomad/screens/browser/widgets/transfers_button.dart";
-import "package:nomad/screens/trash/widgets/trash_item_tile.dart";
-import "package:nomad/screens/trash/widgets/trash_summary.dart";
-import "package:nomad/util/action_feedback.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/layout/app_page.dart";
-import "package:nomad/widgets/shared/async_value_view.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
-import "package:nomad/widgets/shared/message_view.dart";
-import "package:nomad/widgets/shared/nav_group.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/providers/trash/trash_provider.dart";
+import "package:polder/screens/browser/widgets/transfers_button.dart";
+import "package:polder/screens/trash/widgets/trash_item_tile.dart";
+import "package:polder/screens/trash/widgets/trash_summary.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/layout/app_page.dart";
+import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/message_view.dart";
+import "package:polder/widgets/shared/nav_group.dart";
 
 class TrashScreen extends ConsumerWidget {
   const TrashScreen({super.key});

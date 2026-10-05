@@ -3,18 +3,18 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/providers/admin/admin_users_provider.dart";
-import "package:nomad/providers/current_user_provider.dart";
-import "package:nomad/screens/admin/widgets/user_form_dialog.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/action_feedback.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
-import "package:nomad/widgets/shared/level_bar.dart";
-import "package:nomad/widgets/shared/tag.dart";
+import "package:polder/models/user.dart";
+import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder/providers/current_user_provider.dart";
+import "package:polder/screens/admin/widgets/user_form_dialog.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/level_bar.dart";
+import "package:polder/widgets/shared/tag.dart";
 
 enum _UserAction { edit, delete }
 

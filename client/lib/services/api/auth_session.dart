@@ -1,4 +1,4 @@
-import "package:nomad/models/token_pair.dart";
+import "package:polder/models/token_pair.dart";
 
 abstract interface class AuthSession {
   String? get accessToken;

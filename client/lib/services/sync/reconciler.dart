@@ -1,11 +1,11 @@
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/local_file_state.dart";
-import "package:nomad/models/sync/remote_state.dart";
-import "package:nomad/models/sync/sync_action.dart";
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/util/relative_path.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/local_file_state.dart";
+import "package:polder/models/sync/remote_state.dart";
+import "package:polder/models/sync/sync_action.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/util/relative_path.dart";
 
 class Reconciler {
   const Reconciler({required this.rootId, required this.mode});

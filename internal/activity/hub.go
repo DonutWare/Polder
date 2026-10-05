@@ -11,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/storage"
-	"nomad-server/internal/users"
+	"polder-server/internal/apperr"
+	"polder-server/internal/storage"
+	"polder-server/internal/users"
 )
 
 const (
@@ -54,7 +54,7 @@ type LiveTransfer struct {
 	Direction Direction `json:"direction"`
 	Path      string    `json:"path"`
 	Device    string    `json:"device"`
-	ClientID  string    `json:"clientId,omitempty" required:"false" doc:"The X-Nomad-Transfer-Id the uploader sent"`
+	ClientID  string    `json:"clientId,omitempty" required:"false" doc:"The X-Polder-Transfer-Id the uploader sent"`
 	Bytes     int64     `json:"bytes" doc:"Bytes transferred so far"`
 	Total     *int64    `json:"total,omitempty" required:"false" doc:"Bytes expected in all; absent when unknown"`
 	Rate      int64     `json:"rate" doc:"Current speed in bytes per second"`

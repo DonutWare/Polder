@@ -21,7 +21,7 @@ class MainFlutterWindow: NSWindow {
     styleMask.insert(.fullSizeContentView)
 
     let channel = FlutterMethodChannel(
-      name: "nomad/titlebar", binaryMessenger: flutterViewController.engine.binaryMessenger)
+      name: "polder/titlebar", binaryMessenger: flutterViewController.engine.binaryMessenger)
     channel.setMethodCallHandler { [weak self] call, result in
       switch call.method {
       case "height":
@@ -33,7 +33,7 @@ class MainFlutterWindow: NSWindow {
     titlebarChannel = channel
 
     let app = FlutterMethodChannel(
-      name: "nomad/app", binaryMessenger: flutterViewController.engine.binaryMessenger)
+      name: "polder/app", binaryMessenger: flutterViewController.engine.binaryMessenger)
     app.setMethodCallHandler { [weak self] call, result in
       switch call.method {
       case "setSyncing":

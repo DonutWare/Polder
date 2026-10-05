@@ -1,11 +1,11 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/sync/sync_activity_provider.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/sync_state_store.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/sync/sync_activity_provider.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/sync_state_store.dart";
 
 final syncRootsProvider = AsyncNotifierProvider<SyncRootsNotifier, List<SyncRoot>>(SyncRootsNotifier.new);
 

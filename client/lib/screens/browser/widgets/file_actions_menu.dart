@@ -3,15 +3,15 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/util/action_feedback.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/util/remote_path.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
-import "package:nomad/widgets/shared/remote_folder_picker_dialog.dart";
-import "package:nomad/widgets/shared/text_input_dialog.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/util/remote_path.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
+import "package:polder/widgets/shared/text_input_dialog.dart";
 
 enum _FileAction { download, rename, move, delete }
 

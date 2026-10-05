@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/theme/app_theme.dart";
+import "package:polder/theme/app_theme.dart";
 
 class NoticeTile extends StatelessWidget {
   const NoticeTile({required this.icon, required this.text, required this.color, this.action, super.key});

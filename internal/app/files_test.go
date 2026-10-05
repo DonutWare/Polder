@@ -112,7 +112,7 @@ func TestMkdirMoveAndDelete(t *testing.T) {
 		alice.mustJSON(http.MethodDelete, "/files?path=/Pictures", nil, http.StatusNoContent, nil)
 		alice.mustJSON(http.MethodGet, "/files/stat?path=/Pictures/2026/a.jpg", nil, http.StatusNotFound, nil)
 
-		trashed, _ := filepath.Glob(filepath.Join(server.app.Config.DataDir, ".nomad", "trash", "alice", "*", "Pictures", "2026", "a.jpg"))
+		trashed, _ := filepath.Glob(filepath.Join(server.app.Config.DataDir, ".polder", "trash", "alice", "*", "Pictures", "2026", "a.jpg"))
 		if len(trashed) != 1 {
 			t.Fatal("deleted file should be kept in the trash")
 		}
@@ -138,7 +138,7 @@ func TestQuotaIsEnforced(t *testing.T) {
 		if me.UsedBytes != 100 || me.QuotaBytes != 100 {
 			t.Fatalf("usage not reported: %+v", me)
 		}
-		leftovers, _ := filepath.Glob(filepath.Join(server.app.Config.DataDir, "alice", ".nomad-tmp-*"))
+		leftovers, _ := filepath.Glob(filepath.Join(server.app.Config.DataDir, "alice", ".polder-tmp-*"))
 		if len(leftovers) != 0 {
 			t.Fatalf("temp files left behind: %v", leftovers)
 		}

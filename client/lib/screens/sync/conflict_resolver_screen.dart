@@ -3,15 +3,15 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/sync/conflict_queue_provider.dart";
-import "package:nomad/screens/sync/widgets/apply_to_all_checkbox.dart";
-import "package:nomad/screens/sync/widgets/conflict_tile.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/layout/app_page.dart";
-import "package:nomad/widgets/shared/message_view.dart";
-import "package:nomad/widgets/shared/nav_group.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder/screens/sync/widgets/apply_to_all_checkbox.dart";
+import "package:polder/screens/sync/widgets/conflict_tile.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/layout/app_page.dart";
+import "package:polder/widgets/shared/message_view.dart";
+import "package:polder/widgets/shared/nav_group.dart";
 
 class ConflictResolverScreen extends ConsumerWidget {
   const ConflictResolverScreen({super.key});

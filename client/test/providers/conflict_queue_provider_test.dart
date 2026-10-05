@@ -1,9 +1,9 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/sync/conflict_queue_provider.dart";
-import "package:nomad/providers/sync/sync_roots_provider.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder/providers/sync/sync_roots_provider.dart";
 
 import "../support/provider_harness.dart";
 

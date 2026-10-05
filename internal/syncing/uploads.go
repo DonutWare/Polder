@@ -15,11 +15,11 @@ import (
 	"regexp"
 	"time"
 
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/chunker"
-	"nomad-server/internal/files"
-	"nomad-server/internal/storage"
-	"nomad-server/internal/users"
+	"polder-server/internal/apperr"
+	"polder-server/internal/chunker"
+	"polder-server/internal/files"
+	"polder-server/internal/storage"
+	"polder-server/internal/users"
 )
 
 const UploadLifetime = 24 * time.Hour

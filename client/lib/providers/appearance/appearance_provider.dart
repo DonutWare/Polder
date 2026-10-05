@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:dynamic_color/dynamic_color.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:nomad/models/appearance.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/services/storage/preferences_store.dart";
+import "package:polder/models/appearance.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/services/storage/preferences_store.dart";
 
 final appearanceProvider = NotifierProvider<AppearanceNotifier, Appearance>(AppearanceNotifier.new);
 
@@ -21,7 +21,7 @@ Future<Color?> readSystemAccent() async {
 }
 
 class AppearanceNotifier extends Notifier<Appearance> {
-  static const _key = "nomad.appearance";
+  static const _key = "polder.appearance";
 
   PreferencesStore get _preferences => ref.read(preferencesStoreProvider);
 

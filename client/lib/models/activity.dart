@@ -1,6 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/util/remote_path.dart";
+import "package:polder/util/remote_path.dart";
 
 part "activity.freezed.dart";
 

@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/shared/app_bar_fade.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/shared/app_bar_fade.dart";
 
 /// A page inside a navigation shell: a transparent app bar over content that scrolls beneath it.
 ///

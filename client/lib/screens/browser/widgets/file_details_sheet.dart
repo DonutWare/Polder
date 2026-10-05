@@ -3,13 +3,13 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/screens/browser/widgets/file_thumbnail.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/date_format_extension.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/detail_row.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/date_format_extension.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/detail_row.dart";
 
 class FileDetailsSheet extends ConsumerWidget {
   const FileDetailsSheet({required this.entry, super.key});

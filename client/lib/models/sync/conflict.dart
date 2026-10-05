@@ -1,7 +1,7 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/sync/local_file_state.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/sync/local_file_state.dart";
 
 part "conflict.freezed.dart";
 part "conflict.g.dart";

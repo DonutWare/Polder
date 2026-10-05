@@ -1,29 +1,29 @@
 import "dart:io";
 
-import "package:nomad/models/manifest.dart";
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/local_file_state.dart";
-import "package:nomad/models/sync/remote_state.dart";
-import "package:nomad/models/sync/sync_action.dart";
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/models/sync/sync_status.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/sync/chunker.dart";
-import "package:nomad/services/sync/conflict_resolver.dart";
-import "package:nomad/services/sync/local_scanner.dart";
-import "package:nomad/services/sync/reconciler.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/remote_change_set.dart";
-import "package:nomad/services/sync/sync_exceptions.dart";
-import "package:nomad/services/sync/sync_executor.dart";
-import "package:nomad/services/sync/sync_ignore_rules.dart";
-import "package:nomad/services/sync/sync_paths.dart";
-import "package:nomad/services/sync/sync_service.dart";
-import "package:nomad/services/sync/work_queue.dart";
-import "package:nomad/services/sync/sync_state_store.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/models/manifest.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/local_file_state.dart";
+import "package:polder/models/sync/remote_state.dart";
+import "package:polder/models/sync/sync_action.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/models/sync/sync_status.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/sync/chunker.dart";
+import "package:polder/services/sync/conflict_resolver.dart";
+import "package:polder/services/sync/local_scanner.dart";
+import "package:polder/services/sync/reconciler.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/remote_change_set.dart";
+import "package:polder/services/sync/sync_exceptions.dart";
+import "package:polder/services/sync/sync_executor.dart";
+import "package:polder/services/sync/sync_ignore_rules.dart";
+import "package:polder/services/sync/sync_paths.dart";
+import "package:polder/services/sync/sync_service.dart";
+import "package:polder/services/sync/work_queue.dart";
+import "package:polder/services/sync/sync_state_store.dart";
+import "package:polder/util/remote_path.dart";
 
 typedef RemoteSnapshot = ({Map<String, RemoteState> states, List<RemoteMove> moves, int cursor});
 
@@ -31,7 +31,7 @@ typedef _Location = ({SyncRoot root, String path});
 
 class SyncEngine implements SyncService {
   SyncEngine({
-    required NomadApi api,
+    required PolderApi api,
     required SyncStateStore store,
     required String deviceName,
     SyncActivity? activity,
@@ -47,7 +47,7 @@ class SyncEngine implements SyncService {
     _resolver = ConflictResolver(executor: _executor, scanner: scanner, deviceName: deviceName, clock: clock);
   }
 
-  final NomadApi _api;
+  final PolderApi _api;
   final SyncStateStore _store;
   final SyncActivity? _activity;
   final LocalScanner _scanner;

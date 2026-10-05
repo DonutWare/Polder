@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/widgets/shared/centered_progress.dart";
-import "package:nomad/widgets/shared/error_view.dart";
+import "package:polder/widgets/shared/centered_progress.dart";
+import "package:polder/widgets/shared/error_view.dart";
 
 class AsyncValueView<T> extends StatelessWidget {
   const AsyncValueView({required this.value, required this.data, this.onRetry, super.key});

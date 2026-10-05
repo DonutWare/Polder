@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'nomad.models.swagger.dart';
+part of 'polder.models.swagger.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

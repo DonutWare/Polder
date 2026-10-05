@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/users"
+	"polder-server/internal/apperr"
+	"polder-server/internal/users"
 )
 
 type TokenPair struct {

@@ -3,12 +3,12 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/providers/sync/conflict_queue_provider.dart";
-import "package:nomad/screens/sync/widgets/conflict_dialog.dart";
-import "package:nomad/screens/sync/widgets/conflict_kind_text.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder/screens/sync/widgets/conflict_dialog.dart";
+import "package:polder/screens/sync/widgets/conflict_kind_text.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 class ConflictTile extends ConsumerWidget {
   const ConflictTile({required this.conflict, super.key});

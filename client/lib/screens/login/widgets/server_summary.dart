@@ -3,10 +3,10 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/login_provider.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/providers/login_provider.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 class ServerSummary extends ConsumerWidget {
   const ServerSummary({super.key});

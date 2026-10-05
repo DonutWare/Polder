@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"nomad-server/internal/preview"
+	"polder-server/internal/preview"
 )
 
 type trashItem struct {

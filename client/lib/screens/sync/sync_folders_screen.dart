@@ -3,17 +3,17 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/screens/sync/widgets/add_sync_folder_dialog.dart";
-import "package:nomad/screens/sync/widgets/conflicts_banner.dart";
-import "package:nomad/screens/sync/widgets/pause_sync_button.dart";
-import "package:nomad/screens/sync/widgets/sync_now_button.dart";
-import "package:nomad/screens/sync/widgets/sync_roots_list.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/layout/app_page.dart";
-import "package:nomad/widgets/shared/message_view.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/screens/sync/widgets/add_sync_folder_dialog.dart";
+import "package:polder/screens/sync/widgets/conflicts_banner.dart";
+import "package:polder/screens/sync/widgets/pause_sync_button.dart";
+import "package:polder/screens/sync/widgets/sync_now_button.dart";
+import "package:polder/screens/sync/widgets/sync_roots_list.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/layout/app_page.dart";
+import "package:polder/widgets/shared/message_view.dart";
 
 class SyncFoldersScreen extends ConsumerWidget {
   const SyncFoldersScreen({super.key});

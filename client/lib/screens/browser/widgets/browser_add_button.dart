@@ -4,17 +4,17 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/scan_session.dart";
+import "package:polder/models/scan_session.dart";
 
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/scan/scan_review_screen.dart";
-import "package:nomad/util/action_feedback.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/util/remote_path.dart";
-import "package:nomad/widgets/shared/text_input_dialog.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/scan/scan_review_screen.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/util/remote_path.dart";
+import "package:polder/widgets/shared/text_input_dialog.dart";
 
 enum _AddAction { upload, scan, folder }
 

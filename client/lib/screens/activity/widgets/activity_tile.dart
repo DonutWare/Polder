@@ -2,13 +2,13 @@ import "package:flutter/material.dart";
 
 import "package:intl/intl.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/screens/activity/widgets/activity_presentation.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
-import "package:nomad/widgets/shared/tag.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/screens/activity/widgets/activity_presentation.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/tag.dart";
 
 class ActivityTile extends StatelessWidget {
   const ActivityTile({required this.entry, this.showUser = false, super.key});

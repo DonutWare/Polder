@@ -3,7 +3,7 @@ package settings
 import (
 	"time"
 
-	"nomad-server/internal/users"
+	"polder-server/internal/users"
 
 	"github.com/danielgtaylor/huma/v2"
 )

@@ -1,9 +1,9 @@
-import "package:nomad/models/sync/auto_upload_settings.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/sync_platform.dart";
-import "package:nomad/services/sync/sync_service.dart";
-import "package:nomad/services/sync/sync_state_store.dart";
+import "package:polder/models/sync/auto_upload_settings.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/sync_platform.dart";
+import "package:polder/services/sync/sync_service.dart";
+import "package:polder/services/sync/sync_state_store.dart";
 
 SyncPlatform createSyncPlatform() => const UnsupportedSyncPlatform();
 
@@ -26,7 +26,7 @@ class UnsupportedSyncPlatform implements SyncPlatform {
 
   @override
   SyncService createService({
-    required NomadApi api,
+    required PolderApi api,
     required SyncStateStore store,
     required String deviceName,
     SyncActivity? activity,

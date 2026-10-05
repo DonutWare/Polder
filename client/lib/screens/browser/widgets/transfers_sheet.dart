@@ -3,14 +3,14 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/transfer.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/api_error_localization.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
-import "package:nomad/widgets/shared/level_bar.dart";
-import "package:nomad/widgets/shared/section_header.dart";
+import "package:polder/models/transfer.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/api_error_localization.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/level_bar.dart";
+import "package:polder/widgets/shared/section_header.dart";
 
 class TransfersSheet extends ConsumerWidget {
   const TransfersSheet({super.key});

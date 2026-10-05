@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/theme/app_theme.dart";
+import "package:polder/theme/app_theme.dart";
 
 class IconBadge extends StatelessWidget {
   const IconBadge({super.key, this.icon, this.child, this.color, this.size = 36, this.shape})

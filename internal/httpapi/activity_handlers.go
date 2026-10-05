@@ -4,9 +4,9 @@ import (
 	"context"
 	"strconv"
 
-	"nomad-server/internal/activity"
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/users"
+	"polder-server/internal/activity"
+	"polder-server/internal/apperr"
+	"polder-server/internal/users"
 )
 
 type activityInput struct {

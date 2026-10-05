@@ -5,9 +5,9 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/auth"
-	"nomad-server/internal/users"
+	"polder-server/internal/apperr"
+	"polder-server/internal/auth"
+	"polder-server/internal/users"
 )
 
 type credentialsRequest struct {

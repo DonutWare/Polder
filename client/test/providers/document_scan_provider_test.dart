@@ -4,9 +4,9 @@ import "dart:io";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/models/scan_session.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/browser/document_scan_provider.dart";
+import "package:polder/models/scan_session.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/browser/document_scan_provider.dart";
 
 import "../support/fake_server.dart";
 import "../support/provider_harness.dart";
@@ -19,7 +19,7 @@ final _onePixelPng = base64Decode(
 class _ServerWithMe extends http.BaseClient {
   _ServerWithMe(this.server);
 
-  final FakeNomadServer server;
+  final FakePolderServer server;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -30,7 +30,7 @@ class _ServerWithMe extends http.BaseClient {
 
 void main() {
   late Directory temp;
-  late FakeNomadServer server;
+  late FakePolderServer server;
   late ProviderHarness harness;
   late List<String> pages;
   late ScanRequest request;
@@ -41,7 +41,7 @@ void main() {
       for (final name in ["a.png", "b.png", "c.png"])
         (await File("${temp.path}/$name").writeAsBytes([..._onePixelPng, name.codeUnitAt(0)])).path,
     ];
-    server = FakeNomadServer()..putFile("/Docs/keep.txt", "k".codeUnits);
+    server = FakePolderServer()..putFile("/Docs/keep.txt", "k".codeUnits);
     harness = ProviderHarness(httpClient: _ServerWithMe(server), account: testAccount());
     request = ScanRequest(directory: "/Docs", pages: pages.take(2).toList());
     harness.container.listen(scanSessionProvider(request), (_, _) {});

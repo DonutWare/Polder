@@ -49,8 +49,8 @@ func Default() Config {
 
 func Load() (Config, error) {
 	cfg := Default()
-	cfg.ConfigDir = envOr("NOMAD_CONFIG_DIR", cfg.ConfigDir)
-	cfg.DataDir = envOr("NOMAD_DATA_DIR", cfg.DataDir)
+	cfg.ConfigDir = envOr("POLDER_CONFIG_DIR", cfg.ConfigDir)
+	cfg.DataDir = envOr("POLDER_DATA_DIR", cfg.DataDir)
 
 	if err := cfg.mergeFile(filepath.Join(cfg.ConfigDir, "config.yaml")); err != nil {
 		return Config{}, err
@@ -76,36 +76,36 @@ func (cfg *Config) mergeFile(path string) error {
 }
 
 func (cfg *Config) mergeEnvironment() error {
-	cfg.ListenAddress = envOr("NOMAD_LISTEN", cfg.ListenAddress)
-	cfg.DatabaseDriver = envOr("NOMAD_DB_DRIVER", cfg.DatabaseDriver)
-	cfg.DatabaseDSN = envOr("NOMAD_DB_DSN", cfg.DatabaseDSN)
-	cfg.WebDir = envOr("NOMAD_WEB_DIR", cfg.WebDir)
+	cfg.ListenAddress = envOr("POLDER_LISTEN", cfg.ListenAddress)
+	cfg.DatabaseDriver = envOr("POLDER_DB_DRIVER", cfg.DatabaseDriver)
+	cfg.DatabaseDSN = envOr("POLDER_DB_DSN", cfg.DatabaseDSN)
+	cfg.WebDir = envOr("POLDER_WEB_DIR", cfg.WebDir)
 
-	if value, ok := os.LookupEnv("NOMAD_RESCAN_INTERVAL"); ok {
+	if value, ok := os.LookupEnv("POLDER_RESCAN_INTERVAL"); ok {
 		interval, err := time.ParseDuration(value)
 		if err != nil {
-			return fmt.Errorf("NOMAD_RESCAN_INTERVAL: %w", err)
+			return fmt.Errorf("POLDER_RESCAN_INTERVAL: %w", err)
 		}
 		cfg.RescanInterval = interval
 	}
-	if value, ok := os.LookupEnv("NOMAD_TRASH_RETENTION_DAYS"); ok {
+	if value, ok := os.LookupEnv("POLDER_TRASH_RETENTION_DAYS"); ok {
 		days, err := strconv.Atoi(value)
 		if err != nil {
-			return fmt.Errorf("NOMAD_TRASH_RETENTION_DAYS: %w", err)
+			return fmt.Errorf("POLDER_TRASH_RETENTION_DAYS: %w", err)
 		}
 		cfg.TrashRetentionDays = days
 	}
-	if value, ok := os.LookupEnv("NOMAD_SERVE_WEB"); ok {
+	if value, ok := os.LookupEnv("POLDER_SERVE_WEB"); ok {
 		serve, err := strconv.ParseBool(value)
 		if err != nil {
-			return fmt.Errorf("NOMAD_SERVE_WEB: %w", err)
+			return fmt.Errorf("POLDER_SERVE_WEB: %w", err)
 		}
 		cfg.ServeWeb = serve
 	}
-	if value, ok := os.LookupEnv("NOMAD_WATCH_FILES"); ok {
+	if value, ok := os.LookupEnv("POLDER_WATCH_FILES"); ok {
 		watch, err := strconv.ParseBool(value)
 		if err != nil {
-			return fmt.Errorf("NOMAD_WATCH_FILES: %w", err)
+			return fmt.Errorf("POLDER_WATCH_FILES: %w", err)
 		}
 		cfg.WatchFiles = watch
 	}
@@ -121,7 +121,7 @@ func (cfg Config) validate() error {
 		return nil
 	case DriverMariaDB:
 		if cfg.DatabaseDSN == "" {
-			return errors.New("NOMAD_DB_DSN is required for the mariadb driver")
+			return errors.New("POLDER_DB_DSN is required for the mariadb driver")
 		}
 		return nil
 	default:
@@ -130,7 +130,7 @@ func (cfg Config) validate() error {
 }
 
 func (cfg Config) SQLitePath() string {
-	return filepath.Join(cfg.ConfigDir, "nomad.db")
+	return filepath.Join(cfg.ConfigDir, "polder.db")
 }
 
 func (cfg Config) PreviewCacheDir() string {

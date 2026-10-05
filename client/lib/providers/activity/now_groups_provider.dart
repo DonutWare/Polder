@@ -1,12 +1,12 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/providers/activity/activity_scope_provider.dart";
-import "package:nomad/providers/activity/live_transfers_provider.dart";
-import "package:nomad/providers/browser/pending_uploads_provider.dart";
-import "package:nomad/providers/sync/sync_activity_provider.dart";
-import "package:nomad/providers/sync/sync_paused_provider.dart";
-import "package:nomad/services/sync/sync_activity.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/providers/activity/activity_scope_provider.dart";
+import "package:polder/providers/activity/live_transfers_provider.dart";
+import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/providers/sync/sync_activity_provider.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/services/sync/sync_activity.dart";
 
 class NowGroup {
   const NowGroup({

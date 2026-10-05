@@ -2,14 +2,14 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:http/http.dart" as http;
 import "package:web_socket_channel/web_socket_channel.dart";
 
-import "package:nomad/services/device/device_conditions.dart";
-import "package:nomad/services/realtime/events_client.dart";
-import "package:nomad/services/storage/credentials_store.dart";
-import "package:nomad/services/storage/preferences_store.dart";
-import "package:nomad/services/transfer/document_scanner_service.dart";
-import "package:nomad/services/transfer/file_picker_service.dart";
-import "package:nomad/util/device_name.dart";
-import "package:nomad/util/hosted_server.dart";
+import "package:polder/services/device/device_conditions.dart";
+import "package:polder/services/realtime/events_client.dart";
+import "package:polder/services/storage/credentials_store.dart";
+import "package:polder/services/storage/preferences_store.dart";
+import "package:polder/services/transfer/document_scanner_service.dart";
+import "package:polder/services/transfer/file_picker_service.dart";
+import "package:polder/util/device_name.dart";
+import "package:polder/util/hosted_server.dart";
 
 final credentialsStoreProvider = Provider<CredentialsStore>((ref) => const SecureCredentialsStore());
 

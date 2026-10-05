@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"nomad-server/internal/storage"
+	"polder-server/internal/storage"
 
 	"github.com/danielgtaylor/huma/v2"
 )

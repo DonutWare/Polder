@@ -1,14 +1,14 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/models/sync/sync_status.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/desktop/tray_status_provider.dart";
-import "package:nomad/providers/sync/sync_activity_provider.dart";
-import "package:nomad/providers/sync/sync_paused_provider.dart";
-import "package:nomad/providers/sync/sync_roots_provider.dart";
-import "package:nomad/providers/sync/sync_status_provider.dart";
-import "package:nomad/services/sync/sync_activity.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/models/sync/sync_status.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/desktop/tray_status_provider.dart";
+import "package:polder/providers/sync/sync_activity_provider.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/providers/sync/sync_roots_provider.dart";
+import "package:polder/providers/sync/sync_status_provider.dart";
+import "package:polder/services/sync/sync_activity.dart";
 
 import "../support/provider_harness.dart";
 

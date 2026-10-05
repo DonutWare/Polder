@@ -9,7 +9,7 @@ jobs:
         image: mariadb:11
         env:
           MARIADB_ROOT_PASSWORD: testpass
-          MARIADB_DATABASE: nomad
+          MARIADB_DATABASE: polder
         ports: ["3306:3306"]
         options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=5s --health-retries=20
     steps:
@@ -20,7 +20,7 @@ jobs:
       - uses: golangci/golangci-lint-action@v8
       - run: go test -race ./...
         env:
-          NOMAD_TEST_MARIADB_DSN: root:testpass@tcp(127.0.0.1:3306)/nomad
+          POLDER_TEST_MARIADB_DSN: root:testpass@tcp(127.0.0.1:3306)/polder
 
   docker:
     runs-on: ubuntu-latest
@@ -29,7 +29,7 @@ jobs:
         web: [none, client]
     steps:
       - uses: actions/checkout@v4
-      - run: docker build --build-arg WEB=${{ matrix.web }} -t nomad-server:${{ matrix.web }} .
+      - run: docker build --build-arg WEB=${{ matrix.web }} -t polder-server:${{ matrix.web }} .
 
   client-api:
     runs-on: ubuntu-latest
@@ -38,4 +38,4 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go run ./cmd/nomad openapi | diff -u client/openapi/nomad.json -
+      - run: go run ./cmd/polder openapi | diff -u client/openapi/polder.json -

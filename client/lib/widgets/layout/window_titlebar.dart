@@ -16,7 +16,7 @@ class WindowTitlebar extends StatefulWidget {
 }
 
 class _WindowTitlebarState extends State<WindowTitlebar> {
-  static const _channel = MethodChannel("nomad/titlebar");
+  static const _channel = MethodChannel("polder/titlebar");
   static final _enabled = !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS;
 
   static _WindowTitlebarState? _current;

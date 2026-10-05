@@ -5,12 +5,12 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"nomad-server/internal/apperr"
+	"polder-server/internal/apperr"
 )
 
 const (
 	RootPath       = "/"
-	ReservedPrefix = ".nomad"
+	ReservedPrefix = ".polder"
 	maxPathLength  = 4096
 	maxNameLength  = 255
 )

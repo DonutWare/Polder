@@ -87,7 +87,7 @@
 			"label": "Docker: up",
 			"detail": "Build the image with the web app and start it on :6060",
 			"type": "shell",
-			"command": "mkdir -p config data && NOMAD_UID=$(id -u) NOMAD_GID=$(id -g) docker compose up -d --build",
+			"command": "mkdir -p config data && POLDER_UID=$(id -u) POLDER_GID=$(id -g) docker compose up -d --build",
 			"problemMatcher": []
 		},
 		{

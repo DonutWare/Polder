@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"nomad-server/internal/apperr"
+	"polder-server/internal/apperr"
 )
 
 func TestCleanPathAcceptsNormalPaths(t *testing.T) {
@@ -19,7 +19,7 @@ func TestCleanPathAcceptsNormalPaths(t *testing.T) {
 }
 
 func TestCleanPathRejectsTraversalAndReservedNames(t *testing.T) {
-	for _, input := range []string{"/../etc", "/a/../../b", "/a//b", "/a/./b", "/a\\b", "/.nomad/x", "/a/.nomad-tmp-1", "/a\x00b"} {
+	for _, input := range []string{"/../etc", "/a/../../b", "/a//b", "/a/./b", "/a\\b", "/.polder/x", "/a/.polder-tmp-1", "/a\x00b"} {
 		if _, err := CleanPath(input); !apperr.Is(err, apperr.KindInvalid) {
 			t.Errorf("CleanPath(%q) should be rejected, got %v", input, err)
 		}

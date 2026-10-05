@@ -1,1 +1,1 @@
-export 'nomad.swagger.dart' show Nomad;
+export 'polder.swagger.dart' show Polder;

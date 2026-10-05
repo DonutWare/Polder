@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"nomad-server/internal/users"
+	"polder-server/internal/users"
 )
 
 func TestProgressIsSmoothedAndSettles(t *testing.T) {

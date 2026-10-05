@@ -2,7 +2,7 @@ import "dart:convert";
 
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 
-import "package:nomad/models/account.dart";
+import "package:polder/models/account.dart";
 
 abstract interface class CredentialsStore {
   Future<Account?> load();
@@ -19,7 +19,7 @@ class SecureCredentialsStore implements CredentialsStore {
   // entitlement; the legacy file-based keychain works for ad-hoc signed builds too.
   static const _macOptions = MacOsOptions(usesDataProtectionKeychain: false);
 
-  static const _key = "nomad.account";
+  static const _key = "polder.account";
 
   final FlutterSecureStorage _storage;
 

@@ -2,11 +2,11 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/sync/auto_upload_settings.dart";
-import "package:nomad/providers/sync/auto_upload_settings_provider.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/async_value_view.dart";
-import "package:nomad/widgets/shared/nav_group.dart";
+import "package:polder/models/sync/auto_upload_settings.dart";
+import "package:polder/providers/sync/auto_upload_settings_provider.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/shared/nav_group.dart";
 
 class AutoUploadSettingsSection extends ConsumerWidget {
   const AutoUploadSettingsSection({super.key});

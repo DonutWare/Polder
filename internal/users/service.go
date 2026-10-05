@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"nomad-server/internal/apperr"
+	"polder-server/internal/apperr"
 )
 
 type PasswordHasher interface {

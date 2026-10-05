@@ -1,6 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/sync/conflict.dart";
+import "package:polder/models/sync/conflict.dart";
 
 part "conflict_queue_state.freezed.dart";
 

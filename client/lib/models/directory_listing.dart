@@ -1,6 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/file_entry.dart";
+import "package:polder/models/file_entry.dart";
 
 part "directory_listing.freezed.dart";
 part "directory_listing.g.dart";

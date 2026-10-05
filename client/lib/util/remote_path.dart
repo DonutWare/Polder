@@ -39,5 +39,5 @@ abstract final class RemotePath {
       !name.contains("/") &&
       !name.contains("\\") &&
       !name.contains("\u0000") &&
-      !name.startsWith(".nomad");
+      !name.startsWith(".polder");
 }

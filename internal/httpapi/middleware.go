@@ -9,9 +9,9 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"nomad-server/internal/activity"
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/users"
+	"polder-server/internal/activity"
+	"polder-server/internal/apperr"
+	"polder-server/internal/users"
 )
 
 type contextKey string

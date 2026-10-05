@@ -1,7 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/manifest.dart";
-import "package:nomad/services/sync/download_plan.dart";
+import "package:polder/models/manifest.dart";
+import "package:polder/services/sync/download_plan.dart";
 
 void main() {
   const remote = Manifest(

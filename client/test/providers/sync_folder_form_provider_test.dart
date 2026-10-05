@@ -1,19 +1,19 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/sync/auto_upload_settings_provider.dart";
-import "package:nomad/providers/sync/sync_folder_form_provider.dart";
-import "package:nomad/providers/sync/sync_roots_provider.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/sync/auto_upload_settings_provider.dart";
+import "package:polder/providers/sync/sync_folder_form_provider.dart";
+import "package:polder/providers/sync/sync_roots_provider.dart";
 
 import "../support/fake_server.dart";
 import "../support/provider_harness.dart";
 
 void main() {
   late ProviderHarness harness;
-  late FakeNomadServer server;
+  late FakePolderServer server;
 
   setUp(() {
-    server = FakeNomadServer();
+    server = FakePolderServer();
     harness = ProviderHarness(account: testAccount(), httpClient: server);
     harness.container
       ..listen(syncRootsProvider, (_, _) {})

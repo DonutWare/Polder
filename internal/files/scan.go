@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"nomad-server/internal/storage"
-	"nomad-server/internal/users"
+	"polder-server/internal/storage"
+	"polder-server/internal/users"
 )
 
 type diskItem struct {

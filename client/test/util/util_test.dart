@@ -1,9 +1,9 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/conflict_file_name.dart";
-import "package:nomad/util/quota_unit.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/conflict_file_name.dart";
+import "package:polder/util/quota_unit.dart";
+import "package:polder/util/remote_path.dart";
 
 void main() {
   group("ConflictFileName", () {
@@ -40,7 +40,7 @@ void main() {
 
     test("rejects names the protocol forbids", () {
       expect(RemotePath.isValidName("ok.txt"), isTrue);
-      for (final name in ["", "..", "a/b", "a\\b", ".nomad-tmp"]) {
+      for (final name in ["", "..", "a/b", "a\\b", ".polder-tmp"]) {
         expect(RemotePath.isValidName(name), isFalse, reason: name);
       }
     });

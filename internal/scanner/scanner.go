@@ -11,9 +11,9 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"nomad-server/internal/files"
-	"nomad-server/internal/storage"
-	"nomad-server/internal/users"
+	"polder-server/internal/files"
+	"polder-server/internal/storage"
+	"polder-server/internal/users"
 )
 
 const watchDebounce = 2 * time.Second

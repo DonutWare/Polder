@@ -1,9 +1,9 @@
-import "package:nomad/models/change.dart";
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/sync/remote_state.dart";
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/util/relative_path.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/models/change.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/sync/remote_state.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/util/relative_path.dart";
+import "package:polder/util/remote_path.dart";
 
 /// A file that now lives at [to] but had the content found at [from] before this change set, so a local
 /// copy of [from] can be moved there instead of downloading [entry] again. Paths are absolute remote paths.

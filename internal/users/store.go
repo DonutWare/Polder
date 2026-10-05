@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"nomad-server/internal/apperr"
+	"polder-server/internal/apperr"
 )
 
 const selectUserColumns = `SELECT u.id, u.username, u.role, u.quota_bytes, u.disabled, u.created_at,

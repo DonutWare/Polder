@@ -1,14 +1,14 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:nomad/models/account.dart";
-import "package:nomad/models/login_state.dart";
-import "package:nomad/models/setup_status.dart";
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/nomad_api.dart";
+import "package:polder/models/account.dart";
+import "package:polder/models/login_state.dart";
+import "package:polder/models/setup_status.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
 
 final loginProvider = NotifierProvider.autoDispose<LoginNotifier, LoginState>(LoginNotifier.new);
 
@@ -21,7 +21,7 @@ class LoginNotifier extends Notifier<LoginState> {
     return LoginState(serverUrl: ApiClientFactory.normalizeServerUrl(hosted), probingHostedServer: true);
   }
 
-  /// Falls back to asking for a server when the page's own origin isn't a Nomad server
+  /// Falls back to asking for a server when the page's own origin isn't a Polder server
   /// (for example when the web client runs from `flutter run`).
   Future<void> _connectToHostedServer() async {
     if (!ref.mounted) return;
@@ -34,12 +34,12 @@ class LoginNotifier extends Notifier<LoginState> {
         step: status.needsSetup ? LoginStep.setup : LoginStep.credentials,
       );
     } catch (_) {
-      // Not a Nomad API (a dev server answers with index.html, for example): ask for the server instead.
+      // Not a Polder API (a dev server answers with index.html, for example): ask for the server instead.
       if (ref.mounted) state = state.copyWith(probingHostedServer: false);
     }
   }
 
-  NomadApi get _api => ref.read(serverNomadApiProvider(state.serverUrl));
+  PolderApi get _api => ref.read(serverPolderApiProvider(state.serverUrl));
 
   void setServerUrl(String value) => state = state.copyWith(serverUrl: value, failure: null);
 

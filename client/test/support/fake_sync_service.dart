@@ -1,9 +1,9 @@
 import "dart:async";
 
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/models/sync/sync_status.dart";
-import "package:nomad/services/sync/sync_service.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/models/sync/sync_status.dart";
+import "package:polder/services/sync/sync_service.dart";
 
 class FakeSyncService implements SyncService {
   final List<(String, ConflictResolution)> resolved = [];

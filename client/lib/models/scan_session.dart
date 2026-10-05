@@ -1,7 +1,7 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:intl/intl.dart";
 
-import "package:nomad/util/remote_path.dart";
+import "package:polder/util/remote_path.dart";
 
 part "scan_session.freezed.dart";
 

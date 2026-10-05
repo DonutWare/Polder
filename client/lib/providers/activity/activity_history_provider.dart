@@ -1,10 +1,10 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/models/server_event.dart";
-import "package:nomad/providers/activity/activity_scope_provider.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/providers/realtime/events_provider.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/models/server_event.dart";
+import "package:polder/providers/activity/activity_scope_provider.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/realtime/events_provider.dart";
 
 class ActivityHistory {
   const ActivityHistory({required this.entries, required this.nextCursor});
@@ -48,7 +48,7 @@ class ActivityHistoryNotifier extends AsyncNotifier<ActivityHistory> {
   }
 
   Future<ActivityHistory> _firstPage() async {
-    final page = await ref.read(nomadApiProvider).activity(scope: scope);
+    final page = await ref.read(polderApiProvider).activity(scope: scope);
     return ActivityHistory(entries: page.entries, nextCursor: page.nextCursor);
   }
 
@@ -62,7 +62,7 @@ class ActivityHistoryNotifier extends AsyncNotifier<ActivityHistory> {
     if (current == null || !current.hasMore || _loadingMore) return;
     _loadingMore = true;
     try {
-      final page = await ref.read(nomadApiProvider).activity(scope: scope, before: current.nextCursor);
+      final page = await ref.read(polderApiProvider).activity(scope: scope, before: current.nextCursor);
       if (!ref.mounted) return;
       final latest = state.value ?? current;
       final known = {for (final entry in latest.entries) entry.id};

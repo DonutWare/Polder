@@ -3,20 +3,20 @@ import "dart:typed_data";
 
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/sync/in_memory_sync_state_store.dart";
-import "package:nomad/services/sync/sync_engine.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/sync/in_memory_sync_state_store.dart";
+import "package:polder/services/sync/sync_engine.dart";
 
 import "../../support/fake_server.dart";
 import "../../support/random_bytes.dart";
 
 void main() {
   late Directory localRoot;
-  late FakeNomadServer server;
+  late FakePolderServer server;
   late InMemorySyncStateStore store;
   late SyncEngine engine;
   late SyncRoot root;
@@ -24,10 +24,10 @@ void main() {
   File local(String relativePath) => File("${localRoot.path}/$relativePath");
 
   setUp(() async {
-    localRoot = await Directory.systemTemp.createTemp("nomad_sync");
-    server = FakeNomadServer();
+    localRoot = await Directory.systemTemp.createTemp("polder_sync");
+    server = FakePolderServer();
     store = InMemorySyncStateStore();
-    final api = NomadApi(ApiClientFactory.create("https://cloud.test", httpClient: server));
+    final api = PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: server));
     engine = SyncEngine(api: api, store: store, deviceName: "Laptop", clock: () => DateTime(2026, 9, 30, 14, 5));
     root = SyncRoot(id: "root", accountId: "a", localPath: localRoot.path, remotePath: "/Docs");
   });
@@ -213,7 +213,7 @@ void main() {
     int contentDownloads() => server.requests.where((request) => request == "GET /files/content").length;
 
     setUp(() async {
-      otherLocalRoot = await Directory.systemTemp.createTemp("nomad_sync_other");
+      otherLocalRoot = await Directory.systemTemp.createTemp("polder_sync_other");
       otherRoot = SyncRoot(id: "other", accountId: "a", localPath: otherLocalRoot.path, remotePath: "/Photos");
       await store.saveRoot(root);
       await store.saveRoot(otherRoot);

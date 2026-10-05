@@ -1,6 +1,6 @@
 import "dart:io";
 
-import "package:nomad/services/sync/sync_ignore_rules.dart";
+import "package:polder/services/sync/sync_ignore_rules.dart";
 
 abstract final class FolderWatcher {
   static Stream<String> watch(String localPath) {

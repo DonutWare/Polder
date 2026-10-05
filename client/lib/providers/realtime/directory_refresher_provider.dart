@@ -2,11 +2,11 @@ import "dart:async";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/server_event.dart";
-import "package:nomad/providers/activity/activity_scope_provider.dart";
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/current_user_provider.dart";
-import "package:nomad/providers/realtime/events_provider.dart";
+import "package:polder/models/server_event.dart";
+import "package:polder/providers/activity/activity_scope_provider.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/current_user_provider.dart";
+import "package:polder/providers/realtime/events_provider.dart";
 
 final directoryRefresherProvider = Provider<void>((ref) {
   final client = ref.watch(eventsClientProvider);

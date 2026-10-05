@@ -13,7 +13,7 @@ import (
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
 
-	"nomad-server/internal/activity"
+	"polder-server/internal/activity"
 )
 
 type activityEntry struct {
@@ -339,7 +339,7 @@ func TestEventsFollowTransfersAndScopes(t *testing.T) {
 		}
 
 		alice.request(http.MethodPut, "/files/content?path=/Photos/cat.jpg&baseRev=0", bytes.NewReader([]byte("meow")),
-			map[string]string{"X-Nomad-Transfer-Id": "local-1"}).Body.Close()
+			map[string]string{"X-Polder-Transfer-Id": "local-1"}).Body.Close()
 
 		started := aliceEvents.next("transfer.started")
 		if started.Transfer.Path != "/Photos/cat.jpg" || started.Transfer.ClientID != "local-1" || *started.Transfer.Total != 4 {

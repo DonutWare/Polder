@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/models/trash.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/util/localization_helper.dart";
 
 Future<RestoreMode?> showRestoreConflictDialog(BuildContext context, TrashItem item) => showDialog<RestoreMode>(
   context: context,

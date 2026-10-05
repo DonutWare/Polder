@@ -3,7 +3,7 @@ import "dart:async";
 import "package:fake_async/fake_async.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/services/sync/sync_scheduler.dart";
+import "package:polder/services/sync/sync_scheduler.dart";
 
 void main() {
   test("the initial run is deferred out of start and folder events are debounced", () {

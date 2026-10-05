@@ -1,7 +1,7 @@
-import "package:nomad/services/storage/preferences_store.dart";
+import "package:polder/services/storage/preferences_store.dart";
 
 abstract final class SyncPause {
-  static const preferenceKey = "nomad.syncPaused";
+  static const preferenceKey = "polder.syncPaused";
 
   static Future<bool> read(PreferencesStore preferences) async =>
       (await preferences.readJson(preferenceKey))?["paused"] == true;

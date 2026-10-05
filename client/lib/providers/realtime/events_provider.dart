@@ -2,12 +2,12 @@ import "dart:async";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/activity/activity_scope_provider.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/realtime/events_client.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/activity/activity_scope_provider.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/realtime/events_client.dart";
 
 final eventsClientProvider = Provider<EventsClient?>((ref) {
   final connect = ref.watch(webSocketConnectorProvider);
@@ -21,7 +21,7 @@ final eventsClientProvider = Provider<EventsClient?>((ref) {
     token: ({required refresh}) async {
       if (refresh) {
         try {
-          await ref.read(nomadApiProvider).me();
+          await ref.read(polderApiProvider).me();
         } on ApiException {
           return null;
         }

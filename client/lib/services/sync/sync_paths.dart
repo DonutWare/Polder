@@ -2,8 +2,8 @@ import "dart:io";
 
 import "package:path/path.dart" as p;
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/util/remote_path.dart";
 
 class SyncPaths {
   const SyncPaths(this.root);

@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/providers/browser/pending_uploads_provider.dart";
-import "package:nomad/screens/browser/widgets/file_actions_menu.dart";
-import "package:nomad/screens/browser/widgets/file_metadata_text.dart";
-import "package:nomad/screens/browser/widgets/file_open_action.dart";
-import "package:nomad/screens/browser/widgets/file_thumbnail.dart";
-import "package:nomad/screens/browser/widgets/pending_upload_widgets.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/screens/browser/widgets/file_actions_menu.dart";
+import "package:polder/screens/browser/widgets/file_metadata_text.dart";
+import "package:polder/screens/browser/widgets/file_open_action.dart";
+import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 
 class FileListTile extends StatelessWidget {
   const FileListTile({required this.parentPath, required this.entry, this.pending, this.busy = false, super.key});

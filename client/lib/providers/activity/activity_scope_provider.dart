@@ -1,7 +1,7 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/providers/account_provider.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/providers/account_provider.dart";
 
 final activityScopeProvider = NotifierProvider<ActivityScopeNotifier, ActivityScope>(ActivityScopeNotifier.new);
 

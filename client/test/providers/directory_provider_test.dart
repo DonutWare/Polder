@@ -1,8 +1,8 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/services/api/api_exceptions.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
 
 import "../support/fake_server.dart";
 import "../support/provider_harness.dart";
@@ -11,7 +11,7 @@ import "../support/scripted_client.dart";
 class _ServerWithMe extends http.BaseClient {
   _ServerWithMe(this.server);
 
-  final FakeNomadServer server;
+  final FakePolderServer server;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -21,12 +21,12 @@ class _ServerWithMe extends http.BaseClient {
 }
 
 void main() {
-  late FakeNomadServer server;
+  late FakePolderServer server;
   late ProviderHarness harness;
   final account = testAccount();
 
   setUp(() {
-    server = FakeNomadServer()
+    server = FakePolderServer()
       ..putFile("/b.txt", "b".codeUnits)
       ..putFile("/Photos/p.jpg", "p".codeUnits);
     harness = ProviderHarness(httpClient: _ServerWithMe(server), account: account);

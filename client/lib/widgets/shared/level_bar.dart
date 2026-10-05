@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/theme/app_theme.dart";
+import "package:polder/theme/app_theme.dart";
 
 class LevelBar extends StatelessWidget {
   const LevelBar({required this.fraction, this.color, this.height = 8, super.key});

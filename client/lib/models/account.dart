@@ -1,7 +1,7 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/models/user.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/models/user.dart";
 
 part "account.freezed.dart";
 part "account.g.dart";

@@ -3,13 +3,13 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
-import "package:nomad/models/login_state.dart";
-import "package:nomad/providers/login_provider.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/login/widgets/credentials_step.dart";
-import "package:nomad/screens/login/widgets/login_header.dart";
-import "package:nomad/screens/login/widgets/server_step.dart";
-import "package:nomad/widgets/shared/loading_indicator.dart";
+import "package:polder/models/login_state.dart";
+import "package:polder/providers/login_provider.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/login/widgets/credentials_step.dart";
+import "package:polder/screens/login/widgets/login_header.dart";
+import "package:polder/screens/login/widgets/server_step.dart";
+import "package:polder/widgets/shared/loading_indicator.dart";
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});

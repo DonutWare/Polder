@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 /// A titled stack of tiles on panel surfaces; the outer corners are round, the joins tight.
 class NavGroup extends StatelessWidget {

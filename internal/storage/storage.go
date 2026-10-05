@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"nomad-server/internal/apperr"
+	"polder-server/internal/apperr"
 )
 
 const (
-	internalDirName = ".nomad"
-	tempFilePrefix  = ".nomad-tmp-"
+	internalDirName = ".polder"
+	tempFilePrefix  = ".polder-tmp-"
 	dirPermissions  = 0o750
 )
 

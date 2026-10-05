@@ -1,17 +1,17 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/models/user_form.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/services/api/nomad_api.dart";
+import "package:polder/models/user.dart";
+import "package:polder/models/user_form.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/services/api/polder_api.dart";
 
 final adminUsersProvider = AsyncNotifierProvider.autoDispose<AdminUsersNotifier, List<User>>(AdminUsersNotifier.new);
 
 class AdminUsersNotifier extends AsyncNotifier<List<User>> {
-  NomadApi get _api => ref.read(nomadApiProvider);
+  PolderApi get _api => ref.read(polderApiProvider);
 
   @override
-  Future<List<User>> build() async => _sorted(await ref.watch(nomadApiProvider).listUsers());
+  Future<List<User>> build() async => _sorted(await ref.watch(polderApiProvider).listUsers());
 
   Future<void> save(UserForm form) async {
     final original = form.original;

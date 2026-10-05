@@ -1,10 +1,10 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/account.dart";
-import "package:nomad/models/user.dart";
-import "package:nomad/routes/app_router.dart";
-import "package:nomad/routes/app_routes.dart";
+import "package:polder/models/account.dart";
+import "package:polder/models/user.dart";
+import "package:polder/routes/app_router.dart";
+import "package:polder/routes/app_routes.dart";
 
 import "../support/provider_harness.dart";
 

@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/util/throughput_meter.dart";
+import "package:polder/util/throughput_meter.dart";
 
 void main() {
   var now = DateTime(2026);

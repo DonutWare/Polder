@@ -1,20 +1,20 @@
 import "dart:io";
 import "dart:math";
 
-import "package:nomad/models/manifest.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/sync/chunker.dart";
-import "package:nomad/services/sync/download_plan.dart";
-import "package:nomad/services/sync/local_scanner.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/sync_exceptions.dart";
-import "package:nomad/services/sync/sync_ignore_rules.dart";
+import "package:polder/models/manifest.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/sync/chunker.dart";
+import "package:polder/services/sync/download_plan.dart";
+import "package:polder/services/sync/local_scanner.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/sync_exceptions.dart";
+import "package:polder/services/sync/sync_ignore_rules.dart";
 
 class DeltaDownloader {
   DeltaDownloader(this._api, {this.maxAttempts = 3});
 
-  final NomadApi _api;
+  final PolderApi _api;
   final int maxAttempts;
   final _random = Random();
 

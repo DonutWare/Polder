@@ -1,12 +1,12 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/conflict_queue_state.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/providers/sync/sync_roots_provider.dart";
-import "package:nomad/services/api/api_exceptions.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/conflict_queue_state.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/providers/sync/sync_roots_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
 
 final conflictQueueProvider = NotifierProvider<ConflictQueueNotifier, ConflictQueueState>(ConflictQueueNotifier.new);
 

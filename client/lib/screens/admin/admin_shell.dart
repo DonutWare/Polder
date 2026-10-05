@@ -4,14 +4,14 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/shell/shell_destinations_provider.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/shell/shell_destination_labels.dart";
-import "package:nomad/screens/shell/widgets/more_options.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/navigation/navigation_shell.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/shell/shell_destinations_provider.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/shell/shell_destination_labels.dart";
+import "package:polder/screens/shell/widgets/more_options.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/navigation/navigation_shell.dart";
 
 /// Server administration, kept apart from the everyday app so its tools stay out of the way.
 class AdminShell extends ConsumerWidget {

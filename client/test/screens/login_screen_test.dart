@@ -5,11 +5,11 @@ import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 import "package:go_router/go_router.dart";
 
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/login/login_screen.dart";
-import "package:nomad/screens/login/widgets/credentials_step.dart";
-import "package:nomad/screens/login/widgets/server_step.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/login/login_screen.dart";
+import "package:polder/screens/login/widgets/credentials_step.dart";
+import "package:polder/screens/login/widgets/server_step.dart";
 
 import "../support/localized_app.dart";
 import "../support/provider_harness.dart";

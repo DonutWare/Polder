@@ -2,11 +2,11 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/providers/current_user_provider.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/level_bar.dart";
+import "package:polder/models/user.dart";
+import "package:polder/providers/current_user_provider.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/level_bar.dart";
 
 class QuotaBar extends ConsumerWidget {
   const QuotaBar({super.key});

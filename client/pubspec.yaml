@@ -1,5 +1,5 @@
-name: nomad
-description: "Nomad client: files, sync and auto-upload for a self-hosted Nomad server."
+name: polder
+description: "Polder client: files, sync and auto-upload for a self-hosted Polder server."
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1

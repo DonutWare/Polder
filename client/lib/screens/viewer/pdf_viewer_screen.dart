@@ -6,12 +6,12 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:pdfrx/pdfrx.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/providers/browser/file_content_provider.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/screens/browser/widgets/file_details_sheet.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/async_value_view.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/providers/browser/file_content_provider.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/screens/browser/widgets/file_details_sheet.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/async_value_view.dart";
 
 class PdfViewerScreen extends ConsumerStatefulWidget {
   const PdfViewerScreen({required this.entry, super.key});

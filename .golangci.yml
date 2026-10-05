@@ -25,7 +25,7 @@ linters:
         - os.Remove
         - (io.Closer).Close
         - (io.ReadCloser).Close
-        - (*nomad-server/internal/app.App).Close
+        - (*polder-server/internal/app.App).Close
         - (*github.com/fsnotify/fsnotify.Watcher).Close
   exclusions:
     rules:

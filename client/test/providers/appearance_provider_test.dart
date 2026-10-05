@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/appearance.dart";
-import "package:nomad/providers/appearance/appearance_provider.dart";
-import "package:nomad/services/storage/preferences_store.dart";
+import "package:polder/models/appearance.dart";
+import "package:polder/providers/appearance/appearance_provider.dart";
+import "package:polder/services/storage/preferences_store.dart";
 
 import "../support/provider_harness.dart";
 

@@ -1,6 +1,6 @@
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/sync/local_file_state.dart";
-import "package:nomad/models/sync/sync_entry.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/sync/local_file_state.dart";
+import "package:polder/models/sync/sync_entry.dart";
 
 final fixedTime = DateTime.utc(2026, 9, 30, 12);
 

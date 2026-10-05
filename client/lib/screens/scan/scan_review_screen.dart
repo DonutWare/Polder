@@ -5,16 +5,16 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/scan_session.dart";
-import "package:nomad/providers/appearance/appearance_provider.dart";
-import "package:nomad/providers/browser/document_scan_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/services/transfer/document_scanner_service.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/action_feedback.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
-import "package:nomad/widgets/shared/remote_folder_picker_dialog.dart";
+import "package:polder/models/scan_session.dart";
+import "package:polder/providers/appearance/appearance_provider.dart";
+import "package:polder/providers/browser/document_scan_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/services/transfer/document_scanner_service.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 
 Future<List<String>?> scanDocument(BuildContext context, WidgetRef ref) async {
   final messenger = ScaffoldMessenger.maybeOf(context);

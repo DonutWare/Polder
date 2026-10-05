@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/theme/app_theme.dart";
+import "package:polder/theme/app_theme.dart";
 
 /// The app's mark: an accent gradient on a cookie shape.
 class AppMark extends StatelessWidget {

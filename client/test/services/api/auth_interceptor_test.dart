@@ -1,11 +1,11 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/auth_session.dart";
-import "package:nomad/services/api/nomad_api.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/auth_session.dart";
+import "package:polder/services/api/polder_api.dart";
 
 import "../../support/scripted_client.dart";
 
@@ -39,7 +39,7 @@ void main() {
   late int refreshCalls;
   late bool refreshSucceeds;
   late ScriptedClient client;
-  late NomadApi api;
+  late PolderApi api;
 
   Future<http.StreamedResponse> handle(RecordedRequest request) async {
     if (request.path.endsWith("/auth/refresh")) {
@@ -67,7 +67,7 @@ void main() {
     refreshCalls = 0;
     refreshSucceeds = true;
     client = ScriptedClient(handle);
-    api = NomadApi(ApiClientFactory.create("https://cloud.test", session: session, httpClient: client));
+    api = PolderApi(ApiClientFactory.create("https://cloud.test", session: session, httpClient: client));
   });
 
   test("sends the bearer token", () async {

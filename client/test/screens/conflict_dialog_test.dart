@@ -1,13 +1,13 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/sync/conflict_queue_provider.dart";
-import "package:nomad/screens/sync/widgets/apply_to_all_checkbox.dart";
-import "package:nomad/screens/sync/widgets/conflict_dialog.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder/screens/sync/widgets/apply_to_all_checkbox.dart";
+import "package:polder/screens/sync/widgets/conflict_dialog.dart";
 
 import "../support/fixtures.dart";
 import "../support/localized_app.dart";

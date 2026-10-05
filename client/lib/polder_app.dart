@@ -2,21 +2,21 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/l10n/generated/app_localizations.dart";
-import "package:nomad/providers/appearance/appearance_provider.dart";
-import "package:nomad/routes/app_router.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/widgets/desktop/desktop_tray.dart";
-import "package:nomad/widgets/layout/window_titlebar.dart";
+import "package:polder/l10n/generated/app_localizations.dart";
+import "package:polder/providers/appearance/appearance_provider.dart";
+import "package:polder/routes/app_router.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder/widgets/layout/window_titlebar.dart";
 
-class NomadApp extends ConsumerStatefulWidget {
-  const NomadApp({super.key});
+class PolderApp extends ConsumerStatefulWidget {
+  const PolderApp({super.key});
 
   @override
-  ConsumerState<NomadApp> createState() => _NomadAppState();
+  ConsumerState<PolderApp> createState() => _PolderAppState();
 }
 
-class _NomadAppState extends ConsumerState<NomadApp> {
+class _PolderAppState extends ConsumerState<PolderApp> {
   late final AppLifecycleListener _lifecycle;
 
   @override

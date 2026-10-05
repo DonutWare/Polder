@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:io";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/sync/sync_ignore_rules.dart";
-import "package:nomad/services/sync/sync_paths.dart";
-import "package:nomad/util/throughput_meter.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/sync/sync_ignore_rules.dart";
+import "package:polder/services/sync/sync_paths.dart";
+import "package:polder/util/throughput_meter.dart";
 
 enum LocalSyncPhase { waiting, preparing, uploading }
 

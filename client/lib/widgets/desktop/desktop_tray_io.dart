@@ -8,13 +8,13 @@ import "package:flutter/services.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:nomad/l10n/generated/app_localizations.dart";
-import "package:nomad/providers/desktop/tray_status_provider.dart";
-import "package:nomad/providers/sync/sync_paused_provider.dart";
-import "package:nomad/routes/app_router.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
+import "package:polder/l10n/generated/app_localizations.dart";
+import "package:polder/providers/desktop/tray_status_provider.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/routes/app_router.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:tray_manager/tray_manager.dart" as tray;
 import "package:window_manager/window_manager.dart";
 
@@ -38,7 +38,7 @@ class DesktopTray extends ConsumerStatefulWidget {
 typedef _TrayView = ({String status, String? speed, bool paused, bool signedIn, IconData glyph, Color color});
 
 class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
-  static const _appChannel = MethodChannel("nomad/app");
+  static const _appChannel = MethodChannel("polder/app");
   static final _template = Platform.isMacOS;
 
   tray.TrayIcon? _icon;

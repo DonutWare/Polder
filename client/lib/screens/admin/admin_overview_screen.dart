@@ -4,19 +4,19 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/providers/admin/admin_users_provider.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/admin/widgets/admin_stats_grid.dart";
-import "package:nomad/screens/admin/widgets/storage_by_user_card.dart";
-import "package:nomad/screens/admin/widgets/trash_retention_group.dart";
-import "package:nomad/screens/admin/widgets/user_form_dialog.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/layout/app_page.dart";
-import "package:nomad/widgets/shared/async_value_view.dart";
-import "package:nomad/widgets/shared/nav_group.dart";
+import "package:polder/models/user.dart";
+import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/admin/widgets/admin_stats_grid.dart";
+import "package:polder/screens/admin/widgets/storage_by_user_card.dart";
+import "package:polder/screens/admin/widgets/trash_retention_group.dart";
+import "package:polder/screens/admin/widgets/user_form_dialog.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/layout/app_page.dart";
+import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/shared/nav_group.dart";
 
 class AdminOverviewScreen extends ConsumerWidget {
   const AdminOverviewScreen({super.key});

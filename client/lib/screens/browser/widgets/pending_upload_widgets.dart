@@ -3,15 +3,15 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/browser/pending_uploads_provider.dart";
-import "package:nomad/providers/sync/sync_paused_provider.dart";
-import "package:nomad/screens/browser/widgets/file_type_icon.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/level_bar.dart";
-import "package:nomad/widgets/shared/tag.dart";
+import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/level_bar.dart";
+import "package:polder/widgets/shared/tag.dart";
 
 String transferSummary(BuildContext context, {required int bytes, int? total, int rate = 0}) {
   final locale = context.localeName;

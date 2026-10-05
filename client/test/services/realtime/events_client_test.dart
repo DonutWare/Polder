@@ -1,9 +1,9 @@
 import "package:fake_async/fake_async.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/models/server_event.dart";
-import "package:nomad/services/realtime/events_client.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/models/server_event.dart";
+import "package:polder/services/realtime/events_client.dart";
 
 import "../../support/fake_web_socket.dart";
 
@@ -11,8 +11,8 @@ void main() {
   test("the endpoint follows the server's scheme and path", () {
     expect(EventsClient.endpointFor("https://cloud.test").toString(), "wss://cloud.test/api/v1/events");
     expect(
-      EventsClient.endpointFor("http://nas.local:8080/nomad/").toString(),
-      "ws://nas.local:8080/nomad/api/v1/events",
+      EventsClient.endpointFor("http://nas.local:8080/polder/").toString(),
+      "ws://nas.local:8080/polder/api/v1/events",
     );
   });
 

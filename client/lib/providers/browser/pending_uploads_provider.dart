@@ -1,13 +1,13 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/transfer.dart";
-import "package:nomad/providers/activity/live_transfers_provider.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/providers/sync/sync_activity_provider.dart";
-import "package:nomad/providers/sync/sync_paused_provider.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/transfer.dart";
+import "package:polder/providers/activity/live_transfers_provider.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/sync/sync_activity_provider.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/util/remote_path.dart";
 
 class PendingUpload {
   const PendingUpload({

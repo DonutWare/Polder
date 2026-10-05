@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/storage"
-	"nomad-server/internal/users"
+	"polder-server/internal/apperr"
+	"polder-server/internal/storage"
+	"polder-server/internal/users"
 )
 
 type WriteRequest struct {

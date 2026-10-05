@@ -2,11 +2,11 @@ import "dart:io";
 
 import "package:workmanager/workmanager.dart";
 
-import "package:nomad/models/sync/auto_upload_settings.dart";
-import "package:nomad/services/background/auto_upload_task.dart";
+import "package:polder/models/sync/auto_upload_settings.dart";
+import "package:polder/services/background/auto_upload_task.dart";
 
 abstract final class AutoUploadScheduler {
-  static const taskName = "org.knaapen.nomad.autoUpload";
+  static const taskName = "org.knaapen.polder.autoUpload";
   static const _frequency = Duration(minutes: 15);
 
   static bool get _isSupported => Platform.isAndroid;

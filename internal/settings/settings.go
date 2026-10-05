@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"strconv"
 
-	"nomad-server/internal/users"
+	"polder-server/internal/users"
 )
 
 const (

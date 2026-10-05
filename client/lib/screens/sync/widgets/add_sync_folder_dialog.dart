@@ -3,11 +3,11 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/sync/sync_folder_form_provider.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
-import "package:nomad/widgets/shared/remote_folder_picker_dialog.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/sync/sync_folder_form_provider.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 
 Future<void> showAddSyncFolderDialog(BuildContext context, SyncMode mode) => showDialog<void>(
   context: context,

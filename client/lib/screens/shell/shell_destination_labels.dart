@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/shell/shell_destinations_provider.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/navigation/navigation_shell.dart";
+import "package:polder/providers/shell/shell_destinations_provider.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/navigation/navigation_shell.dart";
 
 extension ShellDestinationPresentation on ShellDestination {
   String label(BuildContext context) => switch (this) {

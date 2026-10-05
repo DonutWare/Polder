@@ -3,9 +3,9 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/sync/sync_paused_provider.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/util/localization_helper.dart";
 
 class PauseSyncButton extends ConsumerWidget {
   const PauseSyncButton({super.key});

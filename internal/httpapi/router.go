@@ -13,14 +13,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"nomad-server/internal/activity"
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/auth"
-	"nomad-server/internal/files"
-	"nomad-server/internal/preview"
-	"nomad-server/internal/settings"
-	"nomad-server/internal/syncing"
-	"nomad-server/internal/users"
+	"polder-server/internal/activity"
+	"polder-server/internal/apperr"
+	"polder-server/internal/auth"
+	"polder-server/internal/files"
+	"polder-server/internal/preview"
+	"polder-server/internal/settings"
+	"polder-server/internal/syncing"
+	"polder-server/internal/users"
 )
 
 type API struct {
@@ -94,7 +94,7 @@ const (
 // apiConfig serves the OpenAPI document built from the registered operations at
 // /api/v1/openapi.json (and .yaml), and an interactive reference at /api/v1/docs.
 func apiConfig() huma.Config {
-	config := huma.DefaultConfig("Nomad API", "1.0.0")
+	config := huma.DefaultConfig("Polder API", "1.0.0")
 	config.Info.Description = "File storage and sync. Log in with POST /auth/login and send the access token " +
 		"as `Authorization: Bearer <token>`; renew it with POST /auth/refresh before it expires."
 	config.OpenAPIPath = apiPrefix + "/openapi"

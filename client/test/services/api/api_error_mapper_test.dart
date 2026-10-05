@@ -1,7 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/services/api/api_error_mapper.dart";
-import "package:nomad/services/api/api_exceptions.dart";
+import "package:polder/services/api/api_error_mapper.dart";
+import "package:polder/services/api/api_exceptions.dart";
 
 void main() {
   Map<String, dynamic> error(String code) => {

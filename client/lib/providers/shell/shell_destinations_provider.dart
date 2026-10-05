@@ -1,6 +1,6 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/routes/app_routes.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/routes/app_routes.dart";
 
 enum ShellDestination {
   files(AppRoutes.files),

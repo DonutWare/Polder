@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/util/api_error_localization.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/util/api_error_localization.dart";
+import "package:polder/util/localization_helper.dart";
 
 extension ActionFeedback on BuildContext {
   Future<bool> runWithFeedback(Future<void> action) async {

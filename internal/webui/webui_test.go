@@ -9,7 +9,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"nomad-server/internal/webui"
+	"polder-server/internal/webui"
 )
 
 func testHandler(t *testing.T) http.Handler {

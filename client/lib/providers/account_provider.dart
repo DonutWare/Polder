@@ -1,11 +1,11 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/account.dart";
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/storage/credentials_store.dart";
+import "package:polder/models/account.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/storage/credentials_store.dart";
 
 /// The signed-in account, or null when signed out.
 final accountProvider = AsyncNotifierProvider<AccountNotifier, Account?>(AccountNotifier.new);
@@ -50,7 +50,7 @@ class AccountNotifier extends AsyncNotifier<Account?> {
 
   Future<void> _revokeQuietly(Account account) async {
     try {
-      await ref.read(serverNomadApiProvider(account.serverUrl)).logout(account.refreshToken);
+      await ref.read(serverPolderApiProvider(account.serverUrl)).logout(account.refreshToken);
     } on ApiException {
       return;
     }

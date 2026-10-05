@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 class SectionCard extends StatelessWidget {
   const SectionCard({

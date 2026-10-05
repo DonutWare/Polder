@@ -3,17 +3,17 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/directory_listing.dart";
-import "package:nomad/providers/browser/browser_view_provider.dart";
-import "package:nomad/providers/activity/live_transfers_provider.dart";
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/browser/pending_uploads_provider.dart";
-import "package:nomad/screens/browser/widgets/file_grid_view.dart";
-import "package:nomad/screens/browser/widgets/file_list_view.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/shared/async_value_view.dart";
-import "package:nomad/widgets/shared/message_view.dart";
+import "package:polder/models/directory_listing.dart";
+import "package:polder/providers/browser/browser_view_provider.dart";
+import "package:polder/providers/activity/live_transfers_provider.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/screens/browser/widgets/file_grid_view.dart";
+import "package:polder/screens/browser/widgets/file_list_view.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/shared/message_view.dart";
 
 class DirectoryView extends ConsumerWidget {
   const DirectoryView({required this.path, super.key});

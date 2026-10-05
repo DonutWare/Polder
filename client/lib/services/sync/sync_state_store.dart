@@ -1,5 +1,5 @@
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
 
 abstract interface class SyncStateStore {
   Future<List<SyncRoot>> roots();

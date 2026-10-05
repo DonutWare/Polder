@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/util/quota_unit.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/util/quota_unit.dart";
 
 class QuotaInput extends StatelessWidget {
   const QuotaInput({

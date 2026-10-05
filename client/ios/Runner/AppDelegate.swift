@@ -17,7 +17,7 @@ import VisionKit
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
     guard let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "DocumentScannerAccent") else { return }
-    let channel = FlutterMethodChannel(name: "nomad/document_scanner", binaryMessenger: registrar.messenger())
+    let channel = FlutterMethodChannel(name: "polder/document_scanner", binaryMessenger: registrar.messenger())
     channel.setMethodCallHandler { call, result in
       switch call.method {
       case "setAccent":

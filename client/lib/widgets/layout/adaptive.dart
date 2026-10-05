@@ -7,7 +7,7 @@ import "package:flutter/services.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:nomad/theme/app_theme.dart";
+import "package:polder/theme/app_theme.dart";
 
 enum WindowSize {
   compact,

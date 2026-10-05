@@ -1,21 +1,21 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/trash.dart";
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/current_user_provider.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/providers/sync/sync_scheduler_provider.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/current_user_provider.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/util/remote_path.dart";
 
 final trashProvider = AsyncNotifierProvider.autoDispose<TrashNotifier, TrashListing>(TrashNotifier.new);
 
 class TrashNotifier extends AsyncNotifier<TrashListing> {
-  NomadApi get _api => ref.read(nomadApiProvider);
+  PolderApi get _api => ref.read(polderApiProvider);
 
   @override
-  Future<TrashListing> build() => ref.watch(nomadApiProvider).listTrash();
+  Future<TrashListing> build() => ref.watch(polderApiProvider).listTrash();
 
   Future<void> refresh() async => state = await AsyncValue.guard(_api.listTrash);
 
@@ -45,10 +45,10 @@ final trashRetentionProvider = AsyncNotifierProvider.autoDispose<TrashRetentionN
 
 class TrashRetentionNotifier extends AsyncNotifier<TrashRetention> {
   @override
-  Future<TrashRetention> build() => ref.watch(nomadApiProvider).trashRetention();
+  Future<TrashRetention> build() => ref.watch(polderApiProvider).trashRetention();
 
   Future<void> choose(int? days) async {
-    state = AsyncData(await ref.read(nomadApiProvider).setTrashRetention(days));
+    state = AsyncData(await ref.read(polderApiProvider).setTrashRetention(days));
     ref.invalidate(trashProvider);
   }
 }

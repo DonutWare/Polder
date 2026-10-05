@@ -3,18 +3,18 @@ import "dart:typed_data";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/transfer.dart";
-import "package:nomad/models/trash.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/current_user_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/providers/sync/sync_scheduler_provider.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/transfer/file_picker_service.dart";
-import "package:nomad/util/remote_path.dart";
-import "package:nomad/util/throughput_meter.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/transfer.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/current_user_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/transfer/file_picker_service.dart";
+import "package:polder/util/remote_path.dart";
+import "package:polder/util/throughput_meter.dart";
 
 final transfersProvider = NotifierProvider<TransfersNotifier, List<Transfer>>(TransfersNotifier.new);
 
@@ -41,7 +41,7 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     final transfer = _start(file.name, TransferDirection.upload, length, remotePath: remotePath);
     await _track(transfer, () async {
       await ref
-          .read(nomadApiProvider)
+          .read(polderApiProvider)
           .putContent(
             remotePath,
             file.openRead(),
@@ -59,14 +59,14 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     name: entry.name,
     size: entry.size,
     mime: entry.mime,
-    fetch: (onProgress) => ref.read(nomadApiProvider).downloadBytes(entry.path, onProgress: onProgress),
+    fetch: (onProgress) => ref.read(polderApiProvider).downloadBytes(entry.path, onProgress: onProgress),
   );
 
   Future<void> downloadFromTrash(TrashItem item) => _downloadAndSave(
     name: item.isDir ? "${item.name}.zip" : item.name,
     size: item.isDir ? 0 : item.size,
     mime: item.isDir ? "application/zip" : item.mime,
-    fetch: (onProgress) => ref.read(nomadApiProvider).downloadFromTrash(item.id, onProgress: onProgress),
+    fetch: (onProgress) => ref.read(polderApiProvider).downloadFromTrash(item.id, onProgress: onProgress),
   );
 
   Future<void> _downloadAndSave({

@@ -3,12 +3,12 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/server_settings.dart";
-import "package:nomad/providers/admin/server_settings_provider.dart";
-import "package:nomad/util/action_feedback.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/nav_group.dart";
-import "package:nomad/widgets/shared/retention_picker_dialog.dart";
+import "package:polder/models/server_settings.dart";
+import "package:polder/providers/admin/server_settings_provider.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/nav_group.dart";
+import "package:polder/widgets/shared/retention_picker_dialog.dart";
 
 class TrashRetentionGroup extends ConsumerWidget {
   const TrashRetentionGroup({super.key});

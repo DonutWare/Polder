@@ -1,8 +1,8 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/admin_user_requests.dart";
-import "package:nomad/models/user.dart";
-import "package:nomad/util/quota_unit.dart";
+import "package:polder/models/admin_user_requests.dart";
+import "package:polder/models/user.dart";
+import "package:polder/util/quota_unit.dart";
 
 part "user_form.freezed.dart";
 

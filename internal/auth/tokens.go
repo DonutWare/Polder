@@ -16,7 +16,7 @@ import (
 const (
 	AccessTokenLifetime = 15 * time.Minute
 	signingKeyLength    = 64
-	tokenIssuer         = "nomad"
+	tokenIssuer         = "polder"
 )
 
 type AccessTokens struct {

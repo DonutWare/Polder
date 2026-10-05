@@ -1,6 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
+import "package:polder/models/sync/sync_root.dart";
 
 part "sync_folder_form.freezed.dart";
 

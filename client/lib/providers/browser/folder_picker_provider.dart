@@ -1,6 +1,6 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/util/remote_path.dart";
+import "package:polder/util/remote_path.dart";
 
 final folderPickerProvider = NotifierProvider.autoDispose.family<FolderPickerNotifier, String, String>(
   FolderPickerNotifier.new,

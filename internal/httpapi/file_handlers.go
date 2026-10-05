@@ -11,12 +11,12 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
-	"nomad-server/internal/activity"
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/files"
-	"nomad-server/internal/preview"
-	"nomad-server/internal/storage"
-	"nomad-server/internal/users"
+	"polder-server/internal/activity"
+	"polder-server/internal/apperr"
+	"polder-server/internal/files"
+	"polder-server/internal/preview"
+	"polder-server/internal/storage"
+	"polder-server/internal/users"
 )
 
 type listResponse struct {
@@ -50,7 +50,7 @@ type uploadInput struct {
 	Path       string `query:"path" doc:"Where to store the file, such as /Photos/cat.jpg"`
 	BaseRev    int64  `query:"baseRev" default:"0" doc:"Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there"`
 	Mtime      string `query:"mtime" format:"date-time" doc:"Modification time to record, as RFC 3339; defaults to now"`
-	TransferID string `header:"X-Nomad-Transfer-Id" doc:"Any ID the client picks; live transfer events echo it back as clientId"`
+	TransferID string `header:"X-Polder-Transfer-Id" doc:"Any ID the client picks; live transfer events echo it back as clientId"`
 	content    io.Reader
 	size       *int64
 }
@@ -87,7 +87,7 @@ func (previewSize) Schema(huma.Registry) *huma.Schema {
 // downloadOutput and previewOutput write their body straight to the connection.
 type downloadOutput struct {
 	ETag        string `header:"ETag" doc:"The file's revision, quoted; send it in If-Match or If-None-Match"`
-	Rev         string `header:"X-Nomad-Rev" doc:"The file's revision"`
+	Rev         string `header:"X-Polder-Rev" doc:"The file's revision"`
 	ContentType string `header:"Content-Type"`
 	Body        func(huma.Context)
 }

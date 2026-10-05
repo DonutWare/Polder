@@ -4,11 +4,11 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:url_launcher/url_launcher.dart";
 
-import "package:nomad/providers/app/package_info_provider.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/layout/app_page.dart";
-import "package:nomad/widgets/shared/polder_logo.dart";
+import "package:polder/providers/app/package_info_provider.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/layout/app_page.dart";
+import "package:polder/widgets/shared/polder_logo.dart";
 
 typedef _Link = ({String name, String platform, String url, IconData icon, Color? color});
 
@@ -16,7 +16,7 @@ const _socials = <_Link>[
   (
     name: "GitHub",
     platform: "GitHub",
-    url: "https://github.com/DonutWare/Nomad",
+    url: "https://github.com/DonutWare/Polder",
     icon: IconsaxPlusLinear.code,
     color: null,
   ),

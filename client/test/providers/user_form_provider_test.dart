@@ -1,8 +1,8 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/models/user_form.dart";
-import "package:nomad/util/quota_unit.dart";
+import "package:polder/models/user.dart";
+import "package:polder/models/user_form.dart";
+import "package:polder/util/quota_unit.dart";
 
 void main() {
   const user = User(id: 7, username: "anna", quotaBytes: 5 * 1024 * 1024 * 1024);

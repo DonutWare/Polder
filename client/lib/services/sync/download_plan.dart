@@ -1,4 +1,4 @@
-import "package:nomad/models/manifest.dart";
+import "package:polder/models/manifest.dart";
 
 sealed class DownloadSegment {
   const DownloadSegment({required this.offset, required this.size});

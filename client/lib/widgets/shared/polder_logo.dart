@@ -3,7 +3,7 @@ import "dart:ui" as ui;
 import "package:flutter/material.dart";
 
 import "package:flutter_svg/flutter_svg.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/util/localization_helper.dart";
 
 const _polderSvg = SvgAssetLoader("assets/icon/polder.svg");
 

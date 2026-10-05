@@ -1,15 +1,15 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/models/sync/sync_status.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/sync/auto_upload_settings_provider.dart";
-import "package:nomad/providers/sync/conflict_queue_provider.dart";
-import "package:nomad/providers/sync/sync_paused_provider.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/providers/sync/sync_roots_provider.dart";
-import "package:nomad/providers/sync/sync_scheduler_provider.dart";
-import "package:nomad/services/sync/sync_service.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/models/sync/sync_status.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/sync/auto_upload_settings_provider.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/providers/sync/sync_roots_provider.dart";
+import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder/services/sync/sync_service.dart";
 
 final syncStatusProvider = NotifierProvider<SyncStatusNotifier, SyncStatus>(SyncStatusNotifier.new);
 

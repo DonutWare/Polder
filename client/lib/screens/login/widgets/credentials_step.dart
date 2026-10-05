@@ -2,11 +2,11 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/providers/login_provider.dart";
-import "package:nomad/screens/login/widgets/login_failure_text.dart";
-import "package:nomad/screens/login/widgets/server_summary.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/loading_button.dart";
+import "package:polder/providers/login_provider.dart";
+import "package:polder/screens/login/widgets/login_failure_text.dart";
+import "package:polder/screens/login/widgets/server_summary.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/loading_button.dart";
 
 class CredentialsStep extends ConsumerWidget {
   const CredentialsStep({required this.creatingAdmin, super.key});

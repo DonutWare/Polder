@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 class MessageView extends StatelessWidget {
   const MessageView({required this.icon, required this.message, this.color, this.action, super.key});

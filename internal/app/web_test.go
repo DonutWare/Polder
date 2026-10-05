@@ -8,13 +8,13 @@ import (
 	"strings"
 	"testing"
 
-	"nomad-server/internal/config"
+	"polder-server/internal/config"
 )
 
 func startServerWithWebClient(t *testing.T) *testServer {
 	t.Helper()
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "index.html"), []byte("<html>nomad</html>"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "index.html"), []byte("<html>polder</html>"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	return startServer(t, config.DriverSQLite, "", func(cfg *config.Config) { cfg.WebDir = dir })
@@ -39,7 +39,7 @@ func TestWebClientIsServedOutsideTheAPI(t *testing.T) {
 
 	for _, path := range []string{"/", "/files", "/admin/users"} {
 		status, _, body := fetch(t, server, path)
-		if status != http.StatusOK || body != "<html>nomad</html>" {
+		if status != http.StatusOK || body != "<html>polder</html>" {
 			t.Errorf("GET %s: %d %q, want the web client", path, status, body)
 		}
 	}

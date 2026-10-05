@@ -4,18 +4,18 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/current_user_provider.dart";
-import "package:nomad/providers/shell/shell_destinations_provider.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/shell/shell_destination_labels.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/layout/adaptive.dart";
-import "package:nomad/widgets/shared/appearance_settings.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
-import "package:nomad/widgets/shared/quota_bar.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/current_user_provider.dart";
+import "package:polder/providers/shell/shell_destinations_provider.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/shell/shell_destination_labels.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/shared/appearance_settings.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/quota_bar.dart";
 
 /// The side sheet behind the menu button: who is signed in, appearance, and the way into
 /// (or out of) administration.

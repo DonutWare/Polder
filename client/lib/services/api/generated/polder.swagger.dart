@@ -6,7 +6,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:json_annotation/json_annotation.dart' as json;
 import 'package:collection/collection.dart';
 
-import 'nomad.models.swagger.dart';
+import 'polder.models.swagger.dart';
 
 import 'package:chopper/chopper.dart';
 
@@ -18,20 +18,20 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart' show MultipartFile;
 import 'package:chopper/chopper.dart' as chopper;
 
-import 'nomad.enums.swagger.dart' as enums;
-import 'nomad.metadata.swagger.dart';
-export 'nomad.enums.swagger.dart';
-export 'nomad.models.swagger.dart';
+import 'polder.enums.swagger.dart' as enums;
+import 'polder.metadata.swagger.dart';
+export 'polder.enums.swagger.dart';
+export 'polder.models.swagger.dart';
 
-part 'nomad.swagger.chopper.dart';
+part 'polder.swagger.chopper.dart';
 
 // **************************************************************************
 // SwaggerChopperGenerator
 // **************************************************************************
 
 @ChopperApi()
-abstract class Nomad extends ChopperService {
-  static Nomad create({
+abstract class Polder extends ChopperService {
+  static Polder create({
     ChopperClient? client,
     http.Client? httpClient,
     Authenticator? authenticator,
@@ -41,11 +41,11 @@ abstract class Nomad extends ChopperService {
     List<Interceptor>? interceptors,
   }) {
     if (client != null) {
-      return _$Nomad(client);
+      return _$Polder(client);
     }
 
     final newClient = ChopperClient(
-      services: [_$Nomad()],
+      services: [_$Polder()],
       converter: converter ?? $JsonSerializableConverter(),
       interceptors: interceptors ?? [],
       client: httpClient,
@@ -53,7 +53,7 @@ abstract class Nomad extends ChopperService {
       errorConverter: errorConverter,
       baseUrl: baseUrl,
     );
-    return _$Nomad(newClient);
+    return _$Polder(newClient);
   }
 
   ///Page through what happened to files and sessions, newest first
@@ -447,12 +447,12 @@ abstract class Nomad extends ChopperService {
   ///@param path Where to store the file, such as /Photos/cat.jpg
   ///@param baseRev Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there
   ///@param mtime Modification time to record, as RFC 3339; defaults to now
-  ///@param X-Nomad-Transfer-Id Any ID the client picks; live transfer events echo it back as clientId
+  ///@param X-Polder-Transfer-Id Any ID the client picks; live transfer events echo it back as clientId
   Future<chopper.Response<Entry>> uploadFile({
     String? path,
     int? baseRev,
     DateTime? mtime,
-    String? xNomadTransferId,
+    String? xPolderTransferId,
     required Object? body,
   }) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
@@ -461,7 +461,7 @@ abstract class Nomad extends ChopperService {
       path: path,
       baseRev: baseRev,
       mtime: mtime,
-      xNomadTransferId: xNomadTransferId?.toString(),
+      xPolderTransferId: xPolderTransferId?.toString(),
       body: body,
     );
   }
@@ -470,13 +470,13 @@ abstract class Nomad extends ChopperService {
   ///@param path Where to store the file, such as /Photos/cat.jpg
   ///@param baseRev Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there
   ///@param mtime Modification time to record, as RFC 3339; defaults to now
-  ///@param X-Nomad-Transfer-Id Any ID the client picks; live transfer events echo it back as clientId
+  ///@param X-Polder-Transfer-Id Any ID the client picks; live transfer events echo it back as clientId
   @PUT(path: '/api/v1/files/content', optionalBody: true)
   Future<chopper.Response<Entry>> _uploadFile({
     @Query('path') String? path,
     @Query('baseRev') int? baseRev,
     @Query('mtime') DateTime? mtime,
-    @Header('X-Nomad-Transfer-Id') String? xNomadTransferId,
+    @Header('X-Polder-Transfer-Id') String? xPolderTransferId,
     @Body() required Object? body,
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(

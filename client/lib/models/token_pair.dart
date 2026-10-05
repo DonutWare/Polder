@@ -1,6 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/user.dart";
+import "package:polder/models/user.dart";
 
 part "token_pair.freezed.dart";
 part "token_pair.g.dart";

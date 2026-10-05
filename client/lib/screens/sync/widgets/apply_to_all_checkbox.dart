@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/providers/sync/conflict_queue_provider.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder/util/localization_helper.dart";
 
 class ApplyToAllCheckbox extends ConsumerWidget {
   const ApplyToAllCheckbox({super.key});

@@ -1,4 +1,4 @@
 tags:
   integration:
-    # Starts a real nomad server from NOMAD_SERVER_DIR (needs Go) or NOMAD_SERVER_BIN. Skip with --exclude-tags integration.
+    # Starts a real polder server from POLDER_SERVER_DIR (needs Go) or POLDER_SERVER_BIN. Skip with --exclude-tags integration.
     timeout: 3x

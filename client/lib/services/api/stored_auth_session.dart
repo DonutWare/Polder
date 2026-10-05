@@ -1,7 +1,7 @@
-import "package:nomad/models/account.dart";
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/services/api/auth_session.dart";
-import "package:nomad/services/storage/credentials_store.dart";
+import "package:polder/models/account.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/services/api/auth_session.dart";
+import "package:polder/services/storage/credentials_store.dart";
 
 class StoredAuthSession implements AuthSession {
   StoredAuthSession({required this._store, required this.accountId, required this._accessToken});

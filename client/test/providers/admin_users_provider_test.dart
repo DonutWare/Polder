@@ -1,10 +1,10 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/models/user.dart";
-import "package:nomad/providers/admin/admin_users_provider.dart";
-import "package:nomad/providers/admin/user_form_provider.dart";
-import "package:nomad/util/quota_unit.dart";
+import "package:polder/models/user.dart";
+import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder/providers/admin/user_form_provider.dart";
+import "package:polder/util/quota_unit.dart";
 
 import "../support/provider_harness.dart";
 import "../support/scripted_client.dart";

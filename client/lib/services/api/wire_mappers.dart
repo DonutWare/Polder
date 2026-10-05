@@ -1,17 +1,17 @@
-import "package:nomad/models/activity.dart";
-import "package:nomad/models/admin_user_requests.dart";
-import "package:nomad/models/change.dart";
-import "package:nomad/models/directory_listing.dart";
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/manifest.dart";
-import "package:nomad/models/server_event.dart";
-import "package:nomad/models/server_settings.dart";
-import "package:nomad/models/setup_status.dart";
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/models/trash.dart";
-import "package:nomad/models/upload_session.dart";
-import "package:nomad/models/user.dart";
-import "package:nomad/services/api/generated/nomad.swagger.dart" as wire;
+import "package:polder/models/activity.dart";
+import "package:polder/models/admin_user_requests.dart";
+import "package:polder/models/change.dart";
+import "package:polder/models/directory_listing.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/manifest.dart";
+import "package:polder/models/server_event.dart";
+import "package:polder/models/server_settings.dart";
+import "package:polder/models/setup_status.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/models/upload_session.dart";
+import "package:polder/models/user.dart";
+import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 
 extension EntryToModel on wire.Entry {
   FileEntry toModel() => FileEntry(

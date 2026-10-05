@@ -15,11 +15,11 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"nomad-server/internal/app"
-	"nomad-server/internal/config"
+	"polder-server/internal/app"
+	"polder-server/internal/config"
 )
 
-const mariaDBEnvironmentVariable = "NOMAD_TEST_MARIADB_DSN"
+const mariaDBEnvironmentVariable = "POLDER_TEST_MARIADB_DSN"
 
 type testServer struct {
 	t      *testing.T

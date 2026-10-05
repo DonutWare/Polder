@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
-import "package:nomad/widgets/shared/level_bar.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/level_bar.dart";
 
 class StatTile extends StatelessWidget {
   const StatTile({

@@ -1,9 +1,9 @@
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/models/login_state.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/login_provider.dart";
+import "package:polder/models/login_state.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/login_provider.dart";
 
 import "../support/provider_harness.dart";
 import "../support/scripted_client.dart";

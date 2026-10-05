@@ -1,12 +1,12 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/thumbnail_request.dart";
-import "package:nomad/models/trash.dart";
-import "package:nomad/providers/browser/thumbnail_provider.dart";
-import "package:nomad/screens/browser/widgets/file_type_icon.dart";
-import "package:nomad/theme/app_theme.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/thumbnail_request.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/providers/browser/thumbnail_provider.dart";
+import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder/theme/app_theme.dart";
 
 class FileThumbnail extends StatelessWidget {
   FileThumbnail({required FileEntry entry, required this.dimension, this.fill = false, super.key})

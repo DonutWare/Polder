@@ -9,7 +9,7 @@ class PendingUpload {
 }
 
 class PendingUploads {
-  static const header = "x-nomad-upload";
+  static const header = "x-polder-upload";
 
   final _uploads = <String, PendingUpload>{};
   var _nextId = 0;

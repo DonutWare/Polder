@@ -92,9 +92,9 @@ BEGIN
             VALUE "CompanyName", "org.knaapen" "\0"
             VALUE "FileDescription", "Polder" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "nomad" "\0"
+            VALUE "InternalName", "polder" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 org.knaapen. All rights reserved." "\0"
-            VALUE "OriginalFilename", "nomad.exe" "\0"
+            VALUE "OriginalFilename", "polder.exe" "\0"
             VALUE "ProductName", "Polder" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

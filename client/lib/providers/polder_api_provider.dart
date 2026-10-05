@@ -1,23 +1,23 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/account.dart";
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/auth_session.dart";
-import "package:nomad/services/api/nomad_api.dart";
+import "package:polder/models/account.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/auth_session.dart";
+import "package:polder/services/api/polder_api.dart";
 
-final serverNomadApiProvider = Provider.family<NomadApi, String>(
-  (ref, serverUrl) => NomadApi(ApiClientFactory.create(serverUrl, httpClient: ref.watch(httpClientProvider))),
+final serverPolderApiProvider = Provider.family<PolderApi, String>(
+  (ref, serverUrl) => PolderApi(ApiClientFactory.create(serverUrl, httpClient: ref.watch(httpClientProvider))),
 );
 
-final nomadApiProvider = Provider<NomadApi>((ref) {
+final polderApiProvider = Provider<PolderApi>((ref) {
   final accountId = ref.watch(currentAccountProvider.select((account) => account?.id));
   final serverUrl = ref.watch(currentAccountProvider.select((account) => account?.serverUrl));
   if (accountId == null || serverUrl == null) throw StateError("No account is signed in");
   final session = AccountAuthSession(ref, accountId);
-  return NomadApi(ApiClientFactory.create(serverUrl, session: session, httpClient: ref.watch(httpClientProvider)));
+  return PolderApi(ApiClientFactory.create(serverUrl, session: session, httpClient: ref.watch(httpClientProvider)));
 });
 
 class AccountAuthSession implements AuthSession {

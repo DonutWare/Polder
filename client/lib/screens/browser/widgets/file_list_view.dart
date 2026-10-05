@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/providers/browser/pending_uploads_provider.dart";
-import "package:nomad/screens/browser/widgets/file_list_tile.dart";
-import "package:nomad/screens/browser/widgets/pending_upload_widgets.dart";
-import "package:nomad/widgets/shared/nav_group.dart";
+import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/screens/browser/widgets/file_list_tile.dart";
+import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
+import "package:polder/widgets/shared/nav_group.dart";
 
 class FileListView extends StatelessWidget {
   const FileListView({required this.parentPath, required this.items, required this.padding, super.key});

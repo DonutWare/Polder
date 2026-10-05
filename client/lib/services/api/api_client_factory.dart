@@ -1,15 +1,15 @@
 import "package:http/http.dart" as http;
 
-import "package:nomad/services/api/api_error_mapper.dart";
-import "package:nomad/services/api/auth_interceptor.dart";
-import "package:nomad/services/api/auth_session.dart";
-import "package:nomad/services/api/generated/nomad.swagger.dart";
-import "package:nomad/services/api/http_client.dart";
-import "package:nomad/services/api/nomad_converter.dart";
-import "package:nomad/services/api/pending_uploads.dart";
+import "package:polder/services/api/api_error_mapper.dart";
+import "package:polder/services/api/auth_interceptor.dart";
+import "package:polder/services/api/auth_session.dart";
+import "package:polder/services/api/generated/polder.swagger.dart";
+import "package:polder/services/api/http_client.dart";
+import "package:polder/services/api/polder_converter.dart";
+import "package:polder/services/api/pending_uploads.dart";
 
 abstract final class ApiClientFactory {
-  static Nomad create(String serverUrl, {AuthSession? session, http.Client? httpClient}) {
+  static Polder create(String serverUrl, {AuthSession? session, http.Client? httpClient}) {
     final uploads = PendingUploads();
     final client = UploadingClient(httpClient ?? createHttpClient(), uploads);
     final auth = session == null
@@ -23,11 +23,11 @@ abstract final class ApiClientFactory {
     return trimmed.contains("://") ? trimmed : "https://$trimmed";
   }
 
-  static Nomad _service(String serverUrl, http.Client client, PendingUploads uploads, [AuthInterceptor? auth]) =>
-      Nomad.create(
+  static Polder _service(String serverUrl, http.Client client, PendingUploads uploads, [AuthInterceptor? auth]) =>
+      Polder.create(
         baseUrl: Uri.parse(serverUrl),
         httpClient: client,
-        converter: NomadConverter(uploads),
+        converter: PolderConverter(uploads),
         authenticator: auth,
         interceptors: [const ApiErrorInterceptor(), ?auth],
       );

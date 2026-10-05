@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/models/trash.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/retention_picker_dialog.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/retention_picker_dialog.dart";
 
 String retentionHint(BuildContext context, TrashRetention retention) => retention.keepsForever
     ? context.localized.trashRetentionForeverHint

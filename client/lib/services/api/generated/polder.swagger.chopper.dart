@@ -1,7 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format width=80
 
-part of 'nomad.swagger.dart';
+part of 'polder.swagger.dart';
 
 // **************************************************************************
 // ChopperGenerator
@@ -9,14 +9,14 @@ part of 'nomad.swagger.dart';
 
 // coverage:ignore-file
 // ignore_for_file: type=lint
-final class _$Nomad extends Nomad {
-  _$Nomad([ChopperClient? client]) {
+final class _$Polder extends Polder {
+  _$Polder([ChopperClient? client]) {
     if (client == null) return;
     this.client = client;
   }
 
   @override
-  final Type definitionType = Nomad;
+  final Type definitionType = Polder;
 
   @override
   Future<Response<LogPage>> _listActivity({
@@ -419,7 +419,7 @@ final class _$Nomad extends Nomad {
     String? path,
     int? baseRev,
     DateTime? mtime,
-    String? xNomadTransferId,
+    String? xPolderTransferId,
     required Object? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -439,7 +439,7 @@ final class _$Nomad extends Nomad {
       'mtime': mtime,
     };
     final Map<String, String> $headers = {
-      if (xNomadTransferId != null) 'X-Nomad-Transfer-Id': xNomadTransferId,
+      if (xPolderTransferId != null) 'X-Polder-Transfer-Id': xPolderTransferId,
     };
     final $body = body;
     final Request $request = Request(

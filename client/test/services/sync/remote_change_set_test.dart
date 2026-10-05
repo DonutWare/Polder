@@ -1,8 +1,8 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/change.dart";
-import "package:nomad/models/sync/remote_state.dart";
-import "package:nomad/services/sync/remote_change_set.dart";
+import "package:polder/models/change.dart";
+import "package:polder/models/sync/remote_state.dart";
+import "package:polder/services/sync/remote_change_set.dart";
 
 import "../../support/fixtures.dart";
 

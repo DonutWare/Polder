@@ -10,7 +10,7 @@ import (
 	"errors"
 	"time"
 
-	"nomad-server/internal/apperr"
+	"polder-server/internal/apperr"
 )
 
 const RefreshTokenLifetime = 30 * 24 * time.Hour

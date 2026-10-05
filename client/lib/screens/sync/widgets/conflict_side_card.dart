@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/date_format_extension.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/date_format_extension.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 class ConflictSideCard extends StatelessWidget {
   const ConflictSideCard({required this.title, required this.icon, this.size, this.modified, this.detail, super.key});

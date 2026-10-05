@@ -3,12 +3,12 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/models/user.dart";
-import "package:nomad/providers/activity/activity_scope_provider.dart";
-import "package:nomad/providers/admin/admin_users_provider.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/async_value_view.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/models/user.dart";
+import "package:polder/providers/activity/activity_scope_provider.dart";
+import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/async_value_view.dart";
 
 enum _ScopeChoice { me, all, user }
 

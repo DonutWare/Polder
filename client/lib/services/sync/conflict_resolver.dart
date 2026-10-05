@@ -1,11 +1,11 @@
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/local_file_state.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/sync/local_scanner.dart";
-import "package:nomad/services/sync/sync_executor.dart";
-import "package:nomad/services/sync/sync_paths.dart";
-import "package:nomad/util/conflict_file_name.dart";
-import "package:nomad/util/relative_path.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/local_file_state.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/sync/local_scanner.dart";
+import "package:polder/services/sync/sync_executor.dart";
+import "package:polder/services/sync/sync_paths.dart";
+import "package:polder/util/conflict_file_name.dart";
+import "package:polder/util/relative_path.dart";
 
 class ConflictResolver {
   const ConflictResolver({

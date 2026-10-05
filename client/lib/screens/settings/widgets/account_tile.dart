@@ -3,11 +3,11 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/account.dart";
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/models/account.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 class AccountTile extends ConsumerWidget {
   const AccountTile({required this.account, super.key});

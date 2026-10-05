@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/util/localization_helper.dart";
 
 class ConflictKindText extends StatelessWidget {
   const ConflictKindText({required this.kind, super.key});

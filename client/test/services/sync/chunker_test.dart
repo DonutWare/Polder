@@ -4,7 +4,7 @@ import "dart:typed_data";
 import "package:crypto/crypto.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/services/sync/chunker.dart";
+import "package:polder/services/sync/chunker.dart";
 
 Uint8List xorshiftTestData(int size) {
   final bytes = ByteData(size);
@@ -43,7 +43,7 @@ void main() {
   });
 
   test("file chunking is identical to in-memory chunking", () async {
-    final directory = await Directory.systemTemp.createTemp("nomad_chunker");
+    final directory = await Directory.systemTemp.createTemp("polder_chunker");
     addTearDown(() => directory.delete(recursive: true));
     final file = File("${directory.path}/vector.bin");
     await file.writeAsBytes(data);

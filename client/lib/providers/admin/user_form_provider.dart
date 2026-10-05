@@ -1,9 +1,9 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/models/user_form.dart";
-import "package:nomad/providers/admin/admin_users_provider.dart";
-import "package:nomad/util/quota_unit.dart";
+import "package:polder/models/user.dart";
+import "package:polder/models/user_form.dart";
+import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder/util/quota_unit.dart";
 
 final userFormProvider = NotifierProvider.autoDispose.family<UserFormNotifier, UserForm, User?>(UserFormNotifier.new);
 

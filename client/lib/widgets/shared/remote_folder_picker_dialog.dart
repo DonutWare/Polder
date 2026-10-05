@@ -3,14 +3,14 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/directory_listing.dart";
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/browser/folder_picker_provider.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/util/remote_path.dart";
-import "package:nomad/widgets/shared/async_value_view.dart";
-import "package:nomad/widgets/shared/icon_badge.dart";
+import "package:polder/models/directory_listing.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/folder_picker_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/util/remote_path.dart";
+import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/shared/icon_badge.dart";
 
 Future<String?> showRemoteFolderPicker(BuildContext context, {String initialPath = RemotePath.root}) =>
     showDialog<String>(

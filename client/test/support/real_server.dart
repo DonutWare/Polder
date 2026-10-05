@@ -5,21 +5,21 @@ import "dart:io";
 import "package:http/http.dart" as http;
 import "package:path/path.dart" as p;
 
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/auth_session.dart";
-import "package:nomad/services/api/nomad_api.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/auth_session.dart";
+import "package:polder/services/api/polder_api.dart";
 
-/// Where the Go server sources live (`NOMAD_SERVER_DIR`). Point `NOMAD_SERVER_BIN` at a
+/// Where the Go server sources live (`POLDER_SERVER_DIR`). Point `POLDER_SERVER_BIN` at a
 /// prebuilt binary instead to skip `go build`. With neither set, the real-server tests skip.
-String? get serverSourceDir => Platform.environment["NOMAD_SERVER_DIR"];
+String? get serverSourceDir => Platform.environment["POLDER_SERVER_DIR"];
 
 /// Why the real-server tests cannot run here, or `null` when they can.
 String? realServerUnavailableReason() {
-  if (Platform.environment["NOMAD_SERVER_BIN"] != null) return null;
+  if (Platform.environment["POLDER_SERVER_BIN"] != null) return null;
   final sources = serverSourceDir;
-  if (sources == null) return "set NOMAD_SERVER_DIR or NOMAD_SERVER_BIN to run against a real server";
-  if (!File(p.join(sources, "go.mod")).existsSync()) return "nomad-server sources not found at $sources";
+  if (sources == null) return "set POLDER_SERVER_DIR or POLDER_SERVER_BIN to run against a real server";
+  if (!File(p.join(sources, "go.mod")).existsSync()) return "polder-server sources not found at $sources";
   try {
     if (Process.runSync("go", ["version"]).exitCode != 0) return "go toolchain not available";
   } on ProcessException {
@@ -64,9 +64,9 @@ class TransferCounter extends http.BaseClient {
   void close() => _inner.close();
 }
 
-/// A real `nomad` server process on a free localhost port with throwaway `/config` and `/data`.
-class RealNomadServer {
-  RealNomadServer._(this._process, this._workDir, this.url, this._log);
+/// A real `polder` server process on a free localhost port with throwaway `/config` and `/data`.
+class RealPolderServer {
+  RealPolderServer._(this._process, this._workDir, this.url, this._log);
 
   final Process _process;
   final Directory _workDir;
@@ -77,9 +77,9 @@ class RealNomadServer {
 
   String get log => _log.toString();
 
-  static Future<RealNomadServer> start() async {
-    final workDir = await Directory.systemTemp.createTemp("nomad_server");
-    final binary = Platform.environment["NOMAD_SERVER_BIN"] ?? await _build(workDir);
+  static Future<RealPolderServer> start() async {
+    final workDir = await Directory.systemTemp.createTemp("polder_server");
+    final binary = Platform.environment["POLDER_SERVER_BIN"] ?? await _build(workDir);
     final port = await _freePort();
     for (final dir in ["config", "data"]) {
       await Directory(p.join(workDir.path, dir)).create();
@@ -88,24 +88,24 @@ class RealNomadServer {
       binary,
       const [],
       environment: {
-        "NOMAD_LISTEN": "127.0.0.1:$port",
-        "NOMAD_CONFIG_DIR": p.join(workDir.path, "config"),
-        "NOMAD_DATA_DIR": p.join(workDir.path, "data"),
-        "NOMAD_RESCAN_INTERVAL": "0",
-        "NOMAD_WATCH_FILES": "false",
+        "POLDER_LISTEN": "127.0.0.1:$port",
+        "POLDER_CONFIG_DIR": p.join(workDir.path, "config"),
+        "POLDER_DATA_DIR": p.join(workDir.path, "data"),
+        "POLDER_RESCAN_INTERVAL": "0",
+        "POLDER_WATCH_FILES": "false",
       },
     );
     final log = StringBuffer();
     process.stdout.transform(utf8.decoder).listen(log.write);
     process.stderr.transform(utf8.decoder).listen(log.write);
-    final server = RealNomadServer._(process, workDir, "http://127.0.0.1:$port", log);
+    final server = RealPolderServer._(process, workDir, "http://127.0.0.1:$port", log);
     await server._waitUntilHealthy();
     return server;
   }
 
   static Future<String> _build(Directory workDir) async {
-    final output = p.join(workDir.path, "nomad");
-    final result = await Process.run("go", ["build", "-o", output, "./cmd/nomad"], workingDirectory: serverSourceDir);
+    final output = p.join(workDir.path, "polder");
+    final result = await Process.run("go", ["build", "-o", output, "./cmd/polder"], workingDirectory: serverSourceDir);
     if (result.exitCode != 0) throw StateError("go build failed:\n${result.stderr}");
     return output;
   }
@@ -128,17 +128,17 @@ class RealNomadServer {
       }
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
-    throw StateError("nomad did not become healthy:\n$log");
+    throw StateError("polder did not become healthy:\n$log");
   }
 
-  NomadApi anonymousApi() => NomadApi(ApiClientFactory.create(url));
+  PolderApi anonymousApi() => PolderApi(ApiClientFactory.create(url));
 
   /// An API authenticated through the real [AuthInterceptor], so token refresh is exercised too.
-  ({NomadApi api, MemoryAuthSession session, TransferCounter counter}) signedIn(TokenPair tokens) {
+  ({PolderApi api, MemoryAuthSession session, TransferCounter counter}) signedIn(TokenPair tokens) {
     final session = MemoryAuthSession()..tokens = tokens;
     final counter = TransferCounter();
     return (
-      api: NomadApi(ApiClientFactory.create(url, session: session, httpClient: counter)),
+      api: PolderApi(ApiClientFactory.create(url, session: session, httpClient: counter)),
       session: session,
       counter: counter,
     );

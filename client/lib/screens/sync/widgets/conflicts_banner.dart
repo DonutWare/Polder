@@ -4,11 +4,11 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/providers/sync/conflict_queue_provider.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/notice_tile.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/notice_tile.dart";
 
 class ConflictsBanner extends ConsumerWidget {
   const ConflictsBanner({super.key});

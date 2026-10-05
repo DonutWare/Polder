@@ -2,19 +2,19 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/trash.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/providers/trash/trash_provider.dart";
-import "package:nomad/screens/browser/widgets/file_thumbnail.dart";
-import "package:nomad/screens/trash/widgets/restore_conflict_dialog.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/util/action_feedback.dart";
-import "package:nomad/util/byte_format.dart";
-import "package:nomad/util/date_format_extension.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/util/remote_path.dart";
-import "package:nomad/widgets/shared/confirm_dialog.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/trash/trash_provider.dart";
+import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/trash/widgets/restore_conflict_dialog.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/byte_format.dart";
+import "package:polder/util/date_format_extension.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/util/remote_path.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
 
 enum _TrashAction { restore, download, deletePermanently }
 

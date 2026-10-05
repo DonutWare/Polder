@@ -2,18 +2,18 @@ import "package:flutter/widgets.dart";
 
 import "package:workmanager/workmanager.dart";
 
-import "package:nomad/models/account.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/api/stored_auth_session.dart";
-import "package:nomad/services/storage/credentials_store.dart";
-import "package:nomad/services/storage/preferences_store.dart";
-import "package:nomad/services/sync/drift/drift_sync_state_store.dart";
-import "package:nomad/services/sync/native_sync_platform.dart";
-import "package:nomad/services/sync/sync_engine.dart";
-import "package:nomad/services/sync/sync_pause.dart";
-import "package:nomad/services/sync/sync_state_store.dart";
+import "package:polder/models/account.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/api/stored_auth_session.dart";
+import "package:polder/services/storage/credentials_store.dart";
+import "package:polder/services/storage/preferences_store.dart";
+import "package:polder/services/sync/drift/drift_sync_state_store.dart";
+import "package:polder/services/sync/native_sync_platform.dart";
+import "package:polder/services/sync/sync_engine.dart";
+import "package:polder/services/sync/sync_pause.dart";
+import "package:polder/services/sync/sync_state_store.dart";
 
 @pragma("vm:entry-point")
 void autoUploadCallbackDispatcher() {
@@ -48,7 +48,7 @@ class AutoUploadTask {
 
   SyncEngine _engineFor(Account account, SyncStateStore store) {
     final session = StoredAuthSession(store: credentials, accountId: account.id, accessToken: account.accessToken);
-    final api = NomadApi(ApiClientFactory.create(account.serverUrl, session: session));
+    final api = PolderApi(ApiClientFactory.create(account.serverUrl, session: session));
     return SyncEngine(api: api, store: store, deviceName: account.deviceName);
   }
 }

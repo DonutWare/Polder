@@ -4,10 +4,10 @@ import "dart:math";
 
 import "package:web_socket_channel/web_socket_channel.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/models/server_event.dart";
-import "package:nomad/services/api/generated/nomad.swagger.dart" as wire;
-import "package:nomad/services/api/wire_mappers.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/models/server_event.dart";
+import "package:polder/services/api/generated/polder.swagger.dart" as wire;
+import "package:polder/services/api/wire_mappers.dart";
 
 typedef WebSocketConnector = WebSocketChannel Function(Uri uri);
 

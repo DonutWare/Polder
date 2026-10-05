@@ -1,24 +1,24 @@
-# nomad-server
+# polder-server
 
-The Go backend for Nomad a cross-platform sync app.
+The Go backend for Polder a cross-platform sync app.
 
-The [Nomad client](client/) (Flutter) lives in this repository too, so the server can embed its web build and API changes land in both in one commit.
+The [Polder client](client/) (Flutter) lives in this repository too, so the server can embed its web build and API changes land in both in one commit.
 
 ## Run
 
 ```sh
 mkdir -p config data
-NOMAD_UID=$(id -u) NOMAD_GID=$(id -g) docker compose up -d --build
+POLDER_UID=$(id -u) POLDER_GID=$(id -g) docker compose up -d --build
 curl http://localhost:6060/healthz
 ```
 
-That image includes the web app. Set `NOMAD_WEB=none` for an API-only image, which skips the Flutter build.
+That image includes the web app. Set `POLDER_WEB=none` for an API-only image, which skips the Flutter build.
 
 Without Docker:
 
 ```sh
 scripts/build-web.sh  
-NOMAD_CONFIG_DIR=./config NOMAD_DATA_DIR=./data go run ./cmd/nomad
+POLDER_CONFIG_DIR=./config POLDER_DATA_DIR=./data go run ./cmd/polder
 ```
 
 The first login creates the admin account.
@@ -30,8 +30,8 @@ with `Upgrade` and `Connection` headers passed through.
 ## Docker image
 
 ```sh
-docker build -t nomad-server .                          # API only
-docker build --build-arg WEB=client -t nomad-server .   # with the web app from client/
+docker build -t polder-server .                          # API only
+docker build --build-arg WEB=client -t polder-server .   # with the web app from client/
 ```
 
 ## Development
@@ -43,14 +43,14 @@ scripts/test-client.sh   # the client's integration tests against this server
 scripts/gen-client.sh    # after changing the API: regenerate the client's API code
 ```
 
-The client's API code is generated from this server's OpenAPI document. `nomad openapi` prints it,
-and `scripts/gen-client.sh` writes it to `client/openapi/nomad.json` and regenerates
+The client's API code is generated from this server's OpenAPI document. `polder openapi` prints it,
+and `scripts/gen-client.sh` writes it to `client/openapi/polder.json` and regenerates
 `client/lib/services/api/generated`. Commit it with the server change; CI fails while the document
 there differs from the server's.
 
 To also run the tests against MariaDB:
 
 ```sh
-docker run -d --rm --name nomad-test-mariadb -e MARIADB_ROOT_PASSWORD=testpass -e MARIADB_DATABASE=nomad -p 33306:3306 mariadb:11
-NOMAD_TEST_MARIADB_DSN='root:testpass@tcp(127.0.0.1:33306)/nomad' go test ./...
+docker run -d --rm --name polder-test-mariadb -e MARIADB_ROOT_PASSWORD=testpass -e MARIADB_DATABASE=polder -p 33306:3306 mariadb:11
+POLDER_TEST_MARIADB_DSN='root:testpass@tcp(127.0.0.1:33306)/polder' go test ./...
 ```

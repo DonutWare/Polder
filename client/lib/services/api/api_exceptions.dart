@@ -1,5 +1,5 @@
-import "package:nomad/models/api_error.dart";
-import "package:nomad/models/file_entry.dart";
+import "package:polder/models/api_error.dart";
+import "package:polder/models/file_entry.dart";
 
 sealed class ApiException implements Exception {
   const ApiException({this.error, this.statusCode});

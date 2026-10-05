@@ -4,7 +4,7 @@ import "package:flutter/material.dart";
 
 import "package:material_expressive/shapes.dart";
 
-import "package:nomad/theme/app_theme.dart";
+import "package:polder/theme/app_theme.dart";
 
 /// The M3 Expressive loading indicator: a shape that morphs through the Material shape set.
 class LoadingIndicator extends StatefulWidget {

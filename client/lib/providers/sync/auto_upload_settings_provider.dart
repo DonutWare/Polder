@@ -1,8 +1,8 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/sync/auto_upload_settings.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
+import "package:polder/models/sync/auto_upload_settings.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
 
 final autoUploadSettingsProvider = AsyncNotifierProvider<AutoUploadSettingsNotifier, AutoUploadSettings>(
   AutoUploadSettingsNotifier.new,
@@ -17,7 +17,7 @@ final autoUploadAllowedProvider = FutureProvider.autoDispose<bool>((ref) async {
 });
 
 class AutoUploadSettingsNotifier extends AsyncNotifier<AutoUploadSettings> {
-  static const _key = "nomad.autoUpload";
+  static const _key = "polder.autoUpload";
 
   @override
   Future<AutoUploadSettings> build() async {

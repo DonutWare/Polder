@@ -8,26 +8,26 @@ import "dart:typed_data";
 import "package:flutter_test/flutter_test.dart";
 import "package:web_socket_channel/web_socket_channel.dart";
 
-import "package:nomad/models/activity.dart";
-import "package:nomad/models/server_event.dart";
+import "package:polder/models/activity.dart";
+import "package:polder/models/server_event.dart";
 
-import "package:nomad/models/admin_user_requests.dart";
-import "package:nomad/models/sync/conflict.dart";
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/models/token_pair.dart";
-import "package:nomad/models/trash.dart";
-import "package:nomad/models/user.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/realtime/events_client.dart";
-import "package:nomad/services/sync/in_memory_sync_state_store.dart";
-import "package:nomad/services/sync/sync_engine.dart";
+import "package:polder/models/admin_user_requests.dart";
+import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/models/token_pair.dart";
+import "package:polder/models/trash.dart";
+import "package:polder/models/user.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/realtime/events_client.dart";
+import "package:polder/services/sync/in_memory_sync_state_store.dart";
+import "package:polder/services/sync/sync_engine.dart";
 
 import "../support/random_bytes.dart";
 import "../support/real_server.dart";
 
-/// Runs the client against a real `nomad` server, built from `NOMAD_SERVER_DIR` or taken from `NOMAD_SERVER_BIN`.
+/// Runs the client against a real `polder` server, built from `POLDER_SERVER_DIR` or taken from `POLDER_SERVER_BIN`.
 /// It skips itself when neither is set or Go is missing; `flutter test --exclude-tags integration` skips it too.
 void main() {
   final unavailable = realServerUnavailableReason();
@@ -35,12 +35,12 @@ void main() {
     test("real server", () {}, skip: unavailable);
     return;
   }
-  late RealNomadServer server;
+  late RealPolderServer server;
   late TokenPair adminTokens;
   late TokenPair userTokens;
 
   setUpAll(() async {
-    server = await RealNomadServer.start();
+    server = await RealPolderServer.start();
     final anonymous = server.anonymousApi();
     expect((await anonymous.setupStatus()).needsSetup, isTrue);
     adminTokens = await anonymous.setup(username: "admin", password: "admin-password");
@@ -181,7 +181,7 @@ void main() {
 
   group("sync engine", () {
     late Directory localRoot;
-    late NomadApi otherDevice;
+    late PolderApi otherDevice;
     late TransferCounter counter;
     late InMemorySyncStateStore store;
     late SyncEngine engine;
@@ -200,7 +200,7 @@ void main() {
     );
 
     setUp(() async {
-      localRoot = await Directory.systemTemp.createTemp("nomad_sync");
+      localRoot = await Directory.systemTemp.createTemp("polder_sync");
       final device = server.signedIn(userTokens);
       counter = device.counter;
       otherDevice = server.signedIn(userTokens).api;
@@ -304,7 +304,7 @@ void main() {
     });
 
     test("remote renames and moves into another sync root move local files", () async {
-      final otherLocalRoot = await Directory.systemTemp.createTemp("nomad_sync_other");
+      final otherLocalRoot = await Directory.systemTemp.createTemp("polder_sync_other");
       addTearDown(() => otherLocalRoot.delete(recursive: true));
       final otherRoot = SyncRoot(
         id: "other",

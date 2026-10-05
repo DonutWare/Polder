@@ -4,13 +4,13 @@ import "dart:io";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/nomad_api.dart";
-import "package:nomad/services/sync/chunker.dart";
-import "package:nomad/services/sync/in_memory_sync_state_store.dart";
-import "package:nomad/services/sync/sync_activity.dart";
-import "package:nomad/services/sync/sync_engine.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/sync/chunker.dart";
+import "package:polder/services/sync/in_memory_sync_state_store.dart";
+import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/services/sync/sync_engine.dart";
 
 import "../../support/fake_server.dart";
 import "../../support/random_bytes.dart";
@@ -23,7 +23,7 @@ void main() {
   File local(String relativePath) => File("${localRoot.path}/$relativePath");
 
   setUp(() async {
-    localRoot = await Directory.systemTemp.createTemp("nomad_activity");
+    localRoot = await Directory.systemTemp.createTemp("polder_activity");
     root = SyncRoot(id: "root", accountId: "a", localPath: localRoot.path, remotePath: "/Docs");
     activity = SyncActivity();
   });
@@ -51,7 +51,7 @@ void main() {
       await Directory("${localRoot.path}/Trip/day1").create(recursive: true);
       await local("Trip/day1/a.jpg").writeAsString("a");
       await local("Trip/.DS_Store").writeAsString("x");
-      await local("Trip/.nomad-123-b.jpg").writeAsString("partial");
+      await local("Trip/.polder-123-b.jpg").writeAsString("partial");
 
       await activity.observe(root, "${localRoot.path}/Trip");
 
@@ -132,14 +132,14 @@ void main() {
   });
 
   group("sync runs", () {
-    late FakeNomadServer server;
+    late FakePolderServer server;
     late InMemorySyncStateStore store;
     late SyncEngine engine;
 
     setUp(() {
-      server = FakeNomadServer();
+      server = FakePolderServer();
       store = InMemorySyncStateStore();
-      final api = NomadApi(ApiClientFactory.create("https://cloud.test", httpClient: server));
+      final api = PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: server));
       engine = SyncEngine(api: api, store: store, deviceName: "Laptop", activity: activity);
     });
 
@@ -186,17 +186,17 @@ void main() {
   });
 
   group("pipelined runs", () {
-    late FakeNomadServer server;
+    late FakePolderServer server;
     late InMemorySyncStateStore store;
     late SyncEngine engine;
     void Function() onChunk = () {};
 
     setUp(() async {
-      server = FakeNomadServer();
+      server = FakePolderServer();
       store = InMemorySyncStateStore();
       onChunk = () {};
       final client = _ChunkWatcher(server, () => onChunk());
-      final api = NomadApi(ApiClientFactory.create("https://cloud.test", httpClient: client));
+      final api = PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: client));
       engine = SyncEngine(api: api, store: store, deviceName: "Laptop", activity: activity);
       await Directory("${localRoot.path}/Trip").create();
       for (var i = 0; i < 10; i++) {
@@ -279,20 +279,20 @@ void main() {
   });
 
   group("interrupting work in flight", () {
-    late FakeNomadServer server;
+    late FakePolderServer server;
     late InMemorySyncStateStore store;
     late SyncEngine engine;
     late Completer<void> network;
     late void Function(http.BaseRequest request) onRequest;
 
     setUp(() {
-      server = FakeNomadServer();
+      server = FakePolderServer();
       store = InMemorySyncStateStore();
       network = Completer<void>();
       onRequest = (_) {};
       final client = _StallingClient(server, (request) => onRequest(request), network.future);
       engine = SyncEngine(
-        api: NomadApi(ApiClientFactory.create("https://cloud.test", httpClient: client)),
+        api: PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: client)),
         store: store,
         deviceName: "Laptop",
         activity: activity,
@@ -368,7 +368,7 @@ void main() {
 class _ChunkWatcher extends http.BaseClient {
   _ChunkWatcher(this._server, this._onChunk);
 
-  final FakeNomadServer _server;
+  final FakePolderServer _server;
   final void Function() _onChunk;
 
   @override
@@ -381,7 +381,7 @@ class _ChunkWatcher extends http.BaseClient {
 class _StallingClient extends http.BaseClient {
   _StallingClient(this._server, this._onRequest, this._network);
 
-  final FakeNomadServer _server;
+  final FakePolderServer _server;
   final void Function(http.BaseRequest request) _onRequest;
   final Future<void> _network;
 

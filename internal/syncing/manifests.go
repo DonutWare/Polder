@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/chunker"
-	"nomad-server/internal/files"
-	"nomad-server/internal/users"
+	"polder-server/internal/apperr"
+	"polder-server/internal/chunker"
+	"polder-server/internal/files"
+	"polder-server/internal/users"
 )
 
 type Manifest struct {

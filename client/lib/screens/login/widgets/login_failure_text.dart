@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/login_state.dart";
-import "package:nomad/providers/login_provider.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/models/login_state.dart";
+import "package:polder/providers/login_provider.dart";
+import "package:polder/util/localization_helper.dart";
 
 class LoginFailureText extends ConsumerWidget {
   const LoginFailureText({super.key});

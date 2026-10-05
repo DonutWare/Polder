@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"nomad-server/internal/chunker"
+	"polder-server/internal/chunker"
 )
 
 type changePage struct {

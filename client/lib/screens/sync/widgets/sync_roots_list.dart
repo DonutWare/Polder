@@ -2,11 +2,11 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/sync/sync_roots_provider.dart";
-import "package:nomad/screens/sync/widgets/sync_root_tile.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/widgets/shared/nav_group.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/sync/sync_roots_provider.dart";
+import "package:polder/screens/sync/widgets/sync_root_tile.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/nav_group.dart";
 
 class SyncRootsList extends ConsumerWidget {
   const SyncRootsList({required this.mode, super.key});

@@ -3,10 +3,10 @@ import "dart:async";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:nomad/models/change.dart";
-import "package:nomad/services/api/api_client_factory.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/nomad_api.dart";
+import "package:polder/models/change.dart";
+import "package:polder/services/api/api_client_factory.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
 
 import "../../support/scripted_client.dart";
 
@@ -40,11 +40,11 @@ class _BodyWatchingClient extends http.BaseClient {
 
 void main() {
   late ScriptedClient client;
-  late NomadApi api;
+  late PolderApi api;
 
   void serve(ScriptedHandler handler) {
     client = ScriptedClient(handler);
-    api = NomadApi(ApiClientFactory.create("https://cloud.test", httpClient: client));
+    api = PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: client));
   }
 
   test("uploads send the length, the bytes and progress", () async {
@@ -68,7 +68,7 @@ void main() {
     expect(request.query, {"path": "/a.txt", "baseRev": "5", "mtime": "2026-10-01T08:00:00.000Z"});
     expect(request.headers["content-type"], "application/octet-stream");
     expect(request.contentLength, 3);
-    expect(request.headers.keys, isNot(contains("x-nomad-upload")));
+    expect(request.headers.keys, isNot(contains("x-polder-upload")));
     expect(request.bytes, [1, 2, 3]);
     expect(progress, [2, 3]);
     expect(entry.rev, 7);
@@ -78,7 +78,7 @@ void main() {
     var listened = false;
     final source = StreamController<List<int>>(onListen: () => listened = true);
     final watcher = _BodyWatchingClient(() => listened);
-    api = NomadApi(ApiClientFactory.create("https://cloud.test", httpClient: watcher));
+    api = PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: watcher));
 
     final upload = api.putContent("/big.bin", source.stream, length: 2);
     await Future<void>.delayed(Duration.zero);

@@ -1,4 +1,4 @@
-package org.knaapen.nomad
+package org.knaapen.polder
 
 import io.flutter.embedding.android.FlutterActivity
 

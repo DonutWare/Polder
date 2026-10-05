@@ -3,7 +3,7 @@ package files
 import (
 	"context"
 
-	"nomad-server/internal/users"
+	"polder-server/internal/users"
 )
 
 type MutationKind string

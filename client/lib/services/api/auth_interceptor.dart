@@ -2,18 +2,18 @@ import "dart:async";
 
 import "package:chopper/chopper.dart";
 
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/services/api/auth_session.dart";
-import "package:nomad/services/api/generated/nomad.metadata.swagger.dart";
-import "package:nomad/services/api/generated/nomad.swagger.dart" as wire;
-import "package:nomad/services/api/pending_uploads.dart";
-import "package:nomad/services/api/wire_mappers.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/auth_session.dart";
+import "package:polder/services/api/generated/polder.metadata.swagger.dart";
+import "package:polder/services/api/generated/polder.swagger.dart" as wire;
+import "package:polder/services/api/pending_uploads.dart";
+import "package:polder/services/api/wire_mappers.dart";
 
 class AuthInterceptor extends Authenticator implements Interceptor {
   AuthInterceptor({required this._session, required this._refreshApi});
 
   final AuthSession _session;
-  final wire.Nomad _refreshApi;
+  final wire.Polder _refreshApi;
   final _inFlight = _InFlightRefresh();
 
   @override

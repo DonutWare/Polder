@@ -383,7 +383,7 @@
             "type": "integer"
           },
           "clientId": {
-            "description": "The X-Nomad-Transfer-Id the uploader sent",
+            "description": "The X-Polder-Transfer-Id the uploader sent",
             "type": "string"
           },
           "device": {
@@ -1032,7 +1032,7 @@
   },
   "info": {
     "description": "File storage and sync. Log in with POST /auth/login and send the access token as `Authorization: Bearer \u003ctoken\u003e`; renew it with POST /auth/refresh before it expires.",
-    "title": "Nomad API",
+    "title": "Polder API",
     "version": "1.0.0"
   },
   "openapi": "3.0.3",
@@ -1874,7 +1874,7 @@
                   "type": "string"
                 }
               },
-              "X-Nomad-Rev": {
+              "X-Polder-Rev": {
                 "schema": {
                   "description": "The file's revision",
                   "type": "string"
@@ -1952,7 +1952,7 @@
           {
             "description": "Any ID the client picks; live transfer events echo it back as clientId",
             "in": "header",
-            "name": "X-Nomad-Transfer-Id",
+            "name": "X-Polder-Transfer-Id",
             "schema": {
               "description": "Any ID the client picks; live transfer events echo it back as clientId",
               "type": "string"

@@ -1,7 +1,7 @@
 import "dart:typed_data";
 
-import "package:nomad/models/file_entry.dart";
-import "package:nomad/models/sync/sync_entry.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/models/sync/sync_entry.dart";
 
 abstract interface class LocalProvider {
   Future<List<FileEntry>> list(String remotePath);

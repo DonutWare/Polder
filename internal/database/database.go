@@ -11,7 +11,7 @@ import (
 	"github.com/pressly/goose/v3"
 	_ "modernc.org/sqlite"
 
-	"nomad-server/internal/config"
+	"polder-server/internal/config"
 )
 
 //go:embed migrations
@@ -52,7 +52,7 @@ func openDriver(cfg config.Config) (*sql.DB, error) {
 func openMariaDB(dsn string) (*sql.DB, error) {
 	mariaConfig, err := mysql.ParseDSN(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("parse NOMAD_DB_DSN: %w", err)
+		return nil, fmt.Errorf("parse POLDER_DB_DSN: %w", err)
 	}
 	if mariaConfig.Params == nil {
 		mariaConfig.Params = map[string]string{}

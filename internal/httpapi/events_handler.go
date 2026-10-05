@@ -11,10 +11,10 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
-	"nomad-server/internal/activity"
-	"nomad-server/internal/apperr"
-	"nomad-server/internal/auth"
-	"nomad-server/internal/users"
+	"polder-server/internal/activity"
+	"polder-server/internal/apperr"
+	"polder-server/internal/auth"
+	"polder-server/internal/users"
 )
 
 const eventsDescription = "Open a WebSocket here and send an `auth` message within 10 seconds, and again whenever " +

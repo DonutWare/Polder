@@ -5,8 +5,8 @@ import "dart:typed_data";
 
 import "package:crypto/crypto.dart";
 
-import "package:nomad/models/manifest.dart";
-import "package:nomad/services/sync/sync_activity.dart";
+import "package:polder/models/manifest.dart";
+import "package:polder/services/sync/sync_activity.dart";
 
 abstract final class FastCdc {
   static const int minSize = 256 * 1024;

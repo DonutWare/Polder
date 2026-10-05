@@ -7,8 +7,8 @@ client_dir="$server_dir/client"
 
 spec=$(mktemp)
 trap 'rm -f "$spec"' EXIT
-(cd "$server_dir" && go run ./cmd/nomad openapi) > "$spec"
-cat "$spec" > "$client_dir/openapi/nomad.json"
+(cd "$server_dir" && go run ./cmd/polder openapi) > "$spec"
+cat "$spec" > "$client_dir/openapi/polder.json"
 (
   cd "$client_dir"
   rm -rf lib/services/api/generated

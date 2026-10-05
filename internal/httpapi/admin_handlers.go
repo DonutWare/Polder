@@ -3,8 +3,8 @@ package httpapi
 import (
 	"context"
 
-	"nomad-server/internal/settings"
-	"nomad-server/internal/users"
+	"polder-server/internal/settings"
+	"polder-server/internal/users"
 )
 
 type userPath struct {

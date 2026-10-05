@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:nomad/models/user.dart";
-import "package:nomad/util/localization_helper.dart";
+import "package:polder/models/user.dart";
+import "package:polder/util/localization_helper.dart";
 
 class RoleSelector extends StatelessWidget {
   const RoleSelector({required this.role, required this.onChanged, super.key});

@@ -15,10 +15,10 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
-	"nomad-server/internal/files"
-	"nomad-server/internal/settings"
-	"nomad-server/internal/storage"
-	"nomad-server/internal/users"
+	"polder-server/internal/files"
+	"polder-server/internal/settings"
+	"polder-server/internal/storage"
+	"polder-server/internal/users"
 )
 
 type trashListing struct {

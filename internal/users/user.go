@@ -6,7 +6,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 
-	"nomad-server/internal/apperr"
+	"polder-server/internal/apperr"
 )
 
 type Role string

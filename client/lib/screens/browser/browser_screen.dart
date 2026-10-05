@@ -1,15 +1,15 @@
 import "package:flutter/material.dart";
 
 import "package:go_router/go_router.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/screens/browser/widgets/breadcrumbs.dart";
-import "package:nomad/screens/browser/widgets/browser_add_button.dart";
-import "package:nomad/screens/browser/widgets/directory_view.dart";
-import "package:nomad/screens/browser/widgets/transfers_button.dart";
-import "package:nomad/screens/browser/widgets/view_mode_button.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/util/remote_path.dart";
-import "package:nomad/widgets/layout/app_page.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/browser/widgets/breadcrumbs.dart";
+import "package:polder/screens/browser/widgets/browser_add_button.dart";
+import "package:polder/screens/browser/widgets/directory_view.dart";
+import "package:polder/screens/browser/widgets/transfers_button.dart";
+import "package:polder/screens/browser/widgets/view_mode_button.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/util/remote_path.dart";
+import "package:polder/widgets/layout/app_page.dart";
 
 class BrowserScreen extends StatelessWidget {
   const BrowserScreen({required this.path, super.key});

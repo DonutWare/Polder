@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 
-import "package:nomad/providers/browser/pending_uploads_provider.dart";
-import "package:nomad/screens/browser/widgets/file_grid_tile.dart";
-import "package:nomad/screens/browser/widgets/pending_upload_widgets.dart";
+import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/screens/browser/widgets/file_grid_tile.dart";
+import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 
 class FileGridView extends StatelessWidget {
   const FileGridView({required this.parentPath, required this.items, required this.padding, super.key});

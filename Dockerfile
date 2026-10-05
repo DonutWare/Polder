@@ -23,7 +23,7 @@ WORKDIR /client
 COPY client/pubspec.yaml client/pubspec.lock ./
 RUN flutter pub get
 COPY client/ .
-# CanvasKit is served by Nomad itself, so the web client also works on a LAN without internet.
+# CanvasKit is served by Polder itself, so the web client also works on a LAN without internet.
 RUN flutter build web --release --no-web-resources-cdn --no-wasm-dry-run \
     && find build/web -name '*.symbols' -delete
 
@@ -38,18 +38,18 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 COPY --from=web /web/ ./internal/webui/dist/
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/nomad ./cmd/nomad \
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/polder ./cmd/polder \
     && mkdir -p /out/config /out/data
 
 FROM gcr.io/distroless/static-debian12:nonroot
-COPY --from=build /out/nomad /usr/local/bin/nomad
+COPY --from=build /out/polder /usr/local/bin/polder
 COPY --from=build --chown=65532:65532 /out/config /config
 COPY --from=build --chown=65532:65532 /out/data /data
-ENV NOMAD_CONFIG_DIR=/config \
-    NOMAD_DATA_DIR=/data \
-    NOMAD_LISTEN=:6060
+ENV POLDER_CONFIG_DIR=/config \
+    POLDER_DATA_DIR=/data \
+    POLDER_LISTEN=:6060
 VOLUME ["/config", "/data"]
 EXPOSE 6060
 USER nonroot
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s CMD ["/usr/local/bin/nomad", "healthcheck"]
-ENTRYPOINT ["/usr/local/bin/nomad"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s CMD ["/usr/local/bin/polder", "healthcheck"]
+ENTRYPOINT ["/usr/local/bin/polder"]

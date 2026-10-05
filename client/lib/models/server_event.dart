@@ -1,6 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-import "package:nomad/models/activity.dart";
+import "package:polder/models/activity.dart";
 
 part "server_event.freezed.dart";
 

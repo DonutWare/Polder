@@ -24,7 +24,7 @@ abstract interface class DocumentScannerService {
 class NativeDocumentScannerService implements DocumentScannerService {
   const NativeDocumentScannerService();
 
-  static const _channel = MethodChannel("nomad/document_scanner");
+  static const _channel = MethodChannel("polder/document_scanner");
 
   @override
   bool get isSupported => !kIsWeb && (Platform.isAndroid || Platform.isIOS);

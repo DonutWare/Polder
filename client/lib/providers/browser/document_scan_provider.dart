@@ -4,13 +4,13 @@ import "dart:io";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:path/path.dart" as p;
 
-import "package:nomad/models/scan_session.dart";
-import "package:nomad/providers/browser/directory_provider.dart";
-import "package:nomad/providers/browser/transfers_provider.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/services/transfer/file_picker_service.dart";
-import "package:nomad/services/transfer/scan_pdf.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/models/scan_session.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/services/transfer/file_picker_service.dart";
+import "package:polder/services/transfer/scan_pdf.dart";
+import "package:polder/util/remote_path.dart";
 
 final scanSessionProvider = NotifierProvider.autoDispose.family<ScanSessionNotifier, ScanSession, ScanRequest>(
   ScanSessionNotifier.new,
@@ -69,7 +69,7 @@ class ScanSessionNotifier extends Notifier<ScanSession> {
         unawaited(transfers.upload(session.directory, pdf));
       case ScanFormat.images:
         final folder = RemotePath.join(session.directory, session.fileName);
-        await ref.read(nomadApiProvider).mkdir(folder);
+        await ref.read(polderApiProvider).mkdir(folder);
         ref.invalidate(directoryProvider(session.directory));
         _handedOff = true;
         unawaited(_uploadPages(transfers, folder, session.pages, files));

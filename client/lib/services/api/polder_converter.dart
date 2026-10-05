@@ -2,11 +2,11 @@ import "dart:async";
 
 import "package:chopper/chopper.dart";
 
-import "package:nomad/services/api/generated/nomad.swagger.dart";
-import "package:nomad/services/api/pending_uploads.dart";
+import "package:polder/services/api/generated/polder.swagger.dart";
+import "package:polder/services/api/pending_uploads.dart";
 
-class NomadConverter extends $JsonSerializableConverter {
-  NomadConverter(this._uploads);
+class PolderConverter extends $JsonSerializableConverter {
+  PolderConverter(this._uploads);
 
   static const octetStream = "application/octet-stream";
 

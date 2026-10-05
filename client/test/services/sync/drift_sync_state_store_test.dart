@@ -1,12 +1,12 @@
 import "package:drift/native.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/sync/drift/drift_sync_state_store.dart";
-import "package:nomad/services/sync/drift/sync_database.dart";
-import "package:nomad/services/sync/in_memory_sync_state_store.dart";
-import "package:nomad/services/sync/sync_state_store.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/sync/drift/drift_sync_state_store.dart";
+import "package:polder/services/sync/drift/sync_database.dart";
+import "package:polder/services/sync/in_memory_sync_state_store.dart";
+import "package:polder/services/sync/sync_state_store.dart";
 
 import "../../support/fixtures.dart";
 

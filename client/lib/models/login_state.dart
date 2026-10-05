@@ -21,7 +21,7 @@ abstract class LoginState with _$LoginState {
     /// The server is the one this web client was served from, so it can't be changed.
     @Default(false) bool serverLocked,
 
-    /// Checking whether the page's own origin is a Nomad server, before showing any form.
+    /// Checking whether the page's own origin is a Polder server, before showing any form.
     @Default(false) bool probingHostedServer,
     LoginFailure? failure,
   }) = _LoginState;

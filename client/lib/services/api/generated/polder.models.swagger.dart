@@ -6,9 +6,9 @@ import 'package:collection/collection.dart';
 
 import 'dart:convert';
 
-import 'nomad.enums.swagger.dart' as enums;
+import 'polder.enums.swagger.dart' as enums;
 
-part 'nomad.models.swagger.g.dart';
+part 'polder.models.swagger.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Change {

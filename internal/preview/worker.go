@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"nomad-server/internal/files"
-	"nomad-server/internal/users"
+	"polder-server/internal/files"
+	"polder-server/internal/users"
 )
 
 var Sizes = []int{128, 256, 512}

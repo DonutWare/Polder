@@ -1,13 +1,13 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:nomad/models/sync/sync_folder_form.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/providers/nomad_api_provider.dart";
-import "package:nomad/providers/service_providers.dart";
-import "package:nomad/providers/sync/auto_upload_settings_provider.dart";
-import "package:nomad/providers/sync/sync_platform_provider.dart";
-import "package:nomad/providers/sync/sync_roots_provider.dart";
-import "package:nomad/services/api/api_exceptions.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/models/sync/sync_folder_form.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/providers/sync/auto_upload_settings_provider.dart";
+import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/providers/sync/sync_roots_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/util/remote_path.dart";
 
 final syncFolderFormProvider = NotifierProvider.autoDispose.family<SyncFolderFormNotifier, SyncFolderForm, SyncMode>(
   SyncFolderFormNotifier.new,
@@ -63,7 +63,7 @@ class SyncFolderFormNotifier extends Notifier<SyncFolderForm> {
   Future<void> _createRemoteFolder(String remotePath) async {
     if (remotePath == RemotePath.root) return;
     try {
-      await ref.read(nomadApiProvider).mkdir(remotePath);
+      await ref.read(polderApiProvider).mkdir(remotePath);
     } on AlreadyExistsException {
       return;
     } on NetworkException {

@@ -1,7 +1,7 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:nomad/providers/account_provider.dart";
-import "package:nomad/services/sync/sync_activity.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/services/sync/sync_activity.dart";
 
 final syncActivityProvider = Provider<SyncActivity>((ref) {
   ref.watch(currentAccountProvider.select((account) => account?.id));

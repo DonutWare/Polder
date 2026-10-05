@@ -1,7 +1,7 @@
-import "package:nomad/models/sync/sync_entry.dart";
-import "package:nomad/models/sync/sync_root.dart";
-import "package:nomad/services/sync/sync_state_store.dart";
-import "package:nomad/util/relative_path.dart";
+import "package:polder/models/sync/sync_entry.dart";
+import "package:polder/models/sync/sync_root.dart";
+import "package:polder/services/sync/sync_state_store.dart";
+import "package:polder/util/relative_path.dart";
 
 class InMemorySyncStateStore implements SyncStateStore {
   final Map<String, SyncRoot> _roots = {};

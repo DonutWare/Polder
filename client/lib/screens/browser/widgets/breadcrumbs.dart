@@ -2,10 +2,10 @@ import "package:flutter/material.dart";
 
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:nomad/routes/app_routes.dart";
-import "package:nomad/theme/app_theme.dart";
-import "package:nomad/util/localization_helper.dart";
-import "package:nomad/util/remote_path.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/theme/app_theme.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/util/remote_path.dart";
 
 class Breadcrumbs extends StatelessWidget {
   const Breadcrumbs({required this.path, super.key});
