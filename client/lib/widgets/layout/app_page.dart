@@ -1,15 +1,10 @@
 import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/app_bar_fade.dart";
 
-/// A page inside a navigation shell: a transparent app bar over content that scrolls beneath it.
-///
-/// The body extends behind the app bar and the floating navigation bar; lay it out with the
-/// padding from [MediaQuery] (for example through [ReadableWidth]).
 class AppPage extends StatelessWidget {
   const AppPage({
     required this.title,
@@ -34,12 +29,12 @@ class AppPage extends StatelessWidget {
     final fab = floatingActionButton;
     return Scaffold(
       extendBodyBehindAppBar: true,
-      floatingActionButton: fab == null || navigationBarOverlap <= 0
-          ? fab
-          : Padding(
-              padding: EdgeInsets.only(bottom: navigationBarOverlap),
+      floatingActionButton: fab != null
+          ? Padding(
+              padding: EdgeInsets.only(bottom: navigationBarOverlap.clamp(0, double.infinity)),
               child: fab,
-            ),
+            )
+          : null,
       appBar: AppBar(
         flexibleSpace: const AppBarFade(),
         toolbarHeight: isRoot ? 64 : null,
