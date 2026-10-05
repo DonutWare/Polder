@@ -264,5 +264,18 @@
 	"trayQuit": "Polder afsluiten",
 	"quit": "Afsluiten",
 	"quitWhileSyncingTitle": "Afsluiten tijdens synchronisatie?",
-	"quitWhileSyncingMessage": "Polder is nog aan het synchroniseren. Onvoltooide overdrachten gaan verder zodra je Polder weer opent."
+	"quitWhileSyncingMessage": "Polder is nog aan het synchroniseren. Onvoltooide overdrachten gaan verder zodra je Polder weer opent.",
+	"newDocument": "Nieuw document",
+	"reviewScan": "Scan controleren",
+	"addPages": "Pagina's toevoegen",
+	"removePage": "Pagina verwijderen",
+	"pageNumber": "Pagina {number}",
+	"scanFormatPdf": "PDF",
+	"scanFormatImages": "Afbeeldingen",
+	"scanSaveTo": "Opslaan in",
+	"discard": "Weggooien",
+	"discardScanTitle": "Deze scan weggooien?",
+	"discardScanMessage": "De gescande pagina's worden niet opgeslagen.",
+	"scanFailed": "Het document kon niet worden gescand.",
+	"scanCameraDenied": "Geef toegang tot de camera om documenten te scannen."
 }

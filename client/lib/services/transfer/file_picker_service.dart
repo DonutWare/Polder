@@ -1,6 +1,8 @@
+import "dart:io";
 import "dart:typed_data";
 
 import "package:file_picker/file_picker.dart";
+import "package:path/path.dart" as p;
 
 abstract interface class PickedFile {
   String get name;
@@ -40,6 +42,36 @@ class PlatformFilePickerService implements FilePickerService {
     await _unsandboxedMacOsReady;
     await FilePicker.saveFile(fileName: name, bytes: bytes, mimeType: mime.isEmpty ? "application/octet-stream" : mime);
   }
+}
+
+class LocalPickedFile implements PickedFile {
+  LocalPickedFile(String path, {String? name}) : _file = File(path), name = name ?? p.basename(path);
+
+  final File _file;
+
+  @override
+  final String name;
+
+  @override
+  Future<int?> length() => _file.length();
+
+  @override
+  Stream<List<int>> openRead() => _file.openRead();
+}
+
+class BytesPickedFile implements PickedFile {
+  const BytesPickedFile(this.name, this._bytes);
+
+  @override
+  final String name;
+
+  final Uint8List _bytes;
+
+  @override
+  Future<int?> length() async => _bytes.length;
+
+  @override
+  Stream<List<int>> openRead() => Stream.value(_bytes);
 }
 
 class _PlatformPickedFile implements PickedFile {

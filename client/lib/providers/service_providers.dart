@@ -6,6 +6,7 @@ import "package:nomad/services/device/device_conditions.dart";
 import "package:nomad/services/realtime/events_client.dart";
 import "package:nomad/services/storage/credentials_store.dart";
 import "package:nomad/services/storage/preferences_store.dart";
+import "package:nomad/services/transfer/document_scanner_service.dart";
 import "package:nomad/services/transfer/file_picker_service.dart";
 import "package:nomad/util/device_name.dart";
 import "package:nomad/util/hosted_server.dart";
@@ -15,6 +16,8 @@ final credentialsStoreProvider = Provider<CredentialsStore>((ref) => const Secur
 final preferencesStoreProvider = Provider<PreferencesStore>((ref) => SharedPreferencesStore());
 
 final filePickerServiceProvider = Provider<FilePickerService>((ref) => const PlatformFilePickerService());
+
+final documentScannerServiceProvider = Provider<DocumentScannerService>((ref) => const NativeDocumentScannerService());
 
 final deviceConditionsProvider = Provider<DeviceConditions>((ref) => PlatformDeviceConditions());
 

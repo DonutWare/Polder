@@ -576,5 +576,25 @@
 	"trayQuit": "Quit Polder",
 	"quit": "Quit",
 	"quitWhileSyncingTitle": "Quit while syncing?",
-	"quitWhileSyncingMessage": "Polder is still syncing. Unfinished transfers continue the next time you open Polder."
+	"quitWhileSyncingMessage": "Polder is still syncing. Unfinished transfers continue the next time you open Polder.",
+	"newDocument": "New document",
+	"reviewScan": "Review scan",
+	"addPages": "Add pages",
+	"removePage": "Remove page",
+	"pageNumber": "Page {number}",
+	"@pageNumber": {
+		"placeholders": {
+			"number": {
+				"type": "int"
+			}
+		}
+	},
+	"scanFormatPdf": "PDF",
+	"scanFormatImages": "Images",
+	"scanSaveTo": "Save to",
+	"discard": "Discard",
+	"discardScanTitle": "Discard this scan?",
+	"discardScanMessage": "The scanned pages won't be saved.",
+	"scanFailed": "Couldn't scan the document.",
+	"scanCameraDenied": "Allow camera access to scan documents."
 }

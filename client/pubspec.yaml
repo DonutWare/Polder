@@ -44,6 +44,9 @@ dependencies:
   flutter_svg: ^2.3.0
   url_launcher: ^6.3.3
   package_info_plus: ^10.2.2
+  cunning_document_scanner: ^3.0.3
+  pdf: ^3.13.1
+  pdfrx: ^2.6.5
 
 dev_dependencies:
   flutter_test:
