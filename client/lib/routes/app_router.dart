@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
 import "package:nomad/models/account.dart";
+import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/scan_session.dart";
 import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/current_user_provider.dart";
@@ -17,6 +18,7 @@ import "package:nomad/screens/browser/browser_screen.dart";
 import "package:nomad/screens/login/login_screen.dart";
 import "package:nomad/screens/scan/scan_review_screen.dart";
 import "package:nomad/screens/settings/about_screen.dart";
+import "package:nomad/screens/viewer/pdf_viewer_screen.dart";
 import "package:nomad/screens/settings/settings_screen.dart";
 import "package:nomad/screens/shell/app_shell.dart";
 import "package:nomad/screens/sync/conflict_resolver_screen.dart";
@@ -43,6 +45,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.scan,
         redirect: (_, state) => state.extra is ScanRequest ? null : AppRoutes.files,
         builder: (_, state) => ScanReviewScreen(request: state.extra! as ScanRequest),
+      ),
+      GoRoute(
+        path: AppRoutes.pdf,
+        redirect: (_, state) => state.extra is FileEntry ? null : AppRoutes.files,
+        builder: (_, state) => PdfViewerScreen(entry: state.extra! as FileEntry),
       ),
       ShellRoute(
         builder: (_, state, child) => AppShell(location: state.uri.path, child: child),

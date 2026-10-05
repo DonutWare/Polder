@@ -8,6 +8,10 @@ import "package:nomad/screens/browser/widgets/file_details_sheet.dart";
 
 void openEntry(BuildContext context, FileEntry entry) {
   if (entry.isDir) return context.go(AppRoutes.filesAt(entry.path));
+  if (entry.isPdf) {
+    context.push(AppRoutes.pdf, extra: entry);
+    return;
+  }
   showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,

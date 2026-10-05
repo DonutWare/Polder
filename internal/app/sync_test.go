@@ -329,6 +329,47 @@ func TestImagesGetMetadataAndThumbnails(t *testing.T) {
 	})
 }
 
+func TestPDFsGetFirstPageThumbnails(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+
+		// A 200x100pt page whose left half is red; PDFium rebuilds the missing xref table.
+		document := "%PDF-1.4\n" +
+			"1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
+			"2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n" +
+			"3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 4 0 R >> endobj\n" +
+			"4 0 obj << /Length 26 >> stream\n1 0 0 rg 0 0 100 100 re f\nendstream endobj\n" +
+			"trailer << /Root 1 0 R >>\n%%EOF\n"
+		var uploaded fileEntry
+		alice.put("/Docs/scan.pdf", 0, []byte(document), http.StatusOK, &uploaded)
+		if uploaded.PreviewState != "pending" {
+			t.Fatalf("new PDF should await a preview, got %s", uploaded.PreviewState)
+		}
+
+		var ready fileEntry
+		deadline := time.Now().Add(30 * time.Second)
+		for ready.PreviewState != "ready" && ready.PreviewState != "failed" && time.Now().Before(deadline) {
+			time.Sleep(50 * time.Millisecond)
+			alice.mustJSON(http.MethodGet, "/files/stat?path=/Docs/scan.pdf", nil, http.StatusOK, &ready)
+		}
+		if ready.PreviewState != "ready" || ready.Meta["pages"] != float64(1) {
+			t.Fatalf("preview not generated correctly: %+v", ready)
+		}
+
+		response := alice.request(http.MethodGet, "/files/preview?path=/Docs/scan.pdf&size=128", nil, nil)
+		defer response.Body.Close()
+		thumbnail, _, err := image.Decode(response.Body)
+		if response.StatusCode != http.StatusOK || err != nil || thumbnail.Bounds().Dx() != 128 || thumbnail.Bounds().Dy() != 64 {
+			t.Fatalf("thumbnail: status %d err %v", response.StatusCode, err)
+		}
+		left, _, _, _ := thumbnail.At(32, 32).RGBA()
+		_, rightGreen, _, _ := thumbnail.At(96, 32).RGBA()
+		if left>>8 < 200 || rightGreen>>8 < 200 {
+			t.Fatalf("expected a red left half on white, got %v and %v", thumbnail.At(32, 32), thumbnail.At(96, 32))
+		}
+	})
+}
+
 func TestRescanDropsIndexedSystemFiles(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 0)

@@ -29,10 +29,11 @@ const (
 )
 
 var previewableMimes = map[string]bool{
-	"image/jpeg": true,
-	"image/png":  true,
-	"image/gif":  true,
-	"image/webp": true,
+	"image/jpeg":      true,
+	"image/png":       true,
+	"image/gif":       true,
+	"image/webp":      true,
+	"application/pdf": true,
 }
 
 type Entry struct {

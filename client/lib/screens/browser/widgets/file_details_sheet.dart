@@ -37,6 +37,7 @@ class FileDetailsSheet extends ConsumerWidget {
             if (entry.mime.isNotEmpty) DetailRow(label: localized.type, value: entry.mime),
             if (entry.width != null && entry.height != null)
               DetailRow(label: localized.dimensionsLabel, value: localized.dimensions(entry.width!, entry.height!)),
+            if (entry.pageCount != null) DetailRow(label: localized.pages, value: "${entry.pageCount}"),
             if (entry.takenAt != null) DetailRow(label: localized.takenAt, value: entry.takenAt!.formatted(context)),
             DetailRow(label: localized.revision, value: "${entry.rev}"),
             const SizedBox(height: 16),

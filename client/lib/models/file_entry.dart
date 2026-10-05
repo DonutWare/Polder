@@ -32,9 +32,13 @@ abstract class FileEntry with _$FileEntry {
 
   bool get isAudio => mime.startsWith("audio/");
 
+  bool get isPdf => mime == "application/pdf";
+
   int? get width => _metaInt("width");
 
   int? get height => _metaInt("height");
+
+  int? get pageCount => _metaInt("pages");
 
   DateTime? get takenAt => DateTime.tryParse(meta["takenAt"]?.toString() ?? "");
 

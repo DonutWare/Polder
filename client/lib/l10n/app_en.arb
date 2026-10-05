@@ -596,5 +596,7 @@
 	"discardScanTitle": "Discard this scan?",
 	"discardScanMessage": "The scanned pages won't be saved.",
 	"scanFailed": "Couldn't scan the document.",
-	"scanCameraDenied": "Allow camera access to scan documents."
+	"scanCameraDenied": "Allow camera access to scan documents.",
+	"pages": "Pages",
+	"details": "Details"
 }

@@ -2,6 +2,7 @@ abstract final class AppRoutes {
   static const login = "/login";
   static const files = "/files";
   static const scan = "/scan";
+  static const pdf = "/pdf";
   static const activity = "/activity";
   static const sync = "/sync";
   static const conflicts = "/sync/conflicts";

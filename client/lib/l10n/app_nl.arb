@@ -277,5 +277,7 @@
 	"discardScanTitle": "Deze scan weggooien?",
 	"discardScanMessage": "De gescande pagina's worden niet opgeslagen.",
 	"scanFailed": "Het document kon niet worden gescand.",
-	"scanCameraDenied": "Geef toegang tot de camera om documenten te scannen."
+	"scanCameraDenied": "Geef toegang tot de camera om documenten te scannen.",
+	"pages": "Pagina's",
+	"details": "Details"
 }

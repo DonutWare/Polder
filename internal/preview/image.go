@@ -37,6 +37,7 @@ type decodedImage struct {
 	height      int
 	takenAt     time.Time
 	orientation orientation
+	pages       int
 }
 
 func (d decodedImage) meta() map[string]any {
@@ -46,6 +47,9 @@ func (d decodedImage) meta() map[string]any {
 	}
 	if !d.takenAt.IsZero() {
 		meta["takenAt"] = d.takenAt.UTC().Format(time.RFC3339)
+	}
+	if d.pages > 0 {
+		meta["pages"] = d.pages
 	}
 	return meta
 }

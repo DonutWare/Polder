@@ -21,6 +21,7 @@ const (
 	queueCapacity   = 1024
 	backlogInterval = time.Minute
 	backlogBatch    = 100
+	pdfIdleTimeout  = 5 * time.Minute
 )
 
 type job struct {
@@ -34,6 +35,7 @@ type Worker struct {
 	cacheDir string
 	queue    chan job
 	cleanups chan struct{}
+	pdf      pdfRenderer
 }
 
 func NewWorker(fileService *files.Service, userStore *users.Store, cacheDir string) *Worker {
@@ -63,6 +65,9 @@ func (w *Worker) Enqueue(userID int64, cleanPath string) {
 func (w *Worker) Run(ctx context.Context) {
 	ticker := time.NewTicker(backlogInterval)
 	defer ticker.Stop()
+	pdfIdle := time.NewTimer(pdfIdleTimeout)
+	defer pdfIdle.Stop()
+	defer w.pdf.close()
 	w.removeUnusedThumbnails(ctx)
 	w.processBacklog(ctx)
 	for {
@@ -75,6 +80,12 @@ func (w *Worker) Run(ctx context.Context) {
 			w.removeUnusedThumbnails(ctx)
 		case <-ticker.C:
 			w.processBacklog(ctx)
+		case <-pdfIdle.C:
+			w.pdf.close()
+		}
+		if w.pdf.used {
+			w.pdf.used = false
+			pdfIdle.Reset(pdfIdleTimeout)
 		}
 	}
 }
@@ -113,7 +124,12 @@ func (w *Worker) generate(ctx context.Context, owner users.User, entry files.Ent
 	}
 	defer file.Close()
 
-	decoded, err := decodeImage(file)
+	var decoded decodedImage
+	if entry.Mime == pdfMime {
+		decoded, err = w.pdf.render(file, entry.Size, Sizes[len(Sizes)-1])
+	} else {
+		decoded, err = decodeImage(file)
+	}
 	if err != nil {
 		slog.Debug("preview decode failed", "path", entry.Path, "error", err)
 		return decoded.meta(), files.PreviewFailed
