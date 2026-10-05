@@ -362,7 +362,7 @@ abstract class Nomad extends ChopperService {
   Future<chopper.Response> _events({
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: 'Open a WebSocket here. Send `{"type":"auth","token":"<access token>"}` within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can send `{"type":"subscribe","scope":"me|all|user","userId":1}` to watch other users; every subscribe is answered with a new snapshot. Your own events always arrive. Events are `transfer.started`, `transfer.progress`, `transfer.finished`, `activity.created` and `files.changed`. The connection closes with code 4401 when authentication fails or the token expires without renewal.',
+      description: 'Open a WebSocket here and send an `auth` message within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can `subscribe` to other users; every subscribe is answered with a new snapshot, and your own events always arrive. Messages are described by the ClientMessage and EventMessage schemas. The connection closes with code 4401 when authentication fails or the token expires without renewal.',
       summary: 'Live activity over a WebSocket',
       operationId: 'events',
       consumes: [],
