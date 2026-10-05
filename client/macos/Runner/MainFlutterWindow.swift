@@ -3,6 +3,9 @@ import FlutterMacOS
 
 class MainFlutterWindow: NSWindow {
   private var titlebarChannel: FlutterMethodChannel?
+  private var appChannel: FlutterMethodChannel?
+  private var isSyncing = false
+  private var quitConfirmed = false
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -29,7 +32,23 @@ class MainFlutterWindow: NSWindow {
     }
     titlebarChannel = channel
 
-    // Full screen hides the title bar until the pointer reaches the top.
+    let app = FlutterMethodChannel(
+      name: "nomad/app", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    app.setMethodCallHandler { [weak self] call, result in
+      switch call.method {
+      case "setSyncing":
+        self?.isSyncing = call.arguments as? Bool ?? false
+        result(nil)
+      case "quit":
+        self?.quitConfirmed = true
+        result(nil)
+        NSApp.terminate(nil)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+    appChannel = app
+
     NotificationCenter.default.addObserver(
       forName: NSWindow.willEnterFullScreenNotification, object: self, queue: .main
     ) { [weak self] _ in
@@ -46,7 +65,18 @@ class MainFlutterWindow: NSWindow {
     super.awakeFromNib()
   }
 
-  /// The height of a regular title bar, which the content now extends under.
+  func shouldTerminate() -> NSApplication.TerminateReply {
+    if quitConfirmed || !isSyncing { return .terminateNow }
+    appChannel?.invokeMethod("quitRequested", arguments: nil)
+    return .terminateCancel
+  }
+
+  func reveal() {
+    NSApp.setActivationPolicy(.regular)
+    NSApp.activate(ignoringOtherApps: true)
+    makeKeyAndOrderFront(nil)
+  }
+
   private static var standardTitlebarHeight: Double {
     Double(NSWindow.frameRect(forContentRect: .zero, styleMask: [.titled]).height)
   }

@@ -1,7 +1,6 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:nomad/models/activity.dart";
-import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/activity/activity_scope_provider.dart";
 import "package:nomad/providers/activity/live_transfers_provider.dart";
 import "package:nomad/providers/browser/pending_uploads_provider.dart";
@@ -16,6 +15,7 @@ class NowGroup {
     this.local = const [],
     this.transfers = const [],
     this.completed = 0,
+    this.rate = 0,
   });
 
   final String key;
@@ -23,6 +23,7 @@ class NowGroup {
   final List<PendingUpload> local;
   final List<LiveTransfer> transfers;
   final int completed;
+  final int rate;
 
   int get active => local.length + transfers.length;
 
@@ -30,16 +31,15 @@ class NowGroup {
 
   bool get isBatch => totalFiles >= 2;
 
-  int get uploading => local.where((upload) => upload.phase == LocalSyncPhase.uploading).length + transfers.length;
+  int get uploading =>
+      local.where((upload) => upload.phase == LocalSyncPhase.uploading).length +
+      transfers.where((transfer) => transfer.isUpload).length;
+
+  int get downloading => transfers.where((transfer) => !transfer.isUpload).length;
 
   int get preparing => local.where((upload) => upload.phase == LocalSyncPhase.preparing).length;
 
   int get waiting => local.where((upload) => upload.phase == LocalSyncPhase.waiting).length;
-
-  int get rate => [
-    ...local.map((upload) => upload.rate),
-    ...transfers.map((transfer) => transfer.rate),
-  ].fold(0, (sum, rate) => sum + rate);
 
   double? get progress => totalFiles == 0 ? null : completed / totalFiles;
 }
@@ -56,12 +56,12 @@ class OpenNowGroupsNotifier extends Notifier<Set<String>> {
 final nowGroupsProvider = Provider<List<NowGroup>>((ref) {
   final scope = ref.watch(activityScopeProvider);
   final selfId = ref.watch(selfUserIdProvider) ?? 0;
-  final device = ref.watch(currentAccountProvider.select((account) => account?.deviceName)) ?? "";
   final paused = ref.watch(syncPausedProvider).value ?? false;
   final items = scope.includes(selfId, selfId: selfId)
       ? ref.watch(localSyncItemsProvider).values.toList()
       : const <LocalSyncItem>[];
-  final completed = ref.read(syncActivityProvider).completed;
+  final activity = ref.read(syncActivityProvider);
+  final completed = activity.completed;
 
   final localGroups = <String, List<LocalSyncItem>>{};
   for (final item in items) {
@@ -73,7 +73,8 @@ final nowGroupsProvider = Provider<List<NowGroup>>((ref) {
     if (transfer.userId == selfId && localPaths.contains(transfer.path)) continue;
     transferGroups.putIfAbsent(LiveTransfersNotifier.folderKey(transfer), () => []).add(transfer);
   }
-  final finished = ref.read(liveTransfersProvider.notifier).finishedByFolder;
+  final live = ref.read(liveTransfersProvider.notifier);
+  final finished = live.finishedByFolder;
 
   return [
     for (final MapEntry(key: group, value: members) in localGroups.entries)
@@ -82,9 +83,10 @@ final nowGroupsProvider = Provider<List<NowGroup>>((ref) {
         folder: members.first.groupRemotePath,
         local: [
           for (final item in members..sort((a, b) => a.relativePath.compareTo(b.relativePath)))
-            PendingUpload.local(item, device: device, paused: paused),
+            PendingUpload.local(item, paused: paused),
         ],
         completed: completed[group] ?? 0,
+        rate: activity.groupRate(group),
       ),
     for (final MapEntry(key: folder, value: transfers) in transferGroups.entries)
       NowGroup(
@@ -92,6 +94,7 @@ final nowGroupsProvider = Provider<List<NowGroup>>((ref) {
         folder: transfers.first.parentPath,
         transfers: transfers,
         completed: finished[folder] ?? 0,
+        rate: live.folderRate(folder),
       ),
   ];
 });

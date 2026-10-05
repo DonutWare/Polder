@@ -2,7 +2,6 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/transfer.dart";
-import "package:nomad/providers/account_provider.dart";
 import "package:nomad/providers/activity/live_transfers_provider.dart";
 import "package:nomad/providers/browser/transfers_provider.dart";
 import "package:nomad/providers/sync/sync_activity_provider.dart";
@@ -13,7 +12,6 @@ import "package:nomad/util/remote_path.dart";
 class PendingUpload {
   const PendingUpload({
     required this.path,
-    required this.device,
     required this.bytes,
     this.total,
     this.rate = 0,
@@ -22,13 +20,11 @@ class PendingUpload {
   });
 
   final String path;
-  final String device;
   final int bytes;
   final int? total;
   final int rate;
-  factory PendingUpload.local(LocalSyncItem item, {required String device, bool paused = false}) => PendingUpload(
+  factory PendingUpload.local(LocalSyncItem item, {bool paused = false}) => PendingUpload(
     path: item.remotePath,
-    device: device,
     bytes: item.bytes,
     total: item.total,
     rate: item.rate,
@@ -66,32 +62,24 @@ class BrowserItem {
 }
 
 final pendingUploadsProvider = Provider.autoDispose.family<List<PendingUpload>, String>((ref, path) {
-  final thisDevice = ref.watch(currentAccountProvider.select((account) => account?.deviceName)) ?? "";
   final ownUploads = ref.watch(transfersProvider).where((transfer) => transfer.direction == TransferDirection.upload);
   final ownIds = {for (final transfer in ownUploads) transfer.clientId};
   final syncing = ref.watch(localSyncItemsProvider).values.where((item) => RemotePath.parent(item.remotePath) == path);
   final syncingPaths = {for (final item in syncing) item.remotePath};
   final paused = ref.watch(syncPausedProvider).value ?? false;
   return [
-    for (final item in syncing) PendingUpload.local(item, device: thisDevice, paused: paused),
+    for (final item in syncing) PendingUpload.local(item, paused: paused),
     for (final transfer in ownUploads)
       if (transfer.isRunning && transfer.remotePath != null && RemotePath.parent(transfer.remotePath!) == path)
         PendingUpload(
           path: transfer.remotePath!,
-          device: thisDevice,
           bytes: transfer.transferred,
           total: transfer.total > 0 ? transfer.total : null,
           rate: transfer.rate,
         ),
     for (final transfer in ref.watch(uploadsIntoDirectoryProvider(path)))
       if (!ownIds.contains(transfer.clientId) && !syncingPaths.contains(transfer.path))
-        PendingUpload(
-          path: transfer.path,
-          device: transfer.device,
-          bytes: transfer.bytes,
-          total: transfer.total,
-          rate: transfer.rate,
-        ),
+        PendingUpload(path: transfer.path, bytes: transfer.bytes, total: transfer.total, rate: transfer.rate),
   ];
 });
 

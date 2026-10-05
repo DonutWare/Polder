@@ -4,6 +4,7 @@ import "dart:io";
 import "package:nomad/models/sync/sync_root.dart";
 import "package:nomad/services/sync/sync_ignore_rules.dart";
 import "package:nomad/services/sync/sync_paths.dart";
+import "package:nomad/util/throughput_meter.dart";
 
 enum LocalSyncPhase { waiting, preparing, uploading }
 
@@ -125,14 +126,16 @@ class SyncActivity {
   static const notifyInterval = Duration(milliseconds: 150);
   static const _ownWriteWindow = Duration(seconds: 5);
   static const _maxListedPerFolder = 2000;
-  static const _rateSmoothing = 0.3;
 
   final DateTime Function() _clock;
   final _changes = StreamController<Map<String, LocalSyncItem>>.broadcast();
   final Map<String, LocalSyncItem> _items = {};
   final Map<String, CancelToken> _tokens = {};
   final Map<String, DateTime> _ownWrites = {};
-  final Map<String, DateTime> _lastProgress = {};
+  final Map<String, ThroughputMeter> _itemMeters = {};
+  final Map<String, ThroughputMeter> _groupMeters = {};
+  late final _uploads = ThroughputMeter(clock: _clock);
+  late final _downloads = ThroughputMeter(clock: _clock);
   final Map<String, CancelToken> _runs = {};
   final Map<String, int> _completed = {};
   Timer? _pendingNotify;
@@ -142,6 +145,12 @@ class SyncActivity {
   Map<String, int> get completed => Map.unmodifiable(_completed);
 
   Stream<Map<String, LocalSyncItem>> get changes => _changes.stream;
+
+  int get uploadRate => _uploads.rate;
+
+  int get downloadRate => _downloads.rate;
+
+  int groupRate(String group) => _groupMeters[group]?.rate ?? 0;
 
   static String _key(String rootId, String relativePath) => "$rootId:$relativePath";
 
@@ -277,7 +286,7 @@ class SyncActivity {
                   phase: phase,
                 ))
             .copyWith(phase: phase, bytes: 0, total: total, rate: 0);
-    _lastProgress.remove(key);
+    _itemMeters.remove(key);
     _notify();
     final token = _tokens[key];
     return token != null && !token.isCancelled ? token : _tokens[key] = CancelToken();
@@ -287,25 +296,25 @@ class SyncActivity {
     final key = _key(rootId, relativePath);
     final current = _items[key];
     if (current == null) return;
-    final now = _clock();
-    final last = _lastProgress[key];
-    var rate = current.rate;
-    if (last != null) {
-      final seconds = now.difference(last).inMicroseconds / Duration.microsecondsPerSecond;
-      if (seconds > 0) {
-        final instant = (bytes - current.bytes) / seconds;
-        rate = (rate == 0 ? instant : _rateSmoothing * instant + (1 - _rateSmoothing) * rate).round();
-      }
+    final sent = bytes - current.bytes;
+    final meter = _itemMeters.putIfAbsent(key, () => ThroughputMeter(clock: _clock))..add(sent);
+    if (current.phase == LocalSyncPhase.uploading) {
+      _uploads.add(sent);
+      _groupMeters.putIfAbsent(current.group, () => ThroughputMeter(clock: _clock)).add(sent);
     }
-    _lastProgress[key] = now;
-    _items[key] = current.copyWith(bytes: bytes, rate: rate < 0 ? 0 : rate);
+    _items[key] = current.copyWith(bytes: bytes, rate: meter.rate);
+    _notify(throttled: true);
+  }
+
+  void downloaded(int bytes) {
+    _downloads.add(bytes);
     _notify(throttled: true);
   }
 
   void done(String rootId, String relativePath) {
     final key = _key(rootId, relativePath);
     _tokens.remove(key);
-    _lastProgress.remove(key);
+    _itemMeters.remove(key);
     final finished = _items.remove(key);
     if (finished == null) return;
     _completed.update(finished.group, (count) => count + 1, ifAbsent: () => 1);
@@ -316,6 +325,8 @@ class SyncActivity {
   void _forgetFinishedGroups() {
     final active = {for (final item in _items.values) item.group};
     _completed.removeWhere((group, _) => !active.contains(group));
+    _groupMeters.removeWhere((group, _) => !active.contains(group));
+    _itemMeters.removeWhere((key, _) => !_items.containsKey(key));
   }
 
   void expectWrite(String rootId, String relativePath) => _ownWrites[_key(rootId, relativePath)] = _clock();
@@ -334,7 +345,7 @@ class SyncActivity {
     for (final key in settled) {
       _items.remove(key);
       _tokens.remove(key);
-      _lastProgress.remove(key);
+      _itemMeters.remove(key);
     }
     if (settled.isNotEmpty) {
       _forgetFinishedGroups();

@@ -39,6 +39,8 @@ dependencies:
   http: ^1.6.0
   web_socket_channel: ^3.0.3
   permission_handler: ^13.0.2
+  tray_manager: ^0.7.0
+  window_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

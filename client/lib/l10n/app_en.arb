@@ -455,22 +455,8 @@
 			}
 		}
 	},
-	"transferUploading": "Uploading · {device}",
-	"@transferUploading": {
-		"placeholders": {
-			"device": {
-				"type": "String"
-			}
-		}
-	},
-	"transferDownloading": "Downloading · {device}",
-	"@transferDownloading": {
-		"placeholders": {
-			"device": {
-				"type": "String"
-			}
-		}
-	},
+	"transferUploading": "Uploading",
+	"transferDownloading": "Downloading",
 	"transferProgress": "{done} of {total}",
 	"@transferProgress": {
 		"placeholders": {
@@ -519,6 +505,14 @@
 			}
 		}
 	},
+	"nowGroupDownloading": "{count} downloading",
+	"@nowGroupDownloading": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"nowGroupPreparing": "{count} preparing",
 	"@nowGroupPreparing": {
 		"placeholders": {
@@ -548,5 +542,24 @@
 	"uploadExistingFiles": "Upload existing files",
 	"uploadExistingFilesHint": "Otherwise only files added from now on are uploaded",
 	"storageAccessDenied": "Nomad needs access to your files to upload this folder. Allow all files access, or at least photos and videos, in the app settings.",
-	"folderWillBeCreated": "This folder doesn't exist yet. It will be created."
+	"folderWillBeCreated": "This folder doesn't exist yet. It will be created.",
+	"trayUpToDate": "Up to date",
+	"traySyncing": "Syncing…",
+	"traySyncingFiles": "{count, plural, =1{Syncing 1 file} other{Syncing {count} files}}",
+	"@traySyncingFiles": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"traySyncPaused": "Sync paused",
+	"traySyncFailed": "Sync failed",
+	"traySignedOut": "Not signed in",
+	"trayOpenApp": "Open Nomad",
+	"trayOpenSyncedFolders": "Open synced folders",
+	"trayQuit": "Quit Nomad",
+	"quit": "Quit",
+	"quitWhileSyncingTitle": "Quit while syncing?",
+	"quitWhileSyncingMessage": "Nomad is still syncing. Unfinished transfers continue the next time you open Nomad."
 }

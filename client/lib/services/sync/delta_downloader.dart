@@ -24,10 +24,11 @@ class DeltaDownloader {
     Manifest? localManifest,
     DateTime? mtime,
     CancelToken? cancel,
+    void Function(int bytes)? onReceived,
   }) async {
     for (var attempt = 1; ; attempt++) {
       try {
-        return await _downloadOnce(remotePath, target, localManifest, mtime, cancel);
+        return await _downloadOnce(remotePath, target, localManifest, mtime, cancel, onReceived);
       } on PreconditionFailedException {
         if (attempt >= maxAttempts) rethrow;
       }
@@ -40,12 +41,13 @@ class DeltaDownloader {
     Manifest? localManifest,
     DateTime? mtime,
     CancelToken? cancel,
+    void Function(int bytes)? onReceived,
   ) async {
     final remote = await _api.manifest(remotePath);
     final local = await _localChunks(target, localManifest);
     final temp = _tempFileFor(target);
     try {
-      await _assemble(remotePath, remote, DownloadPlan.build(remote, local), target, temp, cancel);
+      await _assemble(remotePath, remote, DownloadPlan.build(remote, local), target, temp, cancel, onReceived);
       cancel?.throwIfCancelled(target.path);
       await _verify(temp, remote.hash);
       await temp.rename(target.path);
@@ -76,6 +78,7 @@ class DeltaDownloader {
     File source,
     File temp,
     CancelToken? cancel,
+    void Function(int bytes)? onReceived,
   ) async {
     await temp.parent.create(recursive: true);
     final sink = temp.openWrite();
@@ -91,7 +94,12 @@ class DeltaDownloader {
             final content = await _api
                 .openContent(remotePath, range: ByteRange(segment.offset, segment.size), ifMatchRev: remote.rev)
                 .unlessCancelled(cancel, source.path);
-            await sink.addStream(content.unlessCancelled(cancel, source.path));
+            await sink.addStream(
+              content.unlessCancelled(cancel, source.path).map((chunk) {
+                onReceived?.call(chunk.length);
+                return chunk;
+              }),
+            );
         }
       }
     } finally {

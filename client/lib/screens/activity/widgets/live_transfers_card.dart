@@ -107,11 +107,14 @@ class NowGroupTile extends ConsumerWidget {
     final localized = context.localized;
     final cs = Theme.of(context).colorScheme;
     final name = RemotePath.name(group.folder);
+    final sky = AppColors.of(context).sky;
     final phases = [
-      if (group.uploading > 0) localized.nowGroupUploading(group.uploading),
-      if (group.preparing > 0) localized.nowGroupPreparing(group.preparing),
-      if (group.waiting > 0) localized.nowGroupWaiting(group.waiting),
+      if (group.uploading > 0) (localized.nowGroupUploading(group.uploading), cs.primary),
+      if (group.downloading > 0) (localized.nowGroupDownloading(group.downloading), sky),
+      if (group.preparing > 0) (localized.nowGroupPreparing(group.preparing), cs.primary),
+      if (group.waiting > 0) (localized.nowGroupWaiting(group.waiting), cs.primary),
     ];
+    final color = group.uploading == 0 && group.downloading > 0 ? sky : cs.primary;
     final progress = [
       localized.nowGroupProgress(group.completed, group.totalFiles),
       if (group.rate > 0) ByteFormat.rate(group.rate, locale: context.localeName),
@@ -127,7 +130,7 @@ class NowGroupTile extends ConsumerWidget {
             UploadRing(
               progress: group.progress,
               dimension: 44,
-              child: Icon(IconsaxPlusBold.folder_2, color: cs.primary, size: 20),
+              child: Icon(IconsaxPlusBold.folder_2, color: color, size: 20),
             ),
             Expanded(
               child: Column(
@@ -142,7 +145,7 @@ class NowGroupTile extends ConsumerWidget {
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
-                    children: [for (final phase in phases) Tag(text: phase, color: cs.primary)],
+                    children: [for (final (text, color) in phases) Tag(text: text, color: color)],
                   ),
                   Text(
                     progress.join(" · "),
@@ -150,13 +153,17 @@ class NowGroupTile extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  LevelBar(fraction: group.progress, height: 4, color: cs.primary),
+                  LevelBar(fraction: group.progress, height: 4, color: color),
                 ],
               ),
             ),
             IconButton(
               tooltip: open ? localized.hideFiles : localized.showFiles,
-              icon: Icon(open ? IconsaxPlusLinear.arrow_up_2 : IconsaxPlusLinear.arrow_down_1),
+              icon: AnimatedRotation(
+                turns: open ? 0.5 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: const Icon(IconsaxPlusLinear.arrow_down_2),
+              ),
               onPressed: () => ref.read(openNowGroupsProvider.notifier).toggle(group.key),
             ),
           ],
@@ -217,9 +224,7 @@ class LiveTransferTile extends StatelessWidget {
                 runSpacing: 4,
                 children: [
                   Tag(
-                    text: transfer.isUpload
-                        ? localized.transferUploading(transfer.device)
-                        : localized.transferDownloading(transfer.device),
+                    text: transfer.isUpload ? localized.transferUploading : localized.transferDownloading,
                     color: color,
                   ),
                   if (showUser) Tag(text: transfer.username, color: AppColors.of(context).sky),

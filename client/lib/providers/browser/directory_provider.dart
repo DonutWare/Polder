@@ -22,7 +22,10 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> {
   @override
   Future<DirectoryListing> build() => ref.watch(nomadApiProvider).list(path);
 
-  Future<void> refresh() async => state = await AsyncValue.guard(() => _api.list(path));
+  Future<void> refresh() async {
+    final result = await AsyncValue.guard(() => _api.list(path));
+    if (ref.mounted) state = result;
+  }
 
   Future<void> createFolder(String name) => _mutate(() => _api.mkdir(RemotePath.join(path, name)));
 
@@ -31,15 +34,16 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> {
 
   Future<void> moveTo(FileEntry entry, String destination) async {
     await _mutate(() => _api.move(from: entry.path, to: RemotePath.join(destination, entry.name), baseRev: entry.rev));
-    ref.invalidate(directoryProvider(destination));
+    if (ref.mounted) ref.invalidate(directoryProvider(destination));
   }
 
   Future<void> delete(FileEntry entry) => _mutate(() => _api.delete(entry.path, baseRev: entry.rev));
 
   Future<void> _mutate(Future<Object?> Function() action) async {
     await action();
+    if (!ref.mounted) return;
     ref.invalidate(currentUserProvider);
     ref.read(syncSchedulerProvider)?.requestRun();
-    if (ref.mounted) await refresh();
+    await refresh();
   }
 }

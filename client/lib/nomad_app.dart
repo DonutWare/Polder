@@ -6,6 +6,7 @@ import "package:nomad/l10n/generated/app_localizations.dart";
 import "package:nomad/providers/appearance/appearance_provider.dart";
 import "package:nomad/routes/app_router.dart";
 import "package:nomad/theme/app_theme.dart";
+import "package:nomad/widgets/desktop/desktop_tray.dart";
 import "package:nomad/widgets/layout/window_titlebar.dart";
 
 class NomadApp extends ConsumerStatefulWidget {
@@ -52,7 +53,7 @@ class _NomadAppState extends ConsumerState<NomadApp> {
       themeMode: appearance.mode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: (_, child) => WindowTitlebar(child: child!),
+      builder: (_, child) => DesktopTray(child: WindowTitlebar(child: child!)),
       routerConfig: ref.watch(routerProvider),
     );
   }

@@ -329,6 +329,40 @@ void main() {
       expect(localRoot.listSync(), isEmpty, reason: "neither the file nor its temp file is left");
     });
   });
+
+  group("speed", () {
+    test("uploads add up per batch and overall, while preparing does not count", () {
+      var now = DateTime(2026);
+      final timed = SyncActivity(clock: () => now);
+      addTearDown(timed.dispose);
+      timed
+        ..enqueue(root, ["Trip/a.jpg", "Trip/b.jpg", "c.txt"])
+        ..begin(root, "Trip/a.jpg", LocalSyncPhase.uploading, total: 4000)
+        ..begin(root, "Trip/b.jpg", LocalSyncPhase.uploading, total: 4000)
+        ..begin(root, "c.txt", LocalSyncPhase.preparing, total: 4000)
+        ..progress(root.id, "Trip/a.jpg", 1000)
+        ..progress(root.id, "Trip/b.jpg", 1000)
+        ..progress(root.id, "c.txt", 4000)
+        ..done(root.id, "Trip/a.jpg");
+      now = now.add(const Duration(milliseconds: 500));
+
+      expect(timed.uploadRate, 2000);
+      expect(timed.groupRate("root:Trip"), 2000);
+      expect(timed.groupRate("root:"), 0);
+    });
+
+    test("downloaded bytes feed the download rate", () {
+      final timed = SyncActivity(clock: () => DateTime(2026));
+      addTearDown(timed.dispose);
+
+      timed
+        ..downloaded(300)
+        ..downloaded(700);
+
+      expect(timed.downloadRate, 1000);
+      expect(timed.uploadRate, 0);
+    });
+  });
 }
 
 class _ChunkWatcher extends http.BaseClient {

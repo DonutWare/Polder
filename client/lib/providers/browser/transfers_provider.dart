@@ -14,17 +14,18 @@ import "package:nomad/providers/sync/sync_scheduler_provider.dart";
 import "package:nomad/services/api/api_exceptions.dart";
 import "package:nomad/services/transfer/file_picker_service.dart";
 import "package:nomad/util/remote_path.dart";
+import "package:nomad/util/throughput_meter.dart";
 
 final transfersProvider = NotifierProvider<TransfersNotifier, List<Transfer>>(TransfersNotifier.new);
 
 class TransfersNotifier extends Notifier<List<Transfer>> {
   /// Progress arrives for every few KB sent; rebuilding the transfer list that often makes the UI sluggish.
   static const progressInterval = Duration(milliseconds: 100);
-  static const _rateSmoothing = 0.3;
 
   var _nextId = 0;
   final _random = Random.secure();
   final Map<int, Stopwatch> _sinceProgress = {};
+  final Map<int, ThroughputMeter> _meters = {};
 
   @override
   List<Transfer> build() => const [];
@@ -107,6 +108,7 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
       _replace(transfer.id, (current) => current.copyWith(status: TransferStatus.failed, error: error, rate: 0));
     } finally {
       _sinceProgress.remove(transfer.id);
+      _meters.remove(transfer.id);
     }
   }
 
@@ -114,15 +116,9 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     final since = _sinceProgress[id];
     if (since != null && since.elapsed < progressInterval && transferred < total) return;
     _sinceProgress[id] = Stopwatch()..start();
-    final seconds = (since?.elapsedMicroseconds ?? 0) / Duration.microsecondsPerSecond;
     _replace(id, (current) {
-      final instant = seconds > 0 ? (transferred - current.transferred) / seconds : 0.0;
-      final rate = current.rate == 0 ? instant : _rateSmoothing * instant + (1 - _rateSmoothing) * current.rate;
-      return current.copyWith(
-        transferred: transferred,
-        total: total > 0 ? total : current.total,
-        rate: max(rate, 0).round(),
-      );
+      final meter = _meters.putIfAbsent(id, ThroughputMeter.new)..add(transferred - current.transferred);
+      return current.copyWith(transferred: transferred, total: total > 0 ? total : current.total, rate: meter.rate);
     });
   }
 

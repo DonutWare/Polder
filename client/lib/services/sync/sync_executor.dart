@@ -87,6 +87,7 @@ class SyncExecutor {
       localManifest: _decodeManifest(previous?.manifestJson),
       mtime: remote.mtime,
       cancel: cancel,
+      onReceived: _activity?.downloaded,
     );
     final stat = await target.stat();
     await _store.saveEntry(_fileEntry(root, path, remote, manifest, localSize: stat.size, localMtime: stat.modified));

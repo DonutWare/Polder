@@ -1,5 +1,4 @@
 import "package:flutter_test/flutter_test.dart";
-
 import "package:nomad/models/activity.dart";
 import "package:nomad/models/file_entry.dart";
 import "package:nomad/models/server_event.dart";
@@ -126,12 +125,12 @@ void main() {
   });
 
   group("pending uploads", () {
-    const upload = PendingUpload(path: "/b.txt", device: "Web", bytes: 1);
+    const upload = PendingUpload(path: "/b.txt", bytes: 1);
 
     test("sit among the files by name, after the folders", () {
       final items = mergePendingUploads(
         [_file("Zeta", isDir: true), _file("a.txt"), _file("c.txt")],
-        [upload, const PendingUpload(path: "/A.txt", device: "Web", bytes: 0)],
+        [upload, const PendingUpload(path: "/A.txt", bytes: 0)],
       );
       expect(items.map((item) => item.name), ["Zeta", "a.txt", "A.txt", "b.txt", "c.txt"]);
       expect(items[3].entry, isNull);

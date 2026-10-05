@@ -30,7 +30,7 @@ extension PendingUploadPresentation on PendingUpload {
     LocalSyncPhase.waiting when paused => context.localized.itemPaused,
     LocalSyncPhase.waiting => context.localized.syncWaiting,
     LocalSyncPhase.preparing => context.localized.syncPreparing,
-    LocalSyncPhase.uploading => context.localized.transferUploading(device),
+    LocalSyncPhase.uploading => context.localized.transferUploading,
   };
 
   IconData get icon => switch (phase) {
