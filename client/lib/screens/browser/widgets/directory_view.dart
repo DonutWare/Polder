@@ -29,7 +29,11 @@ class DirectoryView extends ConsumerWidget {
       value: ref.watch(directoryProvider(path)),
       onRetry: notifier.refresh,
       data: (listing) {
-        final items = mergePendingUploads(listing.sortedEntries, pending, busyFolders: busyFolders);
+        final items = mergePendingUploads(
+          ref.watch(browserSortProvider).apply(listing.entries),
+          pending,
+          busyFolders: busyFolders,
+        );
         return ReadableWidth(
           maxWidth: 1200,
           builder: (context, inset) => RefreshIndicator(

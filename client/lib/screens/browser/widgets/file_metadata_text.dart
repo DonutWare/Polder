@@ -13,7 +13,7 @@ class FileMetadataText extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     [
-      if (!entry.isDir) ByteFormat.format(entry.size, locale: context.localeName),
+      ByteFormat.format(entry.size, locale: context.localeName),
       entry.mtime.formatted(context),
       if (entry.width != null && entry.height != null) context.localized.dimensions(entry.width!, entry.height!),
     ].join(" · "),

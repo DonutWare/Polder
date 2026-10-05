@@ -279,5 +279,9 @@
 	"scanFailed": "Het document kon niet worden gescand.",
 	"scanCameraDenied": "Geef toegang tot de camera om documenten te scannen.",
 	"pages": "Pagina's",
-	"details": "Details"
+	"details": "Details",
+	"sortBy": "Sorteren",
+	"sortAscending": "Oplopend",
+	"sortDescending": "Aflopend",
+	"sortFoldersFirst": "Mappen bovenaan"
 }

@@ -5,6 +5,7 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/breadcrumbs.dart";
 import "package:polder/screens/browser/widgets/browser_add_button.dart";
 import "package:polder/screens/browser/widgets/directory_view.dart";
+import "package:polder/screens/browser/widgets/sort_button.dart";
 import "package:polder/screens/browser/widgets/transfers_button.dart";
 import "package:polder/screens/browser/widgets/view_mode_button.dart";
 import "package:polder/util/localization_helper.dart";
@@ -24,7 +25,7 @@ class BrowserScreen extends StatelessWidget {
     },
     child: AppPage(
       title: Text(path == RemotePath.root ? context.localized.navFiles : RemotePath.name(path)),
-      actions: const [TransfersButton(), ViewModeButton()],
+      actions: const [TransfersButton(), SortButton(), ViewModeButton()],
       bottom: path == RemotePath.root
           ? null
           : PreferredSize(

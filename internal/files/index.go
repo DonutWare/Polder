@@ -9,6 +9,7 @@ import (
 	"errors"
 	"path"
 	"sort"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -93,8 +94,48 @@ func listChildren(ctx context.Context, q querier, userID int64, cleanPath string
 		return nil, err
 	}
 	entries, err := scanEntries(rows)
+	if err != nil {
+		return nil, err
+	}
+	if err := fillFolderSizes(ctx, q, userID, cleanPath, entries); err != nil {
+		return nil, err
+	}
 	sortForListing(entries)
-	return entries, err
+	return entries, nil
+}
+
+func fillFolderSizes(ctx context.Context, q querier, userID int64, cleanPath string, entries []Entry) error {
+	prefix := cleanPath + "/"
+	if cleanPath == storage.RootPath {
+		prefix = storage.RootPath
+	}
+	rows, err := q.QueryContext(ctx,
+		`SELECT path, size FROM files WHERE user_id = ? AND is_dir = 0 AND SUBSTR(path, 1, ?) = ?`,
+		userID, utf8.RuneCountInString(prefix), prefix)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	sizes := map[string]int64{}
+	for rows.Next() {
+		var filePath string
+		var size int64
+		if err := rows.Scan(&filePath, &size); err != nil {
+			return err
+		}
+		if child, _, nested := strings.Cut(strings.TrimPrefix(filePath, prefix), "/"); nested {
+			sizes[child] += size
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for i := range entries {
+		if entries[i].IsDir {
+			entries[i].Size = sizes[entries[i].Name]
+		}
+	}
+	return nil
 }
 
 func listAll(ctx context.Context, q querier, userID int64) ([]Entry, error) {

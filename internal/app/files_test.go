@@ -46,6 +46,35 @@ func TestUsersCannotSeeEachOthersFiles(t *testing.T) {
 	})
 }
 
+func TestListingReportsFolderSizes(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		alice.put("/Photos/a.jpg", 0, []byte("12345"), http.StatusOK, nil)
+		alice.put("/Photos/2026/b.jpg", 0, []byte("123"), http.StatusOK, nil)
+		alice.put("/Photography/c.jpg", 0, []byte("1"), http.StatusOK, nil)
+		alice.put("/notes.txt", 0, []byte("12"), http.StatusOK, nil)
+
+		var listing struct {
+			Entries []fileEntry `json:"entries"`
+		}
+		alice.mustJSON(http.MethodGet, "/files/list?path=/", nil, http.StatusOK, &listing)
+		sizes := map[string]int64{}
+		for _, entry := range listing.Entries {
+			sizes[entry.Name] = entry.Size
+		}
+		if sizes["Photos"] != 8 || sizes["Photography"] != 1 || sizes["notes.txt"] != 2 {
+			t.Fatalf("unexpected root sizes %+v", sizes)
+		}
+
+		alice.mustJSON(http.MethodGet, "/files/list?path=/Photos", nil, http.StatusOK, &listing)
+		for _, entry := range listing.Entries {
+			if entry.Name == "2026" && entry.Size != 3 {
+				t.Fatalf("unexpected nested folder size %+v", entry)
+			}
+		}
+	})
+}
+
 func TestDownloadSupportsRangesAndETags(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 0)
