@@ -12,20 +12,17 @@ abstract class Account with _$Account {
 
   const factory Account({
     required String serverUrl,
-    required String deviceName,
     required String accessToken,
     required String refreshToken,
     required User user,
   }) = _Account;
 
-  factory Account.fromTokens({required String serverUrl, required String deviceName, required TokenPair tokens}) =>
-      Account(
-        serverUrl: serverUrl,
-        deviceName: deviceName,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        user: tokens.user,
-      );
+  factory Account.fromTokens({required String serverUrl, required TokenPair tokens}) => Account(
+    serverUrl: serverUrl,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    user: tokens.user,
+  );
 
   factory Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
 

@@ -37,9 +37,10 @@ class PolderApi {
 
   Future<SetupStatus> setupStatus() async => (await _service.getSetupStatus()).body!.toModel();
 
-  Future<TokenPair> setup({required String username, required String password}) async => (await _service.setup(
-    body: wire.CredentialsRequest(username: username, password: password),
-  )).body!.toModel();
+  Future<TokenPair> setup({required String username, required String password, String? deviceName}) async =>
+      (await _service.setup(
+        body: wire.CredentialsRequest(username: username, password: password, deviceName: deviceName),
+      )).body!.toModel();
 
   Future<TokenPair> login({required String username, required String password, required String deviceName}) async =>
       (await _service.login(

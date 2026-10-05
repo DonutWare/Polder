@@ -1,3317 +1,3321 @@
 {
-  "components": {
-    "schemas": {
-      "Change": {
-        "additionalProperties": false,
-        "properties": {
-          "entry": {
-            "$ref": "#/components/schemas/Entry",
-            "description": "The entry after the change; null for a delete, or when a later change superseded it"
-          },
-          "fromPath": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "seq": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "type": {
-            "enum": [
-              "upsert",
-              "delete",
-              "move"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "seq",
-          "type",
-          "path"
-        ],
-        "type": "object"
-      },
-      "ChangePage": {
-        "additionalProperties": false,
-        "properties": {
-          "changes": {
-            "items": {
-              "$ref": "#/components/schemas/Change"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "cursor": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "hasMore": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "changes",
-          "cursor",
-          "hasMore"
-        ],
-        "type": "object"
-      },
-      "Changes": {
-        "additionalProperties": false,
-        "properties": {
-          "disabled": {
-            "nullable": true,
-            "type": "boolean"
-          },
-          "password": {
-            "nullable": true,
-            "type": "string"
-          },
-          "quotaBytes": {
-            "description": "Storage limit in bytes; 0 is unlimited",
-            "format": "int64",
-            "nullable": true,
-            "type": "integer"
-          },
-          "role": {
-            "enum": [
-              "admin",
-              "user"
-            ],
-            "nullable": true,
-            "type": "string"
-          },
-          "trashRetentionOverrideDays": {
-            "description": "Days to keep this user's trash regardless of their own setting (0 keeps it forever); -1 removes the override",
-            "format": "int64",
-            "nullable": true,
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
-      "Chunk": {
-        "additionalProperties": false,
-        "properties": {
-          "hash": {
-            "type": "string"
-          },
-          "offset": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "size": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "offset",
-          "size",
-          "hash"
-        ],
-        "type": "object"
-      },
-      "ChunkRef": {
-        "additionalProperties": false,
-        "properties": {
-          "hash": {
-            "type": "string"
-          },
-          "size": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "hash",
-          "size"
-        ],
-        "type": "object"
-      },
-      "ClientMessage": {
-        "additionalProperties": false,
-        "properties": {
-          "scope": {
-            "description": "Whose events to watch, for subscribe",
-            "enum": [
-              "me",
-              "all",
-              "user"
-            ],
-            "type": "string"
-          },
-          "token": {
-            "description": "The access token, for auth",
-            "type": "string"
-          },
-          "type": {
-            "enum": [
-              "auth",
-              "subscribe"
-            ],
-            "type": "string"
-          },
-          "userId": {
-            "description": "The user to watch when scope is user",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "type"
-        ],
-        "type": "object"
-      },
-      "CredentialsRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "deviceName": {
-            "description": "Name of the device the session is for",
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "username",
-          "password"
-        ],
-        "type": "object"
-      },
-      "Entry": {
-        "additionalProperties": false,
-        "properties": {
-          "hash": {
-            "type": "string"
-          },
-          "isDir": {
-            "type": "boolean"
-          },
-          "meta": {
-            "additionalProperties": {},
-            "type": "object"
-          },
-          "mime": {
-            "type": "string"
-          },
-          "mtime": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "previewState": {
-            "enum": [
-              "none",
-              "pending",
-              "ready",
-              "failed"
-            ],
-            "type": "string"
-          },
-          "rev": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "size": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "path",
-          "name",
-          "isDir",
-          "size",
-          "mtime",
-          "rev",
-          "hash",
-          "mime",
-          "meta",
-          "previewState"
-        ],
-        "type": "object"
-      },
-      "ErrorDetail": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "description": "Machine-readable error code, such as not_found, conflict or invalid_request",
-            "type": "string"
-          },
-          "message": {
-            "description": "Human-readable explanation",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "message"
-        ],
-        "type": "object"
-      },
-      "ErrorResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "current": {
-            "description": "The server's current entry, sent with conflict and already_exists errors"
-          },
-          "error": {
-            "$ref": "#/components/schemas/ErrorDetail"
-          }
-        },
-        "required": [
-          "error"
-        ],
-        "type": "object"
-      },
-      "EventMessage": {
-        "additionalProperties": false,
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "dirs": {
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "entry": {
-            "$ref": "#/components/schemas/LogEntry"
-          },
-          "message": {
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "ok",
-              "failed",
-              "cancelled"
-            ],
-            "type": "string"
-          },
-          "transfer": {
-            "$ref": "#/components/schemas/LiveTransfer"
-          },
-          "transfers": {
-            "items": {
-              "$ref": "#/components/schemas/LiveTransfer"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "type": {
-            "enum": [
-              "ready",
-              "snapshot",
-              "error",
-              "transfer.started",
-              "transfer.progress",
-              "transfer.finished",
-              "activity.created",
-              "files.changed"
-            ],
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "userId": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "type",
-          "userId"
-        ],
-        "type": "object"
-      },
-      "HealthStatus": {
-        "additionalProperties": false,
-        "properties": {
-          "status": {
-            "example": "ok",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status"
-        ],
-        "type": "object"
-      },
-      "ListResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "entries": {
-            "items": {
-              "$ref": "#/components/schemas/Entry"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "path": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "path",
-          "entries"
-        ],
-        "type": "object"
-      },
-      "LiveTransfer": {
-        "additionalProperties": false,
-        "properties": {
-          "bytes": {
-            "description": "Bytes transferred so far",
-            "format": "int64",
-            "type": "integer"
-          },
-          "clientId": {
-            "description": "The X-Polder-Transfer-Id the uploader sent",
-            "type": "string"
-          },
-          "device": {
-            "type": "string"
-          },
-          "direction": {
-            "enum": [
-              "upload",
-              "download"
-            ],
-            "type": "string"
-          },
-          "id": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "rate": {
-            "description": "Current speed in bytes per second",
-            "format": "int64",
-            "type": "integer"
-          },
-          "startedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "total": {
-            "description": "Bytes expected in all; absent when unknown",
-            "format": "int64",
-            "type": "integer"
-          },
-          "userId": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "username": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "userId",
-          "username",
-          "direction",
-          "path",
-          "device",
-          "bytes",
-          "rate",
-          "startedAt"
-        ],
-        "type": "object"
-      },
-      "LiveTransfers": {
-        "additionalProperties": false,
-        "properties": {
-          "transfers": {
-            "items": {
-              "$ref": "#/components/schemas/LiveTransfer"
-            },
-            "nullable": true,
-            "type": "array"
-          }
-        },
-        "required": [
-          "transfers"
-        ],
-        "type": "object"
-      },
-      "LogEntry": {
-        "additionalProperties": false,
-        "properties": {
-          "bytes": {
-            "description": "Bytes sent over the network; less than size when delta sync reused chunks",
-            "format": "int64",
-            "type": "integer"
-          },
-          "count": {
-            "description": "Number of items for trash operations and rescan summaries",
-            "format": "int64",
-            "type": "integer"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "detail": {
-            "description": "Error message, or for a rescan: added, changed, removed or summary",
-            "type": "string"
-          },
-          "device": {
-            "description": "Device that did it, or server for the server's own work",
-            "type": "string"
-          },
-          "durationMs": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "fromPath": {
-            "description": "Where a moved or restored item came from",
-            "type": "string"
-          },
-          "id": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "isDir": {
-            "type": "boolean"
-          },
-          "kind": {
-            "enum": [
-              "upload",
-              "download",
-              "mkdir",
-              "move",
-              "delete",
-              "restore",
-              "trashDelete",
-              "trashEmpty",
-              "trashExpire",
-              "rescan",
-              "login",
-              "logout"
-            ],
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "size": {
-            "description": "Size of the file or items involved",
-            "format": "int64",
-            "type": "integer"
-          },
-          "status": {
-            "enum": [
-              "ok",
-              "failed",
-              "cancelled"
-            ],
-            "type": "string"
-          },
-          "userId": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "username": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "userId",
-          "username",
-          "device",
-          "kind",
-          "path",
-          "isDir",
-          "status",
-          "detail",
-          "createdAt"
-        ],
-        "type": "object"
-      },
-      "LogPage": {
-        "additionalProperties": false,
-        "properties": {
-          "entries": {
-            "items": {
-              "$ref": "#/components/schemas/LogEntry"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "nextCursor": {
-            "description": "Pass as before for the next page; 0 when there are no more",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "entries",
-          "nextCursor"
-        ],
-        "type": "object"
-      },
-      "Manifest": {
-        "additionalProperties": false,
-        "properties": {
-          "chunks": {
-            "items": {
-              "$ref": "#/components/schemas/Chunk"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "hash": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "rev": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "size": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "path",
-          "rev",
-          "size",
-          "hash",
-          "chunks"
-        ],
-        "type": "object"
-      },
-      "MoveRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "baseRev": {
-            "description": "Revision the client last saw of the source; 0 or -1 skips the check",
-            "format": "int64",
-            "type": "integer"
-          },
-          "from": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "from",
-          "to"
-        ],
-        "type": "object"
-      },
-      "NewUser": {
-        "additionalProperties": false,
-        "properties": {
-          "password": {
-            "type": "string"
-          },
-          "quotaBytes": {
-            "description": "Storage limit in bytes; 0 or omitted is unlimited",
-            "format": "int64",
-            "type": "integer"
-          },
-          "role": {
-            "enum": [
-              "admin",
-              "user"
-            ],
-            "type": "string"
-          },
-          "username": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "username",
-          "password",
-          "role"
-        ],
-        "type": "object"
-      },
-      "PathRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "path": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "path"
-        ],
-        "type": "object"
-      },
-      "RefreshRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "refreshToken": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "refreshToken"
-        ],
-        "type": "object"
-      },
-      "RestoreRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "onConflict": {
-            "default": "fail",
-            "description": "What to do when something already exists at the original path: fail with already_exists, overwrite it (it moves to the trash), or keep both by restoring under a new name",
-            "enum": [
-              "fail",
-              "overwrite",
-              "keepBoth"
-            ],
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
-      "RetentionRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "days": {
-            "description": "Days to keep trashed items, 0 keeps them forever; null or absent follows the server default",
-            "format": "int64",
-            "nullable": true,
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
-      "ServerSettings": {
-        "additionalProperties": false,
-        "properties": {
-          "trashRetentionDays": {
-            "description": "Days trashed items are kept before they're deleted permanently; 0 keeps them forever",
-            "format": "int64",
-            "type": "integer"
-          },
-          "trashRetentionEnforced": {
-            "description": "Apply trashRetentionDays to every user, ignoring their own setting",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "trashRetentionDays",
-          "trashRetentionEnforced"
-        ],
-        "type": "object"
-      },
-      "ServerSettingsChanges": {
-        "additionalProperties": false,
-        "properties": {
-          "trashRetentionDays": {
-            "description": "Days trashed items are kept; 0 keeps them forever",
-            "format": "int64",
-            "nullable": true,
-            "type": "integer"
-          },
-          "trashRetentionEnforced": {
-            "description": "Apply trashRetentionDays to every user, ignoring their own setting",
-            "nullable": true,
-            "type": "boolean"
-          }
-        },
-        "type": "object"
-      },
-      "SetupStatus": {
-        "additionalProperties": false,
-        "properties": {
-          "needsSetup": {
-            "description": "True until the first administrator account exists",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "needsSetup"
-        ],
-        "type": "object"
-      },
-      "TokenPair": {
-        "additionalProperties": false,
-        "properties": {
-          "accessToken": {
-            "type": "string"
-          },
-          "expiresIn": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "refreshToken": {
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
-        },
-        "required": [
-          "accessToken",
-          "refreshToken",
-          "expiresIn",
-          "user"
-        ],
-        "type": "object"
-      },
-      "TrashItem": {
-        "additionalProperties": false,
-        "properties": {
-          "deletedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "expiresAt": {
-            "description": "When the item is deleted permanently; absent while the trash keeps items forever",
-            "format": "date-time",
-            "type": "string"
-          },
-          "hash": {
-            "type": "string"
-          },
-          "id": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "isDir": {
-            "type": "boolean"
-          },
-          "mime": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "originalPath": {
-            "description": "Where the item was when it was deleted, and where a restore puts it back",
-            "type": "string"
-          },
-          "previewState": {
-            "enum": [
-              "none",
-              "pending",
-              "ready",
-              "failed"
-            ],
-            "type": "string"
-          },
-          "size": {
-            "description": "Bytes, including everything inside a directory",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "originalPath",
-          "isDir",
-          "size",
-          "mime",
-          "hash",
-          "previewState",
-          "deletedAt"
-        ],
-        "type": "object"
-      },
-      "TrashListing": {
-        "additionalProperties": false,
-        "properties": {
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/TrashItem"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "retention": {
-            "$ref": "#/components/schemas/TrashRetention"
-          },
-          "totalBytes": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "items",
-          "totalBytes",
-          "retention"
-        ],
-        "type": "object"
-      },
-      "TrashRetention": {
-        "additionalProperties": false,
-        "properties": {
-          "days": {
-            "description": "Days trashed items are kept before they're deleted permanently; 0 keeps them forever",
-            "format": "int64",
-            "type": "integer"
-          },
-          "defaultDays": {
-            "description": "The server's default",
-            "format": "int64",
-            "type": "integer"
-          },
-          "locked": {
-            "description": "True when an administrator decides, so the user's own setting has no effect",
-            "type": "boolean"
-          },
-          "source": {
-            "description": "Where days comes from; server and admin mean an administrator decides",
-            "enum": [
-              "default",
-              "user",
-              "server",
-              "admin"
-            ],
-            "type": "string"
-          },
-          "userDays": {
-            "description": "The user's own choice; absent when they follow the server default",
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "days",
-          "source",
-          "locked",
-          "defaultDays"
-        ],
-        "type": "object"
-      },
-      "UploadRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "baseRev": {
-            "description": "Revision this upload replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
-            "format": "int64",
-            "type": "integer"
-          },
-          "chunks": {
-            "description": "The file's chunks in order",
-            "items": {
-              "$ref": "#/components/schemas/ChunkRef"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "hash": {
-            "description": "Lowercase hex SHA-256 of the whole file",
-            "type": "string"
-          },
-          "mtime": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "size": {
-            "format": "int64",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "path",
-          "size",
-          "hash",
-          "chunks"
-        ],
-        "type": "object"
-      },
-      "UploadStatus": {
-        "additionalProperties": false,
-        "properties": {
-          "missing": {
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "type": "array"
-          },
-          "uploadId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "uploadId",
-          "missing"
-        ],
-        "type": "object"
-      },
-      "User": {
-        "additionalProperties": false,
-        "properties": {
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "disabled": {
-            "type": "boolean"
-          },
-          "id": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "quotaBytes": {
-            "description": "Storage limit in bytes; 0 is unlimited",
-            "format": "int64",
-            "type": "integer"
-          },
-          "role": {
-            "enum": [
-              "admin",
-              "user"
-            ],
-            "type": "string"
-          },
-          "trashRetentionDays": {
-            "description": "Days the user chose to keep trashed items; absent follows the server default",
-            "format": "int64",
-            "type": "integer"
-          },
-          "trashRetentionOverrideDays": {
-            "description": "Days an administrator fixed for this user's trash; absent when not overridden",
-            "format": "int64",
-            "type": "integer"
-          },
-          "usedBytes": {
-            "format": "int64",
-            "type": "integer"
-          },
-          "username": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "username",
-          "role",
-          "quotaBytes",
-          "usedBytes",
-          "disabled",
-          "createdAt"
-        ],
-        "type": "object"
-      }
-    },
-    "securitySchemes": {
-      "bearer": {
-        "bearerFormat": "JWT",
-        "scheme": "bearer",
-        "type": "http"
-      }
-    }
-  },
-  "info": {
-    "description": "File storage and sync. Log in with POST /auth/login and send the access token as `Authorization: Bearer \u003ctoken\u003e`; renew it with POST /auth/refresh before it expires.",
-    "title": "Polder API",
-    "version": "1.0.0"
-  },
-  "openapi": "3.0.3",
-  "paths": {
-    "/api/v1/activity": {
-      "get": {
-        "operationId": "listActivity",
-        "parameters": [
-          {
-            "description": "me, all, or a user id; anything but your own activity needs the administrator role",
-            "explode": false,
-            "in": "query",
-            "name": "user",
-            "schema": {
-              "default": "me",
-              "description": "me, all, or a user id; anything but your own activity needs the administrator role",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Cursor from the previous page; 0 starts at the newest",
-            "explode": false,
-            "in": "query",
-            "name": "before",
-            "schema": {
-              "description": "Cursor from the previous page; 0 starts at the newest",
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Maximum number of entries to return; the server caps it",
-            "explode": false,
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "default": 50,
-              "description": "Maximum number of entries to return; the server caps it",
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LogPage"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Page through what happened to files and sessions, newest first",
-        "tags": [
-          "activity"
-        ]
-      }
-    },
-    "/api/v1/activity/live": {
-      "get": {
-        "operationId": "listLiveTransfers",
-        "parameters": [
-          {
-            "description": "me, all, or a user id; anything but your own transfers needs the administrator role",
-            "explode": false,
-            "in": "query",
-            "name": "user",
-            "schema": {
-              "default": "me",
-              "description": "me, all, or a user id; anything but your own transfers needs the administrator role",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LiveTransfers"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Uploads and downloads in progress",
-        "tags": [
-          "activity"
-        ]
-      }
-    },
-    "/api/v1/admin/settings": {
-      "get": {
-        "operationId": "getServerSettings",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettings"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Server-wide settings",
-        "tags": [
-          "admin"
-        ]
-      },
-      "patch": {
-        "operationId": "updateServerSettings",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ServerSettingsChanges"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServerSettings"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Change server-wide settings",
-        "tags": [
-          "admin"
-        ]
-      }
-    },
-    "/api/v1/admin/users": {
-      "get": {
-        "operationId": "listUsers",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  },
-                  "nullable": true,
-                  "type": "array"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List all users",
-        "tags": [
-          "admin"
-        ]
-      },
-      "post": {
-        "operationId": "createUser",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewUser"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a user",
-        "tags": [
-          "admin"
-        ]
-      }
-    },
-    "/api/v1/admin/users/{userID}": {
-      "delete": {
-        "operationId": "deleteUser",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "userID",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a user; their files are archived on the server",
-        "tags": [
-          "admin"
-        ]
-      },
-      "patch": {
-        "operationId": "updateUser",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "userID",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Changes"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Change a user; password changes and disabling log the user out",
-        "tags": [
-          "admin"
-        ]
-      }
-    },
-    "/api/v1/auth/login": {
-      "post": {
-        "operationId": "login",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CredentialsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenPair"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Log in and get a token pair",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/v1/auth/logout": {
-      "post": {
-        "operationId": "logout",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Revoke a refresh token",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/v1/auth/me": {
-      "get": {
-        "operationId": "getMe",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "The logged-in user",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/v1/auth/refresh": {
-      "post": {
-        "operationId": "refresh",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenPair"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Exchange a refresh token for a new token pair",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/v1/events": {
-      "get": {
-        "description": "Open a WebSocket here and send an `auth` message within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can `subscribe` to other users; every subscribe is answered with a new snapshot, and your own events always arrive. Messages are described by the ClientMessage and EventMessage schemas. The connection closes with code 4401 when authentication fails or the token expires without renewal.",
-        "operationId": "events",
-        "responses": {
-          "101": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EventMessage"
-                }
-              }
-            },
-            "description": "WebSocket connection; every message the server sends has this shape"
-          },
-          "200": {
-            "description": "OK"
-          }
-        },
-        "summary": "Live activity over a WebSocket",
-        "tags": [
-          "events"
-        ],
-        "x-client-message": {
-          "$ref": "#/components/schemas/ClientMessage"
-        }
-      }
-    },
-    "/api/v1/files": {
-      "delete": {
-        "operationId": "deleteFile",
-        "parameters": [
-          {
-            "explode": false,
-            "in": "query",
-            "name": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Revision the client last saw; -1 deletes whatever is there",
-            "explode": false,
-            "in": "query",
-            "name": "baseRev",
-            "schema": {
-              "default": -1,
-              "description": "Revision the client last saw; -1 deletes whatever is there",
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a file or directory",
-        "tags": [
-          "files"
-        ]
-      }
-    },
-    "/api/v1/files/content": {
-      "get": {
-        "operationId": "downloadFile",
-        "parameters": [
-          {
-            "description": "Path inside the user's storage, such as /Photos/cat.jpg",
-            "explode": false,
-            "in": "query",
-            "name": "path",
-            "schema": {
-              "description": "Path inside the user's storage, such as /Photos/cat.jpg",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Byte range to send, such as bytes=0-1023",
-            "in": "header",
-            "name": "Range",
-            "schema": {
-              "description": "Byte range to send, such as bytes=0-1023",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Fail with 412 unless the file still has this ETag",
-            "in": "header",
-            "name": "If-Match",
-            "schema": {
-              "description": "Fail with 412 unless the file still has this ETag",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Answer 304 if the file still has this ETag",
-            "in": "header",
-            "name": "If-None-Match",
-            "schema": {
-              "description": "Answer 304 if the file still has this ETag",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "format": "binary",
-                  "type": "string",
-                  "x-contentMediaType": "application/octet-stream"
-                }
-              }
-            },
-            "description": "File content",
-            "headers": {
-              "Content-Type": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "ETag": {
-                "schema": {
-                  "description": "The file's revision, quoted; send it in If-Match or If-None-Match",
-                  "type": "string"
-                }
-              },
-              "X-Polder-Rev": {
-                "schema": {
-                  "description": "The file's revision",
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Download a file; supports Range and conditional requests",
-        "tags": [
-          "files"
-        ]
-      },
-      "put": {
-        "operationId": "uploadFile",
-        "parameters": [
-          {
-            "description": "Where to store the file, such as /Photos/cat.jpg",
-            "explode": false,
-            "in": "query",
-            "name": "path",
-            "schema": {
-              "description": "Where to store the file, such as /Photos/cat.jpg",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
-            "explode": false,
-            "in": "query",
-            "name": "baseRev",
-            "schema": {
-              "default": 0,
-              "description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Modification time to record, as RFC 3339; defaults to now",
-            "explode": false,
-            "in": "query",
-            "name": "mtime",
-            "schema": {
-              "description": "Modification time to record, as RFC 3339; defaults to now",
-              "format": "date-time",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Any ID the client picks; live transfer events echo it back as clientId",
-            "in": "header",
-            "name": "X-Polder-Transfer-Id",
-            "schema": {
-              "description": "Any ID the client picks; live transfer events echo it back as clientId",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/octet-stream": {
-              "schema": {
-                "format": "binary",
-                "type": "string",
-                "x-contentMediaType": "application/octet-stream"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Entry"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Upload a whole file as the request body",
-        "tags": [
-          "files"
-        ]
-      }
-    },
-    "/api/v1/files/list": {
-      "get": {
-        "operationId": "listFiles",
-        "parameters": [
-          {
-            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
-            "explode": false,
-            "in": "query",
-            "name": "path",
-            "schema": {
-              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ListResponse"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List a directory",
-        "tags": [
-          "files"
-        ]
-      }
-    },
-    "/api/v1/files/mkdir": {
-      "post": {
-        "operationId": "makeDirectory",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PathRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Entry"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a directory",
-        "tags": [
-          "files"
-        ]
-      }
-    },
-    "/api/v1/files/move": {
-      "post": {
-        "operationId": "moveFile",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MoveRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Entry"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Move or rename a file or directory",
-        "tags": [
-          "files"
-        ]
-      }
-    },
-    "/api/v1/files/preview": {
-      "get": {
-        "operationId": "previewFile",
-        "parameters": [
-          {
-            "explode": false,
-            "in": "query",
-            "name": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Thumbnail width and height in pixels",
-            "explode": false,
-            "in": "query",
-            "name": "size",
-            "schema": {
-              "default": 256,
-              "description": "Thumbnail width and height in pixels",
-              "enum": [
-                128,
-                256,
-                512
-              ],
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "image/jpeg": {
-                "schema": {
-                  "format": "binary",
-                  "type": "string",
-                  "x-contentMediaType": "application/octet-stream"
-                }
-              }
-            },
-            "description": "Thumbnail",
-            "headers": {
-              "Cache-Control": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Content-Type": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "ETag": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a JPEG thumbnail of an image",
-        "tags": [
-          "files"
-        ]
-      }
-    },
-    "/api/v1/files/stat": {
-      "get": {
-        "operationId": "statFile",
-        "parameters": [
-          {
-            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
-            "explode": false,
-            "in": "query",
-            "name": "path",
-            "schema": {
-              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Entry"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get one file or directory",
-        "tags": [
-          "files"
-        ]
-      }
-    },
-    "/api/v1/setup": {
-      "get": {
-        "operationId": "getSetupStatus",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SetupStatus"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Whether the server still needs its first account",
-        "tags": [
-          "setup"
-        ]
-      },
-      "post": {
-        "operationId": "setup",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CredentialsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TokenPair"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Create the first administrator account",
-        "tags": [
-          "setup"
-        ]
-      }
-    },
-    "/api/v1/sync/changes": {
-      "get": {
-        "operationId": "listChanges",
-        "parameters": [
-          {
-            "description": "Cursor from the previous page; 0 starts from the beginning",
-            "explode": false,
-            "in": "query",
-            "name": "cursor",
-            "schema": {
-              "default": 0,
-              "description": "Cursor from the previous page; 0 starts from the beginning",
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Maximum number of changes to return; the server caps it",
-            "explode": false,
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "default": 1000,
-              "description": "Maximum number of changes to return; the server caps it",
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChangePage"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Page through changes since a cursor",
-        "tags": [
-          "sync"
-        ]
-      }
-    },
-    "/api/v1/sync/manifest": {
-      "get": {
-        "operationId": "getManifest",
-        "parameters": [
-          {
-            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
-            "explode": false,
-            "in": "query",
-            "name": "path",
-            "schema": {
-              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Manifest"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a file's chunk manifest for delta sync",
-        "tags": [
-          "sync"
-        ]
-      }
-    },
-    "/api/v1/sync/uploads": {
-      "post": {
-        "operationId": "createUpload",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadStatus"
-                }
-              }
-            },
-            "description": "Created"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Start a chunked upload; returns the chunks the server is missing",
-        "tags": [
-          "sync"
-        ]
-      }
-    },
-    "/api/v1/sync/uploads/{uploadID}": {
-      "delete": {
-        "operationId": "abortUpload",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "uploadID",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Cancel an upload",
-        "tags": [
-          "sync"
-        ]
-      },
-      "get": {
-        "operationId": "getUpload",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "uploadID",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UploadStatus"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get the chunks an upload is still missing",
-        "tags": [
-          "sync"
-        ]
-      }
-    },
-    "/api/v1/sync/uploads/{uploadID}/chunks/{chunkHash}": {
-      "put": {
-        "operationId": "putChunk",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "uploadID",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Lowercase hex SHA-256 of the chunk",
-            "in": "path",
-            "name": "chunkHash",
-            "required": true,
-            "schema": {
-              "description": "Lowercase hex SHA-256 of the chunk",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/octet-stream": {
-              "schema": {
-                "format": "binary",
-                "type": "string",
-                "x-contentMediaType": "application/octet-stream"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Send one chunk as the request body",
-        "tags": [
-          "sync"
-        ]
-      }
-    },
-    "/api/v1/sync/uploads/{uploadID}/commit": {
-      "post": {
-        "operationId": "commitUpload",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "uploadID",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Entry"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Assemble the uploaded chunks into the file",
-        "tags": [
-          "sync"
-        ]
-      }
-    },
-    "/api/v1/trash": {
-      "delete": {
-        "operationId": "emptyTrash",
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete everything in the trash permanently",
-        "tags": [
-          "trash"
-        ]
-      },
-      "get": {
-        "operationId": "listTrash",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrashListing"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List deleted items, most recent first",
-        "tags": [
-          "trash"
-        ]
-      }
-    },
-    "/api/v1/trash/retention": {
-      "get": {
-        "operationId": "getTrashRetention",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrashRetention"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "How long deleted items stay in the trash",
-        "tags": [
-          "trash"
-        ]
-      },
-      "put": {
-        "operationId": "setTrashRetention",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RetentionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrashRetention"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Choose how long deleted items stay in the trash",
-        "tags": [
-          "trash"
-        ]
-      }
-    },
-    "/api/v1/trash/{itemID}": {
-      "delete": {
-        "operationId": "deleteTrashItem",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "itemID",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete one item in the trash permanently",
-        "tags": [
-          "trash"
-        ]
-      }
-    },
-    "/api/v1/trash/{itemID}/content": {
-      "get": {
-        "operationId": "downloadTrashItem",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "itemID",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "format": "binary",
-                  "type": "string",
-                  "x-contentMediaType": "application/octet-stream"
-                }
-              }
-            },
-            "description": "Item content",
-            "headers": {
-              "Content-Disposition": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Content-Type": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Download a deleted item without restoring it; a directory comes as a zip",
-        "tags": [
-          "trash"
-        ]
-      }
-    },
-    "/api/v1/trash/{itemID}/preview": {
-      "get": {
-        "operationId": "previewTrashItem",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "itemID",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Thumbnail width and height in pixels",
-            "explode": false,
-            "in": "query",
-            "name": "size",
-            "schema": {
-              "default": 256,
-              "description": "Thumbnail width and height in pixels",
-              "enum": [
-                128,
-                256,
-                512
-              ],
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "image/jpeg": {
-                "schema": {
-                  "format": "binary",
-                  "type": "string",
-                  "x-contentMediaType": "application/octet-stream"
-                }
-              }
-            },
-            "description": "Thumbnail",
-            "headers": {
-              "Cache-Control": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "Content-Type": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "ETag": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a JPEG thumbnail of a deleted image",
-        "tags": [
-          "trash"
-        ]
-      }
-    },
-    "/api/v1/trash/{itemID}/restore": {
-      "post": {
-        "operationId": "restoreTrashItem",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "itemID",
-            "required": true,
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RestoreRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Entry"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Put a deleted item back where it was",
-        "tags": [
-          "trash"
-        ]
-      }
-    },
-    "/healthz": {
-      "get": {
-        "operationId": "health",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthStatus"
-                }
-              }
-            },
-            "description": "OK"
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Error"
-          }
-        },
-        "summary": "Health check",
-        "tags": [
-          "server"
-        ]
-      }
-    }
-  }
+	"components": {
+		"schemas": {
+			"Change": {
+				"additionalProperties": false,
+				"properties": {
+					"entry": {
+						"$ref": "#/components/schemas/Entry",
+						"description": "The entry after the change; null for a delete, or when a later change superseded it"
+					},
+					"fromPath": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"seq": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"type": {
+						"enum": [
+							"upsert",
+							"delete",
+							"move"
+						],
+						"type": "string"
+					}
+				},
+				"required": [
+					"seq",
+					"type",
+					"path"
+				],
+				"type": "object"
+			},
+			"ChangePage": {
+				"additionalProperties": false,
+				"properties": {
+					"changes": {
+						"items": {
+							"$ref": "#/components/schemas/Change"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"cursor": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"hasMore": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"changes",
+					"cursor",
+					"hasMore"
+				],
+				"type": "object"
+			},
+			"Changes": {
+				"additionalProperties": false,
+				"properties": {
+					"disabled": {
+						"nullable": true,
+						"type": "boolean"
+					},
+					"password": {
+						"nullable": true,
+						"type": "string"
+					},
+					"quotaBytes": {
+						"description": "Storage limit in bytes; 0 is unlimited",
+						"format": "int64",
+						"nullable": true,
+						"type": "integer"
+					},
+					"role": {
+						"enum": [
+							"admin",
+							"user"
+						],
+						"nullable": true,
+						"type": "string"
+					},
+					"trashRetentionOverrideDays": {
+						"description": "Days to keep this user's trash regardless of their own setting (0 keeps it forever); -1 removes the override",
+						"format": "int64",
+						"nullable": true,
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"Chunk": {
+				"additionalProperties": false,
+				"properties": {
+					"hash": {
+						"type": "string"
+					},
+					"offset": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"size": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"offset",
+					"size",
+					"hash"
+				],
+				"type": "object"
+			},
+			"ChunkRef": {
+				"additionalProperties": false,
+				"properties": {
+					"hash": {
+						"type": "string"
+					},
+					"size": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"hash",
+					"size"
+				],
+				"type": "object"
+			},
+			"ClientMessage": {
+				"additionalProperties": false,
+				"properties": {
+					"scope": {
+						"description": "Whose events to watch, for subscribe",
+						"enum": [
+							"me",
+							"all",
+							"user"
+						],
+						"type": "string"
+					},
+					"token": {
+						"description": "The access token, for auth",
+						"type": "string"
+					},
+					"type": {
+						"enum": [
+							"auth",
+							"subscribe"
+						],
+						"type": "string"
+					},
+					"userId": {
+						"description": "The user to watch when scope is user",
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"type"
+				],
+				"type": "object"
+			},
+			"CredentialsRequest": {
+				"additionalProperties": false,
+				"properties": {
+					"deviceName": {
+						"description": "Name of the device the session is for",
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"username",
+					"password"
+				],
+				"type": "object"
+			},
+			"Entry": {
+				"additionalProperties": false,
+				"properties": {
+					"hash": {
+						"type": "string"
+					},
+					"isDir": {
+						"type": "boolean"
+					},
+					"meta": {
+						"additionalProperties": {},
+						"type": "object"
+					},
+					"mime": {
+						"type": "string"
+					},
+					"mtime": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"previewState": {
+						"enum": [
+							"none",
+							"pending",
+							"ready",
+							"failed"
+						],
+						"type": "string"
+					},
+					"rev": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"size": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"path",
+					"name",
+					"isDir",
+					"size",
+					"mtime",
+					"rev",
+					"hash",
+					"mime",
+					"meta",
+					"previewState"
+				],
+				"type": "object"
+			},
+			"ErrorDetail": {
+				"additionalProperties": false,
+				"properties": {
+					"code": {
+						"description": "Machine-readable error code, such as not_found, conflict or invalid_request",
+						"type": "string"
+					},
+					"message": {
+						"description": "Human-readable explanation",
+						"type": "string"
+					}
+				},
+				"required": [
+					"code",
+					"message"
+				],
+				"type": "object"
+			},
+			"ErrorResponse": {
+				"additionalProperties": false,
+				"properties": {
+					"current": {
+						"description": "The server's current entry, sent with conflict and already_exists errors"
+					},
+					"error": {
+						"$ref": "#/components/schemas/ErrorDetail"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object"
+			},
+			"EventMessage": {
+				"additionalProperties": false,
+				"properties": {
+					"code": {
+						"type": "string"
+					},
+					"dirs": {
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"entry": {
+						"$ref": "#/components/schemas/LogEntry"
+					},
+					"message": {
+						"type": "string"
+					},
+					"status": {
+						"enum": [
+							"ok",
+							"failed",
+							"cancelled"
+						],
+						"type": "string"
+					},
+					"transfer": {
+						"$ref": "#/components/schemas/LiveTransfer"
+					},
+					"transfers": {
+						"items": {
+							"$ref": "#/components/schemas/LiveTransfer"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"type": {
+						"enum": [
+							"ready",
+							"snapshot",
+							"error",
+							"transfer.started",
+							"transfer.progress",
+							"transfer.finished",
+							"activity.created",
+							"files.changed"
+						],
+						"type": "string"
+					},
+					"user": {
+						"$ref": "#/components/schemas/User"
+					},
+					"userId": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"type",
+					"userId"
+				],
+				"type": "object"
+			},
+			"HealthStatus": {
+				"additionalProperties": false,
+				"properties": {
+					"status": {
+						"example": "ok",
+						"type": "string"
+					}
+				},
+				"required": [
+					"status"
+				],
+				"type": "object"
+			},
+			"ListResponse": {
+				"additionalProperties": false,
+				"properties": {
+					"entries": {
+						"items": {
+							"$ref": "#/components/schemas/Entry"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"path": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"path",
+					"entries"
+				],
+				"type": "object"
+			},
+			"LiveTransfer": {
+				"additionalProperties": false,
+				"properties": {
+					"bytes": {
+						"description": "Bytes transferred so far",
+						"format": "int64",
+						"type": "integer"
+					},
+					"clientId": {
+						"description": "The X-Polder-Transfer-Id the uploader sent",
+						"type": "string"
+					},
+					"device": {
+						"type": "string"
+					},
+					"direction": {
+						"enum": [
+							"upload",
+							"download"
+						],
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"rate": {
+						"description": "Current speed in bytes per second",
+						"format": "int64",
+						"type": "integer"
+					},
+					"startedAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"total": {
+						"description": "Bytes expected in all; absent when unknown",
+						"format": "int64",
+						"type": "integer"
+					},
+					"userId": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"userId",
+					"username",
+					"direction",
+					"path",
+					"device",
+					"bytes",
+					"rate",
+					"startedAt"
+				],
+				"type": "object"
+			},
+			"LiveTransfers": {
+				"additionalProperties": false,
+				"properties": {
+					"transfers": {
+						"items": {
+							"$ref": "#/components/schemas/LiveTransfer"
+						},
+						"nullable": true,
+						"type": "array"
+					}
+				},
+				"required": [
+					"transfers"
+				],
+				"type": "object"
+			},
+			"LogEntry": {
+				"additionalProperties": false,
+				"properties": {
+					"bytes": {
+						"description": "Bytes sent over the network; less than size when delta sync reused chunks",
+						"format": "int64",
+						"type": "integer"
+					},
+					"count": {
+						"description": "Number of items for trash operations and rescan summaries",
+						"format": "int64",
+						"type": "integer"
+					},
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"detail": {
+						"description": "Error message, or for a rescan: added, changed, removed or summary",
+						"type": "string"
+					},
+					"device": {
+						"description": "Device that did it, or server for the server's own work",
+						"type": "string"
+					},
+					"durationMs": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"fromPath": {
+						"description": "Where a moved or restored item came from",
+						"type": "string"
+					},
+					"id": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"isDir": {
+						"type": "boolean"
+					},
+					"kind": {
+						"enum": [
+							"upload",
+							"download",
+							"mkdir",
+							"move",
+							"delete",
+							"restore",
+							"trashDelete",
+							"trashEmpty",
+							"trashExpire",
+							"rescan",
+							"login",
+							"logout"
+						],
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"size": {
+						"description": "Size of the file or items involved",
+						"format": "int64",
+						"type": "integer"
+					},
+					"status": {
+						"enum": [
+							"ok",
+							"failed",
+							"cancelled"
+						],
+						"type": "string"
+					},
+					"userId": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"userId",
+					"username",
+					"device",
+					"kind",
+					"path",
+					"isDir",
+					"status",
+					"detail",
+					"createdAt"
+				],
+				"type": "object"
+			},
+			"LogPage": {
+				"additionalProperties": false,
+				"properties": {
+					"entries": {
+						"items": {
+							"$ref": "#/components/schemas/LogEntry"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"nextCursor": {
+						"description": "Pass as before for the next page; 0 when there are no more",
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"entries",
+					"nextCursor"
+				],
+				"type": "object"
+			},
+			"Manifest": {
+				"additionalProperties": false,
+				"properties": {
+					"chunks": {
+						"items": {
+							"$ref": "#/components/schemas/Chunk"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"hash": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"rev": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"size": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"path",
+					"rev",
+					"size",
+					"hash",
+					"chunks"
+				],
+				"type": "object"
+			},
+			"MoveRequest": {
+				"additionalProperties": false,
+				"properties": {
+					"baseRev": {
+						"description": "Revision the client last saw of the source; 0 or -1 skips the check",
+						"format": "int64",
+						"type": "integer"
+					},
+					"from": {
+						"type": "string"
+					},
+					"to": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"from",
+					"to"
+				],
+				"type": "object"
+			},
+			"NewUser": {
+				"additionalProperties": false,
+				"properties": {
+					"password": {
+						"type": "string"
+					},
+					"quotaBytes": {
+						"description": "Storage limit in bytes; 0 or omitted is unlimited",
+						"format": "int64",
+						"type": "integer"
+					},
+					"role": {
+						"enum": [
+							"admin",
+							"user"
+						],
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"username",
+					"password",
+					"role"
+				],
+				"type": "object"
+			},
+			"PathRequest": {
+				"additionalProperties": false,
+				"properties": {
+					"path": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"path"
+				],
+				"type": "object"
+			},
+			"RefreshRequest": {
+				"additionalProperties": false,
+				"properties": {
+					"deviceName": {
+						"description": "Current name of the device, replaces the one stored on the session",
+						"type": "string"
+					},
+					"refreshToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"refreshToken"
+				],
+				"type": "object"
+			},
+			"RestoreRequest": {
+				"additionalProperties": false,
+				"properties": {
+					"onConflict": {
+						"default": "fail",
+						"description": "What to do when something already exists at the original path: fail with already_exists, overwrite it (it moves to the trash), or keep both by restoring under a new name",
+						"enum": [
+							"fail",
+							"overwrite",
+							"keepBoth"
+						],
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"RetentionRequest": {
+				"additionalProperties": false,
+				"properties": {
+					"days": {
+						"description": "Days to keep trashed items, 0 keeps them forever; null or absent follows the server default",
+						"format": "int64",
+						"nullable": true,
+						"type": "integer"
+					}
+				},
+				"type": "object"
+			},
+			"ServerSettings": {
+				"additionalProperties": false,
+				"properties": {
+					"trashRetentionDays": {
+						"description": "Days trashed items are kept before they're deleted permanently; 0 keeps them forever",
+						"format": "int64",
+						"type": "integer"
+					},
+					"trashRetentionEnforced": {
+						"description": "Apply trashRetentionDays to every user, ignoring their own setting",
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"trashRetentionDays",
+					"trashRetentionEnforced"
+				],
+				"type": "object"
+			},
+			"ServerSettingsChanges": {
+				"additionalProperties": false,
+				"properties": {
+					"trashRetentionDays": {
+						"description": "Days trashed items are kept; 0 keeps them forever",
+						"format": "int64",
+						"nullable": true,
+						"type": "integer"
+					},
+					"trashRetentionEnforced": {
+						"description": "Apply trashRetentionDays to every user, ignoring their own setting",
+						"nullable": true,
+						"type": "boolean"
+					}
+				},
+				"type": "object"
+			},
+			"SetupStatus": {
+				"additionalProperties": false,
+				"properties": {
+					"needsSetup": {
+						"description": "True until the first administrator account exists",
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"needsSetup"
+				],
+				"type": "object"
+			},
+			"TokenPair": {
+				"additionalProperties": false,
+				"properties": {
+					"accessToken": {
+						"type": "string"
+					},
+					"expiresIn": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"refreshToken": {
+						"type": "string"
+					},
+					"user": {
+						"$ref": "#/components/schemas/User"
+					}
+				},
+				"required": [
+					"accessToken",
+					"refreshToken",
+					"expiresIn",
+					"user"
+				],
+				"type": "object"
+			},
+			"TrashItem": {
+				"additionalProperties": false,
+				"properties": {
+					"deletedAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"expiresAt": {
+						"description": "When the item is deleted permanently; absent while the trash keeps items forever",
+						"format": "date-time",
+						"type": "string"
+					},
+					"hash": {
+						"type": "string"
+					},
+					"id": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"isDir": {
+						"type": "boolean"
+					},
+					"mime": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"originalPath": {
+						"description": "Where the item was when it was deleted, and where a restore puts it back",
+						"type": "string"
+					},
+					"previewState": {
+						"enum": [
+							"none",
+							"pending",
+							"ready",
+							"failed"
+						],
+						"type": "string"
+					},
+					"size": {
+						"description": "Bytes, including everything inside a directory",
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"originalPath",
+					"isDir",
+					"size",
+					"mime",
+					"hash",
+					"previewState",
+					"deletedAt"
+				],
+				"type": "object"
+			},
+			"TrashListing": {
+				"additionalProperties": false,
+				"properties": {
+					"items": {
+						"items": {
+							"$ref": "#/components/schemas/TrashItem"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"retention": {
+						"$ref": "#/components/schemas/TrashRetention"
+					},
+					"totalBytes": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"items",
+					"totalBytes",
+					"retention"
+				],
+				"type": "object"
+			},
+			"TrashRetention": {
+				"additionalProperties": false,
+				"properties": {
+					"days": {
+						"description": "Days trashed items are kept before they're deleted permanently; 0 keeps them forever",
+						"format": "int64",
+						"type": "integer"
+					},
+					"defaultDays": {
+						"description": "The server's default",
+						"format": "int64",
+						"type": "integer"
+					},
+					"locked": {
+						"description": "True when an administrator decides, so the user's own setting has no effect",
+						"type": "boolean"
+					},
+					"source": {
+						"description": "Where days comes from; server and admin mean an administrator decides",
+						"enum": [
+							"default",
+							"user",
+							"server",
+							"admin"
+						],
+						"type": "string"
+					},
+					"userDays": {
+						"description": "The user's own choice; absent when they follow the server default",
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"days",
+					"source",
+					"locked",
+					"defaultDays"
+				],
+				"type": "object"
+			},
+			"UploadRequest": {
+				"additionalProperties": false,
+				"properties": {
+					"baseRev": {
+						"description": "Revision this upload replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+						"format": "int64",
+						"type": "integer"
+					},
+					"chunks": {
+						"description": "The file's chunks in order",
+						"items": {
+							"$ref": "#/components/schemas/ChunkRef"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"hash": {
+						"description": "Lowercase hex SHA-256 of the whole file",
+						"type": "string"
+					},
+					"mtime": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"size": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"path",
+					"size",
+					"hash",
+					"chunks"
+				],
+				"type": "object"
+			},
+			"UploadStatus": {
+				"additionalProperties": false,
+				"properties": {
+					"missing": {
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"uploadId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"uploadId",
+					"missing"
+				],
+				"type": "object"
+			},
+			"User": {
+				"additionalProperties": false,
+				"properties": {
+					"createdAt": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"disabled": {
+						"type": "boolean"
+					},
+					"id": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"quotaBytes": {
+						"description": "Storage limit in bytes; 0 is unlimited",
+						"format": "int64",
+						"type": "integer"
+					},
+					"role": {
+						"enum": [
+							"admin",
+							"user"
+						],
+						"type": "string"
+					},
+					"trashRetentionDays": {
+						"description": "Days the user chose to keep trashed items; absent follows the server default",
+						"format": "int64",
+						"type": "integer"
+					},
+					"trashRetentionOverrideDays": {
+						"description": "Days an administrator fixed for this user's trash; absent when not overridden",
+						"format": "int64",
+						"type": "integer"
+					},
+					"usedBytes": {
+						"format": "int64",
+						"type": "integer"
+					},
+					"username": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"username",
+					"role",
+					"quotaBytes",
+					"usedBytes",
+					"disabled",
+					"createdAt"
+				],
+				"type": "object"
+			}
+		},
+		"securitySchemes": {
+			"bearer": {
+				"bearerFormat": "JWT",
+				"scheme": "bearer",
+				"type": "http"
+			}
+		}
+	},
+	"info": {
+		"description": "File storage and sync. Log in with POST /auth/login and send the access token as `Authorization: Bearer \u003ctoken\u003e`; renew it with POST /auth/refresh before it expires.",
+		"title": "Polder API",
+		"version": "1.0.0"
+	},
+	"openapi": "3.0.3",
+	"paths": {
+		"/api/v1/activity": {
+			"get": {
+				"operationId": "listActivity",
+				"parameters": [
+					{
+						"description": "me, all, or a user id; anything but your own activity needs the administrator role",
+						"explode": false,
+						"in": "query",
+						"name": "user",
+						"schema": {
+							"default": "me",
+							"description": "me, all, or a user id; anything but your own activity needs the administrator role",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Cursor from the previous page; 0 starts at the newest",
+						"explode": false,
+						"in": "query",
+						"name": "before",
+						"schema": {
+							"description": "Cursor from the previous page; 0 starts at the newest",
+							"format": "int64",
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Maximum number of entries to return; the server caps it",
+						"explode": false,
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"default": 50,
+							"description": "Maximum number of entries to return; the server caps it",
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LogPage"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Page through what happened to files and sessions, newest first",
+				"tags": [
+					"activity"
+				]
+			}
+		},
+		"/api/v1/activity/live": {
+			"get": {
+				"operationId": "listLiveTransfers",
+				"parameters": [
+					{
+						"description": "me, all, or a user id; anything but your own transfers needs the administrator role",
+						"explode": false,
+						"in": "query",
+						"name": "user",
+						"schema": {
+							"default": "me",
+							"description": "me, all, or a user id; anything but your own transfers needs the administrator role",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LiveTransfers"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Uploads and downloads in progress",
+				"tags": [
+					"activity"
+				]
+			}
+		},
+		"/api/v1/admin/settings": {
+			"get": {
+				"operationId": "getServerSettings",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServerSettings"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Server-wide settings",
+				"tags": [
+					"admin"
+				]
+			},
+			"patch": {
+				"operationId": "updateServerSettings",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ServerSettingsChanges"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServerSettings"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Change server-wide settings",
+				"tags": [
+					"admin"
+				]
+			}
+		},
+		"/api/v1/admin/users": {
+			"get": {
+				"operationId": "listUsers",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/User"
+									},
+									"nullable": true,
+									"type": "array"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "List all users",
+				"tags": [
+					"admin"
+				]
+			},
+			"post": {
+				"operationId": "createUser",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NewUser"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						},
+						"description": "Created"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Create a user",
+				"tags": [
+					"admin"
+				]
+			}
+		},
+		"/api/v1/admin/users/{userID}": {
+			"delete": {
+				"operationId": "deleteUser",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userID",
+						"required": true,
+						"schema": {
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Delete a user; their files are archived on the server",
+				"tags": [
+					"admin"
+				]
+			},
+			"patch": {
+				"operationId": "updateUser",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "userID",
+						"required": true,
+						"schema": {
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Changes"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Change a user; password changes and disabling log the user out",
+				"tags": [
+					"admin"
+				]
+			}
+		},
+		"/api/v1/auth/login": {
+			"post": {
+				"operationId": "login",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CredentialsRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenPair"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"summary": "Log in and get a token pair",
+				"tags": [
+					"auth"
+				]
+			}
+		},
+		"/api/v1/auth/logout": {
+			"post": {
+				"operationId": "logout",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RefreshRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"summary": "Revoke a refresh token",
+				"tags": [
+					"auth"
+				]
+			}
+		},
+		"/api/v1/auth/me": {
+			"get": {
+				"operationId": "getMe",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "The logged-in user",
+				"tags": [
+					"auth"
+				]
+			}
+		},
+		"/api/v1/auth/refresh": {
+			"post": {
+				"operationId": "refresh",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RefreshRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenPair"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"summary": "Exchange a refresh token for a new token pair",
+				"tags": [
+					"auth"
+				]
+			}
+		},
+		"/api/v1/events": {
+			"get": {
+				"description": "Open a WebSocket here and send an `auth` message within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can `subscribe` to other users; every subscribe is answered with a new snapshot, and your own events always arrive. Messages are described by the ClientMessage and EventMessage schemas. The connection closes with code 4401 when authentication fails or the token expires without renewal.",
+				"operationId": "events",
+				"responses": {
+					"101": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/EventMessage"
+								}
+							}
+						},
+						"description": "WebSocket connection; every message the server sends has this shape"
+					},
+					"200": {
+						"description": "OK"
+					}
+				},
+				"summary": "Live activity over a WebSocket",
+				"tags": [
+					"events"
+				],
+				"x-client-message": {
+					"$ref": "#/components/schemas/ClientMessage"
+				}
+			}
+		},
+		"/api/v1/files": {
+			"delete": {
+				"operationId": "deleteFile",
+				"parameters": [
+					{
+						"explode": false,
+						"in": "query",
+						"name": "path",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Revision the client last saw; -1 deletes whatever is there",
+						"explode": false,
+						"in": "query",
+						"name": "baseRev",
+						"schema": {
+							"default": -1,
+							"description": "Revision the client last saw; -1 deletes whatever is there",
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Delete a file or directory",
+				"tags": [
+					"files"
+				]
+			}
+		},
+		"/api/v1/files/content": {
+			"get": {
+				"operationId": "downloadFile",
+				"parameters": [
+					{
+						"description": "Path inside the user's storage, such as /Photos/cat.jpg",
+						"explode": false,
+						"in": "query",
+						"name": "path",
+						"schema": {
+							"description": "Path inside the user's storage, such as /Photos/cat.jpg",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Byte range to send, such as bytes=0-1023",
+						"in": "header",
+						"name": "Range",
+						"schema": {
+							"description": "Byte range to send, such as bytes=0-1023",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Fail with 412 unless the file still has this ETag",
+						"in": "header",
+						"name": "If-Match",
+						"schema": {
+							"description": "Fail with 412 unless the file still has this ETag",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Answer 304 if the file still has this ETag",
+						"in": "header",
+						"name": "If-None-Match",
+						"schema": {
+							"description": "Answer 304 if the file still has this ETag",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream": {
+								"schema": {
+									"format": "binary",
+									"type": "string",
+									"x-contentMediaType": "application/octet-stream"
+								}
+							}
+						},
+						"description": "File content",
+						"headers": {
+							"Content-Type": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"schema": {
+									"description": "The file's revision, quoted; send it in If-Match or If-None-Match",
+									"type": "string"
+								}
+							},
+							"X-Polder-Rev": {
+								"schema": {
+									"description": "The file's revision",
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Download a file; supports Range and conditional requests",
+				"tags": [
+					"files"
+				]
+			},
+			"put": {
+				"operationId": "uploadFile",
+				"parameters": [
+					{
+						"description": "Where to store the file, such as /Photos/cat.jpg",
+						"explode": false,
+						"in": "query",
+						"name": "path",
+						"schema": {
+							"description": "Where to store the file, such as /Photos/cat.jpg",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+						"explode": false,
+						"in": "query",
+						"name": "baseRev",
+						"schema": {
+							"default": 0,
+							"description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+							"format": "int64",
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Modification time to record, as RFC 3339; defaults to now",
+						"explode": false,
+						"in": "query",
+						"name": "mtime",
+						"schema": {
+							"description": "Modification time to record, as RFC 3339; defaults to now",
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Any ID the client picks; live transfer events echo it back as clientId",
+						"in": "header",
+						"name": "X-Polder-Transfer-Id",
+						"schema": {
+							"description": "Any ID the client picks; live transfer events echo it back as clientId",
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/octet-stream": {
+							"schema": {
+								"format": "binary",
+								"type": "string",
+								"x-contentMediaType": "application/octet-stream"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Entry"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Upload a whole file as the request body",
+				"tags": [
+					"files"
+				]
+			}
+		},
+		"/api/v1/files/list": {
+			"get": {
+				"operationId": "listFiles",
+				"parameters": [
+					{
+						"description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+						"explode": false,
+						"in": "query",
+						"name": "path",
+						"schema": {
+							"description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ListResponse"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "List a directory",
+				"tags": [
+					"files"
+				]
+			}
+		},
+		"/api/v1/files/mkdir": {
+			"post": {
+				"operationId": "makeDirectory",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PathRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Entry"
+								}
+							}
+						},
+						"description": "Created"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Create a directory",
+				"tags": [
+					"files"
+				]
+			}
+		},
+		"/api/v1/files/move": {
+			"post": {
+				"operationId": "moveFile",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MoveRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Entry"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Move or rename a file or directory",
+				"tags": [
+					"files"
+				]
+			}
+		},
+		"/api/v1/files/preview": {
+			"get": {
+				"operationId": "previewFile",
+				"parameters": [
+					{
+						"explode": false,
+						"in": "query",
+						"name": "path",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Thumbnail width and height in pixels",
+						"explode": false,
+						"in": "query",
+						"name": "size",
+						"schema": {
+							"default": 256,
+							"description": "Thumbnail width and height in pixels",
+							"enum": [
+								128,
+								256,
+								512
+							],
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"image/jpeg": {
+								"schema": {
+									"format": "binary",
+									"type": "string",
+									"x-contentMediaType": "application/octet-stream"
+								}
+							}
+						},
+						"description": "Thumbnail",
+						"headers": {
+							"Cache-Control": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Content-Type": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Get a JPEG thumbnail of an image",
+				"tags": [
+					"files"
+				]
+			}
+		},
+		"/api/v1/files/stat": {
+			"get": {
+				"operationId": "statFile",
+				"parameters": [
+					{
+						"description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+						"explode": false,
+						"in": "query",
+						"name": "path",
+						"schema": {
+							"description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Entry"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Get one file or directory",
+				"tags": [
+					"files"
+				]
+			}
+		},
+		"/api/v1/setup": {
+			"get": {
+				"operationId": "getSetupStatus",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SetupStatus"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"summary": "Whether the server still needs its first account",
+				"tags": [
+					"setup"
+				]
+			},
+			"post": {
+				"operationId": "setup",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CredentialsRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokenPair"
+								}
+							}
+						},
+						"description": "Created"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"summary": "Create the first administrator account",
+				"tags": [
+					"setup"
+				]
+			}
+		},
+		"/api/v1/sync/changes": {
+			"get": {
+				"operationId": "listChanges",
+				"parameters": [
+					{
+						"description": "Cursor from the previous page; 0 starts from the beginning",
+						"explode": false,
+						"in": "query",
+						"name": "cursor",
+						"schema": {
+							"default": 0,
+							"description": "Cursor from the previous page; 0 starts from the beginning",
+							"format": "int64",
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Maximum number of changes to return; the server caps it",
+						"explode": false,
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"default": 1000,
+							"description": "Maximum number of changes to return; the server caps it",
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ChangePage"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Page through changes since a cursor",
+				"tags": [
+					"sync"
+				]
+			}
+		},
+		"/api/v1/sync/manifest": {
+			"get": {
+				"operationId": "getManifest",
+				"parameters": [
+					{
+						"description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+						"explode": false,
+						"in": "query",
+						"name": "path",
+						"schema": {
+							"description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Manifest"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Get a file's chunk manifest for delta sync",
+				"tags": [
+					"sync"
+				]
+			}
+		},
+		"/api/v1/sync/uploads": {
+			"post": {
+				"operationId": "createUpload",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UploadRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UploadStatus"
+								}
+							}
+						},
+						"description": "Created"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Start a chunked upload; returns the chunks the server is missing",
+				"tags": [
+					"sync"
+				]
+			}
+		},
+		"/api/v1/sync/uploads/{uploadID}": {
+			"delete": {
+				"operationId": "abortUpload",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "uploadID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Cancel an upload",
+				"tags": [
+					"sync"
+				]
+			},
+			"get": {
+				"operationId": "getUpload",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "uploadID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UploadStatus"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Get the chunks an upload is still missing",
+				"tags": [
+					"sync"
+				]
+			}
+		},
+		"/api/v1/sync/uploads/{uploadID}/chunks/{chunkHash}": {
+			"put": {
+				"operationId": "putChunk",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "uploadID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Lowercase hex SHA-256 of the chunk",
+						"in": "path",
+						"name": "chunkHash",
+						"required": true,
+						"schema": {
+							"description": "Lowercase hex SHA-256 of the chunk",
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/octet-stream": {
+							"schema": {
+								"format": "binary",
+								"type": "string",
+								"x-contentMediaType": "application/octet-stream"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Send one chunk as the request body",
+				"tags": [
+					"sync"
+				]
+			}
+		},
+		"/api/v1/sync/uploads/{uploadID}/commit": {
+			"post": {
+				"operationId": "commitUpload",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "uploadID",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Entry"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Assemble the uploaded chunks into the file",
+				"tags": [
+					"sync"
+				]
+			}
+		},
+		"/api/v1/trash": {
+			"delete": {
+				"operationId": "emptyTrash",
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Delete everything in the trash permanently",
+				"tags": [
+					"trash"
+				]
+			},
+			"get": {
+				"operationId": "listTrash",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TrashListing"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "List deleted items, most recent first",
+				"tags": [
+					"trash"
+				]
+			}
+		},
+		"/api/v1/trash/retention": {
+			"get": {
+				"operationId": "getTrashRetention",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TrashRetention"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "How long deleted items stay in the trash",
+				"tags": [
+					"trash"
+				]
+			},
+			"put": {
+				"operationId": "setTrashRetention",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RetentionRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TrashRetention"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Choose how long deleted items stay in the trash",
+				"tags": [
+					"trash"
+				]
+			}
+		},
+		"/api/v1/trash/{itemID}": {
+			"delete": {
+				"operationId": "deleteTrashItem",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "itemID",
+						"required": true,
+						"schema": {
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Delete one item in the trash permanently",
+				"tags": [
+					"trash"
+				]
+			}
+		},
+		"/api/v1/trash/{itemID}/content": {
+			"get": {
+				"operationId": "downloadTrashItem",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "itemID",
+						"required": true,
+						"schema": {
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/octet-stream": {
+								"schema": {
+									"format": "binary",
+									"type": "string",
+									"x-contentMediaType": "application/octet-stream"
+								}
+							}
+						},
+						"description": "Item content",
+						"headers": {
+							"Content-Disposition": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Content-Type": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Download a deleted item without restoring it; a directory comes as a zip",
+				"tags": [
+					"trash"
+				]
+			}
+		},
+		"/api/v1/trash/{itemID}/preview": {
+			"get": {
+				"operationId": "previewTrashItem",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "itemID",
+						"required": true,
+						"schema": {
+							"format": "int64",
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Thumbnail width and height in pixels",
+						"explode": false,
+						"in": "query",
+						"name": "size",
+						"schema": {
+							"default": 256,
+							"description": "Thumbnail width and height in pixels",
+							"enum": [
+								128,
+								256,
+								512
+							],
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"image/jpeg": {
+								"schema": {
+									"format": "binary",
+									"type": "string",
+									"x-contentMediaType": "application/octet-stream"
+								}
+							}
+						},
+						"description": "Thumbnail",
+						"headers": {
+							"Cache-Control": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Content-Type": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"ETag": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Get a JPEG thumbnail of a deleted image",
+				"tags": [
+					"trash"
+				]
+			}
+		},
+		"/api/v1/trash/{itemID}/restore": {
+			"post": {
+				"operationId": "restoreTrashItem",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "itemID",
+						"required": true,
+						"schema": {
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RestoreRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Entry"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Put a deleted item back where it was",
+				"tags": [
+					"trash"
+				]
+			}
+		},
+		"/healthz": {
+			"get": {
+				"operationId": "health",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/HealthStatus"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"summary": "Health check",
+				"tags": [
+					"server"
+				]
+			}
+		}
+	}
 }

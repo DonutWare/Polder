@@ -47,6 +47,7 @@ dependencies:
   cunning_document_scanner: ^3.0.3
   pdf: ^3.13.1
   pdfrx: ^2.6.5
+  device_info_plus: ^13.3.0
 
 dev_dependencies:
   flutter_test:

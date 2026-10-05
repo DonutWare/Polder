@@ -50,7 +50,7 @@ void main() {
           "error": {"code": "unauthorized", "message": "revoked"},
         });
       }
-      expect(request.data, {"refreshToken": "refresh-1"});
+      expect(request.data, {"refreshToken": "refresh-1", "deviceName": "Laptop"});
       expect(request.headers["Authorization"], isNull);
       return jsonResponse(200, tokenJson(validToken, "refresh-2"));
     }
@@ -67,7 +67,9 @@ void main() {
     refreshCalls = 0;
     refreshSucceeds = true;
     client = ScriptedClient(handle);
-    api = PolderApi(ApiClientFactory.create("https://cloud.test", session: session, httpClient: client));
+    api = PolderApi(
+      ApiClientFactory.create("https://cloud.test", session: session, deviceName: "Laptop", httpClient: client),
+    );
   });
 
   test("sends the bearer token", () async {

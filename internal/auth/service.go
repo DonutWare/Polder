@@ -92,8 +92,8 @@ func (s *Service) Login(ctx context.Context, username, password, deviceName stri
 
 var dummyHash, _ = Argon2Hasher{}.Hash("timing-equalizer")
 
-func (s *Service) Refresh(ctx context.Context, refreshToken string) (TokenPair, error) {
-	session, rotatedToken, err := s.sessions.Rotate(ctx, refreshToken)
+func (s *Service) Refresh(ctx context.Context, refreshToken, deviceName string) (TokenPair, error) {
+	session, rotatedToken, err := s.sessions.Rotate(ctx, refreshToken, deviceName)
 	if err != nil {
 		return TokenPair{}, err
 	}

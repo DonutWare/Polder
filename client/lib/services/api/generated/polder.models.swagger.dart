@@ -1460,13 +1460,15 @@ extension $PathRequestExtension on PathRequest {
 
 @JsonSerializable(explicitToJson: true)
 class RefreshRequest {
-  const RefreshRequest({required this.refreshToken});
+  const RefreshRequest({this.deviceName, required this.refreshToken});
 
   factory RefreshRequest.fromJson(Map<String, dynamic> json) => _$RefreshRequestFromJson(json);
 
   static const toJsonFactory = _$RefreshRequestToJson;
   Map<String, dynamic> toJson() => _$RefreshRequestToJson(this);
 
+  @JsonKey(name: 'deviceName', includeIfNull: false)
+  final String? deviceName;
   @JsonKey(name: 'refreshToken', includeIfNull: false)
   final String refreshToken;
   static const fromJsonFactory = _$RefreshRequestFromJson;
@@ -1475,21 +1477,29 @@ class RefreshRequest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is RefreshRequest &&
+            (identical(other.deviceName, deviceName) ||
+                const DeepCollectionEquality().equals(other.deviceName, deviceName)) &&
             (identical(other.refreshToken, refreshToken) ||
                 const DeepCollectionEquality().equals(other.refreshToken, refreshToken)));
   }
 
   @override
-  int get hashCode => const DeepCollectionEquality().hash(refreshToken) ^ runtimeType.hashCode;
+  int get hashCode =>
+      const DeepCollectionEquality().hash(deviceName) ^
+      const DeepCollectionEquality().hash(refreshToken) ^
+      runtimeType.hashCode;
 }
 
 extension $RefreshRequestExtension on RefreshRequest {
-  RefreshRequest copyWith({String? refreshToken}) {
-    return RefreshRequest(refreshToken: refreshToken ?? this.refreshToken);
+  RefreshRequest copyWith({String? deviceName, String? refreshToken}) {
+    return RefreshRequest(deviceName: deviceName ?? this.deviceName, refreshToken: refreshToken ?? this.refreshToken);
   }
 
-  RefreshRequest copyWithWrapped({Wrapped<String>? refreshToken}) {
-    return RefreshRequest(refreshToken: (refreshToken != null ? refreshToken.value : this.refreshToken));
+  RefreshRequest copyWithWrapped({Wrapped<String?>? deviceName, Wrapped<String>? refreshToken}) {
+    return RefreshRequest(
+      deviceName: (deviceName != null ? deviceName.value : this.deviceName),
+      refreshToken: (refreshToken != null ? refreshToken.value : this.refreshToken),
+    );
   }
 }
 

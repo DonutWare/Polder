@@ -376,3 +376,22 @@ func TestEventsFollowTransfersAndScopes(t *testing.T) {
 		}
 	})
 }
+
+func TestRefreshRenamesSessionDevice(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		server.setupAdmin()
+		var first, renamed, kept tokenPair
+		server.anonymous().mustJSON(http.MethodPost, "/auth/login",
+			map[string]string{"username": "admin", "password": "adminpass1", "deviceName": "old name"}, http.StatusOK, &first)
+		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh",
+			map[string]string{"refreshToken": first.RefreshToken, "deviceName": "new name"}, http.StatusOK, &renamed)
+		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh",
+			map[string]string{"refreshToken": renamed.RefreshToken}, http.StatusOK, &kept)
+
+		admin := &client{server: server, token: kept.AccessToken}
+		admin.mustJSON(http.MethodPost, "/files/mkdir", map[string]string{"path": "/Docs"}, http.StatusCreated, nil)
+		if entry := admin.activity("").Entries[0]; entry.Kind != "mkdir" || entry.Device != "new name" {
+			t.Fatalf("entry = %+v", entry)
+		}
+	})
+}

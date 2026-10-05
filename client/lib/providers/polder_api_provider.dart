@@ -17,7 +17,14 @@ final polderApiProvider = Provider<PolderApi>((ref) {
   final serverUrl = ref.watch(currentAccountProvider.select((account) => account?.serverUrl));
   if (accountId == null || serverUrl == null) throw StateError("No account is signed in");
   final session = AccountAuthSession(ref, accountId);
-  return PolderApi(ApiClientFactory.create(serverUrl, session: session, httpClient: ref.watch(httpClientProvider)));
+  return PolderApi(
+    ApiClientFactory.create(
+      serverUrl,
+      session: session,
+      deviceName: ref.watch(deviceNameProvider),
+      httpClient: ref.watch(httpClientProvider),
+    ),
+  );
 });
 
 class AccountAuthSession implements AuthSession {

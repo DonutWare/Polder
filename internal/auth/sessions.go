@@ -42,7 +42,7 @@ func (s *Sessions) Create(ctx context.Context, userID int64, deviceName string) 
 	return Session{ID: id, UserID: userID, DeviceName: deviceName}, token, err
 }
 
-func (s *Sessions) Rotate(ctx context.Context, refreshToken string) (Session, string, error) {
+func (s *Sessions) Rotate(ctx context.Context, refreshToken, deviceName string) (Session, string, error) {
 	session, expiresAt, err := s.find(ctx, refreshToken)
 	if errors.Is(err, sql.ErrNoRows) || (err == nil && time.Now().Unix() > expiresAt) {
 		return Session{}, "", apperr.Unauthorized("refresh token is invalid or expired")
@@ -51,10 +51,13 @@ func (s *Sessions) Rotate(ctx context.Context, refreshToken string) (Session, st
 		return Session{}, "", err
 	}
 
+	if deviceName != "" {
+		session.DeviceName = deviceName
+	}
 	token, tokenHash := newRefreshToken()
 	now := time.Now()
-	_, err = s.db.ExecContext(ctx, `UPDATE sessions SET token_hash = ?, last_used_at = ?, expires_at = ? WHERE id = ?`,
-		tokenHash, now.Unix(), now.Add(RefreshTokenLifetime).Unix(), session.ID)
+	_, err = s.db.ExecContext(ctx, `UPDATE sessions SET token_hash = ?, device_name = ?, last_used_at = ?, expires_at = ? WHERE id = ?`,
+		tokenHash, session.DeviceName, now.Unix(), now.Add(RefreshTokenLifetime).Unix(), session.ID)
 	return session, token, err
 }
 

@@ -77,15 +77,16 @@ class LoginNotifier extends Notifier<LoginState> {
   });
 
   Future<void> createAdmin() => _run(() async {
-    await _complete(await _api.setup(username: state.username.trim(), password: state.password));
+    final tokens = await _api.setup(
+      username: state.username.trim(),
+      password: state.password,
+      deviceName: ref.read(deviceNameProvider),
+    );
+    await _complete(tokens);
   });
 
   Future<void> _complete(TokenPair tokens) async {
-    final account = Account.fromTokens(
-      serverUrl: state.serverUrl,
-      deviceName: ref.read(deviceNameProvider),
-      tokens: tokens,
-    );
+    final account = Account.fromTokens(serverUrl: state.serverUrl, tokens: tokens);
     await ref.read(accountProvider.notifier).signIn(account);
     if (ref.mounted) state = state.copyWith(completed: true);
   }

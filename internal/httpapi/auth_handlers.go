@@ -18,6 +18,7 @@ type credentialsRequest struct {
 
 type refreshRequest struct {
 	RefreshToken string `json:"refreshToken"`
+	DeviceName   string `json:"deviceName" required:"false" doc:"Current name of the device, replaces the one stored on the session"`
 }
 
 type setupStatus struct {
@@ -65,7 +66,7 @@ func (a *API) login(ctx context.Context, input *loginInput) (*jsonBody[auth.Toke
 }
 
 func (a *API) refresh(ctx context.Context, input *jsonBody[refreshRequest]) (*jsonBody[auth.TokenPair], error) {
-	tokens, err := a.auth.Refresh(ctx, input.Body.RefreshToken)
+	tokens, err := a.auth.Refresh(ctx, input.Body.RefreshToken, input.Body.DeviceName)
 	if err != nil {
 		return nil, err
 	}

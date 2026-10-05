@@ -8,7 +8,6 @@ import "package:polder/services/storage/credentials_store.dart";
 import "package:polder/services/storage/preferences_store.dart";
 import "package:polder/services/transfer/document_scanner_service.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
-import "package:polder/util/device_name.dart";
 import "package:polder/util/hosted_server.dart";
 
 final credentialsStoreProvider = Provider<CredentialsStore>((ref) => const SecureCredentialsStore());
@@ -21,7 +20,7 @@ final documentScannerServiceProvider = Provider<DocumentScannerService>((ref) =>
 
 final deviceConditionsProvider = Provider<DeviceConditions>((ref) => PlatformDeviceConditions());
 
-final deviceNameProvider = Provider<String>((ref) => DeviceName.current());
+final deviceNameProvider = Provider<String>((ref) => throw UnimplementedError("Resolved in main"));
 
 final httpClientProvider = Provider<http.Client?>((ref) => null);
 

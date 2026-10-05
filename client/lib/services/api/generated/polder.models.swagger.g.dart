@@ -305,9 +305,10 @@ PathRequest _$PathRequestFromJson(Map<String, dynamic> json) => PathRequest(path
 Map<String, dynamic> _$PathRequestToJson(PathRequest instance) => <String, dynamic>{'path': instance.path};
 
 RefreshRequest _$RefreshRequestFromJson(Map<String, dynamic> json) =>
-    RefreshRequest(refreshToken: json['refreshToken'] as String);
+    RefreshRequest(deviceName: json['deviceName'] as String?, refreshToken: json['refreshToken'] as String);
 
 Map<String, dynamic> _$RefreshRequestToJson(RefreshRequest instance) => <String, dynamic>{
+  'deviceName': ?instance.deviceName,
   'refreshToken': instance.refreshToken,
 };
 

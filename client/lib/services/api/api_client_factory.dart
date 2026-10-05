@@ -9,12 +9,12 @@ import "package:polder/services/api/polder_converter.dart";
 import "package:polder/services/api/pending_uploads.dart";
 
 abstract final class ApiClientFactory {
-  static Polder create(String serverUrl, {AuthSession? session, http.Client? httpClient}) {
+  static Polder create(String serverUrl, {AuthSession? session, String? deviceName, http.Client? httpClient}) {
     final uploads = PendingUploads();
     final client = UploadingClient(httpClient ?? createHttpClient(), uploads);
     final auth = session == null
         ? null
-        : AuthInterceptor(session: session, refreshApi: _service(serverUrl, client, uploads));
+        : AuthInterceptor(session: session, deviceName: deviceName, refreshApi: _service(serverUrl, client, uploads));
     return _service(serverUrl, client, uploads, auth);
   }
 

@@ -10,9 +10,10 @@ import "package:polder/services/api/pending_uploads.dart";
 import "package:polder/services/api/wire_mappers.dart";
 
 class AuthInterceptor extends Authenticator implements Interceptor {
-  AuthInterceptor({required this._session, required this._refreshApi});
+  AuthInterceptor({required this._session, required this._refreshApi, this._deviceName});
 
   final AuthSession _session;
+  final String? _deviceName;
   final wire.Polder _refreshApi;
   final _inFlight = _InFlightRefresh();
 
@@ -50,7 +51,9 @@ class AuthInterceptor extends Authenticator implements Interceptor {
     final refreshToken = await _session.readRefreshToken();
     if (refreshToken == null) return null;
     try {
-      final response = await _refreshApi.refresh(body: wire.RefreshRequest(refreshToken: refreshToken));
+      final response = await _refreshApi.refresh(
+        body: wire.RefreshRequest(refreshToken: refreshToken, deviceName: _deviceName),
+      );
       final tokens = response.body!.toModel();
       await _session.storeTokens(tokens);
       return tokens.accessToken;

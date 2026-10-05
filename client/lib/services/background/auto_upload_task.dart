@@ -14,6 +14,7 @@ import "package:polder/services/sync/native_sync_platform.dart";
 import "package:polder/services/sync/sync_engine.dart";
 import "package:polder/services/sync/sync_pause.dart";
 import "package:polder/services/sync/sync_state_store.dart";
+import "package:polder/util/device_name.dart";
 
 @pragma("vm:entry-point")
 void autoUploadCallbackDispatcher() {
@@ -34,7 +35,7 @@ class AutoUploadTask {
     try {
       final account = await credentials.load();
       if (account == null || await SyncPause.read(SharedPreferencesStore())) return;
-      final engine = _engineFor(account, store);
+      final engine = _engineFor(account, store, await DeviceName.resolve());
       for (final root in await _autoUploadRoots(store)) {
         if (root.accountId == account.id) await engine.run(root);
       }
@@ -46,9 +47,9 @@ class AutoUploadTask {
   Future<List<SyncRoot>> _autoUploadRoots(SyncStateStore store) async =>
       (await store.roots()).where((root) => root.enabled && root.mode == SyncMode.autoUpload).toList();
 
-  SyncEngine _engineFor(Account account, SyncStateStore store) {
+  SyncEngine _engineFor(Account account, SyncStateStore store, String deviceName) {
     final session = StoredAuthSession(store: credentials, accountId: account.id, accessToken: account.accessToken);
-    final api = PolderApi(ApiClientFactory.create(account.serverUrl, session: session));
-    return SyncEngine(api: api, store: store, deviceName: account.deviceName);
+    final api = PolderApi(ApiClientFactory.create(account.serverUrl, session: session, deviceName: deviceName));
+    return SyncEngine(api: api, store: store, deviceName: deviceName);
   }
 }

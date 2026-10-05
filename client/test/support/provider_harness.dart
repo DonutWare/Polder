@@ -32,7 +32,6 @@ class FixedDeviceConditions implements DeviceConditions {
 
 Account testAccount({String serverUrl = "https://cloud.test", UserRole role = UserRole.user}) => Account(
   serverUrl: serverUrl,
-  deviceName: "Test",
   accessToken: "access",
   refreshToken: "refresh",
   user: User(id: 1, username: "jop", role: role),

@@ -1,7 +1,7 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/service_providers.dart";
 import "package:polder/providers/sync/sync_activity_provider.dart";
 import "package:polder/services/sync/sync_platform.dart";
 import "package:polder/services/sync/sync_platform_factory.dart";
@@ -23,7 +23,7 @@ final syncServiceProvider = FutureProvider<SyncService>((ref) async {
       .createService(
         api: ref.watch(polderApiProvider),
         store: store,
-        deviceName: ref.watch(currentAccountProvider)?.deviceName ?? "",
+        deviceName: ref.watch(deviceNameProvider),
         activity: ref.watch(syncActivityProvider),
       );
 });
