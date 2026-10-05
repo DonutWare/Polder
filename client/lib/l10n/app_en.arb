@@ -1,7 +1,19 @@
 {
 	"@@locale": "en",
 	"about": "About",
-	"aboutLegalese": "Files, sync and auto-upload for your own server.",
+	"aboutCreatedBy": "Created by DonutWare",
+	"aboutHint": "Version, licenses and supporting the project",
+	"aboutLegalese": "Create your own private polder and sync your files.",
+	"aboutLicenses": "Licenses",
+	"aboutSocials": "Socials",
+	"aboutVersion": "Version {version}",
+	"@aboutVersion": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			}
+		}
+	},
 	"accentBlue": "Blue",
 	"accentColor": "Accent color",
 	"accentCustomHint": "Status colors are tuned to match your accent.",
@@ -285,6 +297,8 @@
 		}
 	},
 	"size": "Size",
+	"sponsor": "Sponsor",
+	"sponsorMessage": "If you enjoy using Polder, consider sponsoring the project to support ongoing development and improvements. Thank you for your support!",
 	"storageByUser": "Storage by user",
 	"syncedWith": "Synced with {remotePath}",
 	"@syncedWith": {

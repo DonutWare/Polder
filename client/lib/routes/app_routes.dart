@@ -7,6 +7,7 @@ abstract final class AppRoutes {
   static const autoUpload = "/auto-upload";
   static const trash = "/trash";
   static const settings = "/settings";
+  static const about = "/settings/about";
 
   static const admin = "/admin";
   static const adminUsers = "/admin/users";

@@ -54,6 +54,17 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            NavGroup(
+              title: localized.about,
+              children: [
+                NavEntry(
+                  icon: IconsaxPlusLinear.info_circle,
+                  title: localized.about,
+                  subtitle: localized.aboutHint,
+                  onTap: () => context.go(AppRoutes.about),
+                ),
+              ],
+            ),
           ],
         ),
       ),

@@ -75,15 +75,6 @@ class MoreOptions extends ConsumerWidget {
           title: Text(localized.appearance),
           onTap: () => showAppearanceDialog(context),
         ),
-        ListTile(
-          leading: const Icon(IconsaxPlusLinear.info_circle),
-          title: Text(localized.about),
-          onTap: () => showAboutDialog(
-            context: context,
-            applicationName: localized.appTitle,
-            applicationLegalese: localized.aboutLegalese,
-          ),
-        ),
         if (!inAdministration)
           for (final destination in ref.watch(secondaryShellDestinationsProvider))
             ListTile(

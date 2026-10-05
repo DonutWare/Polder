@@ -14,6 +14,7 @@ import "package:nomad/screens/admin/admin_users_screen.dart";
 import "package:nomad/screens/auto_upload/auto_upload_screen.dart";
 import "package:nomad/screens/browser/browser_screen.dart";
 import "package:nomad/screens/login/login_screen.dart";
+import "package:nomad/screens/settings/about_screen.dart";
 import "package:nomad/screens/settings/settings_screen.dart";
 import "package:nomad/screens/shell/app_shell.dart";
 import "package:nomad/screens/sync/conflict_resolver_screen.dart";
@@ -58,7 +59,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(path: AppRoutes.autoUpload, builder: (_, _) => const AutoUploadScreen()),
           GoRoute(path: AppRoutes.trash, builder: (_, _) => const TrashScreen()),
-          GoRoute(path: AppRoutes.settings, builder: (_, _) => const SettingsScreen()),
+          GoRoute(
+            path: AppRoutes.settings,
+            builder: (_, _) => const SettingsScreen(),
+            routes: [GoRoute(path: "about", builder: (_, _) => const AboutScreen())],
+          ),
         ],
       ),
       ShellRoute(
