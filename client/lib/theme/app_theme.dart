@@ -214,7 +214,7 @@ abstract final class AppTheme {
     final cs = buildColorScheme(seed, brightness);
 
     final colors = AppColors.fromScheme(cs);
-    final base = ThemeData(colorScheme: cs, useMaterial3: true);
+    final base = ThemeData(colorScheme: cs, useMaterial3: true, fontFamily: "Rubik");
     final text = base.textTheme.copyWith(
       headlineLarge: base.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.8),
       headlineMedium: base.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.6),

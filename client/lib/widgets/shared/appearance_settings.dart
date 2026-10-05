@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:nomad/l10n/generated/app_localizations.dart";
 import "package:nomad/models/appearance.dart";
 import "package:nomad/providers/appearance/appearance_provider.dart";
@@ -21,6 +20,7 @@ Future<void> showAppearanceDialog(BuildContext context) => showDialog<void>(
 
 extension AccentPresetLabel on AccentPreset {
   String label(AppLocalizations localized) => switch (this) {
+    AccentPreset.polder => localized.accentPolder,
     AccentPreset.blue => localized.accentBlue,
     AccentPreset.teal => localized.accentTeal,
     AccentPreset.green => localized.accentGreen,
@@ -73,7 +73,6 @@ class AppearanceSettings extends ConsumerWidget {
           runSpacing: 10,
           children: [
             _Swatch(
-              color: appearance.systemAccent ?? Appearance.defaultAccent,
               tooltip: appearance.systemAccent == null ? localized.systemAccentUnavailable : localized.themeSystem,
               system: true,
               selected: appearance.accent == null,
@@ -151,15 +150,14 @@ class _ModeOption extends StatelessWidget {
 }
 
 class _Swatch extends StatelessWidget {
-  const _Swatch({
-    required this.color,
-    required this.tooltip,
-    required this.selected,
-    required this.onTap,
-    this.system = false,
-  });
+  const _Swatch({required this.tooltip, required this.selected, required this.onTap, this.color, this.system = false});
 
-  final Color color;
+  static const _rainbow = SweepGradient(
+    colors: [Color(0xFF4285F4), Color(0xFF34A853), Color(0xFFFBBC05), Color(0xFFEA4335), Color(0xFF4285F4)],
+    stops: [0, 0.25, 0.5, 0.75, 1],
+  );
+
+  final Color? color;
   final String tooltip;
   final bool selected;
   final bool system;
@@ -168,7 +166,10 @@ class _Swatch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final fg = ThemeData.estimateBrightnessForColor(color) == Brightness.dark ? Colors.white : Colors.black;
+    final color = this.color;
+    final fg = color == null || ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? Colors.white
+        : Colors.black;
     return Tooltip(
       message: tooltip,
       child: Semantics(
@@ -188,7 +189,11 @@ class _Swatch extends StatelessWidget {
               border: Border.all(color: selected ? cs.onSurface : Colors.transparent, width: 2),
             ),
             child: DecoratedBox(
-              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+                gradient: color == null ? _rainbow : null,
+              ),
               child: Icon(
                 selected ? IconsaxPlusBold.tick_circle : (system ? IconsaxPlusLinear.magicpen : null),
                 size: 18,

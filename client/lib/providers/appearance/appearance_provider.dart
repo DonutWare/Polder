@@ -2,14 +2,12 @@ import "package:flutter/material.dart";
 
 import "package:dynamic_color/dynamic_color.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
 import "package:nomad/models/appearance.dart";
 import "package:nomad/providers/service_providers.dart";
 import "package:nomad/services/storage/preferences_store.dart";
 
 final appearanceProvider = NotifierProvider<AppearanceNotifier, Appearance>(AppearanceNotifier.new);
 
-/// Reads the platform accent color (Android wallpaper colors, macOS/Windows/Linux accent).
 typedef SystemAccentReader = Future<Color?> Function();
 
 final systemAccentReaderProvider = Provider<SystemAccentReader>((ref) => readSystemAccent);
@@ -19,11 +17,7 @@ Future<Color?> readSystemAccent() async {
     final palette = await DynamicColorPlugin.getCorePalette();
     if (palette != null) return Color(palette.primary.get(40));
   } catch (_) {}
-  try {
-    return await DynamicColorPlugin.getAccentColor();
-  } catch (_) {
-    return null;
-  }
+  return null;
 }
 
 class AppearanceNotifier extends Notifier<Appearance> {

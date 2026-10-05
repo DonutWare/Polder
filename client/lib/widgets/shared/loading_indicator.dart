@@ -18,7 +18,9 @@ class LoadingIndicator extends StatefulWidget {
 }
 
 class _LoadingIndicatorState extends State<LoadingIndicator> with SingleTickerProviderStateMixin {
-  static final _shapes = [
+  var _shapes = _buildShapes();
+
+  static List<List<Offset>> _buildShapes() => [
     MaterialShapes.softBurst,
     MaterialShapes.cookie9Sided,
     MaterialShapes.pentagon,
@@ -30,6 +32,12 @@ class _LoadingIndicatorState extends State<LoadingIndicator> with SingleTickerPr
   static const _step = Duration(milliseconds: 650);
 
   late final _controller = AnimationController(vsync: this, duration: _step * _shapes.length)..repeat();
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    _shapes = _buildShapes();
+  }
 
   @override
   void dispose() {

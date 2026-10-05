@@ -8,6 +8,7 @@
 	"accentGreen": "Green",
 	"accentNoSystemHint": "This device has no accent color to follow, so the default is used.",
 	"accentOrange": "Orange",
+	"accentPolder": "Polder",
 	"accentRose": "Rose",
 	"accentSlate": "Slate",
 	"accentSystemHint": "Follows your device's accent color.",
@@ -44,7 +45,7 @@
 			}
 		}
 	},
-	"appTitle": "Nomad",
+	"appTitle": "Polder",
 	"autoUploadDescription": "Upload new photos and files from the chosen folders automatically.",
 	"autoUploadEnabled": "Auto-upload",
 	"backToFiles": "Back to files",
@@ -168,8 +169,8 @@
 	"loginErrorDisabled": "This account is disabled.",
 	"loginErrorInvalidCredentials": "Wrong username or password.",
 	"loginErrorSetupUnavailable": "This server has already been set up.",
-	"loginErrorUnreachable": "Could not reach a Nomad server at this address.",
-	"loginServerIntro": "Enter the address of your Nomad server.",
+	"loginErrorUnreachable": "Could not reach a Polder server at this address.",
+	"loginServerIntro": "Enter the address of your Polder server.",
 	"management": "Management",
 	"manageUsersHint": "Accounts, roles and quotas",
 	"modified": "Modified",
@@ -541,7 +542,7 @@
 	"hideFiles": "Hide files",
 	"uploadExistingFiles": "Upload existing files",
 	"uploadExistingFilesHint": "Otherwise only files added from now on are uploaded",
-	"storageAccessDenied": "Nomad needs access to your files to upload this folder. Allow all files access, or at least photos and videos, in the app settings.",
+	"storageAccessDenied": "Polder needs access to your files to upload this folder. Allow all files access, or at least photos and videos, in the app settings.",
 	"folderWillBeCreated": "This folder doesn't exist yet. It will be created.",
 	"trayUpToDate": "Up to date",
 	"traySyncing": "Syncing…",
@@ -556,10 +557,10 @@
 	"traySyncPaused": "Sync paused",
 	"traySyncFailed": "Sync failed",
 	"traySignedOut": "Not signed in",
-	"trayOpenApp": "Open Nomad",
+	"trayOpenApp": "Open Polder",
 	"trayOpenSyncedFolders": "Open synced folders",
-	"trayQuit": "Quit Nomad",
+	"trayQuit": "Quit Polder",
 	"quit": "Quit",
 	"quitWhileSyncingTitle": "Quit while syncing?",
-	"quitWhileSyncingMessage": "Nomad is still syncing. Unfinished transfers continue the next time you open Nomad."
+	"quitWhileSyncingMessage": "Polder is still syncing. Unfinished transfers continue the next time you open Polder."
 }

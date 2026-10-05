@@ -81,6 +81,15 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
   }
 
   @override
+  void reassemble() {
+    super.reassemble();
+    if (!_isDesktop) return;
+    _images.clear();
+    _shown = null;
+    _apply();
+  }
+
+  @override
   void dispose() {
     if (_isDesktop) {
       windowManager.removeListener(this);

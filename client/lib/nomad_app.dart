@@ -19,10 +19,6 @@ class NomadApp extends ConsumerStatefulWidget {
 class _NomadAppState extends ConsumerState<NomadApp> {
   late final AppLifecycleListener _lifecycle;
 
-  Color? _seed;
-  late ThemeData _light;
-  late ThemeData _dark;
-
   @override
   void initState() {
     super.initState();
@@ -35,21 +31,13 @@ class _NomadAppState extends ConsumerState<NomadApp> {
     super.dispose();
   }
 
-  void _updateThemes(Color seed) {
-    if (seed == _seed) return;
-    _seed = seed;
-    _light = AppTheme.build(seed, Brightness.light);
-    _dark = AppTheme.build(seed, Brightness.dark);
-  }
-
   @override
   Widget build(BuildContext context) {
     final appearance = ref.watch(appearanceProvider);
-    _updateThemes(appearance.seed);
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-      theme: _light,
-      darkTheme: _dark,
+      theme: AppTheme.build(appearance.seed, Brightness.light),
+      darkTheme: AppTheme.build(appearance.seed, Brightness.dark),
       themeMode: appearance.mode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
