@@ -137,6 +137,10 @@ func (cfg Config) PreviewCacheDir() string {
 	return filepath.Join(cfg.ConfigDir, "cache", "previews")
 }
 
+func (cfg Config) SearchIndexDir() string {
+	return filepath.Join(cfg.ConfigDir, "search", "index")
+}
+
 func (cfg Config) JWTKeyPath() string {
 	return filepath.Join(cfg.ConfigDir, "jwt.key")
 }

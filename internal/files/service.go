@@ -321,6 +321,20 @@ func (s *Service) UsedBytes(ctx context.Context, userID int64) (int64, error) {
 	return usedBytes(ctx, s.db, userID)
 }
 
+func (s *Service) AllEntries(ctx context.Context, userID int64) ([]Entry, error) {
+	return listAll(ctx, s.db, userID)
+}
+
+func (s *Service) EntriesByID(ctx context.Context, userID int64, ids []int64) (map[int64]Entry, error) {
+	return entriesByID(ctx, s.db, userID, ids)
+}
+
+func (s *Service) LatestChangeSeq(ctx context.Context, userID int64) (int64, error) {
+	var seq int64
+	err := s.db.QueryRowContext(ctx, `SELECT COALESCE(MAX(id), 0) FROM changes WHERE user_id = ?`, userID).Scan(&seq)
+	return seq, err
+}
+
 func nonRootPath(rawPath string) (string, error) {
 	cleanPath, err := storage.CleanPath(rawPath)
 	if err != nil {

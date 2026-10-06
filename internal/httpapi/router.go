@@ -18,6 +18,7 @@ import (
 	"polder-server/internal/auth"
 	"polder-server/internal/files"
 	"polder-server/internal/preview"
+	"polder-server/internal/search"
 	"polder-server/internal/settings"
 	"polder-server/internal/syncing"
 	"polder-server/internal/users"
@@ -32,6 +33,7 @@ type API struct {
 	sync     *syncing.Service
 	previews *preview.Worker
 	activity *activity.Hub
+	search   *search.Service
 	limiter  *failedAttemptLimiter
 }
 
@@ -44,6 +46,7 @@ type Dependencies struct {
 	Sync                   *syncing.Service
 	Previews               *preview.Worker
 	Activity               *activity.Hub
+	Search                 *search.Service
 	LoginAttemptsPerMinute int
 	// Web serves the browser client for every path outside the API; nil serves only the API.
 	Web http.Handler
@@ -59,6 +62,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		sync:     deps.Sync,
 		previews: deps.Previews,
 		activity: deps.Activity,
+		search:   deps.Search,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 	}
 
@@ -137,6 +141,10 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image", a.previewFile,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
 
+	register(user, http.MethodGet, "/search", "searchFiles", "Find files and folders by name, type, date and size", a.searchFiles,
+		withDescription(searchDescription))
+	register(user, http.MethodGet, "/search/suggest", "suggestSearch", "Complete the search tag under the cursor", a.suggestSearch)
+
 	register(user, http.MethodGet, "/trash", "listTrash", "List deleted items, most recent first", a.listTrash)
 	register(user, http.MethodDelete, "/trash", "emptyTrash", "Delete everything in the trash permanently", a.emptyTrash)
 	register(user, http.MethodGet, "/trash/retention", "getTrashRetention", "How long deleted items stay in the trash", a.getTrashRetention)
@@ -169,6 +177,8 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodPatch, "/admin/users/{userID}", "updateUser", "Change a user; password changes and disabling log the user out", a.updateUser)
 	register(admin, http.MethodGet, "/admin/settings", "getServerSettings", "Server-wide settings", a.getServerSettings)
 	register(admin, http.MethodPatch, "/admin/settings", "updateServerSettings", "Change server-wide settings", a.updateServerSettings)
+	register(admin, http.MethodGet, "/admin/search", "getSearchStatus", "State of the search index", a.searchStatus)
+	register(admin, http.MethodPost, "/admin/search/rebuild", "rebuildSearchIndex", "Rebuild the search index from scratch in the background", a.rebuildSearchIndex, accepted)
 	register(admin, http.MethodDelete, "/admin/users/{userID}", "deleteUser", "Delete a user; their files are archived on the server", a.deleteUser)
 }
 
@@ -182,6 +192,10 @@ func register[I, O any](api huma.API, method, path, id, summary string, handler 
 
 func created(operation *huma.Operation) {
 	operation.DefaultStatus = http.StatusCreated
+}
+
+func accepted(operation *huma.Operation) {
+	operation.DefaultStatus = http.StatusAccepted
 }
 
 func maxBody(limit int64) func(*huma.Operation) {

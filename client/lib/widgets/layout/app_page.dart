@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
+import "package:polder/screens/search/open_search.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/app_bar_fade.dart";
@@ -41,7 +42,7 @@ class AppPage extends StatelessWidget {
         leading: showMenu ? const MoreOptionsButton() : null,
         titleSpacing: showMenu ? 4 : null,
         title: title,
-        actions: [...?actions, const SizedBox(width: 8)],
+        actions: [if (isRoot) const SearchButton(), ...?actions, const SizedBox(width: 8)],
         bottom: bottom,
       ),
       body: body,

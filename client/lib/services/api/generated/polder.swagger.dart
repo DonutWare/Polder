@@ -114,6 +114,50 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///State of the search index
+  Future<chopper.Response<IndexStatus>> getSearchStatus() {
+    generatedMapping.putIfAbsent(IndexStatus, () => IndexStatus.fromJsonFactory);
+
+    return _getSearchStatus();
+  }
+
+  ///State of the search index
+  @GET(path: '/api/v1/admin/search')
+  Future<chopper.Response<IndexStatus>> _getSearchStatus({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'State of the search index',
+      operationId: 'getSearchStatus',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Rebuild the search index from scratch in the background
+  Future<chopper.Response> rebuildSearchIndex() {
+    return _rebuildSearchIndex();
+  }
+
+  ///Rebuild the search index from scratch in the background
+  @POST(path: '/api/v1/admin/search/rebuild', optionalBody: true)
+  Future<chopper.Response> _rebuildSearchIndex({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Rebuild the search index from scratch in the background',
+      operationId: 'rebuildSearchIndex',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
   ///Server-wide settings
   Future<chopper.Response<ServerSettings>> getServerSettings() {
     generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
@@ -614,6 +658,75 @@ abstract class Polder extends ChopperService {
       produces: [],
       security: ["bearer"],
       tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  ///Find files and folders by name, type, date and size
+  ///@param q What to look for; see the operation description for tags
+  ///@param limit
+  ///@param offset
+  Future<chopper.Response<Results>> searchFiles({String? q, int? limit, int? offset}) {
+    generatedMapping.putIfAbsent(Results, () => Results.fromJsonFactory);
+
+    return _searchFiles(q: q, limit: limit, offset: offset);
+  }
+
+  ///Find files and folders by name, type, date and size
+  ///@param q What to look for; see the operation description for tags
+  ///@param limit
+  ///@param offset
+  @GET(path: '/api/v1/search')
+  Future<chopper.Response<Results>> _searchFiles({
+    @Query('q') String? q,
+    @Query('limit') int? limit,
+    @Query('offset') int? offset,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '''Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. Tags narrow the results; they have the form `key<op>values`:
+
+- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`
+- `ext`: extensions only
+- `in`: a folder and everything below it, such as `in="/My Docs"`
+- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`
+- `size`: such as `10mb`, `500kb`, `1.5gb`
+
+Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. Commas separate alternatives, separate tags must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified>7d` is newer than a week ago.''',
+      summary: 'Find files and folders by name, type, date and size',
+      operationId: 'searchFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["search"],
+      deprecated: false,
+    ),
+  });
+
+  ///Complete the search tag under the cursor
+  ///@param q
+  ///@param cursor Caret position in the query, in UTF-16 code units
+  Future<chopper.Response<Suggestions>> suggestSearch({String? q, int? cursor}) {
+    generatedMapping.putIfAbsent(Suggestions, () => Suggestions.fromJsonFactory);
+
+    return _suggestSearch(q: q, cursor: cursor);
+  }
+
+  ///Complete the search tag under the cursor
+  ///@param q
+  ///@param cursor Caret position in the query, in UTF-16 code units
+  @GET(path: '/api/v1/search/suggest')
+  Future<chopper.Response<Suggestions>> _suggestSearch({
+    @Query('q') String? q,
+    @Query('cursor') int? cursor,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Complete the search tag under the cursor',
+      operationId: 'suggestSearch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["search"],
       deprecated: false,
     ),
   });

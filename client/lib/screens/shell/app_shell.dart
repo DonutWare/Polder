@@ -8,6 +8,7 @@ import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
 import "package:polder/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/screens/shell/sync_background_activator.dart";
 import "package:polder/screens/shell/widgets/more_options.dart";
@@ -60,7 +61,7 @@ class AppShell extends ConsumerWidget {
           subtitle: account == null ? "" : Uri.tryParse(account.serverUrl)?.host ?? account.serverUrl,
           markIcon: IconsaxPlusBold.cloud,
           sidebarFooter: const QuotaBar(),
-          child: child,
+          child: SearchShortcut(child: child),
         ),
       ),
     );

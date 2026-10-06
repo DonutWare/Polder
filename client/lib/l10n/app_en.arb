@@ -269,6 +269,111 @@
 	"roleUser": "User",
 	"rootFolder": "Files",
 	"save": "Save",
+	"searchAddFilterButton": "Filter",
+	"searchChooseFolder": "Choose folder",
+	"searchClear": "Clear",
+	"searchCustomSize": "Another size, like 250mb",
+	"searchCustomType": "Another type or extension, like heic",
+	"searchDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+	"@searchDaysAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchFieldFolder": "Folder",
+	"searchFieldModified": "Modified",
+	"searchFieldSize": "Size",
+	"searchFieldType": "Type",
+	"searchFilesCount": "{count, plural, =1{1 file} other{{count} files}}",
+	"@searchFilesCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchFilterAdd": "Add filter",
+	"searchFilterValues": "Values",
+	"searchGoTo": "Go to",
+	"searchHint": "Search files, folders and pages",
+	"searchKeywordsAbout": "version, licenses, info",
+	"searchKeywordsActivity": "history, log, uploads, downloads, transfers, sessions, devices",
+	"searchKeywordsAdmin": "admin, server, administration, retention, storage",
+	"searchKeywordsAdminUsers": "accounts, people, members, quota",
+	"searchKeywordsAutoUpload": "camera, photos, backup, gallery",
+	"searchKeywordsConflicts": "conflict, resolve, versions",
+	"searchKeywordsFiles": "browse, documents, home, storage",
+	"searchKeywordsSettings": "preferences, appearance, theme, account, language, password",
+	"searchKeywordsSync": "folders, desktop, mirror",
+	"searchKeywordsTrash": "deleted, recycle bin, restore, bin",
+	"searchMonthsAgo": "{count, plural, =1{1 month ago} other{{count} months ago}}",
+	"@searchMonthsAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchNoResults": "Nothing matches your search",
+	"searchOpAfter": "after",
+	"searchOpAtLeast": "at least",
+	"searchOpAtMost": "at most",
+	"searchOpBefore": "before",
+	"searchOpBetween": "between",
+	"searchOpFrom": "from",
+	"searchOpIs": "is",
+	"searchOpIsNot": "is not",
+	"searchOpLarger": "larger than",
+	"searchOpOn": "on",
+	"searchOpSmaller": "smaller than",
+	"searchOpUntil": "until",
+	"searchPickDate": "Pick a date",
+	"searchPickRange": "Pick dates",
+	"searchPresetToday": "today",
+	"searchPresetYesterday": "yesterday",
+	"searchRange": "{from} and {to}",
+	"@searchRange": {
+		"placeholders": {
+			"from": {
+				"type": "String"
+			},
+			"to": {
+				"type": "String"
+			}
+		}
+	},
+	"searchShowInFolder": "Show in folder",
+	"searchSizeFrom": "From",
+	"searchSizeTo": "To",
+	"searchSyncConflicts": "Sync conflicts",
+	"searchTipsBody": "Type part of a name, even with typos. Add tags like type=pdf, modified>7d or size>100mb, use != to leave things out, or pick one with Filter.",
+	"searchTipsTitle": "Narrow it down",
+	"searchTooltip": "Search ({shortcut})",
+	"@searchTooltip": {
+		"placeholders": {
+			"shortcut": {
+				"type": "String"
+			}
+		}
+	},
+	"searchWeeksAgo": "{count, plural, =1{1 week ago} other{{count} weeks ago}}",
+	"@searchWeeksAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchYearsAgo": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+	"@searchYearsAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"server": "Server",
 	"serverFolder": "Folder on the server",
 	"serverTrashRetention": "Trash retention",

@@ -33,6 +33,8 @@ COPY --from=flutter /client/build/web /web
 FROM web-${WEB} AS web
 
 FROM golang:1.27-alpine AS build
+# mailcap provides /etc/mime.types, which Go reads to map extensions to MIME types; distroless has none.
+RUN apk add --no-cache mailcap
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -43,6 +45,7 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/polder ./cmd/polde
 
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/polder /usr/local/bin/polder
+COPY --from=build /etc/mime.types /etc/mime.types
 COPY --from=build --chown=65532:65532 /out/config /config
 COPY --from=build --chown=65532:65532 /out/data /data
 ENV POLDER_CONFIG_DIR=/config \

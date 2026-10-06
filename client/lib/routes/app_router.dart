@@ -17,6 +17,7 @@ import "package:polder/screens/auto_upload/auto_upload_screen.dart";
 import "package:polder/screens/browser/browser_screen.dart";
 import "package:polder/screens/login/login_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
+import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/settings/about_screen.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
@@ -62,8 +63,15 @@ final routerProvider = Provider<GoRouter>((ref) {
               lastBrowsedPath = path;
               return null;
             },
+            builder: (_, state) => BrowserScreen(
+              path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
+              select: state.uri.queryParameters[AppRoutes.selectParameter],
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.search,
             builder: (_, state) =>
-                BrowserScreen(path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root),
+                SearchScreen(initialQuery: state.uri.queryParameters[AppRoutes.queryParameter] ?? ""),
           ),
           GoRoute(path: AppRoutes.activity, builder: (_, _) => const ActivityScreen()),
           GoRoute(

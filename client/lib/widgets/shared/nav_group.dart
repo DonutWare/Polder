@@ -50,17 +50,20 @@ class GroupedTile extends StatelessWidget {
   final int count;
   final Widget child;
 
+  static ShapeBorder shapeFor(int index, int count, {BorderSide side = BorderSide.none}) => RoundedSuperellipseBorder(
+    side: side,
+    borderRadius: BorderRadius.vertical(
+      top: Radius.circular(index == 0 ? outer : inner),
+      bottom: Radius.circular(index == count - 1 ? outer : inner),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsets.only(top: index > 0 ? 2 : 0),
     child: Material(
       color: AppColors.of(context).panel,
-      shape: RoundedSuperellipseBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(index == 0 ? outer : inner),
-          bottom: Radius.circular(index == count - 1 ? outer : inner),
-        ),
-      ),
+      shape: shapeFor(index, count),
       clipBehavior: Clip.antiAlias,
       child: ListTileTheme.merge(shape: const RoundedRectangleBorder(), child: child),
     ),

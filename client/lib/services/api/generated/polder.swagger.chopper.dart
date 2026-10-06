@@ -77,6 +77,52 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<IndexStatus>> _getSearchStatus({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'State of the search index',
+      operationId: 'getSearchStatus',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/search');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<IndexStatus, IndexStatus>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _rebuildSearchIndex({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Rebuild the search index from scratch in the background',
+      operationId: 'rebuildSearchIndex',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/search/rebuild');
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<ServerSettings>> _getServerSettings({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -586,6 +632,76 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<Results>> _searchFiles({
+    String? q,
+    int? limit,
+    int? offset,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '''Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. Tags narrow the results; they have the form `key<op>values`:
+
+- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`
+- `ext`: extensions only
+- `in`: a folder and everything below it, such as `in="/My Docs"`
+- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`
+- `size`: such as `10mb`, `500kb`, `1.5gb`
+
+Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. Commas separate alternatives, separate tags must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified>7d` is newer than a week ago.''',
+      summary: 'Find files and folders by name, type, date and size',
+      operationId: 'searchFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["search"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/search');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'q': q,
+      'limit': limit,
+      'offset': offset,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Results, Results>($request);
+  }
+
+  @override
+  Future<Response<Suggestions>> _suggestSearch({
+    String? q,
+    int? cursor,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Complete the search tag under the cursor',
+      operationId: 'suggestSearch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["search"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/search/suggest');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'q': q,
+      'cursor': cursor,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Suggestions, Suggestions>($request);
   }
 
   @override

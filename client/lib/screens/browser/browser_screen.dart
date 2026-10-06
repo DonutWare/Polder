@@ -13,9 +13,10 @@ import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/layout/app_page.dart";
 
 class BrowserScreen extends StatelessWidget {
-  const BrowserScreen({required this.path, super.key});
+  const BrowserScreen({required this.path, this.select, super.key});
 
   final String path;
+  final String? select;
 
   @override
   Widget build(BuildContext context) => PopScope(
@@ -32,7 +33,7 @@ class BrowserScreen extends StatelessWidget {
               preferredSize: const Size.fromHeight(44),
               child: Breadcrumbs(path: path),
             ),
-      body: DirectoryView(path: path),
+      body: DirectoryView(path: path, select: select),
       floatingActionButton: BrowserAddButton(path: path),
     ),
   );

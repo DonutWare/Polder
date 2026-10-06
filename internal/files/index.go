@@ -159,6 +159,34 @@ func listTree(ctx context.Context, q querier, userID int64, cleanPath string) ([
 	return entries, err
 }
 
+const entriesByIDBatch = 500
+
+func entriesByID(ctx context.Context, q querier, userID int64, ids []int64) (map[int64]Entry, error) {
+	found := make(map[int64]Entry, len(ids))
+	for len(ids) > 0 {
+		batch := ids[:min(len(ids), entriesByIDBatch)]
+		ids = ids[len(batch):]
+		args := make([]any, 0, len(batch)+1)
+		args = append(args, userID)
+		for _, id := range batch {
+			args = append(args, id)
+		}
+		placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
+		rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = ? AND f.id IN (`+placeholders+`)`, args...)
+		if err != nil {
+			return nil, err
+		}
+		entries, err := scanEntries(rows)
+		if err != nil {
+			return nil, err
+		}
+		for _, entry := range entries {
+			found[entry.ID] = entry
+		}
+	}
+	return found, nil
+}
+
 func sortForListing(entries []Entry) {
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].IsDir != entries[j].IsDir {

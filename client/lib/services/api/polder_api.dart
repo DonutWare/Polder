@@ -8,6 +8,7 @@ import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/manifest.dart";
+import "package:polder/models/search.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
@@ -67,6 +68,12 @@ class PolderApi {
   Future<DirectoryListing> list(String path) async => (await _service.listFiles(path: path)).body!.toModel();
 
   Future<FileEntry> stat(String path) async => (await _service.statFile(path: path)).body!.toModel();
+
+  Future<SearchResults> search(String query, {int limit = 50, int offset = 0}) async =>
+      (await _service.searchFiles(q: query, limit: limit, offset: offset)).body!.toModel();
+
+  Future<SearchSuggestions> suggestSearch(String query, int cursor) async =>
+      (await _service.suggestSearch(q: query, cursor: cursor)).body!.toModel();
 
   Future<Stream<Uint8List>> openContent(String path, {ByteRange? range, int? ifMatchRev}) async {
     final response = await _service.downloadFile(

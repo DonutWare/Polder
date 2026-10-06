@@ -19,6 +19,7 @@ import (
 	"polder-server/internal/httpapi"
 	"polder-server/internal/preview"
 	"polder-server/internal/scanner"
+	"polder-server/internal/search"
 	"polder-server/internal/settings"
 	"polder-server/internal/storage"
 	"polder-server/internal/syncing"
@@ -39,6 +40,7 @@ type App struct {
 	Users    *users.Store
 	Settings *settings.Store
 	Activity *activity.Hub
+	Search   *search.Service
 	db       *sql.DB
 	scanner  *scanner.Scanner
 	previews *preview.Worker
@@ -79,12 +81,18 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	fileService.OnContentRemoved(previews.RequestCleanup)
 	activityHub := activity.NewHub(activity.NewStore(db))
 	fileService.OnMutation(activityHub.FileMutation)
+	searchService, err := search.Open(cfg.SearchIndexDir(), fileService, userStore)
+	if err != nil {
+		return nil, err
+	}
+	fileService.OnMutation(searchService.FileMutation)
 	authService := auth.NewService(userService, sessions, tokens)
 	authService.OnSession(func(ctx context.Context, user users.User, session auth.Session, event auth.SessionEvent) {
 		activityHub.Session(ctx, user, session.ID, session.DeviceName, event == auth.SessionStarted)
 	})
 	web, err := webClient(cfg)
 	if err != nil {
+		searchService.Close()
 		return nil, err
 	}
 
@@ -97,6 +105,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Sync:                   syncService,
 		Previews:               previews,
 		Activity:               activityHub,
+		Search:                 searchService,
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		Web:                    web,
 	})
@@ -107,6 +116,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Users:    userStore,
 		Settings: serverSettings,
 		Activity: activityHub,
+		Search:   searchService,
 		db:       db,
 		scanner:  scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles),
 		previews: previews,
@@ -139,12 +149,13 @@ func webClient(cfg config.Config) (http.Handler, error) {
 }
 
 func (a *App) Close() error {
-	return a.db.Close()
+	return errors.Join(a.Search.Close(), a.db.Close())
 }
 
 func (a *App) StartBackgroundWork(ctx context.Context) {
 	go a.scanner.Run(ctx)
 	go a.previews.Run(ctx)
+	go a.Search.Run(ctx)
 	go repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads)
 	go repeat(ctx, trashPurgeInterval, "purge expired trash", func(ctx context.Context) error {
 		return a.PurgeExpiredTrash(ctx, time.Now())

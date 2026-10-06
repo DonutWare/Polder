@@ -163,9 +163,37 @@ Map<String, dynamic> _$EventMessageToJson(EventMessage instance) => <String, dyn
   'userId': instance.userId,
 };
 
+FacetCount _$FacetCountFromJson(Map<String, dynamic> json) =>
+    FacetCount(count: (json['count'] as num).toInt(), value: json['value'] as String);
+
+Map<String, dynamic> _$FacetCountToJson(FacetCount instance) => <String, dynamic>{
+  'count': instance.count,
+  'value': instance.value,
+};
+
+Facets _$FacetsFromJson(Map<String, dynamic> json) => Facets(
+  exts: (json['exts'] as List<dynamic>?)?.map((e) => FacetCount.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  types: (json['types'] as List<dynamic>?)?.map((e) => FacetCount.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$FacetsToJson(Facets instance) => <String, dynamic>{
+  'exts': ?instance.exts?.map((e) => e.toJson()).toList(),
+  'types': ?instance.types?.map((e) => e.toJson()).toList(),
+};
+
 HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) => HealthStatus(status: json['status'] as String);
 
 Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) => <String, dynamic>{'status': instance.status};
+
+IndexStatus _$IndexStatusFromJson(Map<String, dynamic> json) => IndexStatus(
+  documents: (json['documents'] as num).toInt(),
+  lastSync: json['lastSync'] == null ? null : DateTime.parse(json['lastSync'] as String),
+);
+
+Map<String, dynamic> _$IndexStatusToJson(IndexStatus instance) => <String, dynamic>{
+  'documents': instance.documents,
+  'lastSync': ?instance.lastSync?.toIso8601String(),
+};
 
 ListResponse _$ListResponseFromJson(Map<String, dynamic> json) => ListResponse(
   entries: (json['entries'] as List<dynamic>?)?.map((e) => Entry.fromJson(e as Map<String, dynamic>)).toList() ?? [],
@@ -277,6 +305,21 @@ Map<String, dynamic> _$ManifestToJson(Manifest instance) => <String, dynamic>{
   'size': instance.size,
 };
 
+Match _$MatchFromJson(Map<String, dynamic> json) => Match(
+  entry: Entry.fromJson(json['entry'] as Map<String, dynamic>),
+  nameMatches:
+      (json['nameMatches'] as List<dynamic>?)?.map((e) => TextSpan.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  score: (json['score'] as num).toDouble(),
+  snippet: json['snippet'] as String?,
+);
+
+Map<String, dynamic> _$MatchToJson(Match instance) => <String, dynamic>{
+  'entry': instance.entry.toJson(),
+  'nameMatches': ?instance.nameMatches?.map((e) => e.toJson()).toList(),
+  'score': instance.score,
+  'snippet': ?instance.snippet,
+};
+
 MoveRequest _$MoveRequestFromJson(Map<String, dynamic> json) =>
     MoveRequest(baseRev: (json['baseRev'] as num?)?.toInt(), from: json['from'] as String, to: json['to'] as String);
 
@@ -304,6 +347,34 @@ PathRequest _$PathRequestFromJson(Map<String, dynamic> json) => PathRequest(path
 
 Map<String, dynamic> _$PathRequestToJson(PathRequest instance) => <String, dynamic>{'path': instance.path};
 
+QueryFilter _$QueryFilterFromJson(Map<String, dynamic> json) => QueryFilter(
+  end: (json['end'] as num).toInt(),
+  key: queryFilterKeyFromJson(json['key']),
+  op: queryFilterOpFromJson(json['op']),
+  start: (json['start'] as num).toInt(),
+  values: (json['values'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+);
+
+Map<String, dynamic> _$QueryFilterToJson(QueryFilter instance) => <String, dynamic>{
+  'end': instance.end,
+  'key': ?queryFilterKeyToJson(instance.key),
+  'op': ?queryFilterOpToJson(instance.op),
+  'start': instance.start,
+  'values': ?instance.values,
+};
+
+QueryWarning _$QueryWarningFromJson(Map<String, dynamic> json) => QueryWarning(
+  end: (json['end'] as num).toInt(),
+  message: json['message'] as String,
+  start: (json['start'] as num).toInt(),
+);
+
+Map<String, dynamic> _$QueryWarningToJson(QueryWarning instance) => <String, dynamic>{
+  'end': instance.end,
+  'message': instance.message,
+  'start': instance.start,
+};
+
 RefreshRequest _$RefreshRequestFromJson(Map<String, dynamic> json) =>
     RefreshRequest(deviceName: json['deviceName'] as String?, refreshToken: json['refreshToken'] as String);
 
@@ -317,6 +388,26 @@ RestoreRequest _$RestoreRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$RestoreRequestToJson(RestoreRequest instance) => <String, dynamic>{
   'onConflict': ?restoreRequestOnConflictNullableToJson(instance.onConflict),
+};
+
+Results _$ResultsFromJson(Map<String, dynamic> json) => Results(
+  facets: Facets.fromJson(json['facets'] as Map<String, dynamic>),
+  filters:
+      (json['filters'] as List<dynamic>?)?.map((e) => QueryFilter.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  query: json['query'] as String,
+  results: (json['results'] as List<dynamic>?)?.map((e) => Match.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  total: (json['total'] as num).toInt(),
+  warnings:
+      (json['warnings'] as List<dynamic>?)?.map((e) => QueryWarning.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$ResultsToJson(Results instance) => <String, dynamic>{
+  'facets': instance.facets.toJson(),
+  'filters': ?instance.filters?.map((e) => e.toJson()).toList(),
+  'query': instance.query,
+  'results': ?instance.results?.map((e) => e.toJson()).toList(),
+  'total': instance.total,
+  'warnings': ?instance.warnings?.map((e) => e.toJson()).toList(),
 };
 
 RetentionRequest _$RetentionRequestFromJson(Map<String, dynamic> json) =>
@@ -347,6 +438,42 @@ Map<String, dynamic> _$ServerSettingsChangesToJson(ServerSettingsChanges instanc
 SetupStatus _$SetupStatusFromJson(Map<String, dynamic> json) => SetupStatus(needsSetup: json['needsSetup'] as bool);
 
 Map<String, dynamic> _$SetupStatusToJson(SetupStatus instance) => <String, dynamic>{'needsSetup': instance.needsSetup};
+
+Suggestion _$SuggestionFromJson(Map<String, dynamic> json) => Suggestion(
+  count: (json['count'] as num).toInt(),
+  insert: json['insert'] as String,
+  kind: suggestionKindFromJson(json['kind']),
+  value: json['value'] as String,
+);
+
+Map<String, dynamic> _$SuggestionToJson(Suggestion instance) => <String, dynamic>{
+  'count': instance.count,
+  'insert': instance.insert,
+  'kind': ?suggestionKindToJson(instance.kind),
+  'value': instance.value,
+};
+
+Suggestions _$SuggestionsFromJson(Map<String, dynamic> json) => Suggestions(
+  end: (json['end'] as num).toInt(),
+  start: (json['start'] as num).toInt(),
+  suggestions:
+      (json['suggestions'] as List<dynamic>?)?.map((e) => Suggestion.fromJson(e as Map<String, dynamic>)).toList() ??
+      [],
+);
+
+Map<String, dynamic> _$SuggestionsToJson(Suggestions instance) => <String, dynamic>{
+  'end': instance.end,
+  'start': instance.start,
+  'suggestions': ?instance.suggestions?.map((e) => e.toJson()).toList(),
+};
+
+TextSpan _$TextSpanFromJson(Map<String, dynamic> json) =>
+    TextSpan(end: (json['end'] as num).toInt(), start: (json['start'] as num).toInt());
+
+Map<String, dynamic> _$TextSpanToJson(TextSpan instance) => <String, dynamic>{
+  'end': instance.end,
+  'start': instance.start,
+};
 
 TokenPair _$TokenPairFromJson(Map<String, dynamic> json) => TokenPair(
   accessToken: json['accessToken'] as String,

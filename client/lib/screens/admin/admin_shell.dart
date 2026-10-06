@@ -7,6 +7,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/screens/shell/widgets/more_options.dart";
 import "package:polder/util/localization_helper.dart";
@@ -40,7 +41,7 @@ class AdminShell extends ConsumerWidget {
           label: context.localized.backToFiles,
           onTap: () => context.go(AppRoutes.files),
         ),
-        child: child,
+        child: SearchShortcut(child: child),
       ),
     );
   }

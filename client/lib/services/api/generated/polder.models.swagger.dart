@@ -772,6 +772,85 @@ extension $EventMessageExtension on EventMessage {
 }
 
 @JsonSerializable(explicitToJson: true)
+class FacetCount {
+  const FacetCount({required this.count, required this.value});
+
+  factory FacetCount.fromJson(Map<String, dynamic> json) => _$FacetCountFromJson(json);
+
+  static const toJsonFactory = _$FacetCountToJson;
+  Map<String, dynamic> toJson() => _$FacetCountToJson(this);
+
+  @JsonKey(name: 'count', includeIfNull: false)
+  final int count;
+  @JsonKey(name: 'value', includeIfNull: false)
+  final String value;
+  static const fromJsonFactory = _$FacetCountFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is FacetCount &&
+            (identical(other.count, count) || const DeepCollectionEquality().equals(other.count, count)) &&
+            (identical(other.value, value) || const DeepCollectionEquality().equals(other.value, value)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(count) ^ const DeepCollectionEquality().hash(value) ^ runtimeType.hashCode;
+}
+
+extension $FacetCountExtension on FacetCount {
+  FacetCount copyWith({int? count, String? value}) {
+    return FacetCount(count: count ?? this.count, value: value ?? this.value);
+  }
+
+  FacetCount copyWithWrapped({Wrapped<int>? count, Wrapped<String>? value}) {
+    return FacetCount(
+      count: (count != null ? count.value : this.count),
+      value: (value != null ? value.value : this.value),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Facets {
+  const Facets({this.exts, this.types});
+
+  factory Facets.fromJson(Map<String, dynamic> json) => _$FacetsFromJson(json);
+
+  static const toJsonFactory = _$FacetsToJson;
+  Map<String, dynamic> toJson() => _$FacetsToJson(this);
+
+  @JsonKey(name: 'exts', includeIfNull: false, defaultValue: <FacetCount>[])
+  final List<FacetCount>? exts;
+  @JsonKey(name: 'types', includeIfNull: false, defaultValue: <FacetCount>[])
+  final List<FacetCount>? types;
+  static const fromJsonFactory = _$FacetsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Facets &&
+            (identical(other.exts, exts) || const DeepCollectionEquality().equals(other.exts, exts)) &&
+            (identical(other.types, types) || const DeepCollectionEquality().equals(other.types, types)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(exts) ^ const DeepCollectionEquality().hash(types) ^ runtimeType.hashCode;
+}
+
+extension $FacetsExtension on Facets {
+  Facets copyWith({List<FacetCount>? exts, List<FacetCount>? types}) {
+    return Facets(exts: exts ?? this.exts, types: types ?? this.types);
+  }
+
+  Facets copyWithWrapped({Wrapped<List<FacetCount>?>? exts, Wrapped<List<FacetCount>?>? types}) {
+    return Facets(exts: (exts != null ? exts.value : this.exts), types: (types != null ? types.value : this.types));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class HealthStatus {
   const HealthStatus({required this.status});
 
@@ -802,6 +881,50 @@ extension $HealthStatusExtension on HealthStatus {
 
   HealthStatus copyWithWrapped({Wrapped<String>? status}) {
     return HealthStatus(status: (status != null ? status.value : this.status));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class IndexStatus {
+  const IndexStatus({required this.documents, this.lastSync});
+
+  factory IndexStatus.fromJson(Map<String, dynamic> json) => _$IndexStatusFromJson(json);
+
+  static const toJsonFactory = _$IndexStatusToJson;
+  Map<String, dynamic> toJson() => _$IndexStatusToJson(this);
+
+  @JsonKey(name: 'documents', includeIfNull: false)
+  final int documents;
+  @JsonKey(name: 'lastSync', includeIfNull: false)
+  final DateTime? lastSync;
+  static const fromJsonFactory = _$IndexStatusFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is IndexStatus &&
+            (identical(other.documents, documents) ||
+                const DeepCollectionEquality().equals(other.documents, documents)) &&
+            (identical(other.lastSync, lastSync) || const DeepCollectionEquality().equals(other.lastSync, lastSync)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(documents) ^
+      const DeepCollectionEquality().hash(lastSync) ^
+      runtimeType.hashCode;
+}
+
+extension $IndexStatusExtension on IndexStatus {
+  IndexStatus copyWith({int? documents, DateTime? lastSync}) {
+    return IndexStatus(documents: documents ?? this.documents, lastSync: lastSync ?? this.lastSync);
+  }
+
+  IndexStatus copyWithWrapped({Wrapped<int>? documents, Wrapped<DateTime?>? lastSync}) {
+    return IndexStatus(
+      documents: (documents != null ? documents.value : this.documents),
+      lastSync: (lastSync != null ? lastSync.value : this.lastSync),
+    );
   }
 }
 
@@ -1313,6 +1436,70 @@ extension $ManifestExtension on Manifest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class Match {
+  const Match({required this.entry, this.nameMatches, required this.score, this.snippet});
+
+  factory Match.fromJson(Map<String, dynamic> json) => _$MatchFromJson(json);
+
+  static const toJsonFactory = _$MatchToJson;
+  Map<String, dynamic> toJson() => _$MatchToJson(this);
+
+  @JsonKey(name: 'entry', includeIfNull: false)
+  final Entry entry;
+  @JsonKey(name: 'nameMatches', includeIfNull: false, defaultValue: <TextSpan>[])
+  final List<TextSpan>? nameMatches;
+  @JsonKey(name: 'score', includeIfNull: false)
+  final double score;
+  @JsonKey(name: 'snippet', includeIfNull: false)
+  final String? snippet;
+  static const fromJsonFactory = _$MatchFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Match &&
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.nameMatches, nameMatches) ||
+                const DeepCollectionEquality().equals(other.nameMatches, nameMatches)) &&
+            (identical(other.score, score) || const DeepCollectionEquality().equals(other.score, score)) &&
+            (identical(other.snippet, snippet) || const DeepCollectionEquality().equals(other.snippet, snippet)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(entry) ^
+      const DeepCollectionEquality().hash(nameMatches) ^
+      const DeepCollectionEquality().hash(score) ^
+      const DeepCollectionEquality().hash(snippet) ^
+      runtimeType.hashCode;
+}
+
+extension $MatchExtension on Match {
+  Match copyWith({Entry? entry, List<TextSpan>? nameMatches, double? score, String? snippet}) {
+    return Match(
+      entry: entry ?? this.entry,
+      nameMatches: nameMatches ?? this.nameMatches,
+      score: score ?? this.score,
+      snippet: snippet ?? this.snippet,
+    );
+  }
+
+  Match copyWithWrapped({
+    Wrapped<Entry>? entry,
+    Wrapped<List<TextSpan>?>? nameMatches,
+    Wrapped<double>? score,
+    Wrapped<String?>? snippet,
+  }) {
+    return Match(
+      entry: (entry != null ? entry.value : this.entry),
+      nameMatches: (nameMatches != null ? nameMatches.value : this.nameMatches),
+      score: (score != null ? score.value : this.score),
+      snippet: (snippet != null ? snippet.value : this.snippet),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class MoveRequest {
   const MoveRequest({this.baseRev, required this.from, required this.to});
 
@@ -1459,6 +1646,130 @@ extension $PathRequestExtension on PathRequest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class QueryFilter {
+  const QueryFilter({required this.end, required this.key, required this.op, required this.start, this.values});
+
+  factory QueryFilter.fromJson(Map<String, dynamic> json) => _$QueryFilterFromJson(json);
+
+  static const toJsonFactory = _$QueryFilterToJson;
+  Map<String, dynamic> toJson() => _$QueryFilterToJson(this);
+
+  @JsonKey(name: 'end', includeIfNull: false)
+  final int end;
+  @JsonKey(name: 'key', includeIfNull: false, toJson: queryFilterKeyToJson, fromJson: queryFilterKeyFromJson)
+  final enums.QueryFilterKey key;
+  @JsonKey(name: 'op', includeIfNull: false, toJson: queryFilterOpToJson, fromJson: queryFilterOpFromJson)
+  final enums.QueryFilterOp op;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final int start;
+  @JsonKey(name: 'values', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? values;
+  static const fromJsonFactory = _$QueryFilterFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is QueryFilter &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.key, key) || const DeepCollectionEquality().equals(other.key, key)) &&
+            (identical(other.op, op) || const DeepCollectionEquality().equals(other.op, op)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.values, values) || const DeepCollectionEquality().equals(other.values, values)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(key) ^
+      const DeepCollectionEquality().hash(op) ^
+      const DeepCollectionEquality().hash(start) ^
+      const DeepCollectionEquality().hash(values) ^
+      runtimeType.hashCode;
+}
+
+extension $QueryFilterExtension on QueryFilter {
+  QueryFilter copyWith({
+    int? end,
+    enums.QueryFilterKey? key,
+    enums.QueryFilterOp? op,
+    int? start,
+    List<String>? values,
+  }) {
+    return QueryFilter(
+      end: end ?? this.end,
+      key: key ?? this.key,
+      op: op ?? this.op,
+      start: start ?? this.start,
+      values: values ?? this.values,
+    );
+  }
+
+  QueryFilter copyWithWrapped({
+    Wrapped<int>? end,
+    Wrapped<enums.QueryFilterKey>? key,
+    Wrapped<enums.QueryFilterOp>? op,
+    Wrapped<int>? start,
+    Wrapped<List<String>?>? values,
+  }) {
+    return QueryFilter(
+      end: (end != null ? end.value : this.end),
+      key: (key != null ? key.value : this.key),
+      op: (op != null ? op.value : this.op),
+      start: (start != null ? start.value : this.start),
+      values: (values != null ? values.value : this.values),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class QueryWarning {
+  const QueryWarning({required this.end, required this.message, required this.start});
+
+  factory QueryWarning.fromJson(Map<String, dynamic> json) => _$QueryWarningFromJson(json);
+
+  static const toJsonFactory = _$QueryWarningToJson;
+  Map<String, dynamic> toJson() => _$QueryWarningToJson(this);
+
+  @JsonKey(name: 'end', includeIfNull: false)
+  final int end;
+  @JsonKey(name: 'message', includeIfNull: false)
+  final String message;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final int start;
+  static const fromJsonFactory = _$QueryWarningFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is QueryWarning &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(message) ^
+      const DeepCollectionEquality().hash(start) ^
+      runtimeType.hashCode;
+}
+
+extension $QueryWarningExtension on QueryWarning {
+  QueryWarning copyWith({int? end, String? message, int? start}) {
+    return QueryWarning(end: end ?? this.end, message: message ?? this.message, start: start ?? this.start);
+  }
+
+  QueryWarning copyWithWrapped({Wrapped<int>? end, Wrapped<String>? message, Wrapped<int>? start}) {
+    return QueryWarning(
+      end: (end != null ? end.value : this.end),
+      message: (message != null ? message.value : this.message),
+      start: (start != null ? start.value : this.start),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class RefreshRequest {
   const RefreshRequest({this.deviceName, required this.refreshToken});
 
@@ -1543,6 +1854,97 @@ extension $RestoreRequestExtension on RestoreRequest {
 
   RestoreRequest copyWithWrapped({Wrapped<enums.RestoreRequestOnConflict?>? onConflict}) {
     return RestoreRequest(onConflict: (onConflict != null ? onConflict.value : this.onConflict));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Results {
+  const Results({
+    required this.facets,
+    this.filters,
+    required this.query,
+    this.results,
+    required this.total,
+    this.warnings,
+  });
+
+  factory Results.fromJson(Map<String, dynamic> json) => _$ResultsFromJson(json);
+
+  static const toJsonFactory = _$ResultsToJson;
+  Map<String, dynamic> toJson() => _$ResultsToJson(this);
+
+  @JsonKey(name: 'facets', includeIfNull: false)
+  final Facets facets;
+  @JsonKey(name: 'filters', includeIfNull: false, defaultValue: <QueryFilter>[])
+  final List<QueryFilter>? filters;
+  @JsonKey(name: 'query', includeIfNull: false)
+  final String query;
+  @JsonKey(name: 'results', includeIfNull: false, defaultValue: <Match>[])
+  final List<Match>? results;
+  @JsonKey(name: 'total', includeIfNull: false)
+  final int total;
+  @JsonKey(name: 'warnings', includeIfNull: false, defaultValue: <QueryWarning>[])
+  final List<QueryWarning>? warnings;
+  static const fromJsonFactory = _$ResultsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Results &&
+            (identical(other.facets, facets) || const DeepCollectionEquality().equals(other.facets, facets)) &&
+            (identical(other.filters, filters) || const DeepCollectionEquality().equals(other.filters, filters)) &&
+            (identical(other.query, query) || const DeepCollectionEquality().equals(other.query, query)) &&
+            (identical(other.results, results) || const DeepCollectionEquality().equals(other.results, results)) &&
+            (identical(other.total, total) || const DeepCollectionEquality().equals(other.total, total)) &&
+            (identical(other.warnings, warnings) || const DeepCollectionEquality().equals(other.warnings, warnings)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(facets) ^
+      const DeepCollectionEquality().hash(filters) ^
+      const DeepCollectionEquality().hash(query) ^
+      const DeepCollectionEquality().hash(results) ^
+      const DeepCollectionEquality().hash(total) ^
+      const DeepCollectionEquality().hash(warnings) ^
+      runtimeType.hashCode;
+}
+
+extension $ResultsExtension on Results {
+  Results copyWith({
+    Facets? facets,
+    List<QueryFilter>? filters,
+    String? query,
+    List<Match>? results,
+    int? total,
+    List<QueryWarning>? warnings,
+  }) {
+    return Results(
+      facets: facets ?? this.facets,
+      filters: filters ?? this.filters,
+      query: query ?? this.query,
+      results: results ?? this.results,
+      total: total ?? this.total,
+      warnings: warnings ?? this.warnings,
+    );
+  }
+
+  Results copyWithWrapped({
+    Wrapped<Facets>? facets,
+    Wrapped<List<QueryFilter>?>? filters,
+    Wrapped<String>? query,
+    Wrapped<List<Match>?>? results,
+    Wrapped<int>? total,
+    Wrapped<List<QueryWarning>?>? warnings,
+  }) {
+    return Results(
+      facets: (facets != null ? facets.value : this.facets),
+      filters: (filters != null ? filters.value : this.filters),
+      query: (query != null ? query.value : this.query),
+      results: (results != null ? results.value : this.results),
+      total: (total != null ? total.value : this.total),
+      warnings: (warnings != null ? warnings.value : this.warnings),
+    );
   }
 }
 
@@ -1712,6 +2114,156 @@ extension $SetupStatusExtension on SetupStatus {
 
   SetupStatus copyWithWrapped({Wrapped<bool>? needsSetup}) {
     return SetupStatus(needsSetup: (needsSetup != null ? needsSetup.value : this.needsSetup));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Suggestion {
+  const Suggestion({required this.count, required this.insert, required this.kind, required this.value});
+
+  factory Suggestion.fromJson(Map<String, dynamic> json) => _$SuggestionFromJson(json);
+
+  static const toJsonFactory = _$SuggestionToJson;
+  Map<String, dynamic> toJson() => _$SuggestionToJson(this);
+
+  @JsonKey(name: 'count', includeIfNull: false)
+  final int count;
+  @JsonKey(name: 'insert', includeIfNull: false)
+  final String insert;
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: suggestionKindToJson, fromJson: suggestionKindFromJson)
+  final enums.SuggestionKind kind;
+  @JsonKey(name: 'value', includeIfNull: false)
+  final String value;
+  static const fromJsonFactory = _$SuggestionFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Suggestion &&
+            (identical(other.count, count) || const DeepCollectionEquality().equals(other.count, count)) &&
+            (identical(other.insert, insert) || const DeepCollectionEquality().equals(other.insert, insert)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.value, value) || const DeepCollectionEquality().equals(other.value, value)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(count) ^
+      const DeepCollectionEquality().hash(insert) ^
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(value) ^
+      runtimeType.hashCode;
+}
+
+extension $SuggestionExtension on Suggestion {
+  Suggestion copyWith({int? count, String? insert, enums.SuggestionKind? kind, String? value}) {
+    return Suggestion(
+      count: count ?? this.count,
+      insert: insert ?? this.insert,
+      kind: kind ?? this.kind,
+      value: value ?? this.value,
+    );
+  }
+
+  Suggestion copyWithWrapped({
+    Wrapped<int>? count,
+    Wrapped<String>? insert,
+    Wrapped<enums.SuggestionKind>? kind,
+    Wrapped<String>? value,
+  }) {
+    return Suggestion(
+      count: (count != null ? count.value : this.count),
+      insert: (insert != null ? insert.value : this.insert),
+      kind: (kind != null ? kind.value : this.kind),
+      value: (value != null ? value.value : this.value),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Suggestions {
+  const Suggestions({required this.end, required this.start, this.suggestions});
+
+  factory Suggestions.fromJson(Map<String, dynamic> json) => _$SuggestionsFromJson(json);
+
+  static const toJsonFactory = _$SuggestionsToJson;
+  Map<String, dynamic> toJson() => _$SuggestionsToJson(this);
+
+  @JsonKey(name: 'end', includeIfNull: false)
+  final int end;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final int start;
+  @JsonKey(name: 'suggestions', includeIfNull: false, defaultValue: <Suggestion>[])
+  final List<Suggestion>? suggestions;
+  static const fromJsonFactory = _$SuggestionsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Suggestions &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.suggestions, suggestions) ||
+                const DeepCollectionEquality().equals(other.suggestions, suggestions)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(start) ^
+      const DeepCollectionEquality().hash(suggestions) ^
+      runtimeType.hashCode;
+}
+
+extension $SuggestionsExtension on Suggestions {
+  Suggestions copyWith({int? end, int? start, List<Suggestion>? suggestions}) {
+    return Suggestions(end: end ?? this.end, start: start ?? this.start, suggestions: suggestions ?? this.suggestions);
+  }
+
+  Suggestions copyWithWrapped({Wrapped<int>? end, Wrapped<int>? start, Wrapped<List<Suggestion>?>? suggestions}) {
+    return Suggestions(
+      end: (end != null ? end.value : this.end),
+      start: (start != null ? start.value : this.start),
+      suggestions: (suggestions != null ? suggestions.value : this.suggestions),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TextSpan {
+  const TextSpan({required this.end, required this.start});
+
+  factory TextSpan.fromJson(Map<String, dynamic> json) => _$TextSpanFromJson(json);
+
+  static const toJsonFactory = _$TextSpanToJson;
+  Map<String, dynamic> toJson() => _$TextSpanToJson(this);
+
+  @JsonKey(name: 'end', includeIfNull: false)
+  final int end;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final int start;
+  static const fromJsonFactory = _$TextSpanFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TextSpan &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(end) ^ const DeepCollectionEquality().hash(start) ^ runtimeType.hashCode;
+}
+
+extension $TextSpanExtension on TextSpan {
+  TextSpan copyWith({int? end, int? start}) {
+    return TextSpan(end: end ?? this.end, start: start ?? this.start);
+  }
+
+  TextSpan copyWithWrapped({Wrapped<int>? end, Wrapped<int>? start}) {
+    return TextSpan(end: (end != null ? end.value : this.end), start: (start != null ? start.value : this.start));
   }
 }
 
@@ -2933,6 +3485,113 @@ List<enums.NewUserRole>? newUserRoleNullableListFromJson(List? newUserRole, [Lis
   return newUserRole.map((e) => newUserRoleFromJson(e.toString())).toList();
 }
 
+String? queryFilterKeyNullableToJson(enums.QueryFilterKey? queryFilterKey) {
+  return queryFilterKey?.value;
+}
+
+String? queryFilterKeyToJson(enums.QueryFilterKey queryFilterKey) {
+  return queryFilterKey.value;
+}
+
+enums.QueryFilterKey queryFilterKeyFromJson(Object? queryFilterKey, [enums.QueryFilterKey? defaultValue]) {
+  return enums.QueryFilterKey.values.firstWhereOrNull((e) => e.value == queryFilterKey) ??
+      defaultValue ??
+      enums.QueryFilterKey.swaggerGeneratedUnknown;
+}
+
+enums.QueryFilterKey? queryFilterKeyNullableFromJson(Object? queryFilterKey, [enums.QueryFilterKey? defaultValue]) {
+  if (queryFilterKey == null) {
+    return null;
+  }
+  return enums.QueryFilterKey.values.firstWhereOrNull((e) => e.value == queryFilterKey) ?? defaultValue;
+}
+
+String queryFilterKeyExplodedListToJson(List<enums.QueryFilterKey>? queryFilterKey) {
+  return queryFilterKey?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> queryFilterKeyListToJson(List<enums.QueryFilterKey>? queryFilterKey) {
+  if (queryFilterKey == null) {
+    return [];
+  }
+
+  return queryFilterKey.map((e) => e.value!).toList();
+}
+
+List<enums.QueryFilterKey> queryFilterKeyListFromJson(
+  List? queryFilterKey, [
+  List<enums.QueryFilterKey>? defaultValue,
+]) {
+  if (queryFilterKey == null) {
+    return defaultValue ?? [];
+  }
+
+  return queryFilterKey.map((e) => queryFilterKeyFromJson(e.toString())).toList();
+}
+
+List<enums.QueryFilterKey>? queryFilterKeyNullableListFromJson(
+  List? queryFilterKey, [
+  List<enums.QueryFilterKey>? defaultValue,
+]) {
+  if (queryFilterKey == null) {
+    return defaultValue;
+  }
+
+  return queryFilterKey.map((e) => queryFilterKeyFromJson(e.toString())).toList();
+}
+
+String? queryFilterOpNullableToJson(enums.QueryFilterOp? queryFilterOp) {
+  return queryFilterOp?.value;
+}
+
+String? queryFilterOpToJson(enums.QueryFilterOp queryFilterOp) {
+  return queryFilterOp.value;
+}
+
+enums.QueryFilterOp queryFilterOpFromJson(Object? queryFilterOp, [enums.QueryFilterOp? defaultValue]) {
+  return enums.QueryFilterOp.values.firstWhereOrNull((e) => e.value == queryFilterOp) ??
+      defaultValue ??
+      enums.QueryFilterOp.swaggerGeneratedUnknown;
+}
+
+enums.QueryFilterOp? queryFilterOpNullableFromJson(Object? queryFilterOp, [enums.QueryFilterOp? defaultValue]) {
+  if (queryFilterOp == null) {
+    return null;
+  }
+  return enums.QueryFilterOp.values.firstWhereOrNull((e) => e.value == queryFilterOp) ?? defaultValue;
+}
+
+String queryFilterOpExplodedListToJson(List<enums.QueryFilterOp>? queryFilterOp) {
+  return queryFilterOp?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> queryFilterOpListToJson(List<enums.QueryFilterOp>? queryFilterOp) {
+  if (queryFilterOp == null) {
+    return [];
+  }
+
+  return queryFilterOp.map((e) => e.value!).toList();
+}
+
+List<enums.QueryFilterOp> queryFilterOpListFromJson(List? queryFilterOp, [List<enums.QueryFilterOp>? defaultValue]) {
+  if (queryFilterOp == null) {
+    return defaultValue ?? [];
+  }
+
+  return queryFilterOp.map((e) => queryFilterOpFromJson(e.toString())).toList();
+}
+
+List<enums.QueryFilterOp>? queryFilterOpNullableListFromJson(
+  List? queryFilterOp, [
+  List<enums.QueryFilterOp>? defaultValue,
+]) {
+  if (queryFilterOp == null) {
+    return defaultValue;
+  }
+
+  return queryFilterOp.map((e) => queryFilterOpFromJson(e.toString())).toList();
+}
+
 String? restoreRequestOnConflictNullableToJson(enums.RestoreRequestOnConflict? restoreRequestOnConflict) {
   return restoreRequestOnConflict?.value;
 }
@@ -2993,6 +3652,61 @@ List<enums.RestoreRequestOnConflict>? restoreRequestOnConflictNullableListFromJs
   }
 
   return restoreRequestOnConflict.map((e) => restoreRequestOnConflictFromJson(e.toString())).toList();
+}
+
+String? suggestionKindNullableToJson(enums.SuggestionKind? suggestionKind) {
+  return suggestionKind?.value;
+}
+
+String? suggestionKindToJson(enums.SuggestionKind suggestionKind) {
+  return suggestionKind.value;
+}
+
+enums.SuggestionKind suggestionKindFromJson(Object? suggestionKind, [enums.SuggestionKind? defaultValue]) {
+  return enums.SuggestionKind.values.firstWhereOrNull((e) => e.value == suggestionKind) ??
+      defaultValue ??
+      enums.SuggestionKind.swaggerGeneratedUnknown;
+}
+
+enums.SuggestionKind? suggestionKindNullableFromJson(Object? suggestionKind, [enums.SuggestionKind? defaultValue]) {
+  if (suggestionKind == null) {
+    return null;
+  }
+  return enums.SuggestionKind.values.firstWhereOrNull((e) => e.value == suggestionKind) ?? defaultValue;
+}
+
+String suggestionKindExplodedListToJson(List<enums.SuggestionKind>? suggestionKind) {
+  return suggestionKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> suggestionKindListToJson(List<enums.SuggestionKind>? suggestionKind) {
+  if (suggestionKind == null) {
+    return [];
+  }
+
+  return suggestionKind.map((e) => e.value!).toList();
+}
+
+List<enums.SuggestionKind> suggestionKindListFromJson(
+  List? suggestionKind, [
+  List<enums.SuggestionKind>? defaultValue,
+]) {
+  if (suggestionKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return suggestionKind.map((e) => suggestionKindFromJson(e.toString())).toList();
+}
+
+List<enums.SuggestionKind>? suggestionKindNullableListFromJson(
+  List? suggestionKind, [
+  List<enums.SuggestionKind>? defaultValue,
+]) {
+  if (suggestionKind == null) {
+    return defaultValue;
+  }
+
+  return suggestionKind.map((e) => suggestionKindFromJson(e.toString())).toList();
 }
 
 String? trashItemPreviewStateNullableToJson(enums.TrashItemPreviewState? trashItemPreviewState) {

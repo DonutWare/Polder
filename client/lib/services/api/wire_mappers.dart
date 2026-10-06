@@ -1,9 +1,12 @@
+import "package:flutter/widgets.dart";
+
 import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/manifest.dart";
+import "package:polder/models/search.dart";
 import "package:polder/models/server_event.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
@@ -280,5 +283,81 @@ extension ActivityScopeToWire on ActivityScope {
       ActivityScopeUser(:final id) => id,
       _ => null,
     },
+  );
+}
+
+extension ResultsToModel on wire.Results {
+  SearchResults toModel() => SearchResults(
+    query: query,
+    total: total,
+    hits: [for (final match in results ?? <wire.Match>[]) match.toModel()],
+    filters: [for (final filter in filters ?? <wire.QueryFilter>[]) ?filter.toModel()],
+    typeFacets: [for (final facet in facets.types ?? <wire.FacetCount>[]) facet.toModel()],
+    extFacets: [for (final facet in facets.exts ?? <wire.FacetCount>[]) facet.toModel()],
+    warnings: [
+      for (final warning in warnings ?? <wire.QueryWarning>[])
+        SearchWarning(
+          range: TextRange(start: warning.start, end: warning.end),
+          message: warning.message,
+        ),
+    ],
+  );
+}
+
+extension MatchToModel on wire.Match {
+  SearchHit toModel() => SearchHit(
+    entry: entry.toModel(),
+    score: score,
+    nameMatches: [for (final span in nameMatches ?? <wire.TextSpan>[]) TextRange(start: span.start, end: span.end)],
+    snippet: snippet,
+  );
+}
+
+extension FacetCountToModel on wire.FacetCount {
+  SearchFacet toModel() => SearchFacet(value: value, count: count);
+}
+
+extension QueryFilterToModel on wire.QueryFilter {
+  SearchFilter? toModel() {
+    final searchKey = switch (key) {
+      wire.QueryFilterKey.type => SearchKey.type,
+      wire.QueryFilterKey.ext => SearchKey.ext,
+      wire.QueryFilterKey.$in => SearchKey.folder,
+      wire.QueryFilterKey.modified => SearchKey.modified,
+      wire.QueryFilterKey.size => SearchKey.size,
+      wire.QueryFilterKey.swaggerGeneratedUnknown => null,
+    };
+    final searchOp = switch (op) {
+      wire.QueryFilterOp.$is => SearchOp.equals,
+      wire.QueryFilterOp.isnot => SearchOp.notEquals,
+      wire.QueryFilterOp.gt => SearchOp.greater,
+      wire.QueryFilterOp.gte => SearchOp.greaterOrEqual,
+      wire.QueryFilterOp.lt => SearchOp.less,
+      wire.QueryFilterOp.lte => SearchOp.lessOrEqual,
+      wire.QueryFilterOp.between => SearchOp.between,
+      wire.QueryFilterOp.swaggerGeneratedUnknown => null,
+    };
+    if (searchKey == null || searchOp == null) return null;
+    return SearchFilter(
+      key: searchKey,
+      op: searchOp,
+      values: values ?? const [],
+      range: TextRange(start: start, end: end),
+    );
+  }
+}
+
+extension SuggestionsToModel on wire.Suggestions {
+  SearchSuggestions toModel() => SearchSuggestions(
+    range: TextRange(start: start, end: end),
+    suggestions: [
+      for (final suggestion in suggestions ?? <wire.Suggestion>[])
+        SearchSuggestion(
+          value: suggestion.value,
+          insert: suggestion.insert,
+          isKey: suggestion.kind == wire.SuggestionKind.key,
+          count: suggestion.count,
+        ),
+    ],
   );
 }

@@ -16,9 +16,10 @@ import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
 
 class DirectoryView extends ConsumerWidget {
-  const DirectoryView({required this.path, super.key});
+  const DirectoryView({required this.path, this.select, super.key});
 
   final String path;
+  final String? select;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,7 +50,12 @@ class DirectoryView extends ConsumerWidget {
                       ),
                     ),
                   )
-                : _EntriesView(path: path, items: items, padding: inset + const EdgeInsets.fromLTRB(16, 8, 16, 96)),
+                : _EntriesView(
+                    path: path,
+                    items: items,
+                    select: select,
+                    padding: inset + const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                  ),
           ),
         );
       },
@@ -58,15 +64,16 @@ class DirectoryView extends ConsumerWidget {
 }
 
 class _EntriesView extends ConsumerWidget {
-  const _EntriesView({required this.path, required this.items, required this.padding});
+  const _EntriesView({required this.path, required this.items, required this.padding, this.select});
 
   final String path;
   final List<BrowserItem> items;
   final EdgeInsets padding;
+  final String? select;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => switch (ref.watch(browserViewModeProvider)) {
-    BrowserViewMode.list => FileListView(parentPath: path, items: items, padding: padding),
-    BrowserViewMode.grid => FileGridView(parentPath: path, items: items, padding: padding),
+    BrowserViewMode.list => FileListView(parentPath: path, items: items, padding: padding, select: select),
+    BrowserViewMode.grid => FileGridView(parentPath: path, items: items, padding: padding, select: select),
   };
 }

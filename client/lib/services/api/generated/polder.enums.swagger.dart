@@ -202,6 +202,50 @@ enum NewUserRole {
   const NewUserRole(this.value);
 }
 
+enum QueryFilterKey {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('type')
+  type('type'),
+  @JsonValue('ext')
+  ext('ext'),
+  @JsonValue('in')
+  $in('in'),
+  @JsonValue('modified')
+  modified('modified'),
+  @JsonValue('size')
+  size('size');
+
+  final String? value;
+
+  const QueryFilterKey(this.value);
+}
+
+enum QueryFilterOp {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('is')
+  $is('is'),
+  @JsonValue('isNot')
+  isnot('isNot'),
+  @JsonValue('gt')
+  gt('gt'),
+  @JsonValue('gte')
+  gte('gte'),
+  @JsonValue('lt')
+  lt('lt'),
+  @JsonValue('lte')
+  lte('lte'),
+  @JsonValue('between')
+  between('between');
+
+  final String? value;
+
+  const QueryFilterOp(this.value);
+}
+
 enum RestoreRequestOnConflict {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -216,6 +260,20 @@ enum RestoreRequestOnConflict {
   final String? value;
 
   const RestoreRequestOnConflict(this.value);
+}
+
+enum SuggestionKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('key')
+  key('key'),
+  @JsonValue('value')
+  $value('value');
+
+  final String? value;
+
+  const SuggestionKind(this.value);
 }
 
 enum TrashItemPreviewState {
