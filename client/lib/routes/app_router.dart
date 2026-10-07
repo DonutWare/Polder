@@ -20,6 +20,7 @@ import "package:polder/screens/login/login_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/settings/about_screen.dart";
+import "package:polder/screens/viewer/document_editor_screen.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
 import "package:polder/screens/shell/app_shell.dart";
@@ -52,6 +53,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.pdf,
         redirect: (_, state) => state.extra is FileEntry ? null : AppRoutes.files,
         builder: (_, state) => PdfViewerScreen(entry: state.extra! as FileEntry),
+      ),
+      GoRoute(
+        path: AppRoutes.editor,
+        redirect: (_, state) => state.extra is FileEntry ? null : AppRoutes.files,
+        builder: (_, state) => DocumentEditorScreen(entry: state.extra! as FileEntry),
       ),
       ShellRoute(
         builder: (_, state, child) => AppShell(location: state.uri.path, child: child),

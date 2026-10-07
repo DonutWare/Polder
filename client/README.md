@@ -10,6 +10,10 @@ dart run build_runner build   # freezed / json / drift / the API client
 flutter run -d macos          # or linux, windows, a device
 ```
 
+The document editor is a webview (`flutter_inappwebview`). On Linux it uses WPE WebKit through
+`flutter_inappwebview_linux`, which needs the WPE WebKit libraries installed to build and run; see that package's
+`WPE_BACKEND.md`.
+
 ### API client
 
 `lib/services/api/generated` is a Chopper service and wire models generated from the server's OpenAPI

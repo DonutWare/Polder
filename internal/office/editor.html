@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+<title>Editor</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  iframe { display: block; border: 0; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<form id="open" method="post" target="office" hidden></form>
+<iframe name="office" id="office" allow="clipboard-read; clipboard-write; fullscreen" allowfullscreen></iframe>
+<script>
+(() => {
+  // Fields: src (the editor URL), access_token, access_token_ttl, ui_defaults, css_variables,
+  // background (page colour while loading) and parent (origin of a web app embedding this page).
+  const params = new URLSearchParams(location.hash.slice(1));
+  history.replaceState(null, "", location.pathname);
+
+  const office = document.getElementById("office");
+  const parentOrigin = params.get("parent");
+  document.body.style.background = params.get("background") || "";
+
+  const toApp = (message) => {
+    if (window.flutter_inappwebview) {
+      window.flutter_inappwebview.callHandler("office", message);
+    } else if (parentOrigin && window.parent !== window) {
+      window.parent.postMessage({ polderOffice: message }, parentOrigin);
+    }
+  };
+  const toEditor = (message) => {
+    office.contentWindow.postMessage(JSON.stringify(message), location.origin);
+  };
+
+  window.addEventListener("message", (event) => {
+    if (event.source === office.contentWindow) {
+      let message;
+      try { message = typeof event.data === "string" ? JSON.parse(event.data) : event.data; } catch { return; }
+      // Collabora only takes messages after the host says it is listening.
+      if (message.MessageId === "App_LoadingStatus" && message.Values && message.Values.Status === "Frame_Ready") {
+        toEditor({ MessageId: "Host_PostmessageReady" });
+      }
+      toApp(JSON.stringify(message));
+      return;
+    }
+    if (parentOrigin && event.source === window.parent && event.origin === parentOrigin && event.data && event.data.polderOffice) {
+      toEditor(JSON.parse(event.data.polderOffice));
+    }
+  });
+  window.polderOffice = { send: (message) => toEditor(message) };
+
+  // Collabora colours the caret after its theme, not the page under it, so it vanishes on a document whose own
+  // page colour matches the theme. Inverting what is underneath keeps it visible on any page. Collabora's
+  // content security policy blocks <style> elements, but not stylesheets adopted from script.
+  office.addEventListener("load", () => {
+    try {
+      const page = office.contentDocument;
+      const sheet = new page.defaultView.CSSStyleSheet();
+      sheet.replaceSync(
+        ".leaflet-cursor-container:has(> .blinking-cursor) { mix-blend-mode: difference; }" +
+        ".leaflet-cursor-container:has(> .blinking-cursor) > .leaflet-cursor { --color-cursor-blink-background: #fff; }"
+      );
+      page.adoptedStyleSheets = [...page.adoptedStyleSheets, sheet];
+    } catch {}
+  });
+
+  const form = document.getElementById("open");
+  form.action = params.get("src") || "";
+  for (const name of ["access_token", "access_token_ttl", "ui_defaults", "css_variables"]) {
+    if (!params.has(name)) continue;
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = params.get(name);
+    form.appendChild(input);
+  }
+  form.submit();
+})();
+</script>
+</body>
+</html>

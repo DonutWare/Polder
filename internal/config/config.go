@@ -3,7 +3,9 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/netip"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -43,6 +45,10 @@ type Config struct {
 	// TrustedProxies are the addresses or ranges of reverse proxies whose X-Forwarded-For and
 	// X-Real-IP headers name the client. Requests from anywhere else are taken at their address.
 	TrustedProxies []string `yaml:"trustedProxies"`
+	// CollaboraURL is where Collabora Online listens, as seen from this server. Without it there is no document editor.
+	CollaboraURL string `yaml:"collaboraUrl"`
+	// WOPIURL is where Collabora reaches this server; it defaults to the listen address on localhost.
+	WOPIURL string `yaml:"wopiUrl"`
 }
 
 func Default() Config {
@@ -98,6 +104,8 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.WebDir = envOr("POLDER_WEB_DIR", cfg.WebDir)
 	cfg.TesseractPath = envOr("POLDER_TESSERACT", cfg.TesseractPath)
 	cfg.OCRModelURL = envOr("POLDER_OCR_MODEL_URL", cfg.OCRModelURL)
+	cfg.CollaboraURL = envOr("POLDER_COLLABORA_URL", cfg.CollaboraURL)
+	cfg.WOPIURL = envOr("POLDER_WOPI_URL", cfg.WOPIURL)
 	if value, ok := os.LookupEnv("POLDER_TRUSTED_PROXIES"); ok {
 		cfg.TrustedProxies = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || unicode.IsSpace(r) })
 	}
@@ -150,6 +158,14 @@ func (cfg Config) validate() error {
 	if _, err := cfg.TrustedProxyRanges(); err != nil {
 		return err
 	}
+	for name, value := range map[string]string{"collaboraUrl": cfg.CollaboraURL, "wopiUrl": cfg.WOPIURL} {
+		if value == "" {
+			continue
+		}
+		if parsed, err := url.Parse(value); err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
+			return fmt.Errorf("%s: %q is not an http(s) URL", name, value)
+		}
+	}
 	switch cfg.DatabaseDriver {
 	case DriverSQLite:
 		return nil
@@ -177,6 +193,17 @@ func (cfg Config) TrustedProxyRanges() ([]netip.Prefix, error) {
 		ranges = append(ranges, prefix.Masked())
 	}
 	return ranges, nil
+}
+
+func (cfg Config) WOPIBaseURL() string {
+	if cfg.WOPIURL != "" {
+		return strings.TrimSuffix(cfg.WOPIURL, "/")
+	}
+	host, port, err := net.SplitHostPort(cfg.ListenAddress)
+	if err != nil || host == "" || host == "0.0.0.0" || host == "::" {
+		host = "localhost"
+	}
+	return "http://" + net.JoinHostPort(host, port)
 }
 
 func (cfg Config) SQLitePath() string {

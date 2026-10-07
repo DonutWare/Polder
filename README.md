@@ -29,6 +29,13 @@ Search also finds text inside files. Text in images and scanned PDFs is read wit
 (`POLDER_OCR_MODEL_URL` changes the source, `POLDER_TESSERACT` the program). Administrators choose the models and can
 turn OCR or content search off under Administration.
 
+Documents (Word, spreadsheets, presentations, OpenDocument and the rest Collabora lists) open in an editor
+inside the app when [Collabora Online](https://www.collaboraonline.com/code/) is set up: `docker compose --profile
+office up -d` with `POLDER_COLLABORA_URL=http://collabora:9980`. Polder proxies Collabora's `/browser`, `/cool` and
+`/hosting` paths, so clients only need Polder's address, and Collabora saves back through Polder's WOPI endpoints
+at `POLDER_WOPI_URL` (in compose, `http://polder:6060`). Behind https, set `COLLABORA_SSL_TERMINATION=true`, and let
+`/cool` upgrade to a WebSocket like `/api/v1/events`.
+
 Clients receive live activity (transfers in progress, folder changes) over a WebSocket at
 `/api/v1/events`. Behind a reverse proxy, let that path upgrade: in nginx, `proxy_http_version 1.1`
 with `Upgrade` and `Connection` headers passed through.
@@ -47,6 +54,7 @@ go test ./...
 golangci-lint run ./...
 scripts/test-client.sh   # the client's integration tests against this server
 scripts/gen-client.sh    # after changing the API: regenerate the client's API code
+scripts/dev-office.sh    # run the server with the document editor (Collabora in Docker)
 ```
 
 The client's API code is generated from this server's OpenAPI document. `polder openapi` prints it,

@@ -17,6 +17,8 @@ services:
     environment:
       POLDER_DB_DRIVER: ${POLDER_DB_DRIVER:-sqlite}
       POLDER_DB_DSN: ${POLDER_DB_DSN:-}
+      POLDER_COLLABORA_URL: ${POLDER_COLLABORA_URL:-}
+      POLDER_WOPI_URL: ${POLDER_WOPI_URL:-http://polder:6060}
 
   # Optional PostgreSQL: `docker compose --profile postgres up -d` with
   # POLDER_DB_DRIVER=postgres and
@@ -35,3 +37,21 @@ services:
       test: ["CMD", "pg_isready", "-U", "polder", "-d", "polder"]
       interval: 10s
       retries: 10
+
+  # Optional document editor: `docker compose --profile office up -d` with
+  # POLDER_COLLABORA_URL=http://collabora:9980. Clients reach it through Polder, so it has no port
+  # of its own. Set COLLABORA_SSL_TERMINATION=true when Polder is served over https.
+  collabora:
+    profiles: ["office"]
+    image: collabora/code:latest
+    restart: unless-stopped
+    cap_add:
+      - MKNOD
+    environment:
+      # The only server allowed to hand Collabora files.
+      aliasgroup1: ${POLDER_WOPI_URL:-http://polder:6060}
+      extra_params: >-
+        --o:ssl.enable=false
+        --o:ssl.termination=${COLLABORA_SSL_TERMINATION:-false}
+        --o:admin_console.enable=false
+        --o:welcome.enable=false

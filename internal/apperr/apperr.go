@@ -17,6 +17,7 @@ const (
 	KindQuotaExceeded Kind = "quota_exceeded"
 	KindPrecondition  Kind = "precondition_failed"
 	KindRateLimited   Kind = "rate_limited"
+	KindUnavailable   Kind = "unavailable"
 )
 
 type Error struct {
@@ -39,6 +40,9 @@ func Forbidden(format string, args ...any) *Error    { return New(KindForbidden,
 func Unauthorized(format string, args ...any) *Error { return New(KindUnauthorized, format, args...) }
 func AlreadyExists(format string, args ...any) *Error {
 	return New(KindAlreadyExists, format, args...)
+}
+func Unavailable(format string, args ...any) *Error {
+	return New(KindUnavailable, format, args...)
 }
 func QuotaExceeded(format string, args ...any) *Error {
 	return New(KindQuotaExceeded, format, args...)

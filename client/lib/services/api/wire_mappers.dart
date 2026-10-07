@@ -4,6 +4,7 @@ import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
+import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/search.dart";
@@ -74,6 +75,27 @@ extension ManifestToModel on wire.Manifest {
     chunks: [
       for (final chunk in chunks ?? <wire.Chunk>[]) ChunkRef(hash: chunk.hash, offset: chunk.offset, size: chunk.size),
     ],
+  );
+}
+
+extension EditorCapabilitiesToModel on wire.EditorCapabilities {
+  EditorCapabilities toModel() => EditorCapabilities(
+    enabled: enabled,
+    editableMimes: {...?editableMimes},
+    editableExtensions: {...?editableExtensions},
+    viewableMimes: {...?viewableMimes},
+    viewableExtensions: {...?viewableExtensions},
+    creatable: {for (final app in creatable ?? <wire.CreatableApp>[]) app.app: app.extensions ?? const []},
+  );
+}
+
+extension EditorSessionToModel on wire.EditorSession {
+  EditorSession toModel() => EditorSession(
+    editorUrl: editorUrl,
+    hostPage: hostPage,
+    accessToken: accessToken,
+    accessTokenTtl: accessTokenTtl,
+    readOnly: readOnly,
   );
 }
 

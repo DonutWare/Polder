@@ -1,10 +1,13 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/routes/app_routes.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
@@ -13,7 +16,7 @@ import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
 
-enum _FileAction { download, rename, move, delete }
+enum _FileAction { edit, download, rename, move, delete }
 
 class FileActionsMenu extends ConsumerWidget {
   const FileActionsMenu({required this.parentPath, required this.entry, super.key});
@@ -24,10 +27,12 @@ class FileActionsMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final error = Theme.of(context).colorScheme.error;
+    final editable = ref.watch(editorCapabilitiesProvider).value?.canOpen(entry) ?? false;
     return PopupMenuButton<_FileAction>(
       icon: const Icon(IconsaxPlusLinear.more),
       onSelected: (action) => _handle(context, ref, action),
       itemBuilder: (context) => [
+        if (editable) _item(_FileAction.edit, IconsaxPlusLinear.edit, context.localized.editorOpen),
         if (!entry.isDir) _item(_FileAction.download, IconsaxPlusLinear.document_download, context.localized.download),
         _item(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
         _item(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
@@ -47,6 +52,8 @@ class FileActionsMenu extends ConsumerWidget {
   Future<void> _handle(BuildContext context, WidgetRef ref, _FileAction action) async {
     final directory = ref.read(directoryProvider(parentPath).notifier);
     switch (action) {
+      case _FileAction.edit:
+        await context.push(AppRoutes.editor, extra: entry);
       case _FileAction.download:
         await ref.read(transfersProvider.notifier).download(entry);
       case _FileAction.rename:

@@ -20,6 +20,7 @@ import (
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
 	"polder-server/internal/logging"
+	"polder-server/internal/office"
 	"polder-server/internal/preview"
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
@@ -39,6 +40,7 @@ type API struct {
 	search   *search.Service
 	extract  *extract.Worker
 	logs     *logging.Files
+	office   *office.Service
 	limiter  *failedAttemptLimiter
 }
 
@@ -54,6 +56,7 @@ type Dependencies struct {
 	Search                 *search.Service
 	Extractor              *extract.Worker
 	Logs                   *logging.Files
+	Office                 *office.Service
 	LoginAttemptsPerMinute int
 	TrustedProxies         []netip.Prefix
 	// Web serves the browser client for every path outside the API; nil serves only the API.
@@ -73,6 +76,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		search:   deps.Search,
 		extract:  deps.Extractor,
 		logs:     deps.Logs,
+		office:   deps.Office,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 	}
 
@@ -83,6 +87,7 @@ func NewRouter(deps Dependencies) http.Handler {
 	api.register(humachi.New(router, apiConfig()))
 	// Unknown API paths answer like the API, never with the web client's index.html.
 	router.Handle("/api/*", http.HandlerFunc(endpointNotFound))
+	deps.Office.Routes(router)
 	if deps.Web != nil {
 		router.Handle("/*", middleware.Compress(5)(deps.Web))
 	}
@@ -165,6 +170,9 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/trash/{itemID}/preview", "previewTrashItem", "Get a JPEG thumbnail of a deleted image", a.previewTrashItem,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
 	register(user, http.MethodDelete, "/trash/{itemID}", "deleteTrashItem", "Delete one item in the trash permanently", a.deleteTrashItem)
+
+	register(user, http.MethodGet, "/office/capabilities", "getOfficeCapabilities", "Which files the document editor can open", a.officeCapabilities)
+	register(user, http.MethodPost, "/office/sessions", "startOfficeSession", "Let the document editor open a file", a.startOfficeSession, created)
 
 	register(user, http.MethodGet, "/activity", "listActivity", "Page through what happened to files and sessions, newest first", a.listActivity)
 	register(user, http.MethodGet, "/activity/live", "listLiveTransfers", "Uploads and downloads in progress", a.listLiveTransfers)

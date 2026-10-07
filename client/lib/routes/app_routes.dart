@@ -4,6 +4,7 @@ abstract final class AppRoutes {
   static const search = "/search";
   static const scan = "/scan";
   static const pdf = "/pdf";
+  static const editor = "/editor";
   static const activity = "/activity";
   static const sync = "/sync";
   static const conflicts = "/sync/conflicts";

@@ -44,6 +44,7 @@ var statusByKind = map[apperr.Kind]int{
 	apperr.KindQuotaExceeded: http.StatusInsufficientStorage,
 	apperr.KindPrecondition:  http.StatusPreconditionFailed,
 	apperr.KindRateLimited:   http.StatusTooManyRequests,
+	apperr.KindUnavailable:   http.StatusServiceUnavailable,
 }
 
 // kindByStatus names errors that Huma raises itself, such as failed request validation.

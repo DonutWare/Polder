@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -43,6 +45,13 @@ func createSigningKey(path string) ([]byte, error) {
 		return nil, err
 	}
 	return key, os.WriteFile(path, key, 0o600)
+}
+
+// DerivedKey gives other token kinds their own signing key, so none of them can pass as an access token.
+func (t *AccessTokens) DerivedKey(purpose string) []byte {
+	mac := hmac.New(sha256.New, t.key)
+	mac.Write([]byte(purpose))
+	return mac.Sum(nil)
 }
 
 type Claims struct {

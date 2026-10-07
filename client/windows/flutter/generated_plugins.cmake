@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   battery_plus
   connectivity_plus
   dynamic_color
+  flutter_inappwebview_windows
   flutter_secure_storage_windows
   permission_handler_windows
   screen_retriever_windows

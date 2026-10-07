@@ -6,6 +6,7 @@ import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
+import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/search.dart";
@@ -157,6 +158,13 @@ class PolderApi {
       return null;
     }
   }
+
+  Future<EditorCapabilities> editorCapabilities() async => (await _service.getOfficeCapabilities()).body!.toModel();
+
+  Future<EditorSession> startEditorSession(String path, {required String origin}) async =>
+      (await _service.startOfficeSession(
+        body: wire.OfficeSessionRequest(path: path, origin: origin),
+      )).body!.toModel();
 
   Future<ChangeFeedPage> changes({required int cursor, int limit = 1000}) async =>
       (await _service.listChanges(cursor: cursor, limit: limit)).body!.toModel();

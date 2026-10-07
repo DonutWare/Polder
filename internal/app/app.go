@@ -18,6 +18,7 @@ import (
 	"polder-server/internal/files"
 	"polder-server/internal/httpapi"
 	"polder-server/internal/logging"
+	"polder-server/internal/office"
 	"polder-server/internal/preview"
 	"polder-server/internal/scanner"
 	"polder-server/internal/search"
@@ -131,6 +132,12 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		searchService.Close()
 		return nil, err
 	}
+	officeService, err := office.New(office.Options{CollaboraURL: cfg.CollaboraURL, WOPIBaseURL: cfg.WOPIBaseURL()},
+		fileService, authService, tokens)
+	if err != nil {
+		searchService.Close()
+		return nil, err
+	}
 	logs := logging.NewFiles(cfg.LogDir())
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
@@ -144,6 +151,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Search:                 searchService,
 		Extractor:              extractor,
 		Logs:                   logs,
+		Office:                 officeService,
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		TrustedProxies:         trustedProxies,
 		Web:                    web,

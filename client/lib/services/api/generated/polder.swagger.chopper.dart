@@ -741,6 +741,55 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<EditorCapabilities>> _getOfficeCapabilities({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Which files the document editor can open',
+      operationId: 'getOfficeCapabilities',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["office"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/office/capabilities');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<EditorCapabilities, EditorCapabilities>($request);
+  }
+
+  @override
+  Future<Response<EditorSession>> _startOfficeSession({
+    required OfficeSessionRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Let the document editor open a file',
+      operationId: 'startOfficeSession',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["office"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/office/sessions');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<EditorSession, EditorSession>($request);
+  }
+
+  @override
   Future<Response<Results>> _searchFiles({
     String? q,
     int? limit,

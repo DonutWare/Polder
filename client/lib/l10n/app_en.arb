@@ -757,5 +757,19 @@
 	"logStopFollowing": "Stop following",
 	"logDownload": "Download log file",
 	"logNoFiles": "No log files yet.",
-	"logsEmpty": "No log entries match."
+	"logsEmpty": "No log entries match.",
+	"editorOpen": "Open in editor",
+	"editorSaved": "All changes saved",
+	"editorSaving": "Saving…",
+	"editorUnsaved": "Unsaved changes",
+	"editorReadOnly": "Read only",
+	"editorSaveFailedTitle": "Changes not saved",
+	"editorSaveFailedMessage": "Your changes could not be saved to the server. Leave anyway and lose them?",
+	"editorLeave": "Leave anyway",
+	"scanDocument": "Scan document",
+	"documentKind": "Document",
+	"spreadsheetKind": "Spreadsheet",
+	"presentationKind": "Presentation",
+	"newSpreadsheet": "New spreadsheet",
+	"newPresentation": "New presentation"
 }

@@ -48,6 +48,14 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> {
 
   Future<void> createFolder(String name) => _mutate(() => _api.mkdir(RemotePath.join(path, name)));
 
+  Future<FileEntry> createEmptyFile(String name) async {
+    late FileEntry created;
+    await _mutate(
+      () async => created = await _api.putContent(RemotePath.join(path, name), const Stream.empty(), length: 0),
+    );
+    return created;
+  }
+
   Future<void> rename(FileEntry entry, String newName) =>
       _mutate(() => _api.move(from: entry.path, to: RemotePath.join(path, newName), baseRev: entry.rev));
 
