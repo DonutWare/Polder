@@ -5,13 +5,13 @@
 #   client  the Flutter web app from client/
 #   docker build --build-arg WEB=client .
 ARG WEB=none
-# The Flutter release the web app is built with; keep it in step with the client.
+# The Flutter release the web app is built with; keep it in step with client/.fvmrc.
 ARG FLUTTER_VERSION=3.47.5
 
-FROM golang:1.27-alpine AS web-none
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS web-none
 RUN mkdir /web
 
-FROM debian:bookworm-slim AS flutter
+FROM --platform=$BUILDPLATFORM debian:bookworm-slim AS flutter
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl git unzip xz-utils \
     && rm -rf /var/lib/apt/lists/*
@@ -27,18 +27,19 @@ COPY client/ .
 RUN flutter build web --release --no-web-resources-cdn --no-wasm-dry-run \
     && find build/web -name '*.symbols' -delete
 
-FROM golang:1.27-alpine AS web-client
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS web-client
 COPY --from=flutter /client/build/web /web
 
 FROM web-${WEB} AS web
 
-FROM golang:1.27-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 COPY --from=web /web/ ./internal/webui/dist/
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/polder ./cmd/polder \
+ARG TARGETOS TARGETARCH TARGETVARIANT
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} go build -trimpath -ldflags="-s -w" -o /out/polder ./cmd/polder \
     && mkdir -p /out/config /out/data
 
 FROM alpine:3.24

@@ -1,0 +1,20 @@
+# appimage-builder recipe, see https://appimage-builder.readthedocs.io
+version: 1
+script:
+  - rm -rf AppDir || true
+  - cp -r build/linux/x64/release/bundle AppDir
+  - mkdir -p AppDir/usr/share/icons/
+  - cp web/icons/Icon-512.png AppDir/usr/share/icons/polder_icon_desktop.png
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: org.knaapen.polder
+    name: Polder
+    icon: polder_icon_desktop
+    version: latest
+    exec: polder
+    exec_args: $@
+AppImage:
+  arch: x86_64
+  update-information: gh-releases-zsync|DonutWare|Polder|latest|Polder-Linux-*.AppImage.zsync
+  file_name: Polder_x86_64.AppImage

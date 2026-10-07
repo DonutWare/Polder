@@ -1,0 +1,49 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare-release:
+    name: Tag Release
+    runs-on: ubuntu-latest
+    steps:
+      # A tag pushed with the bot token triggers the build workflow; one pushed with GITHUB_TOKEN would not.
+      - name: Generate Bot Token
+        id: generate-token
+        uses: actions/create-github-app-token@v3.1.1
+        with:
+          app-id: ${{ secrets.FLADDER_BOT_APP_ID }}
+          private-key: ${{ secrets.FLADDER_BOT_APP_PRIVATE_KEY }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.generate-token.outputs.token }}
+
+      - name: Extract Version
+        id: version
+        run: |
+          FULL_VERSION=$(grep '^version: ' client/pubspec.yaml | sed 's/version: //')
+          VERSION_NAME=$(echo "$FULL_VERSION" | cut -d'+' -f1)
+          echo "version=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION_NAME"
+
+          if git rev-parse "v${VERSION_NAME}" >/dev/null 2>&1; then
+            echo "is_new_version=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::v${VERSION_NAME} is already tagged, bump the version in client/pubspec.yaml first"
+          else
+            echo "is_new_version=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tag
+        if: steps.version.outputs.is_new_version == 'true'
+        run: |
+          git config user.name "Fladder Bot"
+          git config user.email "fladder-bot[bot]@users.noreply.github.com"
+
+          VERSION="v${{ steps.version.outputs.version }}"
+          git tag "$VERSION"
+          git push origin "$VERSION"
