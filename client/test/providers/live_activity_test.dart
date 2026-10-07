@@ -159,7 +159,7 @@ void main() {
       httpClient: ScriptedClient((request) async {
         if (request.path == "/auth/me") return jsonResponse(200, userJson());
         listed.add(request.query["path"]!);
-        return jsonResponse(200, {"path": request.query["path"], "entries": <Object>[]});
+        return jsonResponse(200, {"path": request.query["path"], "entries": <Object>[], "indexing": false});
       }),
     );
     addTearDown(harness.dispose);

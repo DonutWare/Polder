@@ -1,6 +1,8 @@
+import "package:fake_async/fake_async.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
+import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
 
@@ -69,6 +71,31 @@ void main() {
 
     expect(await names(), ["Photos"]);
     expect(server.contentOf("/Photos/b.txt"), isNotNull);
+  });
+
+  test("keeps refreshing while the server is indexing, then stops", () {
+    fakeAsync((async) {
+      server.indexing = true;
+      final indexing = ProviderHarness(httpClient: _ServerWithMe(server), account: account);
+      indexing.container.read(accountProvider.future);
+      async.flushMicrotasks();
+      indexing.container.listen(directoryProvider("/"), (_, _) {});
+      async.flushMicrotasks();
+      expect(indexing.container.read(directoryProvider("/")).requireValue.indexing, isTrue);
+
+      server
+        ..putFile("/found.txt", "f".codeUnits)
+        ..indexing = false;
+      async.elapse(DirectoryNotifier.indexingRefresh);
+      final listing = indexing.container.read(directoryProvider("/")).requireValue;
+      expect(listing.indexing, isFalse);
+      expect(listing.entries.map((entry) => entry.name), contains("found.txt"));
+
+      final requests = server.requests.length;
+      async.elapse(DirectoryNotifier.indexingRefresh * 3);
+      expect(server.requests.length, requests);
+      indexing.dispose();
+    });
   });
 
   test("a stale rev surfaces a conflict", () async {

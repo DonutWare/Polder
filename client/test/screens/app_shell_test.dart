@@ -88,7 +88,7 @@ void main() {
     await pumpShell(tester, UserRole.user, size: const Size(1400, 900));
 
     expect(find.text("Files"), findsOneWidget);
-    expect(find.text("jop"), findsOneWidget);
+    expect(find.text("alice"), findsOneWidget);
     expect(find.text("cloud.test"), findsOneWidget);
   });
 }

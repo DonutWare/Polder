@@ -296,7 +296,7 @@ func (s *eventSocket) next(messageType string) socketMessage {
 		if err != nil {
 			s.t.Fatalf("waiting for %s: %v", messageType, err)
 		}
-		if message.Type == messageType {
+		if messageType == "" || message.Type == messageType {
 			return message
 		}
 	}

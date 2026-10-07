@@ -59,13 +59,13 @@ void main() {
   test("a successful sign in stores the account", () async {
     final notifier = await connected("https://cloud.test");
     notifier
-      ..setUsername("jop")
+      ..setUsername("alice")
       ..setPassword("secret");
 
     await notifier.signIn();
 
     final account = await harness.container.read(accountProvider.future);
-    expect(account?.user.username, "jop");
+    expect(account?.user.username, "alice");
     expect(account?.refreshToken, "r");
     expect((await harness.credentials.load())?.refreshToken, "r");
     expect(state().completed, isTrue);
@@ -74,7 +74,7 @@ void main() {
   test("wrong credentials report a typed failure", () async {
     final notifier = await connected("https://cloud.test");
     notifier
-      ..setUsername("jop")
+      ..setUsername("alice")
       ..setPassword("wrong");
 
     await notifier.signIn();

@@ -55,7 +55,7 @@ void main() {
   }
 
   Future<void> submitCredentials(WidgetTester tester, String password) async {
-    await tester.enterText(find.byKey(CredentialsStep.usernameFieldKey), "jop");
+    await tester.enterText(find.byKey(CredentialsStep.usernameFieldKey), "alice");
     await tester.enterText(find.byKey(CredentialsStep.passwordFieldKey), password);
     await tester.pump();
     await tester.tap(find.byKey(CredentialsStep.submitButtonKey));
@@ -102,7 +102,7 @@ void main() {
     await submitCredentials(tester, "secret");
 
     expect(find.text("files-home"), findsOneWidget);
-    expect(harness.container.read(currentAccountProvider)?.user.username, "jop");
+    expect(harness.container.read(currentAccountProvider)?.user.username, "alice");
   });
 
   testWidgets("the server form stays up while connecting", (tester) async {

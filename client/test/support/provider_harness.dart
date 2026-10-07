@@ -34,7 +34,7 @@ Account testAccount({String serverUrl = "https://cloud.test", UserRole role = Us
   serverUrl: serverUrl,
   accessToken: "access",
   refreshToken: "refresh",
-  user: User(id: 1, username: "jop", role: role),
+  user: User(id: 1, username: "alice", role: role),
 );
 
 class ProviderHarness {

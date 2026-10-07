@@ -20,6 +20,7 @@ type Service struct {
 	store       *Store
 	hasher      PasswordHasher
 	directories UserDirectories
+	onCreated   []func(User)
 }
 
 func NewService(store *Store, hasher PasswordHasher, directories UserDirectories) *Service {
@@ -27,6 +28,10 @@ func NewService(store *Store, hasher PasswordHasher, directories UserDirectories
 }
 
 func (s *Service) Store() *Store { return s.store }
+
+func (s *Service) OnCreated(listener func(User)) {
+	s.onCreated = append(s.onCreated, listener)
+}
 
 func (s *Service) Create(ctx context.Context, newUser NewUser) (User, error) {
 	if err := newUser.validate(); err != nil {
@@ -42,6 +47,9 @@ func (s *Service) Create(ctx context.Context, newUser NewUser) (User, error) {
 	}
 	if err := s.directories.EnsureUserRoot(user.Username); err != nil {
 		return User{}, fmt.Errorf("create user directory: %w", err)
+	}
+	for _, listener := range s.onCreated {
+		listener(user)
 	}
 	return user, nil
 }

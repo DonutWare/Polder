@@ -240,6 +240,86 @@ func TestDeltaUploadRejectsWrongChunkAndStaleBase(t *testing.T) {
 	})
 }
 
+func TestNewUserSeesFilesAlreadyInTheirFolder(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		admin := server.setupAdmin()
+		folder := filepath.Join(server.app.Config.DataDir, "alice", "Photos")
+		if err := os.MkdirAll(folder, 0o750); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(folder, "cat.jpg"), []byte("cat"), 0o640); err != nil {
+			t.Fatal(err)
+		}
+
+		alice := server.createUser(admin, "alice", 0)
+		eventually(t, func() error {
+			var listing struct {
+				Entries []fileEntry `json:"entries"`
+			}
+			alice.mustJSON(http.MethodGet, "/files/list?path=/", nil, http.StatusOK, &listing)
+			if len(listing.Entries) != 1 || listing.Entries[0].Name != "Photos" || listing.Entries[0].Size != 3 {
+				return fmt.Errorf("listing = %+v, want Photos holding cat.jpg", listing.Entries)
+			}
+			return nil
+		})
+	})
+}
+
+func TestLargeRescanCommitsInBatchesAndLogsOnce(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		admin := server.setupAdmin()
+		const fileCount = 600
+		folder := filepath.Join(server.app.Config.DataDir, "alice", "Imported")
+		if err := os.MkdirAll(folder, 0o750); err != nil {
+			t.Fatal(err)
+		}
+		for i := range fileCount {
+			if err := os.WriteFile(filepath.Join(folder, fmt.Sprintf("%03d.txt", i)), []byte(fmt.Sprint(i)), 0o640); err != nil {
+				t.Fatal(err)
+			}
+		}
+		events := admin.openEvents()
+		events.send(map[string]any{"type": "subscribe", "scope": "all"})
+		events.next("snapshot")
+
+		alice := server.createUser(admin, "alice", 0)
+		batches := 0
+		for {
+			message := events.next("")
+			if message.Type == "files.changed" {
+				batches++
+			}
+			if message.Type == "activity.created" && message.Entry.Kind == "rescan" {
+				if message.Entry.Detail != "summary" || message.Entry.Count == nil || *message.Entry.Count != fileCount+1 {
+					t.Fatalf("rescan activity = %+v, want one summary of %d", message.Entry, fileCount+1)
+				}
+				break
+			}
+		}
+		if batches < 3 {
+			t.Fatalf("saw %d committed batches, want at least 3", batches)
+		}
+
+		var listing struct {
+			Entries  []fileEntry `json:"entries"`
+			Indexing bool        `json:"indexing"`
+		}
+		alice.mustJSON(http.MethodGet, "/files/list?path=/Imported", nil, http.StatusOK, &listing)
+		if len(listing.Entries) != fileCount || listing.Indexing {
+			t.Fatalf("listed %d files, indexing %v; want %d and done", len(listing.Entries), listing.Indexing, fileCount)
+		}
+		rescans := 0
+		for _, entry := range alice.activity("").Entries {
+			if entry.Kind == "rescan" {
+				rescans++
+			}
+		}
+		if rescans != 1 {
+			t.Fatalf("logged %d rescans, want 1", rescans)
+		}
+	})
+}
+
 func TestRescanPicksUpFilesChangedDirectlyOnDisk(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 0)

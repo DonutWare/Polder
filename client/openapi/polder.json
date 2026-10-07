@@ -432,13 +432,18 @@
 						"nullable": true,
 						"type": "array"
 					},
+					"indexing": {
+						"description": "Files found on disk are still being added, so the listing may be incomplete",
+						"type": "boolean"
+					},
 					"path": {
 						"type": "string"
 					}
 				},
 				"required": [
 					"path",
-					"entries"
+					"entries",
+					"indexing"
 				],
 				"type": "object"
 			},

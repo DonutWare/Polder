@@ -34,8 +34,11 @@ extension EntryToModel on wire.Entry {
 PreviewState _previewState(String? name) => PreviewState.values.asNameMap()[name] ?? PreviewState.none;
 
 extension ListResponseToModel on wire.ListResponse {
-  DirectoryListing toModel() =>
-      DirectoryListing(path: path, entries: [for (final entry in entries ?? <wire.Entry>[]) entry.toModel()]);
+  DirectoryListing toModel() => DirectoryListing(
+    path: path,
+    entries: [for (final entry in entries ?? <wire.Entry>[]) entry.toModel()],
+    indexing: indexing,
+  );
 }
 
 extension ChangeToModel on wire.Change {

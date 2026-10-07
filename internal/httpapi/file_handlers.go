@@ -20,8 +20,9 @@ import (
 )
 
 type listResponse struct {
-	Path    string        `json:"path"`
-	Entries []files.Entry `json:"entries"`
+	Path     string        `json:"path"`
+	Entries  []files.Entry `json:"entries"`
+	Indexing bool          `json:"indexing" doc:"Files found on disk are still being added, so the listing may be incomplete"`
 }
 
 type pathRequest struct {
@@ -100,11 +101,12 @@ type previewOutput struct {
 }
 
 func (a *API) listFiles(ctx context.Context, input *pathQuery) (*jsonBody[listResponse], error) {
-	listedPath, entries, err := a.files.List(ctx, currentUser(ctx), input.Path)
+	owner := currentUser(ctx)
+	listedPath, entries, err := a.files.List(ctx, owner, input.Path)
 	if err != nil {
 		return nil, err
 	}
-	return respond(listResponse{Path: listedPath, Entries: entries}), nil
+	return respond(listResponse{Path: listedPath, Entries: entries, Indexing: a.files.IsIndexing(owner.ID)}), nil
 }
 
 func (a *API) statFile(ctx context.Context, input *pathQuery) (*jsonBody[files.Entry], error) {

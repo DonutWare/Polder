@@ -1,6 +1,8 @@
 package database
 
 import (
+	"context"
+	"crypto/rand"
 	"database/sql"
 	"embed"
 	"fmt"
@@ -13,6 +15,8 @@ import (
 
 	"polder-server/internal/config"
 )
+
+const idSetting = "database_id"
 
 //go:embed migrations
 var migrations embed.FS
@@ -47,6 +51,19 @@ func openDriver(cfg config.Config) (*sql.DB, error) {
 	}
 	db.SetMaxOpenConns(1)
 	return db, nil
+}
+
+// ID tells files derived from the database, such as the search index, which database they belong to,
+// so they are rebuilt rather than trusted after the database is replaced.
+func ID(ctx context.Context, db *sql.DB) (string, error) {
+	_, err := db.ExecContext(ctx, `INSERT INTO server_settings (name, value) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING`,
+		idSetting, rand.Text())
+	if err != nil {
+		return "", err
+	}
+	var id string
+	err = db.QueryRowContext(ctx, `SELECT value FROM server_settings WHERE name = $1`, idSetting).Scan(&id)
+	return id, err
 }
 
 func migrate(db *sql.DB, driver string) error {

@@ -27,11 +27,12 @@ type TextSource interface {
 }
 
 type Service struct {
-	files    *files.Service
-	users    *users.Store
-	settings *settings.Store
-	texts    TextSource
-	dir      string
+	files      *files.Service
+	users      *users.Store
+	settings   *settings.Store
+	texts      TextSource
+	dir        string
+	databaseID string
 
 	mu       sync.Mutex
 	index    *index
@@ -39,12 +40,12 @@ type Service struct {
 	pokes    chan int64
 }
 
-func Open(dir string, fileService *files.Service, userStore *users.Store, settingsStore *settings.Store, texts TextSource) (*Service, error) {
-	opened, err := openIndex(dir)
+func Open(dir, databaseID string, fileService *files.Service, userStore *users.Store, settingsStore *settings.Store, texts TextSource) (*Service, error) {
+	opened, err := openIndex(dir, databaseID)
 	if err != nil {
 		return nil, err
 	}
-	return &Service{files: fileService, users: userStore, settings: settingsStore, texts: texts, dir: dir, index: opened,
+	return &Service{files: fileService, users: userStore, settings: settingsStore, texts: texts, dir: dir, databaseID: databaseID, index: opened,
 		pokes: make(chan int64, pokeCapacity)}, nil
 }
 
@@ -265,9 +266,9 @@ func (s *Service) Status() (IndexStatus, error) {
 func (s *Service) Rebuild(ctx context.Context) error {
 	s.mu.Lock()
 	closeErr := s.index.Close()
-	rebuilt, err := createIndex(s.dir)
+	rebuilt, err := createIndex(s.dir, s.databaseID)
 	if err != nil {
-		if reopened, reopenErr := openIndex(s.dir); reopenErr == nil {
+		if reopened, reopenErr := openIndex(s.dir, s.databaseID); reopenErr == nil {
 			s.index = reopened
 		}
 		s.mu.Unlock()

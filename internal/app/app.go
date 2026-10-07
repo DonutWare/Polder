@@ -100,12 +100,18 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	}
 	fileService.OnContentChanged(extractor.Enqueue)
 	fileService.OnContentRemoved(extractor.RequestCleanup)
-	searchService, err := search.Open(cfg.SearchIndexDir(), fileService, userStore, serverSettings, extractor.Cache())
+	databaseID, err := database.ID(context.Background(), db)
+	if err != nil {
+		return nil, err
+	}
+	searchService, err := search.Open(cfg.SearchIndexDir(), databaseID, fileService, userStore, serverSettings, extractor.Cache())
 	if err != nil {
 		return nil, err
 	}
 	fileService.OnMutation(searchService.FileMutation)
 	extractor.OnExtracted(searchService.IndexText)
+	fileScanner := scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles)
+	userService.OnCreated(func(user users.User) { fileScanner.Request(user.Username) })
 	authService := auth.NewService(userService, sessions, tokens)
 	authService.OnSession(func(ctx context.Context, user users.User, session auth.Session, event auth.SessionEvent) {
 		activityHub.Session(ctx, user, session.ID, session.DeviceName, event == auth.SessionStarted)
@@ -139,7 +145,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Activity:  activityHub,
 		Search:    searchService,
 		db:        db,
-		scanner:   scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles),
+		scanner:   fileScanner,
 		previews:  previews,
 		extractor: extractor,
 		sync:      syncService,

@@ -10,6 +10,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"polder-server/internal/apperr"
@@ -28,6 +29,8 @@ type Service struct {
 	db             *sql.DB
 	disk           *storage.Disk
 	locks          userLocks
+	scanLocks      userLocks
+	indexing       sync.Map
 	contentChanged []ContentChangedFunc
 	contentRemoved []func()
 	observers      []MutationFunc

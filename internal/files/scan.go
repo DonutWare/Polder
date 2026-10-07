@@ -25,54 +25,100 @@ type diskItem struct {
 	mtime time.Time
 }
 
-type scanPlan struct {
-	upserts  []Entry
-	removals []string
-}
+const (
+	scanBatchSize     = 250
+	scanBatchInterval = 2 * time.Second
+	// scanChangeSample is how many changes a finished rescan reports by name; the rest are only counted.
+	scanChangeSample = 100
+)
 
-func (p scanPlan) isEmpty() bool {
-	return len(p.upserts) == 0 && len(p.removals) == 0
-}
-
+// Rescan brings the index in line with the user's directory. It commits in batches, so a large
+// directory fills in while it is still being read.
 func (s *Service) Rescan(ctx context.Context, owner users.User) error {
+	unlock := s.scanLocks.lock(owner.ID)
+	defer unlock()
 	if err := s.disk.EnsureUserRoot(owner.Username); err != nil {
 		return err
 	}
-	plan, err := s.planRescan(ctx, owner)
-	if err != nil || plan.isEmpty() {
-		return err
-	}
-	return s.applyRescan(ctx, owner, plan)
-}
-
-func (s *Service) planRescan(ctx context.Context, owner users.User) (scanPlan, error) {
 	indexedList, err := listAll(ctx, s.db, owner.ID)
 	if err != nil {
-		return scanPlan{}, err
+		return err
 	}
 	indexed := make(map[string]Entry, len(indexedList))
 	for _, entry := range indexedList {
 		indexed[entry.Path] = entry
 	}
+
 	onDisk, err := s.walkUserRoot(owner.Username)
 	if err != nil {
-		return scanPlan{}, err
+		return err
+	}
+	var pending []diskItem
+	for _, item := range onDisk {
+		if known, isKnown := indexed[item.path]; !isKnown || differs(known, item) {
+			pending = append(pending, item)
+		}
+	}
+	sort.Slice(pending, func(i, j int) bool { return len(pending[i].path) < len(pending[j].path) })
+	if len(pending) > scanBatchSize {
+		s.indexing.Store(owner.ID, true)
+		defer s.indexing.Delete(owner.ID)
 	}
 
-	var plan scanPlan
-	for _, item := range onDisk {
-		known, isKnown := indexed[item.path]
-		if isKnown && !differs(known, item) {
-			continue
-		}
-		entry, err := s.entryFromDisk(owner, item, known)
+	var summary scanSummary
+	if removals := topmostMissingPaths(indexed, onDisk); len(removals) > 0 {
+		changes, err := s.applyRemovals(ctx, owner, removals)
 		if err != nil {
-			continue
+			return err
 		}
-		plan.upserts = append(plan.upserts, entry)
+		summary.add(changes)
 	}
-	plan.removals = topmostMissingPaths(indexed, onDisk)
-	return plan, nil
+
+	var batch []Entry
+	lastCommit := time.Now()
+	commit := func() error {
+		changes, err := s.applyUpserts(ctx, owner, batch)
+		batch, lastCommit = batch[:0], time.Now()
+		summary.add(changes)
+		return err
+	}
+	for _, item := range pending {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if entry, err := s.entryFromDisk(owner, item, indexed[item.path]); err == nil {
+			batch = append(batch, entry)
+		}
+		if len(batch) >= scanBatchSize || time.Since(lastCommit) >= scanBatchInterval {
+			if err := commit(); err != nil {
+				return err
+			}
+		}
+	}
+	if err := commit(); err != nil {
+		return err
+	}
+	if summary.count > 0 {
+		s.notify(ctx, Mutation{Owner: owner, Kind: MutationRescanFinished, Path: "/", IsDir: true, Count: summary.count, Changes: summary.sample})
+	}
+	return nil
+}
+
+type scanSummary struct {
+	count  int
+	sample []ScanChange
+}
+
+// IsIndexing reports whether a rescan with more than one batch of work is running for the user.
+func (s *Service) IsIndexing(userID int64) bool {
+	_, indexing := s.indexing.Load(userID)
+	return indexing
+}
+
+func (s *scanSummary) add(changes []ScanChange) {
+	s.count += len(changes)
+	room := scanChangeSample - len(s.sample)
+	s.sample = append(s.sample, changes[:min(room, len(changes))]...)
 }
 
 func differs(known Entry, item diskItem) bool {
@@ -154,16 +200,13 @@ func topmostMissingPaths(indexed map[string]Entry, onDisk map[string]diskItem) [
 	return topmost
 }
 
-func (s *Service) applyRescan(ctx context.Context, owner users.User, plan scanPlan) error {
+func (s *Service) applyRemovals(ctx context.Context, owner users.User, removals []string) ([]ScanChange, error) {
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
-
-	sort.Slice(plan.upserts, func(i, j int) bool { return len(plan.upserts[i].Path) < len(plan.upserts[j].Path) })
-	var changedFiles []string
 	var changes []ScanChange
 	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
 		changes = changes[:0]
-		for _, removedPath := range plan.removals {
+		for _, removedPath := range removals {
 			if !isInternalName(removedPath) && s.existsOnDisk(owner.Username, removedPath) {
 				continue
 			}
@@ -178,7 +221,29 @@ func (s *Service) applyRescan(ctx context.Context, owner users.User, plan scanPl
 				changes = append(changes, ScanChange{Path: removedPath, IsDir: removed.IsDir, Change: ScanRemoved})
 			}
 		}
-		for _, entry := range plan.upserts {
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	s.onContentRemoved()
+	if len(changes) > 0 {
+		s.notify(ctx, Mutation{Owner: owner, Kind: MutationRescan, Path: "/", IsDir: true, Changes: changes})
+	}
+	return changes, nil
+}
+
+func (s *Service) applyUpserts(ctx context.Context, owner users.User, upserts []Entry) ([]ScanChange, error) {
+	if len(upserts) == 0 {
+		return nil, nil
+	}
+	unlock := s.locks.lock(owner.ID)
+	defer unlock()
+	var changedFiles []string
+	var changes []ScanChange
+	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
+		changedFiles, changes = changedFiles[:0], changes[:0]
+		for _, entry := range upserts {
 			change, err := s.applyScannedEntry(ctx, tx, owner, entry)
 			if err != nil {
 				return err
@@ -193,16 +258,15 @@ func (s *Service) applyRescan(ctx context.Context, owner users.User, plan scanPl
 		return nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, changedPath := range changedFiles {
 		s.onContentChanged(owner.ID, changedPath)
 	}
-	s.onContentRemoved()
 	if len(changes) > 0 {
 		s.notify(ctx, Mutation{Owner: owner, Kind: MutationRescan, Path: "/", IsDir: true, Changes: changes})
 	}
-	return nil
+	return changes, nil
 }
 
 func (s *Service) applyScannedEntry(ctx context.Context, tx *sql.Tx, owner users.User, entry Entry) (ScanChangeType, error) {

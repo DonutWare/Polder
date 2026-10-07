@@ -2,10 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:polder/models/directory_listing.dart";
-import "package:polder/providers/browser/browser_view_provider.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
+import "package:polder/providers/browser/browser_view_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/file_grid_view.dart";
@@ -14,6 +13,7 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
+import "package:polder/widgets/shared/notice_tile.dart";
 
 class DirectoryView extends ConsumerWidget {
   const DirectoryView({required this.path, this.select, super.key});
@@ -35,7 +35,7 @@ class DirectoryView extends ConsumerWidget {
           pending,
           busyFolders: busyFolders,
         );
-        return ReadableWidth(
+        final view = ReadableWidth(
           maxWidth: 1200,
           builder: (context, inset) => RefreshIndicator(
             edgeOffset: inset.top,
@@ -46,7 +46,12 @@ class DirectoryView extends ConsumerWidget {
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: SizedBox(
                         height: constraints.maxHeight,
-                        child: MessageView(icon: IconsaxPlusLinear.folder_open, message: context.localized.emptyFolder),
+                        child: listing.indexing
+                            ? MessageView(
+                                icon: IconsaxPlusLinear.refresh_2,
+                                message: context.localized.indexingEmptyFolder,
+                              )
+                            : MessageView(icon: IconsaxPlusLinear.folder_open, message: context.localized.emptyFolder),
                       ),
                     ),
                   )
@@ -57,6 +62,26 @@ class DirectoryView extends ConsumerWidget {
                     padding: inset + const EdgeInsets.fromLTRB(16, 8, 16, 96),
                   ),
           ),
+        );
+        if (!listing.indexing || items.isEmpty) return view;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ReadableWidth(
+              maxWidth: 1200,
+              builder: (context, inset) => Padding(
+                padding: EdgeInsets.fromLTRB(inset.left + 16, inset.top + 8, inset.right + 16, 0),
+                child: NoticeTile(
+                  icon: IconsaxPlusLinear.refresh_2,
+                  text: context.localized.indexingBanner,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            Expanded(
+              child: MediaQuery.removePadding(context: context, removeTop: true, child: view),
+            ),
+          ],
         );
       },
     );

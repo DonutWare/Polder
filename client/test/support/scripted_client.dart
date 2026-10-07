@@ -61,7 +61,7 @@ http.StreamedResponse bytesResponse(int status, List<int> bytes, {String content
 
 Map<String, dynamic> userJson({String role = "user"}) => {
   "id": 1,
-  "username": "jop",
+  "username": "alice",
   "role": role,
   "quotaBytes": 0,
   "usedBytes": 0,

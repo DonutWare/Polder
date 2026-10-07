@@ -9,15 +9,16 @@ import (
 type MutationKind string
 
 const (
-	MutationWrite       MutationKind = "write"
-	MutationMkdir       MutationKind = "mkdir"
-	MutationMove        MutationKind = "move"
-	MutationDelete      MutationKind = "delete"
-	MutationRestore     MutationKind = "restore"
-	MutationTrashDelete MutationKind = "trashDelete"
-	MutationTrashEmpty  MutationKind = "trashEmpty"
-	MutationTrashExpire MutationKind = "trashExpire"
-	MutationRescan      MutationKind = "rescan"
+	MutationWrite          MutationKind = "write"
+	MutationMkdir          MutationKind = "mkdir"
+	MutationMove           MutationKind = "move"
+	MutationDelete         MutationKind = "delete"
+	MutationRestore        MutationKind = "restore"
+	MutationTrashDelete    MutationKind = "trashDelete"
+	MutationTrashEmpty     MutationKind = "trashEmpty"
+	MutationTrashExpire    MutationKind = "trashExpire"
+	MutationRescan         MutationKind = "rescan"
+	MutationRescanFinished MutationKind = "rescanFinished"
 )
 
 type ScanChangeType string

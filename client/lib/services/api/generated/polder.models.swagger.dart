@@ -943,7 +943,7 @@ extension $HealthStatusExtension on HealthStatus {
 
 @JsonSerializable(explicitToJson: true)
 class ListResponse {
-  const ListResponse({this.entries, required this.path});
+  const ListResponse({this.entries, required this.indexing, required this.path});
 
   factory ListResponse.fromJson(Map<String, dynamic> json) => _$ListResponseFromJson(json);
 
@@ -952,6 +952,8 @@ class ListResponse {
 
   @JsonKey(name: 'entries', includeIfNull: false, defaultValue: <Entry>[])
   final List<Entry>? entries;
+  @JsonKey(name: 'indexing', includeIfNull: false)
+  final bool indexing;
   @JsonKey(name: 'path', includeIfNull: false)
   final String path;
   static const fromJsonFactory = _$ListResponseFromJson;
@@ -961,22 +963,27 @@ class ListResponse {
     return identical(this, other) ||
         (other is ListResponse &&
             (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)) &&
+            (identical(other.indexing, indexing) || const DeepCollectionEquality().equals(other.indexing, indexing)) &&
             (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(entries) ^ const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
+      const DeepCollectionEquality().hash(entries) ^
+      const DeepCollectionEquality().hash(indexing) ^
+      const DeepCollectionEquality().hash(path) ^
+      runtimeType.hashCode;
 }
 
 extension $ListResponseExtension on ListResponse {
-  ListResponse copyWith({List<Entry>? entries, String? path}) {
-    return ListResponse(entries: entries ?? this.entries, path: path ?? this.path);
+  ListResponse copyWith({List<Entry>? entries, bool? indexing, String? path}) {
+    return ListResponse(entries: entries ?? this.entries, indexing: indexing ?? this.indexing, path: path ?? this.path);
   }
 
-  ListResponse copyWithWrapped({Wrapped<List<Entry>?>? entries, Wrapped<String>? path}) {
+  ListResponse copyWithWrapped({Wrapped<List<Entry>?>? entries, Wrapped<bool>? indexing, Wrapped<String>? path}) {
     return ListResponse(
       entries: (entries != null ? entries.value : this.entries),
+      indexing: (indexing != null ? indexing.value : this.indexing),
       path: (path != null ? path.value : this.path),
     );
   }

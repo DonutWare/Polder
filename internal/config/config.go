@@ -20,6 +20,7 @@ type Config struct {
 	ListenAddress  string        `yaml:"listen"`
 	ConfigDir      string        `yaml:"-"`
 	DataDir        string        `yaml:"-"`
+	CacheDir       string        `yaml:"-"`
 	DatabaseDriver string        `yaml:"databaseDriver"`
 	DatabaseDSN    string        `yaml:"databaseDsn"`
 	RescanInterval time.Duration `yaml:"rescanInterval"`
@@ -57,6 +58,7 @@ func Load() (Config, error) {
 	cfg := Default()
 	cfg.ConfigDir = envOr("POLDER_CONFIG_DIR", cfg.ConfigDir)
 	cfg.DataDir = envOr("POLDER_DATA_DIR", cfg.DataDir)
+	cfg.CacheDir = envOr("POLDER_CACHE_DIR", cfg.CacheDir)
 
 	if err := cfg.mergeFile(filepath.Join(cfg.ConfigDir, "config.yaml")); err != nil {
 		return Config{}, err
@@ -141,20 +143,28 @@ func (cfg Config) SQLitePath() string {
 	return filepath.Join(cfg.ConfigDir, "polder.db")
 }
 
+// The cache directory holds only what can be rebuilt from the data directory and the database, so it is safe to delete.
+func (cfg Config) cacheDir() string {
+	if cfg.CacheDir != "" {
+		return cfg.CacheDir
+	}
+	return filepath.Join(cfg.ConfigDir, "cache")
+}
+
 func (cfg Config) PreviewCacheDir() string {
-	return filepath.Join(cfg.ConfigDir, "cache", "previews")
+	return filepath.Join(cfg.cacheDir(), "previews")
 }
 
 func (cfg Config) SearchIndexDir() string {
-	return filepath.Join(cfg.ConfigDir, "search", "index")
+	return filepath.Join(cfg.cacheDir(), "search-index")
 }
 
 func (cfg Config) SearchTextDir() string {
-	return filepath.Join(cfg.ConfigDir, "search", "text")
+	return filepath.Join(cfg.cacheDir(), "text")
 }
 
 func (cfg Config) OCRModelDir() string {
-	return filepath.Join(cfg.ConfigDir, "search", "tessdata")
+	return filepath.Join(cfg.cacheDir(), "tessdata")
 }
 
 func (cfg Config) JWTKeyPath() string {

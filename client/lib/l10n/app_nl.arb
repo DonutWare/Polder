@@ -348,5 +348,7 @@
 	"sortBy": "Sorteren",
 	"sortAscending": "Oplopend",
 	"sortDescending": "Aflopend",
-	"sortFoldersFirst": "Mappen bovenaan"
+	"sortFoldersFirst": "Mappen bovenaan",
+	"indexingBanner": "Bezig met indexeren… mappen vullen zich zodra bestanden gevonden zijn.",
+	"indexingEmptyFolder": "Nog bezig met indexeren. Bestanden verschijnen hier zodra ze gevonden zijn."
 }

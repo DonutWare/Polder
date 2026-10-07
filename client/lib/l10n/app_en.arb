@@ -740,5 +740,7 @@
 	"sortBy": "Sort",
 	"sortAscending": "Ascending",
 	"sortDescending": "Descending",
-	"sortFoldersFirst": "Folders on top"
+	"sortFoldersFirst": "Folders on top",
+	"indexingBanner": "Indexing… folders fill in as files are found.",
+	"indexingEmptyFolder": "Still indexing. Files appear here as they're found."
 }

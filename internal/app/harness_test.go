@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"sync"
 	"testing"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -25,6 +26,7 @@ type testServer struct {
 	t      *testing.T
 	app    *app.App
 	server *httptest.Server
+	stop   func()
 }
 
 type client struct {
@@ -68,12 +70,13 @@ func startServer(t *testing.T, driver, dsn string, configure ...func(*config.Con
 	ctx, cancel := context.WithCancel(context.Background())
 	application.StartBackgroundWork(ctx)
 	server := httptest.NewServer(application.Handler)
-	t.Cleanup(func() {
+	stop := sync.OnceFunc(func() {
 		server.Close()
 		cancel()
 		application.Close()
 	})
-	return &testServer{t: t, app: application, server: server}
+	t.Cleanup(stop)
+	return &testServer{t: t, app: application, server: server, stop: stop}
 }
 
 func resetPostgres(t *testing.T, dsn string) {

@@ -26,10 +26,35 @@ type Scanner struct {
 
 	pendingMu sync.Mutex
 	pending   map[string]*time.Timer
+
+	requestedMu sync.Mutex
+	requested   map[string]struct{}
+	wake        chan struct{}
 }
 
 func New(fileService *files.Service, userStore *users.Store, interval time.Duration, watch bool) *Scanner {
-	return &Scanner{files: fileService, users: userStore, interval: interval, watch: watch, pending: map[string]*time.Timer{}}
+	return &Scanner{files: fileService, users: userStore, interval: interval, watch: watch, pending: map[string]*time.Timer{},
+		requested: map[string]struct{}{}, wake: make(chan struct{}, 1)}
+}
+
+func (s *Scanner) Request(username string) {
+	s.requestedMu.Lock()
+	s.requested[username] = struct{}{}
+	s.requestedMu.Unlock()
+	select {
+	case s.wake <- struct{}{}:
+	default:
+	}
+}
+
+func (s *Scanner) rescanRequested(ctx context.Context) {
+	s.requestedMu.Lock()
+	requested := s.requested
+	s.requested = map[string]struct{}{}
+	s.requestedMu.Unlock()
+	for username := range requested {
+		s.rescanByUsername(ctx, username)
+	}
 }
 
 func (s *Scanner) Run(ctx context.Context) {
@@ -37,17 +62,20 @@ func (s *Scanner) Run(ctx context.Context) {
 	if s.watch {
 		go s.watchDataDir(ctx)
 	}
-	if s.interval <= 0 {
-		return
+	var tick <-chan time.Time
+	if s.interval > 0 {
+		ticker := time.NewTicker(s.interval)
+		defer ticker.Stop()
+		tick = ticker.C
 	}
-	ticker := time.NewTicker(s.interval)
-	defer ticker.Stop()
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-ticker.C:
+		case <-tick:
 			s.RescanAll(ctx)
+		case <-s.wake:
+			s.rescanRequested(ctx)
 		}
 	}
 }

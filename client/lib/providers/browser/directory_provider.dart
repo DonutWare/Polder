@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/directory_listing.dart";
@@ -15,16 +17,33 @@ final directoryProvider = AsyncNotifierProvider.autoDispose.family<DirectoryNoti
 class DirectoryNotifier extends AsyncNotifier<DirectoryListing> {
   DirectoryNotifier(this.path);
 
+  // The server says when it is still indexing but not when it stops, so the listing is fetched
+  // again until it is done.
+  static const indexingRefresh = Duration(seconds: 3);
+
   final String path;
+  Timer? _indexingTimer;
 
   PolderApi get _api => ref.read(polderApiProvider);
 
   @override
-  Future<DirectoryListing> build() => ref.watch(polderApiProvider).list(path);
+  Future<DirectoryListing> build() async {
+    ref.onDispose(() => _indexingTimer?.cancel());
+    final listing = await ref.watch(polderApiProvider).list(path);
+    _followIndexing(listing);
+    return listing;
+  }
 
   Future<void> refresh() async {
     final result = await AsyncValue.guard(() => _api.list(path));
-    if (ref.mounted) state = result;
+    if (!ref.mounted) return;
+    state = result;
+    if (result.value case final listing?) _followIndexing(listing);
+  }
+
+  void _followIndexing(DirectoryListing listing) {
+    _indexingTimer?.cancel();
+    _indexingTimer = listing.indexing ? Timer(indexingRefresh, refresh) : null;
   }
 
   Future<void> createFolder(String name) => _mutate(() => _api.mkdir(RemotePath.join(path, name)));

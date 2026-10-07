@@ -199,11 +199,13 @@ Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) => <String, dyn
 
 ListResponse _$ListResponseFromJson(Map<String, dynamic> json) => ListResponse(
   entries: (json['entries'] as List<dynamic>?)?.map((e) => Entry.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  indexing: json['indexing'] as bool,
   path: json['path'] as String,
 );
 
 Map<String, dynamic> _$ListResponseToJson(ListResponse instance) => <String, dynamic>{
   'entries': ?instance.entries?.map((e) => e.toJson()).toList(),
+  'indexing': instance.indexing,
   'path': instance.path,
 };
 

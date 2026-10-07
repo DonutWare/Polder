@@ -49,6 +49,7 @@ class FakePolderServer extends http.BaseClient {
   final List<Map<String, dynamic>> changes = [];
   final Map<String, FakeUpload> uploads = {};
   final List<String> requests = [];
+  bool indexing = false;
   int rangeBytesServed = 0;
   int chunkBytesReceived = 0;
   int wholeBytesReceived = 0;
@@ -122,7 +123,7 @@ class FakePolderServer extends http.BaseClient {
 
   http.StreamedResponse _list(String path) {
     final entries = nodes.keys.where((key) => key != "/" && RemotePath.parent(key) == path).map(_entry).toList();
-    return _json(200, {"path": path, "entries": entries});
+    return _json(200, {"path": path, "entries": entries, "indexing": indexing});
   }
 
   http.StreamedResponse _content(String path, Map<String, String> headers) {

@@ -15,6 +15,8 @@ import (
 	"testing"
 	"time"
 	"unicode/utf16"
+
+	"polder-server/internal/config"
 )
 
 type searchResponse struct {
@@ -177,6 +179,31 @@ func TestSearchFollowsChanges(t *testing.T) {
 		}
 		expectPaths(t, "sunrise", alice.search("sunrise"), "/sunrise.png")
 	})
+}
+
+func TestSearchIndexIsRebuiltForANewDatabase(t *testing.T) {
+	configDir := t.TempDir()
+	sharedConfig := func(cfg *config.Config) { cfg.ConfigDir = configDir }
+
+	first := startServer(t, config.DriverSQLite, "", sharedConfig)
+	alice := first.createUser(first.setupAdmin(), "alice", 0)
+	for i := range 20 {
+		alice.put(fmt.Sprintf("/secret-%d.txt", i), 0, []byte("old"), http.StatusOK, nil)
+	}
+	if got := len(alice.search("secret").Results); got != 20 {
+		t.Fatalf("old server found %d secrets, want 20", got)
+	}
+	first.stop()
+	for _, suffix := range []string{"", "-wal", "-shm"} {
+		if err := os.Remove(filepath.Join(configDir, "polder.db"+suffix)); err != nil && !os.IsNotExist(err) {
+			t.Fatal(err)
+		}
+	}
+
+	second := startServer(t, config.DriverSQLite, "", sharedConfig)
+	carol := second.createUser(second.setupAdmin(), "carol", 0)
+	carol.put("/secret-notes.txt", 0, []byte("new"), http.StatusOK, nil)
+	expectPaths(t, "secret", carol.search("secret"), "/secret-notes.txt")
 }
 
 func TestSearchSuggestions(t *testing.T) {

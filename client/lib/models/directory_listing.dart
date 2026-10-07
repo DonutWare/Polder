@@ -9,8 +9,11 @@ part "directory_listing.g.dart";
 abstract class DirectoryListing with _$DirectoryListing {
   const DirectoryListing._();
 
-  const factory DirectoryListing({required String path, @Default(<FileEntry>[]) List<FileEntry> entries}) =
-      _DirectoryListing;
+  const factory DirectoryListing({
+    required String path,
+    @Default(<FileEntry>[]) List<FileEntry> entries,
+    @Default(false) bool indexing,
+  }) = _DirectoryListing;
 
   factory DirectoryListing.fromJson(Map<String, dynamic> json) => _$DirectoryListingFromJson(json);
 

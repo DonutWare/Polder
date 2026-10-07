@@ -52,7 +52,9 @@ func (h *Hub) FileMutation(ctx context.Context, mutation files.Mutation) {
 	case files.MutationTrashExpire:
 		entry.Kind = KindTrashExpire
 	case files.MutationRescan:
-		h.recordRescan(ctx, entry, mutation.Changes)
+		return
+	case files.MutationRescanFinished:
+		h.recordRescan(ctx, entry, mutation.Changes, mutation.Count)
 		return
 	default:
 		return
@@ -60,11 +62,11 @@ func (h *Hub) FileMutation(ctx context.Context, mutation files.Mutation) {
 	h.record(ctx, entry)
 }
 
-func (h *Hub) recordRescan(ctx context.Context, base LogEntry, changes []files.ScanChange) {
+func (h *Hub) recordRescan(ctx context.Context, base LogEntry, changes []files.ScanChange, count int) {
 	base.Kind = KindRescan
-	if len(changes) > rescanDetailLimit {
+	if count > rescanDetailLimit {
 		base.Detail = "summary"
-		base.Count = ptr(int64(len(changes)))
+		base.Count = ptr(int64(count))
 		h.record(ctx, base)
 		return
 	}
@@ -87,7 +89,7 @@ func (h *Hub) Session(ctx context.Context, user users.User, sessionID int64, dev
 
 func changedPaths(mutation files.Mutation) []string {
 	switch mutation.Kind {
-	case files.MutationTrashDelete, files.MutationTrashEmpty, files.MutationTrashExpire:
+	case files.MutationTrashDelete, files.MutationTrashEmpty, files.MutationTrashExpire, files.MutationRescanFinished:
 		return nil
 	case files.MutationRescan:
 		paths := make([]string, 0, len(mutation.Changes))

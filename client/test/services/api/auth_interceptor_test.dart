@@ -84,7 +84,7 @@ void main() {
   test("refreshes on 401, stores the rotated pair and retries", () async {
     final user = await api.me();
 
-    expect(user.username, "jop");
+    expect(user.username, "alice");
     expect(refreshCalls, 1);
     expect(session.stored, 1);
     expect(session.refreshToken, "refresh-2");
@@ -110,7 +110,7 @@ void main() {
 
   test("anonymous endpoints never trigger a refresh", () async {
     await expectLater(
-      api.login(username: "jop", password: "wrong", deviceName: "test"),
+      api.login(username: "alice", password: "wrong", deviceName: "test"),
       throwsA(isA<UnauthorizedException>()),
     );
 

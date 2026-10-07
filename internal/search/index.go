@@ -45,8 +45,9 @@ const (
 	analyzerWords   = "words"
 	analyzerLowered = "lowered_keyword"
 
-	internalVersion = "mapping_version"
-	internalCursor  = "cursor/"
+	internalVersion  = "mapping_version"
+	internalDatabase = "database_id"
+	internalCursor   = "cursor/"
 )
 
 type index struct {
@@ -54,22 +55,27 @@ type index struct {
 	bleve.Index
 }
 
-func openIndex(dir string) (*index, error) {
+func openIndex(dir, databaseID string) (*index, error) {
 	opened, err := bleve.Open(dir)
 	if err == nil {
 		version, _ := opened.GetInternal([]byte(internalVersion))
-		if string(version) == mappingVersion {
+		database, _ := opened.GetInternal([]byte(internalDatabase))
+		switch {
+		case string(version) != mappingVersion:
+			slog.Info("search index is out of date; rebuilding", "dir", dir)
+		case string(database) != databaseID:
+			slog.Info("search index belongs to another database; rebuilding", "dir", dir)
+		default:
 			return &index{dir: dir, Index: opened}, nil
 		}
-		slog.Info("search index is out of date; rebuilding", "dir", dir)
-		opened.Close()
+		_ = opened.Close()
 	} else if !errors.Is(err, bleve.ErrorIndexPathDoesNotExist) {
 		slog.Warn("search index unreadable; rebuilding", "dir", dir, "error", err)
 	}
-	return createIndex(dir)
+	return createIndex(dir, databaseID)
 }
 
-func createIndex(dir string) (*index, error) {
+func createIndex(dir, databaseID string) (*index, error) {
 	if err := os.RemoveAll(dir); err != nil {
 		return nil, err
 	}
@@ -82,7 +88,11 @@ func createIndex(dir string) (*index, error) {
 		return nil, fmt.Errorf("create search index: %w", err)
 	}
 	if err := created.SetInternal([]byte(internalVersion), []byte(mappingVersion)); err != nil {
-		created.Close()
+		_ = created.Close()
+		return nil, err
+	}
+	if err := created.SetInternal([]byte(internalDatabase), []byte(databaseID)); err != nil {
+		_ = created.Close()
 		return nil, err
 	}
 	return &index{dir: dir, Index: created}, nil
