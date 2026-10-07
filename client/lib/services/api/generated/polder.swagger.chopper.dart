@@ -77,10 +77,10 @@ final class _$Polder extends Polder {
   }
 
   @override
-  Future<Response<IndexStatus>> _getSearchStatus({
+  Future<Response<SearchStatus>> _getSearchStatus({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'State of the search index',
+      summary: 'State of the search index and of reading text from files',
       operationId: 'getSearchStatus',
       consumes: [],
       produces: [],
@@ -96,7 +96,7 @@ final class _$Polder extends Polder {
       client.baseUrl,
       tag: swaggerMetaData,
     );
-    return client.send<IndexStatus, IndexStatus>($request);
+    return client.send<SearchStatus, SearchStatus>($request);
   }
 
   @override
@@ -640,7 +640,7 @@ final class _$Polder extends Polder {
     int? limit,
     int? offset,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '''Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. Tags narrow the results; they have the form `key<op>values`:
+      description: '''Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Tags narrow the results; they have the form `key<op>values`:
 
 - `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`
 - `ext`: extensions only
@@ -649,7 +649,7 @@ final class _$Polder extends Polder {
 - `size`: such as `10mb`, `500kb`, `1.5gb`
 
 Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. Commas separate alternatives, separate tags must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified>7d` is newer than a week ago.''',
-      summary: 'Find files and folders by name, type, date and size',
+      summary: 'Find files and folders by name, text inside them, type, date and size',
       operationId: 'searchFiles',
       consumes: [],
       produces: [],

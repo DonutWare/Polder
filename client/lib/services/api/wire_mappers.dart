@@ -138,8 +138,26 @@ extension TrashListingToModel on wire.TrashListing {
 }
 
 extension ServerSettingsToModel on wire.ServerSettings {
-  ServerSettings toModel() =>
-      ServerSettings(trashRetentionDays: trashRetentionDays, trashRetentionEnforced: trashRetentionEnforced);
+  ServerSettings toModel() => ServerSettings(
+    trashRetentionDays: trashRetentionDays,
+    trashRetentionEnforced: trashRetentionEnforced,
+    searchContentEnabled: searchContentEnabled,
+    ocrEnabled: ocrEnabled,
+    ocrLanguages: ocrLanguages ?? const <String>[],
+    ocrMaxPages: ocrMaxPages,
+  );
+}
+
+extension ExtractionStatusToModel on wire.ExtractionStatus {
+  TextExtractionStatus toModel() => TextExtractionStatus(
+    pending: pending,
+    ocr: switch (ocr) {
+      wire.ExtractionStatusOcr.ready => OcrState.ready,
+      wire.ExtractionStatusOcr.unavailable => OcrState.unavailable,
+      _ => OcrState.off,
+    },
+    ocrProblem: ocrProblem,
+  );
 }
 
 extension RestoreModeToWire on RestoreMode {
@@ -310,6 +328,9 @@ extension MatchToModel on wire.Match {
     score: score,
     nameMatches: [for (final span in nameMatches ?? <wire.TextSpan>[]) TextRange(start: span.start, end: span.end)],
     snippet: snippet,
+    snippetMatches: [
+      for (final span in snippetMatches ?? <wire.TextSpan>[]) TextRange(start: span.start, end: span.end),
+    ],
   );
 }
 

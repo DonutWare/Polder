@@ -2,12 +2,15 @@ package search
 
 import (
 	"context"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/blevesearch/bleve/v2"
+	bleveSearch "github.com/blevesearch/bleve/v2/search"
 	"github.com/blevesearch/bleve/v2/search/query"
 
 	"polder-server/internal/files"
@@ -22,10 +25,11 @@ const (
 )
 
 type Match struct {
-	Entry       files.Entry `json:"entry"`
-	Score       float64     `json:"score"`
-	NameMatches []TextSpan  `json:"nameMatches" doc:"Ranges of the name that matched the query, in UTF-16 code units"`
-	Snippet     *string     `json:"snippet" required:"false" doc:"Matching text from inside the file, when the content matched"`
+	Entry          files.Entry `json:"entry"`
+	Score          float64     `json:"score"`
+	NameMatches    []TextSpan  `json:"nameMatches" doc:"Ranges of the name that matched the query, in UTF-16 code units"`
+	Snippet        *string     `json:"snippet" required:"false" doc:"Matching text from inside the file, when the content matched"`
+	SnippetMatches []TextSpan  `json:"snippetMatches" doc:"Ranges of the snippet that matched the query, in UTF-16 code units"`
 }
 
 type FacetCount struct {
@@ -107,8 +111,11 @@ func (s *Service) searchFilters(ctx context.Context, owner users.User, parsed Qu
 }
 
 type ranked struct {
-	entry files.Entry
-	match nameMatch
+	entry     files.Entry
+	match     nameMatch
+	named     bool
+	content   float64
+	locations bleveSearch.TermLocationMap
 }
 
 func (s *Service) searchText(ctx context.Context, owner users.User, parsed Query, response Results, limit, offset int) (Results, error) {
@@ -116,13 +123,26 @@ func (s *Service) searchText(ctx context.Context, owner users.User, parsed Query
 	candidates.AddFilter(filterQuery(owner.ID, parsed))
 	candidates.AddShould(textQuery(parsed.Terms)...)
 	candidates.SetMinShould(1)
-	request := bleve.NewSearchRequestOptions(candidates, candidateWindow, 0, false)
-	result, err := s.searchIndex(request)
+	nameHits, err := s.searchIndex(bleve.NewSearchRequestOptions(candidates, candidateWindow, 0, false))
 	if err != nil {
 		return Results{}, err
 	}
-	ids := make([]int64, 0, len(result.Hits))
-	for _, hit := range result.Hits {
+	var contentHits bleveSearch.DocumentMatchCollection
+	if s.contentEnabled(ctx) {
+		inText := bleve.NewBooleanQuery()
+		inText.AddFilter(filterQuery(owner.ID, parsed))
+		inText.AddMust(contentQuery(parsed.Terms))
+		request := bleve.NewSearchRequestOptions(inText, candidateWindow, 0, false)
+		request.IncludeLocations = true
+		result, err := s.searchIndex(request)
+		if err != nil {
+			return Results{}, err
+		}
+		contentHits = result.Hits
+	}
+
+	ids := make([]int64, 0, len(nameHits.Hits)+len(contentHits))
+	for _, hit := range append(nameHits.Hits, contentHits...) {
 		if id, err := strconv.ParseInt(hit.ID, 10, 64); err == nil {
 			ids = append(ids, id)
 		}
@@ -132,21 +152,43 @@ func (s *Service) searchText(ctx context.Context, owner users.User, parsed Query
 		return Results{}, err
 	}
 
-	var matches []ranked
-	for _, id := range ids {
+	var matches []*ranked
+	byID := map[int64]*ranked{}
+	for _, id := range ids[:len(nameHits.Hits)] {
+		entry, ok := entries[id]
+		if !ok || byID[id] != nil {
+			continue
+		}
+		if found, ok := rankEntry(parsed.Terms, entry.Name, entry.Path); ok {
+			byID[id] = &ranked{entry: entry, match: found, named: true}
+			matches = append(matches, byID[id])
+		}
+	}
+	for i, hit := range contentHits {
+		id := ids[len(nameHits.Hits)+i]
 		entry, ok := entries[id]
 		if !ok {
 			continue
 		}
-		if found, ok := rankEntry(parsed.Terms, entry.Name, entry.Path); ok {
-			matches = append(matches, ranked{entry: entry, match: found})
+		if existing := byID[id]; existing != nil {
+			existing.locations = hit.Locations[fieldContent]
+			continue
 		}
+		byID[id] = &ranked{entry: entry, match: nameMatch{spans: []TextSpan{}}, content: hit.Score, locations: hit.Locations[fieldContent]}
+		matches = append(matches, byID[id])
 	}
 	sort.SliceStable(matches, func(i, j int) bool {
-		if matches[i].match.score != matches[j].match.score {
-			return matches[i].match.score > matches[j].match.score
+		a, b := matches[i], matches[j]
+		if a.named != b.named {
+			return a.named
 		}
-		return matches[i].entry.Mtime.After(matches[j].entry.Mtime)
+		if a.match.score != b.match.score {
+			return a.match.score > b.match.score
+		}
+		if a.content != b.content {
+			return a.content > b.content
+		}
+		return a.entry.Mtime.After(b.entry.Mtime)
 	})
 
 	types, exts := map[string]int{}, map[string]int{}
@@ -160,7 +202,18 @@ func (s *Service) searchText(ctx context.Context, owner users.User, parsed Query
 	response.Facets = Facets{Types: sortedCounts(types), Exts: sortedCounts(exts)}
 	response.Total = len(matches)
 	for _, match := range matches[min(offset, len(matches)):min(offset+limit, len(matches))] {
-		response.Results = append(response.Results, Match{Entry: match.entry, Score: match.match.score, NameMatches: match.match.spans})
+		result := Match{Entry: match.entry, Score: match.match.score, NameMatches: match.match.spans, SnippetMatches: []TextSpan{}}
+		if !match.named {
+			result.Score = match.content
+		}
+		if len(match.locations) > 0 {
+			if text, ok := s.texts.Text(match.entry); ok {
+				if snippet, spans := buildSnippet(text, contentSpans(text, match.locations)); snippet != "" {
+					result.Snippet, result.SnippetMatches = &snippet, spans
+				}
+			}
+		}
+		response.Results = append(response.Results, result)
 	}
 	return response, nil
 }
@@ -211,6 +264,32 @@ func textQuery(terms []Term) []query.Query {
 		}
 	}
 	return should
+}
+
+const contentFuzzyMinRunes = 6
+
+func contentQuery(terms []Term) query.Query {
+	var all []query.Query
+	for _, term := range terms {
+		if term.Exact {
+			phrase := bleve.NewMatchPhraseQuery(term.Text)
+			phrase.SetField(fieldContent)
+			all = append(all, phrase)
+			continue
+		}
+		words := bleve.NewMatchQuery(term.Text)
+		words.SetField(fieldContent)
+		words.SetOperator(query.MatchQueryOperatorAnd)
+		if runes := []rune(term.Text); len(runes) >= contentFuzzyMinRunes && !slices.ContainsFunc(runes, isCJK) {
+			words.SetFuzziness(1)
+		}
+		all = append(all, words)
+	}
+	return bleve.NewConjunctionQuery(all...)
+}
+
+func isCJK(r rune) bool {
+	return unicode.In(r, unicode.Han, unicode.Hiragana, unicode.Katakana, unicode.Hangul)
 }
 
 func filterQuery(userID int64, parsed Query) query.Query {

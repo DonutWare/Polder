@@ -25,7 +25,7 @@ class IconBadge extends StatelessWidget {
         shape: shape ?? squircle(size * 0.34, side: tintedSide(c)),
       ),
       alignment: Alignment.center,
-      child: child ?? Icon(icon, size: size * 0.52, color: c),
+      child: child ?? Icon(icon, size: size * 0.6, color: c),
     );
   }
 }

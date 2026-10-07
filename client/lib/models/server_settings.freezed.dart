@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ServerSettings {
 
- int get trashRetentionDays; bool get trashRetentionEnforced;
+ int get trashRetentionDays; bool get trashRetentionEnforced; bool get searchContentEnabled; bool get ocrEnabled; List<String> get ocrLanguages; int get ocrMaxPages;
 /// Create a copy of ServerSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $ServerSettingsCopyWith<ServerSettings> get copyWith => _$ServerSettingsCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as ServerSettings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServerSettings&&(identical(other.trashRetentionDays, _this.trashRetentionDays) || other.trashRetentionDays == _this.trashRetentionDays)&&(identical(other.trashRetentionEnforced, _this.trashRetentionEnforced) || other.trashRetentionEnforced == _this.trashRetentionEnforced));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServerSettings&&(identical(other.trashRetentionDays, _this.trashRetentionDays) || other.trashRetentionDays == _this.trashRetentionDays)&&(identical(other.trashRetentionEnforced, _this.trashRetentionEnforced) || other.trashRetentionEnforced == _this.trashRetentionEnforced)&&(identical(other.searchContentEnabled, _this.searchContentEnabled) || other.searchContentEnabled == _this.searchContentEnabled)&&(identical(other.ocrEnabled, _this.ocrEnabled) || other.ocrEnabled == _this.ocrEnabled)&&const DeepCollectionEquality().equals(other.ocrLanguages, _this.ocrLanguages)&&(identical(other.ocrMaxPages, _this.ocrMaxPages) || other.ocrMaxPages == _this.ocrMaxPages));
 }
 
 
 @override
 int get hashCode {
   final _this = this as ServerSettings;
-  return Object.hash(runtimeType,_this.trashRetentionDays,_this.trashRetentionEnforced);
+  return Object.hash(runtimeType,_this.trashRetentionDays,_this.trashRetentionEnforced,_this.searchContentEnabled,_this.ocrEnabled,const DeepCollectionEquality().hash(_this.ocrLanguages),_this.ocrMaxPages);
 }
 
 @override
 String toString() {
   final _this = this as ServerSettings;
-  return 'ServerSettings(trashRetentionDays: ${_this.trashRetentionDays}, trashRetentionEnforced: ${_this.trashRetentionEnforced})';
+  return 'ServerSettings(trashRetentionDays: ${_this.trashRetentionDays}, trashRetentionEnforced: ${_this.trashRetentionEnforced}, searchContentEnabled: ${_this.searchContentEnabled}, ocrEnabled: ${_this.ocrEnabled}, ocrLanguages: ${_this.ocrLanguages}, ocrMaxPages: ${_this.ocrMaxPages})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $ServerSettingsCopyWith<$Res>  {
   factory $ServerSettingsCopyWith(ServerSettings value, $Res Function(ServerSettings) _then) = _$ServerSettingsCopyWithImpl;
 @useResult
 $Res call({
- int trashRetentionDays, bool trashRetentionEnforced
+ int trashRetentionDays, bool trashRetentionEnforced, bool searchContentEnabled, bool ocrEnabled, List<String> ocrLanguages, int ocrMaxPages
 });
 
 
@@ -68,11 +68,15 @@ class _$ServerSettingsCopyWithImpl<$Res>
 
 /// Create a copy of ServerSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? trashRetentionDays = null,Object? trashRetentionEnforced = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? trashRetentionDays = null,Object? trashRetentionEnforced = null,Object? searchContentEnabled = null,Object? ocrEnabled = null,Object? ocrLanguages = null,Object? ocrMaxPages = null,}) {
   return _then(ServerSettings(
 trashRetentionDays: null == trashRetentionDays ? _self.trashRetentionDays : trashRetentionDays // ignore: cast_nullable_to_non_nullable
 as int,trashRetentionEnforced: null == trashRetentionEnforced ? _self.trashRetentionEnforced : trashRetentionEnforced // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,searchContentEnabled: null == searchContentEnabled ? _self.searchContentEnabled : searchContentEnabled // ignore: cast_nullable_to_non_nullable
+as bool,ocrEnabled: null == ocrEnabled ? _self.ocrEnabled : ocrEnabled // ignore: cast_nullable_to_non_nullable
+as bool,ocrLanguages: null == ocrLanguages ? _self.ocrLanguages : ocrLanguages // ignore: cast_nullable_to_non_nullable
+as List<String>,ocrMaxPages: null == ocrMaxPages ? _self.ocrMaxPages : ocrMaxPages // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -157,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int trashRetentionDays,  bool trashRetentionEnforced)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int trashRetentionDays,  bool trashRetentionEnforced,  bool searchContentEnabled,  bool ocrEnabled,  List<String> ocrLanguages,  int ocrMaxPages)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ServerSettings() when $default != null:
-return $default(_that.trashRetentionDays,_that.trashRetentionEnforced);case _:
+return $default(_that.trashRetentionDays,_that.trashRetentionEnforced,_that.searchContentEnabled,_that.ocrEnabled,_that.ocrLanguages,_that.ocrMaxPages);case _:
   return orElse();
 
 }
@@ -178,10 +182,10 @@ return $default(_that.trashRetentionDays,_that.trashRetentionEnforced);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int trashRetentionDays,  bool trashRetentionEnforced)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int trashRetentionDays,  bool trashRetentionEnforced,  bool searchContentEnabled,  bool ocrEnabled,  List<String> ocrLanguages,  int ocrMaxPages)  $default,) {final _that = this;
 switch (_that) {
 case _ServerSettings():
-return $default(_that.trashRetentionDays,_that.trashRetentionEnforced);case _:
+return $default(_that.trashRetentionDays,_that.trashRetentionEnforced,_that.searchContentEnabled,_that.ocrEnabled,_that.ocrLanguages,_that.ocrMaxPages);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +202,10 @@ return $default(_that.trashRetentionDays,_that.trashRetentionEnforced);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int trashRetentionDays,  bool trashRetentionEnforced)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int trashRetentionDays,  bool trashRetentionEnforced,  bool searchContentEnabled,  bool ocrEnabled,  List<String> ocrLanguages,  int ocrMaxPages)?  $default,) {final _that = this;
 switch (_that) {
 case _ServerSettings() when $default != null:
-return $default(_that.trashRetentionDays,_that.trashRetentionEnforced);case _:
+return $default(_that.trashRetentionDays,_that.trashRetentionEnforced,_that.searchContentEnabled,_that.ocrEnabled,_that.ocrLanguages,_that.ocrMaxPages);case _:
   return null;
 
 }
@@ -213,11 +217,21 @@ return $default(_that.trashRetentionDays,_that.trashRetentionEnforced);case _:
 
 
 class _ServerSettings implements ServerSettings {
-  const _ServerSettings({required this.trashRetentionDays, this.trashRetentionEnforced = false});
+  const _ServerSettings({required this.trashRetentionDays, this.trashRetentionEnforced = false, this.searchContentEnabled = true, this.ocrEnabled = true,  List<String> ocrLanguages = const <String>[], this.ocrMaxPages = 1}): _ocrLanguages = ocrLanguages;
   
 
 @override final  int trashRetentionDays;
 @override@JsonKey() final  bool trashRetentionEnforced;
+@override@JsonKey() final  bool searchContentEnabled;
+@override@JsonKey() final  bool ocrEnabled;
+ final  List<String> _ocrLanguages;
+@override@JsonKey() List<String> get ocrLanguages {
+  if (_ocrLanguages is EqualUnmodifiableListView) return _ocrLanguages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_ocrLanguages);
+}
+
+@override@JsonKey() final  int ocrMaxPages;
 
 /// Create a copy of ServerSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -229,18 +243,18 @@ _$ServerSettingsCopyWith<_ServerSettings> get copyWith => __$ServerSettingsCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServerSettings&&(identical(other.trashRetentionDays, trashRetentionDays) || other.trashRetentionDays == trashRetentionDays)&&(identical(other.trashRetentionEnforced, trashRetentionEnforced) || other.trashRetentionEnforced == trashRetentionEnforced));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServerSettings&&(identical(other.trashRetentionDays, trashRetentionDays) || other.trashRetentionDays == trashRetentionDays)&&(identical(other.trashRetentionEnforced, trashRetentionEnforced) || other.trashRetentionEnforced == trashRetentionEnforced)&&(identical(other.searchContentEnabled, searchContentEnabled) || other.searchContentEnabled == searchContentEnabled)&&(identical(other.ocrEnabled, ocrEnabled) || other.ocrEnabled == ocrEnabled)&&const DeepCollectionEquality().equals(other.ocrLanguages, _ocrLanguages)&&(identical(other.ocrMaxPages, ocrMaxPages) || other.ocrMaxPages == ocrMaxPages));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,trashRetentionDays,trashRetentionEnforced);
+    return Object.hash(runtimeType,trashRetentionDays,trashRetentionEnforced,searchContentEnabled,ocrEnabled,const DeepCollectionEquality().hash(_ocrLanguages),ocrMaxPages);
 }
 
 @override
 String toString() {
-    return 'ServerSettings(trashRetentionDays: $trashRetentionDays, trashRetentionEnforced: $trashRetentionEnforced)';
+    return 'ServerSettings(trashRetentionDays: $trashRetentionDays, trashRetentionEnforced: $trashRetentionEnforced, searchContentEnabled: $searchContentEnabled, ocrEnabled: $ocrEnabled, ocrLanguages: $ocrLanguages, ocrMaxPages: $ocrMaxPages)';
 }
 
 
@@ -251,7 +265,7 @@ abstract mixin class _$ServerSettingsCopyWith<$Res> implements $ServerSettingsCo
   factory _$ServerSettingsCopyWith(_ServerSettings value, $Res Function(_ServerSettings) _then) = __$ServerSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- int trashRetentionDays, bool trashRetentionEnforced
+ int trashRetentionDays, bool trashRetentionEnforced, bool searchContentEnabled, bool ocrEnabled, List<String> ocrLanguages, int ocrMaxPages
 });
 
 
@@ -268,11 +282,15 @@ class __$ServerSettingsCopyWithImpl<$Res>
 
 /// Create a copy of ServerSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? trashRetentionDays = null,Object? trashRetentionEnforced = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? trashRetentionDays = null,Object? trashRetentionEnforced = null,Object? searchContentEnabled = null,Object? ocrEnabled = null,Object? ocrLanguages = null,Object? ocrMaxPages = null,}) {
   return _then(_ServerSettings(
 trashRetentionDays: null == trashRetentionDays ? _self.trashRetentionDays : trashRetentionDays // ignore: cast_nullable_to_non_nullable
 as int,trashRetentionEnforced: null == trashRetentionEnforced ? _self.trashRetentionEnforced : trashRetentionEnforced // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,searchContentEnabled: null == searchContentEnabled ? _self.searchContentEnabled : searchContentEnabled // ignore: cast_nullable_to_non_nullable
+as bool,ocrEnabled: null == ocrEnabled ? _self.ocrEnabled : ocrEnabled // ignore: cast_nullable_to_non_nullable
+as bool,ocrLanguages: null == ocrLanguages ? _self._ocrLanguages : ocrLanguages // ignore: cast_nullable_to_non_nullable
+as List<String>,ocrMaxPages: null == ocrMaxPages ? _self.ocrMaxPages : ocrMaxPages // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

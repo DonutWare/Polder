@@ -772,6 +772,63 @@ extension $EventMessageExtension on EventMessage {
 }
 
 @JsonSerializable(explicitToJson: true)
+class ExtractionStatus {
+  const ExtractionStatus({required this.ocr, this.ocrProblem, required this.pending});
+
+  factory ExtractionStatus.fromJson(Map<String, dynamic> json) => _$ExtractionStatusFromJson(json);
+
+  static const toJsonFactory = _$ExtractionStatusToJson;
+  Map<String, dynamic> toJson() => _$ExtractionStatusToJson(this);
+
+  @JsonKey(name: 'ocr', includeIfNull: false, toJson: extractionStatusOcrToJson, fromJson: extractionStatusOcrFromJson)
+  final enums.ExtractionStatusOcr ocr;
+  @JsonKey(name: 'ocrProblem', includeIfNull: false)
+  final String? ocrProblem;
+  @JsonKey(name: 'pending', includeIfNull: false)
+  final int pending;
+  static const fromJsonFactory = _$ExtractionStatusFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtractionStatus &&
+            (identical(other.ocr, ocr) || const DeepCollectionEquality().equals(other.ocr, ocr)) &&
+            (identical(other.ocrProblem, ocrProblem) ||
+                const DeepCollectionEquality().equals(other.ocrProblem, ocrProblem)) &&
+            (identical(other.pending, pending) || const DeepCollectionEquality().equals(other.pending, pending)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(ocr) ^
+      const DeepCollectionEquality().hash(ocrProblem) ^
+      const DeepCollectionEquality().hash(pending) ^
+      runtimeType.hashCode;
+}
+
+extension $ExtractionStatusExtension on ExtractionStatus {
+  ExtractionStatus copyWith({enums.ExtractionStatusOcr? ocr, String? ocrProblem, int? pending}) {
+    return ExtractionStatus(
+      ocr: ocr ?? this.ocr,
+      ocrProblem: ocrProblem ?? this.ocrProblem,
+      pending: pending ?? this.pending,
+    );
+  }
+
+  ExtractionStatus copyWithWrapped({
+    Wrapped<enums.ExtractionStatusOcr>? ocr,
+    Wrapped<String?>? ocrProblem,
+    Wrapped<int>? pending,
+  }) {
+    return ExtractionStatus(
+      ocr: (ocr != null ? ocr.value : this.ocr),
+      ocrProblem: (ocrProblem != null ? ocrProblem.value : this.ocrProblem),
+      pending: (pending != null ? pending.value : this.pending),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class FacetCount {
   const FacetCount({required this.count, required this.value});
 
@@ -881,50 +938,6 @@ extension $HealthStatusExtension on HealthStatus {
 
   HealthStatus copyWithWrapped({Wrapped<String>? status}) {
     return HealthStatus(status: (status != null ? status.value : this.status));
-  }
-}
-
-@JsonSerializable(explicitToJson: true)
-class IndexStatus {
-  const IndexStatus({required this.documents, this.lastSync});
-
-  factory IndexStatus.fromJson(Map<String, dynamic> json) => _$IndexStatusFromJson(json);
-
-  static const toJsonFactory = _$IndexStatusToJson;
-  Map<String, dynamic> toJson() => _$IndexStatusToJson(this);
-
-  @JsonKey(name: 'documents', includeIfNull: false)
-  final int documents;
-  @JsonKey(name: 'lastSync', includeIfNull: false)
-  final DateTime? lastSync;
-  static const fromJsonFactory = _$IndexStatusFromJson;
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is IndexStatus &&
-            (identical(other.documents, documents) ||
-                const DeepCollectionEquality().equals(other.documents, documents)) &&
-            (identical(other.lastSync, lastSync) || const DeepCollectionEquality().equals(other.lastSync, lastSync)));
-  }
-
-  @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(documents) ^
-      const DeepCollectionEquality().hash(lastSync) ^
-      runtimeType.hashCode;
-}
-
-extension $IndexStatusExtension on IndexStatus {
-  IndexStatus copyWith({int? documents, DateTime? lastSync}) {
-    return IndexStatus(documents: documents ?? this.documents, lastSync: lastSync ?? this.lastSync);
-  }
-
-  IndexStatus copyWithWrapped({Wrapped<int>? documents, Wrapped<DateTime?>? lastSync}) {
-    return IndexStatus(
-      documents: (documents != null ? documents.value : this.documents),
-      lastSync: (lastSync != null ? lastSync.value : this.lastSync),
-    );
   }
 }
 
@@ -1437,7 +1450,7 @@ extension $ManifestExtension on Manifest {
 
 @JsonSerializable(explicitToJson: true)
 class Match {
-  const Match({required this.entry, this.nameMatches, required this.score, this.snippet});
+  const Match({required this.entry, this.nameMatches, required this.score, this.snippet, this.snippetMatches});
 
   factory Match.fromJson(Map<String, dynamic> json) => _$MatchFromJson(json);
 
@@ -1452,6 +1465,8 @@ class Match {
   final double score;
   @JsonKey(name: 'snippet', includeIfNull: false)
   final String? snippet;
+  @JsonKey(name: 'snippetMatches', includeIfNull: false, defaultValue: <TextSpan>[])
+  final List<TextSpan>? snippetMatches;
   static const fromJsonFactory = _$MatchFromJson;
 
   @override
@@ -1462,7 +1477,9 @@ class Match {
             (identical(other.nameMatches, nameMatches) ||
                 const DeepCollectionEquality().equals(other.nameMatches, nameMatches)) &&
             (identical(other.score, score) || const DeepCollectionEquality().equals(other.score, score)) &&
-            (identical(other.snippet, snippet) || const DeepCollectionEquality().equals(other.snippet, snippet)));
+            (identical(other.snippet, snippet) || const DeepCollectionEquality().equals(other.snippet, snippet)) &&
+            (identical(other.snippetMatches, snippetMatches) ||
+                const DeepCollectionEquality().equals(other.snippetMatches, snippetMatches)));
   }
 
   @override
@@ -1471,16 +1488,24 @@ class Match {
       const DeepCollectionEquality().hash(nameMatches) ^
       const DeepCollectionEquality().hash(score) ^
       const DeepCollectionEquality().hash(snippet) ^
+      const DeepCollectionEquality().hash(snippetMatches) ^
       runtimeType.hashCode;
 }
 
 extension $MatchExtension on Match {
-  Match copyWith({Entry? entry, List<TextSpan>? nameMatches, double? score, String? snippet}) {
+  Match copyWith({
+    Entry? entry,
+    List<TextSpan>? nameMatches,
+    double? score,
+    String? snippet,
+    List<TextSpan>? snippetMatches,
+  }) {
     return Match(
       entry: entry ?? this.entry,
       nameMatches: nameMatches ?? this.nameMatches,
       score: score ?? this.score,
       snippet: snippet ?? this.snippet,
+      snippetMatches: snippetMatches ?? this.snippetMatches,
     );
   }
 
@@ -1489,12 +1514,14 @@ extension $MatchExtension on Match {
     Wrapped<List<TextSpan>?>? nameMatches,
     Wrapped<double>? score,
     Wrapped<String?>? snippet,
+    Wrapped<List<TextSpan>?>? snippetMatches,
   }) {
     return Match(
       entry: (entry != null ? entry.value : this.entry),
       nameMatches: (nameMatches != null ? nameMatches.value : this.nameMatches),
       score: (score != null ? score.value : this.score),
       snippet: (snippet != null ? snippet.value : this.snippet),
+      snippetMatches: (snippetMatches != null ? snippetMatches.value : this.snippetMatches),
     );
   }
 }
@@ -1983,14 +2010,87 @@ extension $RetentionRequestExtension on RetentionRequest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class SearchStatus {
+  const SearchStatus({required this.documents, required this.extraction, this.lastSync});
+
+  factory SearchStatus.fromJson(Map<String, dynamic> json) => _$SearchStatusFromJson(json);
+
+  static const toJsonFactory = _$SearchStatusToJson;
+  Map<String, dynamic> toJson() => _$SearchStatusToJson(this);
+
+  @JsonKey(name: 'documents', includeIfNull: false)
+  final int documents;
+  @JsonKey(name: 'extraction', includeIfNull: false)
+  final ExtractionStatus extraction;
+  @JsonKey(name: 'lastSync', includeIfNull: false)
+  final DateTime? lastSync;
+  static const fromJsonFactory = _$SearchStatusFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is SearchStatus &&
+            (identical(other.documents, documents) ||
+                const DeepCollectionEquality().equals(other.documents, documents)) &&
+            (identical(other.extraction, extraction) ||
+                const DeepCollectionEquality().equals(other.extraction, extraction)) &&
+            (identical(other.lastSync, lastSync) || const DeepCollectionEquality().equals(other.lastSync, lastSync)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(documents) ^
+      const DeepCollectionEquality().hash(extraction) ^
+      const DeepCollectionEquality().hash(lastSync) ^
+      runtimeType.hashCode;
+}
+
+extension $SearchStatusExtension on SearchStatus {
+  SearchStatus copyWith({int? documents, ExtractionStatus? extraction, DateTime? lastSync}) {
+    return SearchStatus(
+      documents: documents ?? this.documents,
+      extraction: extraction ?? this.extraction,
+      lastSync: lastSync ?? this.lastSync,
+    );
+  }
+
+  SearchStatus copyWithWrapped({
+    Wrapped<int>? documents,
+    Wrapped<ExtractionStatus>? extraction,
+    Wrapped<DateTime?>? lastSync,
+  }) {
+    return SearchStatus(
+      documents: (documents != null ? documents.value : this.documents),
+      extraction: (extraction != null ? extraction.value : this.extraction),
+      lastSync: (lastSync != null ? lastSync.value : this.lastSync),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class ServerSettings {
-  const ServerSettings({required this.trashRetentionDays, required this.trashRetentionEnforced});
+  const ServerSettings({
+    required this.ocrEnabled,
+    this.ocrLanguages,
+    required this.ocrMaxPages,
+    required this.searchContentEnabled,
+    required this.trashRetentionDays,
+    required this.trashRetentionEnforced,
+  });
 
   factory ServerSettings.fromJson(Map<String, dynamic> json) => _$ServerSettingsFromJson(json);
 
   static const toJsonFactory = _$ServerSettingsToJson;
   Map<String, dynamic> toJson() => _$ServerSettingsToJson(this);
 
+  @JsonKey(name: 'ocrEnabled', includeIfNull: false)
+  final bool ocrEnabled;
+  @JsonKey(name: 'ocrLanguages', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? ocrLanguages;
+  @JsonKey(name: 'ocrMaxPages', includeIfNull: false)
+  final int ocrMaxPages;
+  @JsonKey(name: 'searchContentEnabled', includeIfNull: false)
+  final bool searchContentEnabled;
   @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
   final int trashRetentionDays;
   @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
@@ -2001,6 +2101,14 @@ class ServerSettings {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ServerSettings &&
+            (identical(other.ocrEnabled, ocrEnabled) ||
+                const DeepCollectionEquality().equals(other.ocrEnabled, ocrEnabled)) &&
+            (identical(other.ocrLanguages, ocrLanguages) ||
+                const DeepCollectionEquality().equals(other.ocrLanguages, ocrLanguages)) &&
+            (identical(other.ocrMaxPages, ocrMaxPages) ||
+                const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
+            (identical(other.searchContentEnabled, searchContentEnabled) ||
+                const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
                 const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
             (identical(other.trashRetentionEnforced, trashRetentionEnforced) ||
@@ -2009,21 +2117,47 @@ class ServerSettings {
 
   @override
   int get hashCode =>
+      const DeepCollectionEquality().hash(ocrEnabled) ^
+      const DeepCollectionEquality().hash(ocrLanguages) ^
+      const DeepCollectionEquality().hash(ocrMaxPages) ^
+      const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(trashRetentionEnforced) ^
       runtimeType.hashCode;
 }
 
 extension $ServerSettingsExtension on ServerSettings {
-  ServerSettings copyWith({int? trashRetentionDays, bool? trashRetentionEnforced}) {
+  ServerSettings copyWith({
+    bool? ocrEnabled,
+    List<String>? ocrLanguages,
+    int? ocrMaxPages,
+    bool? searchContentEnabled,
+    int? trashRetentionDays,
+    bool? trashRetentionEnforced,
+  }) {
     return ServerSettings(
+      ocrEnabled: ocrEnabled ?? this.ocrEnabled,
+      ocrLanguages: ocrLanguages ?? this.ocrLanguages,
+      ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
+      searchContentEnabled: searchContentEnabled ?? this.searchContentEnabled,
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       trashRetentionEnforced: trashRetentionEnforced ?? this.trashRetentionEnforced,
     );
   }
 
-  ServerSettings copyWithWrapped({Wrapped<int>? trashRetentionDays, Wrapped<bool>? trashRetentionEnforced}) {
+  ServerSettings copyWithWrapped({
+    Wrapped<bool>? ocrEnabled,
+    Wrapped<List<String>?>? ocrLanguages,
+    Wrapped<int>? ocrMaxPages,
+    Wrapped<bool>? searchContentEnabled,
+    Wrapped<int>? trashRetentionDays,
+    Wrapped<bool>? trashRetentionEnforced,
+  }) {
     return ServerSettings(
+      ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
+      ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
+      ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
+      searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
       trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
       trashRetentionEnforced: (trashRetentionEnforced != null
           ? trashRetentionEnforced.value
@@ -2034,13 +2168,28 @@ extension $ServerSettingsExtension on ServerSettings {
 
 @JsonSerializable(explicitToJson: true)
 class ServerSettingsChanges {
-  const ServerSettingsChanges({this.trashRetentionDays, this.trashRetentionEnforced});
+  const ServerSettingsChanges({
+    this.ocrEnabled,
+    this.ocrLanguages,
+    this.ocrMaxPages,
+    this.searchContentEnabled,
+    this.trashRetentionDays,
+    this.trashRetentionEnforced,
+  });
 
   factory ServerSettingsChanges.fromJson(Map<String, dynamic> json) => _$ServerSettingsChangesFromJson(json);
 
   static const toJsonFactory = _$ServerSettingsChangesToJson;
   Map<String, dynamic> toJson() => _$ServerSettingsChangesToJson(this);
 
+  @JsonKey(name: 'ocrEnabled', includeIfNull: false)
+  final bool? ocrEnabled;
+  @JsonKey(name: 'ocrLanguages', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? ocrLanguages;
+  @JsonKey(name: 'ocrMaxPages', includeIfNull: false)
+  final int? ocrMaxPages;
+  @JsonKey(name: 'searchContentEnabled', includeIfNull: false)
+  final bool? searchContentEnabled;
   @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
   final int? trashRetentionDays;
   @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
@@ -2051,6 +2200,14 @@ class ServerSettingsChanges {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ServerSettingsChanges &&
+            (identical(other.ocrEnabled, ocrEnabled) ||
+                const DeepCollectionEquality().equals(other.ocrEnabled, ocrEnabled)) &&
+            (identical(other.ocrLanguages, ocrLanguages) ||
+                const DeepCollectionEquality().equals(other.ocrLanguages, ocrLanguages)) &&
+            (identical(other.ocrMaxPages, ocrMaxPages) ||
+                const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
+            (identical(other.searchContentEnabled, searchContentEnabled) ||
+                const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
                 const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
             (identical(other.trashRetentionEnforced, trashRetentionEnforced) ||
@@ -2059,21 +2216,47 @@ class ServerSettingsChanges {
 
   @override
   int get hashCode =>
+      const DeepCollectionEquality().hash(ocrEnabled) ^
+      const DeepCollectionEquality().hash(ocrLanguages) ^
+      const DeepCollectionEquality().hash(ocrMaxPages) ^
+      const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(trashRetentionEnforced) ^
       runtimeType.hashCode;
 }
 
 extension $ServerSettingsChangesExtension on ServerSettingsChanges {
-  ServerSettingsChanges copyWith({int? trashRetentionDays, bool? trashRetentionEnforced}) {
+  ServerSettingsChanges copyWith({
+    bool? ocrEnabled,
+    List<String>? ocrLanguages,
+    int? ocrMaxPages,
+    bool? searchContentEnabled,
+    int? trashRetentionDays,
+    bool? trashRetentionEnforced,
+  }) {
     return ServerSettingsChanges(
+      ocrEnabled: ocrEnabled ?? this.ocrEnabled,
+      ocrLanguages: ocrLanguages ?? this.ocrLanguages,
+      ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
+      searchContentEnabled: searchContentEnabled ?? this.searchContentEnabled,
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       trashRetentionEnforced: trashRetentionEnforced ?? this.trashRetentionEnforced,
     );
   }
 
-  ServerSettingsChanges copyWithWrapped({Wrapped<int?>? trashRetentionDays, Wrapped<bool?>? trashRetentionEnforced}) {
+  ServerSettingsChanges copyWithWrapped({
+    Wrapped<bool?>? ocrEnabled,
+    Wrapped<List<String>?>? ocrLanguages,
+    Wrapped<int?>? ocrMaxPages,
+    Wrapped<bool?>? searchContentEnabled,
+    Wrapped<int?>? trashRetentionDays,
+    Wrapped<bool?>? trashRetentionEnforced,
+  }) {
     return ServerSettingsChanges(
+      ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
+      ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
+      ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
+      searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
       trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
       trashRetentionEnforced: (trashRetentionEnforced != null
           ? trashRetentionEnforced.value
@@ -3266,6 +3449,67 @@ List<enums.EventMessageType>? eventMessageTypeNullableListFromJson(
   }
 
   return eventMessageType.map((e) => eventMessageTypeFromJson(e.toString())).toList();
+}
+
+String? extractionStatusOcrNullableToJson(enums.ExtractionStatusOcr? extractionStatusOcr) {
+  return extractionStatusOcr?.value;
+}
+
+String? extractionStatusOcrToJson(enums.ExtractionStatusOcr extractionStatusOcr) {
+  return extractionStatusOcr.value;
+}
+
+enums.ExtractionStatusOcr extractionStatusOcrFromJson(
+  Object? extractionStatusOcr, [
+  enums.ExtractionStatusOcr? defaultValue,
+]) {
+  return enums.ExtractionStatusOcr.values.firstWhereOrNull((e) => e.value == extractionStatusOcr) ??
+      defaultValue ??
+      enums.ExtractionStatusOcr.swaggerGeneratedUnknown;
+}
+
+enums.ExtractionStatusOcr? extractionStatusOcrNullableFromJson(
+  Object? extractionStatusOcr, [
+  enums.ExtractionStatusOcr? defaultValue,
+]) {
+  if (extractionStatusOcr == null) {
+    return null;
+  }
+  return enums.ExtractionStatusOcr.values.firstWhereOrNull((e) => e.value == extractionStatusOcr) ?? defaultValue;
+}
+
+String extractionStatusOcrExplodedListToJson(List<enums.ExtractionStatusOcr>? extractionStatusOcr) {
+  return extractionStatusOcr?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> extractionStatusOcrListToJson(List<enums.ExtractionStatusOcr>? extractionStatusOcr) {
+  if (extractionStatusOcr == null) {
+    return [];
+  }
+
+  return extractionStatusOcr.map((e) => e.value!).toList();
+}
+
+List<enums.ExtractionStatusOcr> extractionStatusOcrListFromJson(
+  List? extractionStatusOcr, [
+  List<enums.ExtractionStatusOcr>? defaultValue,
+]) {
+  if (extractionStatusOcr == null) {
+    return defaultValue ?? [];
+  }
+
+  return extractionStatusOcr.map((e) => extractionStatusOcrFromJson(e.toString())).toList();
+}
+
+List<enums.ExtractionStatusOcr>? extractionStatusOcrNullableListFromJson(
+  List? extractionStatusOcr, [
+  List<enums.ExtractionStatusOcr>? defaultValue,
+]) {
+  if (extractionStatusOcr == null) {
+    return defaultValue;
+  }
+
+  return extractionStatusOcr.map((e) => extractionStatusOcrFromJson(e.toString())).toList();
 }
 
 String? liveTransferDirectionNullableToJson(enums.LiveTransferDirection? liveTransferDirection) {

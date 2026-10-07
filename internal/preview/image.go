@@ -75,6 +75,14 @@ func decodeImage(file *os.File) (decodedImage, error) {
 	return decoded, err
 }
 
+func DecodeUpright(file *os.File, maxEdge int) (image.Image, error) {
+	decoded, err := decodeImage(file)
+	if err != nil {
+		return nil, err
+	}
+	return applyOrientation(scaleToFit(decoded.image, maxEdge), decoded.orientation), nil
+}
+
 func (d *decodedImage) readExif(file *os.File) {
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
 		return

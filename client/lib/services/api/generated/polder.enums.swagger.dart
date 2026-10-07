@@ -124,6 +124,22 @@ enum EventMessageType {
   const EventMessageType(this.value);
 }
 
+enum ExtractionStatusOcr {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('off')
+  off('off'),
+  @JsonValue('ready')
+  ready('ready'),
+  @JsonValue('unavailable')
+  unavailable('unavailable');
+
+  final String? value;
+
+  const ExtractionStatusOcr(this.value);
+}
+
 enum LiveTransferDirection {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

@@ -23,6 +23,12 @@ POLDER_CONFIG_DIR=./config POLDER_DATA_DIR=./data go run ./cmd/polder
 
 The first login creates the admin account.
 
+Search also finds text inside files. Text in images and scanned PDFs is read with
+[Tesseract](https://github.com/tesseract-ocr/tesseract), which the Docker image includes; without Docker, install
+`tesseract` or OCR stays off. Its models are downloaded into the config directory when first needed
+(`POLDER_OCR_MODEL_URL` changes the source, `POLDER_TESSERACT` the program). Administrators choose the models and can
+turn OCR or content search off under Administration.
+
 Clients receive live activity (transfers in progress, folder changes) over a WebSocket at
 `/api/v1/events`. Behind a reverse proxy, let that path upgrade: in nginx, `proxy_http_version 1.1`
 with `Upgrade` and `Connection` headers passed through.

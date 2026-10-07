@@ -24,24 +24,36 @@ const (
 type ContentChangedFunc func(userID int64, cleanPath string)
 
 type Service struct {
-	db               *sql.DB
-	disk             *storage.Disk
-	locks            userLocks
-	onContentChanged ContentChangedFunc
-	onContentRemoved func()
-	observers        []MutationFunc
+	db             *sql.DB
+	disk           *storage.Disk
+	locks          userLocks
+	contentChanged []ContentChangedFunc
+	contentRemoved []func()
+	observers      []MutationFunc
 }
 
 func NewService(db *sql.DB, disk *storage.Disk) *Service {
-	return &Service{db: db, disk: disk, onContentChanged: func(int64, string) {}, onContentRemoved: func() {}}
+	return &Service{db: db, disk: disk}
 }
 
 func (s *Service) OnContentChanged(callback ContentChangedFunc) {
-	s.onContentChanged = callback
+	s.contentChanged = append(s.contentChanged, callback)
 }
 
 func (s *Service) OnContentRemoved(callback func()) {
-	s.onContentRemoved = callback
+	s.contentRemoved = append(s.contentRemoved, callback)
+}
+
+func (s *Service) onContentChanged(userID int64, cleanPath string) {
+	for _, callback := range s.contentChanged {
+		callback(userID, cleanPath)
+	}
+}
+
+func (s *Service) onContentRemoved() {
+	for _, callback := range s.contentRemoved {
+		callback()
+	}
 }
 
 func (s *Service) HashesInUse(ctx context.Context) (map[string]bool, error) {
@@ -315,6 +327,33 @@ func (s *Service) UpdateDerivedFields(ctx context.Context, userID int64, cleanPa
 
 func (s *Service) EntriesAwaitingPreview(ctx context.Context, limit int) ([]Entry, error) {
 	return entriesWithPreviewState(ctx, s.db, PreviewPending, limit)
+}
+
+func (s *Service) UpdateTextState(ctx context.Context, userID int64, cleanPath, hash string, state TextState) error {
+	return updateTextState(ctx, s.db, userID, cleanPath, hash, state)
+}
+
+func (s *Service) EntriesAwaitingText(ctx context.Context, limit int, excludedMimePatterns ...string) ([]Entry, error) {
+	return entriesWithTextState(ctx, s.db, TextPending, limit, excludedMimePatterns)
+}
+
+func (s *Service) CountAwaitingText(ctx context.Context) (int, error) {
+	var count int
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM files WHERE text_state = ?`, TextPending).Scan(&count)
+	return count, err
+}
+
+func (s *Service) RequeueText(ctx context.Context, mimePatterns ...string) error {
+	query := `UPDATE files SET text_state = ? WHERE is_dir = 0 AND text_state <> ?`
+	args := []any{TextPending, TextPending}
+	if len(mimePatterns) > 0 {
+		query += ` AND (` + strings.TrimSuffix(strings.Repeat(`mime LIKE ? OR `, len(mimePatterns)), ` OR `) + `)`
+		for _, pattern := range mimePatterns {
+			args = append(args, pattern)
+		}
+	}
+	_, err := s.db.ExecContext(ctx, query, args...)
+	return err
 }
 
 func (s *Service) UsedBytes(ctx context.Context, userID int64) (int64, error) {

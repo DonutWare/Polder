@@ -4,11 +4,13 @@ import (
 	"context"
 	"log/slog"
 
+	"polder-server/internal/extract"
 	"polder-server/internal/search"
 )
 
 const searchDescription = "Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, " +
-	"and small typos. Tags narrow the results; they have the form `key<op>values`:\n\n" +
+	"and small typos. It also matches the text inside files when the server reads it, including text recognised in " +
+	"images and scans; every word must appear, and quotes match a phrase. Name matches come first. Tags narrow the results; they have the form `key<op>values`:\n\n" +
 	"- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, " +
 	"a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`\n" +
 	"- `ext`: extensions only\n" +
@@ -46,12 +48,21 @@ func (a *API) suggestSearch(ctx context.Context, input *suggestInput) (*jsonBody
 	return respond(suggestions), nil
 }
 
-func (a *API) searchStatus(_ context.Context, _ *struct{}) (*jsonBody[search.IndexStatus], error) {
-	status, err := a.search.Status()
+type searchStatus struct {
+	search.IndexStatus
+	Extraction extract.ExtractionStatus `json:"extraction"`
+}
+
+func (a *API) searchStatus(ctx context.Context, _ *struct{}) (*jsonBody[searchStatus], error) {
+	index, err := a.search.Status()
 	if err != nil {
 		return nil, err
 	}
-	return respond(status), nil
+	extraction, err := a.extract.Status(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return respond(searchStatus{IndexStatus: index, Extraction: extraction}), nil
 }
 
 func (a *API) rebuildSearchIndex(ctx context.Context, _ *struct{}) (*struct{}, error) {

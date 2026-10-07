@@ -55,6 +55,8 @@ func startServer(t *testing.T, driver, dsn string, configure ...func(*config.Con
 	cfg.DatabaseDSN = dsn
 	cfg.WatchFiles = false
 	cfg.RescanInterval = 0
+	// Without tesseract OCR stays off, so tests never download models.
+	cfg.TesseractPath = ""
 	for _, change := range configure {
 		change(&cfg)
 	}

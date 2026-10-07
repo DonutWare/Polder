@@ -31,6 +31,10 @@ type Config struct {
 	WebDir string `yaml:"webDir"`
 	// ServeWeb turns the bundled web client off when false, leaving only the API.
 	ServeWeb bool `yaml:"serveWeb"`
+	// TesseractPath is the OCR program, looked up on PATH unless it is a path. Without it there is no OCR.
+	TesseractPath string `yaml:"tesseractPath"`
+	// OCRModelURL is where OCR models are downloaded from, as <OCRModelURL>/<model>.traineddata.
+	OCRModelURL string `yaml:"ocrModelUrl"`
 }
 
 func Default() Config {
@@ -44,6 +48,8 @@ func Default() Config {
 		LoginRateLimit:     10,
 		TrashRetentionDays: 30,
 		ServeWeb:           true,
+		TesseractPath:      "tesseract",
+		OCRModelURL:        "https://github.com/tesseract-ocr/tessdata_fast/raw/main",
 	}
 }
 
@@ -80,6 +86,8 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.DatabaseDriver = envOr("POLDER_DB_DRIVER", cfg.DatabaseDriver)
 	cfg.DatabaseDSN = envOr("POLDER_DB_DSN", cfg.DatabaseDSN)
 	cfg.WebDir = envOr("POLDER_WEB_DIR", cfg.WebDir)
+	cfg.TesseractPath = envOr("POLDER_TESSERACT", cfg.TesseractPath)
+	cfg.OCRModelURL = envOr("POLDER_OCR_MODEL_URL", cfg.OCRModelURL)
 
 	if value, ok := os.LookupEnv("POLDER_RESCAN_INTERVAL"); ok {
 		interval, err := time.ParseDuration(value)
@@ -139,6 +147,14 @@ func (cfg Config) PreviewCacheDir() string {
 
 func (cfg Config) SearchIndexDir() string {
 	return filepath.Join(cfg.ConfigDir, "search", "index")
+}
+
+func (cfg Config) SearchTextDir() string {
+	return filepath.Join(cfg.ConfigDir, "search", "text")
+}
+
+func (cfg Config) OCRModelDir() string {
+	return filepath.Join(cfg.ConfigDir, "search", "tessdata")
 }
 
 func (cfg Config) JWTKeyPath() string {

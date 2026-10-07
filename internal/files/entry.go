@@ -23,6 +23,16 @@ func (PreviewState) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schem
 	return s
 }
 
+type TextState string
+
+const (
+	TextNone    TextState = "none"
+	TextPending TextState = "pending"
+	TextReady   TextState = "ready"
+	TextSkipped TextState = "skipped"
+	TextFailed  TextState = "failed"
+)
+
 const (
 	directoryMime = "inode/directory"
 	fallbackMime  = "application/octet-stream"
@@ -49,6 +59,7 @@ type Entry struct {
 	Mime         string         `json:"mime"`
 	Meta         map[string]any `json:"meta"`
 	PreviewState PreviewState   `json:"previewState"`
+	TextState    TextState      `json:"-"`
 }
 
 func newDirectoryEntry(userID int64, cleanPath string, mtime time.Time) Entry {
@@ -61,6 +72,7 @@ func newDirectoryEntry(userID int64, cleanPath string, mtime time.Time) Entry {
 		Mime:         directoryMime,
 		Meta:         map[string]any{},
 		PreviewState: PreviewNone,
+		TextState:    TextNone,
 	}
 }
 
@@ -76,6 +88,7 @@ func newFileEntry(userID int64, cleanPath string, size int64, mtime time.Time, h
 		Mime:         mimeType,
 		Meta:         map[string]any{},
 		PreviewState: initialPreviewState(mimeType),
+		TextState:    TextPending,
 	}
 }
 

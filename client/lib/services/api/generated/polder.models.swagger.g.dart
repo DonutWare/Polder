@@ -163,6 +163,18 @@ Map<String, dynamic> _$EventMessageToJson(EventMessage instance) => <String, dyn
   'userId': instance.userId,
 };
 
+ExtractionStatus _$ExtractionStatusFromJson(Map<String, dynamic> json) => ExtractionStatus(
+  ocr: extractionStatusOcrFromJson(json['ocr']),
+  ocrProblem: json['ocrProblem'] as String?,
+  pending: (json['pending'] as num).toInt(),
+);
+
+Map<String, dynamic> _$ExtractionStatusToJson(ExtractionStatus instance) => <String, dynamic>{
+  'ocr': ?extractionStatusOcrToJson(instance.ocr),
+  'ocrProblem': ?instance.ocrProblem,
+  'pending': instance.pending,
+};
+
 FacetCount _$FacetCountFromJson(Map<String, dynamic> json) =>
     FacetCount(count: (json['count'] as num).toInt(), value: json['value'] as String);
 
@@ -184,16 +196,6 @@ Map<String, dynamic> _$FacetsToJson(Facets instance) => <String, dynamic>{
 HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) => HealthStatus(status: json['status'] as String);
 
 Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) => <String, dynamic>{'status': instance.status};
-
-IndexStatus _$IndexStatusFromJson(Map<String, dynamic> json) => IndexStatus(
-  documents: (json['documents'] as num).toInt(),
-  lastSync: json['lastSync'] == null ? null : DateTime.parse(json['lastSync'] as String),
-);
-
-Map<String, dynamic> _$IndexStatusToJson(IndexStatus instance) => <String, dynamic>{
-  'documents': instance.documents,
-  'lastSync': ?instance.lastSync?.toIso8601String(),
-};
 
 ListResponse _$ListResponseFromJson(Map<String, dynamic> json) => ListResponse(
   entries: (json['entries'] as List<dynamic>?)?.map((e) => Entry.fromJson(e as Map<String, dynamic>)).toList() ?? [],
@@ -311,6 +313,9 @@ Match _$MatchFromJson(Map<String, dynamic> json) => Match(
       (json['nameMatches'] as List<dynamic>?)?.map((e) => TextSpan.fromJson(e as Map<String, dynamic>)).toList() ?? [],
   score: (json['score'] as num).toDouble(),
   snippet: json['snippet'] as String?,
+  snippetMatches:
+      (json['snippetMatches'] as List<dynamic>?)?.map((e) => TextSpan.fromJson(e as Map<String, dynamic>)).toList() ??
+      [],
 );
 
 Map<String, dynamic> _$MatchToJson(Match instance) => <String, dynamic>{
@@ -318,6 +323,7 @@ Map<String, dynamic> _$MatchToJson(Match instance) => <String, dynamic>{
   'nameMatches': ?instance.nameMatches?.map((e) => e.toJson()).toList(),
   'score': instance.score,
   'snippet': ?instance.snippet,
+  'snippetMatches': ?instance.snippetMatches?.map((e) => e.toJson()).toList(),
 };
 
 MoveRequest _$MoveRequestFromJson(Map<String, dynamic> json) =>
@@ -415,22 +421,50 @@ RetentionRequest _$RetentionRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$RetentionRequestToJson(RetentionRequest instance) => <String, dynamic>{'days': ?instance.days};
 
+SearchStatus _$SearchStatusFromJson(Map<String, dynamic> json) => SearchStatus(
+  documents: (json['documents'] as num).toInt(),
+  extraction: ExtractionStatus.fromJson(json['extraction'] as Map<String, dynamic>),
+  lastSync: json['lastSync'] == null ? null : DateTime.parse(json['lastSync'] as String),
+);
+
+Map<String, dynamic> _$SearchStatusToJson(SearchStatus instance) => <String, dynamic>{
+  'documents': instance.documents,
+  'extraction': instance.extraction.toJson(),
+  'lastSync': ?instance.lastSync?.toIso8601String(),
+};
+
 ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) => ServerSettings(
+  ocrEnabled: json['ocrEnabled'] as bool,
+  ocrLanguages: (json['ocrLanguages'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  ocrMaxPages: (json['ocrMaxPages'] as num).toInt(),
+  searchContentEnabled: json['searchContentEnabled'] as bool,
   trashRetentionDays: (json['trashRetentionDays'] as num).toInt(),
   trashRetentionEnforced: json['trashRetentionEnforced'] as bool,
 );
 
 Map<String, dynamic> _$ServerSettingsToJson(ServerSettings instance) => <String, dynamic>{
+  'ocrEnabled': instance.ocrEnabled,
+  'ocrLanguages': ?instance.ocrLanguages,
+  'ocrMaxPages': instance.ocrMaxPages,
+  'searchContentEnabled': instance.searchContentEnabled,
   'trashRetentionDays': instance.trashRetentionDays,
   'trashRetentionEnforced': instance.trashRetentionEnforced,
 };
 
 ServerSettingsChanges _$ServerSettingsChangesFromJson(Map<String, dynamic> json) => ServerSettingsChanges(
+  ocrEnabled: json['ocrEnabled'] as bool?,
+  ocrLanguages: (json['ocrLanguages'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  ocrMaxPages: (json['ocrMaxPages'] as num?)?.toInt(),
+  searchContentEnabled: json['searchContentEnabled'] as bool?,
   trashRetentionDays: (json['trashRetentionDays'] as num?)?.toInt(),
   trashRetentionEnforced: json['trashRetentionEnforced'] as bool?,
 );
 
 Map<String, dynamic> _$ServerSettingsChangesToJson(ServerSettingsChanges instance) => <String, dynamic>{
+  'ocrEnabled': ?instance.ocrEnabled,
+  'ocrLanguages': ?instance.ocrLanguages,
+  'ocrMaxPages': ?instance.ocrMaxPages,
+  'searchContentEnabled': ?instance.searchContentEnabled,
   'trashRetentionDays': ?instance.trashRetentionDays,
   'trashRetentionEnforced': ?instance.trashRetentionEnforced,
 };

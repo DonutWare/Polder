@@ -11,6 +11,7 @@ import (
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
+	"github.com/blevesearch/bleve/v2/analysis/lang/cjk"
 	"github.com/blevesearch/bleve/v2/analysis/token/lowercase"
 	"github.com/blevesearch/bleve/v2/analysis/token/ngram"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/single"
@@ -22,7 +23,7 @@ import (
 )
 
 // Bump mappingVersion whenever the mapping or the document fields change; the index is then rebuilt.
-const mappingVersion = "1"
+const mappingVersion = "2"
 
 const (
 	fieldUser    = "user"
@@ -38,6 +39,7 @@ const (
 	fieldIsDir   = "is_dir"
 	fieldSize    = "size"
 	fieldMtime   = "mtime"
+	fieldContent = "content"
 
 	analyzerNgram   = "name_ngram"
 	analyzerWords   = "words"
@@ -124,6 +126,14 @@ func newMapping() (*mapping.IndexMappingImpl, error) {
 	date := bleve.NewDateTimeFieldMapping()
 	date.Store = false
 	date.IncludeInAll = false
+	// The CJK analyzer splits Chinese, Japanese and Korean into overlapping pairs of characters and
+	// otherwise behaves like the standard analyzer. Term vectors give the match offsets for snippets.
+	content := bleve.NewTextFieldMapping()
+	content.Analyzer = cjk.AnalyzerName
+	content.Store = false
+	content.IncludeInAll = false
+	content.IncludeTermVectors = true
+	content.DocValues = false
 	boolean := bleve.NewBooleanFieldMapping()
 	boolean.Store = false
 	boolean.IncludeInAll = false
@@ -142,6 +152,7 @@ func newMapping() (*mapping.IndexMappingImpl, error) {
 	document.AddFieldMappingsAt(fieldIsDir, boolean)
 	document.AddFieldMappingsAt(fieldSize, numeric)
 	document.AddFieldMappingsAt(fieldMtime, date)
+	document.AddFieldMappingsAt(fieldContent, content)
 	indexMapping.DefaultMapping = document
 	indexMapping.DefaultAnalyzer = analyzerWords
 	return indexMapping, nil

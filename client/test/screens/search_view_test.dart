@@ -27,13 +27,24 @@ Map<String, dynamic> _results(String query) => {
   "query": query,
   "total": 1,
   "results": [
-    {
-      "entry": _entry("/Finance/invoice_q3.pdf"),
-      "score": 120,
-      "nameMatches": [
-        {"start": 0, "end": 3},
-      ],
-    },
+    if (query == "orchard")
+      {
+        "entry": _entry("/Letters/offer.pdf"),
+        "score": 2.5,
+        "nameMatches": <Object>[],
+        "snippet": "…the pineapple orchard lease is renewed.",
+        "snippetMatches": [
+          {"start": 15, "end": 22},
+        ],
+      }
+    else
+      {
+        "entry": _entry("/Finance/invoice_q3.pdf"),
+        "score": 120,
+        "nameMatches": [
+          {"start": 0, "end": 3},
+        ],
+      },
   ],
   "filters": [
     if (query.indexOf("type=pdf") case final start when start >= 0)
@@ -103,6 +114,22 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.search);
     await tester.pumpAndSettle();
     expect(visited, ["/trash"]);
+  });
+
+  testWidgets("a match inside a file shows where the text matched", (tester) async {
+    await pumpSearch(tester);
+
+    await tester.enterText(find.byType(TextField), "orchard");
+    await tester.pumpAndSettle();
+
+    final snippet = find.textContaining("…the pineapple orchard lease is renewed.", findRichText: true);
+    expect(snippet, findsOneWidget);
+    final highlighted = <String>[];
+    tester.widget<RichText>(snippet).text.visitChildren((span) {
+      if (span is TextSpan && span.style?.fontWeight == FontWeight.w700) highlighted.add(span.text!);
+      return true;
+    });
+    expect(highlighted, ["orchard"]);
   });
 
   testWidgets("arrow keys move the selection to a file", (tester) async {

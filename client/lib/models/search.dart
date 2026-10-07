@@ -27,6 +27,7 @@ abstract class SearchHit with _$SearchHit {
     @Default(0) double score,
     @Default(<TextRange>[]) List<TextRange> nameMatches,
     String? snippet,
+    @Default(<TextRange>[]) List<TextRange> snippetMatches,
   }) = _SearchHit;
 }
 
@@ -73,4 +74,15 @@ abstract class SearchSuggestions with _$SearchSuggestions {
     @Default(TextRange.empty) TextRange range,
     @Default(<SearchSuggestion>[]) List<SearchSuggestion> suggestions,
   }) = _SearchSuggestions;
+}
+
+enum OcrState { off, ready, unavailable }
+
+@freezed
+abstract class TextExtractionStatus with _$TextExtractionStatus {
+  const factory TextExtractionStatus({
+    @Default(0) int pending,
+    @Default(OcrState.off) OcrState ocr,
+    String? ocrProblem,
+  }) = _TextExtractionStatus;
 }

@@ -294,7 +294,7 @@ as TextRange,
 /// @nodoc
 mixin _$SearchHit {
 
- FileEntry get entry; double get score; List<TextRange> get nameMatches; String? get snippet;
+ FileEntry get entry; double get score; List<TextRange> get nameMatches; String? get snippet; List<TextRange> get snippetMatches;
 /// Create a copy of SearchHit
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -306,20 +306,20 @@ $SearchHitCopyWith<SearchHit> get copyWith => _$SearchHitCopyWithImpl<SearchHit>
 @override
 bool operator ==(Object other) {
   final _this = this as SearchHit;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchHit&&(identical(other.entry, _this.entry) || other.entry == _this.entry)&&(identical(other.score, _this.score) || other.score == _this.score)&&const DeepCollectionEquality().equals(other.nameMatches, _this.nameMatches)&&(identical(other.snippet, _this.snippet) || other.snippet == _this.snippet));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchHit&&(identical(other.entry, _this.entry) || other.entry == _this.entry)&&(identical(other.score, _this.score) || other.score == _this.score)&&const DeepCollectionEquality().equals(other.nameMatches, _this.nameMatches)&&(identical(other.snippet, _this.snippet) || other.snippet == _this.snippet)&&const DeepCollectionEquality().equals(other.snippetMatches, _this.snippetMatches));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SearchHit;
-  return Object.hash(runtimeType,_this.entry,_this.score,const DeepCollectionEquality().hash(_this.nameMatches),_this.snippet);
+  return Object.hash(runtimeType,_this.entry,_this.score,const DeepCollectionEquality().hash(_this.nameMatches),_this.snippet,const DeepCollectionEquality().hash(_this.snippetMatches));
 }
 
 @override
 String toString() {
   final _this = this as SearchHit;
-  return 'SearchHit(entry: ${_this.entry}, score: ${_this.score}, nameMatches: ${_this.nameMatches}, snippet: ${_this.snippet})';
+  return 'SearchHit(entry: ${_this.entry}, score: ${_this.score}, nameMatches: ${_this.nameMatches}, snippet: ${_this.snippet}, snippetMatches: ${_this.snippetMatches})';
 }
 
 
@@ -330,7 +330,7 @@ abstract mixin class $SearchHitCopyWith<$Res>  {
   factory $SearchHitCopyWith(SearchHit value, $Res Function(SearchHit) _then) = _$SearchHitCopyWithImpl;
 @useResult
 $Res call({
- FileEntry entry, double score, List<TextRange> nameMatches, String? snippet
+ FileEntry entry, double score, List<TextRange> nameMatches, String? snippet, List<TextRange> snippetMatches
 });
 
 
@@ -347,13 +347,14 @@ class _$SearchHitCopyWithImpl<$Res>
 
 /// Create a copy of SearchHit
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? entry = null,Object? score = null,Object? nameMatches = null,Object? snippet = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? entry = null,Object? score = null,Object? nameMatches = null,Object? snippet = freezed,Object? snippetMatches = null,}) {
   return _then(SearchHit(
 entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
 as FileEntry,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
 as double,nameMatches: null == nameMatches ? _self.nameMatches : nameMatches // ignore: cast_nullable_to_non_nullable
 as List<TextRange>,snippet: freezed == snippet ? _self.snippet : snippet // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,snippetMatches: null == snippetMatches ? _self.snippetMatches : snippetMatches // ignore: cast_nullable_to_non_nullable
+as List<TextRange>,
   ));
 }
 /// Create a copy of SearchHit
@@ -447,10 +448,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FileEntry entry,  double score,  List<TextRange> nameMatches,  String? snippet)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FileEntry entry,  double score,  List<TextRange> nameMatches,  String? snippet,  List<TextRange> snippetMatches)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SearchHit() when $default != null:
-return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet);case _:
+return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet,_that.snippetMatches);case _:
   return orElse();
 
 }
@@ -468,10 +469,10 @@ return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FileEntry entry,  double score,  List<TextRange> nameMatches,  String? snippet)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FileEntry entry,  double score,  List<TextRange> nameMatches,  String? snippet,  List<TextRange> snippetMatches)  $default,) {final _that = this;
 switch (_that) {
 case _SearchHit():
-return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet);case _:
+return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet,_that.snippetMatches);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -488,10 +489,10 @@ return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FileEntry entry,  double score,  List<TextRange> nameMatches,  String? snippet)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FileEntry entry,  double score,  List<TextRange> nameMatches,  String? snippet,  List<TextRange> snippetMatches)?  $default,) {final _that = this;
 switch (_that) {
 case _SearchHit() when $default != null:
-return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet);case _:
+return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet,_that.snippetMatches);case _:
   return null;
 
 }
@@ -503,7 +504,7 @@ return $default(_that.entry,_that.score,_that.nameMatches,_that.snippet);case _:
 
 
 class _SearchHit implements SearchHit {
-  const _SearchHit({required this.entry, this.score = 0,  List<TextRange> nameMatches = const <TextRange>[], this.snippet}): _nameMatches = nameMatches;
+  const _SearchHit({required this.entry, this.score = 0,  List<TextRange> nameMatches = const <TextRange>[], this.snippet,  List<TextRange> snippetMatches = const <TextRange>[]}): _nameMatches = nameMatches,_snippetMatches = snippetMatches;
   
 
 @override final  FileEntry entry;
@@ -516,6 +517,13 @@ class _SearchHit implements SearchHit {
 }
 
 @override final  String? snippet;
+ final  List<TextRange> _snippetMatches;
+@override@JsonKey() List<TextRange> get snippetMatches {
+  if (_snippetMatches is EqualUnmodifiableListView) return _snippetMatches;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_snippetMatches);
+}
+
 
 /// Create a copy of SearchHit
 /// with the given fields replaced by the non-null parameter values.
@@ -527,18 +535,18 @@ _$SearchHitCopyWith<_SearchHit> get copyWith => __$SearchHitCopyWithImpl<_Search
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchHit&&(identical(other.entry, entry) || other.entry == entry)&&(identical(other.score, score) || other.score == score)&&const DeepCollectionEquality().equals(other.nameMatches, _nameMatches)&&(identical(other.snippet, snippet) || other.snippet == snippet));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchHit&&(identical(other.entry, entry) || other.entry == entry)&&(identical(other.score, score) || other.score == score)&&const DeepCollectionEquality().equals(other.nameMatches, _nameMatches)&&(identical(other.snippet, snippet) || other.snippet == snippet)&&const DeepCollectionEquality().equals(other.snippetMatches, _snippetMatches));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,entry,score,const DeepCollectionEquality().hash(_nameMatches),snippet);
+    return Object.hash(runtimeType,entry,score,const DeepCollectionEquality().hash(_nameMatches),snippet,const DeepCollectionEquality().hash(_snippetMatches));
 }
 
 @override
 String toString() {
-    return 'SearchHit(entry: $entry, score: $score, nameMatches: $nameMatches, snippet: $snippet)';
+    return 'SearchHit(entry: $entry, score: $score, nameMatches: $nameMatches, snippet: $snippet, snippetMatches: $snippetMatches)';
 }
 
 
@@ -549,7 +557,7 @@ abstract mixin class _$SearchHitCopyWith<$Res> implements $SearchHitCopyWith<$Re
   factory _$SearchHitCopyWith(_SearchHit value, $Res Function(_SearchHit) _then) = __$SearchHitCopyWithImpl;
 @override @useResult
 $Res call({
- FileEntry entry, double score, List<TextRange> nameMatches, String? snippet
+ FileEntry entry, double score, List<TextRange> nameMatches, String? snippet, List<TextRange> snippetMatches
 });
 
 
@@ -566,13 +574,14 @@ class __$SearchHitCopyWithImpl<$Res>
 
 /// Create a copy of SearchHit
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? entry = null,Object? score = null,Object? nameMatches = null,Object? snippet = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? entry = null,Object? score = null,Object? nameMatches = null,Object? snippet = freezed,Object? snippetMatches = null,}) {
   return _then(_SearchHit(
 entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
 as FileEntry,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
 as double,nameMatches: null == nameMatches ? _self._nameMatches : nameMatches // ignore: cast_nullable_to_non_nullable
 as List<TextRange>,snippet: freezed == snippet ? _self.snippet : snippet // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,snippetMatches: null == snippetMatches ? _self._snippetMatches : snippetMatches // ignore: cast_nullable_to_non_nullable
+as List<TextRange>,
   ));
 }
 
@@ -1974,6 +1983,276 @@ class __$SearchSuggestionsCopyWithImpl<$Res>
 range: null == range ? _self.range : range // ignore: cast_nullable_to_non_nullable
 as TextRange,suggestions: null == suggestions ? _self._suggestions : suggestions // ignore: cast_nullable_to_non_nullable
 as List<SearchSuggestion>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$TextExtractionStatus {
+
+ int get pending; OcrState get ocr; String? get ocrProblem;
+/// Create a copy of TextExtractionStatus
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TextExtractionStatusCopyWith<TextExtractionStatus> get copyWith => _$TextExtractionStatusCopyWithImpl<TextExtractionStatus>(this as TextExtractionStatus, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as TextExtractionStatus;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TextExtractionStatus&&(identical(other.pending, _this.pending) || other.pending == _this.pending)&&(identical(other.ocr, _this.ocr) || other.ocr == _this.ocr)&&(identical(other.ocrProblem, _this.ocrProblem) || other.ocrProblem == _this.ocrProblem));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as TextExtractionStatus;
+  return Object.hash(runtimeType,_this.pending,_this.ocr,_this.ocrProblem);
+}
+
+@override
+String toString() {
+  final _this = this as TextExtractionStatus;
+  return 'TextExtractionStatus(pending: ${_this.pending}, ocr: ${_this.ocr}, ocrProblem: ${_this.ocrProblem})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TextExtractionStatusCopyWith<$Res>  {
+  factory $TextExtractionStatusCopyWith(TextExtractionStatus value, $Res Function(TextExtractionStatus) _then) = _$TextExtractionStatusCopyWithImpl;
+@useResult
+$Res call({
+ int pending, OcrState ocr, String? ocrProblem
+});
+
+
+
+
+}
+/// @nodoc
+class _$TextExtractionStatusCopyWithImpl<$Res>
+    implements $TextExtractionStatusCopyWith<$Res> {
+  _$TextExtractionStatusCopyWithImpl(this._self, this._then);
+
+  final TextExtractionStatus _self;
+  final $Res Function(TextExtractionStatus) _then;
+
+/// Create a copy of TextExtractionStatus
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? pending = null,Object? ocr = null,Object? ocrProblem = freezed,}) {
+  return _then(TextExtractionStatus(
+pending: null == pending ? _self.pending : pending // ignore: cast_nullable_to_non_nullable
+as int,ocr: null == ocr ? _self.ocr : ocr // ignore: cast_nullable_to_non_nullable
+as OcrState,ocrProblem: freezed == ocrProblem ? _self.ocrProblem : ocrProblem // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [TextExtractionStatus].
+extension TextExtractionStatusPatterns on TextExtractionStatus {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TextExtractionStatus value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _TextExtractionStatus() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TextExtractionStatus value)  $default,){
+final _that = this;
+switch (_that) {
+case _TextExtractionStatus():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TextExtractionStatus value)?  $default,){
+final _that = this;
+switch (_that) {
+case _TextExtractionStatus() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int pending,  OcrState ocr,  String? ocrProblem)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _TextExtractionStatus() when $default != null:
+return $default(_that.pending,_that.ocr,_that.ocrProblem);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int pending,  OcrState ocr,  String? ocrProblem)  $default,) {final _that = this;
+switch (_that) {
+case _TextExtractionStatus():
+return $default(_that.pending,_that.ocr,_that.ocrProblem);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int pending,  OcrState ocr,  String? ocrProblem)?  $default,) {final _that = this;
+switch (_that) {
+case _TextExtractionStatus() when $default != null:
+return $default(_that.pending,_that.ocr,_that.ocrProblem);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _TextExtractionStatus implements TextExtractionStatus {
+  const _TextExtractionStatus({this.pending = 0, this.ocr = OcrState.off, this.ocrProblem});
+  
+
+@override@JsonKey() final  int pending;
+@override@JsonKey() final  OcrState ocr;
+@override final  String? ocrProblem;
+
+/// Create a copy of TextExtractionStatus
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TextExtractionStatusCopyWith<_TextExtractionStatus> get copyWith => __$TextExtractionStatusCopyWithImpl<_TextExtractionStatus>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TextExtractionStatus&&(identical(other.pending, pending) || other.pending == pending)&&(identical(other.ocr, ocr) || other.ocr == ocr)&&(identical(other.ocrProblem, ocrProblem) || other.ocrProblem == ocrProblem));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,pending,ocr,ocrProblem);
+}
+
+@override
+String toString() {
+    return 'TextExtractionStatus(pending: $pending, ocr: $ocr, ocrProblem: $ocrProblem)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TextExtractionStatusCopyWith<$Res> implements $TextExtractionStatusCopyWith<$Res> {
+  factory _$TextExtractionStatusCopyWith(_TextExtractionStatus value, $Res Function(_TextExtractionStatus) _then) = __$TextExtractionStatusCopyWithImpl;
+@override @useResult
+$Res call({
+ int pending, OcrState ocr, String? ocrProblem
+});
+
+
+
+
+}
+/// @nodoc
+class __$TextExtractionStatusCopyWithImpl<$Res>
+    implements _$TextExtractionStatusCopyWith<$Res> {
+  __$TextExtractionStatusCopyWithImpl(this._self, this._then);
+
+  final _TextExtractionStatus _self;
+  final $Res Function(_TextExtractionStatus) _then;
+
+/// Create a copy of TextExtractionStatus
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? pending = null,Object? ocr = null,Object? ocrProblem = freezed,}) {
+  return _then(_TextExtractionStatus(
+pending: null == pending ? _self.pending : pending // ignore: cast_nullable_to_non_nullable
+as int,ocr: null == ocr ? _self.ocr : ocr // ignore: cast_nullable_to_non_nullable
+as OcrState,ocrProblem: freezed == ocrProblem ? _self.ocrProblem : ocrProblem // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

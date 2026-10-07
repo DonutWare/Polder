@@ -15,6 +15,7 @@ import (
 	"polder-server/internal/auth"
 	"polder-server/internal/config"
 	"polder-server/internal/database"
+	"polder-server/internal/extract"
 	"polder-server/internal/files"
 	"polder-server/internal/httpapi"
 	"polder-server/internal/preview"
@@ -34,17 +35,18 @@ const (
 )
 
 type App struct {
-	Config   config.Config
-	Handler  http.Handler
-	Files    *files.Service
-	Users    *users.Store
-	Settings *settings.Store
-	Activity *activity.Hub
-	Search   *search.Service
-	db       *sql.DB
-	scanner  *scanner.Scanner
-	previews *preview.Worker
-	sync     *syncing.Service
+	Config    config.Config
+	Handler   http.Handler
+	Files     *files.Service
+	Users     *users.Store
+	Settings  *settings.Store
+	Activity  *activity.Hub
+	Search    *search.Service
+	db        *sql.DB
+	scanner   *scanner.Scanner
+	previews  *preview.Worker
+	extractor *extract.Worker
+	sync      *syncing.Service
 }
 
 func New(cfg config.Config) (*App, error) {
@@ -73,7 +75,13 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	userStore := users.NewStore(db)
 	userService := users.NewService(userStore, auth.Argon2Hasher{}, disk)
 	sessions := auth.NewSessions(db)
-	serverSettings := settings.NewStore(db, settings.ServerSettings{TrashRetentionDays: cfg.TrashRetentionDays})
+	serverSettings := settings.NewStore(db, settings.ServerSettings{
+		TrashRetentionDays:   cfg.TrashRetentionDays,
+		SearchContentEnabled: true,
+		OCREnabled:           true,
+		OCRLanguages:         extract.DefaultOCRLanguages,
+		OCRMaxPages:          extract.DefaultOCRMaxPages,
+	})
 	fileService := files.NewService(db, disk)
 	syncService := syncing.NewService(db, fileService)
 	previews := preview.NewWorker(fileService, userStore, cfg.PreviewCacheDir())
@@ -81,11 +89,23 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	fileService.OnContentRemoved(previews.RequestCleanup)
 	activityHub := activity.NewHub(activity.NewStore(db))
 	fileService.OnMutation(activityHub.FileMutation)
-	searchService, err := search.Open(cfg.SearchIndexDir(), fileService, userStore)
+	extractor, err := extract.NewWorker(fileService, userStore, serverSettings, extract.Options{
+		CacheDir:      cfg.SearchTextDir(),
+		ModelDir:      cfg.OCRModelDir(),
+		TesseractPath: cfg.TesseractPath,
+		ModelURL:      cfg.OCRModelURL,
+	})
+	if err != nil {
+		return nil, err
+	}
+	fileService.OnContentChanged(extractor.Enqueue)
+	fileService.OnContentRemoved(extractor.RequestCleanup)
+	searchService, err := search.Open(cfg.SearchIndexDir(), fileService, userStore, serverSettings, extractor.Cache())
 	if err != nil {
 		return nil, err
 	}
 	fileService.OnMutation(searchService.FileMutation)
+	extractor.OnExtracted(searchService.IndexText)
 	authService := auth.NewService(userService, sessions, tokens)
 	authService.OnSession(func(ctx context.Context, user users.User, session auth.Session, event auth.SessionEvent) {
 		activityHub.Session(ctx, user, session.ID, session.DeviceName, event == auth.SessionStarted)
@@ -106,21 +126,23 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Previews:               previews,
 		Activity:               activityHub,
 		Search:                 searchService,
+		Extractor:              extractor,
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		Web:                    web,
 	})
 	return &App{
-		Config:   cfg,
-		Handler:  handler,
-		Files:    fileService,
-		Users:    userStore,
-		Settings: serverSettings,
-		Activity: activityHub,
-		Search:   searchService,
-		db:       db,
-		scanner:  scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles),
-		previews: previews,
-		sync:     syncService,
+		Config:    cfg,
+		Handler:   handler,
+		Files:     fileService,
+		Users:     userStore,
+		Settings:  serverSettings,
+		Activity:  activityHub,
+		Search:    searchService,
+		db:        db,
+		scanner:   scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles),
+		previews:  previews,
+		extractor: extractor,
+		sync:      syncService,
 	}, nil
 }
 
@@ -155,6 +177,7 @@ func (a *App) Close() error {
 func (a *App) StartBackgroundWork(ctx context.Context) {
 	go a.scanner.Run(ctx)
 	go a.previews.Run(ctx)
+	go a.extractor.Run(ctx)
 	go a.Search.Run(ctx)
 	go repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads)
 	go repeat(ctx, trashPurgeInterval, "purge expired trash", func(ctx context.Context) error {

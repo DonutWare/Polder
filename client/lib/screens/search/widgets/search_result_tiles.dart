@@ -29,25 +29,42 @@ class SearchHitTile extends StatelessWidget {
     final entry = hit.entry;
     final theme = Theme.of(context);
     final parent = RemotePath.parent(entry.path);
+    final snippet = hit.snippet;
+    final location = Row(
+      children: [
+        Flexible(
+          child: Text(
+            parent == RemotePath.root ? context.localized.navFiles : parent,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (!entry.isDir) ...[const Text(" · "), Flexible(child: FileMetadataText(entry: entry))],
+      ],
+    );
     return ListTile(
       selected: selected,
       selectedTileColor: theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
       selectedColor: theme.colorScheme.onSurface,
-      shape: const StadiumBorder(),
+      shape: snippet == null ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       leading: FileThumbnail(entry: entry, dimension: 40),
       title: HighlightedText(text: entry.name, ranges: hit.nameMatches),
-      subtitle: Row(
-        children: [
-          Flexible(
-            child: Text(
-              parent == RemotePath.root ? context.localized.navFiles : parent,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+      isThreeLine: snippet != null,
+      subtitle: snippet == null
+          ? location
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
+              children: [
+                location,
+                HighlightedText(
+                  text: snippet,
+                  ranges: hit.snippetMatches,
+                  maxLines: 2,
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ],
             ),
-          ),
-          if (!entry.isDir) ...[const Text(" · "), Flexible(child: FileMetadataText(entry: entry))],
-        ],
-      ),
       trailing: IconButton(
         tooltip: context.localized.searchShowInFolder,
         icon: const Icon(IconsaxPlusLinear.folder_open),
@@ -87,10 +104,12 @@ class DestinationTile extends StatelessWidget {
 }
 
 class HighlightedText extends StatelessWidget {
-  const HighlightedText({required this.text, required this.ranges, super.key});
+  const HighlightedText({required this.text, required this.ranges, this.maxLines = 1, this.style, super.key});
 
   final String text;
   final List<TextRange> ranges;
+  final int maxLines;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +124,11 @@ class HighlightedText extends StatelessWidget {
       position = range.end;
     }
     spans.add(TextSpan(text: text.substring(position)));
-    return Text.rich(TextSpan(children: spans), maxLines: 1, overflow: TextOverflow.ellipsis);
+    return Text.rich(
+      TextSpan(children: spans),
+      style: style,
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 }

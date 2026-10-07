@@ -16,6 +16,7 @@ import (
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/auth"
+	"polder-server/internal/extract"
 	"polder-server/internal/files"
 	"polder-server/internal/preview"
 	"polder-server/internal/search"
@@ -34,6 +35,7 @@ type API struct {
 	previews *preview.Worker
 	activity *activity.Hub
 	search   *search.Service
+	extract  *extract.Worker
 	limiter  *failedAttemptLimiter
 }
 
@@ -47,6 +49,7 @@ type Dependencies struct {
 	Previews               *preview.Worker
 	Activity               *activity.Hub
 	Search                 *search.Service
+	Extractor              *extract.Worker
 	LoginAttemptsPerMinute int
 	// Web serves the browser client for every path outside the API; nil serves only the API.
 	Web http.Handler
@@ -63,6 +66,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		previews: deps.Previews,
 		activity: deps.Activity,
 		search:   deps.Search,
+		extract:  deps.Extractor,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 	}
 
@@ -141,7 +145,7 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image", a.previewFile,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
 
-	register(user, http.MethodGet, "/search", "searchFiles", "Find files and folders by name, type, date and size", a.searchFiles,
+	register(user, http.MethodGet, "/search", "searchFiles", "Find files and folders by name, text inside them, type, date and size", a.searchFiles,
 		withDescription(searchDescription))
 	register(user, http.MethodGet, "/search/suggest", "suggestSearch", "Complete the search tag under the cursor", a.suggestSearch)
 
@@ -177,7 +181,7 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodPatch, "/admin/users/{userID}", "updateUser", "Change a user; password changes and disabling log the user out", a.updateUser)
 	register(admin, http.MethodGet, "/admin/settings", "getServerSettings", "Server-wide settings", a.getServerSettings)
 	register(admin, http.MethodPatch, "/admin/settings", "updateServerSettings", "Change server-wide settings", a.updateServerSettings)
-	register(admin, http.MethodGet, "/admin/search", "getSearchStatus", "State of the search index", a.searchStatus)
+	register(admin, http.MethodGet, "/admin/search", "getSearchStatus", "State of the search index and of reading text from files", a.searchStatus)
 	register(admin, http.MethodPost, "/admin/search/rebuild", "rebuildSearchIndex", "Rebuild the search index from scratch in the background", a.rebuildSearchIndex, accepted)
 	register(admin, http.MethodDelete, "/admin/users/{userID}", "deleteUser", "Delete a user; their files are archived on the server", a.deleteUser)
 }

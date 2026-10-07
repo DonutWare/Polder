@@ -11,6 +11,7 @@ import (
 	"github.com/blevesearch/bleve/v2/search/query"
 
 	"polder-server/internal/files"
+	"polder-server/internal/settings"
 	"polder-server/internal/users"
 )
 
@@ -21,13 +22,16 @@ const (
 	resyncInterval = 10 * time.Minute
 )
 
-// Service keeps a Bleve index of every user's files in step with the files table by following the
-// per-user changes feed. The cursor into that feed is stored in the index itself, so an index that is
-// deleted, stale or replaced simply catches up again from the database.
+type TextSource interface {
+	Text(entry files.Entry) (string, bool)
+}
+
 type Service struct {
-	files *files.Service
-	users *users.Store
-	dir   string
+	files    *files.Service
+	users    *users.Store
+	settings *settings.Store
+	texts    TextSource
+	dir      string
 
 	mu       sync.Mutex
 	index    *index
@@ -35,12 +39,13 @@ type Service struct {
 	pokes    chan int64
 }
 
-func Open(dir string, fileService *files.Service, userStore *users.Store) (*Service, error) {
+func Open(dir string, fileService *files.Service, userStore *users.Store, settingsStore *settings.Store, texts TextSource) (*Service, error) {
 	opened, err := openIndex(dir)
 	if err != nil {
 		return nil, err
 	}
-	return &Service{files: fileService, users: userStore, dir: dir, index: opened, pokes: make(chan int64, pokeCapacity)}, nil
+	return &Service{files: fileService, users: userStore, settings: settingsStore, texts: texts, dir: dir, index: opened,
+		pokes: make(chan int64, pokeCapacity)}, nil
 }
 
 func (s *Service) Close() error {
@@ -97,6 +102,10 @@ func (s *Service) syncAll(ctx context.Context) {
 func (s *Service) Sync(ctx context.Context, userID int64) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.syncLocked(ctx, userID)
+}
+
+func (s *Service) syncLocked(ctx context.Context, userID int64) error {
 	cursor, indexed := s.index.cursor(userID)
 	if !indexed {
 		var err error
@@ -120,8 +129,36 @@ func (s *Service) Sync(ctx context.Context, userID int64) error {
 	}
 }
 
-// indexEverything indexes a user from scratch. The feed position is read before the files, so a change
-// that lands in between is applied again afterwards, which is harmless.
+func (s *Service) IndexText(ctx context.Context, extracted files.Entry) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := s.syncLocked(ctx, extracted.UserID); err != nil {
+		slog.Warn("update search index", "user", extracted.UserID, "error", err)
+		return
+	}
+	current, err := s.files.EntriesByID(ctx, extracted.UserID, []int64{extracted.ID})
+	entry, ok := current[extracted.ID]
+	if err != nil || !ok || entry.Hash != extracted.Hash {
+		return
+	}
+	if err := s.index.Index.Index(documentID(entry.ID), s.document(entry)); err != nil {
+		slog.Warn("index file text", "path", entry.Path, "error", err)
+	}
+}
+
+func (s *Service) document(entry files.Entry) map[string]any {
+	document := newDocument(entry)
+	if text, ok := s.texts.Text(entry); ok {
+		document[fieldContent] = text
+	}
+	return document
+}
+
+func (s *Service) contentEnabled(ctx context.Context) bool {
+	server, err := s.settings.Get(ctx)
+	return err == nil && server.SearchContentEnabled
+}
+
 func (s *Service) indexEverything(ctx context.Context, userID int64) (int64, error) {
 	cursor, err := s.files.LatestChangeSeq(ctx, userID)
 	if err != nil {
@@ -136,7 +173,7 @@ func (s *Service) indexEverything(ctx context.Context, userID int64) (int64, err
 	}
 	batch := s.index.NewBatch()
 	for _, entry := range entries {
-		if err := batch.Index(documentID(entry.ID), newDocument(entry)); err != nil {
+		if err := batch.Index(documentID(entry.ID), s.document(entry)); err != nil {
 			return 0, err
 		}
 		if batch.Size() >= batchSize {
@@ -165,7 +202,7 @@ func (s *Service) apply(userID int64, page files.ChangePage) error {
 	}
 	for _, change := range page.Changes {
 		if change.Entry != nil {
-			if err := batch.Index(documentID(change.Entry.ID), newDocument(*change.Entry)); err != nil {
+			if err := batch.Index(documentID(change.Entry.ID), s.document(*change.Entry)); err != nil {
 				return err
 			}
 			continue

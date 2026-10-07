@@ -200,6 +200,28 @@
 	"noFolders": "No folders yet.",
 	"notChosen": "Not chosen",
 	"noUsers": "No users yet.",
+	"ocrLanguagesLabel": "Tesseract models, comma-separated, like eng, jpn or script/Latin",
+	"ocrLanguagesSetting": "Languages and scripts",
+	"ocrMaxPagesHint": "{count, plural, =1{OCR reads at most 1 page of each PDF} other{OCR reads at most {count} pages of each PDF}}",
+	"@ocrMaxPagesHint": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"ocrMaxPagesLabel": "Pages",
+	"ocrMaxPagesSetting": "Pages per PDF",
+	"ocrSetting": "Recognise text in images and scans",
+	"ocrSettingHint": "Reads photos and scanned PDF pages with OCR. This is slow and runs in the background.",
+	"ocrUnavailable": "OCR is unavailable: {reason}",
+	"@ocrUnavailable": {
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
 	"overwrite": "Overwrite",
 	"password": "Password",
 	"quota": "Quota",
@@ -272,6 +294,16 @@
 	"searchAddFilterButton": "Filter",
 	"searchChooseFolder": "Choose folder",
 	"searchClear": "Clear",
+	"searchContentPending": "{count, plural, =1{1 file still to read} other{{count} files still to read}}",
+	"@searchContentPending": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchContentSetting": "Search inside files",
+	"searchContentSettingHint": "Reads the text in documents, PDFs and images so search can find it.",
 	"searchCustomSize": "Another size, like 250mb",
 	"searchCustomType": "Another type or extension, like heic",
 	"searchDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
@@ -300,7 +332,7 @@
 	"searchHint": "Search files, folders and pages",
 	"searchKeywordsAbout": "version, licenses, info",
 	"searchKeywordsActivity": "history, log, uploads, downloads, transfers, sessions, devices",
-	"searchKeywordsAdmin": "admin, server, administration, retention, storage",
+	"searchKeywordsAdmin": "admin, server, administration, retention, storage, ocr, text recognition, search",
 	"searchKeywordsAdminUsers": "accounts, people, members, quota",
 	"searchKeywordsAutoUpload": "camera, photos, backup, gallery",
 	"searchKeywordsConflicts": "conflict, resolve, versions",
@@ -376,6 +408,7 @@
 	},
 	"server": "Server",
 	"serverFolder": "Folder on the server",
+	"serverSearchGroup": "Search",
 	"serverTrashRetention": "Trash retention",
 	"serverTrashRetentionHint": "Default for every user: {duration}",
 	"@serverTrashRetentionHint": {

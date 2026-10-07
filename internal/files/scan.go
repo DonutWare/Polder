@@ -131,7 +131,7 @@ func (s *Service) entryFromDisk(owner users.User, item diskItem, known Entry) (E
 	}
 	entry := newFileEntry(owner.ID, item.path, item.size, item.mtime, hash)
 	if !known.IsDir && known.Hash == hash {
-		entry.Meta, entry.PreviewState = known.Meta, known.PreviewState
+		entry.Meta, entry.PreviewState, entry.TextState = known.Meta, known.PreviewState, known.TextState
 	}
 	return entry, nil
 }

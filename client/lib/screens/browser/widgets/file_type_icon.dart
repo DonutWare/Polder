@@ -23,7 +23,7 @@ class FileTypeIcon extends StatelessWidget {
   (IconData, Color) _style(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final colors = AppColors.of(context);
-    if (isDir) return (IconsaxPlusBold.folder_2, cs.primary);
+    if (isDir) return (IconsaxPlusBold.folder, cs.primary);
     if (mime.startsWith("image/")) return (IconsaxPlusLinear.gallery, colors.rose);
     if (mime.startsWith("video/")) return (IconsaxPlusLinear.video_play, colors.sky);
     if (mime.startsWith("audio/")) return (IconsaxPlusLinear.music, colors.success);

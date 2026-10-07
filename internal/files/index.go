@@ -32,7 +32,7 @@ func (ChangeType) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema 
 }
 
 const (
-	entryColumns = `f.id, f.user_id, f.path, f.name, f.is_dir, f.size, f.mtime_ns, f.hash, f.rev, f.mime, f.meta_json, f.preview_state`
+	entryColumns = `f.id, f.user_id, f.path, f.name, f.is_dir, f.size, f.mtime_ns, f.hash, f.rev, f.mime, f.meta_json, f.preview_state, f.text_state`
 )
 
 type querier interface {
@@ -55,7 +55,7 @@ func scanEntry(row rowScanner) (Entry, error) {
 	var mtimeNanos int64
 	var metaJSON string
 	err := row.Scan(&entry.ID, &entry.UserID, &entry.Path, &entry.Name, &entry.IsDir, &entry.Size, &mtimeNanos,
-		&entry.Hash, &entry.Rev, &entry.Mime, &metaJSON, &entry.PreviewState)
+		&entry.Hash, &entry.Rev, &entry.Mime, &metaJSON, &entry.PreviewState, &entry.TextState)
 	if err != nil {
 		return Entry{}, err
 	}
@@ -237,9 +237,9 @@ func saveEntry(ctx context.Context, q querier, entry Entry) (Entry, error) {
 	metaJSON, _ := json.Marshal(entry.Meta)
 
 	result, err := q.ExecContext(ctx,
-		`UPDATE files SET is_dir = ?, size = ?, mtime_ns = ?, hash = ?, rev = ?, mime = ?, meta_json = ?, preview_state = ?
+		`UPDATE files SET is_dir = ?, size = ?, mtime_ns = ?, hash = ?, rev = ?, mime = ?, meta_json = ?, preview_state = ?, text_state = ?
 		 WHERE user_id = ? AND path_key = ?`,
-		entry.IsDir, entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState,
+		entry.IsDir, entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState,
 		entry.UserID, pathKey(entry.Path))
 	if err != nil {
 		return Entry{}, err
@@ -249,10 +249,10 @@ func saveEntry(ctx context.Context, q querier, entry Entry) (Entry, error) {
 	}
 
 	_, err = q.ExecContext(ctx,
-		`INSERT INTO files (user_id, path, path_key, parent_key, name, is_dir, size, mtime_ns, hash, rev, mime, meta_json, preview_state)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO files (user_id, path, path_key, parent_key, name, is_dir, size, mtime_ns, hash, rev, mime, meta_json, preview_state, text_state)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		entry.UserID, entry.Path, pathKey(entry.Path), pathKey(storage.ParentPath(entry.Path)), entry.Name, entry.IsDir,
-		entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState)
+		entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState)
 	return entry, err
 }
 
@@ -281,6 +281,26 @@ func updateDerivedFields(ctx context.Context, q querier, userID int64, cleanPath
 
 func entriesWithPreviewState(ctx context.Context, q querier, state PreviewState, limit int) ([]Entry, error) {
 	rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.preview_state = ? LIMIT ?`, state, limit)
+	if err != nil {
+		return nil, err
+	}
+	return scanEntries(rows)
+}
+
+func updateTextState(ctx context.Context, q querier, userID int64, cleanPath, hash string, state TextState) error {
+	_, err := q.ExecContext(ctx, `UPDATE files SET text_state = ? WHERE user_id = ? AND path_key = ? AND hash = ?`,
+		state, userID, pathKey(cleanPath), hash)
+	return err
+}
+
+func entriesWithTextState(ctx context.Context, q querier, state TextState, limit int, excludedMimePatterns []string) ([]Entry, error) {
+	query := `SELECT ` + entryColumns + ` FROM files f WHERE f.text_state = ?`
+	args := []any{state}
+	for _, pattern := range excludedMimePatterns {
+		query += ` AND f.mime NOT LIKE ?`
+		args = append(args, pattern)
+	}
+	rows, err := q.QueryContext(ctx, query+` ORDER BY f.id LIMIT ?`, append(args, limit)...)
 	if err != nil {
 		return nil, err
 	}

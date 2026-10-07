@@ -207,13 +207,26 @@ class PolderApi {
 
   Future<ServerSettings> serverSettings() async => (await _service.getServerSettings()).body!.toModel();
 
-  Future<ServerSettings> updateServerSettings({int? trashRetentionDays, bool? trashRetentionEnforced}) async =>
-      (await _service.updateServerSettings(
-        body: wire.ServerSettingsChanges(
-          trashRetentionDays: trashRetentionDays,
-          trashRetentionEnforced: trashRetentionEnforced,
-        ),
-      )).body!.toModel();
+  Future<ServerSettings> updateServerSettings({
+    int? trashRetentionDays,
+    bool? trashRetentionEnforced,
+    bool? searchContentEnabled,
+    bool? ocrEnabled,
+    List<String>? ocrLanguages,
+    int? ocrMaxPages,
+  }) async => (await _service.updateServerSettings(
+    body: wire.ServerSettingsChanges(
+      trashRetentionDays: trashRetentionDays,
+      trashRetentionEnforced: trashRetentionEnforced,
+      searchContentEnabled: searchContentEnabled,
+      ocrEnabled: ocrEnabled,
+      ocrLanguages: ocrLanguages,
+      ocrMaxPages: ocrMaxPages,
+    ),
+  )).body!.toModel();
+
+  Future<TextExtractionStatus> textExtractionStatus() async =>
+      (await _service.getSearchStatus()).body!.extraction.toModel();
 
   static Uint8List _asBytes(List<int> chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
 

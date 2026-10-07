@@ -62,10 +62,10 @@ func (s *Service) Changes(ctx context.Context, userID, cursor int64, limit int) 
 func scanChangeRow(rows *sql.Rows) (Change, bool, error) {
 	var change Change
 	var id, userID, size, mtimeNanos, rev sql.NullInt64
-	var fromPath, filePath, name, hash, mime, metaJSON, previewState sql.NullString
+	var fromPath, filePath, name, hash, mime, metaJSON, previewState, textState sql.NullString
 	var isDir sql.NullBool
 	err := rows.Scan(&change.Seq, &change.Type, &change.Path, &fromPath,
-		&id, &userID, &filePath, &name, &isDir, &size, &mtimeNanos, &hash, &rev, &mime, &metaJSON, &previewState)
+		&id, &userID, &filePath, &name, &isDir, &size, &mtimeNanos, &hash, &rev, &mime, &metaJSON, &previewState, &textState)
 	if err != nil {
 		return Change{}, false, err
 	}
@@ -79,7 +79,7 @@ func scanChangeRow(rows *sql.Rows) (Change, bool, error) {
 	entry := Entry{
 		ID: id.Int64, UserID: userID.Int64, Path: filePath.String, Name: name.String, IsDir: isDir.Bool,
 		Size: size.Int64, Mtime: time.Unix(0, mtimeNanos.Int64).UTC(), Hash: hash.String, Rev: rev.Int64,
-		Mime: mime.String, PreviewState: PreviewState(previewState.String), Meta: decodeMeta(metaJSON.String),
+		Mime: mime.String, PreviewState: PreviewState(previewState.String), TextState: TextState(textState.String), Meta: decodeMeta(metaJSON.String),
 	}
 	change.Entry = &entry
 	return change, true, nil

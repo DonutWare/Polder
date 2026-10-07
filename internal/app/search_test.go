@@ -1,15 +1,20 @@
 package app_test
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
+	"unicode/utf16"
 )
 
 type searchResponse struct {
@@ -20,6 +25,11 @@ type searchResponse struct {
 			Start int `json:"start"`
 			End   int `json:"end"`
 		} `json:"nameMatches"`
+		Snippet        *string `json:"snippet"`
+		SnippetMatches []struct {
+			Start int `json:"start"`
+			End   int `json:"end"`
+		} `json:"snippetMatches"`
 	} `json:"results"`
 	Filters []struct {
 		Key    string   `json:"key"`
@@ -213,5 +223,94 @@ func TestSearchSuggestions(t *testing.T) {
 		if len(folders.Suggestions) != 1 || folders.Suggestions[0].Insert != `"/Work Stuff"` {
 			t.Fatalf("folder suggestion: %+v", folders)
 		}
+	})
+}
+
+func docx(paragraphs ...string) []byte {
+	var body bytes.Buffer
+	for _, paragraph := range paragraphs {
+		fmt.Fprintf(&body, "<w:p><w:r><w:t>%s</w:t></w:r></w:p>", paragraph)
+	}
+	var archive bytes.Buffer
+	writer := zip.NewWriter(&archive)
+	for name, content := range map[string]string{
+		"[Content_Types].xml": `<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>`,
+		"word/document.xml": `<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>` +
+			body.String() + `</w:body></w:document>`,
+		"word/styles.xml": `<?xml version="1.0"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:style w:styleId="Heading"/></w:styles>`,
+	} {
+		part, _ := writer.Create(name)
+		part.Write([]byte(content))
+	}
+	writer.Close()
+	return archive.Bytes()
+}
+
+func (c *client) searchUntil(query string, ready func(searchResponse) bool) searchResponse {
+	c.server.t.Helper()
+	var response searchResponse
+	eventually(c.server.t, func() error {
+		response = c.search(query)
+		if !ready(response) {
+			return fmt.Errorf("search %q = %v", query, response.paths())
+		}
+		return nil
+	})
+	return response
+}
+
+func TestSearchFindsTextInsideFiles(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		admin := server.setupAdmin()
+		alice := server.createUser(admin, "alice", 0)
+		bob := server.createUser(admin, "bob", 0)
+		alice.put("/notes.md", 0, []byte("# Groceries\n\nRemember the  ubiquitous\n\npineapple for Saturday."), http.StatusOK, nil)
+		alice.put("/Letters/offer.docx", 0, docx("Dear tenant,", "the pineapple orchard lease is renewed."), http.StatusOK, nil)
+		alice.put("/pineapple.txt", 0, []byte("nothing to see"), http.StatusOK, nil)
+		alice.put("/blob.bin", 0, []byte{0, 1, 2, 'p', 'i', 'n', 'e', 'a', 'p', 'p', 'l', 'e'}, http.StatusOK, nil)
+		bob.put("/secret.txt", 0, []byte("pineapple"), http.StatusOK, nil)
+
+		found := alice.searchUntil("pineapple", func(r searchResponse) bool { return len(r.Results) == 3 })
+		expectPaths(t, "pineapple", found, "/pineapple.txt", "/notes.md", "/Letters/offer.docx")
+		if found.Results[0].Entry.Path != "/pineapple.txt" {
+			t.Fatalf("a name match should come before text matches: %v", found.paths())
+		}
+		for _, result := range found.Results[1:] {
+			if result.Snippet == nil || len(result.SnippetMatches) != 1 {
+				t.Fatalf("%s should have a snippet with one match: %+v", result.Entry.Path, result)
+			}
+			match := result.SnippetMatches[0]
+			if got := string(utf16.Decode(utf16.Encode([]rune(*result.Snippet))[match.Start:match.End])); got != "pineapple" {
+				t.Fatalf("%s snippet %q highlights %q", result.Entry.Path, *result.Snippet, got)
+			}
+		}
+
+		expectPaths(t, "every word", alice.search("pineapple saturday"), "/notes.md")
+		expectPaths(t, "typo", alice.search("ubiquitus"), "/notes.md")
+		expectPaths(t, "phrase", alice.search(`"orchard lease"`), "/Letters/offer.docx")
+		expectPaths(t, "phrase out of order", alice.search(`"lease orchard"`))
+		expectPaths(t, "filters", alice.search("pineapple type=md"), "/notes.md")
+		expectPaths(t, "styles are not text", alice.search("heading"))
+
+		alice.put("/tokyo.txt", 0, []byte("請求書の番号を確認してください\n東京都の新しい事務所について"), http.StatusOK, nil)
+		japanese := alice.searchUntil("事務所", func(r searchResponse) bool { return len(r.Results) == 1 })
+		if snippet := japanese.Results[0].Snippet; snippet == nil || !strings.Contains(*snippet, "東京都の新しい事務所") {
+			t.Fatalf("snippet should show the Japanese text: %+v", japanese.Results[0])
+		}
+		expectPaths(t, "japanese word", alice.search("請求書"), "/tokyo.txt")
+
+		alice.put("/seoul.txt", 0, []byte("안녕하세요 세계"), http.StatusOK, nil)
+		alice.searchUntil(`"안녕하세요 세계"`, func(r searchResponse) bool { return len(r.Results) == 1 })
+
+		alice.put("/notes.md", -1, []byte("now about mangoes"), http.StatusOK, nil)
+		alice.searchUntil("mangoes", func(r searchResponse) bool { return len(r.Results) == 1 })
+		expectPaths(t, "replaced text", alice.search("saturday"))
+
+		alice.mustJSON(http.MethodPost, "/files/mkdir", map[string]string{"path": "/Archive"}, http.StatusCreated, nil)
+		alice.mustJSON(http.MethodPost, "/files/move", map[string]any{"from": "/notes.md", "to": "/Archive/old.md"}, http.StatusOK, nil)
+		expectPaths(t, "moved file keeps its text", alice.search("mangoes"), "/Archive/old.md")
+
+		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"searchContentEnabled": false}, http.StatusOK, nil)
+		expectPaths(t, "content search off", alice.search("mangoes"))
 	})
 }
