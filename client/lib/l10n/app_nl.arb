@@ -350,5 +350,20 @@
 	"sortDescending": "Aflopend",
 	"sortFoldersFirst": "Mappen bovenaan",
 	"indexingBanner": "Bezig met indexeren… mappen vullen zich zodra bestanden gevonden zijn.",
-	"indexingEmptyFolder": "Nog bezig met indexeren. Bestanden verschijnen hier zodra ze gevonden zijn."
+	"indexingEmptyFolder": "Nog bezig met indexeren. Bestanden verschijnen hier zodra ze gevonden zijn.",
+	"serverLogs": "Serverlogboek",
+	"serverLogsHint": "Wat de server deed en elke fout die hij tegenkwam",
+	"logLevelDebug": "Debug",
+	"logLevelInfo": "Info",
+	"logLevelWarn": "Waarschuwingen",
+	"logLevelError": "Fouten",
+	"logMinimumLevel": "Minimaal niveau",
+	"logComponent": "Onderdeel",
+	"logAllComponents": "Alle onderdelen",
+	"logSearchHint": "Zoek in berichten en details",
+	"logFollow": "Nieuwe regels volgen",
+	"logStopFollowing": "Stoppen met volgen",
+	"logDownload": "Logbestand downloaden",
+	"logNoFiles": "Nog geen logbestanden.",
+	"logsEmpty": "Geen logregels gevonden."
 }

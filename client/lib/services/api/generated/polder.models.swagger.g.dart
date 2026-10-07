@@ -247,6 +247,13 @@ Map<String, dynamic> _$LiveTransfersToJson(LiveTransfers instance) => <String, d
   'transfers': ?instance.transfers?.map((e) => e.toJson()).toList(),
 };
 
+LogComponents _$LogComponentsFromJson(Map<String, dynamic> json) =>
+    LogComponents(components: (json['components'] as List<dynamic>?)?.map((e) => e as String).toList() ?? []);
+
+Map<String, dynamic> _$LogComponentsToJson(LogComponents instance) => <String, dynamic>{
+  'components': ?instance.components,
+};
+
 LogEntry _$LogEntryFromJson(Map<String, dynamic> json) => LogEntry(
   bytes: (json['bytes'] as num?)?.toInt(),
   count: (json['count'] as num?)?.toInt(),
@@ -281,6 +288,15 @@ Map<String, dynamic> _$LogEntryToJson(LogEntry instance) => <String, dynamic>{
   'status': ?logEntryStatusToJson(instance.status),
   'userId': instance.userId,
   'username': instance.username,
+};
+
+LogFiles _$LogFilesFromJson(Map<String, dynamic> json) => LogFiles(
+  files:
+      (json['files'] as List<dynamic>?)?.map((e) => ServerLogFile.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$LogFilesToJson(LogFiles instance) => <String, dynamic>{
+  'files': ?instance.files?.map((e) => e.toJson()).toList(),
 };
 
 LogPage _$LogPageFromJson(Map<String, dynamic> json) => LogPage(
@@ -433,6 +449,48 @@ Map<String, dynamic> _$SearchStatusToJson(SearchStatus instance) => <String, dyn
   'documents': instance.documents,
   'extraction': instance.extraction.toJson(),
   'lastSync': ?instance.lastSync?.toIso8601String(),
+};
+
+ServerLogEntry _$ServerLogEntryFromJson(Map<String, dynamic> json) => ServerLogEntry(
+  attrs: json['attrs'] as Map<String, dynamic>,
+  component: json['component'] as String,
+  id: json['id'] as String,
+  level: json['level'] as String,
+  message: json['message'] as String,
+  time: json['time'] == null ? null : DateTime.parse(json['time'] as String),
+);
+
+Map<String, dynamic> _$ServerLogEntryToJson(ServerLogEntry instance) => <String, dynamic>{
+  'attrs': instance.attrs,
+  'component': instance.component,
+  'id': instance.id,
+  'level': instance.level,
+  'message': instance.message,
+  'time': ?instance.time?.toIso8601String(),
+};
+
+ServerLogFile _$ServerLogFileFromJson(Map<String, dynamic> json) => ServerLogFile(
+  day: DateTime.parse(json['day'] as String),
+  name: json['name'] as String,
+  size: (json['size'] as num).toInt(),
+);
+
+Map<String, dynamic> _$ServerLogFileToJson(ServerLogFile instance) => <String, dynamic>{
+  'day': ?_dateToJson(instance.day),
+  'name': instance.name,
+  'size': instance.size,
+};
+
+ServerLogPage _$ServerLogPageFromJson(Map<String, dynamic> json) => ServerLogPage(
+  entries:
+      (json['entries'] as List<dynamic>?)?.map((e) => ServerLogEntry.fromJson(e as Map<String, dynamic>)).toList() ??
+      [],
+  nextCursor: json['nextCursor'] as String,
+);
+
+Map<String, dynamic> _$ServerLogPageToJson(ServerLogPage instance) => <String, dynamic>{
+  'entries': ?instance.entries?.map((e) => e.toJson()).toList(),
+  'nextCursor': instance.nextCursor,
 };
 
 ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) => ServerSettings(

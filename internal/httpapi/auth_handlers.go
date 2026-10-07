@@ -7,8 +7,11 @@ import (
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/auth"
+	"polder-server/internal/logging"
 	"polder-server/internal/users"
 )
+
+var authLog = logging.For("auth")
 
 type credentialsRequest struct {
 	Username   string `json:"username"`
@@ -48,11 +51,13 @@ func (a *API) setup(ctx context.Context, input *jsonBody[credentialsRequest]) (*
 	if err != nil {
 		return nil, err
 	}
+	authLog.Info("first administrator created", "user", tokens.User.Username)
 	return respond(tokens), nil
 }
 
 func (a *API) login(ctx context.Context, input *loginInput) (*jsonBody[auth.TokenPair], error) {
 	if !a.limiter.allowed(input.address) {
+		authLog.Warn("login refused: too many failed attempts", "user", input.Body.Username, "address", input.address)
 		return nil, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
 	}
 	tokens, err := a.auth.Login(ctx, input.Body.Username, input.Body.Password, input.Body.DeviceName)
@@ -60,14 +65,17 @@ func (a *API) login(ctx context.Context, input *loginInput) (*jsonBody[auth.Toke
 		a.limiter.recordFailure(input.address)
 	}
 	if err != nil {
+		authLog.Warn("login failed", "user", input.Body.Username, "address", input.address, "error", err)
 		return nil, err
 	}
+	authLog.Info("logged in", "user", tokens.User.Username, "device", input.Body.DeviceName, "address", input.address)
 	return respond(tokens), nil
 }
 
 func (a *API) refresh(ctx context.Context, input *jsonBody[refreshRequest]) (*jsonBody[auth.TokenPair], error) {
 	tokens, err := a.auth.Refresh(ctx, input.Body.RefreshToken, input.Body.DeviceName)
 	if err != nil {
+		authLog.Info("token refresh refused", "device", input.Body.DeviceName, "error", err)
 		return nil, err
 	}
 	return respond(tokens), nil

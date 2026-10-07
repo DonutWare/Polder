@@ -3,7 +3,6 @@ package search
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"mime"
 	"os"
 	"strconv"
@@ -62,15 +61,15 @@ func openIndex(dir, databaseID string) (*index, error) {
 		database, _ := opened.GetInternal([]byte(internalDatabase))
 		switch {
 		case string(version) != mappingVersion:
-			slog.Info("search index is out of date; rebuilding", "dir", dir)
+			logger.Info("search index is out of date; rebuilding", "dir", dir)
 		case string(database) != databaseID:
-			slog.Info("search index belongs to another database; rebuilding", "dir", dir)
+			logger.Info("search index belongs to another database; rebuilding", "dir", dir)
 		default:
 			return &index{dir: dir, Index: opened}, nil
 		}
 		_ = opened.Close()
 	} else if !errors.Is(err, bleve.ErrorIndexPathDoesNotExist) {
-		slog.Warn("search index unreadable; rebuilding", "dir", dir, "error", err)
+		logger.Warn("search index unreadable; rebuilding", "dir", dir, "error", err)
 	}
 	return createIndex(dir, databaseID)
 }

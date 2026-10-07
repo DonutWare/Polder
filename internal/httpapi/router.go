@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/netip"
 	"reflect"
 	"strconv"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"polder-server/internal/auth"
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
+	"polder-server/internal/logging"
 	"polder-server/internal/preview"
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
@@ -36,6 +38,7 @@ type API struct {
 	activity *activity.Hub
 	search   *search.Service
 	extract  *extract.Worker
+	logs     *logging.Files
 	limiter  *failedAttemptLimiter
 }
 
@@ -50,7 +53,9 @@ type Dependencies struct {
 	Activity               *activity.Hub
 	Search                 *search.Service
 	Extractor              *extract.Worker
+	Logs                   *logging.Files
 	LoginAttemptsPerMinute int
+	TrustedProxies         []netip.Prefix
 	// Web serves the browser client for every path outside the API; nil serves only the API.
 	Web http.Handler
 }
@@ -67,11 +72,12 @@ func NewRouter(deps Dependencies) http.Handler {
 		activity: deps.Activity,
 		search:   deps.Search,
 		extract:  deps.Extractor,
+		logs:     deps.Logs,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 	}
 
 	router := chi.NewRouter()
-	router.Use(middleware.Recoverer)
+	router.Use(forwardedClient(deps.TrustedProxies), logRequests, recoverPanics)
 	// Set before mounting so the API subrouter inherits it.
 	router.NotFound(endpointNotFound)
 	api.register(humachi.New(router, apiConfig()))
@@ -184,6 +190,11 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodGet, "/admin/search", "getSearchStatus", "State of the search index and of reading text from files", a.searchStatus)
 	register(admin, http.MethodPost, "/admin/search/rebuild", "rebuildSearchIndex", "Rebuild the search index from scratch in the background", a.rebuildSearchIndex, accepted)
 	register(admin, http.MethodDelete, "/admin/users/{userID}", "deleteUser", "Delete a user; their files are archived on the server", a.deleteUser)
+	register(admin, http.MethodGet, "/admin/logs", "listLogs", "Page through the server log, newest first", a.listLogs)
+	register(admin, http.MethodGet, "/admin/logs/components", "listLogComponents", "Parts of the server that appear in the log", a.listLogComponents)
+	register(admin, http.MethodGet, "/admin/logs/files", "listLogFiles", "The log files, one per day, newest first", a.listLogFiles)
+	register(admin, http.MethodGet, "/admin/logs/files/{name}", "downloadLogFile", "Download one day's log file as JSON lines", a.downloadLogFile,
+		withResponse(http.StatusOK, "Log file", binaryContent("application/x-ndjson")))
 }
 
 func register[I, O any](api huma.API, method, path, id, summary string, handler func(context.Context, *I) (*O, error), options ...func(*huma.Operation)) {

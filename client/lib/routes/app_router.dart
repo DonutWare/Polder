@@ -10,6 +10,7 @@ import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/activity/activity_screen.dart";
+import "package:polder/screens/admin/admin_logs_screen.dart";
 import "package:polder/screens/admin/admin_overview_screen.dart";
 import "package:polder/screens/admin/admin_shell.dart";
 import "package:polder/screens/admin/admin_users_screen.dart";
@@ -93,6 +94,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminOverviewScreen()),
           GoRoute(path: AppRoutes.adminUsers, builder: (_, _) => const AdminUsersScreen()),
+          GoRoute(path: AppRoutes.adminLogs, builder: (_, _) => const AdminLogsScreen()),
         ],
       ),
     ],

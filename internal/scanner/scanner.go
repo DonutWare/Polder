@@ -3,7 +3,6 @@ package scanner
 import (
 	"context"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"sync"
@@ -12,9 +11,12 @@ import (
 	"github.com/fsnotify/fsnotify"
 
 	"polder-server/internal/files"
+	"polder-server/internal/logging"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
 )
+
+var logger = logging.For("scanner")
 
 const watchDebounce = 2 * time.Second
 
@@ -83,7 +85,7 @@ func (s *Scanner) Run(ctx context.Context) {
 func (s *Scanner) RescanAll(ctx context.Context) {
 	allUsers, err := s.users.List(ctx)
 	if err != nil {
-		slog.Error("list users for rescan", "error", err)
+		logger.Error("list users for rescan", "error", err)
 		return
 	}
 	for _, user := range allUsers {
@@ -94,16 +96,16 @@ func (s *Scanner) RescanAll(ctx context.Context) {
 func (s *Scanner) rescanUser(ctx context.Context, user users.User) {
 	started := time.Now()
 	if err := s.files.Rescan(ctx, user); err != nil {
-		slog.Error("rescan", "user", user.Username, "error", err)
+		logger.Error("rescan", "user", user.Username, "error", err)
 		return
 	}
-	slog.Debug("rescan finished", "user", user.Username, "duration", time.Since(started))
+	logger.Debug("rescan finished", "user", user.Username, "duration", time.Since(started).Round(time.Millisecond).String())
 }
 
 func (s *Scanner) watchDataDir(ctx context.Context) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		slog.Warn("file watching unavailable, relying on periodic rescans", "error", err)
+		logger.Warn("file watching unavailable, relying on periodic rescans", "error", err)
 		return
 	}
 	defer watcher.Close()
@@ -123,7 +125,7 @@ func (s *Scanner) watchDataDir(ctx context.Context) {
 			if !ok {
 				return
 			}
-			slog.Warn("file watcher", "error", err)
+			logger.Warn("file watcher", "error", err)
 		}
 	}
 }
@@ -179,7 +181,7 @@ func addDirectoryTree(watcher *fsnotify.Watcher, root string) {
 			return filepath.SkipDir
 		}
 		if err := watcher.Add(path); err != nil {
-			slog.Debug("watch directory", "path", path, "error", err)
+			logger.Debug("watch directory", "path", path, "error", err)
 		}
 		return nil
 	})

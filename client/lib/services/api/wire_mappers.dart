@@ -8,6 +8,7 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/search.dart";
 import "package:polder/models/server_event.dart";
+import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
@@ -255,6 +256,28 @@ extension LogPageToModel on wire.LogPage {
     entries: [for (final entry in entries ?? <wire.LogEntry>[]) entry.toModel()],
     nextCursor: nextCursor,
   );
+}
+
+extension ServerLogEntryToModel on wire.ServerLogEntry {
+  ServerLogEntry toModel() => ServerLogEntry(
+    id: id,
+    time: time,
+    level: LogLevel.parseLogLevels(level),
+    component: component,
+    message: message,
+    attrs: {for (final MapEntry(:key, :value) in attrs.entries) key: "$value"},
+  );
+}
+
+extension ServerLogPageToModel on wire.ServerLogPage {
+  ServerLogPage toModel() => ServerLogPage(
+    entries: [for (final entry in entries ?? <wire.ServerLogEntry>[]) entry.toModel()],
+    nextCursor: nextCursor,
+  );
+}
+
+extension ServerLogFileToModel on wire.ServerLogFile {
+  ServerLogFile toModel() => ServerLogFile(name: name, day: day, size: size);
 }
 
 extension LiveTransferToModel on wire.LiveTransfer {

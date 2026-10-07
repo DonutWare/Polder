@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"io/fs"
-	"log/slog"
 	"mime"
 	"net/http"
 	"os"
@@ -45,7 +44,7 @@ type restoreInput struct {
 	Body   restoreRequest
 }
 
-type trashDownloadOutput struct {
+type attachmentOutput struct {
 	ContentType        string `header:"Content-Type"`
 	ContentDisposition string `header:"Content-Disposition"`
 	Body               func(huma.Context)
@@ -84,18 +83,18 @@ func (a *API) restoreTrashItem(ctx context.Context, input *restoreInput) (*jsonB
 	return respond(entry), nil
 }
 
-func (a *API) downloadTrashItem(ctx context.Context, input *trashItemPath) (*trashDownloadOutput, error) {
+func (a *API) downloadTrashItem(ctx context.Context, input *trashItemPath) (*attachmentOutput, error) {
 	item, absolute, err := a.files.OpenTrashItem(ctx, currentUser(ctx), input.ItemID)
 	if err != nil {
 		return nil, err
 	}
 	if item.IsDir {
-		return &trashDownloadOutput{
+		return &attachmentOutput{
 			ContentType:        "application/zip",
 			ContentDisposition: attachment(item.Name + ".zip"),
 			Body: func(ctx huma.Context) {
 				if err := writeZip(ctx.BodyWriter(), absolute); err != nil {
-					slog.Warn("zip trashed directory", "name", item.Name, "error", err)
+					logger.Warn("zip trashed directory", "name", item.Name, "error", err)
 				}
 			},
 		}, nil
@@ -104,7 +103,7 @@ func (a *API) downloadTrashItem(ctx context.Context, input *trashItemPath) (*tra
 	if err != nil {
 		return nil, err
 	}
-	return &trashDownloadOutput{
+	return &attachmentOutput{
 		ContentType:        item.Mime,
 		ContentDisposition: attachment(item.Name),
 		Body: func(ctx huma.Context) {

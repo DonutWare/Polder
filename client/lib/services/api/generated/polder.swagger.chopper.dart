@@ -77,6 +77,112 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<ServerLogPage>> _listLogs({
+    String? level,
+    String? component,
+    String? q,
+    String? before,
+    int? limit,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Page through the server log, newest first',
+      operationId: 'listLogs',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/logs');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'level': level,
+      'component': component,
+      'q': q,
+      'before': before,
+      'limit': limit,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<ServerLogPage, ServerLogPage>($request);
+  }
+
+  @override
+  Future<Response<LogComponents>> _listLogComponents({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Parts of the server that appear in the log',
+      operationId: 'listLogComponents',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/logs/components');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<LogComponents, LogComponents>($request);
+  }
+
+  @override
+  Future<Response<LogFiles>> _listLogFiles({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The log files, one per day, newest first',
+      operationId: 'listLogFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/logs/files');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<LogFiles, LogFiles>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadLogFile({
+    required String? name,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download one day\'s log file as JSON lines',
+      operationId: 'downloadLogFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/logs/files/${name}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
   Future<Response<SearchStatus>> _getSearchStatus({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',

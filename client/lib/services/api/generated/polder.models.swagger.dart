@@ -1168,6 +1168,41 @@ extension $LiveTransfersExtension on LiveTransfers {
 }
 
 @JsonSerializable(explicitToJson: true)
+class LogComponents {
+  const LogComponents({this.components});
+
+  factory LogComponents.fromJson(Map<String, dynamic> json) => _$LogComponentsFromJson(json);
+
+  static const toJsonFactory = _$LogComponentsToJson;
+  Map<String, dynamic> toJson() => _$LogComponentsToJson(this);
+
+  @JsonKey(name: 'components', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? components;
+  static const fromJsonFactory = _$LogComponentsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LogComponents &&
+            (identical(other.components, components) ||
+                const DeepCollectionEquality().equals(other.components, components)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(components) ^ runtimeType.hashCode;
+}
+
+extension $LogComponentsExtension on LogComponents {
+  LogComponents copyWith({List<String>? components}) {
+    return LogComponents(components: components ?? this.components);
+  }
+
+  LogComponents copyWithWrapped({Wrapped<List<String>?>? components}) {
+    return LogComponents(components: (components != null ? components.value : this.components));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class LogEntry {
   const LogEntry({
     this.bytes,
@@ -1338,6 +1373,40 @@ extension $LogEntryExtension on LogEntry {
       userId: (userId != null ? userId.value : this.userId),
       username: (username != null ? username.value : this.username),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LogFiles {
+  const LogFiles({this.files});
+
+  factory LogFiles.fromJson(Map<String, dynamic> json) => _$LogFilesFromJson(json);
+
+  static const toJsonFactory = _$LogFilesToJson;
+  Map<String, dynamic> toJson() => _$LogFilesToJson(this);
+
+  @JsonKey(name: 'files', includeIfNull: false, defaultValue: <ServerLogFile>[])
+  final List<ServerLogFile>? files;
+  static const fromJsonFactory = _$LogFilesFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LogFiles &&
+            (identical(other.files, files) || const DeepCollectionEquality().equals(other.files, files)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(files) ^ runtimeType.hashCode;
+}
+
+extension $LogFilesExtension on LogFiles {
+  LogFiles copyWith({List<ServerLogFile>? files}) {
+    return LogFiles(files: files ?? this.files);
+  }
+
+  LogFiles copyWithWrapped({Wrapped<List<ServerLogFile>?>? files}) {
+    return LogFiles(files: (files != null ? files.value : this.files));
   }
 }
 
@@ -2070,6 +2139,190 @@ extension $SearchStatusExtension on SearchStatus {
       documents: (documents != null ? documents.value : this.documents),
       extraction: (extraction != null ? extraction.value : this.extraction),
       lastSync: (lastSync != null ? lastSync.value : this.lastSync),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ServerLogEntry {
+  const ServerLogEntry({
+    required this.attrs,
+    required this.component,
+    required this.id,
+    required this.level,
+    required this.message,
+    this.time,
+  });
+
+  factory ServerLogEntry.fromJson(Map<String, dynamic> json) => _$ServerLogEntryFromJson(json);
+
+  static const toJsonFactory = _$ServerLogEntryToJson;
+  Map<String, dynamic> toJson() => _$ServerLogEntryToJson(this);
+
+  @JsonKey(name: 'attrs', includeIfNull: false)
+  final Map<String, dynamic> attrs;
+  @JsonKey(name: 'component', includeIfNull: false)
+  final String component;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final String id;
+  @JsonKey(name: 'level', includeIfNull: false)
+  final String level;
+  @JsonKey(name: 'message', includeIfNull: false)
+  final String message;
+  @JsonKey(name: 'time', includeIfNull: false)
+  final DateTime? time;
+  static const fromJsonFactory = _$ServerLogEntryFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ServerLogEntry &&
+            (identical(other.attrs, attrs) || const DeepCollectionEquality().equals(other.attrs, attrs)) &&
+            (identical(other.component, component) ||
+                const DeepCollectionEquality().equals(other.component, component)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.level, level) || const DeepCollectionEquality().equals(other.level, level)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.time, time) || const DeepCollectionEquality().equals(other.time, time)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(attrs) ^
+      const DeepCollectionEquality().hash(component) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(level) ^
+      const DeepCollectionEquality().hash(message) ^
+      const DeepCollectionEquality().hash(time) ^
+      runtimeType.hashCode;
+}
+
+extension $ServerLogEntryExtension on ServerLogEntry {
+  ServerLogEntry copyWith({
+    Map<String, dynamic>? attrs,
+    String? component,
+    String? id,
+    String? level,
+    String? message,
+    DateTime? time,
+  }) {
+    return ServerLogEntry(
+      attrs: attrs ?? this.attrs,
+      component: component ?? this.component,
+      id: id ?? this.id,
+      level: level ?? this.level,
+      message: message ?? this.message,
+      time: time ?? this.time,
+    );
+  }
+
+  ServerLogEntry copyWithWrapped({
+    Wrapped<Map<String, dynamic>>? attrs,
+    Wrapped<String>? component,
+    Wrapped<String>? id,
+    Wrapped<String>? level,
+    Wrapped<String>? message,
+    Wrapped<DateTime?>? time,
+  }) {
+    return ServerLogEntry(
+      attrs: (attrs != null ? attrs.value : this.attrs),
+      component: (component != null ? component.value : this.component),
+      id: (id != null ? id.value : this.id),
+      level: (level != null ? level.value : this.level),
+      message: (message != null ? message.value : this.message),
+      time: (time != null ? time.value : this.time),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ServerLogFile {
+  const ServerLogFile({required this.day, required this.name, required this.size});
+
+  factory ServerLogFile.fromJson(Map<String, dynamic> json) => _$ServerLogFileFromJson(json);
+
+  static const toJsonFactory = _$ServerLogFileToJson;
+  Map<String, dynamic> toJson() => _$ServerLogFileToJson(this);
+
+  @JsonKey(name: 'day', includeIfNull: false, toJson: _dateToJson)
+  final DateTime day;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  @JsonKey(name: 'size', includeIfNull: false)
+  final int size;
+  static const fromJsonFactory = _$ServerLogFileFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ServerLogFile &&
+            (identical(other.day, day) || const DeepCollectionEquality().equals(other.day, day)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(day) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(size) ^
+      runtimeType.hashCode;
+}
+
+extension $ServerLogFileExtension on ServerLogFile {
+  ServerLogFile copyWith({DateTime? day, String? name, int? size}) {
+    return ServerLogFile(day: day ?? this.day, name: name ?? this.name, size: size ?? this.size);
+  }
+
+  ServerLogFile copyWithWrapped({Wrapped<DateTime>? day, Wrapped<String>? name, Wrapped<int>? size}) {
+    return ServerLogFile(
+      day: (day != null ? day.value : this.day),
+      name: (name != null ? name.value : this.name),
+      size: (size != null ? size.value : this.size),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ServerLogPage {
+  const ServerLogPage({this.entries, required this.nextCursor});
+
+  factory ServerLogPage.fromJson(Map<String, dynamic> json) => _$ServerLogPageFromJson(json);
+
+  static const toJsonFactory = _$ServerLogPageToJson;
+  Map<String, dynamic> toJson() => _$ServerLogPageToJson(this);
+
+  @JsonKey(name: 'entries', includeIfNull: false, defaultValue: <ServerLogEntry>[])
+  final List<ServerLogEntry>? entries;
+  @JsonKey(name: 'nextCursor', includeIfNull: false)
+  final String nextCursor;
+  static const fromJsonFactory = _$ServerLogPageFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ServerLogPage &&
+            (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)) &&
+            (identical(other.nextCursor, nextCursor) ||
+                const DeepCollectionEquality().equals(other.nextCursor, nextCursor)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(entries) ^
+      const DeepCollectionEquality().hash(nextCursor) ^
+      runtimeType.hashCode;
+}
+
+extension $ServerLogPageExtension on ServerLogPage {
+  ServerLogPage copyWith({List<ServerLogEntry>? entries, String? nextCursor}) {
+    return ServerLogPage(entries: entries ?? this.entries, nextCursor: nextCursor ?? this.nextCursor);
+  }
+
+  ServerLogPage copyWithWrapped({Wrapped<List<ServerLogEntry>?>? entries, Wrapped<String>? nextCursor}) {
+    return ServerLogPage(
+      entries: (entries != null ? entries.value : this.entries),
+      nextCursor: (nextCursor != null ? nextCursor.value : this.nextCursor),
     );
   }
 }
@@ -4129,6 +4382,67 @@ List<enums.UserRole>? userRoleNullableListFromJson(List? userRole, [List<enums.U
   }
 
   return userRole.map((e) => userRoleFromJson(e.toString())).toList();
+}
+
+String? apiV1AdminLogsGetLevelNullableToJson(enums.ApiV1AdminLogsGetLevel? apiV1AdminLogsGetLevel) {
+  return apiV1AdminLogsGetLevel?.value;
+}
+
+String? apiV1AdminLogsGetLevelToJson(enums.ApiV1AdminLogsGetLevel apiV1AdminLogsGetLevel) {
+  return apiV1AdminLogsGetLevel.value;
+}
+
+enums.ApiV1AdminLogsGetLevel apiV1AdminLogsGetLevelFromJson(
+  Object? apiV1AdminLogsGetLevel, [
+  enums.ApiV1AdminLogsGetLevel? defaultValue,
+]) {
+  return enums.ApiV1AdminLogsGetLevel.values.firstWhereOrNull((e) => e.value == apiV1AdminLogsGetLevel) ??
+      defaultValue ??
+      enums.ApiV1AdminLogsGetLevel.swaggerGeneratedUnknown;
+}
+
+enums.ApiV1AdminLogsGetLevel? apiV1AdminLogsGetLevelNullableFromJson(
+  Object? apiV1AdminLogsGetLevel, [
+  enums.ApiV1AdminLogsGetLevel? defaultValue,
+]) {
+  if (apiV1AdminLogsGetLevel == null) {
+    return null;
+  }
+  return enums.ApiV1AdminLogsGetLevel.values.firstWhereOrNull((e) => e.value == apiV1AdminLogsGetLevel) ?? defaultValue;
+}
+
+String apiV1AdminLogsGetLevelExplodedListToJson(List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevel) {
+  return apiV1AdminLogsGetLevel?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> apiV1AdminLogsGetLevelListToJson(List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevel) {
+  if (apiV1AdminLogsGetLevel == null) {
+    return [];
+  }
+
+  return apiV1AdminLogsGetLevel.map((e) => e.value!).toList();
+}
+
+List<enums.ApiV1AdminLogsGetLevel> apiV1AdminLogsGetLevelListFromJson(
+  List? apiV1AdminLogsGetLevel, [
+  List<enums.ApiV1AdminLogsGetLevel>? defaultValue,
+]) {
+  if (apiV1AdminLogsGetLevel == null) {
+    return defaultValue ?? [];
+  }
+
+  return apiV1AdminLogsGetLevel.map((e) => apiV1AdminLogsGetLevelFromJson(e.toString())).toList();
+}
+
+List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevelNullableListFromJson(
+  List? apiV1AdminLogsGetLevel, [
+  List<enums.ApiV1AdminLogsGetLevel>? defaultValue,
+]) {
+  if (apiV1AdminLogsGetLevel == null) {
+    return defaultValue;
+  }
+
+  return apiV1AdminLogsGetLevel.map((e) => apiV1AdminLogsGetLevelFromJson(e.toString())).toList();
 }
 
 int? apiV1FilesPreviewGetSizeNullableToJson(enums.ApiV1FilesPreviewGetSize? apiV1FilesPreviewGetSize) {

@@ -114,6 +114,120 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Page through the server log, newest first
+  ///@param level Leave out entries below this level
+  ///@param component Only entries from this part of the server
+  ///@param q Only entries whose message or attributes contain this text, ignoring case
+  ///@param before Cursor from the previous page; empty starts at the newest
+  ///@param limit Maximum number of entries to return; the server caps it
+  Future<chopper.Response<ServerLogPage>> listLogs({
+    enums.ApiV1AdminLogsGetLevel? level,
+    String? component,
+    String? q,
+    String? before,
+    int? limit,
+  }) {
+    generatedMapping.putIfAbsent(ServerLogPage, () => ServerLogPage.fromJsonFactory);
+
+    return _listLogs(level: level?.value?.toString(), component: component, q: q, before: before, limit: limit);
+  }
+
+  ///Page through the server log, newest first
+  ///@param level Leave out entries below this level
+  ///@param component Only entries from this part of the server
+  ///@param q Only entries whose message or attributes contain this text, ignoring case
+  ///@param before Cursor from the previous page; empty starts at the newest
+  ///@param limit Maximum number of entries to return; the server caps it
+  @GET(path: '/api/v1/admin/logs')
+  Future<chopper.Response<ServerLogPage>> _listLogs({
+    @Query('level') String? level,
+    @Query('component') String? component,
+    @Query('q') String? q,
+    @Query('before') String? before,
+    @Query('limit') int? limit,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Page through the server log, newest first',
+      operationId: 'listLogs',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Parts of the server that appear in the log
+  Future<chopper.Response<LogComponents>> listLogComponents() {
+    generatedMapping.putIfAbsent(LogComponents, () => LogComponents.fromJsonFactory);
+
+    return _listLogComponents();
+  }
+
+  ///Parts of the server that appear in the log
+  @GET(path: '/api/v1/admin/logs/components')
+  Future<chopper.Response<LogComponents>> _listLogComponents({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Parts of the server that appear in the log',
+      operationId: 'listLogComponents',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///The log files, one per day, newest first
+  Future<chopper.Response<LogFiles>> listLogFiles() {
+    generatedMapping.putIfAbsent(LogFiles, () => LogFiles.fromJsonFactory);
+
+    return _listLogFiles();
+  }
+
+  ///The log files, one per day, newest first
+  @GET(path: '/api/v1/admin/logs/files')
+  Future<chopper.Response<LogFiles>> _listLogFiles({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The log files, one per day, newest first',
+      operationId: 'listLogFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Download one day's log file as JSON lines
+  ///@param name
+  Future<chopper.Response<Stream<List<int>>>> downloadLogFile({required String? name}) {
+    return _downloadLogFile(name: name);
+  }
+
+  ///Download one day's log file as JSON lines
+  ///@param name
+  @GET(path: '/api/v1/admin/logs/files/{name}')
+  Future<chopper.Response<Stream<List<int>>>> _downloadLogFile({
+    @Path('name') required String? name,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download one day\'s log file as JSON lines',
+      operationId: 'downloadLogFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
   ///State of the search index and of reading text from files
   Future<chopper.Response<SearchStatus>> getSearchStatus() {
     generatedMapping.putIfAbsent(SearchStatus, () => SearchStatus.fromJsonFactory);

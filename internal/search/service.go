@@ -3,7 +3,6 @@ package search
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"sync"
 	"time"
 
@@ -11,9 +10,12 @@ import (
 	"github.com/blevesearch/bleve/v2/search/query"
 
 	"polder-server/internal/files"
+	"polder-server/internal/logging"
 	"polder-server/internal/settings"
 	"polder-server/internal/users"
 )
+
+var logger = logging.For("search")
 
 const (
 	changePageSize = 1000
@@ -74,7 +76,7 @@ func (s *Service) Run(ctx context.Context) {
 			return
 		case userID := <-s.pokes:
 			if err := s.Sync(ctx, userID); err != nil && ctx.Err() == nil {
-				slog.Warn("update search index", "user", userID, "error", err)
+				logger.Warn("update search index", "user", userID, "error", err)
 			}
 		case <-ticker.C:
 			s.syncAll(ctx)
@@ -85,18 +87,18 @@ func (s *Service) Run(ctx context.Context) {
 func (s *Service) syncAll(ctx context.Context) {
 	allUsers, err := s.users.List(ctx)
 	if err != nil {
-		slog.Warn("list users for search index", "error", err)
+		logger.Warn("list users for search index", "error", err)
 		return
 	}
 	known := make([]int64, len(allUsers))
 	for i, user := range allUsers {
 		known[i] = user.ID
 		if err := s.Sync(ctx, user.ID); err != nil && ctx.Err() == nil {
-			slog.Warn("update search index", "user", user.Username, "error", err)
+			logger.Warn("update search index", "user", user.Username, "error", err)
 		}
 	}
 	if err := s.removeOtherUsers(known); err != nil {
-		slog.Warn("remove deleted users from search index", "error", err)
+		logger.Warn("remove deleted users from search index", "error", err)
 	}
 }
 
@@ -134,7 +136,7 @@ func (s *Service) IndexText(ctx context.Context, extracted files.Entry) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if err := s.syncLocked(ctx, extracted.UserID); err != nil {
-		slog.Warn("update search index", "user", extracted.UserID, "error", err)
+		logger.Warn("update search index", "user", extracted.UserID, "error", err)
 		return
 	}
 	current, err := s.files.EntriesByID(ctx, extracted.UserID, []int64{extracted.ID})
@@ -143,7 +145,7 @@ func (s *Service) IndexText(ctx context.Context, extracted files.Entry) {
 		return
 	}
 	if err := s.index.Index.Index(documentID(entry.ID), s.document(entry)); err != nil {
-		slog.Warn("index file text", "path", entry.Path, "error", err)
+		logger.Warn("index file text", "path", entry.Path, "error", err)
 	}
 }
 

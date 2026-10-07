@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/server_log.dart";
 import "package:polder/models/transfer.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/providers/polder_api_provider.dart";
@@ -67,6 +68,13 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     size: item.isDir ? 0 : item.size,
     mime: item.isDir ? "application/zip" : item.mime,
     fetch: (onProgress) => ref.read(polderApiProvider).downloadFromTrash(item.id, onProgress: onProgress),
+  );
+
+  Future<void> downloadLogFile(ServerLogFile file) => _downloadAndSave(
+    name: file.name,
+    size: file.size,
+    mime: "application/x-ndjson",
+    fetch: (onProgress) => ref.read(polderApiProvider).downloadLogFile(file.name, onProgress: onProgress),
   );
 
   Future<void> _downloadAndSave({

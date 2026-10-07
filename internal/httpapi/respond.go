@@ -2,14 +2,16 @@ package httpapi
 
 import (
 	"errors"
-	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/logging"
 )
+
+var logger = logging.For("http")
 
 const (
 	smallBodyLimit  = 1 << 20
@@ -120,11 +122,11 @@ func codeFor(status int) string {
 
 func logFailure(ctx huma.Context, err error) {
 	if ctx == nil {
-		slog.Error("request failed", "error", err)
+		logger.Error("request failed", "error", err)
 		return
 	}
 	url := ctx.URL()
-	slog.Error("request failed", "method", ctx.Method(), "path", url.Path, "error", err)
+	logger.Error("request failed", "method", ctx.Method(), "path", url.Path, "error", err)
 }
 
 // writeError sends err from a middleware, where there is no handler to return it from.

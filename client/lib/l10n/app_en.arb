@@ -742,5 +742,20 @@
 	"sortDescending": "Descending",
 	"sortFoldersFirst": "Folders on top",
 	"indexingBanner": "Indexing… folders fill in as files are found.",
-	"indexingEmptyFolder": "Still indexing. Files appear here as they're found."
+	"indexingEmptyFolder": "Still indexing. Files appear here as they're found.",
+	"serverLogs": "Server logs",
+	"serverLogsHint": "What the server did and every error it ran into",
+	"logLevelDebug": "Debug",
+	"logLevelInfo": "Info",
+	"logLevelWarn": "Warnings",
+	"logLevelError": "Errors",
+	"logMinimumLevel": "Minimum level",
+	"logComponent": "Component",
+	"logAllComponents": "All components",
+	"logSearchHint": "Search messages and details",
+	"logFollow": "Follow new entries",
+	"logStopFollowing": "Stop following",
+	"logDownload": "Download log file",
+	"logNoFiles": "No log files yet.",
+	"logsEmpty": "No log entries match."
 }

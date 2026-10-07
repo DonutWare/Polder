@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,11 +13,14 @@ import (
 	"time"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/logging"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
 
 	"github.com/danielgtaylor/huma/v2"
 )
+
+var logger = logging.For("files")
 
 const trashColumns = `id, original_path, name, is_dir, size, mime, hash, preview_state, storage_id, deleted_at`
 
@@ -184,7 +186,7 @@ func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int
 		return Entry{}, err
 	}
 	if err := s.disk.RemoveTrashItem(owner.Username, item.storageID); err != nil {
-		slog.Warn("remove restored trash directory", "user", owner.Username, "error", err)
+		logger.Warn("remove restored trash directory", "user", owner.Username, "error", err)
 	}
 	for _, changedPath := range changedFiles {
 		s.onContentChanged(owner.ID, changedPath)

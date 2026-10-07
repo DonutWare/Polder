@@ -65,6 +65,12 @@ class AdminOverviewScreen extends ConsumerWidget {
                       subtitle: localized.addUserHint,
                       onTap: () => showUserFormDialog(context),
                     ),
+                    NavEntry(
+                      icon: IconsaxPlusLinear.document_text,
+                      title: localized.serverLogs,
+                      subtitle: localized.serverLogsHint,
+                      onTap: () => context.go(AppRoutes.adminLogs),
+                    ),
                   ],
                 ),
                 const TrashRetentionGroup(),

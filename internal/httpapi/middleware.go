@@ -3,6 +3,8 @@ package httpapi
 import (
 	"context"
 	"net"
+	"net/http"
+	"net/netip"
 	"strings"
 	"sync"
 	"time"
@@ -32,6 +34,7 @@ func (a *API) requireUser(api huma.API) func(huma.Context, func(huma.Context)) {
 			writeError(api, ctx, err)
 			return
 		}
+		noteUsername(ctx.Context(), identity.User.Username)
 		ctx = huma.WithValue(ctx, currentUserKey, identity.User)
 		next(huma.WithContext(ctx, activity.WithActor(ctx.Context(), activity.Actor{SessionID: identity.SessionID, Device: identity.Device})))
 	}
@@ -95,4 +98,73 @@ func clientAddress(remoteAddr string) string {
 		return remoteAddr
 	}
 	return host
+}
+
+// forwardedClient sets the remote address of a request that came through a trusted proxy to the
+// client the proxy names, so rate limits and logs see the client instead of the proxy.
+func forwardedClient(trusted []netip.Prefix) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		if len(trusted) == 0 {
+			return next
+		}
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if client, ok := clientBehind(r, trusted); ok {
+				r = r.WithContext(r.Context())
+				r.RemoteAddr = client
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// clientBehind reads X-Forwarded-For from the right, where the nearest proxy added its peer: the
+// first address that is not a trusted proxy is the client. Anything further left was sent by the
+// client and could be forged.
+func clientBehind(r *http.Request, trusted []netip.Prefix) (string, bool) {
+	peer, err := parseHop(clientAddress(r.RemoteAddr))
+	if err != nil || !isTrusted(peer, trusted) {
+		return "", false
+	}
+	var hops []string
+	for _, header := range r.Header.Values("X-Forwarded-For") {
+		for hop := range strings.SplitSeq(header, ",") {
+			if hop = strings.TrimSpace(hop); hop != "" {
+				hops = append(hops, hop)
+			}
+		}
+	}
+	for i := len(hops) - 1; i >= 0; i-- {
+		address, err := parseHop(hops[i])
+		if err != nil {
+			return "", false
+		}
+		if !isTrusted(address, trusted) || i == 0 {
+			return address.String(), true
+		}
+	}
+	if address, err := parseHop(strings.TrimSpace(r.Header.Get("X-Real-IP"))); err == nil {
+		return address.String(), true
+	}
+	return "", false
+}
+
+func parseHop(hop string) (netip.Addr, error) {
+	address, err := netip.ParseAddr(hop)
+	if err != nil {
+		addressPort, portErr := netip.ParseAddrPort(hop)
+		if portErr != nil {
+			return netip.Addr{}, err
+		}
+		address = addressPort.Addr()
+	}
+	return address.Unmap(), nil
+}
+
+func isTrusted(address netip.Addr, trusted []netip.Prefix) bool {
+	for _, prefix := range trusted {
+		if prefix.Contains(address) {
+			return true
+		}
+	}
+	return false
 }

@@ -526,6 +526,23 @@
 				],
 				"type": "object"
 			},
+			"LogComponents": {
+				"additionalProperties": false,
+				"properties": {
+					"components": {
+						"description": "Parts of the server that appear in the log files",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"type": "array"
+					}
+				},
+				"required": [
+					"components"
+				],
+				"type": "object"
+			},
 			"LogEntry": {
 				"additionalProperties": false,
 				"properties": {
@@ -618,6 +635,22 @@
 					"status",
 					"detail",
 					"createdAt"
+				],
+				"type": "object"
+			},
+			"LogFiles": {
+				"additionalProperties": false,
+				"properties": {
+					"files": {
+						"items": {
+							"$ref": "#/components/schemas/ServerLogFile"
+						},
+						"nullable": true,
+						"type": "array"
+					}
+				},
+				"required": [
+					"files"
 				],
 				"type": "object"
 			},
@@ -964,6 +997,88 @@
 					"extraction",
 					"documents",
 					"lastSync"
+				],
+				"type": "object"
+			},
+			"ServerLogEntry": {
+				"additionalProperties": false,
+				"properties": {
+					"attrs": {
+						"additionalProperties": {
+							"type": "string"
+						},
+						"type": "object"
+					},
+					"component": {
+						"description": "Part of the server that wrote it",
+						"type": "string"
+					},
+					"id": {
+						"description": "Pass as before to get the entries older than this one",
+						"type": "string"
+					},
+					"level": {
+						"description": "DEBUG, INFO, WARN or ERROR; empty for lines the server could not parse",
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"time": {
+						"description": "Absent for lines the server could not parse",
+						"format": "date-time",
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"level",
+					"component",
+					"message",
+					"attrs"
+				],
+				"type": "object"
+			},
+			"ServerLogFile": {
+				"additionalProperties": false,
+				"properties": {
+					"day": {
+						"format": "date",
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"size": {
+						"format": "int64",
+						"type": "integer"
+					}
+				},
+				"required": [
+					"name",
+					"day",
+					"size"
+				],
+				"type": "object"
+			},
+			"ServerLogPage": {
+				"additionalProperties": false,
+				"properties": {
+					"entries": {
+						"items": {
+							"$ref": "#/components/schemas/ServerLogEntry"
+						},
+						"nullable": true,
+						"type": "array"
+					},
+					"nextCursor": {
+						"description": "Pass as before for the next page; empty when there are no more",
+						"type": "string"
+					}
+				},
+				"required": [
+					"entries",
+					"nextCursor"
 				],
 				"type": "object"
 			},
@@ -1563,6 +1678,315 @@
 				"summary": "Uploads and downloads in progress",
 				"tags": [
 					"activity"
+				]
+			}
+		},
+		"/api/v1/admin/logs": {
+			"get": {
+				"operationId": "listLogs",
+				"parameters": [
+					{
+						"description": "Leave out entries below this level",
+						"explode": false,
+						"in": "query",
+						"name": "level",
+						"schema": {
+							"default": "debug",
+							"description": "Leave out entries below this level",
+							"enum": [
+								"debug",
+								"info",
+								"warn",
+								"error"
+							],
+							"type": "string"
+						}
+					},
+					{
+						"description": "Only entries from this part of the server",
+						"explode": false,
+						"in": "query",
+						"name": "component",
+						"schema": {
+							"description": "Only entries from this part of the server",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Only entries whose message or attributes contain this text, ignoring case",
+						"explode": false,
+						"in": "query",
+						"name": "q",
+						"schema": {
+							"description": "Only entries whose message or attributes contain this text, ignoring case",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Cursor from the previous page; empty starts at the newest",
+						"explode": false,
+						"in": "query",
+						"name": "before",
+						"schema": {
+							"description": "Cursor from the previous page; empty starts at the newest",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Maximum number of entries to return; the server caps it",
+						"explode": false,
+						"in": "query",
+						"name": "limit",
+						"schema": {
+							"default": 100,
+							"description": "Maximum number of entries to return; the server caps it",
+							"format": "int64",
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ServerLogPage"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Page through the server log, newest first",
+				"tags": [
+					"admin"
+				]
+			}
+		},
+		"/api/v1/admin/logs/components": {
+			"get": {
+				"operationId": "listLogComponents",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LogComponents"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Parts of the server that appear in the log",
+				"tags": [
+					"admin"
+				]
+			}
+		},
+		"/api/v1/admin/logs/files": {
+			"get": {
+				"operationId": "listLogFiles",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/LogFiles"
+								}
+							}
+						},
+						"description": "OK"
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "The log files, one per day, newest first",
+				"tags": [
+					"admin"
+				]
+			}
+		},
+		"/api/v1/admin/logs/files/{name}": {
+			"get": {
+				"operationId": "downloadLogFile",
+				"parameters": [
+					{
+						"in": "path",
+						"name": "name",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/x-ndjson": {
+								"schema": {
+									"format": "binary",
+									"type": "string",
+									"x-contentMediaType": "application/octet-stream"
+								}
+							}
+						},
+						"description": "Log file",
+						"headers": {
+							"Content-Disposition": {
+								"schema": {
+									"type": "string"
+								}
+							},
+							"Content-Type": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"401": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Unauthorized"
+					},
+					"403": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Forbidden"
+					},
+					"default": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ErrorResponse"
+								}
+							}
+						},
+						"description": "Error"
+					}
+				},
+				"security": [
+					{
+						"bearer": []
+					}
+				],
+				"summary": "Download one day's log file as JSON lines",
+				"tags": [
+					"admin"
 				]
 			}
 		},

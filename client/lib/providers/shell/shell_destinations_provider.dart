@@ -17,7 +17,8 @@ enum ShellDestination {
 
 enum AdminDestination {
   overview(AppRoutes.admin),
-  users(AppRoutes.adminUsers);
+  users(AppRoutes.adminUsers),
+  logs(AppRoutes.adminLogs);
 
   const AdminDestination(this.route);
 

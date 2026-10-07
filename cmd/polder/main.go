@@ -17,9 +17,12 @@ import (
 	"polder-server/internal/app"
 	"polder-server/internal/config"
 	"polder-server/internal/httpapi"
+	"polder-server/internal/logging"
 )
 
 const shutdownTimeout = 15 * time.Second
+
+var logger = logging.For("server")
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel()})))
@@ -30,7 +33,7 @@ func main() {
 		os.Exit(printOpenAPI())
 	}
 	if err := run(); err != nil {
-		slog.Error("polder stopped", "error", err)
+		logger.Error("polder stopped", "error", err)
 		os.Exit(1)
 	}
 }
@@ -46,6 +49,11 @@ func run() error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
+	}
+	if logFiles, err := logging.Setup(cfg.LogDir(), logLevel(), os.Stdout); err != nil {
+		logger.Warn("logging to the console only", "error", err)
+	} else {
+		defer logFiles.Close()
 	}
 	application, err := app.New(cfg)
 	if err != nil {
@@ -63,8 +71,8 @@ func serve(ctx context.Context, cfg config.Config, handler http.Handler) error {
 	server := &http.Server{Addr: cfg.ListenAddress, Handler: handler, ReadHeaderTimeout: 10 * time.Second}
 	serverErrors := make(chan error, 1)
 	go func() {
-		slog.Info("polder listening", "address", cfg.ListenAddress, "database", cfg.DatabaseDriver,
-			"config", cfg.ConfigDir, "data", cfg.DataDir)
+		logger.Info("polder listening", "address", cfg.ListenAddress, "database", cfg.DatabaseDriver,
+			"config", cfg.ConfigDir, "data", cfg.DataDir, "logs", cfg.LogDir())
 		serverErrors <- server.ListenAndServe()
 	}()
 
@@ -72,6 +80,7 @@ func serve(ctx context.Context, cfg config.Config, handler http.Handler) error {
 	case err := <-serverErrors:
 		return err
 	case <-ctx.Done():
+		logger.Info("shutting down")
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 		defer cancel()
 		if err := server.Shutdown(shutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {

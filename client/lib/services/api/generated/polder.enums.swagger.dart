@@ -342,6 +342,24 @@ enum UserRole {
   const UserRole(this.value);
 }
 
+enum ApiV1AdminLogsGetLevel {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('debug')
+  debug('debug'),
+  @JsonValue('info')
+  info('info'),
+  @JsonValue('warn')
+  warn('warn'),
+  @JsonValue('error')
+  error('error');
+
+  final String? value;
+
+  const ApiV1AdminLogsGetLevel(this.value);
+}
+
 enum ApiV1FilesPreviewGetSize {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

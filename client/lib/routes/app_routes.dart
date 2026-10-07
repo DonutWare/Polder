@@ -14,6 +14,7 @@ abstract final class AppRoutes {
 
   static const admin = "/admin";
   static const adminUsers = "/admin/users";
+  static const adminLogs = "/admin/logs";
 
   static const pathParameter = "path";
   static const selectParameter = "select";

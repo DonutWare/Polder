@@ -3,10 +3,13 @@ package config
 import (
 	"errors"
 	"fmt"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
+	"unicode"
 
 	"gopkg.in/yaml.v3"
 )
@@ -28,6 +31,7 @@ type Config struct {
 	LoginRateLimit int           `yaml:"loginAttemptsPerMinute"`
 	// TrashRetentionDays is the default until an administrator changes it in the app; 0 keeps the trash forever.
 	TrashRetentionDays int `yaml:"trashRetentionDays"`
+	LogRetentionDays   int `yaml:"logRetentionDays"`
 	// WebDir serves the web client from disk instead of the copy built into the binary.
 	WebDir string `yaml:"webDir"`
 	// ServeWeb turns the bundled web client off when false, leaving only the API.
@@ -36,6 +40,9 @@ type Config struct {
 	TesseractPath string `yaml:"tesseractPath"`
 	// OCRModelURL is where OCR models are downloaded from, as <OCRModelURL>/<model>.traineddata.
 	OCRModelURL string `yaml:"ocrModelUrl"`
+	// TrustedProxies are the addresses or ranges of reverse proxies whose X-Forwarded-For and
+	// X-Real-IP headers name the client. Requests from anywhere else are taken at their address.
+	TrustedProxies []string `yaml:"trustedProxies"`
 }
 
 func Default() Config {
@@ -48,6 +55,7 @@ func Default() Config {
 		WatchFiles:         true,
 		LoginRateLimit:     10,
 		TrashRetentionDays: 30,
+		LogRetentionDays:   14,
 		ServeWeb:           true,
 		TesseractPath:      "tesseract",
 		OCRModelURL:        "https://github.com/tesseract-ocr/tessdata_fast/raw/main",
@@ -90,6 +98,9 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.WebDir = envOr("POLDER_WEB_DIR", cfg.WebDir)
 	cfg.TesseractPath = envOr("POLDER_TESSERACT", cfg.TesseractPath)
 	cfg.OCRModelURL = envOr("POLDER_OCR_MODEL_URL", cfg.OCRModelURL)
+	if value, ok := os.LookupEnv("POLDER_TRUSTED_PROXIES"); ok {
+		cfg.TrustedProxies = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || unicode.IsSpace(r) })
+	}
 
 	if value, ok := os.LookupEnv("POLDER_RESCAN_INTERVAL"); ok {
 		interval, err := time.ParseDuration(value)
@@ -104,6 +115,13 @@ func (cfg *Config) mergeEnvironment() error {
 			return fmt.Errorf("POLDER_TRASH_RETENTION_DAYS: %w", err)
 		}
 		cfg.TrashRetentionDays = days
+	}
+	if value, ok := os.LookupEnv("POLDER_LOG_RETENTION_DAYS"); ok {
+		days, err := strconv.Atoi(value)
+		if err != nil {
+			return fmt.Errorf("POLDER_LOG_RETENTION_DAYS: %w", err)
+		}
+		cfg.LogRetentionDays = days
 	}
 	if value, ok := os.LookupEnv("POLDER_SERVE_WEB"); ok {
 		serve, err := strconv.ParseBool(value)
@@ -126,6 +144,12 @@ func (cfg Config) validate() error {
 	if cfg.TrashRetentionDays < 0 {
 		return errors.New("trashRetentionDays cannot be negative")
 	}
+	if cfg.LogRetentionDays < 1 {
+		return errors.New("logRetentionDays must be at least 1")
+	}
+	if _, err := cfg.TrustedProxyRanges(); err != nil {
+		return err
+	}
 	switch cfg.DatabaseDriver {
 	case DriverSQLite:
 		return nil
@@ -137,6 +161,22 @@ func (cfg Config) validate() error {
 	default:
 		return fmt.Errorf("unknown database driver %q (use %q or %q)", cfg.DatabaseDriver, DriverSQLite, DriverPostgres)
 	}
+}
+
+func (cfg Config) TrustedProxyRanges() ([]netip.Prefix, error) {
+	ranges := make([]netip.Prefix, 0, len(cfg.TrustedProxies))
+	for _, proxy := range cfg.TrustedProxies {
+		if address, err := netip.ParseAddr(proxy); err == nil {
+			ranges = append(ranges, netip.PrefixFrom(address.Unmap(), address.Unmap().BitLen()))
+			continue
+		}
+		prefix, err := netip.ParsePrefix(proxy)
+		if err != nil {
+			return nil, fmt.Errorf("trustedProxies: %q is not an address or range", proxy)
+		}
+		ranges = append(ranges, prefix.Masked())
+	}
+	return ranges, nil
 }
 
 func (cfg Config) SQLitePath() string {
@@ -165,6 +205,10 @@ func (cfg Config) SearchTextDir() string {
 
 func (cfg Config) OCRModelDir() string {
 	return filepath.Join(cfg.cacheDir(), "tessdata")
+}
+
+func (cfg Config) LogDir() string {
+	return filepath.Join(cfg.ConfigDir, "logs")
 }
 
 func (cfg Config) JWTKeyPath() string {

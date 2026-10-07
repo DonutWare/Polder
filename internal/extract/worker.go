@@ -6,7 +6,6 @@ import (
 	"errors"
 	"image"
 	"io"
-	"log/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -16,10 +15,13 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 
 	"polder-server/internal/files"
+	"polder-server/internal/logging"
 	"polder-server/internal/preview"
 	"polder-server/internal/settings"
 	"polder-server/internal/users"
 )
+
+var logger = logging.For("extract")
 
 const (
 	queueCapacity   = 1024
@@ -142,9 +144,9 @@ func (w *Worker) Status(ctx context.Context) (ExtractionStatus, error) {
 func (w *Worker) Run(ctx context.Context) {
 	if w.fresh {
 		if err := w.files.RequeueText(ctx); err != nil {
-			slog.Warn("queue files for text extraction", "error", err)
+			logger.Warn("queue files for text extraction", "error", err)
 		} else if err := w.cache.setApplied(""); err != nil {
-			slog.Warn("store text cache state", "error", err)
+			logger.Warn("store text cache state", "error", err)
 		}
 	}
 	w.removeUnused(ctx)
@@ -190,7 +192,7 @@ func (w *Worker) sweep(ctx context.Context) (more bool) {
 	}
 	pending, err := w.files.EntriesAwaitingText(ctx, backlogBatch, held...)
 	if err != nil {
-		slog.Warn("load text extraction backlog", "error", err)
+		logger.Warn("load text extraction backlog", "error", err)
 		return false
 	}
 	for _, entry := range pending {
@@ -207,7 +209,7 @@ func (w *Worker) sweep(ctx context.Context) (more bool) {
 func (w *Worker) plan(ctx context.Context) (plan, bool) {
 	server, err := w.settings.Get(ctx)
 	if err != nil {
-		slog.Warn("load settings for text extraction", "error", err)
+		logger.Warn("load settings for text extraction", "error", err)
 		return plan{}, false
 	}
 	if !server.SearchContentEnabled {
@@ -224,11 +226,11 @@ func (w *Worker) plan(ctx context.Context) (plan, bool) {
 	}
 	if desired != w.cache.applied() {
 		if err := w.files.RequeueText(ctx, ocrMimePatterns...); err != nil {
-			slog.Warn("queue files for OCR", "error", err)
+			logger.Warn("queue files for OCR", "error", err)
 			return plan{holdOCR: true}, true
 		}
 		if err := w.cache.setApplied(desired); err != nil {
-			slog.Warn("store text cache state", "error", err)
+			logger.Warn("store text cache state", "error", err)
 			return plan{holdOCR: true}, true
 		}
 		w.RequestCleanup()
@@ -253,7 +255,7 @@ func (w *Worker) setOCR(state OCRState, problem string) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if state == OCRUnavailable && problem != w.ocrProblem {
-		slog.Warn("OCR unavailable", "reason", problem)
+		logger.Warn("OCR unavailable", "reason", problem)
 	}
 	w.ocrState, w.ocrProblem = state, problem
 }
@@ -275,7 +277,7 @@ func (w *Worker) processPath(ctx context.Context, current plan, userID int64, cl
 		return
 	}
 	if err := w.files.UpdateTextState(ctx, owner.ID, entry.Path, entry.Hash, state); err != nil {
-		slog.Warn("store text extraction state", "path", entry.Path, "error", err)
+		logger.Warn("store text extraction state", "path", entry.Path, "error", err)
 		return
 	}
 	// Callbacks also run when no text was found, so text from an earlier read is dropped.
@@ -303,13 +305,13 @@ func (w *Worker) extract(ctx context.Context, owner users.User, entry files.Entr
 	case errors.Is(err, errNoText):
 		return files.TextSkipped
 	case err != nil && !hasWords(text):
-		slog.Debug("text extraction failed", "path", entry.Path, "error", err)
+		logger.Debug("text extraction failed", "path", entry.Path, "error", err)
 		return files.TextFailed
 	case !hasWords(text):
 		return files.TextSkipped
 	}
 	if err := w.cache.store(ready, text); err != nil {
-		slog.Warn("store extracted text", "path", entry.Path, "error", err)
+		logger.Warn("store extracted text", "path", entry.Path, "error", err)
 		return files.TextFailed
 	}
 	return files.TextReady
@@ -355,10 +357,10 @@ func (w *Worker) read(ctx context.Context, file *os.File, entry files.Entry, cur
 func (w *Worker) removeUnused(ctx context.Context) {
 	inUse, err := w.files.HashesInUse(ctx)
 	if err != nil {
-		slog.Warn("load hashes for text cache cleanup", "error", err)
+		logger.Warn("load hashes for text cache cleanup", "error", err)
 		return
 	}
 	if err := w.cache.removeUnused(inUse); err != nil {
-		slog.Warn("remove unused extracted text", "error", err)
+		logger.Warn("remove unused extracted text", "error", err)
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -18,6 +17,7 @@ import (
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
 	"polder-server/internal/httpapi"
+	"polder-server/internal/logging"
 	"polder-server/internal/preview"
 	"polder-server/internal/scanner"
 	"polder-server/internal/search"
@@ -28,10 +28,13 @@ import (
 	"polder-server/internal/webui"
 )
 
+var logger = logging.For("app")
+
 const (
 	uploadCleanupInterval = time.Hour
 	trashPurgeInterval    = time.Hour
 	activityPurgeInterval = time.Hour
+	logPurgeInterval      = 24 * time.Hour
 )
 
 type App struct {
@@ -42,6 +45,7 @@ type App struct {
 	Settings  *settings.Store
 	Activity  *activity.Hub
 	Search    *search.Service
+	Logs      *logging.Files
 	db        *sql.DB
 	scanner   *scanner.Scanner
 	previews  *preview.Worker
@@ -122,6 +126,12 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		return nil, err
 	}
 
+	trustedProxies, err := cfg.TrustedProxyRanges()
+	if err != nil {
+		searchService.Close()
+		return nil, err
+	}
+	logs := logging.NewFiles(cfg.LogDir())
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
 		Sessions:               sessions,
@@ -133,7 +143,9 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Activity:               activityHub,
 		Search:                 searchService,
 		Extractor:              extractor,
+		Logs:                   logs,
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
+		TrustedProxies:         trustedProxies,
 		Web:                    web,
 	})
 	return &App{
@@ -144,6 +156,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Settings:  serverSettings,
 		Activity:  activityHub,
 		Search:    searchService,
+		Logs:      logs,
 		db:        db,
 		scanner:   fileScanner,
 		previews:  previews,
@@ -168,7 +181,7 @@ func webClient(cfg config.Config) (http.Handler, error) {
 	default:
 		embedded, ok := webui.Embedded()
 		if !ok {
-			slog.Info("no web client built into this binary; serving the API only")
+			logger.Info("no web client built into this binary; serving the API only")
 			return nil, nil
 		}
 		client = embedded
@@ -194,6 +207,13 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 		_, err := a.Activity.Store().PurgeOlderThan(ctx, time.Now().Add(-activity.Retention))
 		return err
 	})
+	go repeat(ctx, logPurgeInterval, "purge old logs", func(context.Context) error {
+		removed, err := a.Logs.PurgeOlderThan(time.Now().AddDate(0, 0, 1-a.Config.LogRetentionDays))
+		if removed > 0 {
+			logger.Info("purged old log files", "files", removed)
+		}
+		return err
+	})
 }
 
 func repeat(ctx context.Context, interval time.Duration, task string, work func(context.Context) error) {
@@ -201,7 +221,7 @@ func repeat(ctx context.Context, interval time.Duration, task string, work func(
 	defer ticker.Stop()
 	for {
 		if err := work(ctx); err != nil && ctx.Err() == nil {
-			slog.Warn(task, "error", err)
+			logger.Warn(task, "error", err)
 		}
 		select {
 		case <-ctx.Done():
@@ -231,7 +251,7 @@ func (a *App) PurgeExpiredTrash(ctx context.Context, now time.Time) error {
 			failures = append(failures, err)
 		}
 		if purged > 0 {
-			slog.Info("purged expired trash", "user", user.Username, "items", purged)
+			logger.Info("purged expired trash", "user", user.Username, "items", purged)
 		}
 	}
 	return errors.Join(failures...)

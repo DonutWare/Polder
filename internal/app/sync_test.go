@@ -274,7 +274,7 @@ func TestLargeRescanCommitsInBatchesAndLogsOnce(t *testing.T) {
 			t.Fatal(err)
 		}
 		for i := range fileCount {
-			if err := os.WriteFile(filepath.Join(folder, fmt.Sprintf("%03d.txt", i)), []byte(fmt.Sprint(i)), 0o640); err != nil {
+			if err := os.WriteFile(filepath.Join(folder, fmt.Sprintf("%03d.txt", i)), fmt.Append(nil, i), 0o640); err != nil {
 				t.Fatal(err)
 			}
 		}

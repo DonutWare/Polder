@@ -9,6 +9,7 @@ import "package:polder/models/directory_listing.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/search.dart";
+import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
@@ -227,6 +228,27 @@ class PolderApi {
 
   Future<TextExtractionStatus> textExtractionStatus() async =>
       (await _service.getSearchStatus()).body!.extraction.toModel();
+
+  Future<ServerLogPage> serverLogs({
+    ServerLogFilter filter = const ServerLogFilter(),
+    String? before,
+    int limit = 100,
+  }) async => (await _service.listLogs(
+    level: wire.ApiV1AdminLogsGetLevel.values.firstWhere((level) => level.value == filter.minLevel.name),
+    component: filter.component,
+    q: filter.query.isEmpty ? null : filter.query,
+    before: before,
+    limit: limit,
+  )).body!.toModel();
+
+  Future<List<String>> logComponents() async => (await _service.listLogComponents()).body!.components ?? const [];
+
+  Future<List<ServerLogFile>> logFiles() async => [
+    for (final file in (await _service.listLogFiles()).body!.files ?? <wire.ServerLogFile>[]) file.toModel(),
+  ];
+
+  Future<Uint8List> downloadLogFile(String name, {void Function(int received, int total)? onProgress}) async =>
+      _collect(await _service.downloadLogFile(name: name), onProgress);
 
   static Uint8List _asBytes(List<int> chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
 

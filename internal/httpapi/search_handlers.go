@@ -2,7 +2,6 @@ package httpapi
 
 import (
 	"context"
-	"log/slog"
 
 	"polder-server/internal/extract"
 	"polder-server/internal/search"
@@ -68,7 +67,7 @@ func (a *API) searchStatus(ctx context.Context, _ *struct{}) (*jsonBody[searchSt
 func (a *API) rebuildSearchIndex(ctx context.Context, _ *struct{}) (*struct{}, error) {
 	go func() {
 		if err := a.search.Rebuild(context.WithoutCancel(ctx)); err != nil {
-			slog.Error("rebuild search index", "error", err)
+			logger.Error("rebuild search index", "error", err)
 		}
 	}()
 	return nil, nil

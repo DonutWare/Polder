@@ -5,16 +5,18 @@ import (
 	"context"
 	"errors"
 	"io"
-	"log/slog"
 	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/logging"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
 )
+
+var logger = logging.For("activity")
 
 const (
 	tickInterval       = 500 * time.Millisecond
@@ -291,7 +293,7 @@ func (h *Hub) record(ctx context.Context, entry LogEntry) {
 	entry.Status = cmp.Or(entry.Status, StatusOK)
 	saved, err := h.store.Insert(context.WithoutCancel(ctx), entry)
 	if err != nil {
-		slog.Warn("record activity", "kind", entry.Kind, "path", entry.Path, "error", err)
+		logger.Warn("record activity", "kind", entry.Kind, "path", entry.Path, "error", err)
 		return
 	}
 	h.Publish(Event{Type: EventActivity, UserID: saved.UserID, LogEntry: &saved})

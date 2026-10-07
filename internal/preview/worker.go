@@ -5,15 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"polder-server/internal/files"
+	"polder-server/internal/logging"
 	"polder-server/internal/users"
 )
+
+var logger = logging.For("preview")
 
 var Sizes = []int{128, 256, 512}
 
@@ -93,7 +95,7 @@ func (w *Worker) Run(ctx context.Context) {
 func (w *Worker) processBacklog(ctx context.Context) {
 	pending, err := w.files.EntriesAwaitingPreview(ctx, backlogBatch)
 	if err != nil {
-		slog.Warn("load preview backlog", "error", err)
+		logger.Warn("load preview backlog", "error", err)
 		return
 	}
 	for _, entry := range pending {
@@ -113,7 +115,7 @@ func (w *Worker) process(ctx context.Context, next job) {
 
 	meta, state := w.generate(ctx, owner, entry)
 	if err := w.files.UpdateDerivedFields(ctx, owner.ID, entry.Path, entry.Hash, meta, state); err != nil {
-		slog.Warn("store preview state", "path", entry.Path, "error", err)
+		logger.Warn("store preview state", "path", entry.Path, "error", err)
 	}
 }
 
@@ -131,12 +133,12 @@ func (w *Worker) generate(ctx context.Context, owner users.User, entry files.Ent
 		decoded, err = decodeImage(file)
 	}
 	if err != nil {
-		slog.Debug("preview decode failed", "path", entry.Path, "error", err)
+		logger.Debug("preview decode failed", "path", entry.Path, "error", err)
 		return decoded.meta(), files.PreviewFailed
 	}
 	for _, size := range Sizes {
 		if err := writeThumbnail(decoded, size, w.ThumbnailPath(entry.Hash, size)); err != nil {
-			slog.Warn("write thumbnail", "path", entry.Path, "error", err)
+			logger.Warn("write thumbnail", "path", entry.Path, "error", err)
 			return decoded.meta(), files.PreviewFailed
 		}
 	}
@@ -146,7 +148,7 @@ func (w *Worker) generate(ctx context.Context, owner users.User, entry files.Ent
 func (w *Worker) removeUnusedThumbnails(ctx context.Context) {
 	inUse, err := w.files.HashesInUse(ctx)
 	if err != nil {
-		slog.Warn("load hashes for thumbnail cleanup", "error", err)
+		logger.Warn("load hashes for thumbnail cleanup", "error", err)
 		return
 	}
 	err = filepath.WalkDir(w.cacheDir, func(current string, entry fs.DirEntry, err error) error {
@@ -163,7 +165,7 @@ func (w *Worker) removeUnusedThumbnails(ctx context.Context) {
 		return nil
 	})
 	if err != nil {
-		slog.Warn("remove unused thumbnails", "error", err)
+		logger.Warn("remove unused thumbnails", "error", err)
 	}
 }
 
