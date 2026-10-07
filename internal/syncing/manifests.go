@@ -50,7 +50,7 @@ func (s *Service) Manifest(ctx context.Context, owner users.User, rawPath string
 
 func (s *Service) cachedChunks(ctx context.Context, entry files.Entry) ([]chunker.Chunk, error) {
 	rows, err := s.db.QueryContext(ctx,
-		`SELECT hash, offset_bytes, size FROM file_chunks WHERE file_id = ? AND rev = ? ORDER BY idx`, entry.ID, entry.Rev)
+		`SELECT hash, offset_bytes, size FROM file_chunks WHERE file_id = $1 AND rev = $2 ORDER BY idx`, entry.ID, entry.Rev)
 	if err != nil {
 		return nil, err
 	}
@@ -94,12 +94,12 @@ func (s *Service) storeChunks(ctx context.Context, entry files.Entry, chunks []c
 	}
 	defer tx.Rollback()
 
-	if _, err := tx.ExecContext(ctx, `DELETE FROM file_chunks WHERE file_id = ?`, entry.ID); err != nil {
+	if _, err := tx.ExecContext(ctx, `DELETE FROM file_chunks WHERE file_id = $1`, entry.ID); err != nil {
 		return err
 	}
 	for index, chunk := range chunks {
 		_, err := tx.ExecContext(ctx,
-			`INSERT INTO file_chunks (file_id, rev, idx, hash, offset_bytes, size) VALUES (?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO file_chunks (file_id, rev, idx, hash, offset_bytes, size) VALUES ($1, $2, $3, $4, $5, $6)`,
 			entry.ID, entry.Rev, index, chunk.Hash, chunk.Offset, chunk.Size)
 		if err != nil {
 			return err

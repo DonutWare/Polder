@@ -5,7 +5,7 @@
 docker-compose*.yml
 config
 data
-mariadb
+postgres
 internal/webui/dist/*
 !internal/webui/dist/.gitkeep
 # client/: only the sources the web build needs.

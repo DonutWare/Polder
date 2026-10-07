@@ -27,9 +27,9 @@ type ChangePage struct {
 const changeFeedQuery = `SELECT c.id, c.change_type, c.path, c.from_path, ` + entryColumns + `
 	FROM changes c
 	LEFT JOIN files f ON f.user_id = c.user_id AND f.path_key = c.path_key AND f.rev = c.id
-	WHERE c.user_id = ? AND c.id > ?
+	WHERE c.user_id = $1 AND c.id > $2
 	ORDER BY c.id
-	LIMIT ?`
+	LIMIT $3`
 
 func (s *Service) Changes(ctx context.Context, userID, cursor int64, limit int) (ChangePage, error) {
 	limit = min(max(limit, 1), MaxChangePageSize)

@@ -18,21 +18,20 @@ services:
       POLDER_DB_DRIVER: ${POLDER_DB_DRIVER:-sqlite}
       POLDER_DB_DSN: ${POLDER_DB_DSN:-}
 
-  # Optional MariaDB: `docker compose --profile mariadb up -d` with
-  # POLDER_DB_DRIVER=mariadb and
-  # POLDER_DB_DSN=polder:change-me@tcp(mariadb:3306)/polder
-  mariadb:
-    profiles: ["mariadb"]
-    image: mariadb:11
+  # Optional PostgreSQL: `docker compose --profile postgres up -d` with
+  # POLDER_DB_DRIVER=postgres and
+  # POLDER_DB_DSN=postgres://polder:change-me@postgres:5432/polder?sslmode=disable
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:18
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: polder
-      MARIADB_USER: polder
-      MARIADB_PASSWORD: change-me
-      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+      POSTGRES_DB: polder
+      POSTGRES_USER: polder
+      POSTGRES_PASSWORD: change-me
     volumes:
-      - ./mariadb:/var/lib/mysql
+      - ./postgres:/var/lib/postgresql
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD", "pg_isready", "-U", "polder", "-d", "polder"]
       interval: 10s
       retries: 10

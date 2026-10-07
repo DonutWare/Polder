@@ -144,7 +144,6 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	return s.Get(ctx)
 }
 
-// save replaces each row rather than upserting, which SQLite and MariaDB spell differently.
 func (s *Store) save(ctx context.Context, values map[string]string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -152,10 +151,9 @@ func (s *Store) save(ctx context.Context, values map[string]string) error {
 	}
 	defer func() { _ = tx.Rollback() }()
 	for name, value := range values {
-		if _, err := tx.ExecContext(ctx, `DELETE FROM server_settings WHERE name = ?`, name); err != nil {
-			return err
-		}
-		if _, err := tx.ExecContext(ctx, `INSERT INTO server_settings (name, value) VALUES (?, ?)`, name, value); err != nil {
+		_, err := tx.ExecContext(ctx,
+			`INSERT INTO server_settings (name, value) VALUES ($1, $2) ON CONFLICT (name) DO UPDATE SET value = excluded.value`, name, value)
+		if err != nil {
 			return err
 		}
 	}

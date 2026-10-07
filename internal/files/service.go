@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -339,18 +340,20 @@ func (s *Service) EntriesAwaitingText(ctx context.Context, limit int, excludedMi
 
 func (s *Service) CountAwaitingText(ctx context.Context) (int, error) {
 	var count int
-	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM files WHERE text_state = ?`, TextPending).Scan(&count)
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM files WHERE text_state = $1`, TextPending).Scan(&count)
 	return count, err
 }
 
 func (s *Service) RequeueText(ctx context.Context, mimePatterns ...string) error {
-	query := `UPDATE files SET text_state = ? WHERE is_dir = 0 AND text_state <> ?`
-	args := []any{TextPending, TextPending}
+	query := `UPDATE files SET text_state = $1 WHERE is_dir = FALSE AND text_state <> $1`
+	args := []any{TextPending}
 	if len(mimePatterns) > 0 {
-		query += ` AND (` + strings.TrimSuffix(strings.Repeat(`mime LIKE ? OR `, len(mimePatterns)), ` OR `) + `)`
+		matches := make([]string, 0, len(mimePatterns))
 		for _, pattern := range mimePatterns {
 			args = append(args, pattern)
+			matches = append(matches, `mime LIKE $`+strconv.Itoa(len(args)))
 		}
+		query += ` AND (` + strings.Join(matches, ` OR `) + `)`
 	}
 	_, err := s.db.ExecContext(ctx, query, args...)
 	return err
@@ -370,7 +373,7 @@ func (s *Service) EntriesByID(ctx context.Context, userID int64, ids []int64) (m
 
 func (s *Service) LatestChangeSeq(ctx context.Context, userID int64) (int64, error) {
 	var seq int64
-	err := s.db.QueryRowContext(ctx, `SELECT COALESCE(MAX(id), 0) FROM changes WHERE user_id = ?`, userID).Scan(&seq)
+	err := s.db.QueryRowContext(ctx, `SELECT COALESCE(MAX(id), 0) FROM changes WHERE user_id = $1`, userID).Scan(&seq)
 	return seq, err
 }
 

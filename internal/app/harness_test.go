@@ -13,13 +13,13 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"polder-server/internal/app"
 	"polder-server/internal/config"
 )
 
-const mariaDBEnvironmentVariable = "POLDER_TEST_MARIADB_DSN"
+const postgresEnvironmentVariable = "POLDER_TEST_POSTGRES_DSN"
 
 type testServer struct {
 	t      *testing.T
@@ -36,13 +36,13 @@ func forEachDatabase(t *testing.T, test func(t *testing.T, server *testServer)) 
 	t.Run("sqlite", func(t *testing.T) {
 		test(t, startServer(t, config.DriverSQLite, ""))
 	})
-	dsn := os.Getenv(mariaDBEnvironmentVariable)
+	dsn := os.Getenv(postgresEnvironmentVariable)
 	if dsn == "" {
 		return
 	}
-	t.Run("mariadb", func(t *testing.T) {
-		resetMariaDB(t, dsn)
-		test(t, startServer(t, config.DriverMariaDB, dsn))
+	t.Run("postgres", func(t *testing.T) {
+		resetPostgres(t, dsn)
+		test(t, startServer(t, config.DriverPostgres, dsn))
 	})
 }
 
@@ -76,17 +76,15 @@ func startServer(t *testing.T, driver, dsn string, configure ...func(*config.Con
 	return &testServer{t: t, app: application, server: server}
 }
 
-func resetMariaDB(t *testing.T, dsn string) {
+func resetPostgres(t *testing.T, dsn string) {
 	t.Helper()
-	db, err := sql.Open("mysql", dsn)
+	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	for _, table := range []string{"activity", "trash", "server_settings", "uploads", "changes", "file_chunks", "files", "sessions", "users", "goose_db_version"} {
-		if _, err := db.Exec("DROP TABLE IF EXISTS " + table); err != nil {
-			t.Fatal(err)
-		}
+	if _, err := db.Exec(`DROP SCHEMA public CASCADE; CREATE SCHEMA public`); err != nil {
+		t.Fatal(err)
 	}
 }
 

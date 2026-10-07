@@ -265,7 +265,7 @@ func (s *Service) RemoveExpiredUploads(ctx context.Context) error {
 
 func (s *Service) expiredUploadIDs(ctx context.Context) ([]string, error) {
 	cutoff := time.Now().Add(-UploadLifetime).Unix()
-	rows, err := s.db.QueryContext(ctx, `SELECT id FROM uploads WHERE created_at < ?`, cutoff)
+	rows, err := s.db.QueryContext(ctx, `SELECT id FROM uploads WHERE created_at < $1`, cutoff)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +289,7 @@ func (s *Service) insertUpload(ctx context.Context, created upload) error {
 	}
 	request := created.request
 	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO uploads (id, user_id, path, base_rev, size, hash, mtime_ns, chunks_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO uploads (id, user_id, path, base_rev, size, hash, mtime_ns, chunks_json, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 		created.id, created.userID, request.Path, request.BaseRev, request.Size, request.Hash, unixNanosOrZero(request.Mtime),
 		string(chunksJSON), time.Now().Unix())
 	return err
@@ -300,7 +300,7 @@ func (s *Service) loadUpload(ctx context.Context, owner users.User, uploadID str
 	var mtimeNanos int64
 	var chunksJSON string
 	err := s.db.QueryRowContext(ctx,
-		`SELECT user_id, path, base_rev, size, hash, mtime_ns, chunks_json FROM uploads WHERE id = ?`, uploadID).
+		`SELECT user_id, path, base_rev, size, hash, mtime_ns, chunks_json FROM uploads WHERE id = $1`, uploadID).
 		Scan(&found.userID, &found.request.Path, &found.request.BaseRev, &found.request.Size, &found.request.Hash, &mtimeNanos, &chunksJSON)
 	if errors.Is(err, sql.ErrNoRows) || (err == nil && found.userID != owner.ID) {
 		return upload{}, apperr.NotFound("upload not found")
@@ -315,7 +315,7 @@ func (s *Service) loadUpload(ctx context.Context, owner users.User, uploadID str
 }
 
 func (s *Service) removeUpload(ctx context.Context, uploadID string) error {
-	if _, err := s.db.ExecContext(ctx, `DELETE FROM uploads WHERE id = ?`, uploadID); err != nil {
+	if _, err := s.db.ExecContext(ctx, `DELETE FROM uploads WHERE id = $1`, uploadID); err != nil {
 		return err
 	}
 	err := os.RemoveAll(s.stagingDir(uploadID))

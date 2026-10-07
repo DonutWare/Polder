@@ -9,6 +9,7 @@ import (
 	"errors"
 	"path"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -78,7 +79,7 @@ func scanEntries(rows *sql.Rows) ([]Entry, error) {
 }
 
 func findEntry(ctx context.Context, q querier, userID int64, cleanPath string) (Entry, bool, error) {
-	row := q.QueryRowContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = ? AND f.path_key = ?`,
+	row := q.QueryRowContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = $1 AND f.path_key = $2`,
 		userID, pathKey(cleanPath))
 	entry, err := scanEntry(row)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -88,7 +89,7 @@ func findEntry(ctx context.Context, q querier, userID int64, cleanPath string) (
 }
 
 func listChildren(ctx context.Context, q querier, userID int64, cleanPath string) ([]Entry, error) {
-	rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = ? AND f.parent_key = ?`,
+	rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = $1 AND f.parent_key = $2`,
 		userID, pathKey(cleanPath))
 	if err != nil {
 		return nil, err
@@ -110,7 +111,7 @@ func fillFolderSizes(ctx context.Context, q querier, userID int64, cleanPath str
 		prefix = storage.RootPath
 	}
 	rows, err := q.QueryContext(ctx,
-		`SELECT path, size FROM files WHERE user_id = ? AND is_dir = 0 AND SUBSTR(path, 1, ?) = ?`,
+		`SELECT path, size FROM files WHERE user_id = $1 AND is_dir = FALSE AND SUBSTR(path, 1, $2) = $3`,
 		userID, utf8.RuneCountInString(prefix), prefix)
 	if err != nil {
 		return err
@@ -139,7 +140,7 @@ func fillFolderSizes(ctx context.Context, q querier, userID int64, cleanPath str
 }
 
 func listAll(ctx context.Context, q querier, userID int64) ([]Entry, error) {
-	rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = ?`, userID)
+	rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = $1`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +150,7 @@ func listAll(ctx context.Context, q querier, userID int64) ([]Entry, error) {
 func listTree(ctx context.Context, q querier, userID int64, cleanPath string) ([]Entry, error) {
 	prefix := cleanPath + "/"
 	rows, err := q.QueryContext(ctx,
-		`SELECT `+entryColumns+` FROM files f WHERE f.user_id = ? AND (f.path_key = ? OR SUBSTR(f.path, 1, ?) = ?)`,
+		`SELECT `+entryColumns+` FROM files f WHERE f.user_id = $1 AND (f.path_key = $2 OR SUBSTR(f.path, 1, $3) = $4)`,
 		userID, pathKey(cleanPath), utf8.RuneCountInString(prefix), prefix)
 	if err != nil {
 		return nil, err
@@ -168,11 +169,12 @@ func entriesByID(ctx context.Context, q querier, userID int64, ids []int64) (map
 		ids = ids[len(batch):]
 		args := make([]any, 0, len(batch)+1)
 		args = append(args, userID)
+		placeholders := make([]string, 0, len(batch))
 		for _, id := range batch {
 			args = append(args, id)
+			placeholders = append(placeholders, "$"+strconv.Itoa(len(args)))
 		}
-		placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
-		rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = ? AND f.id IN (`+placeholders+`)`, args...)
+		rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.user_id = $1 AND f.id IN (`+strings.Join(placeholders, ",")+`)`, args...)
 		if err != nil {
 			return nil, err
 		}
@@ -201,13 +203,11 @@ func recordChange(ctx context.Context, q querier, userID int64, cleanPath string
 }
 
 func insertChange(ctx context.Context, q querier, userID int64, cleanPath string, changeType ChangeType, fromPath sql.NullString) (int64, error) {
-	result, err := q.ExecContext(ctx,
-		`INSERT INTO changes (user_id, path, path_key, change_type, from_path, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
-		userID, cleanPath, pathKey(cleanPath), changeType, fromPath, time.Now().Unix())
-	if err != nil {
-		return 0, err
-	}
-	return result.LastInsertId()
+	var id int64
+	err := q.QueryRowContext(ctx,
+		`INSERT INTO changes (user_id, path, path_key, change_type, from_path, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+		userID, cleanPath, pathKey(cleanPath), changeType, fromPath, time.Now().Unix()).Scan(&id)
+	return id, err
 }
 
 // relocateEntry moves an indexed entry to a new path in place, so it keeps its id and cached chunks.
@@ -216,12 +216,12 @@ func relocateEntry(ctx context.Context, q querier, entry Entry, newPath string) 
 	if err != nil {
 		return Entry{}, err
 	}
-	_, err = q.ExecContext(ctx, `UPDATE files SET path = ?, path_key = ?, parent_key = ?, name = ?, rev = ? WHERE id = ?`,
+	_, err = q.ExecContext(ctx, `UPDATE files SET path = $1, path_key = $2, parent_key = $3, name = $4, rev = $5 WHERE id = $6`,
 		newPath, pathKey(newPath), pathKey(storage.ParentPath(newPath)), path.Base(newPath), rev, entry.ID)
 	if err != nil {
 		return Entry{}, err
 	}
-	if _, err := q.ExecContext(ctx, `UPDATE file_chunks SET rev = ? WHERE file_id = ? AND rev = ?`, rev, entry.ID, entry.Rev); err != nil {
+	if _, err := q.ExecContext(ctx, `UPDATE file_chunks SET rev = $1 WHERE file_id = $2 AND rev = $3`, rev, entry.ID, entry.Rev); err != nil {
 		return Entry{}, err
 	}
 	entry.Path, entry.Name, entry.Rev = newPath, path.Base(newPath), rev
@@ -237,8 +237,8 @@ func saveEntry(ctx context.Context, q querier, entry Entry) (Entry, error) {
 	metaJSON, _ := json.Marshal(entry.Meta)
 
 	result, err := q.ExecContext(ctx,
-		`UPDATE files SET is_dir = ?, size = ?, mtime_ns = ?, hash = ?, rev = ?, mime = ?, meta_json = ?, preview_state = ?, text_state = ?
-		 WHERE user_id = ? AND path_key = ?`,
+		`UPDATE files SET is_dir = $1, size = $2, mtime_ns = $3, hash = $4, rev = $5, mime = $6, meta_json = $7, preview_state = $8, text_state = $9
+		 WHERE user_id = $10 AND path_key = $11`,
 		entry.IsDir, entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState,
 		entry.UserID, pathKey(entry.Path))
 	if err != nil {
@@ -250,7 +250,7 @@ func saveEntry(ctx context.Context, q querier, entry Entry) (Entry, error) {
 
 	_, err = q.ExecContext(ctx,
 		`INSERT INTO files (user_id, path, path_key, parent_key, name, is_dir, size, mtime_ns, hash, rev, mime, meta_json, preview_state, text_state)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
 		entry.UserID, entry.Path, pathKey(entry.Path), pathKey(storage.ParentPath(entry.Path)), entry.Name, entry.IsDir,
 		entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState)
 	return entry, err
@@ -261,26 +261,26 @@ func removeTree(ctx context.Context, q querier, userID int64, cleanPath string) 
 		return err
 	}
 	prefix := cleanPath + "/"
-	_, err := q.ExecContext(ctx, `DELETE FROM files WHERE user_id = ? AND (path_key = ? OR SUBSTR(path, 1, ?) = ?)`,
+	_, err := q.ExecContext(ctx, `DELETE FROM files WHERE user_id = $1 AND (path_key = $2 OR SUBSTR(path, 1, $3) = $4)`,
 		userID, pathKey(cleanPath), utf8.RuneCountInString(prefix), prefix)
 	return err
 }
 
 func usedBytes(ctx context.Context, q querier, userID int64) (int64, error) {
 	var used int64
-	err := q.QueryRowContext(ctx, `SELECT COALESCE(SUM(size), 0) FROM files WHERE user_id = ?`, userID).Scan(&used)
+	err := q.QueryRowContext(ctx, `SELECT COALESCE(SUM(size), 0) FROM files WHERE user_id = $1`, userID).Scan(&used)
 	return used, err
 }
 
 func updateDerivedFields(ctx context.Context, q querier, userID int64, cleanPath, hash string, meta map[string]any, state PreviewState) error {
 	metaJSON, _ := json.Marshal(meta)
-	_, err := q.ExecContext(ctx, `UPDATE files SET meta_json = ?, preview_state = ? WHERE user_id = ? AND path_key = ? AND hash = ?`,
+	_, err := q.ExecContext(ctx, `UPDATE files SET meta_json = $1, preview_state = $2 WHERE user_id = $3 AND path_key = $4 AND hash = $5`,
 		string(metaJSON), state, userID, pathKey(cleanPath), hash)
 	return err
 }
 
 func entriesWithPreviewState(ctx context.Context, q querier, state PreviewState, limit int) ([]Entry, error) {
-	rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.preview_state = ? LIMIT ?`, state, limit)
+	rows, err := q.QueryContext(ctx, `SELECT `+entryColumns+` FROM files f WHERE f.preview_state = $1 LIMIT $2`, state, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -288,19 +288,20 @@ func entriesWithPreviewState(ctx context.Context, q querier, state PreviewState,
 }
 
 func updateTextState(ctx context.Context, q querier, userID int64, cleanPath, hash string, state TextState) error {
-	_, err := q.ExecContext(ctx, `UPDATE files SET text_state = ? WHERE user_id = ? AND path_key = ? AND hash = ?`,
+	_, err := q.ExecContext(ctx, `UPDATE files SET text_state = $1 WHERE user_id = $2 AND path_key = $3 AND hash = $4`,
 		state, userID, pathKey(cleanPath), hash)
 	return err
 }
 
 func entriesWithTextState(ctx context.Context, q querier, state TextState, limit int, excludedMimePatterns []string) ([]Entry, error) {
-	query := `SELECT ` + entryColumns + ` FROM files f WHERE f.text_state = ?`
+	query := `SELECT ` + entryColumns + ` FROM files f WHERE f.text_state = $1`
 	args := []any{state}
 	for _, pattern := range excludedMimePatterns {
-		query += ` AND f.mime NOT LIKE ?`
 		args = append(args, pattern)
+		query += ` AND f.mime NOT LIKE $` + strconv.Itoa(len(args))
 	}
-	rows, err := q.QueryContext(ctx, query+` ORDER BY f.id LIMIT ?`, append(args, limit)...)
+	args = append(args, limit)
+	rows, err := q.QueryContext(ctx, query+` ORDER BY f.id LIMIT $`+strconv.Itoa(len(args)), args...)
 	if err != nil {
 		return nil, err
 	}

@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	DriverSQLite  = "sqlite"
-	DriverMariaDB = "mariadb"
+	DriverSQLite   = "sqlite"
+	DriverPostgres = "postgres"
 )
 
 type Config struct {
@@ -127,13 +127,13 @@ func (cfg Config) validate() error {
 	switch cfg.DatabaseDriver {
 	case DriverSQLite:
 		return nil
-	case DriverMariaDB:
+	case DriverPostgres:
 		if cfg.DatabaseDSN == "" {
-			return errors.New("POLDER_DB_DSN is required for the mariadb driver")
+			return errors.New("POLDER_DB_DSN is required for the postgres driver")
 		}
 		return nil
 	default:
-		return fmt.Errorf("unknown database driver %q (use %q or %q)", cfg.DatabaseDriver, DriverSQLite, DriverMariaDB)
+		return fmt.Errorf("unknown database driver %q (use %q or %q)", cfg.DatabaseDriver, DriverSQLite, DriverPostgres)
 	}
 }
 

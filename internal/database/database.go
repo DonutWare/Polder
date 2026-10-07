@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 	_ "modernc.org/sqlite"
 
@@ -34,8 +34,8 @@ func Open(cfg config.Config) (*sql.DB, error) {
 }
 
 func openDriver(cfg config.Config) (*sql.DB, error) {
-	if cfg.DatabaseDriver == config.DriverMariaDB {
-		return openMariaDB(cfg.DatabaseDSN)
+	if cfg.DatabaseDriver == config.DriverPostgres {
+		return sql.Open("pgx", cfg.DatabaseDSN)
 	}
 	if err := os.MkdirAll(filepath.Dir(cfg.SQLitePath()), 0o750); err != nil {
 		return nil, fmt.Errorf("create config dir: %w", err)
@@ -49,24 +49,12 @@ func openDriver(cfg config.Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func openMariaDB(dsn string) (*sql.DB, error) {
-	mariaConfig, err := mysql.ParseDSN(dsn)
-	if err != nil {
-		return nil, fmt.Errorf("parse POLDER_DB_DSN: %w", err)
-	}
-	if mariaConfig.Params == nil {
-		mariaConfig.Params = map[string]string{}
-	}
-	mariaConfig.Params["transaction_isolation"] = "'READ-COMMITTED'"
-	return sql.Open("mysql", mariaConfig.FormatDSN())
-}
-
 func migrate(db *sql.DB, driver string) error {
 	goose.SetBaseFS(migrations)
 	goose.SetLogger(goose.NopLogger())
 	dialect, directory := "sqlite3", "migrations/sqlite"
-	if driver == config.DriverMariaDB {
-		dialect, directory = "mysql", "migrations/mysql"
+	if driver == config.DriverPostgres {
+		dialect, directory = "postgres", "migrations/postgres"
 	}
 	if err := goose.SetDialect(dialect); err != nil {
 		return err

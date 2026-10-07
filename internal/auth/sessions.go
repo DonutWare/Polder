@@ -32,13 +32,13 @@ type Session struct {
 func (s *Sessions) Create(ctx context.Context, userID int64, deviceName string) (Session, string, error) {
 	token, tokenHash := newRefreshToken()
 	now := time.Now()
-	result, err := s.db.ExecContext(ctx,
-		`INSERT INTO sessions (user_id, token_hash, device_name, created_at, last_used_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)`,
-		userID, tokenHash, deviceName, now.Unix(), now.Unix(), now.Add(RefreshTokenLifetime).Unix())
+	var id int64
+	err := s.db.QueryRowContext(ctx,
+		`INSERT INTO sessions (user_id, token_hash, device_name, created_at, last_used_at, expires_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+		userID, tokenHash, deviceName, now.Unix(), now.Unix(), now.Add(RefreshTokenLifetime).Unix()).Scan(&id)
 	if err != nil {
 		return Session{}, "", err
 	}
-	id, err := result.LastInsertId()
 	return Session{ID: id, UserID: userID, DeviceName: deviceName}, token, err
 }
 
@@ -56,7 +56,7 @@ func (s *Sessions) Rotate(ctx context.Context, refreshToken, deviceName string) 
 	}
 	token, tokenHash := newRefreshToken()
 	now := time.Now()
-	_, err = s.db.ExecContext(ctx, `UPDATE sessions SET token_hash = ?, device_name = ?, last_used_at = ?, expires_at = ? WHERE id = ?`,
+	_, err = s.db.ExecContext(ctx, `UPDATE sessions SET token_hash = $1, device_name = $2, last_used_at = $3, expires_at = $4 WHERE id = $5`,
 		tokenHash, session.DeviceName, now.Unix(), now.Add(RefreshTokenLifetime).Unix(), session.ID)
 	return session, token, err
 }
@@ -69,20 +69,20 @@ func (s *Sessions) Revoke(ctx context.Context, refreshToken string) (Session, bo
 	if err != nil {
 		return Session{}, false, err
 	}
-	_, err = s.db.ExecContext(ctx, `DELETE FROM sessions WHERE id = ?`, session.ID)
+	_, err = s.db.ExecContext(ctx, `DELETE FROM sessions WHERE id = $1`, session.ID)
 	return session, err == nil, err
 }
 
 func (s *Sessions) find(ctx context.Context, refreshToken string) (Session, int64, error) {
 	var session Session
 	var expiresAt int64
-	err := s.db.QueryRowContext(ctx, `SELECT id, user_id, device_name, expires_at FROM sessions WHERE token_hash = ?`, hashToken(refreshToken)).
+	err := s.db.QueryRowContext(ctx, `SELECT id, user_id, device_name, expires_at FROM sessions WHERE token_hash = $1`, hashToken(refreshToken)).
 		Scan(&session.ID, &session.UserID, &session.DeviceName, &expiresAt)
 	return session, expiresAt, err
 }
 
 func (s *Sessions) RevokeAllForUser(ctx context.Context, userID int64) error {
-	_, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE user_id = ?`, userID)
+	_, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE user_id = $1`, userID)
 	return err
 }
 

@@ -5,13 +5,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
-      mariadb:
-        image: mariadb:11
+      postgres:
+        image: postgres:18
         env:
-          MARIADB_ROOT_PASSWORD: testpass
-          MARIADB_DATABASE: polder
-        ports: ["3306:3306"]
-        options: --health-cmd="healthcheck.sh --connect --innodb_initialized" --health-interval=5s --health-retries=20
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: polder
+        ports: ["5432:5432"]
+        options: --health-cmd="pg_isready -U postgres" --health-interval=5s --health-retries=20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -20,7 +20,7 @@ jobs:
       - uses: golangci/golangci-lint-action@v8
       - run: go test -race ./...
         env:
-          POLDER_TEST_MARIADB_DSN: root:testpass@tcp(127.0.0.1:3306)/polder
+          POLDER_TEST_POSTGRES_DSN: postgres://postgres:testpass@127.0.0.1:5432/polder?sslmode=disable
 
   docker:
     runs-on: ubuntu-latest

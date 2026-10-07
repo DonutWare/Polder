@@ -1,6 +1,6 @@
 /config/
 /data/
-/mariadb/
+/postgres/
 /polder
 *.db
 /internal/webui/dist/*

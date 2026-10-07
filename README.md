@@ -54,9 +54,9 @@ and `scripts/gen-client.sh` writes it to `client/openapi/polder.json` and regene
 `client/lib/services/api/generated`. Commit it with the server change; CI fails while the document
 there differs from the server's.
 
-To also run the tests against MariaDB:
+To also run the tests against PostgreSQL:
 
 ```sh
-docker run -d --rm --name polder-test-mariadb -e MARIADB_ROOT_PASSWORD=testpass -e MARIADB_DATABASE=polder -p 33306:3306 mariadb:11
-POLDER_TEST_MARIADB_DSN='root:testpass@tcp(127.0.0.1:33306)/polder' go test ./...
+docker run -d --rm --name polder-test-postgres -e POSTGRES_PASSWORD=testpass -e POSTGRES_DB=polder -p 55432:5432 postgres:18
+POLDER_TEST_POSTGRES_DSN='postgres://postgres:testpass@127.0.0.1:55432/polder?sslmode=disable' go test ./...
 ```

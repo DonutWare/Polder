@@ -76,7 +76,7 @@ func queryTrashItems(ctx context.Context, q querier, query string, args ...any) 
 }
 
 func findTrashItem(ctx context.Context, q querier, userID, id int64) (TrashItem, error) {
-	item, err := scanTrashItem(q.QueryRowContext(ctx, `SELECT `+trashColumns+` FROM trash WHERE user_id = ? AND id = ?`, userID, id))
+	item, err := scanTrashItem(q.QueryRowContext(ctx, `SELECT `+trashColumns+` FROM trash WHERE user_id = $1 AND id = $2`, userID, id))
 	if errors.Is(err, sql.ErrNoRows) {
 		return TrashItem{}, apperr.NotFound("no such item in the trash")
 	}
@@ -84,7 +84,7 @@ func findTrashItem(ctx context.Context, q querier, userID, id int64) (TrashItem,
 }
 
 func (s *Service) ListTrash(ctx context.Context, owner users.User) ([]TrashItem, error) {
-	return queryTrashItems(ctx, s.db, `WHERE user_id = ? ORDER BY deleted_at DESC, id DESC`, owner.ID)
+	return queryTrashItems(ctx, s.db, `WHERE user_id = $1 ORDER BY deleted_at DESC, id DESC`, owner.ID)
 }
 
 func noUndo() {}
@@ -124,7 +124,7 @@ func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, 
 func insertTrashItem(ctx context.Context, q querier, userID int64, entry Entry, size int64, storageID string) error {
 	_, err := q.ExecContext(ctx,
 		`INSERT INTO trash (user_id, original_path, name, is_dir, size, mime, hash, preview_state, storage_id, deleted_at)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 		userID, entry.Path, entry.Name, entry.IsDir, size, entry.Mime, entry.Hash, entry.PreviewState, storageID, time.Now().Unix())
 	return err
 }
@@ -174,7 +174,7 @@ func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int
 		if restored, changedFiles, err = s.indexRestoredTree(ctx, tx, owner, target, absolute); err != nil {
 			return err
 		}
-		_, err = tx.ExecContext(ctx, `DELETE FROM trash WHERE id = ?`, item.ID)
+		_, err = tx.ExecContext(ctx, `DELETE FROM trash WHERE id = $1`, item.ID)
 		return err
 	})
 	if err != nil {
@@ -327,7 +327,7 @@ func (s *Service) EmptyTrash(ctx context.Context, owner users.User) error {
 }
 
 func (s *Service) PurgeTrash(ctx context.Context, owner users.User, deletedBefore time.Time) (int, error) {
-	items, err := queryTrashItems(ctx, s.db, `WHERE user_id = ? AND deleted_at < ?`, owner.ID, deletedBefore.Unix())
+	items, err := queryTrashItems(ctx, s.db, `WHERE user_id = $1 AND deleted_at < $2`, owner.ID, deletedBefore.Unix())
 	if err != nil {
 		return 0, err
 	}
@@ -353,7 +353,7 @@ func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem
 	defer s.onContentRemoved()
 	var failures []error
 	for _, item := range items {
-		if _, err := s.db.ExecContext(ctx, `DELETE FROM trash WHERE id = ?`, item.ID); err != nil {
+		if _, err := s.db.ExecContext(ctx, `DELETE FROM trash WHERE id = $1`, item.ID); err != nil {
 			return err
 		}
 		if err := s.disk.RemoveTrashItem(owner.Username, item.storageID); err != nil {

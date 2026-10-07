@@ -3,6 +3,7 @@ package activity
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -58,20 +59,17 @@ func (s *Store) Insert(ctx context.Context, entry LogEntry) (LogEntry, error) {
 	if entry.CreatedAt.IsZero() {
 		entry.CreatedAt = time.Now().UTC().Truncate(time.Second)
 	}
-	result, err := s.db.ExecContext(ctx,
+	err := s.db.QueryRowContext(ctx,
 		`INSERT INTO activity (user_id, session_id, device, kind, path, from_path, is_dir, size, bytes, duration_ms, item_count, status, detail, created_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		RETURNING id`,
 		entry.UserID, nullable(entry.sessionID), entry.Device, entry.Kind, entry.Path, entry.FromPath, entry.IsDir,
 		nullablePointer(entry.Size), nullablePointer(entry.Bytes), nullablePointer(entry.DurationMs), nullablePointer(entry.Count),
-		entry.Status, entry.Detail, entry.CreatedAt.Unix())
-	if err != nil {
-		return LogEntry{}, err
-	}
-	entry.ID, err = result.LastInsertId()
+		entry.Status, entry.Detail, entry.CreatedAt.Unix()).Scan(&entry.ID)
 	if err != nil || entry.Username != "" {
 		return entry, err
 	}
-	err = s.db.QueryRowContext(ctx, `SELECT username FROM users WHERE id = ?`, entry.UserID).Scan(&entry.Username)
+	err = s.db.QueryRowContext(ctx, `SELECT username FROM users WHERE id = $1`, entry.UserID).Scan(&entry.Username)
 	return entry, err
 }
 
@@ -85,19 +83,19 @@ func (s *Store) List(ctx context.Context, filter Filter) (LogPage, error) {
 	var conditions []string
 	var args []any
 	if filter.UserID != 0 {
-		conditions = append(conditions, "a.user_id = ?")
 		args = append(args, filter.UserID)
+		conditions = append(conditions, "a.user_id = $"+strconv.Itoa(len(args)))
 	}
 	if filter.Before > 0 {
-		conditions = append(conditions, "a.id < ?")
 		args = append(args, filter.Before)
+		conditions = append(conditions, "a.id < $"+strconv.Itoa(len(args)))
 	}
 	query := selectEntryQuery
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
-	query += " ORDER BY a.id DESC LIMIT ?"
 	args = append(args, limit+1)
+	query += " ORDER BY a.id DESC LIMIT $" + strconv.Itoa(len(args))
 
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -123,7 +121,7 @@ func (s *Store) List(ctx context.Context, filter Filter) (LogPage, error) {
 }
 
 func (s *Store) PurgeOlderThan(ctx context.Context, cutoff time.Time) (int64, error) {
-	result, err := s.db.ExecContext(ctx, `DELETE FROM activity WHERE created_at < ?`, cutoff.Unix())
+	result, err := s.db.ExecContext(ctx, `DELETE FROM activity WHERE created_at < $1`, cutoff.Unix())
 	if err != nil {
 		return 0, err
 	}
