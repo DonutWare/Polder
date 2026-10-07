@@ -104,7 +104,7 @@ func renderForOCR(instance pdfium.Pdfium, page requests.Page) (image.Image, int,
 		return nil, 0, err
 	}
 	defer rendered.Cleanup()
-	source := rendered.Result.Image
+	source := rendered.Result.RenderedImage
 	onWhite := image.NewGray(source.Bounds())
 	draw.Draw(onWhite, onWhite.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
 	draw.Draw(onWhite, onWhite.Bounds(), source, source.Bounds().Min, draw.Over)

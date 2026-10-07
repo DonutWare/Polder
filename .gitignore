@@ -8,3 +8,4 @@
 .DS_Store
 __debug_bin*
 client/lib/l10n/generated/*
+client/android/.kotlin/sessions/*

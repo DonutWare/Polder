@@ -24,7 +24,7 @@ func TestRankEntryMatches(t *testing.T) {
 		{query: terms("invq3"), name: "invoice_q3.pdf", path: "/invoice_q3.pdf", spans: []TextSpan{{0, 3}, {8, 10}}},
 		{query: terms("recipt"), name: "receipt.pdf", path: "/receipt.pdf", spans: []TextSpan{{0, 7}}},
 		{query: terms("mbp"), name: "MacBookPro.png", path: "/MacBookPro.png", spans: []TextSpan{{0, 1}, {3, 4}, {7, 8}}},
-		{query: terms("recieved"), name: "received.pdf", path: "/received.pdf", spans: []TextSpan{{0, 8}}},
+		{query: terms("recieved"), name: "received.pdf", path: "/received.pdf", spans: []TextSpan{{0, 8}}}, //nolint:misspell
 		{query: terms("invocie"), name: "invoice.pdf", path: "/invoice.pdf", spans: []TextSpan{{0, 7}}},
 		{query: terms("photos", "cat"), name: "cat.jpg", path: "/Photos/cat.jpg", spans: []TextSpan{{0, 3}}},
 		{query: terms("😀b"), name: "a😀b.txt", path: "/a😀b.txt", spans: []TextSpan{{1, 4}}},

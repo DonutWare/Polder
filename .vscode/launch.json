@@ -39,6 +39,16 @@
 			"cwd": "${workspaceFolder}/client"
 		},
 		{
+			"name": "Client (Profile)",
+			"args": [
+				"--profile"
+			],
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client"
+		},
+		{
 			"name": "Server tests (end-to-end)",
 			"type": "go",
 			"request": "launch",

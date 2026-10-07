@@ -3,6 +3,7 @@ package extract
 import (
 	"archive/zip"
 	"bytes"
+	"errors"
 	"image"
 	"image/color"
 	"strings"
@@ -103,7 +104,7 @@ func TestReadZipDocument(t *testing.T) {
 		}
 	}
 	plain := zipOf(t, map[string]string{"photo.jpg": "jpeg"})
-	if _, err := readZipDocument(bytes.NewReader(plain), int64(len(plain))); err != errNoText {
+	if _, err := readZipDocument(bytes.NewReader(plain), int64(len(plain))); !errors.Is(err, errNoText) {
 		t.Fatalf("a plain zip should have no text, got %v", err)
 	}
 }

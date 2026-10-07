@@ -26,6 +26,9 @@ linters:
         - (io.Closer).Close
         - (io.ReadCloser).Close
         - (*polder-server/internal/app.App).Close
+        - (*polder-server/internal/search.Service).Close
+        - (github.com/klippa-app/go-pdfium.Pdfium).Close
+        - (github.com/klippa-app/go-pdfium.Pdfium).FPDF_CloseDocument
         - (*github.com/fsnotify/fsnotify.Watcher).Close
   exclusions:
     rules:
