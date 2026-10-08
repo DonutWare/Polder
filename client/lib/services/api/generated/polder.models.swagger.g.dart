@@ -6,6 +6,28 @@ part of 'polder.models.swagger.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+Branding _$BrandingFromJson(Map<String, dynamic> json) => Branding(
+  accentColor: json['accentColor'] as String,
+  backgrounds:
+      (json['backgrounds'] as List<dynamic>?)
+          ?.map((e) => ImageInfo.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+  icon: json['icon'] == null
+      ? null
+      : ImageInfo.fromJson(json['icon'] as Map<String, dynamic>),
+  message: json['message'] as String,
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$BrandingToJson(Branding instance) => <String, dynamic>{
+  'accentColor': instance.accentColor,
+  'backgrounds': ?instance.backgrounds?.map((e) => e.toJson()).toList(),
+  'icon': ?instance.icon?.toJson(),
+  'message': instance.message,
+  'name': instance.name,
+};
+
 Change _$ChangeFromJson(Map<String, dynamic> json) => Change(
   entry: json['entry'] == null
       ? null
@@ -307,6 +329,16 @@ HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) =>
     <String, dynamic>{'status': instance.status};
+
+ImageInfo _$ImageInfoFromJson(Map<String, dynamic> json) => ImageInfo(
+  contentType: json['contentType'] as String,
+  id: json['id'] as String,
+);
+
+Map<String, dynamic> _$ImageInfoToJson(ImageInfo instance) => <String, dynamic>{
+  'contentType': instance.contentType,
+  'id': instance.id,
+};
 
 ListResponse _$ListResponseFromJson(Map<String, dynamic> json) => ListResponse(
   entries:
@@ -695,6 +727,8 @@ Map<String, dynamic> _$ServerLogPageToJson(ServerLogPage instance) =>
 
 ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) =>
     ServerSettings(
+      accentColor: json['accentColor'] as String,
+      instanceName: json['instanceName'] as String,
       ocrEnabled: json['ocrEnabled'] as bool,
       ocrLanguages:
           (json['ocrLanguages'] as List<dynamic>?)
@@ -705,21 +739,27 @@ ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) =>
       searchContentEnabled: json['searchContentEnabled'] as bool,
       trashRetentionDays: (json['trashRetentionDays'] as num).toInt(),
       trashRetentionEnforced: json['trashRetentionEnforced'] as bool,
+      welcomeMessage: json['welcomeMessage'] as String,
     );
 
 Map<String, dynamic> _$ServerSettingsToJson(ServerSettings instance) =>
     <String, dynamic>{
+      'accentColor': instance.accentColor,
+      'instanceName': instance.instanceName,
       'ocrEnabled': instance.ocrEnabled,
       'ocrLanguages': ?instance.ocrLanguages,
       'ocrMaxPages': instance.ocrMaxPages,
       'searchContentEnabled': instance.searchContentEnabled,
       'trashRetentionDays': instance.trashRetentionDays,
       'trashRetentionEnforced': instance.trashRetentionEnforced,
+      'welcomeMessage': instance.welcomeMessage,
     };
 
 ServerSettingsChanges _$ServerSettingsChangesFromJson(
   Map<String, dynamic> json,
 ) => ServerSettingsChanges(
+  accentColor: json['accentColor'] as String?,
+  instanceName: json['instanceName'] as String?,
   ocrEnabled: json['ocrEnabled'] as bool?,
   ocrLanguages:
       (json['ocrLanguages'] as List<dynamic>?)
@@ -730,17 +770,21 @@ ServerSettingsChanges _$ServerSettingsChangesFromJson(
   searchContentEnabled: json['searchContentEnabled'] as bool?,
   trashRetentionDays: (json['trashRetentionDays'] as num?)?.toInt(),
   trashRetentionEnforced: json['trashRetentionEnforced'] as bool?,
+  welcomeMessage: json['welcomeMessage'] as String?,
 );
 
 Map<String, dynamic> _$ServerSettingsChangesToJson(
   ServerSettingsChanges instance,
 ) => <String, dynamic>{
+  'accentColor': ?instance.accentColor,
+  'instanceName': ?instance.instanceName,
   'ocrEnabled': ?instance.ocrEnabled,
   'ocrLanguages': ?instance.ocrLanguages,
   'ocrMaxPages': ?instance.ocrMaxPages,
   'searchContentEnabled': ?instance.searchContentEnabled,
   'trashRetentionDays': ?instance.trashRetentionDays,
   'trashRetentionEnforced': ?instance.trashRetentionEnforced,
+  'welcomeMessage': ?instance.welcomeMessage,
 };
 
 SetupStatus _$SetupStatusFromJson(Map<String, dynamic> json) =>

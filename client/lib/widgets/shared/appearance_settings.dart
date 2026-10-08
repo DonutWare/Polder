@@ -5,6 +5,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/models/appearance.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
+import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 
@@ -39,6 +40,7 @@ class AppearanceSettings extends ConsumerWidget {
     final theme = Theme.of(context);
     final localized = context.localized;
     final appearance = ref.watch(appearanceProvider);
+    final branding = ref.watch(brandingProvider);
     final notifier = ref.read(appearanceProvider.notifier);
     final label = theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant, letterSpacing: 0.6);
     return Column(
@@ -79,12 +81,20 @@ class AppearanceSettings extends ConsumerWidget {
               onTap: () => notifier.setAccent(null),
             ),
             for (final preset in AccentPreset.values)
-              _Swatch(
-                color: preset.color,
-                tooltip: preset.label(localized),
-                selected: appearance.isAccent(preset.color),
-                onTap: () => notifier.setAccent(preset.color),
-              ),
+              if (preset == AccentPreset.polder)
+                _Swatch(
+                  color: branding.accent ?? preset.color,
+                  tooltip: branding.nameOr(preset.label(localized)),
+                  selected: appearance.isAccent(branding.accent ?? preset.color),
+                  onTap: () => notifier.setAccent(branding.accent ?? preset.color),
+                )
+              else
+                _Swatch(
+                  color: preset.color,
+                  tooltip: preset.label(localized),
+                  selected: appearance.isAccent(preset.color),
+                  onTap: () => notifier.setAccent(preset.color),
+                ),
           ],
         ),
         const SizedBox(height: 10),

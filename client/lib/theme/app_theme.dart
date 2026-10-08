@@ -376,9 +376,10 @@ abstract final class AppTheme {
         selectedColor: cs.secondaryContainer,
         checkmarkColor: cs.onSecondaryContainer,
       ),
+      checkboxTheme: CheckboxThemeData(shape: rounded(AppRadius.tag - 2)),
       switchTheme: SwitchThemeData(
         thumbIcon: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? const Icon(Icons.check_rounded, size: 16) : null,
+          (states) => states.contains(WidgetState.selected) ? const Icon(IconsaxPlusLinear.check, size: 16) : null,
         ),
       ),
       // ignore: deprecated_member_use

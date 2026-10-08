@@ -4,6 +4,7 @@ import "package:chopper/chopper.dart" as chopper;
 
 import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
+import "package:polder/models/branding.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
@@ -37,6 +38,16 @@ class PolderApi {
   final wire.Polder _service;
 
   Future<bool> healthz() async => (await _service.health()).body?.status == "ok";
+
+  Future<Branding> branding() async => (await _service.getBranding()).body!.toModel();
+
+  Future<void> setBrandingIcon(Uint8List bytes) => _service.setBrandingIcon(body: bytes);
+
+  Future<void> removeBrandingIcon() => _service.removeBrandingIcon();
+
+  Future<void> addBrandingBackground(Uint8List bytes) => _service.addBrandingBackground(body: bytes);
+
+  Future<void> removeBrandingBackground(String id) => _service.removeBrandingBackground(imageID: id);
 
   Future<SetupStatus> setupStatus() async => (await _service.getSetupStatus()).body!.toModel();
 
@@ -223,6 +234,9 @@ class PolderApi {
     bool? ocrEnabled,
     List<String>? ocrLanguages,
     int? ocrMaxPages,
+    String? instanceName,
+    String? welcomeMessage,
+    String? accentColor,
   }) async => (await _service.updateServerSettings(
     body: wire.ServerSettingsChanges(
       trashRetentionDays: trashRetentionDays,
@@ -231,6 +245,9 @@ class PolderApi {
       ocrEnabled: ocrEnabled,
       ocrLanguages: ocrLanguages,
       ocrMaxPages: ocrMaxPages,
+      instanceName: instanceName,
+      welcomeMessage: welcomeMessage,
+      accentColor: accentColor,
     ),
   )).body!.toModel();
 

@@ -72,6 +72,10 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+	images, err := settings.OpenImages(cfg.BrandingDir())
+	if err != nil {
+		return nil, err
+	}
 	tokens, err := auth.LoadOrCreateSigningKey(cfg.JWTKeyPath())
 	if err != nil {
 		return nil, err
@@ -145,6 +149,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Users:                  userService,
 		Files:                  fileService,
 		Settings:               serverSettings,
+		Images:                 images,
 		Sync:                   syncService,
 		Previews:               previews,
 		Activity:               activityHub,

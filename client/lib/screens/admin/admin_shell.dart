@@ -12,6 +12,7 @@ import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/screens/shell/widgets/more_options.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/navigation/app_mark.dart";
 import "package:polder/widgets/navigation/navigation_shell.dart";
 
 /// Server administration, kept apart from the everyday app so its tools stay out of the way.
@@ -35,7 +36,7 @@ class AdminShell extends ConsumerWidget {
         onSelected: (index) => context.go(AdminDestination.values[index].route),
         title: context.localized.administration,
         subtitle: Uri.tryParse(serverUrl)?.host ?? serverUrl,
-        markIcon: IconsaxPlusBold.shield_tick,
+        mark: const AppMark(icon: IconsaxPlusBold.shield_tick),
         exitAction: NavAction(
           icon: IconsaxPlusLinear.arrow_left,
           label: context.localized.backToFiles,

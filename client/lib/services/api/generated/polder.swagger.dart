@@ -121,6 +121,103 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Add the image in the request body to the login screen's backgrounds
+  Future<chopper.Response<Branding>> addBrandingBackground({
+    required Object? body,
+  }) {
+    generatedMapping.putIfAbsent(Branding, () => Branding.fromJsonFactory);
+
+    return _addBrandingBackground(body: body);
+  }
+
+  ///Add the image in the request body to the login screen's backgrounds
+  @POST(path: '/api/v1/admin/branding/backgrounds', optionalBody: true)
+  Future<chopper.Response<Branding>> _addBrandingBackground({
+    @Body() required Object? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Add the image in the request body to the login screen\'s backgrounds',
+      operationId: 'addBrandingBackground',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Remove one of the login screen's backgrounds
+  ///@param imageID
+  Future<chopper.Response> removeBrandingBackground({
+    required String? imageID,
+  }) {
+    return _removeBrandingBackground(imageID: imageID);
+  }
+
+  ///Remove one of the login screen's backgrounds
+  ///@param imageID
+  @DELETE(path: '/api/v1/admin/branding/backgrounds/{imageID}')
+  Future<chopper.Response> _removeBrandingBackground({
+    @Path('imageID') required String? imageID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove one of the login screen\'s backgrounds',
+      operationId: 'removeBrandingBackground',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Go back to the apps' own icon
+  Future<chopper.Response> removeBrandingIcon() {
+    return _removeBrandingIcon();
+  }
+
+  ///Go back to the apps' own icon
+  @DELETE(path: '/api/v1/admin/branding/icon')
+  Future<chopper.Response> _removeBrandingIcon({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Go back to the apps\' own icon',
+      operationId: 'removeBrandingIcon',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Replace the server's icon with the image in the request body
+  Future<chopper.Response<Branding>> setBrandingIcon({required Object? body}) {
+    generatedMapping.putIfAbsent(Branding, () => Branding.fromJsonFactory);
+
+    return _setBrandingIcon(body: body);
+  }
+
+  ///Replace the server's icon with the image in the request body
+  @PUT(path: '/api/v1/admin/branding/icon', optionalBody: true)
+  Future<chopper.Response<Branding>> _setBrandingIcon({
+    @Body() required Object? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Replace the server\'s icon with the image in the request body',
+      operationId: 'setBrandingIcon',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
   ///Page through the server log, newest first
   ///@param level Leave out entries below this level
   ///@param component Only entries from this part of the server
@@ -543,6 +640,79 @@ abstract class Polder extends ChopperService {
       produces: [],
       security: [],
       tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///How the apps present this server, shown before logging in
+  Future<chopper.Response<Branding>> getBranding() {
+    generatedMapping.putIfAbsent(Branding, () => Branding.fromJsonFactory);
+
+    return _getBranding();
+  }
+
+  ///How the apps present this server, shown before logging in
+  @GET(path: '/api/v1/branding')
+  Future<chopper.Response<Branding>> _getBranding({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How the apps present this server, shown before logging in',
+      operationId: 'getBranding',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["branding"],
+      deprecated: false,
+    ),
+  });
+
+  ///One of the login screen's backgrounds
+  ///@param imageID
+  Future<chopper.Response<String>> getBrandingBackground({
+    required String? imageID,
+  }) {
+    return _getBrandingBackground(imageID: imageID);
+  }
+
+  ///One of the login screen's backgrounds
+  ///@param imageID
+  @GET(path: '/api/v1/branding/backgrounds/{imageID}')
+  Future<chopper.Response<String>> _getBrandingBackground({
+    @Path('imageID') required String? imageID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'One of the login screen\'s backgrounds',
+      operationId: 'getBrandingBackground',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["branding"],
+      deprecated: false,
+    ),
+  });
+
+  ///The server's icon
+  ///@param imageID
+  Future<chopper.Response<String>> getBrandingIcon({required String? imageID}) {
+    return _getBrandingIcon(imageID: imageID);
+  }
+
+  ///The server's icon
+  ///@param imageID
+  @GET(path: '/api/v1/branding/icon/{imageID}')
+  Future<chopper.Response<String>> _getBrandingIcon({
+    @Path('imageID') required String? imageID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The server\'s icon',
+      operationId: 'getBrandingIcon',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["branding"],
       deprecated: false,
     ),
   });

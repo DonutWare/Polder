@@ -77,6 +77,105 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<Branding>> _addBrandingBackground({
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Add the image in the request body to the login screen\'s backgrounds',
+      operationId: 'addBrandingBackground',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/branding/backgrounds');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Branding, Branding>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _removeBrandingBackground({
+    required String? imageID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove one of the login screen\'s backgrounds',
+      operationId: 'removeBrandingBackground',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/branding/backgrounds/${imageID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _removeBrandingIcon({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Go back to the apps\' own icon',
+      operationId: 'removeBrandingIcon',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/branding/icon');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<Branding>> _setBrandingIcon({
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Replace the server\'s icon with the image in the request body',
+      operationId: 'setBrandingIcon',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/branding/icon');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Branding, Branding>($request);
+  }
+
+  @override
   Future<Response<ServerLogPage>> _listLogs({
     String? level,
     String? component,
@@ -476,6 +575,77 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<TokenPair, TokenPair>($request);
+  }
+
+  @override
+  Future<Response<Branding>> _getBranding({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How the apps present this server, shown before logging in',
+      operationId: 'getBranding',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["branding"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/branding');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Branding, Branding>($request);
+  }
+
+  @override
+  Future<Response<String>> _getBrandingBackground({
+    required String? imageID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'One of the login screen\'s backgrounds',
+      operationId: 'getBrandingBackground',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["branding"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/branding/backgrounds/${imageID}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<String, String>($request);
+  }
+
+  @override
+  Future<Response<String>> _getBrandingIcon({
+    required String? imageID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The server\'s icon',
+      operationId: 'getBrandingIcon',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["branding"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/branding/icon/${imageID}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<String, String>($request);
   }
 
   @override

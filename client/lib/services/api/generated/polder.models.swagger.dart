@@ -11,6 +11,107 @@ import 'polder.enums.swagger.dart' as enums;
 part 'polder.models.swagger.g.dart';
 
 @JsonSerializable(explicitToJson: true)
+class Branding {
+  const Branding({
+    required this.accentColor,
+    this.backgrounds,
+    this.icon,
+    required this.message,
+    required this.name,
+  });
+
+  factory Branding.fromJson(Map<String, dynamic> json) =>
+      _$BrandingFromJson(json);
+
+  static const toJsonFactory = _$BrandingToJson;
+  Map<String, dynamic> toJson() => _$BrandingToJson(this);
+
+  @JsonKey(name: 'accentColor', includeIfNull: false)
+  final String accentColor;
+  @JsonKey(
+    name: 'backgrounds',
+    includeIfNull: false,
+    defaultValue: <ImageInfo>[],
+  )
+  final List<ImageInfo>? backgrounds;
+  @JsonKey(name: 'icon', includeIfNull: false)
+  final ImageInfo? icon;
+  @JsonKey(name: 'message', includeIfNull: false)
+  final String message;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  static const fromJsonFactory = _$BrandingFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Branding &&
+            (identical(other.accentColor, accentColor) ||
+                const DeepCollectionEquality().equals(
+                  other.accentColor,
+                  accentColor,
+                )) &&
+            (identical(other.backgrounds, backgrounds) ||
+                const DeepCollectionEquality().equals(
+                  other.backgrounds,
+                  backgrounds,
+                )) &&
+            (identical(other.icon, icon) ||
+                const DeepCollectionEquality().equals(other.icon, icon)) &&
+            (identical(other.message, message) ||
+                const DeepCollectionEquality().equals(
+                  other.message,
+                  message,
+                )) &&
+            (identical(other.name, name) ||
+                const DeepCollectionEquality().equals(other.name, name)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(accentColor) ^
+      const DeepCollectionEquality().hash(backgrounds) ^
+      const DeepCollectionEquality().hash(icon) ^
+      const DeepCollectionEquality().hash(message) ^
+      const DeepCollectionEquality().hash(name) ^
+      runtimeType.hashCode;
+}
+
+extension $BrandingExtension on Branding {
+  Branding copyWith({
+    String? accentColor,
+    List<ImageInfo>? backgrounds,
+    ImageInfo? icon,
+    String? message,
+    String? name,
+  }) {
+    return Branding(
+      accentColor: accentColor ?? this.accentColor,
+      backgrounds: backgrounds ?? this.backgrounds,
+      icon: icon ?? this.icon,
+      message: message ?? this.message,
+      name: name ?? this.name,
+    );
+  }
+
+  Branding copyWithWrapped({
+    Wrapped<String>? accentColor,
+    Wrapped<List<ImageInfo>?>? backgrounds,
+    Wrapped<ImageInfo?>? icon,
+    Wrapped<String>? message,
+    Wrapped<String>? name,
+  }) {
+    return Branding(
+      accentColor: (accentColor != null ? accentColor.value : this.accentColor),
+      backgrounds: (backgrounds != null ? backgrounds.value : this.backgrounds),
+      icon: (icon != null ? icon.value : this.icon),
+      message: (message != null ? message.value : this.message),
+      name: (name != null ? name.value : this.name),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Change {
   const Change({
     this.entry,
@@ -1472,6 +1573,61 @@ extension $HealthStatusExtension on HealthStatus {
 
   HealthStatus copyWithWrapped({Wrapped<String>? status}) {
     return HealthStatus(status: (status != null ? status.value : this.status));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ImageInfo {
+  const ImageInfo({required this.contentType, required this.id});
+
+  factory ImageInfo.fromJson(Map<String, dynamic> json) =>
+      _$ImageInfoFromJson(json);
+
+  static const toJsonFactory = _$ImageInfoToJson;
+  Map<String, dynamic> toJson() => _$ImageInfoToJson(this);
+
+  @JsonKey(name: 'contentType', includeIfNull: false)
+  final String contentType;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final String id;
+  static const fromJsonFactory = _$ImageInfoFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ImageInfo &&
+            (identical(other.contentType, contentType) ||
+                const DeepCollectionEquality().equals(
+                  other.contentType,
+                  contentType,
+                )) &&
+            (identical(other.id, id) ||
+                const DeepCollectionEquality().equals(other.id, id)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(contentType) ^
+      const DeepCollectionEquality().hash(id) ^
+      runtimeType.hashCode;
+}
+
+extension $ImageInfoExtension on ImageInfo {
+  ImageInfo copyWith({String? contentType, String? id}) {
+    return ImageInfo(
+      contentType: contentType ?? this.contentType,
+      id: id ?? this.id,
+    );
+  }
+
+  ImageInfo copyWithWrapped({
+    Wrapped<String>? contentType,
+    Wrapped<String>? id,
+  }) {
+    return ImageInfo(
+      contentType: (contentType != null ? contentType.value : this.contentType),
+      id: (id != null ? id.value : this.id),
+    );
   }
 }
 
@@ -3280,12 +3436,15 @@ extension $ServerLogPageExtension on ServerLogPage {
 @JsonSerializable(explicitToJson: true)
 class ServerSettings {
   const ServerSettings({
+    required this.accentColor,
+    required this.instanceName,
     required this.ocrEnabled,
     this.ocrLanguages,
     required this.ocrMaxPages,
     required this.searchContentEnabled,
     required this.trashRetentionDays,
     required this.trashRetentionEnforced,
+    required this.welcomeMessage,
   });
 
   factory ServerSettings.fromJson(Map<String, dynamic> json) =>
@@ -3294,6 +3453,10 @@ class ServerSettings {
   static const toJsonFactory = _$ServerSettingsToJson;
   Map<String, dynamic> toJson() => _$ServerSettingsToJson(this);
 
+  @JsonKey(name: 'accentColor', includeIfNull: false)
+  final String accentColor;
+  @JsonKey(name: 'instanceName', includeIfNull: false)
+  final String instanceName;
   @JsonKey(name: 'ocrEnabled', includeIfNull: false)
   final bool ocrEnabled;
   @JsonKey(name: 'ocrLanguages', includeIfNull: false, defaultValue: <String>[])
@@ -3306,12 +3469,24 @@ class ServerSettings {
   final int trashRetentionDays;
   @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
   final bool trashRetentionEnforced;
+  @JsonKey(name: 'welcomeMessage', includeIfNull: false)
+  final String welcomeMessage;
   static const fromJsonFactory = _$ServerSettingsFromJson;
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ServerSettings &&
+            (identical(other.accentColor, accentColor) ||
+                const DeepCollectionEquality().equals(
+                  other.accentColor,
+                  accentColor,
+                )) &&
+            (identical(other.instanceName, instanceName) ||
+                const DeepCollectionEquality().equals(
+                  other.instanceName,
+                  instanceName,
+                )) &&
             (identical(other.ocrEnabled, ocrEnabled) ||
                 const DeepCollectionEquality().equals(
                   other.ocrEnabled,
@@ -3341,30 +3516,43 @@ class ServerSettings {
                 const DeepCollectionEquality().equals(
                   other.trashRetentionEnforced,
                   trashRetentionEnforced,
+                )) &&
+            (identical(other.welcomeMessage, welcomeMessage) ||
+                const DeepCollectionEquality().equals(
+                  other.welcomeMessage,
+                  welcomeMessage,
                 )));
   }
 
   @override
   int get hashCode =>
+      const DeepCollectionEquality().hash(accentColor) ^
+      const DeepCollectionEquality().hash(instanceName) ^
       const DeepCollectionEquality().hash(ocrEnabled) ^
       const DeepCollectionEquality().hash(ocrLanguages) ^
       const DeepCollectionEquality().hash(ocrMaxPages) ^
       const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(trashRetentionEnforced) ^
+      const DeepCollectionEquality().hash(welcomeMessage) ^
       runtimeType.hashCode;
 }
 
 extension $ServerSettingsExtension on ServerSettings {
   ServerSettings copyWith({
+    String? accentColor,
+    String? instanceName,
     bool? ocrEnabled,
     List<String>? ocrLanguages,
     int? ocrMaxPages,
     bool? searchContentEnabled,
     int? trashRetentionDays,
     bool? trashRetentionEnforced,
+    String? welcomeMessage,
   }) {
     return ServerSettings(
+      accentColor: accentColor ?? this.accentColor,
+      instanceName: instanceName ?? this.instanceName,
       ocrEnabled: ocrEnabled ?? this.ocrEnabled,
       ocrLanguages: ocrLanguages ?? this.ocrLanguages,
       ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
@@ -3372,18 +3560,26 @@ extension $ServerSettingsExtension on ServerSettings {
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       trashRetentionEnforced:
           trashRetentionEnforced ?? this.trashRetentionEnforced,
+      welcomeMessage: welcomeMessage ?? this.welcomeMessage,
     );
   }
 
   ServerSettings copyWithWrapped({
+    Wrapped<String>? accentColor,
+    Wrapped<String>? instanceName,
     Wrapped<bool>? ocrEnabled,
     Wrapped<List<String>?>? ocrLanguages,
     Wrapped<int>? ocrMaxPages,
     Wrapped<bool>? searchContentEnabled,
     Wrapped<int>? trashRetentionDays,
     Wrapped<bool>? trashRetentionEnforced,
+    Wrapped<String>? welcomeMessage,
   }) {
     return ServerSettings(
+      accentColor: (accentColor != null ? accentColor.value : this.accentColor),
+      instanceName: (instanceName != null
+          ? instanceName.value
+          : this.instanceName),
       ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
       ocrLanguages: (ocrLanguages != null
           ? ocrLanguages.value
@@ -3398,6 +3594,9 @@ extension $ServerSettingsExtension on ServerSettings {
       trashRetentionEnforced: (trashRetentionEnforced != null
           ? trashRetentionEnforced.value
           : this.trashRetentionEnforced),
+      welcomeMessage: (welcomeMessage != null
+          ? welcomeMessage.value
+          : this.welcomeMessage),
     );
   }
 }
@@ -3405,12 +3604,15 @@ extension $ServerSettingsExtension on ServerSettings {
 @JsonSerializable(explicitToJson: true)
 class ServerSettingsChanges {
   const ServerSettingsChanges({
+    this.accentColor,
+    this.instanceName,
     this.ocrEnabled,
     this.ocrLanguages,
     this.ocrMaxPages,
     this.searchContentEnabled,
     this.trashRetentionDays,
     this.trashRetentionEnforced,
+    this.welcomeMessage,
   });
 
   factory ServerSettingsChanges.fromJson(Map<String, dynamic> json) =>
@@ -3419,6 +3621,10 @@ class ServerSettingsChanges {
   static const toJsonFactory = _$ServerSettingsChangesToJson;
   Map<String, dynamic> toJson() => _$ServerSettingsChangesToJson(this);
 
+  @JsonKey(name: 'accentColor', includeIfNull: false)
+  final String? accentColor;
+  @JsonKey(name: 'instanceName', includeIfNull: false)
+  final String? instanceName;
   @JsonKey(name: 'ocrEnabled', includeIfNull: false)
   final bool? ocrEnabled;
   @JsonKey(name: 'ocrLanguages', includeIfNull: false, defaultValue: <String>[])
@@ -3431,12 +3637,24 @@ class ServerSettingsChanges {
   final int? trashRetentionDays;
   @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
   final bool? trashRetentionEnforced;
+  @JsonKey(name: 'welcomeMessage', includeIfNull: false)
+  final String? welcomeMessage;
   static const fromJsonFactory = _$ServerSettingsChangesFromJson;
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ServerSettingsChanges &&
+            (identical(other.accentColor, accentColor) ||
+                const DeepCollectionEquality().equals(
+                  other.accentColor,
+                  accentColor,
+                )) &&
+            (identical(other.instanceName, instanceName) ||
+                const DeepCollectionEquality().equals(
+                  other.instanceName,
+                  instanceName,
+                )) &&
             (identical(other.ocrEnabled, ocrEnabled) ||
                 const DeepCollectionEquality().equals(
                   other.ocrEnabled,
@@ -3466,30 +3684,43 @@ class ServerSettingsChanges {
                 const DeepCollectionEquality().equals(
                   other.trashRetentionEnforced,
                   trashRetentionEnforced,
+                )) &&
+            (identical(other.welcomeMessage, welcomeMessage) ||
+                const DeepCollectionEquality().equals(
+                  other.welcomeMessage,
+                  welcomeMessage,
                 )));
   }
 
   @override
   int get hashCode =>
+      const DeepCollectionEquality().hash(accentColor) ^
+      const DeepCollectionEquality().hash(instanceName) ^
       const DeepCollectionEquality().hash(ocrEnabled) ^
       const DeepCollectionEquality().hash(ocrLanguages) ^
       const DeepCollectionEquality().hash(ocrMaxPages) ^
       const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(trashRetentionEnforced) ^
+      const DeepCollectionEquality().hash(welcomeMessage) ^
       runtimeType.hashCode;
 }
 
 extension $ServerSettingsChangesExtension on ServerSettingsChanges {
   ServerSettingsChanges copyWith({
+    String? accentColor,
+    String? instanceName,
     bool? ocrEnabled,
     List<String>? ocrLanguages,
     int? ocrMaxPages,
     bool? searchContentEnabled,
     int? trashRetentionDays,
     bool? trashRetentionEnforced,
+    String? welcomeMessage,
   }) {
     return ServerSettingsChanges(
+      accentColor: accentColor ?? this.accentColor,
+      instanceName: instanceName ?? this.instanceName,
       ocrEnabled: ocrEnabled ?? this.ocrEnabled,
       ocrLanguages: ocrLanguages ?? this.ocrLanguages,
       ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
@@ -3497,18 +3728,26 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       trashRetentionEnforced:
           trashRetentionEnforced ?? this.trashRetentionEnforced,
+      welcomeMessage: welcomeMessage ?? this.welcomeMessage,
     );
   }
 
   ServerSettingsChanges copyWithWrapped({
+    Wrapped<String?>? accentColor,
+    Wrapped<String?>? instanceName,
     Wrapped<bool?>? ocrEnabled,
     Wrapped<List<String>?>? ocrLanguages,
     Wrapped<int?>? ocrMaxPages,
     Wrapped<bool?>? searchContentEnabled,
     Wrapped<int?>? trashRetentionDays,
     Wrapped<bool?>? trashRetentionEnforced,
+    Wrapped<String?>? welcomeMessage,
   }) {
     return ServerSettingsChanges(
+      accentColor: (accentColor != null ? accentColor.value : this.accentColor),
+      instanceName: (instanceName != null
+          ? instanceName.value
+          : this.instanceName),
       ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
       ocrLanguages: (ocrLanguages != null
           ? ocrLanguages.value
@@ -3523,6 +3762,9 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       trashRetentionEnforced: (trashRetentionEnforced != null
           ? trashRetentionEnforced.value
           : this.trashRetentionEnforced),
+      welcomeMessage: (welcomeMessage != null
+          ? welcomeMessage.value
+          : this.welcomeMessage),
     );
   }
 }

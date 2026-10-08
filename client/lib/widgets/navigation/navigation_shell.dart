@@ -6,7 +6,6 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
-import "package:polder/widgets/navigation/app_mark.dart";
 
 @immutable
 class NavItem {
@@ -34,7 +33,7 @@ class NavigationShell extends ConsumerWidget {
     required this.onSelected,
     required this.title,
     required this.subtitle,
-    required this.markIcon,
+    required this.mark,
     required this.child,
     this.secondaryItems = const [],
     this.sidebarFooter,
@@ -50,7 +49,7 @@ class NavigationShell extends ConsumerWidget {
 
   final String title;
   final String subtitle;
-  final IconData markIcon;
+  final Widget mark;
 
   final Widget? sidebarFooter;
 
@@ -118,7 +117,7 @@ class NavigationShell extends ConsumerWidget {
             onSelected: onSelected,
             title: title,
             subtitle: subtitle,
-            markIcon: markIcon,
+            mark: mark,
             footer: sidebarFooter,
             exitAction: exit,
           )
@@ -185,7 +184,7 @@ class _Sidebar extends ConsumerWidget {
     required this.onSelected,
     required this.title,
     required this.subtitle,
-    required this.markIcon,
+    required this.mark,
     this.secondaryItems = const [],
     this.footer,
     this.exitAction,
@@ -197,7 +196,7 @@ class _Sidebar extends ConsumerWidget {
   final ValueChanged<int> onSelected;
   final String title;
   final String subtitle;
-  final IconData markIcon;
+  final Widget mark;
   final Widget? footer;
   final NavAction? exitAction;
 
@@ -230,7 +229,7 @@ class _Sidebar extends ConsumerWidget {
                           padding: const EdgeInsets.all(10),
                           child: Row(
                             children: [
-                              AppMark(icon: markIcon),
+                              mark,
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Column(

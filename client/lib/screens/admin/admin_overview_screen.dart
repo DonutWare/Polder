@@ -66,6 +66,12 @@ class AdminOverviewScreen extends ConsumerWidget {
                       onTap: () => showUserFormDialog(context),
                     ),
                     NavEntry(
+                      icon: IconsaxPlusLinear.brush_2,
+                      title: localized.brandingGroup,
+                      subtitle: localized.brandingHint,
+                      onTap: () => context.go(AppRoutes.adminBranding),
+                    ),
+                    NavEntry(
                       icon: IconsaxPlusLinear.document_text,
                       title: localized.serverLogs,
                       subtitle: localized.serverLogsHint,

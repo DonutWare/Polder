@@ -7,6 +7,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/scan_session.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
+import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/browser/document_scan_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/services/transfer/document_scanner_service.dart";
@@ -20,7 +21,7 @@ Future<List<String>?> scanDocument(BuildContext context, WidgetRef ref) async {
   final messenger = ScaffoldMessenger.maybeOf(context);
   final localizations = context.localized;
   try {
-    final seed = ref.read(appearanceProvider).seed;
+    final seed = ref.read(appearanceProvider).seedWith(ref.read(brandingProvider).accent);
     return await ref
         .read(documentScannerServiceProvider)
         .scan(

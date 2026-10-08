@@ -1,7 +1,11 @@
+import "dart:ui";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "package:polder/models/branding.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/providers/admin/text_extraction_status_provider.dart";
+import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 
 final serverSettingsProvider = AsyncNotifierProvider.autoDispose<ServerSettingsNotifier, ServerSettings>(
@@ -30,8 +34,19 @@ class ServerSettingsNotifier extends AsyncNotifier<ServerSettings> {
   Future<void> setOcrMaxPages(int pages) =>
       _update(() => ref.read(polderApiProvider).updateServerSettings(ocrMaxPages: pages));
 
+  Future<void> setInstanceName(String name) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(instanceName: name));
+
+  Future<void> setWelcomeMessage(String message) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(welcomeMessage: message));
+
+  Future<void> setAccentColor(Color? color) => _update(
+    () => ref.read(polderApiProvider).updateServerSettings(accentColor: color == null ? "" : hexColor(color)),
+  );
+
   Future<void> _update(Future<ServerSettings> Function() change) async {
     state = AsyncData(await change());
     ref.invalidate(textExtractionStatusProvider);
+    await ref.read(brandingProvider.notifier).refresh();
   }
 }

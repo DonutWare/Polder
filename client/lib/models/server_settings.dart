@@ -1,3 +1,5 @@
+import "dart:ui";
+
 import "package:freezed_annotation/freezed_annotation.dart";
 
 part "server_settings.freezed.dart";
@@ -11,5 +13,8 @@ abstract class ServerSettings with _$ServerSettings {
     @Default(true) bool ocrEnabled,
     @Default(<String>[]) List<String> ocrLanguages,
     @Default(1) int ocrMaxPages,
+    @Default("") String instanceName,
+    @Default("") String welcomeMessage,
+    Color? accentColor,
   }) = _ServerSettings;
 }

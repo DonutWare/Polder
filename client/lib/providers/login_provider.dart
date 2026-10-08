@@ -1,9 +1,12 @@
+import "dart:async";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/account.dart";
 import "package:polder/models/login_state.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/services/api/api_client_factory.dart";
@@ -28,6 +31,7 @@ class LoginNotifier extends Notifier<LoginState> {
     try {
       final status = await _api.setupStatus();
       if (!ref.mounted) return;
+      unawaited(ref.read(brandingProvider.notifier).load(state.serverUrl));
       state = state.copyWith(
         probingHostedServer: false,
         serverLocked: true,
@@ -49,6 +53,7 @@ class LoginNotifier extends Notifier<LoginState> {
 
   void backToServer() {
     if (state.serverLocked) return;
+    ref.read(brandingProvider.notifier).clear();
     state = state.copyWith(step: LoginStep.server, password: "", failure: null);
   }
 
@@ -64,6 +69,7 @@ class LoginNotifier extends Notifier<LoginState> {
       state = state.copyWith(serverUrl: state.serverUrl.replaceFirst("https://", "http://"));
       status = await _api.setupStatus();
     }
+    unawaited(ref.read(brandingProvider.notifier).load(state.serverUrl));
     state = state.copyWith(step: status.needsSetup ? LoginStep.setup : LoginStep.credentials);
   });
 

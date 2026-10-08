@@ -34,6 +34,7 @@ type API struct {
 	users    *users.Service
 	files    *files.Service
 	settings *settings.Store
+	images   *settings.Images
 	sync     *syncing.Service
 	previews *preview.Worker
 	activity *activity.Hub
@@ -50,6 +51,7 @@ type Dependencies struct {
 	Users                  *users.Service
 	Files                  *files.Service
 	Settings               *settings.Store
+	Images                 *settings.Images
 	Sync                   *syncing.Service
 	Previews               *preview.Worker
 	Activity               *activity.Hub
@@ -70,6 +72,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		users:    deps.Users,
 		files:    deps.Files,
 		settings: deps.Settings,
+		images:   deps.Images,
 		sync:     deps.Sync,
 		previews: deps.Previews,
 		activity: deps.Activity,
@@ -132,6 +135,11 @@ func (a *API) routes(api huma.API) {
 	v1.UseSimpleModifier(tagByPath)
 	register(v1, http.MethodGet, "/setup", "getSetupStatus", "Whether the server still needs its first account", a.setupStatus)
 	register(v1, http.MethodPost, "/setup", "setup", "Create the first administrator account", a.setup, created)
+	register(v1, http.MethodGet, "/branding", "getBranding", "How the apps present this server, shown before logging in", a.branding)
+	register(v1, http.MethodGet, "/branding/icon/{imageID}", "getBrandingIcon", "The server's icon", a.brandingIcon,
+		withResponse(http.StatusOK, "Icon image", binaryContent("application/octet-stream")))
+	register(v1, http.MethodGet, "/branding/backgrounds/{imageID}", "getBrandingBackground", "One of the login screen's backgrounds", a.brandingBackground,
+		withResponse(http.StatusOK, "Background image", binaryContent("application/octet-stream")))
 	register(v1, http.MethodPost, "/auth/login", "login", "Log in and get a token pair", a.login)
 	register(v1, http.MethodPost, "/auth/refresh", "refresh", "Exchange a refresh token for a new token pair", a.refresh)
 	register(v1, http.MethodPost, "/auth/logout", "logout", "Revoke a refresh token", a.logout)
@@ -195,6 +203,12 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodPatch, "/admin/users/{userID}", "updateUser", "Change a user; password changes and disabling log the user out", a.updateUser)
 	register(admin, http.MethodGet, "/admin/settings", "getServerSettings", "Server-wide settings", a.getServerSettings)
 	register(admin, http.MethodPatch, "/admin/settings", "updateServerSettings", "Change server-wide settings", a.updateServerSettings)
+	register(admin, http.MethodPut, "/admin/branding/icon", "setBrandingIcon", "Replace the server's icon with the image in the request body", a.setBrandingIcon,
+		withRequestBody(binaryContent("application/octet-stream")))
+	register(admin, http.MethodDelete, "/admin/branding/icon", "removeBrandingIcon", "Go back to the apps' own icon", a.removeBrandingIcon)
+	register(admin, http.MethodPost, "/admin/branding/backgrounds", "addBrandingBackground", "Add the image in the request body to the login screen's backgrounds", a.addBrandingBackground,
+		created, withRequestBody(binaryContent("application/octet-stream")))
+	register(admin, http.MethodDelete, "/admin/branding/backgrounds/{imageID}", "removeBrandingBackground", "Remove one of the login screen's backgrounds", a.removeBrandingBackground)
 	register(admin, http.MethodGet, "/admin/search", "getSearchStatus", "State of the search index and of reading text from files", a.searchStatus)
 	register(admin, http.MethodPost, "/admin/search/rebuild", "rebuildSearchIndex", "Rebuild the search index from scratch in the background", a.rebuildSearchIndex, accepted)
 	register(admin, http.MethodDelete, "/admin/users/{userID}", "deleteUser", "Delete a user; their files are archived on the server", a.deleteUser)

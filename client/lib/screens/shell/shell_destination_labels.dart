@@ -43,6 +43,7 @@ extension AdminDestinationPresentation on AdminDestination {
     AdminDestination.overview => context.localized.adminOverview,
     AdminDestination.users => context.localized.users,
     AdminDestination.logs => context.localized.serverLogs,
+    AdminDestination.branding => context.localized.brandingGroup,
   };
 
   NavItem item(BuildContext context) => switch (this) {
@@ -59,6 +60,11 @@ extension AdminDestinationPresentation on AdminDestination {
     AdminDestination.logs => NavItem(
       icon: IconsaxPlusLinear.document_text,
       selectedIcon: IconsaxPlusBold.document_text,
+      label: label(context),
+    ),
+    AdminDestination.branding => NavItem(
+      icon: IconsaxPlusLinear.brush_2,
+      selectedIcon: IconsaxPlusBold.brush_2,
       label: label(context),
     ),
   };

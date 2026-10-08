@@ -28,7 +28,9 @@ abstract class Appearance with _$Appearance {
   const factory Appearance({@Default(ThemeMode.system) ThemeMode mode, Color? accent, Color? systemAccent}) =
       _Appearance;
 
-  Color get seed => accent ?? systemAccent ?? defaultAccent;
+  Color get seed => seedWith(null);
+
+  Color seedWith(Color? serverAccent) => accent ?? systemAccent ?? serverAccent ?? defaultAccent;
 
   bool isAccent(Color color) => accent?.toARGB32() == color.toARGB32();
 }

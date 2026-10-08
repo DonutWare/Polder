@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
+import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
@@ -34,10 +35,12 @@ class _PolderAppState extends ConsumerState<PolderApp> {
   @override
   Widget build(BuildContext context) {
     final appearance = ref.watch(appearanceProvider);
+    final branding = ref.watch(brandingProvider);
+    final seed = appearance.seedWith(branding.accent);
     return MaterialApp.router(
-      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-      theme: AppTheme.build(appearance.seed, Brightness.light),
-      darkTheme: AppTheme.build(appearance.seed, Brightness.dark),
+      onGenerateTitle: (context) => branding.nameOr(AppLocalizations.of(context).appTitle),
+      theme: AppTheme.build(seed, Brightness.light),
+      darkTheme: AppTheme.build(seed, Brightness.dark),
       themeMode: appearance.mode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

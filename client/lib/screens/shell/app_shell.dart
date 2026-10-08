@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
-import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
+import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
 import "package:polder/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
@@ -16,8 +16,10 @@ import "package:polder/util/extensions/num_extensions.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/navigation/app_mark.dart";
 import "package:polder/widgets/navigation/navigation_shell.dart";
 import "package:polder/widgets/shared/quota_bar.dart";
+import "package:polder/widgets/shared/server_icon.dart";
 
 class AppShell extends ConsumerWidget {
   const AppShell({required this.location, required this.child, super.key});
@@ -33,9 +35,10 @@ class AppShell extends ConsumerWidget {
     final conflicts = ref.watch(conflictQueueProvider.select((queue) => queue.conflicts.length));
     final uploading = ref.watch(incomingPathsProvider.select((paths) => paths.length));
     final account = ref.watch(currentAccountProvider);
+    final name = ref.watch(brandingProvider.select((branding) => branding.nameOr(context.localized.appTitle)));
     return SyncBackgroundActivator(
       child: SideSheetDrawer(
-        title: context.localized.appTitle,
+        title: name,
         sheet: const MoreOptions(),
         canEdgeSwipe: () => WindowSize.of(context) == WindowSize.compact && !GoRouter.of(context).canPop(),
         child: NavigationShell(
@@ -57,9 +60,9 @@ class AppShell extends ConsumerWidget {
             final reselectedFiles = destination == ShellDestination.files && location.startsWith(destination.route);
             context.go(reselectedFiles ? AppRoutes.filesAt(RemotePath.root) : destination.route);
           },
-          title: account?.user.username ?? context.localized.appTitle,
+          title: account?.user.username ?? name,
           subtitle: account == null ? "" : Uri.tryParse(account.serverUrl)?.host ?? account.serverUrl,
-          markIcon: IconsaxPlusBold.cloud,
+          mark: const ServerIcon(size: 36, fallback: AppMark()),
           sidebarFooter: const QuotaBar(),
           child: SearchShortcut(child: child),
         ),

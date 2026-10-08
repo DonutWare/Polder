@@ -1,6 +1,42 @@
 {
   "components": {
     "schemas": {
+      "Branding": {
+        "additionalProperties": false,
+        "properties": {
+          "accentColor": {
+            "description": "Default accent color as #RRGGBB; empty means the app's own default",
+            "type": "string"
+          },
+          "backgrounds": {
+            "description": "The login screen's backgrounds, shown in turn",
+            "items": {
+              "$ref": "#/components/schemas/ImageInfo"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/ImageInfo",
+            "description": "Absent when the server has no icon of its own"
+          },
+          "message": {
+            "description": "Welcome message for the login screen; empty means none",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name to show for this server; empty means the app's own name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "message",
+          "accentColor",
+          "backgrounds"
+        ],
+        "type": "object"
+      },
       "Change": {
         "additionalProperties": false,
         "properties": {
@@ -529,6 +565,23 @@
         },
         "required": [
           "status"
+        ],
+        "type": "object"
+      },
+      "ImageInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "contentType": {
+            "description": "Such as image/png or image/svg+xml",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contentType"
         ],
         "type": "object"
       },
@@ -1213,6 +1266,14 @@
       "ServerSettings": {
         "additionalProperties": false,
         "properties": {
+          "accentColor": {
+            "description": "Default accent color as #RRGGBB; empty uses the apps' own default",
+            "type": "string"
+          },
+          "instanceName": {
+            "description": "Name the apps show for this server; empty shows the default",
+            "type": "string"
+          },
           "ocrEnabled": {
             "description": "Recognise text in images and scanned PDF pages",
             "type": "boolean"
@@ -1242,6 +1303,10 @@
           "trashRetentionEnforced": {
             "description": "Apply trashRetentionDays to every user, ignoring their own setting",
             "type": "boolean"
+          },
+          "welcomeMessage": {
+            "description": "Shown on the login screen; empty shows none",
+            "type": "string"
           }
         },
         "required": [
@@ -1250,13 +1315,27 @@
           "searchContentEnabled",
           "ocrEnabled",
           "ocrLanguages",
-          "ocrMaxPages"
+          "ocrMaxPages",
+          "instanceName",
+          "welcomeMessage",
+          "accentColor"
         ],
         "type": "object"
       },
       "ServerSettingsChanges": {
         "additionalProperties": false,
         "properties": {
+          "accentColor": {
+            "description": "Default accent color as #RRGGBB; empty uses the apps' own default",
+            "nullable": true,
+            "type": "string"
+          },
+          "instanceName": {
+            "description": "Name the apps show for this server; empty shows the default",
+            "maxLength": 64,
+            "nullable": true,
+            "type": "string"
+          },
           "ocrEnabled": {
             "description": "Recognise text in images and scanned PDF pages",
             "nullable": true,
@@ -1293,6 +1372,12 @@
             "description": "Apply trashRetentionDays to every user, ignoring their own setting",
             "nullable": true,
             "type": "boolean"
+          },
+          "welcomeMessage": {
+            "description": "Shown on the login screen; empty shows none",
+            "maxLength": 500,
+            "nullable": true,
+            "type": "string"
           }
         },
         "type": "object"
@@ -1806,6 +1891,248 @@
         "summary": "Uploads and downloads in progress",
         "tags": [
           "activity"
+        ]
+      }
+    },
+    "/api/v1/admin/branding/backgrounds": {
+      "post": {
+        "operationId": "addBrandingBackground",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Branding"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add the image in the request body to the login screen's backgrounds",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/branding/backgrounds/{imageID}": {
+      "delete": {
+        "operationId": "removeBrandingBackground",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "imageID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove one of the login screen's backgrounds",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/branding/icon": {
+      "delete": {
+        "operationId": "removeBrandingIcon",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Go back to the apps' own icon",
+        "tags": [
+          "admin"
+        ]
+      },
+      "put": {
+        "operationId": "setBrandingIcon",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Branding"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace the server's icon with the image in the request body",
+        "tags": [
+          "admin"
         ]
       }
     },
@@ -2761,6 +3088,167 @@
         "summary": "Exchange a refresh token for a new token pair",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/branding": {
+      "get": {
+        "operationId": "getBranding",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Branding"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "How the apps present this server, shown before logging in",
+        "tags": [
+          "branding"
+        ]
+      }
+    },
+    "/api/v1/branding/backgrounds/{imageID}": {
+      "get": {
+        "operationId": "getBrandingBackground",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "imageID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Background image",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "One of the login screen's backgrounds",
+        "tags": [
+          "branding"
+        ]
+      }
+    },
+    "/api/v1/branding/icon/{imageID}": {
+      "get": {
+        "operationId": "getBrandingIcon",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "imageID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Icon image",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "The server's icon",
+        "tags": [
+          "branding"
         ]
       }
     },

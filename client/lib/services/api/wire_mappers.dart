@@ -11,6 +11,7 @@ import "package:polder/models/search.dart";
 import "package:polder/models/server_event.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
+import "package:polder/models/branding.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
@@ -171,7 +172,24 @@ extension ServerSettingsToModel on wire.ServerSettings {
     ocrEnabled: ocrEnabled,
     ocrLanguages: ocrLanguages ?? const <String>[],
     ocrMaxPages: ocrMaxPages,
+    instanceName: instanceName,
+    welcomeMessage: welcomeMessage,
+    accentColor: parseHexColor(accentColor),
   );
+}
+
+extension BrandingToModel on wire.Branding {
+  Branding toModel() => Branding(
+    name: name,
+    message: message,
+    accent: parseHexColor(accentColor),
+    icon: icon?.toModel(),
+    backgrounds: [for (final background in backgrounds ?? <wire.ImageInfo>[]) background.toModel()],
+  );
+}
+
+extension ImageInfoToModel on wire.ImageInfo {
+  ServerImage toModel() => ServerImage(id: id, contentType: contentType);
 }
 
 extension ExtractionStatusToModel on wire.ExtractionStatus {

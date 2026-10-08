@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"regexp"
 	"strconv"
+	"strings"
+	"unicode/utf8"
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/users"
@@ -18,11 +20,20 @@ const (
 	ocrEnabledKey             = "ocr_enabled"
 	ocrLanguagesKey           = "ocr_languages"
 	ocrMaxPagesKey            = "ocr_max_pages"
+	instanceNameKey           = "instance_name"
+	welcomeMessageKey         = "welcome_message"
+	accentColorKey            = "accent_color"
 
 	MaxOCRPages = 10000
+
+	maxInstanceNameLength   = 64
+	maxWelcomeMessageLength = 500
 )
 
-var ocrLanguagePattern = regexp.MustCompile(`^(script/)?[A-Za-z][A-Za-z0-9_]*$`)
+var (
+	ocrLanguagePattern = regexp.MustCompile(`^(script/)?[A-Za-z][A-Za-z0-9_]*$`)
+	accentColorPattern = regexp.MustCompile(`^#[0-9A-Fa-f]{6}$`)
+)
 
 type ServerSettings struct {
 	TrashRetentionDays     int      `json:"trashRetentionDays" doc:"Days trashed items are kept before they're deleted permanently; 0 keeps them forever"`
@@ -31,6 +42,9 @@ type ServerSettings struct {
 	OCREnabled             bool     `json:"ocrEnabled" doc:"Recognise text in images and scanned PDF pages"`
 	OCRLanguages           []string `json:"ocrLanguages" doc:"Tesseract models read in one pass: languages such as eng or jpn, or whole writing systems such as script/Latin or script/HanS. Missing models are downloaded when needed"`
 	OCRMaxPages            int      `json:"ocrMaxPages" doc:"The most PDF pages recognised per file"`
+	InstanceName           string   `json:"instanceName" doc:"Name the apps show for this server; empty shows the default"`
+	WelcomeMessage         string   `json:"welcomeMessage" doc:"Shown on the login screen; empty shows none"`
+	AccentColor            string   `json:"accentColor" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
 }
 
 type ServerSettingsChanges struct {
@@ -40,6 +54,9 @@ type ServerSettingsChanges struct {
 	OCREnabled             *bool     `json:"ocrEnabled" required:"false" doc:"Recognise text in images and scanned PDF pages"`
 	OCRLanguages           *[]string `json:"ocrLanguages" required:"false" doc:"Tesseract models read in one pass: languages such as eng or jpn, or whole writing systems such as script/Latin or script/HanS. Missing models are downloaded when needed"`
 	OCRMaxPages            *int      `json:"ocrMaxPages" required:"false" minimum:"1" maximum:"10000" doc:"The most PDF pages recognised per file"`
+	InstanceName           *string   `json:"instanceName" required:"false" maxLength:"64" doc:"Name the apps show for this server; empty shows the default"`
+	WelcomeMessage         *string   `json:"welcomeMessage" required:"false" maxLength:"500" doc:"Shown on the login screen; empty shows none"`
+	AccentColor            *string   `json:"accentColor" required:"false" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
 }
 
 func (c ServerSettingsChanges) validate() error {
@@ -57,6 +74,15 @@ func (c ServerSettingsChanges) validate() error {
 	}
 	if c.OCRMaxPages != nil && (*c.OCRMaxPages < 1 || *c.OCRMaxPages > MaxOCRPages) {
 		return apperr.Invalid("OCR page limit must be between 1 and %d", MaxOCRPages)
+	}
+	if c.InstanceName != nil && utf8.RuneCountInString(strings.TrimSpace(*c.InstanceName)) > maxInstanceNameLength {
+		return apperr.Invalid("name must be at most %d characters", maxInstanceNameLength)
+	}
+	if c.WelcomeMessage != nil && utf8.RuneCountInString(strings.TrimSpace(*c.WelcomeMessage)) > maxWelcomeMessageLength {
+		return apperr.Invalid("welcome message must be at most %d characters", maxWelcomeMessageLength)
+	}
+	if c.AccentColor != nil && *c.AccentColor != "" && !accentColorPattern.MatchString(*c.AccentColor) {
+		return apperr.Invalid("%q is not a color as #RRGGBB", *c.AccentColor)
 	}
 	return nil
 }
@@ -109,6 +135,12 @@ func (s *Store) Get(ctx context.Context) (ServerSettings, error) {
 			if pages, err := strconv.Atoi(value); err == nil {
 				current.OCRMaxPages = pages
 			}
+		case instanceNameKey:
+			current.InstanceName = value
+		case welcomeMessageKey:
+			current.WelcomeMessage = value
+		case accentColorKey:
+			current.AccentColor = value
 		}
 	}
 	return current, rows.Err()
@@ -137,6 +169,15 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	}
 	if changes.OCRMaxPages != nil {
 		values[ocrMaxPagesKey] = strconv.Itoa(*changes.OCRMaxPages)
+	}
+	if changes.InstanceName != nil {
+		values[instanceNameKey] = strings.TrimSpace(*changes.InstanceName)
+	}
+	if changes.WelcomeMessage != nil {
+		values[welcomeMessageKey] = strings.TrimSpace(*changes.WelcomeMessage)
+	}
+	if changes.AccentColor != nil {
+		values[accentColorKey] = strings.ToUpper(*changes.AccentColor)
 	}
 	if err := s.save(ctx, values); err != nil {
 		return ServerSettings{}, err

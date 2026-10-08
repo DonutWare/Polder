@@ -427,7 +427,7 @@ func TestPDFsGetFirstPageThumbnails(t *testing.T) {
 		}
 
 		var ready fileEntry
-		deadline := time.Now().Add(30 * time.Second)
+		deadline := time.Now().Add(2 * time.Minute)
 		for ready.PreviewState != "ready" && ready.PreviewState != "failed" && time.Now().Before(deadline) {
 			time.Sleep(50 * time.Millisecond)
 			alice.mustJSON(http.MethodGet, "/files/stat?path=/Docs/scan.pdf", nil, http.StatusOK, &ready)

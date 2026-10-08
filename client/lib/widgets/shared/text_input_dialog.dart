@@ -9,6 +9,7 @@ Future<String?> showTextInputDialog(
   required String confirmLabel,
   String initialValue = "",
   bool Function(String value)? isValid,
+  int maxLines = 1,
 }) => showDialog<String>(
   context: context,
   builder: (_) => TextInputDialog(
@@ -17,6 +18,7 @@ Future<String?> showTextInputDialog(
     confirmLabel: confirmLabel,
     initialValue: initialValue,
     isValid: isValid ?? (value) => value.trim().isNotEmpty,
+    maxLines: maxLines,
   ),
 );
 
@@ -27,6 +29,7 @@ class TextInputDialog extends StatefulWidget {
     required this.confirmLabel,
     required this.initialValue,
     required this.isValid,
+    this.maxLines = 1,
     super.key,
   });
 
@@ -35,6 +38,7 @@ class TextInputDialog extends StatefulWidget {
   final String confirmLabel;
   final String initialValue;
   final bool Function(String value) isValid;
+  final int maxLines;
 
   @override
   State<TextInputDialog> createState() => _TextInputDialogState();
@@ -56,6 +60,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
     content: TextField(
       controller: _controller,
       autofocus: true,
+      minLines: 1,
+      maxLines: widget.maxLines,
       decoration: InputDecoration(labelText: widget.label),
       onSubmitted: (_) => _submit(),
     ),
