@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"net/http"
 	"net/url"
 	"slices"
 	"strings"
@@ -29,6 +30,7 @@ type Service struct {
 	collabora *url.URL
 	wopiBase  string
 	discovery *discovery
+	converter *http.Client
 	tokens    *tokens
 	locks     *locks
 	files     *files.Service
@@ -52,6 +54,7 @@ func New(options Options, fileService *files.Service, authService *auth.Service,
 	}
 	service.collabora = collabora
 	service.discovery = newDiscovery(collabora)
+	service.converter = &http.Client{Timeout: convertTimeout}
 	return service, nil
 }
 

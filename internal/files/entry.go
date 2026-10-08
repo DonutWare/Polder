@@ -38,14 +38,6 @@ const (
 	fallbackMime  = "application/octet-stream"
 )
 
-var previewableMimes = map[string]bool{
-	"image/jpeg":      true,
-	"image/png":       true,
-	"image/gif":       true,
-	"image/webp":      true,
-	"application/pdf": true,
-}
-
 type Entry struct {
 	ID           int64          `json:"-"`
 	UserID       int64          `json:"-"`
@@ -87,7 +79,7 @@ func newFileEntry(userID int64, cleanPath string, size int64, mtime time.Time, h
 		Hash:         hash,
 		Mime:         mimeType,
 		Meta:         map[string]any{},
-		PreviewState: initialPreviewState(mimeType),
+		PreviewState: PreviewPending,
 		TextState:    TextPending,
 	}
 }
@@ -102,11 +94,4 @@ func mimeFor(filePath string) string {
 		return fallbackMime
 	}
 	return mediaType
-}
-
-func initialPreviewState(mimeType string) PreviewState {
-	if previewableMimes[mimeType] {
-		return PreviewPending
-	}
-	return PreviewNone
 }

@@ -287,6 +287,32 @@ func entriesWithPreviewState(ctx context.Context, q querier, state PreviewState,
 	return scanEntries(rows)
 }
 
+func mimesWithoutPreview(ctx context.Context, q querier) ([]string, error) {
+	rows, err := q.QueryContext(ctx, `SELECT DISTINCT mime FROM files WHERE preview_state = $1 AND is_dir = FALSE`, PreviewNone)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var mimes []string
+	for rows.Next() {
+		var mimeType string
+		if err := rows.Scan(&mimeType); err != nil {
+			return nil, err
+		}
+		mimes = append(mimes, mimeType)
+	}
+	return mimes, rows.Err()
+}
+
+func requestPreviews(ctx context.Context, q querier, mimeType string) (int64, error) {
+	result, err := q.ExecContext(ctx, `UPDATE files SET preview_state = $1 WHERE preview_state = $2 AND mime = $3 AND is_dir = FALSE`,
+		PreviewPending, PreviewNone, mimeType)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 func updateTextState(ctx context.Context, q querier, userID int64, cleanPath, hash string, state TextState) error {
 	_, err := q.ExecContext(ctx, `UPDATE files SET text_state = $1 WHERE user_id = $2 AND path_key = $3 AND hash = $4`,
 		state, userID, pathKey(cleanPath), hash)

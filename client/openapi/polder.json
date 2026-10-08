@@ -3802,7 +3802,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a JPEG thumbnail of an image",
+        "summary": "Get a JPEG thumbnail of an image, video or document",
         "tags": [
           "files"
         ]
@@ -4994,7 +4994,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a JPEG thumbnail of a deleted image",
+        "summary": "Get a JPEG thumbnail of a deleted image, video or document",
         "tags": [
           "trash"
         ]

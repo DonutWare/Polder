@@ -860,7 +860,7 @@ final class _$Polder extends Polder {
     String? size,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of an image',
+      summary: 'Get a JPEG thumbnail of an image, video or document',
       operationId: 'previewFile',
       consumes: [],
       produces: [],
@@ -1412,7 +1412,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     String? size,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of a deleted image',
+      summary: 'Get a JPEG thumbnail of a deleted image, video or document',
       operationId: 'previewTrashItem',
       consumes: [],
       produces: [],

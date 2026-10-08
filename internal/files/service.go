@@ -333,6 +333,14 @@ func (s *Service) EntriesAwaitingPreview(ctx context.Context, limit int) ([]Entr
 	return entriesWithPreviewState(ctx, s.db, PreviewPending, limit)
 }
 
+func (s *Service) MimesWithoutPreview(ctx context.Context) ([]string, error) {
+	return mimesWithoutPreview(ctx, s.db)
+}
+
+func (s *Service) RequestPreviews(ctx context.Context, mimeType string) (int64, error) {
+	return requestPreviews(ctx, s.db, mimeType)
+}
+
 func (s *Service) UpdateTextState(ctx context.Context, userID int64, cleanPath, hash string, state TextState) error {
 	return updateTextState(ctx, s.db, userID, cleanPath, hash, state)
 }

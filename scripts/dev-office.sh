@@ -11,14 +11,16 @@ listen=${POLDER_LISTEN:-:6060}
 polder_port=${listen##*:}
 # Collabora runs in a container, where localhost is the container itself.
 wopi_url=http://host.docker.internal:$polder_port
+extra_params="--o:ssl.enable=false --o:ssl.termination=false --o:admin_console.enable=false --o:welcome.enable=false --o:net.post_allow.host[0]=.+"
 
-if [ "$(docker inspect -f '{{.State.Running}}' "$container" 2>/dev/null)" != "true" ]; then
+running_params=$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$container" 2>/dev/null | sed -n 's/^extra_params=//p')
+if [ "$(docker inspect -f '{{.State.Running}}' "$container" 2>/dev/null)" != "true" ] || [ "$running_params" != "$extra_params" ]; then
   docker rm -f "$container" >/dev/null 2>&1 || true
   echo "Starting Collabora Online on port $collabora_port..."
-  docker run -d --rm --name "$container" -p "$collabora_port:9980" \
+  docker run -d --rm --name "$container" -p "127.0.0.1:$collabora_port:9980" \
     --add-host=host.docker.internal:host-gateway \
     -e "aliasgroup1=$wopi_url" \
-    -e "extra_params=--o:ssl.enable=false --o:ssl.termination=false --o:admin_console.enable=false --o:welcome.enable=false" \
+    -e "extra_params=$extra_params" \
     collabora/code:latest >/dev/null
 fi
 

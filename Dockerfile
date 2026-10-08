@@ -42,15 +42,22 @@ ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} go build -trimpath -ldflags="-s -w" -o /out/polder ./cmd/polder \
     && mkdir -p /out/config /out/data
 
-FROM alpine:3.24
-RUN apk add --no-cache tesseract-ocr mailcap \
-    && adduser -D -H -u 65532 nonroot
+FROM debian:trixie-slim
+ARG TARGETARCH
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates media-types tesseract-ocr ffmpeg mesa-va-drivers \
+    && if [ "$TARGETARCH" = "amd64" ]; then \
+        apt-get install -y --no-install-recommends intel-media-va-driver libmfx-gen1.2; \
+    fi \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --system --no-create-home --uid 65532 --shell /usr/sbin/nologin nonroot
 COPY --from=build /out/polder /usr/local/bin/polder
 COPY --from=build --chown=65532:65532 /out/config /config
 COPY --from=build --chown=65532:65532 /out/data /data
 ENV POLDER_CONFIG_DIR=/config \
     POLDER_DATA_DIR=/data \
-    POLDER_LISTEN=:6060
+    POLDER_LISTEN=:6060 \
+    NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
 VOLUME ["/config", "/data"]
 EXPOSE 6060
 USER nonroot

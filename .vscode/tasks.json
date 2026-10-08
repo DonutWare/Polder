@@ -10,6 +10,14 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Run backend with collabora online docker",
+			"detail": "Run the backend with Collabora Online using Docker",
+			"type": "shell",
+			"command": "scripts/dev-office.sh",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
 			"label": "Generate client code",
 			"detail": "build_runner for freezed / json / drift",
 			"type": "shell",

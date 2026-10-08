@@ -93,9 +93,6 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	})
 	fileService := files.NewService(db, disk)
 	syncService := syncing.NewService(db, fileService)
-	previews := preview.NewWorker(fileService, userStore, cfg.PreviewCacheDir())
-	fileService.OnContentChanged(previews.Enqueue)
-	fileService.OnContentRemoved(previews.RequestCleanup)
 	activityHub := activity.NewHub(activity.NewStore(db))
 	fileService.OnMutation(activityHub.FileMutation)
 	extractor, err := extract.NewWorker(fileService, userStore, serverSettings, extract.Options{
@@ -142,6 +139,13 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		searchService.Close()
 		return nil, err
 	}
+	previews := preview.NewWorker(fileService, userStore, cfg.PreviewCacheDir(), preview.FFmpegOptions{
+		Path:          cfg.FFmpegPath,
+		HWAccel:       cfg.VideoHWAccel,
+		HWAccelDevice: cfg.VideoHWAccelDevice,
+	}, officeService)
+	fileService.OnContentChanged(previews.Enqueue)
+	fileService.OnContentRemoved(previews.RequestCleanup)
 	logs := logging.NewFiles(cfg.LogDir())
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,

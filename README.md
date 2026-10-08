@@ -36,6 +36,17 @@ office up -d` with `POLDER_COLLABORA_URL=http://collabora:9980`. Polder proxies 
 at `POLDER_WOPI_URL` (in compose, `http://polder:6060`). Behind https, set `COLLABORA_SSL_TERMINATION=true`, and let
 `/cool` upgrade to a WebSocket like `/api/v1/events`.
 
+Thumbnails of videos, and of images other than JPEG, PNG, GIF and WebP (HEIC, AVIF, TIFF and the like), come from
+[FFmpeg](https://ffmpeg.org), which the Docker image includes; without Docker, install `ffmpeg` and `ffprobe` or those
+files get none (`POLDER_FFMPEG` changes the program). HDR is tone-mapped when ffmpeg has the `zscale` filter. Decoding
+uses a GPU when one is available (`POLDER_VIDEO_HWACCEL`: `auto`, `vaapi`, `qsv`, `cuda` or `none`);
+`docker-compose.yml` shows how to pass an Intel, AMD or NVIDIA GPU through.
+
+Documents show the picture of their first page that office suites save inside OpenDocument and Office Open XML files.
+Word and Excel often save none; with Collabora set up, it draws those, and every other type it can open. Collabora
+accepts that from private networks by default, so a Collabora on a public address needs Polder's address in its
+`net.post_allow.host` setting.
+
 Clients receive live activity (transfers in progress, folder changes) over a WebSocket at
 `/api/v1/events`. Behind a reverse proxy, let that path upgrade: in nginx, `proxy_http_version 1.1`
 with `Upgrade` and `Connection` headers passed through.

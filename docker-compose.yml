@@ -19,6 +19,30 @@ services:
       POLDER_DB_DSN: ${POLDER_DB_DSN:-}
       POLDER_COLLABORA_URL: ${POLDER_COLLABORA_URL:-}
       POLDER_WOPI_URL: ${POLDER_WOPI_URL:-http://polder:6060}
+      # How videos and photos are decoded for previews: auto picks any GPU passed through below and
+      # otherwise uses the CPU. Force one with vaapi (Intel, AMD), qsv (Intel Quick Sync), cuda
+      # (NVIDIA) or none.
+      POLDER_VIDEO_HWACCEL: ${POLDER_VIDEO_HWACCEL:-auto}
+      # Only needed with several GPUs, such as /dev/dri/renderD129 for vaapi or qsv, or 1 for cuda.
+      POLDER_VIDEO_HWACCEL_DEVICE: ${POLDER_VIDEO_HWACCEL_DEVICE:-}
+    # GPU decoding for previews, on Linux hosts. Uncomment the block for your GPU.
+    #
+    # Intel (Quick Sync) and AMD: pass the render devices, and the group that may use them, which
+    # `getent group render | cut -d: -f3` prints on the host (some distributions use video instead).
+    # devices:
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - "${POLDER_RENDER_GID:?set POLDER_RENDER_GID to the host's render group id}"
+    #
+    # NVIDIA: install the NVIDIA Container Toolkit on the host
+    # (https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html), then:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
 
   # Optional PostgreSQL: `docker compose --profile postgres up -d` with
   # POLDER_DB_DRIVER=postgres and
@@ -40,7 +64,8 @@ services:
 
   # Optional document editor: `docker compose --profile office up -d` with
   # POLDER_COLLABORA_URL=http://collabora:9980. Clients reach it through Polder, so it has no port
-  # of its own. Set COLLABORA_SSL_TERMINATION=true when Polder is served over https.
+  # of its own. Polder also has it draw thumbnails of documents that carry none. Set
+  # COLLABORA_SSL_TERMINATION=true when Polder is served over https.
   collabora:
     profiles: ["office"]
     image: collabora/code:latest

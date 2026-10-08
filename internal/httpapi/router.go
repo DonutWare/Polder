@@ -161,7 +161,7 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPost, "/files/mkdir", "makeDirectory", "Create a directory", a.makeDirectory, created)
 	register(user, http.MethodPost, "/files/move", "moveFile", "Move or rename a file or directory", a.moveFile)
 	register(user, http.MethodDelete, "/files", "deleteFile", "Delete a file or directory", a.deleteFile)
-	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image", a.previewFile,
+	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image, video or document", a.previewFile,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
 
 	register(user, http.MethodGet, "/search", "searchFiles", "Find files and folders by name, text inside them, type, date and size", a.searchFiles,
@@ -175,7 +175,7 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPost, "/trash/{itemID}/restore", "restoreTrashItem", "Put a deleted item back where it was", a.restoreTrashItem)
 	register(user, http.MethodGet, "/trash/{itemID}/content", "downloadTrashItem", "Download a deleted item without restoring it; a directory comes as a zip", a.downloadTrashItem,
 		withResponse(http.StatusOK, "Item content", binaryContent("application/octet-stream")))
-	register(user, http.MethodGet, "/trash/{itemID}/preview", "previewTrashItem", "Get a JPEG thumbnail of a deleted image", a.previewTrashItem,
+	register(user, http.MethodGet, "/trash/{itemID}/preview", "previewTrashItem", "Get a JPEG thumbnail of a deleted image, video or document", a.previewTrashItem,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
 	register(user, http.MethodDelete, "/trash/{itemID}", "deleteTrashItem", "Delete one item in the trash permanently", a.deleteTrashItem)
 

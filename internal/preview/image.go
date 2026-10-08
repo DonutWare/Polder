@@ -20,7 +20,10 @@ import (
 const (
 	maxDecodedPixels = 100_000_000
 	thumbnailQuality = 80
+	exifSearchLimit  = 16 << 20
 )
+
+var exifMarker = []byte("Exif\x00\x00")
 
 type orientation int
 
@@ -38,6 +41,7 @@ type decodedImage struct {
 	takenAt     time.Time
 	orientation orientation
 	pages       int
+	duration    float64
 }
 
 func (d decodedImage) meta() map[string]any {
@@ -50,6 +54,9 @@ func (d decodedImage) meta() map[string]any {
 	}
 	if d.pages > 0 {
 		meta["pages"] = d.pages
+	}
+	if d.duration > 0 {
+		meta["duration"] = d.duration
 	}
 	return meta
 }
@@ -65,9 +72,7 @@ func decodeImage(file *os.File) (decodedImage, error) {
 	}
 
 	decoded.readExif(file)
-	if decoded.orientation == orientationRotatedCW || decoded.orientation == orientationRotatedCCW {
-		decoded.width, decoded.height = decoded.height, decoded.width
-	}
+	decoded.swapSidewaysDimensions()
 	if _, err := file.Seek(0, io.SeekStart); err != nil {
 		return decoded, err
 	}
@@ -84,20 +89,61 @@ func DecodeUpright(file *os.File, maxEdge int) (image.Image, error) {
 }
 
 func (d *decodedImage) readExif(file *os.File) {
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		return
+	if metadata := exifAtStart(file); metadata != nil {
+		d.applyExif(metadata, true)
 	}
-	metadata, err := exif.Decode(file)
-	if err != nil {
-		return
-	}
+}
+
+func (d *decodedImage) applyExif(metadata *exif.Exif, includeOrientation bool) {
 	if takenAt, err := metadata.DateTime(); err == nil {
 		d.takenAt = takenAt
+	}
+	if !includeOrientation {
+		return
 	}
 	if tag, err := metadata.Get(exif.Orientation); err == nil {
 		if value, err := tag.Int(0); err == nil {
 			d.orientation = orientation(value)
 		}
+	}
+}
+
+func (d *decodedImage) swapSidewaysDimensions() {
+	if d.orientation == orientationRotatedCW || d.orientation == orientationRotatedCCW {
+		d.width, d.height = d.height, d.width
+	}
+}
+
+func exifAtStart(file *os.File) *exif.Exif {
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return nil
+	}
+	metadata, err := exif.Decode(file)
+	if err != nil {
+		return nil
+	}
+	return metadata
+}
+
+func findExif(file *os.File) *exif.Exif {
+	if metadata := exifAtStart(file); metadata != nil {
+		return metadata
+	}
+	head := make([]byte, exifSearchLimit)
+	read, _ := io.ReadFull(io.NewSectionReader(file, 0, exifSearchLimit), head)
+	head = head[:read]
+	for start := 0; ; {
+		found := bytes.Index(head[start:], exifMarker)
+		if found < 0 {
+			return nil
+		}
+		payload := head[start+found+len(exifMarker):]
+		if bytes.HasPrefix(payload, []byte("MM\x00*")) || bytes.HasPrefix(payload, []byte("II*\x00")) {
+			if metadata, err := exif.Decode(bytes.NewReader(payload)); err == nil {
+				return metadata
+			}
+		}
+		start += found + len(exifMarker)
 	}
 }
 

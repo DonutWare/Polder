@@ -409,19 +409,20 @@ func TestImagesGetMetadataAndThumbnails(t *testing.T) {
 	})
 }
 
+// A 200x100pt page whose left half is red; PDFium rebuilds the missing xref table.
+const redHalfPDF = "%PDF-1.4\n" +
+	"1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
+	"2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n" +
+	"3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 4 0 R >> endobj\n" +
+	"4 0 obj << /Length 26 >> stream\n1 0 0 rg 0 0 100 100 re f\nendstream endobj\n" +
+	"trailer << /Root 1 0 R >>\n%%EOF\n"
+
 func TestPDFsGetFirstPageThumbnails(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 0)
 
-		// A 200x100pt page whose left half is red; PDFium rebuilds the missing xref table.
-		document := "%PDF-1.4\n" +
-			"1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
-			"2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n" +
-			"3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 200 100] /Contents 4 0 R >> endobj\n" +
-			"4 0 obj << /Length 26 >> stream\n1 0 0 rg 0 0 100 100 re f\nendstream endobj\n" +
-			"trailer << /Root 1 0 R >>\n%%EOF\n"
 		var uploaded fileEntry
-		alice.put("/Docs/scan.pdf", 0, []byte(document), http.StatusOK, &uploaded)
+		alice.put("/Docs/scan.pdf", 0, []byte(redHalfPDF), http.StatusOK, &uploaded)
 		if uploaded.PreviewState != "pending" {
 			t.Fatalf("new PDF should await a preview, got %s", uploaded.PreviewState)
 		}

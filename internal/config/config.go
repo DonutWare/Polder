@@ -48,7 +48,10 @@ type Config struct {
 	// CollaboraURL is where Collabora Online listens, as seen from this server. Without it there is no document editor.
 	CollaboraURL string `yaml:"collaboraUrl"`
 	// WOPIURL is where Collabora reaches this server; it defaults to the listen address on localhost.
-	WOPIURL string `yaml:"wopiUrl"`
+	WOPIURL            string `yaml:"wopiUrl"`
+	FFmpegPath         string `yaml:"ffmpegPath"`
+	VideoHWAccel       string `yaml:"videoHwaccel"`
+	VideoHWAccelDevice string `yaml:"videoHwaccelDevice"`
 }
 
 func Default() Config {
@@ -65,6 +68,8 @@ func Default() Config {
 		ServeWeb:           true,
 		TesseractPath:      "tesseract",
 		OCRModelURL:        "https://github.com/tesseract-ocr/tessdata_fast/raw/main",
+		FFmpegPath:         "ffmpeg",
+		VideoHWAccel:       "auto",
 	}
 }
 
@@ -106,6 +111,9 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.OCRModelURL = envOr("POLDER_OCR_MODEL_URL", cfg.OCRModelURL)
 	cfg.CollaboraURL = envOr("POLDER_COLLABORA_URL", cfg.CollaboraURL)
 	cfg.WOPIURL = envOr("POLDER_WOPI_URL", cfg.WOPIURL)
+	cfg.FFmpegPath = envOr("POLDER_FFMPEG", cfg.FFmpegPath)
+	cfg.VideoHWAccel = envOr("POLDER_VIDEO_HWACCEL", cfg.VideoHWAccel)
+	cfg.VideoHWAccelDevice = envOr("POLDER_VIDEO_HWACCEL_DEVICE", cfg.VideoHWAccelDevice)
 	if value, ok := os.LookupEnv("POLDER_TRUSTED_PROXIES"); ok {
 		cfg.TrustedProxies = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || unicode.IsSpace(r) })
 	}
