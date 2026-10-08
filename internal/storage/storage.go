@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,6 +19,7 @@ const (
 	internalDirName = ".polder"
 	tempFilePrefix  = ".polder-tmp-"
 	dirPermissions  = 0o750
+	filePermissions = 0o640
 )
 
 type Disk struct {
@@ -26,7 +28,7 @@ type Disk struct {
 
 func NewDisk(dataDir string) (*Disk, error) {
 	disk := &Disk{dataDir: dataDir}
-	for _, dir := range []string{dataDir, disk.UploadsDir(), disk.trashRoot(), disk.deletedUsersDir()} {
+	for _, dir := range []string{dataDir, disk.UploadsDir(), disk.trashRoot(), disk.versionsRoot(), disk.deletedUsersDir()} {
 		if err := os.MkdirAll(dir, dirPermissions); err != nil {
 			return nil, fmt.Errorf("create %s: %w", dir, err)
 		}
@@ -46,6 +48,34 @@ func (d *Disk) UploadsDir() string {
 
 func (d *Disk) trashRoot() string {
 	return filepath.Join(d.dataDir, internalDirName, "trash")
+}
+
+func (d *Disk) versionsRoot() string {
+	return filepath.Join(d.dataDir, internalDirName, "versions")
+}
+
+func (d *Disk) VersionChunkPath(username, chunkHash string) string {
+	return filepath.Join(d.VersionChunksDir(username), chunkHash[:2], chunkHash)
+}
+
+func (d *Disk) VersionChunksDir(username string) string {
+	return filepath.Join(d.versionsRoot(), username, "chunks")
+}
+
+func (d *Disk) PendingVersionPath(username string, versionID int64) string {
+	return filepath.Join(d.PendingVersionsDir(username), strconv.FormatInt(versionID, 10))
+}
+
+func (d *Disk) PendingVersionsDir(username string) string {
+	return filepath.Join(d.versionsRoot(), username, "pending")
+}
+
+func (d *Disk) HistoryRoot(username string) string {
+	return filepath.Join(d.versionsRoot(), username, "history")
+}
+
+func (d *Disk) HistoryDir(username, historyID string) string {
+	return filepath.Join(d.HistoryRoot(username), historyID[:2], historyID)
 }
 
 func (d *Disk) deletedUsersDir() string {
@@ -97,6 +127,14 @@ func (d *Disk) TrashItemPath(username, storageID, name string) string {
 	return filepath.Join(d.trashRoot(), username, storageID, name)
 }
 
+func (d *Disk) UserTrashRoot(username string) string {
+	return filepath.Join(d.trashRoot(), username)
+}
+
+func (d *Disk) TrashSidecarPath(username, storageID string) string {
+	return filepath.Join(d.trashRoot(), username, storageID+".json")
+}
+
 func (d *Disk) MoveToTrash(username, absolutePath, storageID, name string) error {
 	target := d.TrashItemPath(username, storageID, name)
 	if err := os.MkdirAll(filepath.Dir(target), dirPermissions); err != nil {
@@ -106,7 +144,13 @@ func (d *Disk) MoveToTrash(username, absolutePath, storageID, name string) error
 }
 
 func (d *Disk) RemoveTrashItem(username, storageID string) error {
-	return os.RemoveAll(filepath.Join(d.trashRoot(), username, storageID))
+	if err := os.RemoveAll(filepath.Join(d.trashRoot(), username, storageID)); err != nil {
+		return err
+	}
+	if err := os.Remove(d.TrashSidecarPath(username, storageID)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	return nil
 }
 
 func (d *Disk) ArchiveUserRoot(username string) error {
@@ -114,7 +158,10 @@ func (d *Disk) ArchiveUserRoot(username string) error {
 	if err := renameIfExists(d.UserRoot(username), archive); err != nil {
 		return err
 	}
-	return renameIfExists(filepath.Join(d.trashRoot(), username), archive+"-trash")
+	if err := renameIfExists(filepath.Join(d.trashRoot(), username), archive+"-trash"); err != nil {
+		return err
+	}
+	return os.RemoveAll(filepath.Join(d.versionsRoot(), username))
 }
 
 func renameIfExists(source, target string) error {
@@ -128,6 +175,24 @@ func NewID() string {
 	buffer := make([]byte, 16)
 	_, _ = rand.Read(buffer)
 	return hex.EncodeToString(buffer)
+}
+
+func WriteFileAtomically(absolutePath string, content []byte) error {
+	temporary, err := os.CreateTemp(filepath.Dir(absolutePath), tempFilePrefix+"*")
+	if err != nil {
+		return err
+	}
+	_, writeErr := temporary.Write(content)
+	closeErr := temporary.Close()
+	if err := errors.Join(writeErr, closeErr, os.Chmod(temporary.Name(), filePermissions)); err != nil {
+		_ = os.Remove(temporary.Name())
+		return err
+	}
+	if err := os.Rename(temporary.Name(), absolutePath); err != nil {
+		_ = os.Remove(temporary.Name())
+		return err
+	}
+	return nil
 }
 
 func MakeDirs(absolutePath string) error {

@@ -550,11 +550,16 @@ OfficeSessionRequest _$OfficeSessionRequestFromJson(
 ) => OfficeSessionRequest(
   origin: json['origin'] as String,
   path: json['path'] as String,
+  versionId: (json['versionId'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$OfficeSessionRequestToJson(
   OfficeSessionRequest instance,
-) => <String, dynamic>{'origin': instance.origin, 'path': instance.path};
+) => <String, dynamic>{
+  'origin': instance.origin,
+  'path': instance.path,
+  'versionId': ?instance.versionId,
+};
 
 PathRequest _$PathRequestFromJson(Map<String, dynamic> json) =>
     PathRequest(path: json['path'] as String);
@@ -739,6 +744,11 @@ ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) =>
       searchContentEnabled: json['searchContentEnabled'] as bool,
       trashRetentionDays: (json['trashRetentionDays'] as num).toInt(),
       trashRetentionEnforced: json['trashRetentionEnforced'] as bool,
+      versionsEnabled: json['versionsEnabled'] as bool,
+      versionsEnforced: json['versionsEnforced'] as bool,
+      versionsKeepAllHours: (json['versionsKeepAllHours'] as num).toInt(),
+      versionsMaxAgeDays: (json['versionsMaxAgeDays'] as num).toInt(),
+      versionsMaxPerFile: (json['versionsMaxPerFile'] as num).toInt(),
       welcomeMessage: json['welcomeMessage'] as String,
     );
 
@@ -752,6 +762,11 @@ Map<String, dynamic> _$ServerSettingsToJson(ServerSettings instance) =>
       'searchContentEnabled': instance.searchContentEnabled,
       'trashRetentionDays': instance.trashRetentionDays,
       'trashRetentionEnforced': instance.trashRetentionEnforced,
+      'versionsEnabled': instance.versionsEnabled,
+      'versionsEnforced': instance.versionsEnforced,
+      'versionsKeepAllHours': instance.versionsKeepAllHours,
+      'versionsMaxAgeDays': instance.versionsMaxAgeDays,
+      'versionsMaxPerFile': instance.versionsMaxPerFile,
       'welcomeMessage': instance.welcomeMessage,
     };
 
@@ -770,6 +785,11 @@ ServerSettingsChanges _$ServerSettingsChangesFromJson(
   searchContentEnabled: json['searchContentEnabled'] as bool?,
   trashRetentionDays: (json['trashRetentionDays'] as num?)?.toInt(),
   trashRetentionEnforced: json['trashRetentionEnforced'] as bool?,
+  versionsEnabled: json['versionsEnabled'] as bool?,
+  versionsEnforced: json['versionsEnforced'] as bool?,
+  versionsKeepAllHours: (json['versionsKeepAllHours'] as num?)?.toInt(),
+  versionsMaxAgeDays: (json['versionsMaxAgeDays'] as num?)?.toInt(),
+  versionsMaxPerFile: (json['versionsMaxPerFile'] as num?)?.toInt(),
   welcomeMessage: json['welcomeMessage'] as String?,
 );
 
@@ -784,6 +804,11 @@ Map<String, dynamic> _$ServerSettingsChangesToJson(
   'searchContentEnabled': ?instance.searchContentEnabled,
   'trashRetentionDays': ?instance.trashRetentionDays,
   'trashRetentionEnforced': ?instance.trashRetentionEnforced,
+  'versionsEnabled': ?instance.versionsEnabled,
+  'versionsEnforced': ?instance.versionsEnforced,
+  'versionsKeepAllHours': ?instance.versionsKeepAllHours,
+  'versionsMaxAgeDays': ?instance.versionsMaxAgeDays,
+  'versionsMaxPerFile': ?instance.versionsMaxPerFile,
   'welcomeMessage': ?instance.welcomeMessage,
 };
 
@@ -954,6 +979,7 @@ Map<String, dynamic> _$UploadStatusToJson(UploadStatus instance) =>
 User _$UserFromJson(Map<String, dynamic> json) => User(
   createdAt: DateTime.parse(json['createdAt'] as String),
   disabled: json['disabled'] as bool,
+  historyBytes: (json['historyBytes'] as num).toInt(),
   id: (json['id'] as num).toInt(),
   quotaBytes: (json['quotaBytes'] as num).toInt(),
   role: userRoleFromJson(json['role']),
@@ -967,6 +993,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'createdAt': instance.createdAt.toIso8601String(),
   'disabled': instance.disabled,
+  'historyBytes': instance.historyBytes,
   'id': instance.id,
   'quotaBytes': instance.quotaBytes,
   'role': ?userRoleToJson(instance.role),
@@ -975,3 +1002,94 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'usedBytes': instance.usedBytes,
   'username': instance.username,
 };
+
+VersionListing _$VersionListingFromJson(Map<String, dynamic> json) =>
+    VersionListing(
+      current: Entry.fromJson(json['current'] as Map<String, dynamic>),
+      path: json['path'] as String,
+      retention: VersionRetention.fromJson(
+        json['retention'] as Map<String, dynamic>,
+      ),
+      versions:
+          (json['versions'] as List<dynamic>?)
+              ?.map((e) => VersionView.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+
+Map<String, dynamic> _$VersionListingToJson(VersionListing instance) =>
+    <String, dynamic>{
+      'current': instance.current.toJson(),
+      'path': instance.path,
+      'retention': instance.retention.toJson(),
+      'versions': ?instance.versions?.map((e) => e.toJson()).toList(),
+    };
+
+VersionPreferences _$VersionPreferencesFromJson(Map<String, dynamic> json) =>
+    VersionPreferences(
+      enabled: json['enabled'] as bool?,
+      maxAgeDays: (json['maxAgeDays'] as num?)?.toInt(),
+      maxPerFile: (json['maxPerFile'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$VersionPreferencesToJson(VersionPreferences instance) =>
+    <String, dynamic>{
+      'enabled': ?instance.enabled,
+      'maxAgeDays': ?instance.maxAgeDays,
+      'maxPerFile': ?instance.maxPerFile,
+    };
+
+VersionRestoreRequest _$VersionRestoreRequestFromJson(
+  Map<String, dynamic> json,
+) => VersionRestoreRequest(baseRev: (json['baseRev'] as num?)?.toInt());
+
+Map<String, dynamic> _$VersionRestoreRequestToJson(
+  VersionRestoreRequest instance,
+) => <String, dynamic>{'baseRev': ?instance.baseRev};
+
+VersionRetention _$VersionRetentionFromJson(Map<String, dynamic> json) =>
+    VersionRetention(
+      enabled: json['enabled'] as bool,
+      keepAllHours: (json['keepAllHours'] as num).toInt(),
+      locked: json['locked'] as bool,
+      maxAgeDays: (json['maxAgeDays'] as num).toInt(),
+      maxPerFile: (json['maxPerFile'] as num).toInt(),
+      serverEnabled: json['serverEnabled'] as bool,
+      serverMaxAgeDays: (json['serverMaxAgeDays'] as num).toInt(),
+      serverMaxPerFile: (json['serverMaxPerFile'] as num).toInt(),
+      source: versionRetentionSourceFromJson(json['source']),
+      user: VersionPreferences.fromJson(json['user'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$VersionRetentionToJson(VersionRetention instance) =>
+    <String, dynamic>{
+      'enabled': instance.enabled,
+      'keepAllHours': instance.keepAllHours,
+      'locked': instance.locked,
+      'maxAgeDays': instance.maxAgeDays,
+      'maxPerFile': instance.maxPerFile,
+      'serverEnabled': instance.serverEnabled,
+      'serverMaxAgeDays': instance.serverMaxAgeDays,
+      'serverMaxPerFile': instance.serverMaxPerFile,
+      'source': ?versionRetentionSourceToJson(instance.source),
+      'user': instance.user.toJson(),
+    };
+
+VersionView _$VersionViewFromJson(Map<String, dynamic> json) => VersionView(
+  hasPreview: json['hasPreview'] as bool,
+  hash: json['hash'] as String,
+  id: (json['id'] as num).toInt(),
+  modifiedAt: DateTime.parse(json['modifiedAt'] as String),
+  replacedAt: DateTime.parse(json['replacedAt'] as String),
+  size: (json['size'] as num).toInt(),
+);
+
+Map<String, dynamic> _$VersionViewToJson(VersionView instance) =>
+    <String, dynamic>{
+      'hasPreview': instance.hasPreview,
+      'hash': instance.hash,
+      'id': instance.id,
+      'modifiedAt': instance.modifiedAt.toIso8601String(),
+      'replacedAt': instance.replacedAt.toIso8601String(),
+      'size': instance.size,
+    };

@@ -98,8 +98,17 @@ func (s *Service) Rescan(ctx context.Context, owner users.User) error {
 	if err := commit(); err != nil {
 		return err
 	}
+	recovered, err := s.ReconcileTrash(ctx, owner)
+	if err != nil {
+		return err
+	}
 	if summary.count > 0 {
 		s.notify(ctx, Mutation{Owner: owner, Kind: MutationRescanFinished, Path: "/", IsDir: true, Count: summary.count, Changes: summary.sample})
+	}
+	if summary.count > 0 || recovered > 0 {
+		for _, callback := range s.rescanned {
+			callback()
+		}
 	}
 	return nil
 }
@@ -214,7 +223,7 @@ func (s *Service) applyRemovals(ctx context.Context, owner users.User, removals 
 			if err != nil {
 				return err
 			}
-			if err := removeTree(ctx, tx, owner.ID, removedPath); err != nil {
+			if err := s.removeTree(ctx, tx, owner, removedPath); err != nil {
 				return err
 			}
 			if found && !isInternalName(removedPath) {
@@ -278,7 +287,7 @@ func (s *Service) applyScannedEntry(ctx context.Context, tx *sql.Tx, owner users
 		return "", err
 	}
 	if found && known.IsDir != entry.IsDir {
-		if err := removeTree(ctx, tx, owner.ID, entry.Path); err != nil {
+		if err := s.removeTree(ctx, tx, owner, entry.Path); err != nil {
 			return "", err
 		}
 	}

@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -22,22 +24,32 @@ const wopiTime = "2006-01-02T15:04:05.000000Z"
 const documentChanged = `{"COOLStatusCode":1010}`
 
 type access struct {
-	grant grant
-	user  users.User
-	entry files.Entry
+	grant   grant
+	user    users.User
+	entry   files.Entry
+	version *files.Version
+}
+
+const versionFileIDPrefix = "version-"
+
+func wopiFileID(fileID, generation, versionID int64) string {
+	switch {
+	case versionID != 0:
+		return versionFileIDPrefix + strconv.FormatInt(versionID, 10)
+	case generation != 0:
+		return strconv.FormatInt(fileID, 10) + "-" + strconv.FormatInt(generation, 10)
+	default:
+		return strconv.FormatInt(fileID, 10)
+	}
 }
 
 func (s *Service) authorize(w http.ResponseWriter, r *http.Request) (access, bool) {
-	fileID, err := strconv.ParseInt(chi.URLParam(r, "fileID"), 10, 64)
-	if err != nil {
-		http.Error(w, "unknown file", http.StatusNotFound)
-		return access{}, false
-	}
 	granted, err := s.tokens.parse(r.URL.Query().Get("access_token"))
-	if err != nil || granted.FileID != fileID {
+	if err != nil || wopiFileID(granted.FileID, granted.Generation, granted.VersionID) != chi.URLParam(r, "fileID") {
 		http.Error(w, "access token is invalid or expired", http.StatusUnauthorized)
 		return access{}, false
 	}
+	fileID := granted.FileID
 	user, err := s.auth.ActiveUser(r.Context(), granted.UserID)
 	if err != nil {
 		http.Error(w, "account is not active", http.StatusUnauthorized)
@@ -53,7 +65,23 @@ func (s *Service) authorize(w http.ResponseWriter, r *http.Request) (access, boo
 		http.Error(w, "unknown file", http.StatusNotFound)
 		return access{}, false
 	}
-	return access{grant: granted, user: user, entry: entry}, true
+	if granted.VersionID == 0 {
+		return access{grant: granted, user: user, entry: entry}, true
+	}
+	version, versionEntry, err := s.files.FindVersion(r.Context(), user, granted.VersionID)
+	if err != nil || versionEntry.ID != entry.ID {
+		http.Error(w, "unknown file", http.StatusNotFound)
+		return access{}, false
+	}
+	return access{grant: granted, user: user, entry: entry, version: &version}, true
+}
+
+func versionFileName(name string, version files.Version) string {
+	extension := path.Ext(name)
+	if extension == name {
+		extension = ""
+	}
+	return strings.TrimSuffix(name, extension) + " (" + version.ModifiedAt.Local().Format("2006-01-02 15.04") + ")" + extension
 }
 
 type fileInfo struct {
@@ -77,7 +105,7 @@ func (s *Service) checkFileInfo(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	writeJSON(w, http.StatusOK, fileInfo{
+	info := fileInfo{
 		BaseFileName:            granted.entry.Name,
 		OwnerID:                 strconv.FormatInt(granted.user.ID, 10),
 		UserID:                  strconv.FormatInt(granted.user.ID, 10),
@@ -90,12 +118,26 @@ func (s *Service) checkFileInfo(w http.ResponseWriter, r *http.Request) {
 		SupportsLocks:           true,
 		SupportsUpdate:          true,
 		PostMessageOrigin:       granted.grant.Origin,
-	})
+	}
+	if version := granted.version; version != nil {
+		info.BaseFileName = versionFileName(granted.entry.Name, *version)
+		info.Size = version.Size
+		info.Version = wopiFileID(0, 0, version.ID)
+		info.LastModifiedTime = version.ModifiedAt.UTC().Format(wopiTime)
+		info.UserCanWrite = false
+		info.SupportsLocks = false
+		info.SupportsUpdate = false
+	}
+	writeJSON(w, http.StatusOK, info)
 }
 
 func (s *Service) getFile(w http.ResponseWriter, r *http.Request) {
 	granted, ok := s.authorize(w, r)
 	if !ok {
+		return
+	}
+	if granted.version != nil {
+		s.getVersion(w, r, granted)
 		return
 	}
 	file, entry, err := s.files.Open(r.Context(), granted.user, granted.entry.Path)
@@ -108,6 +150,19 @@ func (s *Service) getFile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Length", strconv.FormatInt(entry.Size, 10))
 	w.Header().Set("X-WOPI-ItemVersion", strconv.FormatInt(entry.Rev, 10))
 	_, _ = io.Copy(w, file)
+}
+
+func (s *Service) getVersion(w http.ResponseWriter, r *http.Request, granted access) {
+	content, version, _, err := s.files.OpenVersion(r.Context(), granted.user, granted.version.ID)
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	defer content.Close()
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Length", strconv.FormatInt(version.Size, 10))
+	w.Header().Set("X-WOPI-ItemVersion", wopiFileID(0, 0, version.ID))
+	_, _ = io.Copy(w, content)
 }
 
 func (s *Service) putFile(w http.ResponseWriter, r *http.Request) {
@@ -175,7 +230,7 @@ func (s *Service) fileOperation(w http.ResponseWriter, r *http.Request) {
 	var done bool
 	switch r.Header.Get("X-WOPI-Override") {
 	case "LOCK":
-		if granted.grant.ReadOnly {
+		if granted.grant.ReadOnly || granted.version != nil {
 			http.Error(w, "this session cannot change the file", http.StatusUnauthorized)
 			return
 		}

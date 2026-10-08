@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_version.dart";
 import "package:polder/models/thumbnail_request.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/providers/browser/thumbnail_provider.dart";
@@ -20,6 +21,17 @@ class FileThumbnail extends StatelessWidget {
       mime = item.mime,
       hasPreview = item.hasPreview,
       request = ((size) => ThumbnailRequest.trash(itemId: item.id, size: size));
+
+  FileThumbnail.version({
+    required FileEntry entry,
+    required FileVersion version,
+    required this.dimension,
+    this.fill = false,
+    super.key,
+  }) : isDir = false,
+       mime = entry.mime,
+       hasPreview = version.hasPreview,
+       request = ((size) => ThumbnailRequest.version(versionId: version.id, size: size));
 
   final bool isDir;
   final String mime;

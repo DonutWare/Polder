@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"polder-server/internal/config"
 	"polder-server/internal/preview"
 )
 
@@ -305,7 +306,12 @@ func TestThumbnailsAreRemovedOnceNothingUsesThem(t *testing.T) {
 
 		replacedHash := uploadWithPreview(t, alice, "/dog.png", encodedPNG(t, 200, 100))
 		alice.put("/dog.png", -1, []byte("not an image anymore"), http.StatusOK, nil)
-		expectFiles(t, filepath.Join(server.app.Config.PreviewCacheDir(), replacedHash[:2], replacedHash+"-*.jpg"), 0)
+		replacedThumbnails := filepath.Join(server.app.Config.PreviewCacheDir(), replacedHash[:2], replacedHash+"-*.jpg")
+		history := alice.versions("/dog.png")
+		expectFiles(t, replacedThumbnails, len(preview.Sizes))
+
+		alice.mustJSON(http.MethodDelete, fmt.Sprintf("/files/versions/%d", history.Versions[0].ID), nil, http.StatusNoContent, nil)
+		expectFiles(t, replacedThumbnails, 0)
 	})
 }
 
@@ -341,4 +347,43 @@ func expectFiles(t *testing.T, pattern string, count int) {
 		}
 	}
 	t.Fatalf("want %d files matching %s, found %v", count, pattern, matches)
+}
+
+func TestTrashSurvivesLosingTheDatabase(t *testing.T) {
+	before := startServer(t, config.DriverSQLite, "")
+	alice := before.createUser(before.setupAdmin(), "alice", 0)
+	alice.put("/Docs/plan.txt", 0, []byte("draft"), http.StatusOK, nil)
+	alice.put("/Docs/plan.txt", -1, []byte("final"), http.StatusOK, nil)
+	before.waitForHistoryFiles("alice", "*.version", 1)
+	alice.mustJSON(http.MethodDelete, "/files?path=/Docs", nil, http.StatusNoContent, nil)
+	deleted := alice.trash().Items[0]
+	before.stop()
+
+	after := startServer(t, config.DriverSQLite, "", func(cfg *config.Config) { cfg.DataDir = before.app.Config.DataDir })
+	alice = after.createUser(after.setupAdmin(), "alice", 0)
+	owner, err := after.app.Users.ByID(context.Background(), 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := after.app.Files.Rescan(context.Background(), owner); err != nil {
+		t.Fatal(err)
+	}
+	listing := alice.trash()
+	if len(listing.Items) != 1 {
+		t.Fatalf("want the trashed folder back, have %+v", listing.Items)
+	}
+	recovered := listing.Items[0]
+	if recovered.OriginalPath != "/Docs" || !recovered.IsDir || recovered.Size != deleted.Size || !recovered.DeletedAt.Equal(deleted.DeletedAt) {
+		t.Fatalf("recovered %+v, deleted %+v", recovered, deleted)
+	}
+
+	alice.waitForUsage("trashed history is recovered", func(usage storageUsage) bool { return usage.HistoryBytes > 0 })
+	alice.restore(recovered.ID, "fail", http.StatusOK, nil)
+	if _, content := alice.download("/Docs/plan.txt", nil); string(content) != "final" {
+		t.Fatalf("restored file holds %q", content)
+	}
+	history := alice.versions("/Docs/plan.txt")
+	if len(history.Versions) != 1 || alice.versionContent(history.Versions[0].ID) != "draft" {
+		t.Fatalf("history should come back with the restored file: %+v", history.Versions)
+	}
 }

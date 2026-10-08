@@ -9,14 +9,16 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
+import "package:polder/widgets/shared/icon_menu_item.dart";
 
-enum _FileAction { edit, download, rename, move, delete }
+enum _FileAction { edit, download, history, rename, move, delete }
 
 class FileActionsMenu extends ConsumerWidget {
   const FileActionsMenu({required this.parentPath, required this.entry, super.key});
@@ -32,22 +34,16 @@ class FileActionsMenu extends ConsumerWidget {
       icon: const Icon(IconsaxPlusLinear.more),
       onSelected: (action) => _handle(context, ref, action),
       itemBuilder: (context) => [
-        if (editable) _item(_FileAction.edit, IconsaxPlusLinear.edit, context.localized.editorOpen),
-        if (!entry.isDir) _item(_FileAction.download, IconsaxPlusLinear.document_download, context.localized.download),
-        _item(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
-        _item(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
-        _item(_FileAction.delete, IconsaxPlusLinear.trash, context.localized.delete, color: error),
+        if (editable) iconMenuItem(_FileAction.edit, IconsaxPlusLinear.edit, context.localized.editorOpen),
+        if (!entry.isDir)
+          iconMenuItem(_FileAction.download, IconsaxPlusLinear.document_download, context.localized.download),
+        if (!entry.isDir) iconMenuItem(_FileAction.history, IconsaxPlusLinear.clock, context.localized.versionHistory),
+        iconMenuItem(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
+        iconMenuItem(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
+        iconMenuItem(_FileAction.delete, IconsaxPlusLinear.trash, context.localized.delete, color: error),
       ],
     );
   }
-
-  PopupMenuItem<_FileAction> _item(_FileAction action, IconData icon, String label, {Color? color}) => PopupMenuItem(
-    value: action,
-    child: ListTile(
-      leading: Icon(icon, color: color),
-      title: Text(label, style: color == null ? null : TextStyle(color: color)),
-    ),
-  );
 
   Future<void> _handle(BuildContext context, WidgetRef ref, _FileAction action) async {
     final directory = ref.read(directoryProvider(parentPath).notifier);
@@ -56,6 +52,8 @@ class FileActionsMenu extends ConsumerWidget {
         await context.push(AppRoutes.editor, extra: entry);
       case _FileAction.download:
         await ref.read(transfersProvider.notifier).download(entry);
+      case _FileAction.history:
+        await showFileHistory(context, entry);
       case _FileAction.rename:
         final name = await showTextInputDialog(
           context,

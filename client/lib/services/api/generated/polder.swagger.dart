@@ -989,6 +989,148 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///List a file's earlier versions, newest first
+  ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
+  Future<chopper.Response<VersionListing>> listFileVersions({String? path}) {
+    generatedMapping.putIfAbsent(
+      VersionListing,
+      () => VersionListing.fromJsonFactory,
+    );
+
+    return _listFileVersions(path: path);
+  }
+
+  ///List a file's earlier versions, newest first
+  ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
+  @GET(path: '/api/v1/files/versions')
+  Future<chopper.Response<VersionListing>> _listFileVersions({
+    @Query('path') String? path,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List a file\'s earlier versions, newest first',
+      operationId: 'listFileVersions',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  ///Delete one earlier version permanently
+  ///@param versionID
+  Future<chopper.Response> deleteFileVersion({required int? versionID}) {
+    return _deleteFileVersion(versionID: versionID);
+  }
+
+  ///Delete one earlier version permanently
+  ///@param versionID
+  @DELETE(path: '/api/v1/files/versions/{versionID}')
+  Future<chopper.Response> _deleteFileVersion({
+    @Path('versionID') required int? versionID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete one earlier version permanently',
+      operationId: 'deleteFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  ///Download an earlier version of a file
+  ///@param versionID
+  Future<chopper.Response<Stream<List<int>>>> downloadFileVersion({
+    required int? versionID,
+  }) {
+    return _downloadFileVersion(versionID: versionID);
+  }
+
+  ///Download an earlier version of a file
+  ///@param versionID
+  @GET(path: '/api/v1/files/versions/{versionID}/content')
+  Future<chopper.Response<Stream<List<int>>>> _downloadFileVersion({
+    @Path('versionID') required int? versionID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download an earlier version of a file',
+      operationId: 'downloadFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  ///Get a JPEG thumbnail of an earlier version
+  ///@param versionID
+  ///@param size Thumbnail width and height in pixels
+  Future<chopper.Response<Stream<List<int>>>> previewFileVersion({
+    required int? versionID,
+    enums.ApiV1FilesVersionsVersionIDPreviewGetSize? size,
+  }) {
+    return _previewFileVersion(
+      versionID: versionID,
+      size: size?.value?.toString(),
+    );
+  }
+
+  ///Get a JPEG thumbnail of an earlier version
+  ///@param versionID
+  ///@param size Thumbnail width and height in pixels
+  @GET(path: '/api/v1/files/versions/{versionID}/preview')
+  Future<chopper.Response<Stream<List<int>>>> _previewFileVersion({
+    @Path('versionID') required int? versionID,
+    @Query('size') String? size,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a JPEG thumbnail of an earlier version',
+      operationId: 'previewFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  ///Make an earlier version the current file; the current content is kept as a version
+  ///@param versionID
+  Future<chopper.Response<Entry>> restoreFileVersion({
+    required int? versionID,
+    required VersionRestoreRequest? body,
+  }) {
+    generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
+
+    return _restoreFileVersion(versionID: versionID, body: body);
+  }
+
+  ///Make an earlier version the current file; the current content is kept as a version
+  ///@param versionID
+  @POST(path: '/api/v1/files/versions/{versionID}/restore', optionalBody: true)
+  Future<chopper.Response<Entry>> _restoreFileVersion({
+    @Path('versionID') required int? versionID,
+    @Body() required VersionRestoreRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Make an earlier version the current file; the current content is kept as a version',
+      operationId: 'restoreFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
   ///Which files the document editor can open
   Future<chopper.Response<EditorCapabilities>> getOfficeCapabilities() {
     generatedMapping.putIfAbsent(
@@ -1584,6 +1726,61 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       produces: [],
       security: ["bearer"],
       tags: ["trash"],
+      deprecated: false,
+    ),
+  });
+
+  ///How long earlier versions of files are kept
+  Future<chopper.Response<VersionRetention>> getVersionSettings() {
+    generatedMapping.putIfAbsent(
+      VersionRetention,
+      () => VersionRetention.fromJsonFactory,
+    );
+
+    return _getVersionSettings();
+  }
+
+  ///How long earlier versions of files are kept
+  @GET(path: '/api/v1/versions/settings')
+  Future<chopper.Response<VersionRetention>> _getVersionSettings({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How long earlier versions of files are kept',
+      operationId: 'getVersionSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["versions"],
+      deprecated: false,
+    ),
+  });
+
+  ///Choose how long earlier versions of files are kept, within the server's limits
+  Future<chopper.Response<VersionRetention>> setVersionSettings({
+    required VersionPreferences? body,
+  }) {
+    generatedMapping.putIfAbsent(
+      VersionRetention,
+      () => VersionRetention.fromJsonFactory,
+    );
+
+    return _setVersionSettings(body: body);
+  }
+
+  ///Choose how long earlier versions of files are kept, within the server's limits
+  @PUT(path: '/api/v1/versions/settings', optionalBody: true)
+  Future<chopper.Response<VersionRetention>> _setVersionSettings({
+    @Body() required VersionPreferences? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose how long earlier versions of files are kept, within the server\'s limits',
+      operationId: 'setVersionSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["versions"],
       deprecated: false,
     ),
   });

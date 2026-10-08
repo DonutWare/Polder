@@ -9,6 +9,7 @@ import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/search.dart";
 import "package:polder/models/server_log.dart";
@@ -162,6 +163,33 @@ class PolderApi {
     ),
   );
 
+  Future<Uint8List?> versionPreview(int id, {int size = 256}) => _thumbnail(
+    () => _service.previewFileVersion(
+      versionID: id,
+      size: _thumbnailSize(wire.ApiV1FilesVersionsVersionIDPreviewGetSize.values, (option) => option.value, size),
+    ),
+  );
+
+  Future<VersionListing> fileVersions(String path) async =>
+      (await _service.listFileVersions(path: path)).body!.toModel();
+
+  Future<Uint8List> downloadVersion(int id, {void Function(int received, int total)? onProgress}) async =>
+      _collect(await _service.downloadFileVersion(versionID: id), onProgress);
+
+  Future<FileEntry> restoreVersion(int id, {int baseRev = 0}) async => (await _service.restoreFileVersion(
+    versionID: id,
+    body: wire.VersionRestoreRequest(baseRev: baseRev),
+  )).body!.toModel();
+
+  Future<void> deleteVersion(int id) => _service.deleteFileVersion(versionID: id);
+
+  Future<VersionRetention> versionSettings() async => (await _service.getVersionSettings()).body!.toModel();
+
+  Future<VersionRetention> setVersionSettings({bool? enabled, int? maxAgeDays, int? maxPerFile}) async =>
+      (await _service.setVersionSettings(
+        body: wire.VersionPreferences(enabled: enabled, maxAgeDays: maxAgeDays, maxPerFile: maxPerFile),
+      )).body!.toModel();
+
   Future<Uint8List?> _thumbnail(Future<chopper.Response<Stream<List<int>>>> Function() request) async {
     try {
       return await _collect(await request(), null);
@@ -172,9 +200,9 @@ class PolderApi {
 
   Future<EditorCapabilities> editorCapabilities() async => (await _service.getOfficeCapabilities()).body!.toModel();
 
-  Future<EditorSession> startEditorSession(String path, {required String origin}) async =>
+  Future<EditorSession> startEditorSession(String path, {required String origin, int? versionId}) async =>
       (await _service.startOfficeSession(
-        body: wire.OfficeSessionRequest(path: path, origin: origin),
+        body: wire.OfficeSessionRequest(path: path, origin: origin, versionId: versionId),
       )).body!.toModel();
 
   Future<ChangeFeedPage> changes({required int cursor, int limit = 1000}) async =>
@@ -237,8 +265,18 @@ class PolderApi {
     String? instanceName,
     String? welcomeMessage,
     String? accentColor,
+    bool? versionsEnabled,
+    bool? versionsEnforced,
+    int? versionsKeepAllHours,
+    int? versionsMaxAgeDays,
+    int? versionsMaxPerFile,
   }) async => (await _service.updateServerSettings(
     body: wire.ServerSettingsChanges(
+      versionsEnabled: versionsEnabled,
+      versionsEnforced: versionsEnforced,
+      versionsKeepAllHours: versionsKeepAllHours,
+      versionsMaxAgeDays: versionsMaxAgeDays,
+      versionsMaxPerFile: versionsMaxPerFile,
       trashRetentionDays: trashRetentionDays,
       trashRetentionEnforced: trashRetentionEnforced,
       searchContentEnabled: searchContentEnabled,

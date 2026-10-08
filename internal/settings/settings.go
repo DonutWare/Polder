@@ -23,6 +23,11 @@ const (
 	instanceNameKey           = "instance_name"
 	welcomeMessageKey         = "welcome_message"
 	accentColorKey            = "accent_color"
+	versionsEnabledKey        = "versions_enabled"
+	versionsEnforcedKey       = "versions_enforced"
+	versionsKeepAllHoursKey   = "versions_keep_all_hours"
+	versionsMaxAgeDaysKey     = "versions_max_age_days"
+	versionsMaxPerFileKey     = "versions_max_per_file"
 
 	MaxOCRPages = 10000
 
@@ -45,6 +50,11 @@ type ServerSettings struct {
 	InstanceName           string   `json:"instanceName" doc:"Name the apps show for this server; empty shows the default"`
 	WelcomeMessage         string   `json:"welcomeMessage" doc:"Shown on the login screen; empty shows none"`
 	AccentColor            string   `json:"accentColor" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
+	VersionsEnabled        bool     `json:"versionsEnabled" doc:"Keep earlier versions of files when they're saved over; off turns history off for everyone"`
+	VersionsEnforced       bool     `json:"versionsEnforced" doc:"Apply the server's history limits to every user, ignoring their own settings"`
+	VersionsKeepAllHours   int      `json:"versionsKeepAllHours" doc:"Hours during which every saved version is kept; older versions thin out gradually"`
+	VersionsMaxAgeDays     int      `json:"versionsMaxAgeDays" doc:"Days earlier versions are kept; 0 for no age limit. Users can only choose less"`
+	VersionsMaxPerFile     int      `json:"versionsMaxPerFile" doc:"Most earlier versions kept per file; 0 for no count limit. Users can only choose fewer"`
 }
 
 type ServerSettingsChanges struct {
@@ -57,6 +67,11 @@ type ServerSettingsChanges struct {
 	InstanceName           *string   `json:"instanceName" required:"false" maxLength:"64" doc:"Name the apps show for this server; empty shows the default"`
 	WelcomeMessage         *string   `json:"welcomeMessage" required:"false" maxLength:"500" doc:"Shown on the login screen; empty shows none"`
 	AccentColor            *string   `json:"accentColor" required:"false" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
+	VersionsEnabled        *bool     `json:"versionsEnabled" required:"false" doc:"Keep earlier versions of files when they're saved over; off turns history off for everyone"`
+	VersionsEnforced       *bool     `json:"versionsEnforced" required:"false" doc:"Apply the server's history limits to every user, ignoring their own settings"`
+	VersionsKeepAllHours   *int      `json:"versionsKeepAllHours" required:"false" minimum:"0" maximum:"720" doc:"Hours during which every saved version is kept"`
+	VersionsMaxAgeDays     *int      `json:"versionsMaxAgeDays" required:"false" minimum:"0" maximum:"3650" doc:"Days earlier versions are kept; 0 for no age limit"`
+	VersionsMaxPerFile     *int      `json:"versionsMaxPerFile" required:"false" minimum:"0" maximum:"10000" doc:"Most earlier versions kept per file; 0 for no count limit"`
 }
 
 func (c ServerSettingsChanges) validate() error {
@@ -84,7 +99,10 @@ func (c ServerSettingsChanges) validate() error {
 	if c.AccentColor != nil && *c.AccentColor != "" && !accentColorPattern.MatchString(*c.AccentColor) {
 		return apperr.Invalid("%q is not a color as #RRGGBB", *c.AccentColor)
 	}
-	return nil
+	if c.VersionsKeepAllHours != nil && (*c.VersionsKeepAllHours < 0 || *c.VersionsKeepAllHours > MaxVersionKeepAllHours) {
+		return apperr.Invalid("hours to keep every version must be between 0 and %d", MaxVersionKeepAllHours)
+	}
+	return ValidateVersionLimits(c.VersionsMaxAgeDays, c.VersionsMaxPerFile)
 }
 
 type Store struct {
@@ -141,6 +159,26 @@ func (s *Store) Get(ctx context.Context) (ServerSettings, error) {
 			current.WelcomeMessage = value
 		case accentColorKey:
 			current.AccentColor = value
+		case versionsEnabledKey:
+			if enabled, err := strconv.ParseBool(value); err == nil {
+				current.VersionsEnabled = enabled
+			}
+		case versionsEnforcedKey:
+			if enforced, err := strconv.ParseBool(value); err == nil {
+				current.VersionsEnforced = enforced
+			}
+		case versionsKeepAllHoursKey:
+			if hours, err := strconv.Atoi(value); err == nil {
+				current.VersionsKeepAllHours = hours
+			}
+		case versionsMaxAgeDaysKey:
+			if days, err := strconv.Atoi(value); err == nil {
+				current.VersionsMaxAgeDays = days
+			}
+		case versionsMaxPerFileKey:
+			if count, err := strconv.Atoi(value); err == nil {
+				current.VersionsMaxPerFile = count
+			}
 		}
 	}
 	return current, rows.Err()
@@ -178,6 +216,21 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	}
 	if changes.AccentColor != nil {
 		values[accentColorKey] = strings.ToUpper(*changes.AccentColor)
+	}
+	if changes.VersionsEnabled != nil {
+		values[versionsEnabledKey] = strconv.FormatBool(*changes.VersionsEnabled)
+	}
+	if changes.VersionsEnforced != nil {
+		values[versionsEnforcedKey] = strconv.FormatBool(*changes.VersionsEnforced)
+	}
+	if changes.VersionsKeepAllHours != nil {
+		values[versionsKeepAllHoursKey] = strconv.Itoa(*changes.VersionsKeepAllHours)
+	}
+	if changes.VersionsMaxAgeDays != nil {
+		values[versionsMaxAgeDaysKey] = strconv.Itoa(*changes.VersionsMaxAgeDays)
+	}
+	if changes.VersionsMaxPerFile != nil {
+		values[versionsMaxPerFileKey] = strconv.Itoa(*changes.VersionsMaxPerFile)
 	}
 	if err := s.save(ctx, values); err != nil {
 		return ServerSettings{}, err

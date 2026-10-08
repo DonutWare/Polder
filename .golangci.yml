@@ -25,6 +25,7 @@ linters:
         - os.Remove
         - (io.Closer).Close
         - (io.ReadCloser).Close
+        - (*io.PipeReader).Close
         - (*polder-server/internal/app.App).Close
         - (*polder-server/internal/search.Service).Close
         - (github.com/klippa-app/go-pdfium.Pdfium).Close

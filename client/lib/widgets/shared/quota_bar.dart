@@ -27,6 +27,13 @@ class QuotaBar extends ConsumerWidget {
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         if (user.hasQuota) LevelBar(fraction: user.usedFraction, height: 6),
+        if (user.historyBytes > 0)
+          Text(
+            context.localized.quotaHistory(ByteFormat.format(user.historyBytes, locale: context.localeName)),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
       ],
     );
   }

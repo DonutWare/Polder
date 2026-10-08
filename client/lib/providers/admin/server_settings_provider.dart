@@ -22,6 +22,21 @@ class ServerSettingsNotifier extends AsyncNotifier<ServerSettings> {
   Future<void> setTrashRetentionEnforced(bool enforced) =>
       _update(() => ref.read(polderApiProvider).updateServerSettings(trashRetentionEnforced: enforced));
 
+  Future<void> setVersionsEnabled(bool enabled) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsEnabled: enabled));
+
+  Future<void> setVersionsEnforced(bool enforced) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsEnforced: enforced));
+
+  Future<void> setVersionsKeepAllHours(int hours) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsKeepAllHours: hours));
+
+  Future<void> setVersionsMaxAgeDays(int days) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsMaxAgeDays: days));
+
+  Future<void> setVersionsMaxPerFile(int count) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsMaxPerFile: count));
+
   Future<void> setSearchContentEnabled(bool enabled) =>
       _update(() => ref.read(polderApiProvider).updateServerSettings(searchContentEnabled: enabled));
 

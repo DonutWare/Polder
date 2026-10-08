@@ -65,6 +65,7 @@ Map<String, dynamic> userJson({String role = "user"}) => {
   "role": role,
   "quotaBytes": 0,
   "usedBytes": 0,
+  "historyBytes": 0,
   "disabled": false,
   "createdAt": "2026-09-30T12:00:00Z",
 };

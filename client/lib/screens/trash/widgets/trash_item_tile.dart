@@ -15,6 +15,7 @@ import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/icon_menu_item.dart";
 
 enum _TrashAction { restore, download, deletePermanently }
 
@@ -64,20 +65,17 @@ class _TrashActionsMenu extends ConsumerWidget {
       icon: const Icon(IconsaxPlusLinear.more),
       onSelected: (action) => _handle(context, ref, action),
       itemBuilder: (context) => [
-        _item(_TrashAction.restore, IconsaxPlusLinear.rotate_left, localized.restore),
-        _item(_TrashAction.download, IconsaxPlusLinear.document_download, localized.download),
-        _item(_TrashAction.deletePermanently, IconsaxPlusLinear.trash, localized.deletePermanently, color: error),
+        iconMenuItem(_TrashAction.restore, IconsaxPlusLinear.rotate_left, localized.restore),
+        iconMenuItem(_TrashAction.download, IconsaxPlusLinear.document_download, localized.download),
+        iconMenuItem(
+          _TrashAction.deletePermanently,
+          IconsaxPlusLinear.trash,
+          localized.deletePermanently,
+          color: error,
+        ),
       ],
     );
   }
-
-  PopupMenuItem<_TrashAction> _item(_TrashAction action, IconData icon, String label, {Color? color}) => PopupMenuItem(
-    value: action,
-    child: ListTile(
-      leading: Icon(icon, color: color),
-      title: Text(label, style: color == null ? null : TextStyle(color: color)),
-    ),
-  );
 
   Future<void> _handle(BuildContext context, WidgetRef ref, _TrashAction action) async {
     switch (action) {

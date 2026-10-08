@@ -83,6 +83,10 @@ func (a *API) updateServerSettings(ctx context.Context, input *jsonBody[settings
 		return nil, err
 	}
 	settingsLog.Info("server settings changed", "fields", changedFields(input.Body), "by", currentUser(ctx).Username)
+	if changes := input.Body; changes.VersionsEnabled != nil || changes.VersionsEnforced != nil || changes.VersionsKeepAllHours != nil ||
+		changes.VersionsMaxAgeDays != nil || changes.VersionsMaxPerFile != nil {
+		a.versions.RequestMaintenance()
+	}
 	return respond(updated), nil
 }
 

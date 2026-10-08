@@ -12,5 +12,6 @@ final thumbnailProvider = FutureProvider.autoDispose.family<Uint8List?, Thumbnai
   return switch (request) {
     FileThumbnailRequest(:final path, :final size) => api.preview(path, size: size),
     TrashThumbnailRequest(:final itemId, :final size) => api.trashPreview(itemId, size: size),
+    VersionThumbnailRequest(:final versionId, :final size) => api.versionPreview(versionId, size: size),
   };
 });

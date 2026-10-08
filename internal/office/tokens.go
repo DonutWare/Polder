@@ -14,11 +14,13 @@ const (
 )
 
 type grant struct {
-	UserID    int64
-	FileID    int64
-	SessionID int64
-	Device    string
-	ReadOnly  bool
+	UserID     int64
+	FileID     int64
+	VersionID  int64
+	Generation int64
+	SessionID  int64
+	Device     string
+	ReadOnly   bool
 	// Origin is the page that embeds the editor, which Collabora posts its messages to.
 	Origin    string
 	ExpiresAt time.Time
@@ -26,11 +28,13 @@ type grant struct {
 
 type grantClaims struct {
 	jwt.RegisteredClaims
-	FileID    int64  `json:"fid"`
-	SessionID int64  `json:"sid,omitempty"`
-	Device    string `json:"dev,omitempty"`
-	ReadOnly  bool   `json:"ro,omitempty"`
-	Origin    string `json:"org,omitempty"`
+	FileID     int64  `json:"fid"`
+	VersionID  int64  `json:"vid,omitempty"`
+	Generation int64  `json:"gen,omitempty"`
+	SessionID  int64  `json:"sid,omitempty"`
+	Device     string `json:"dev,omitempty"`
+	ReadOnly   bool   `json:"ro,omitempty"`
+	Origin     string `json:"org,omitempty"`
 }
 
 type tokens struct {
@@ -48,11 +52,13 @@ func (t *tokens) issue(g grant) (string, grant, error) {
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(g.ExpiresAt),
 		},
-		FileID:    g.FileID,
-		SessionID: g.SessionID,
-		Device:    g.Device,
-		ReadOnly:  g.ReadOnly,
-		Origin:    g.Origin,
+		FileID:     g.FileID,
+		VersionID:  g.VersionID,
+		Generation: g.Generation,
+		SessionID:  g.SessionID,
+		Device:     g.Device,
+		ReadOnly:   g.ReadOnly,
+		Origin:     g.Origin,
 	}
 	signed, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(t.key)
 	return signed, g, err
@@ -74,12 +80,14 @@ func (t *tokens) parse(token string) (grant, error) {
 		return grant{}, err
 	}
 	return grant{
-		UserID:    userID,
-		FileID:    claims.FileID,
-		SessionID: claims.SessionID,
-		Device:    claims.Device,
-		ReadOnly:  claims.ReadOnly,
-		Origin:    claims.Origin,
-		ExpiresAt: claims.ExpiresAt.Time,
+		UserID:     userID,
+		FileID:     claims.FileID,
+		VersionID:  claims.VersionID,
+		Generation: claims.Generation,
+		SessionID:  claims.SessionID,
+		Device:     claims.Device,
+		ReadOnly:   claims.ReadOnly,
+		Origin:     claims.Origin,
+		ExpiresAt:  claims.ExpiresAt.Time,
 	}, nil
 }

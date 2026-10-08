@@ -9,13 +9,18 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_version.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/versions/file_versions_provider.dart";
 import "package:polder/screens/browser/widgets/file_details_sheet.dart";
+import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/screens/viewer/editor_theme.dart";
 import "package:polder/screens/viewer/editor_view.dart";
 import "package:polder/theme/app_theme.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/centered_progress.dart";
@@ -24,9 +29,9 @@ import "package:polder/widgets/shared/confirm_dialog.dart";
 enum _SaveState { saved, unsaved, saving }
 
 class DocumentEditorScreen extends ConsumerStatefulWidget {
-  const DocumentEditorScreen({required this.entry, super.key});
+  const DocumentEditorScreen({required this.target, super.key});
 
-  final FileEntry entry;
+  final EditorTarget target;
 
   @override
   ConsumerState<DocumentEditorScreen> createState() => _DocumentEditorScreenState();
@@ -43,6 +48,10 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
   bool _closing = false;
   _SaveState _state = _SaveState.saved;
   Completer<bool>? _saveResult;
+  late FileVersion? _version = widget.target.version;
+  int _coveringLayers = 0;
+
+  FileEntry get _entry => widget.target.entry;
 
   Uri get _server => Uri.parse(ref.read(currentAccountProvider)!.serverUrl);
 
@@ -66,7 +75,8 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
   Future<void> _start() async {
     setState(() => _session = const AsyncLoading());
     final result = await AsyncValue.guard(
-      () => ref.read(polderApiProvider).startEditorSession(widget.entry.path, origin: _server.origin),
+      () =>
+          ref.read(polderApiProvider).startEditorSession(_entry.path, origin: _server.origin, versionId: _version?.id),
     );
     if (mounted) setState(() => _session = result);
   }
@@ -80,6 +90,63 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
       _generation++;
       _loaded = false;
     });
+  }
+
+  Future<void> _showVersion(FileVersion? version) async {
+    await _save();
+    if (!mounted) return;
+    setState(() {
+      _version = version;
+      _generation++;
+      _loaded = false;
+      _channel = null;
+      _state = _SaveState.saved;
+    });
+    await _start();
+  }
+
+  Future<T> _overEditor<T>(Future<T> Function() open) async {
+    setState(() => _coveringLayers++);
+    try {
+      return await open();
+    } finally {
+      if (mounted) setState(() => _coveringLayers--);
+    }
+  }
+
+  Future<void> _showHistory() =>
+      _overEditor(() => showFileHistory(context, _entry, onView: _showVersion, onRestore: _restore));
+
+  Future<void> _restore(FileVersion version) async {
+    final localized = context.localized;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (!await _save()) {
+      messenger?.showSnackBar(SnackBar(content: Text(localized.editorSaveFailedTitle)));
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _session = const AsyncLoading());
+    final restored = await context.runWithFeedback(
+      ref.read(fileVersionsProvider(_entry.path).notifier).restore(version),
+    );
+    if (!mounted) return;
+    await _showVersion(null);
+    if (restored) messenger?.showSnackBar(SnackBar(content: Text(localized.versionRestored)));
+  }
+
+  Future<void> _restoreShownVersion() async {
+    final version = _version;
+    if (version == null) return;
+    final localized = context.localized;
+    final confirmed = await _overEditor(
+      () => showConfirmDialog(
+        context,
+        title: localized.versionRestoreTitle,
+        message: localized.versionRestoreMessage,
+        confirmLabel: localized.versionRestore,
+      ),
+    );
+    if (confirmed && mounted) await _restore(version);
   }
 
   Uri _page(EditorSession session, String language) => _server.replace(
@@ -111,6 +178,8 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
         setState(() => _state = success ? _SaveState.saved : _SaveState.unsaved);
       case ("UI_Close", _):
         unawaited(_close());
+      case ("UI_FileVersions", _):
+        unawaited(_showHistory());
     }
   }
 
@@ -132,12 +201,14 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
     final saved = await _save();
     if (!mounted) return;
     if (!saved) {
-      final leave = await showConfirmDialog(
-        context,
-        title: context.localized.editorSaveFailedTitle,
-        message: context.localized.editorSaveFailedMessage,
-        confirmLabel: context.localized.editorLeave,
-        destructive: true,
+      final leave = await _overEditor(
+        () => showConfirmDialog(
+          context,
+          title: context.localized.editorSaveFailedTitle,
+          message: context.localized.editorSaveFailedMessage,
+          confirmLabel: context.localized.editorLeave,
+          destructive: true,
+        ),
       );
       if (!mounted) return;
       if (!leave) {
@@ -164,7 +235,7 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.entry.name, overflow: TextOverflow.ellipsis),
+              Text(_entry.name, overflow: TextOverflow.ellipsis),
               if (_status(context) case final status?) Text(status, style: Theme.of(context).textTheme.bodySmall),
             ],
           ),
@@ -174,16 +245,27 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
               icon: const Icon(IconsaxPlusLinear.document_download),
               onPressed: () async {
                 await _save();
-                await ref.read(transfersProvider.notifier).download(widget.entry);
+                final transfers = ref.read(transfersProvider.notifier);
+                await switch (_version) {
+                  final version? => transfers.downloadVersion(_entry, version),
+                  null => transfers.download(_entry),
+                };
               },
+            ),
+            IconButton(
+              tooltip: context.localized.versionHistory,
+              icon: const Icon(IconsaxPlusLinear.clock),
+              onPressed: _showHistory,
             ),
             IconButton(
               tooltip: context.localized.details,
               icon: const Icon(IconsaxPlusLinear.info_circle),
-              onPressed: () => showModalBottomSheet<void>(
-                context: context,
-                showDragHandle: true,
-                builder: (_) => FileDetailsSheet(entry: widget.entry),
+              onPressed: () => _overEditor(
+                () => showModalBottomSheet<void>(
+                  context: context,
+                  showDragHandle: true,
+                  builder: (_) => FileDetailsSheet(entry: _entry, onShowHistory: _showHistory),
+                ),
               ),
             ),
           ],
@@ -191,14 +273,33 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
         body: AsyncValueView<EditorSession>(
           value: _session,
           onRetry: _start,
-          data: (session) => Stack(
+          data: (session) => Column(
             children: [
-              EditorView(
-                page: _page(session, language),
-                onMessage: _onMessage,
-                onReady: (channel) => _channel = channel,
+              if (_version case final version?)
+                MaterialBanner(
+                  leading: const Icon(IconsaxPlusLinear.clock),
+                  content: Text(context.localized.versionViewing(version.modifiedAt.formatted(context))),
+                  actions: [
+                    TextButton(
+                      onPressed: () => _showVersion(null),
+                      child: Text(context.localized.versionBackToCurrent),
+                    ),
+                    FilledButton(onPressed: _restoreShownVersion, child: Text(context.localized.versionRestore)),
+                  ],
+                ),
+              Expanded(
+                child: Stack(
+                  children: [
+                    EditorView(
+                      page: _page(session, language),
+                      onMessage: _onMessage,
+                      onReady: (channel) => _channel = channel,
+                      interactive: _coveringLayers == 0,
+                    ),
+                    if (!_loaded) const Positioned.fill(child: IgnorePointer(child: CenteredProgress())),
+                  ],
+                ),
               ),
-              if (!_loaded) const Positioned.fill(child: IgnorePointer(child: CenteredProgress())),
             ],
           ),
         ),

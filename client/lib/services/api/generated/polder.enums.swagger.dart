@@ -342,6 +342,24 @@ enum UserRole {
   const UserRole(this.value);
 }
 
+enum VersionRetentionSource {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('default')
+  $default('default'),
+  @JsonValue('user')
+  user('user'),
+  @JsonValue('server')
+  server('server'),
+  @JsonValue('admin')
+  admin('admin');
+
+  final String? value;
+
+  const VersionRetentionSource(this.value);
+}
+
 enum ApiV1AdminLogsGetLevel {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -374,6 +392,22 @@ enum ApiV1FilesPreviewGetSize {
   final int? value;
 
   const ApiV1FilesPreviewGetSize(this.value);
+}
+
+enum ApiV1FilesVersionsVersionIDPreviewGetSize {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue(128)
+  value_128(128),
+  @JsonValue(256)
+  value_256(256),
+  @JsonValue(512)
+  value_512(512);
+
+  final int? value;
+
+  const ApiV1FilesVersionsVersionIDPreviewGetSize(this.value);
 }
 
 enum ApiV1TrashItemIDPreviewGetSize {

@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_version.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/transfer.dart";
 import "package:polder/models/trash.dart";
@@ -61,6 +62,13 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     size: entry.size,
     mime: entry.mime,
     fetch: (onProgress) => ref.read(polderApiProvider).downloadBytes(entry.path, onProgress: onProgress),
+  );
+
+  Future<void> downloadVersion(FileEntry entry, FileVersion version) => _downloadAndSave(
+    name: entry.name,
+    size: version.size,
+    mime: entry.mime,
+    fetch: (onProgress) => ref.read(polderApiProvider).downloadVersion(version.id, onProgress: onProgress),
   );
 
   Future<void> downloadFromTrash(TrashItem item) => _downloadAndSave(

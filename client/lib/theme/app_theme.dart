@@ -379,7 +379,7 @@ abstract final class AppTheme {
       checkboxTheme: CheckboxThemeData(shape: rounded(AppRadius.tag - 2)),
       switchTheme: SwitchThemeData(
         thumbIcon: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected) ? const Icon(IconsaxPlusLinear.check, size: 16) : null,
+          (states) => states.contains(WidgetState.selected) ? const Icon(Icons.check_rounded, size: 16) : null,
         ),
       ),
       // ignore: deprecated_member_use

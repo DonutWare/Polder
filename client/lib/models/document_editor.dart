@@ -1,5 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_version.dart";
 
 part "document_editor.freezed.dart";
 
@@ -56,4 +57,11 @@ abstract class EditorSession with _$EditorSession {
     required int accessTokenTtl,
     @Default(false) bool readOnly,
   }) = _EditorSession;
+}
+
+class EditorTarget {
+  const EditorTarget(this.entry, {this.version});
+
+  final FileEntry entry;
+  final FileVersion? version;
 }

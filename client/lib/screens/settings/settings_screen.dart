@@ -9,6 +9,7 @@ import "package:polder/providers/current_user_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/settings/widgets/account_tile.dart";
 import "package:polder/screens/settings/widgets/trash_retention_tile.dart";
+import "package:polder/screens/settings/widgets/version_settings_group.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
@@ -37,6 +38,7 @@ class SettingsScreen extends ConsumerWidget {
                 children: [AccountTile(account: account)],
               ),
             NavGroup(title: localized.navTrash, children: const [TrashRetentionTile()]),
+            const VersionSettingsGroup(),
             NavGroup(
               title: localized.appearance,
               children: const [Padding(padding: EdgeInsets.all(20), child: AppearanceSettings())],

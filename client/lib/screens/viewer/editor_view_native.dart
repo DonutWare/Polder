@@ -8,9 +8,16 @@ import "package:polder/screens/viewer/editor_view.dart";
 import "package:url_launcher/url_launcher.dart";
 
 class EditorView extends StatefulWidget {
-  const EditorView({required this.page, required this.onMessage, required this.onReady, super.key});
+  const EditorView({
+    required this.page,
+    required this.onMessage,
+    required this.onReady,
+    this.interactive = true,
+    super.key,
+  });
 
   final Uri page;
+  final bool interactive;
   final EditorMessageHandler onMessage;
   final ValueChanged<EditorChannel> onReady;
 
@@ -33,7 +40,9 @@ class _EditorViewState extends State<EditorView> implements EditorChannel {
   }
 
   @override
-  Widget build(BuildContext context) => InAppWebView(
+  Widget build(BuildContext context) => IgnorePointer(ignoring: !widget.interactive, child: _webView());
+
+  Widget _webView() => InAppWebView(
     initialUrlRequest: URLRequest(url: WebUri.uri(widget.page)),
     initialSettings: InAppWebViewSettings(
       isInspectable: kDebugMode,

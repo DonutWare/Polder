@@ -6,6 +6,7 @@ import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/search.dart";
 import "package:polder/models/server_event.dart";
@@ -119,6 +120,7 @@ extension UserToModel on wire.User {
     },
     quotaBytes: quotaBytes,
     usedBytes: usedBytes,
+    historyBytes: historyBytes,
     disabled: disabled,
     createdAt: createdAt,
     trashRetentionOverrideDays: trashRetentionOverrideDays,
@@ -175,6 +177,53 @@ extension ServerSettingsToModel on wire.ServerSettings {
     instanceName: instanceName,
     welcomeMessage: welcomeMessage,
     accentColor: parseHexColor(accentColor),
+    versionsEnabled: versionsEnabled,
+    versionsEnforced: versionsEnforced,
+    versionsKeepAllHours: versionsKeepAllHours,
+    versionsMaxAgeDays: versionsMaxAgeDays,
+    versionsMaxPerFile: versionsMaxPerFile,
+  );
+}
+
+extension VersionViewToModel on wire.VersionView {
+  FileVersion toModel() => FileVersion(
+    id: id,
+    size: size,
+    hash: hash,
+    modifiedAt: modifiedAt,
+    replacedAt: replacedAt,
+    hasPreview: hasPreview,
+  );
+}
+
+extension VersionRetentionToModel on wire.VersionRetention {
+  VersionRetention toModel() => VersionRetention(
+    enabled: enabled,
+    keepAllHours: keepAllHours,
+    maxAgeDays: maxAgeDays,
+    maxPerFile: maxPerFile,
+    source: switch (source) {
+      wire.VersionRetentionSource.user => RetentionSource.user,
+      wire.VersionRetentionSource.server => RetentionSource.server,
+      wire.VersionRetentionSource.admin => RetentionSource.admin,
+      wire.VersionRetentionSource.$default ||
+      wire.VersionRetentionSource.swaggerGeneratedUnknown => RetentionSource.serverDefault,
+    },
+    locked: locked,
+    serverEnabled: serverEnabled,
+    serverMaxAgeDays: serverMaxAgeDays,
+    serverMaxPerFile: serverMaxPerFile,
+    userEnabled: user.enabled,
+    userMaxAgeDays: user.maxAgeDays,
+    userMaxPerFile: user.maxPerFile,
+  );
+}
+
+extension VersionListingToModel on wire.VersionListing {
+  VersionListing toModel() => VersionListing(
+    current: current.toModel(),
+    versions: [for (final version in versions ?? <wire.VersionView>[]) version.toModel()],
+    retention: retention.toModel(),
   );
 }
 

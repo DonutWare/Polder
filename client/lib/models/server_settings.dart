@@ -16,5 +16,10 @@ abstract class ServerSettings with _$ServerSettings {
     @Default("") String instanceName,
     @Default("") String welcomeMessage,
     Color? accentColor,
+    @Default(true) bool versionsEnabled,
+    @Default(false) bool versionsEnforced,
+    @Default(0) int versionsKeepAllHours,
+    @Default(0) int versionsMaxAgeDays,
+    @Default(0) int versionsMaxPerFile,
   }) = _ServerSettings;
 }

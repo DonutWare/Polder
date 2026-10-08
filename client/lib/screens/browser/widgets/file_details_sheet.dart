@@ -5,6 +5,8 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/versions/file_versions_provider.dart";
+import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/util/byte_format.dart";
 import "package:polder/util/date_format_extension.dart";
@@ -12,9 +14,10 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/detail_row.dart";
 
 class FileDetailsSheet extends ConsumerWidget {
-  const FileDetailsSheet({required this.entry, super.key});
+  const FileDetailsSheet({required this.entry, this.onShowHistory, super.key});
 
   final FileEntry entry;
+  final VoidCallback? onShowHistory;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,7 +42,27 @@ class FileDetailsSheet extends ConsumerWidget {
               DetailRow(label: localized.dimensionsLabel, value: localized.dimensions(entry.width!, entry.height!)),
             if (entry.pageCount != null) DetailRow(label: localized.pages, value: "${entry.pageCount}"),
             if (entry.takenAt != null) DetailRow(label: localized.takenAt, value: entry.takenAt!.formatted(context)),
-            DetailRow(label: localized.revision, value: "${entry.rev}"),
+            if (!entry.isDir)
+              InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () {
+                  final navigator = Navigator.of(context);
+                  navigator.pop();
+                  if (onShowHistory case final show?) {
+                    show();
+                  } else {
+                    showFileHistory(navigator.context, entry);
+                  }
+                },
+                child: DetailRow(
+                  label: localized.versions,
+                  value: switch (ref.watch(fileVersionsProvider(entry.path))) {
+                    AsyncValue(:final value?) => localized.versionCount(value.versions.length),
+                    _ => "…",
+                  },
+                  valueColor: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             const SizedBox(height: 16),
             FilledButton.icon(
               icon: const Icon(IconsaxPlusLinear.document_download),

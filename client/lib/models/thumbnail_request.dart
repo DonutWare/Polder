@@ -8,4 +8,6 @@ sealed class ThumbnailRequest with _$ThumbnailRequest {
       FileThumbnailRequest;
 
   const factory ThumbnailRequest.trash({required int itemId, @Default(256) int size}) = TrashThumbnailRequest;
+
+  const factory ThumbnailRequest.version({required int versionId, @Default(256) int size}) = VersionThumbnailRequest;
 }

@@ -2610,7 +2610,11 @@ extension $NewUserExtension on NewUser {
 
 @JsonSerializable(explicitToJson: true)
 class OfficeSessionRequest {
-  const OfficeSessionRequest({required this.origin, required this.path});
+  const OfficeSessionRequest({
+    required this.origin,
+    required this.path,
+    this.versionId,
+  });
 
   factory OfficeSessionRequest.fromJson(Map<String, dynamic> json) =>
       _$OfficeSessionRequestFromJson(json);
@@ -2622,6 +2626,8 @@ class OfficeSessionRequest {
   final String origin;
   @JsonKey(name: 'path', includeIfNull: false)
   final String path;
+  @JsonKey(name: 'versionId', includeIfNull: false)
+  final int? versionId;
   static const fromJsonFactory = _$OfficeSessionRequestFromJson;
 
   @override
@@ -2631,31 +2637,44 @@ class OfficeSessionRequest {
             (identical(other.origin, origin) ||
                 const DeepCollectionEquality().equals(other.origin, origin)) &&
             (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)));
+                const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.versionId, versionId) ||
+                const DeepCollectionEquality().equals(
+                  other.versionId,
+                  versionId,
+                )));
   }
 
   @override
   int get hashCode =>
       const DeepCollectionEquality().hash(origin) ^
       const DeepCollectionEquality().hash(path) ^
+      const DeepCollectionEquality().hash(versionId) ^
       runtimeType.hashCode;
 }
 
 extension $OfficeSessionRequestExtension on OfficeSessionRequest {
-  OfficeSessionRequest copyWith({String? origin, String? path}) {
+  OfficeSessionRequest copyWith({
+    String? origin,
+    String? path,
+    int? versionId,
+  }) {
     return OfficeSessionRequest(
       origin: origin ?? this.origin,
       path: path ?? this.path,
+      versionId: versionId ?? this.versionId,
     );
   }
 
   OfficeSessionRequest copyWithWrapped({
     Wrapped<String>? origin,
     Wrapped<String>? path,
+    Wrapped<int?>? versionId,
   }) {
     return OfficeSessionRequest(
       origin: (origin != null ? origin.value : this.origin),
       path: (path != null ? path.value : this.path),
+      versionId: (versionId != null ? versionId.value : this.versionId),
     );
   }
 }
@@ -3444,6 +3463,11 @@ class ServerSettings {
     required this.searchContentEnabled,
     required this.trashRetentionDays,
     required this.trashRetentionEnforced,
+    required this.versionsEnabled,
+    required this.versionsEnforced,
+    required this.versionsKeepAllHours,
+    required this.versionsMaxAgeDays,
+    required this.versionsMaxPerFile,
     required this.welcomeMessage,
   });
 
@@ -3469,6 +3493,16 @@ class ServerSettings {
   final int trashRetentionDays;
   @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
   final bool trashRetentionEnforced;
+  @JsonKey(name: 'versionsEnabled', includeIfNull: false)
+  final bool versionsEnabled;
+  @JsonKey(name: 'versionsEnforced', includeIfNull: false)
+  final bool versionsEnforced;
+  @JsonKey(name: 'versionsKeepAllHours', includeIfNull: false)
+  final int versionsKeepAllHours;
+  @JsonKey(name: 'versionsMaxAgeDays', includeIfNull: false)
+  final int versionsMaxAgeDays;
+  @JsonKey(name: 'versionsMaxPerFile', includeIfNull: false)
+  final int versionsMaxPerFile;
   @JsonKey(name: 'welcomeMessage', includeIfNull: false)
   final String welcomeMessage;
   static const fromJsonFactory = _$ServerSettingsFromJson;
@@ -3517,6 +3551,31 @@ class ServerSettings {
                   other.trashRetentionEnforced,
                   trashRetentionEnforced,
                 )) &&
+            (identical(other.versionsEnabled, versionsEnabled) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsEnabled,
+                  versionsEnabled,
+                )) &&
+            (identical(other.versionsEnforced, versionsEnforced) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsEnforced,
+                  versionsEnforced,
+                )) &&
+            (identical(other.versionsKeepAllHours, versionsKeepAllHours) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsKeepAllHours,
+                  versionsKeepAllHours,
+                )) &&
+            (identical(other.versionsMaxAgeDays, versionsMaxAgeDays) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsMaxAgeDays,
+                  versionsMaxAgeDays,
+                )) &&
+            (identical(other.versionsMaxPerFile, versionsMaxPerFile) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsMaxPerFile,
+                  versionsMaxPerFile,
+                )) &&
             (identical(other.welcomeMessage, welcomeMessage) ||
                 const DeepCollectionEquality().equals(
                   other.welcomeMessage,
@@ -3534,6 +3593,11 @@ class ServerSettings {
       const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(trashRetentionEnforced) ^
+      const DeepCollectionEquality().hash(versionsEnabled) ^
+      const DeepCollectionEquality().hash(versionsEnforced) ^
+      const DeepCollectionEquality().hash(versionsKeepAllHours) ^
+      const DeepCollectionEquality().hash(versionsMaxAgeDays) ^
+      const DeepCollectionEquality().hash(versionsMaxPerFile) ^
       const DeepCollectionEquality().hash(welcomeMessage) ^
       runtimeType.hashCode;
 }
@@ -3548,6 +3612,11 @@ extension $ServerSettingsExtension on ServerSettings {
     bool? searchContentEnabled,
     int? trashRetentionDays,
     bool? trashRetentionEnforced,
+    bool? versionsEnabled,
+    bool? versionsEnforced,
+    int? versionsKeepAllHours,
+    int? versionsMaxAgeDays,
+    int? versionsMaxPerFile,
     String? welcomeMessage,
   }) {
     return ServerSettings(
@@ -3560,6 +3629,11 @@ extension $ServerSettingsExtension on ServerSettings {
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       trashRetentionEnforced:
           trashRetentionEnforced ?? this.trashRetentionEnforced,
+      versionsEnabled: versionsEnabled ?? this.versionsEnabled,
+      versionsEnforced: versionsEnforced ?? this.versionsEnforced,
+      versionsKeepAllHours: versionsKeepAllHours ?? this.versionsKeepAllHours,
+      versionsMaxAgeDays: versionsMaxAgeDays ?? this.versionsMaxAgeDays,
+      versionsMaxPerFile: versionsMaxPerFile ?? this.versionsMaxPerFile,
       welcomeMessage: welcomeMessage ?? this.welcomeMessage,
     );
   }
@@ -3573,6 +3647,11 @@ extension $ServerSettingsExtension on ServerSettings {
     Wrapped<bool>? searchContentEnabled,
     Wrapped<int>? trashRetentionDays,
     Wrapped<bool>? trashRetentionEnforced,
+    Wrapped<bool>? versionsEnabled,
+    Wrapped<bool>? versionsEnforced,
+    Wrapped<int>? versionsKeepAllHours,
+    Wrapped<int>? versionsMaxAgeDays,
+    Wrapped<int>? versionsMaxPerFile,
     Wrapped<String>? welcomeMessage,
   }) {
     return ServerSettings(
@@ -3594,6 +3673,21 @@ extension $ServerSettingsExtension on ServerSettings {
       trashRetentionEnforced: (trashRetentionEnforced != null
           ? trashRetentionEnforced.value
           : this.trashRetentionEnforced),
+      versionsEnabled: (versionsEnabled != null
+          ? versionsEnabled.value
+          : this.versionsEnabled),
+      versionsEnforced: (versionsEnforced != null
+          ? versionsEnforced.value
+          : this.versionsEnforced),
+      versionsKeepAllHours: (versionsKeepAllHours != null
+          ? versionsKeepAllHours.value
+          : this.versionsKeepAllHours),
+      versionsMaxAgeDays: (versionsMaxAgeDays != null
+          ? versionsMaxAgeDays.value
+          : this.versionsMaxAgeDays),
+      versionsMaxPerFile: (versionsMaxPerFile != null
+          ? versionsMaxPerFile.value
+          : this.versionsMaxPerFile),
       welcomeMessage: (welcomeMessage != null
           ? welcomeMessage.value
           : this.welcomeMessage),
@@ -3612,6 +3706,11 @@ class ServerSettingsChanges {
     this.searchContentEnabled,
     this.trashRetentionDays,
     this.trashRetentionEnforced,
+    this.versionsEnabled,
+    this.versionsEnforced,
+    this.versionsKeepAllHours,
+    this.versionsMaxAgeDays,
+    this.versionsMaxPerFile,
     this.welcomeMessage,
   });
 
@@ -3637,6 +3736,16 @@ class ServerSettingsChanges {
   final int? trashRetentionDays;
   @JsonKey(name: 'trashRetentionEnforced', includeIfNull: false)
   final bool? trashRetentionEnforced;
+  @JsonKey(name: 'versionsEnabled', includeIfNull: false)
+  final bool? versionsEnabled;
+  @JsonKey(name: 'versionsEnforced', includeIfNull: false)
+  final bool? versionsEnforced;
+  @JsonKey(name: 'versionsKeepAllHours', includeIfNull: false)
+  final int? versionsKeepAllHours;
+  @JsonKey(name: 'versionsMaxAgeDays', includeIfNull: false)
+  final int? versionsMaxAgeDays;
+  @JsonKey(name: 'versionsMaxPerFile', includeIfNull: false)
+  final int? versionsMaxPerFile;
   @JsonKey(name: 'welcomeMessage', includeIfNull: false)
   final String? welcomeMessage;
   static const fromJsonFactory = _$ServerSettingsChangesFromJson;
@@ -3685,6 +3794,31 @@ class ServerSettingsChanges {
                   other.trashRetentionEnforced,
                   trashRetentionEnforced,
                 )) &&
+            (identical(other.versionsEnabled, versionsEnabled) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsEnabled,
+                  versionsEnabled,
+                )) &&
+            (identical(other.versionsEnforced, versionsEnforced) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsEnforced,
+                  versionsEnforced,
+                )) &&
+            (identical(other.versionsKeepAllHours, versionsKeepAllHours) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsKeepAllHours,
+                  versionsKeepAllHours,
+                )) &&
+            (identical(other.versionsMaxAgeDays, versionsMaxAgeDays) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsMaxAgeDays,
+                  versionsMaxAgeDays,
+                )) &&
+            (identical(other.versionsMaxPerFile, versionsMaxPerFile) ||
+                const DeepCollectionEquality().equals(
+                  other.versionsMaxPerFile,
+                  versionsMaxPerFile,
+                )) &&
             (identical(other.welcomeMessage, welcomeMessage) ||
                 const DeepCollectionEquality().equals(
                   other.welcomeMessage,
@@ -3702,6 +3836,11 @@ class ServerSettingsChanges {
       const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(trashRetentionEnforced) ^
+      const DeepCollectionEquality().hash(versionsEnabled) ^
+      const DeepCollectionEquality().hash(versionsEnforced) ^
+      const DeepCollectionEquality().hash(versionsKeepAllHours) ^
+      const DeepCollectionEquality().hash(versionsMaxAgeDays) ^
+      const DeepCollectionEquality().hash(versionsMaxPerFile) ^
       const DeepCollectionEquality().hash(welcomeMessage) ^
       runtimeType.hashCode;
 }
@@ -3716,6 +3855,11 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     bool? searchContentEnabled,
     int? trashRetentionDays,
     bool? trashRetentionEnforced,
+    bool? versionsEnabled,
+    bool? versionsEnforced,
+    int? versionsKeepAllHours,
+    int? versionsMaxAgeDays,
+    int? versionsMaxPerFile,
     String? welcomeMessage,
   }) {
     return ServerSettingsChanges(
@@ -3728,6 +3872,11 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       trashRetentionEnforced:
           trashRetentionEnforced ?? this.trashRetentionEnforced,
+      versionsEnabled: versionsEnabled ?? this.versionsEnabled,
+      versionsEnforced: versionsEnforced ?? this.versionsEnforced,
+      versionsKeepAllHours: versionsKeepAllHours ?? this.versionsKeepAllHours,
+      versionsMaxAgeDays: versionsMaxAgeDays ?? this.versionsMaxAgeDays,
+      versionsMaxPerFile: versionsMaxPerFile ?? this.versionsMaxPerFile,
       welcomeMessage: welcomeMessage ?? this.welcomeMessage,
     );
   }
@@ -3741,6 +3890,11 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     Wrapped<bool?>? searchContentEnabled,
     Wrapped<int?>? trashRetentionDays,
     Wrapped<bool?>? trashRetentionEnforced,
+    Wrapped<bool?>? versionsEnabled,
+    Wrapped<bool?>? versionsEnforced,
+    Wrapped<int?>? versionsKeepAllHours,
+    Wrapped<int?>? versionsMaxAgeDays,
+    Wrapped<int?>? versionsMaxPerFile,
     Wrapped<String?>? welcomeMessage,
   }) {
     return ServerSettingsChanges(
@@ -3762,6 +3916,21 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       trashRetentionEnforced: (trashRetentionEnforced != null
           ? trashRetentionEnforced.value
           : this.trashRetentionEnforced),
+      versionsEnabled: (versionsEnabled != null
+          ? versionsEnabled.value
+          : this.versionsEnabled),
+      versionsEnforced: (versionsEnforced != null
+          ? versionsEnforced.value
+          : this.versionsEnforced),
+      versionsKeepAllHours: (versionsKeepAllHours != null
+          ? versionsKeepAllHours.value
+          : this.versionsKeepAllHours),
+      versionsMaxAgeDays: (versionsMaxAgeDays != null
+          ? versionsMaxAgeDays.value
+          : this.versionsMaxAgeDays),
+      versionsMaxPerFile: (versionsMaxPerFile != null
+          ? versionsMaxPerFile.value
+          : this.versionsMaxPerFile),
       welcomeMessage: (welcomeMessage != null
           ? welcomeMessage.value
           : this.welcomeMessage),
@@ -4592,6 +4761,7 @@ class User {
   const User({
     required this.createdAt,
     required this.disabled,
+    required this.historyBytes,
     required this.id,
     required this.quotaBytes,
     required this.role,
@@ -4610,6 +4780,8 @@ class User {
   final DateTime createdAt;
   @JsonKey(name: 'disabled', includeIfNull: false)
   final bool disabled;
+  @JsonKey(name: 'historyBytes', includeIfNull: false)
+  final int historyBytes;
   @JsonKey(name: 'id', includeIfNull: false)
   final int id;
   @JsonKey(name: 'quotaBytes', includeIfNull: false)
@@ -4644,6 +4816,11 @@ class User {
                 const DeepCollectionEquality().equals(
                   other.disabled,
                   disabled,
+                )) &&
+            (identical(other.historyBytes, historyBytes) ||
+                const DeepCollectionEquality().equals(
+                  other.historyBytes,
+                  historyBytes,
                 )) &&
             (identical(other.id, id) ||
                 const DeepCollectionEquality().equals(other.id, id)) &&
@@ -4683,6 +4860,7 @@ class User {
   int get hashCode =>
       const DeepCollectionEquality().hash(createdAt) ^
       const DeepCollectionEquality().hash(disabled) ^
+      const DeepCollectionEquality().hash(historyBytes) ^
       const DeepCollectionEquality().hash(id) ^
       const DeepCollectionEquality().hash(quotaBytes) ^
       const DeepCollectionEquality().hash(role) ^
@@ -4697,6 +4875,7 @@ extension $UserExtension on User {
   User copyWith({
     DateTime? createdAt,
     bool? disabled,
+    int? historyBytes,
     int? id,
     int? quotaBytes,
     enums.UserRole? role,
@@ -4708,6 +4887,7 @@ extension $UserExtension on User {
     return User(
       createdAt: createdAt ?? this.createdAt,
       disabled: disabled ?? this.disabled,
+      historyBytes: historyBytes ?? this.historyBytes,
       id: id ?? this.id,
       quotaBytes: quotaBytes ?? this.quotaBytes,
       role: role ?? this.role,
@@ -4722,6 +4902,7 @@ extension $UserExtension on User {
   User copyWithWrapped({
     Wrapped<DateTime>? createdAt,
     Wrapped<bool>? disabled,
+    Wrapped<int>? historyBytes,
     Wrapped<int>? id,
     Wrapped<int>? quotaBytes,
     Wrapped<enums.UserRole>? role,
@@ -4733,6 +4914,9 @@ extension $UserExtension on User {
     return User(
       createdAt: (createdAt != null ? createdAt.value : this.createdAt),
       disabled: (disabled != null ? disabled.value : this.disabled),
+      historyBytes: (historyBytes != null
+          ? historyBytes.value
+          : this.historyBytes),
       id: (id != null ? id.value : this.id),
       quotaBytes: (quotaBytes != null ? quotaBytes.value : this.quotaBytes),
       role: (role != null ? role.value : this.role),
@@ -4744,6 +4928,488 @@ extension $UserExtension on User {
           : this.trashRetentionOverrideDays),
       usedBytes: (usedBytes != null ? usedBytes.value : this.usedBytes),
       username: (username != null ? username.value : this.username),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class VersionListing {
+  const VersionListing({
+    required this.current,
+    required this.path,
+    required this.retention,
+    this.versions,
+  });
+
+  factory VersionListing.fromJson(Map<String, dynamic> json) =>
+      _$VersionListingFromJson(json);
+
+  static const toJsonFactory = _$VersionListingToJson;
+  Map<String, dynamic> toJson() => _$VersionListingToJson(this);
+
+  @JsonKey(name: 'current', includeIfNull: false)
+  final Entry current;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  @JsonKey(name: 'retention', includeIfNull: false)
+  final VersionRetention retention;
+  @JsonKey(
+    name: 'versions',
+    includeIfNull: false,
+    defaultValue: <VersionView>[],
+  )
+  final List<VersionView>? versions;
+  static const fromJsonFactory = _$VersionListingFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is VersionListing &&
+            (identical(other.current, current) ||
+                const DeepCollectionEquality().equals(
+                  other.current,
+                  current,
+                )) &&
+            (identical(other.path, path) ||
+                const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.retention, retention) ||
+                const DeepCollectionEquality().equals(
+                  other.retention,
+                  retention,
+                )) &&
+            (identical(other.versions, versions) ||
+                const DeepCollectionEquality().equals(
+                  other.versions,
+                  versions,
+                )));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(current) ^
+      const DeepCollectionEquality().hash(path) ^
+      const DeepCollectionEquality().hash(retention) ^
+      const DeepCollectionEquality().hash(versions) ^
+      runtimeType.hashCode;
+}
+
+extension $VersionListingExtension on VersionListing {
+  VersionListing copyWith({
+    Entry? current,
+    String? path,
+    VersionRetention? retention,
+    List<VersionView>? versions,
+  }) {
+    return VersionListing(
+      current: current ?? this.current,
+      path: path ?? this.path,
+      retention: retention ?? this.retention,
+      versions: versions ?? this.versions,
+    );
+  }
+
+  VersionListing copyWithWrapped({
+    Wrapped<Entry>? current,
+    Wrapped<String>? path,
+    Wrapped<VersionRetention>? retention,
+    Wrapped<List<VersionView>?>? versions,
+  }) {
+    return VersionListing(
+      current: (current != null ? current.value : this.current),
+      path: (path != null ? path.value : this.path),
+      retention: (retention != null ? retention.value : this.retention),
+      versions: (versions != null ? versions.value : this.versions),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class VersionPreferences {
+  const VersionPreferences({this.enabled, this.maxAgeDays, this.maxPerFile});
+
+  factory VersionPreferences.fromJson(Map<String, dynamic> json) =>
+      _$VersionPreferencesFromJson(json);
+
+  static const toJsonFactory = _$VersionPreferencesToJson;
+  Map<String, dynamic> toJson() => _$VersionPreferencesToJson(this);
+
+  @JsonKey(name: 'enabled', includeIfNull: false)
+  final bool? enabled;
+  @JsonKey(name: 'maxAgeDays', includeIfNull: false)
+  final int? maxAgeDays;
+  @JsonKey(name: 'maxPerFile', includeIfNull: false)
+  final int? maxPerFile;
+  static const fromJsonFactory = _$VersionPreferencesFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is VersionPreferences &&
+            (identical(other.enabled, enabled) ||
+                const DeepCollectionEquality().equals(
+                  other.enabled,
+                  enabled,
+                )) &&
+            (identical(other.maxAgeDays, maxAgeDays) ||
+                const DeepCollectionEquality().equals(
+                  other.maxAgeDays,
+                  maxAgeDays,
+                )) &&
+            (identical(other.maxPerFile, maxPerFile) ||
+                const DeepCollectionEquality().equals(
+                  other.maxPerFile,
+                  maxPerFile,
+                )));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(enabled) ^
+      const DeepCollectionEquality().hash(maxAgeDays) ^
+      const DeepCollectionEquality().hash(maxPerFile) ^
+      runtimeType.hashCode;
+}
+
+extension $VersionPreferencesExtension on VersionPreferences {
+  VersionPreferences copyWith({
+    bool? enabled,
+    int? maxAgeDays,
+    int? maxPerFile,
+  }) {
+    return VersionPreferences(
+      enabled: enabled ?? this.enabled,
+      maxAgeDays: maxAgeDays ?? this.maxAgeDays,
+      maxPerFile: maxPerFile ?? this.maxPerFile,
+    );
+  }
+
+  VersionPreferences copyWithWrapped({
+    Wrapped<bool?>? enabled,
+    Wrapped<int?>? maxAgeDays,
+    Wrapped<int?>? maxPerFile,
+  }) {
+    return VersionPreferences(
+      enabled: (enabled != null ? enabled.value : this.enabled),
+      maxAgeDays: (maxAgeDays != null ? maxAgeDays.value : this.maxAgeDays),
+      maxPerFile: (maxPerFile != null ? maxPerFile.value : this.maxPerFile),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class VersionRestoreRequest {
+  const VersionRestoreRequest({this.baseRev});
+
+  factory VersionRestoreRequest.fromJson(Map<String, dynamic> json) =>
+      _$VersionRestoreRequestFromJson(json);
+
+  static const toJsonFactory = _$VersionRestoreRequestToJson;
+  Map<String, dynamic> toJson() => _$VersionRestoreRequestToJson(this);
+
+  @JsonKey(name: 'baseRev', includeIfNull: false)
+  final int? baseRev;
+  static const fromJsonFactory = _$VersionRestoreRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is VersionRestoreRequest &&
+            (identical(other.baseRev, baseRev) ||
+                const DeepCollectionEquality().equals(other.baseRev, baseRev)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(baseRev) ^ runtimeType.hashCode;
+}
+
+extension $VersionRestoreRequestExtension on VersionRestoreRequest {
+  VersionRestoreRequest copyWith({int? baseRev}) {
+    return VersionRestoreRequest(baseRev: baseRev ?? this.baseRev);
+  }
+
+  VersionRestoreRequest copyWithWrapped({Wrapped<int?>? baseRev}) {
+    return VersionRestoreRequest(
+      baseRev: (baseRev != null ? baseRev.value : this.baseRev),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class VersionRetention {
+  const VersionRetention({
+    required this.enabled,
+    required this.keepAllHours,
+    required this.locked,
+    required this.maxAgeDays,
+    required this.maxPerFile,
+    required this.serverEnabled,
+    required this.serverMaxAgeDays,
+    required this.serverMaxPerFile,
+    required this.source,
+    required this.user,
+  });
+
+  factory VersionRetention.fromJson(Map<String, dynamic> json) =>
+      _$VersionRetentionFromJson(json);
+
+  static const toJsonFactory = _$VersionRetentionToJson;
+  Map<String, dynamic> toJson() => _$VersionRetentionToJson(this);
+
+  @JsonKey(name: 'enabled', includeIfNull: false)
+  final bool enabled;
+  @JsonKey(name: 'keepAllHours', includeIfNull: false)
+  final int keepAllHours;
+  @JsonKey(name: 'locked', includeIfNull: false)
+  final bool locked;
+  @JsonKey(name: 'maxAgeDays', includeIfNull: false)
+  final int maxAgeDays;
+  @JsonKey(name: 'maxPerFile', includeIfNull: false)
+  final int maxPerFile;
+  @JsonKey(name: 'serverEnabled', includeIfNull: false)
+  final bool serverEnabled;
+  @JsonKey(name: 'serverMaxAgeDays', includeIfNull: false)
+  final int serverMaxAgeDays;
+  @JsonKey(name: 'serverMaxPerFile', includeIfNull: false)
+  final int serverMaxPerFile;
+  @JsonKey(
+    name: 'source',
+    includeIfNull: false,
+    toJson: versionRetentionSourceToJson,
+    fromJson: versionRetentionSourceFromJson,
+  )
+  final enums.VersionRetentionSource source;
+  @JsonKey(name: 'user', includeIfNull: false)
+  final VersionPreferences user;
+  static const fromJsonFactory = _$VersionRetentionFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is VersionRetention &&
+            (identical(other.enabled, enabled) ||
+                const DeepCollectionEquality().equals(
+                  other.enabled,
+                  enabled,
+                )) &&
+            (identical(other.keepAllHours, keepAllHours) ||
+                const DeepCollectionEquality().equals(
+                  other.keepAllHours,
+                  keepAllHours,
+                )) &&
+            (identical(other.locked, locked) ||
+                const DeepCollectionEquality().equals(other.locked, locked)) &&
+            (identical(other.maxAgeDays, maxAgeDays) ||
+                const DeepCollectionEquality().equals(
+                  other.maxAgeDays,
+                  maxAgeDays,
+                )) &&
+            (identical(other.maxPerFile, maxPerFile) ||
+                const DeepCollectionEquality().equals(
+                  other.maxPerFile,
+                  maxPerFile,
+                )) &&
+            (identical(other.serverEnabled, serverEnabled) ||
+                const DeepCollectionEquality().equals(
+                  other.serverEnabled,
+                  serverEnabled,
+                )) &&
+            (identical(other.serverMaxAgeDays, serverMaxAgeDays) ||
+                const DeepCollectionEquality().equals(
+                  other.serverMaxAgeDays,
+                  serverMaxAgeDays,
+                )) &&
+            (identical(other.serverMaxPerFile, serverMaxPerFile) ||
+                const DeepCollectionEquality().equals(
+                  other.serverMaxPerFile,
+                  serverMaxPerFile,
+                )) &&
+            (identical(other.source, source) ||
+                const DeepCollectionEquality().equals(other.source, source)) &&
+            (identical(other.user, user) ||
+                const DeepCollectionEquality().equals(other.user, user)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(enabled) ^
+      const DeepCollectionEquality().hash(keepAllHours) ^
+      const DeepCollectionEquality().hash(locked) ^
+      const DeepCollectionEquality().hash(maxAgeDays) ^
+      const DeepCollectionEquality().hash(maxPerFile) ^
+      const DeepCollectionEquality().hash(serverEnabled) ^
+      const DeepCollectionEquality().hash(serverMaxAgeDays) ^
+      const DeepCollectionEquality().hash(serverMaxPerFile) ^
+      const DeepCollectionEquality().hash(source) ^
+      const DeepCollectionEquality().hash(user) ^
+      runtimeType.hashCode;
+}
+
+extension $VersionRetentionExtension on VersionRetention {
+  VersionRetention copyWith({
+    bool? enabled,
+    int? keepAllHours,
+    bool? locked,
+    int? maxAgeDays,
+    int? maxPerFile,
+    bool? serverEnabled,
+    int? serverMaxAgeDays,
+    int? serverMaxPerFile,
+    enums.VersionRetentionSource? source,
+    VersionPreferences? user,
+  }) {
+    return VersionRetention(
+      enabled: enabled ?? this.enabled,
+      keepAllHours: keepAllHours ?? this.keepAllHours,
+      locked: locked ?? this.locked,
+      maxAgeDays: maxAgeDays ?? this.maxAgeDays,
+      maxPerFile: maxPerFile ?? this.maxPerFile,
+      serverEnabled: serverEnabled ?? this.serverEnabled,
+      serverMaxAgeDays: serverMaxAgeDays ?? this.serverMaxAgeDays,
+      serverMaxPerFile: serverMaxPerFile ?? this.serverMaxPerFile,
+      source: source ?? this.source,
+      user: user ?? this.user,
+    );
+  }
+
+  VersionRetention copyWithWrapped({
+    Wrapped<bool>? enabled,
+    Wrapped<int>? keepAllHours,
+    Wrapped<bool>? locked,
+    Wrapped<int>? maxAgeDays,
+    Wrapped<int>? maxPerFile,
+    Wrapped<bool>? serverEnabled,
+    Wrapped<int>? serverMaxAgeDays,
+    Wrapped<int>? serverMaxPerFile,
+    Wrapped<enums.VersionRetentionSource>? source,
+    Wrapped<VersionPreferences>? user,
+  }) {
+    return VersionRetention(
+      enabled: (enabled != null ? enabled.value : this.enabled),
+      keepAllHours: (keepAllHours != null
+          ? keepAllHours.value
+          : this.keepAllHours),
+      locked: (locked != null ? locked.value : this.locked),
+      maxAgeDays: (maxAgeDays != null ? maxAgeDays.value : this.maxAgeDays),
+      maxPerFile: (maxPerFile != null ? maxPerFile.value : this.maxPerFile),
+      serverEnabled: (serverEnabled != null
+          ? serverEnabled.value
+          : this.serverEnabled),
+      serverMaxAgeDays: (serverMaxAgeDays != null
+          ? serverMaxAgeDays.value
+          : this.serverMaxAgeDays),
+      serverMaxPerFile: (serverMaxPerFile != null
+          ? serverMaxPerFile.value
+          : this.serverMaxPerFile),
+      source: (source != null ? source.value : this.source),
+      user: (user != null ? user.value : this.user),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class VersionView {
+  const VersionView({
+    required this.hasPreview,
+    required this.hash,
+    required this.id,
+    required this.modifiedAt,
+    required this.replacedAt,
+    required this.size,
+  });
+
+  factory VersionView.fromJson(Map<String, dynamic> json) =>
+      _$VersionViewFromJson(json);
+
+  static const toJsonFactory = _$VersionViewToJson;
+  Map<String, dynamic> toJson() => _$VersionViewToJson(this);
+
+  @JsonKey(name: 'hasPreview', includeIfNull: false)
+  final bool hasPreview;
+  @JsonKey(name: 'hash', includeIfNull: false)
+  final String hash;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'modifiedAt', includeIfNull: false)
+  final DateTime modifiedAt;
+  @JsonKey(name: 'replacedAt', includeIfNull: false)
+  final DateTime replacedAt;
+  @JsonKey(name: 'size', includeIfNull: false)
+  final int size;
+  static const fromJsonFactory = _$VersionViewFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is VersionView &&
+            (identical(other.hasPreview, hasPreview) ||
+                const DeepCollectionEquality().equals(
+                  other.hasPreview,
+                  hasPreview,
+                )) &&
+            (identical(other.hash, hash) ||
+                const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.id, id) ||
+                const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.modifiedAt, modifiedAt) ||
+                const DeepCollectionEquality().equals(
+                  other.modifiedAt,
+                  modifiedAt,
+                )) &&
+            (identical(other.replacedAt, replacedAt) ||
+                const DeepCollectionEquality().equals(
+                  other.replacedAt,
+                  replacedAt,
+                )) &&
+            (identical(other.size, size) ||
+                const DeepCollectionEquality().equals(other.size, size)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(hasPreview) ^
+      const DeepCollectionEquality().hash(hash) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(modifiedAt) ^
+      const DeepCollectionEquality().hash(replacedAt) ^
+      const DeepCollectionEquality().hash(size) ^
+      runtimeType.hashCode;
+}
+
+extension $VersionViewExtension on VersionView {
+  VersionView copyWith({
+    bool? hasPreview,
+    String? hash,
+    int? id,
+    DateTime? modifiedAt,
+    DateTime? replacedAt,
+    int? size,
+  }) {
+    return VersionView(
+      hasPreview: hasPreview ?? this.hasPreview,
+      hash: hash ?? this.hash,
+      id: id ?? this.id,
+      modifiedAt: modifiedAt ?? this.modifiedAt,
+      replacedAt: replacedAt ?? this.replacedAt,
+      size: size ?? this.size,
+    );
+  }
+
+  VersionView copyWithWrapped({
+    Wrapped<bool>? hasPreview,
+    Wrapped<String>? hash,
+    Wrapped<int>? id,
+    Wrapped<DateTime>? modifiedAt,
+    Wrapped<DateTime>? replacedAt,
+    Wrapped<int>? size,
+  }) {
+    return VersionView(
+      hasPreview: (hasPreview != null ? hasPreview.value : this.hasPreview),
+      hash: (hash != null ? hash.value : this.hash),
+      id: (id != null ? id.value : this.id),
+      modifiedAt: (modifiedAt != null ? modifiedAt.value : this.modifiedAt),
+      replacedAt: (replacedAt != null ? replacedAt.value : this.replacedAt),
+      size: (size != null ? size.value : this.size),
     );
   }
 }
@@ -6135,6 +6801,84 @@ List<enums.UserRole>? userRoleNullableListFromJson(
   return userRole.map((e) => userRoleFromJson(e.toString())).toList();
 }
 
+String? versionRetentionSourceNullableToJson(
+  enums.VersionRetentionSource? versionRetentionSource,
+) {
+  return versionRetentionSource?.value;
+}
+
+String? versionRetentionSourceToJson(
+  enums.VersionRetentionSource versionRetentionSource,
+) {
+  return versionRetentionSource.value;
+}
+
+enums.VersionRetentionSource versionRetentionSourceFromJson(
+  Object? versionRetentionSource, [
+  enums.VersionRetentionSource? defaultValue,
+]) {
+  return enums.VersionRetentionSource.values.firstWhereOrNull(
+        (e) => e.value == versionRetentionSource,
+      ) ??
+      defaultValue ??
+      enums.VersionRetentionSource.swaggerGeneratedUnknown;
+}
+
+enums.VersionRetentionSource? versionRetentionSourceNullableFromJson(
+  Object? versionRetentionSource, [
+  enums.VersionRetentionSource? defaultValue,
+]) {
+  if (versionRetentionSource == null) {
+    return null;
+  }
+  return enums.VersionRetentionSource.values.firstWhereOrNull(
+        (e) => e.value == versionRetentionSource,
+      ) ??
+      defaultValue;
+}
+
+String versionRetentionSourceExplodedListToJson(
+  List<enums.VersionRetentionSource>? versionRetentionSource,
+) {
+  return versionRetentionSource?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> versionRetentionSourceListToJson(
+  List<enums.VersionRetentionSource>? versionRetentionSource,
+) {
+  if (versionRetentionSource == null) {
+    return [];
+  }
+
+  return versionRetentionSource.map((e) => e.value!).toList();
+}
+
+List<enums.VersionRetentionSource> versionRetentionSourceListFromJson(
+  List? versionRetentionSource, [
+  List<enums.VersionRetentionSource>? defaultValue,
+]) {
+  if (versionRetentionSource == null) {
+    return defaultValue ?? [];
+  }
+
+  return versionRetentionSource
+      .map((e) => versionRetentionSourceFromJson(e.toString()))
+      .toList();
+}
+
+List<enums.VersionRetentionSource>? versionRetentionSourceNullableListFromJson(
+  List? versionRetentionSource, [
+  List<enums.VersionRetentionSource>? defaultValue,
+]) {
+  if (versionRetentionSource == null) {
+    return defaultValue;
+  }
+
+  return versionRetentionSource
+      .map((e) => versionRetentionSourceFromJson(e.toString()))
+      .toList();
+}
+
 String? apiV1AdminLogsGetLevelNullableToJson(
   enums.ApiV1AdminLogsGetLevel? apiV1AdminLogsGetLevel,
 ) {
@@ -6289,6 +7033,99 @@ apiV1FilesPreviewGetSizeNullableListFromJson(
 
   return apiV1FilesPreviewGetSize
       .map((e) => apiV1FilesPreviewGetSizeFromJson(e))
+      .toList();
+}
+
+int? apiV1FilesVersionsVersionIDPreviewGetSizeNullableToJson(
+  enums.ApiV1FilesVersionsVersionIDPreviewGetSize?
+  apiV1FilesVersionsVersionIDPreviewGetSize,
+) {
+  return apiV1FilesVersionsVersionIDPreviewGetSize?.value;
+}
+
+int? apiV1FilesVersionsVersionIDPreviewGetSizeToJson(
+  enums.ApiV1FilesVersionsVersionIDPreviewGetSize
+  apiV1FilesVersionsVersionIDPreviewGetSize,
+) {
+  return apiV1FilesVersionsVersionIDPreviewGetSize.value;
+}
+
+enums.ApiV1FilesVersionsVersionIDPreviewGetSize
+apiV1FilesVersionsVersionIDPreviewGetSizeFromJson(
+  Object? apiV1FilesVersionsVersionIDPreviewGetSize, [
+  enums.ApiV1FilesVersionsVersionIDPreviewGetSize? defaultValue,
+]) {
+  return enums.ApiV1FilesVersionsVersionIDPreviewGetSize.values
+          .firstWhereOrNull(
+            (e) => e.value == apiV1FilesVersionsVersionIDPreviewGetSize,
+          ) ??
+      defaultValue ??
+      enums.ApiV1FilesVersionsVersionIDPreviewGetSize.swaggerGeneratedUnknown;
+}
+
+enums.ApiV1FilesVersionsVersionIDPreviewGetSize?
+apiV1FilesVersionsVersionIDPreviewGetSizeNullableFromJson(
+  Object? apiV1FilesVersionsVersionIDPreviewGetSize, [
+  enums.ApiV1FilesVersionsVersionIDPreviewGetSize? defaultValue,
+]) {
+  if (apiV1FilesVersionsVersionIDPreviewGetSize == null) {
+    return null;
+  }
+  return enums.ApiV1FilesVersionsVersionIDPreviewGetSize.values
+          .firstWhereOrNull(
+            (e) => e.value == apiV1FilesVersionsVersionIDPreviewGetSize,
+          ) ??
+      defaultValue;
+}
+
+String apiV1FilesVersionsVersionIDPreviewGetSizeExplodedListToJson(
+  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>?
+  apiV1FilesVersionsVersionIDPreviewGetSize,
+) {
+  return apiV1FilesVersionsVersionIDPreviewGetSize
+          ?.map((e) => e.value!)
+          .join(',') ??
+      '';
+}
+
+List<int> apiV1FilesVersionsVersionIDPreviewGetSizeListToJson(
+  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>?
+  apiV1FilesVersionsVersionIDPreviewGetSize,
+) {
+  if (apiV1FilesVersionsVersionIDPreviewGetSize == null) {
+    return [];
+  }
+
+  return apiV1FilesVersionsVersionIDPreviewGetSize
+      .map((e) => e.value!)
+      .toList();
+}
+
+List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>
+apiV1FilesVersionsVersionIDPreviewGetSizeListFromJson(
+  List? apiV1FilesVersionsVersionIDPreviewGetSize, [
+  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>? defaultValue,
+]) {
+  if (apiV1FilesVersionsVersionIDPreviewGetSize == null) {
+    return defaultValue ?? [];
+  }
+
+  return apiV1FilesVersionsVersionIDPreviewGetSize
+      .map((e) => apiV1FilesVersionsVersionIDPreviewGetSizeFromJson(e))
+      .toList();
+}
+
+List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>?
+apiV1FilesVersionsVersionIDPreviewGetSizeNullableListFromJson(
+  List? apiV1FilesVersionsVersionIDPreviewGetSize, [
+  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>? defaultValue,
+]) {
+  if (apiV1FilesVersionsVersionIDPreviewGetSize == null) {
+    return defaultValue;
+  }
+
+  return apiV1FilesVersionsVersionIDPreviewGetSize
+      .map((e) => apiV1FilesVersionsVersionIDPreviewGetSizeFromJson(e))
       .toList();
 }
 

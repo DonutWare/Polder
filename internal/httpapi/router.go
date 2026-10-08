@@ -26,6 +26,7 @@ import (
 	"polder-server/internal/settings"
 	"polder-server/internal/syncing"
 	"polder-server/internal/users"
+	"polder-server/internal/versions"
 )
 
 type API struct {
@@ -42,6 +43,7 @@ type API struct {
 	extract  *extract.Worker
 	logs     *logging.Files
 	office   *office.Service
+	versions *versions.Worker
 	limiter  *failedAttemptLimiter
 }
 
@@ -59,6 +61,7 @@ type Dependencies struct {
 	Extractor              *extract.Worker
 	Logs                   *logging.Files
 	Office                 *office.Service
+	Versions               *versions.Worker
 	LoginAttemptsPerMinute int
 	TrustedProxies         []netip.Prefix
 	// Web serves the browser client for every path outside the API; nil serves only the API.
@@ -80,6 +83,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		extract:  deps.Extractor,
 		logs:     deps.Logs,
 		office:   deps.Office,
+		versions: deps.Versions,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 	}
 
@@ -163,6 +167,16 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodDelete, "/files", "deleteFile", "Delete a file or directory", a.deleteFile)
 	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image, video or document", a.previewFile,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+
+	register(user, http.MethodGet, "/files/versions", "listFileVersions", "List a file's earlier versions, newest first", a.listVersions)
+	register(user, http.MethodGet, "/files/versions/{versionID}/content", "downloadFileVersion", "Download an earlier version of a file", a.downloadVersion,
+		withResponse(http.StatusOK, "Version content", binaryContent("application/octet-stream")))
+	register(user, http.MethodGet, "/files/versions/{versionID}/preview", "previewFileVersion", "Get a JPEG thumbnail of an earlier version", a.previewVersion,
+		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(user, http.MethodPost, "/files/versions/{versionID}/restore", "restoreFileVersion", "Make an earlier version the current file; the current content is kept as a version", a.restoreVersion)
+	register(user, http.MethodDelete, "/files/versions/{versionID}", "deleteFileVersion", "Delete one earlier version permanently", a.deleteVersion)
+	register(user, http.MethodGet, "/versions/settings", "getVersionSettings", "How long earlier versions of files are kept", a.getVersionSettings)
+	register(user, http.MethodPut, "/versions/settings", "setVersionSettings", "Choose how long earlier versions of files are kept, within the server's limits", a.setVersionSettings)
 
 	register(user, http.MethodGet, "/search", "searchFiles", "Find files and folders by name, text inside them, type, date and size", a.searchFiles,
 		withDescription(searchDescription))

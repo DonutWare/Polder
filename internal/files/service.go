@@ -34,6 +34,10 @@ type Service struct {
 	contentChanged []ContentChangedFunc
 	contentRemoved []func()
 	observers      []MutationFunc
+
+	versioningEnabled VersioningPolicy
+	versionsChanged   []func()
+	rescanned         []func()
 }
 
 func NewService(db *sql.DB, disk *storage.Disk) *Service {
@@ -42,6 +46,10 @@ func NewService(db *sql.DB, disk *storage.Disk) *Service {
 
 func (s *Service) OnContentChanged(callback ContentChangedFunc) {
 	s.contentChanged = append(s.contentChanged, callback)
+}
+
+func (s *Service) OnRescanned(callback func()) {
+	s.rescanned = append(s.rescanned, callback)
 }
 
 func (s *Service) OnContentRemoved(callback func()) {
@@ -61,7 +69,7 @@ func (s *Service) onContentRemoved() {
 }
 
 func (s *Service) HashesInUse(ctx context.Context) (map[string]bool, error) {
-	rows, err := s.db.QueryContext(ctx, `SELECT hash FROM files WHERE hash <> '' UNION SELECT hash FROM trash WHERE hash <> ''`)
+	rows, err := s.db.QueryContext(ctx, `SELECT hash FROM files WHERE hash <> '' UNION SELECT hash FROM trash WHERE hash <> '' UNION SELECT hash FROM file_versions`)
 	if err != nil {
 		return nil, err
 	}
@@ -279,8 +287,10 @@ func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo str
 		if err := s.renameOnDisk(owner, from, to); err != nil {
 			return err
 		}
-		moved, err = reindexMovedTree(ctx, tx, owner.ID, from, to)
-		return err
+		if moved, err = reindexMovedTree(ctx, tx, owner.ID, from, to); err != nil {
+			return err
+		}
+		return s.relocateHistoriesOfTree(ctx, tx, owner, to)
 	})
 	if err != nil {
 		return moved, err
@@ -368,10 +378,6 @@ func (s *Service) RequeueText(ctx context.Context, mimePatterns ...string) error
 	}
 	_, err := s.db.ExecContext(ctx, query, args...)
 	return err
-}
-
-func (s *Service) UsedBytes(ctx context.Context, userID int64) (int64, error) {
-	return usedBytes(ctx, s.db, userID)
 }
 
 func (s *Service) AllEntries(ctx context.Context, userID int64) ([]Entry, error) {

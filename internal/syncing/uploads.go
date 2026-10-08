@@ -104,7 +104,7 @@ func (s *Service) checkUploadAllowed(ctx context.Context, owner users.User, requ
 	if owner.HasUnlimitedQuota() {
 		return nil
 	}
-	used, err := s.files.UsedBytes(ctx, owner.ID)
+	used, err := s.files.FileBytes(ctx, owner.ID)
 	if err != nil {
 		return err
 	}

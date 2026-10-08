@@ -34,6 +34,12 @@ targets:
             - url: "/api/v1/trash/{itemID}/preview"
               method: get
               overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/files/versions/{versionID}/content"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/files/versions/{versionID}/preview"
+              method: get
+              overridden_value: "Stream<List<int>>"
             - url: "/api/v1/admin/logs/files/{name}"
               method: get
               overridden_value: "Stream<List<int>>"

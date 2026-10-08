@@ -911,6 +911,134 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<VersionListing>> _listFileVersions({
+    String? path,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List a file\'s earlier versions, newest first',
+      operationId: 'listFileVersions',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/versions');
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<VersionListing, VersionListing>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteFileVersion({
+    required int? versionID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete one earlier version permanently',
+      operationId: 'deleteFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/versions/${versionID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadFileVersion({
+    required int? versionID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download an earlier version of a file',
+      operationId: 'downloadFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/versions/${versionID}/content');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _previewFileVersion({
+    required int? versionID,
+    String? size,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a JPEG thumbnail of an earlier version',
+      operationId: 'previewFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/versions/${versionID}/preview');
+    final Map<String, dynamic> $params = <String, dynamic>{'size': size};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _restoreFileVersion({
+    required int? versionID,
+    required VersionRestoreRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Make an earlier version the current file; the current content is kept as a version',
+      operationId: 'restoreFileVersion',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/versions/${versionID}/restore');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
   Future<Response<EditorCapabilities>> _getOfficeCapabilities({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -1458,6 +1586,55 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       tag: swaggerMetaData,
     );
     return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<VersionRetention>> _getVersionSettings({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How long earlier versions of files are kept',
+      operationId: 'getVersionSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["versions"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/versions/settings');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<VersionRetention, VersionRetention>($request);
+  }
+
+  @override
+  Future<Response<VersionRetention>> _setVersionSettings({
+    required VersionPreferences? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose how long earlier versions of files are kept, within the server\'s limits',
+      operationId: 'setVersionSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["versions"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/versions/settings');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<VersionRetention, VersionRetention>($request);
   }
 
   @override

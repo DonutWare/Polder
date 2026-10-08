@@ -973,6 +973,11 @@
           "path": {
             "minLength": 1,
             "type": "string"
+          },
+          "versionId": {
+            "description": "Open this earlier version of the file, read-only",
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
@@ -1304,6 +1309,29 @@
             "description": "Apply trashRetentionDays to every user, ignoring their own setting",
             "type": "boolean"
           },
+          "versionsEnabled": {
+            "description": "Keep earlier versions of files when they're saved over; off turns history off for everyone",
+            "type": "boolean"
+          },
+          "versionsEnforced": {
+            "description": "Apply the server's history limits to every user, ignoring their own settings",
+            "type": "boolean"
+          },
+          "versionsKeepAllHours": {
+            "description": "Hours during which every saved version is kept; older versions thin out gradually",
+            "format": "int64",
+            "type": "integer"
+          },
+          "versionsMaxAgeDays": {
+            "description": "Days earlier versions are kept; 0 for no age limit. Users can only choose less",
+            "format": "int64",
+            "type": "integer"
+          },
+          "versionsMaxPerFile": {
+            "description": "Most earlier versions kept per file; 0 for no count limit. Users can only choose fewer",
+            "format": "int64",
+            "type": "integer"
+          },
           "welcomeMessage": {
             "description": "Shown on the login screen; empty shows none",
             "type": "string"
@@ -1318,7 +1346,12 @@
           "ocrMaxPages",
           "instanceName",
           "welcomeMessage",
-          "accentColor"
+          "accentColor",
+          "versionsEnabled",
+          "versionsEnforced",
+          "versionsKeepAllHours",
+          "versionsMaxAgeDays",
+          "versionsMaxPerFile"
         ],
         "type": "object"
       },
@@ -1372,6 +1405,40 @@
             "description": "Apply trashRetentionDays to every user, ignoring their own setting",
             "nullable": true,
             "type": "boolean"
+          },
+          "versionsEnabled": {
+            "description": "Keep earlier versions of files when they're saved over; off turns history off for everyone",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "versionsEnforced": {
+            "description": "Apply the server's history limits to every user, ignoring their own settings",
+            "nullable": true,
+            "type": "boolean"
+          },
+          "versionsKeepAllHours": {
+            "description": "Hours during which every saved version is kept",
+            "format": "int64",
+            "maximum": 720,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "versionsMaxAgeDays": {
+            "description": "Days earlier versions are kept; 0 for no age limit",
+            "format": "int64",
+            "maximum": 3650,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "versionsMaxPerFile": {
+            "description": "Most earlier versions kept per file; 0 for no count limit",
+            "format": "int64",
+            "maximum": 10000,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
           },
           "welcomeMessage": {
             "description": "Shown on the login screen; empty shows none",
@@ -1692,6 +1759,11 @@
           "disabled": {
             "type": "boolean"
           },
+          "historyBytes": {
+            "description": "Bytes used by earlier versions of files",
+            "format": "int64",
+            "type": "integer"
+          },
           "id": {
             "format": "int64",
             "type": "integer"
@@ -1719,6 +1791,7 @@
             "type": "integer"
           },
           "usedBytes": {
+            "description": "Bytes counted against the quota, including file history",
             "format": "int64",
             "type": "integer"
           },
@@ -1732,8 +1805,179 @@
           "role",
           "quotaBytes",
           "usedBytes",
+          "historyBytes",
           "disabled",
           "createdAt"
+        ],
+        "type": "object"
+      },
+      "VersionListing": {
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "$ref": "#/components/schemas/Entry"
+          },
+          "path": {
+            "type": "string"
+          },
+          "retention": {
+            "$ref": "#/components/schemas/VersionRetention"
+          },
+          "versions": {
+            "description": "Earlier versions, newest first",
+            "items": {
+              "$ref": "#/components/schemas/VersionView"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "path",
+          "current",
+          "versions",
+          "retention"
+        ],
+        "type": "object"
+      },
+      "VersionPreferences": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether to keep earlier versions of files; absent follows the server",
+            "type": "boolean"
+          },
+          "maxAgeDays": {
+            "description": "Days to keep earlier versions, 0 for no age limit; absent follows the server",
+            "format": "int64",
+            "type": "integer"
+          },
+          "maxPerFile": {
+            "description": "Most earlier versions kept per file, 0 for no count limit; absent follows the server",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VersionRestoreRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseRev": {
+            "description": "Revision the client last saw of the current file; 0 skips the check",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "VersionRetention": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether earlier versions of this user's files are kept",
+            "type": "boolean"
+          },
+          "keepAllHours": {
+            "description": "Hours during which every saved version is kept; older versions thin out gradually",
+            "format": "int64",
+            "type": "integer"
+          },
+          "locked": {
+            "description": "True when an administrator decides, so the user's own settings have no effect",
+            "type": "boolean"
+          },
+          "maxAgeDays": {
+            "description": "Days earlier versions are kept; 0 for no age limit",
+            "format": "int64",
+            "type": "integer"
+          },
+          "maxPerFile": {
+            "description": "Most earlier versions kept per file; 0 for no count limit",
+            "format": "int64",
+            "type": "integer"
+          },
+          "serverEnabled": {
+            "description": "Whether the server keeps history at all",
+            "type": "boolean"
+          },
+          "serverMaxAgeDays": {
+            "description": "The server's limit, which the user can only lower; 0 for no age limit",
+            "format": "int64",
+            "type": "integer"
+          },
+          "serverMaxPerFile": {
+            "description": "The server's limit, which the user can only lower; 0 for no count limit",
+            "format": "int64",
+            "type": "integer"
+          },
+          "source": {
+            "description": "Where the values come from; server means an administrator decides",
+            "enum": [
+              "default",
+              "user",
+              "server",
+              "admin"
+            ],
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/VersionPreferences",
+            "description": "The user's own choices; absent fields follow the server"
+          }
+        },
+        "required": [
+          "enabled",
+          "keepAllHours",
+          "maxAgeDays",
+          "maxPerFile",
+          "source",
+          "locked",
+          "serverEnabled",
+          "serverMaxAgeDays",
+          "serverMaxPerFile",
+          "user"
+        ],
+        "type": "object"
+      },
+      "VersionView": {
+        "additionalProperties": false,
+        "properties": {
+          "hasPreview": {
+            "description": "Whether GET /files/versions/{versionID}/preview has a thumbnail",
+            "type": "boolean"
+          },
+          "hash": {
+            "description": "SHA-256 of the content",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "modifiedAt": {
+            "description": "When this content was saved",
+            "format": "date-time",
+            "type": "string"
+          },
+          "replacedAt": {
+            "description": "When a newer save replaced it",
+            "format": "date-time",
+            "type": "string"
+          },
+          "size": {
+            "description": "Bytes of the file as it was",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hasPreview",
+          "id",
+          "size",
+          "hash",
+          "modifiedAt",
+          "replacedAt"
         ],
         "type": "object"
       }
@@ -3866,6 +4110,349 @@
         ]
       }
     },
+    "/api/v1/files/versions": {
+      "get": {
+        "operationId": "listFileVersions",
+        "parameters": [
+          {
+            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionListing"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a file's earlier versions, newest first",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/versions/{versionID}": {
+      "delete": {
+        "operationId": "deleteFileVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "versionID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete one earlier version permanently",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/versions/{versionID}/content": {
+      "get": {
+        "operationId": "downloadFileVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "versionID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Version content",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download an earlier version of a file",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/versions/{versionID}/preview": {
+      "get": {
+        "operationId": "previewFileVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "versionID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Thumbnail width and height in pixels",
+            "explode": false,
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "default": 256,
+              "description": "Thumbnail width and height in pixels",
+              "enum": [
+                128,
+                256,
+                512
+              ],
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Thumbnail",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a JPEG thumbnail of an earlier version",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/versions/{versionID}/restore": {
+      "post": {
+        "operationId": "restoreFileVersion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "versionID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionRestoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Make an earlier version the current file; the current content is kept as a version",
+        "tags": [
+          "files"
+        ]
+      }
+    },
     "/api/v1/office/capabilities": {
       "get": {
         "operationId": "getOfficeCapabilities",
@@ -5064,6 +5651,106 @@
         "summary": "Put a deleted item back where it was",
         "tags": [
           "trash"
+        ]
+      }
+    },
+    "/api/v1/versions/settings": {
+      "get": {
+        "operationId": "getVersionSettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionRetention"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "How long earlier versions of files are kept",
+        "tags": [
+          "versions"
+        ]
+      },
+      "put": {
+        "operationId": "setVersionSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionPreferences"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionRetention"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Choose how long earlier versions of files are kept, within the server's limits",
+        "tags": [
+          "versions"
         ]
       }
     },

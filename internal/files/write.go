@@ -100,7 +100,7 @@ func (s *Service) writeBudget(ctx context.Context, q querier, owner users.User, 
 	if owner.HasUnlimitedQuota() {
 		return unlimitedBudget, nil
 	}
-	used, err := usedBytes(ctx, q, owner.ID)
+	used, err := fileBytes(ctx, q, owner.ID)
 	if err != nil {
 		return 0, err
 	}
@@ -142,6 +142,8 @@ func (s *Service) commit(ctx context.Context, owner users.User, cleanPath, absol
 	defer unlock()
 
 	var saved Entry
+	historyChanged := false
+	keepsHistory := s.shouldCaptureVersion(ctx, owner)
 	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
 		current, exists, err := findEntry(ctx, tx, owner.ID, cleanPath)
 		if err != nil {
@@ -157,8 +159,25 @@ func (s *Service) commit(ctx context.Context, owner users.User, cleanPath, absol
 		if budget != unlimitedBudget && staged.size > budget {
 			return apperr.QuotaExceeded("this upload exceeds your storage quota")
 		}
+		capture := exists && current.Hash != staged.hash && keepsHistory
+		if capture && budget != unlimitedBudget {
+			filesAfterWrite := owner.QuotaBytes - budget + staged.size
+			var evicted bool
+			capture, evicted, err = s.makeRoomForHistory(ctx, tx, owner, filesAfterWrite, current.Size)
+			if err != nil {
+				return err
+			}
+			historyChanged = evicted
+		}
 		if err := s.ensureParentDirectories(ctx, tx, owner, cleanPath); err != nil {
 			return err
+		}
+		if capture {
+			captured, err := s.captureVersion(ctx, tx, owner, current, absolute)
+			if err != nil {
+				return err
+			}
+			historyChanged = historyChanged || captured
 		}
 		mtime, err := placeStagedFile(staged, absolute, request.Mtime)
 		if err != nil {
@@ -167,6 +186,9 @@ func (s *Service) commit(ctx context.Context, owner users.User, cleanPath, absol
 		saved, err = saveEntry(ctx, tx, newFileEntry(owner.ID, cleanPath, staged.size, mtime, staged.hash))
 		return err
 	})
+	if err == nil && historyChanged {
+		s.onVersionsChanged()
+	}
 	return saved, err
 }
 

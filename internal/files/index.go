@@ -15,6 +15,7 @@ import (
 	"unicode/utf8"
 
 	"polder-server/internal/storage"
+	"polder-server/internal/users"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -256,20 +257,17 @@ func saveEntry(ctx context.Context, q querier, entry Entry) (Entry, error) {
 	return entry, err
 }
 
-func removeTree(ctx context.Context, q querier, userID int64, cleanPath string) error {
-	if _, err := recordChange(ctx, q, userID, cleanPath, changeDelete); err != nil {
+func (s *Service) removeTree(ctx context.Context, q querier, owner users.User, cleanPath string) error {
+	if _, err := recordChange(ctx, q, owner.ID, cleanPath, changeDelete); err != nil {
+		return err
+	}
+	if err := s.removeVersionsOfTree(ctx, q, owner, cleanPath); err != nil {
 		return err
 	}
 	prefix := cleanPath + "/"
 	_, err := q.ExecContext(ctx, `DELETE FROM files WHERE user_id = $1 AND (path_key = $2 OR SUBSTR(path, 1, $3) = $4)`,
-		userID, pathKey(cleanPath), utf8.RuneCountInString(prefix), prefix)
+		owner.ID, pathKey(cleanPath), utf8.RuneCountInString(prefix), prefix)
 	return err
-}
-
-func usedBytes(ctx context.Context, q querier, userID int64) (int64, error) {
-	var used int64
-	err := q.QueryRowContext(ctx, `SELECT COALESCE(SUM(size), 0) FROM files WHERE user_id = $1`, userID).Scan(&used)
-	return used, err
 }
 
 func updateDerivedFields(ctx context.Context, q querier, userID int64, cleanPath, hash string, meta map[string]any, state PreviewState) error {

@@ -117,7 +117,7 @@ type EditorSession struct {
 
 // StartSession grants the editor access to one file. Origin is the origin of the page that embeds
 // the editor: the address the client uses for this server.
-func (s *Service) StartSession(ctx context.Context, owner users.User, rawPath, origin string) (EditorSession, error) {
+func (s *Service) StartSession(ctx context.Context, owner users.User, rawPath, origin string, versionID int64) (EditorSession, error) {
 	if !s.Enabled() {
 		return EditorSession{}, apperr.NotFound("no document editor is set up on this server")
 	}
@@ -141,19 +141,34 @@ func (s *Service) StartSession(ctx context.Context, owner users.User, rawPath, o
 	if !ok {
 		return EditorSession{}, apperr.Invalid("the document editor cannot open %s", entry.Name)
 	}
+	if versionID != 0 {
+		if _, versionEntry, err := s.files.FindVersion(ctx, owner, versionID); err != nil {
+			return EditorSession{}, err
+		} else if versionEntry.ID != entry.ID {
+			return EditorSession{}, apperr.NotFound("no such version of %s", entry.Path)
+		}
+	}
+	var generation int64
+	if versionID == 0 {
+		if generation, err = s.files.RestoreCount(ctx, entry.ID); err != nil {
+			return EditorSession{}, err
+		}
+	}
 	actor := activity.ActorFrom(ctx)
 	token, issued, err := s.tokens.issue(grant{
-		UserID:    owner.ID,
-		FileID:    entry.ID,
-		SessionID: actor.SessionID,
-		Device:    actor.Device,
-		ReadOnly:  !editor.editable,
-		Origin:    cleanOrigin,
+		UserID:     owner.ID,
+		FileID:     entry.ID,
+		VersionID:  versionID,
+		Generation: generation,
+		SessionID:  actor.SessionID,
+		Device:     actor.Device,
+		ReadOnly:   !editor.editable || versionID != 0,
+		Origin:     cleanOrigin,
 	})
 	if err != nil {
 		return EditorSession{}, err
 	}
-	query := url.Values{"WOPISrc": {fmt.Sprintf("%s/wopi/files/%d", s.wopiBase, entry.ID)}}
+	query := url.Values{"WOPISrc": {fmt.Sprintf("%s/wopi/files/%s", s.wopiBase, wopiFileID(entry.ID, generation, versionID))}}
 	return EditorSession{
 		EditorURL:      editor.path + "?" + query.Encode(),
 		HostPage:       editorPagePath,

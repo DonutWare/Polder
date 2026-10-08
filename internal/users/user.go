@@ -30,15 +30,23 @@ const (
 var usernamePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9_.-]{1,31}$`)
 
 type User struct {
-	ID                         int64     `json:"id"`
-	Username                   string    `json:"username"`
-	Role                       Role      `json:"role"`
-	QuotaBytes                 int64     `json:"quotaBytes" doc:"Storage limit in bytes; 0 is unlimited"`
-	UsedBytes                  int64     `json:"usedBytes"`
-	Disabled                   bool      `json:"disabled"`
-	CreatedAt                  time.Time `json:"createdAt"`
-	TrashRetentionDays         *int      `json:"trashRetentionDays,omitempty" required:"false" doc:"Days the user chose to keep trashed items; absent follows the server default"`
-	TrashRetentionOverrideDays *int      `json:"trashRetentionOverrideDays,omitempty" required:"false" doc:"Days an administrator fixed for this user's trash; absent when not overridden"`
+	ID                         int64              `json:"id"`
+	Username                   string             `json:"username"`
+	Role                       Role               `json:"role"`
+	QuotaBytes                 int64              `json:"quotaBytes" doc:"Storage limit in bytes; 0 is unlimited"`
+	UsedBytes                  int64              `json:"usedBytes" doc:"Bytes counted against the quota, including file history"`
+	HistoryBytes               int64              `json:"historyBytes" doc:"Bytes used by earlier versions of files"`
+	Disabled                   bool               `json:"disabled"`
+	CreatedAt                  time.Time          `json:"createdAt"`
+	TrashRetentionDays         *int               `json:"trashRetentionDays,omitempty" required:"false" doc:"Days the user chose to keep trashed items; absent follows the server default"`
+	TrashRetentionOverrideDays *int               `json:"trashRetentionOverrideDays,omitempty" required:"false" doc:"Days an administrator fixed for this user's trash; absent when not overridden"`
+	Versions                   VersionPreferences `json:"-"`
+}
+
+type VersionPreferences struct {
+	Enabled    *bool `json:"enabled,omitempty" required:"false" doc:"Whether to keep earlier versions of files; absent follows the server"`
+	MaxAgeDays *int  `json:"maxAgeDays,omitempty" required:"false" doc:"Days to keep earlier versions, 0 for no age limit; absent follows the server"`
+	MaxPerFile *int  `json:"maxPerFile,omitempty" required:"false" doc:"Most earlier versions kept per file, 0 for no count limit; absent follows the server"`
 }
 
 func (u User) IsAdmin() bool { return u.Role == RoleAdmin }

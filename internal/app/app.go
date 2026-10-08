@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"polder-server/internal/activity"
@@ -26,6 +27,7 @@ import (
 	"polder-server/internal/storage"
 	"polder-server/internal/syncing"
 	"polder-server/internal/users"
+	"polder-server/internal/versions"
 	"polder-server/internal/webui"
 )
 
@@ -52,6 +54,9 @@ type App struct {
 	previews  *preview.Worker
 	extractor *extract.Worker
 	sync      *syncing.Service
+	versions  *versions.Worker
+
+	background sync.WaitGroup
 }
 
 func New(cfg config.Config) (*App, error) {
@@ -90,9 +95,14 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		OCREnabled:           true,
 		OCRLanguages:         extract.DefaultOCRLanguages,
 		OCRMaxPages:          extract.DefaultOCRMaxPages,
+		VersionsEnabled:      true,
+		VersionsKeepAllHours: settings.DefaultVersionKeepAllHours,
+		VersionsMaxAgeDays:   settings.DefaultVersionMaxAgeDays,
+		VersionsMaxPerFile:   settings.DefaultVersionMaxPerFile,
 	})
 	fileService := files.NewService(db, disk)
 	syncService := syncing.NewService(db, fileService)
+	versionWorker := versions.NewWorker(fileService, userStore, serverSettings)
 	activityHub := activity.NewHub(activity.NewStore(db))
 	fileService.OnMutation(activityHub.FileMutation)
 	extractor, err := extract.NewWorker(fileService, userStore, serverSettings, extract.Options{
@@ -161,6 +171,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Extractor:              extractor,
 		Logs:                   logs,
 		Office:                 officeService,
+		Versions:               versionWorker,
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		TrustedProxies:         trustedProxies,
 		Web:                    web,
@@ -179,6 +190,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		previews:  previews,
 		extractor: extractor,
 		sync:      syncService,
+		versions:  versionWorker,
 	}, nil
 }
 
@@ -207,29 +219,37 @@ func webClient(cfg config.Config) (http.Handler, error) {
 }
 
 func (a *App) Close() error {
+	a.background.Wait()
 	return errors.Join(a.Search.Close(), a.db.Close())
 }
 
 func (a *App) StartBackgroundWork(ctx context.Context) {
-	go a.scanner.Run(ctx)
-	go a.previews.Run(ctx)
-	go a.extractor.Run(ctx)
-	go a.Search.Run(ctx)
-	go repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads)
-	go repeat(ctx, trashPurgeInterval, "purge expired trash", func(ctx context.Context) error {
-		return a.PurgeExpiredTrash(ctx, time.Now())
+	a.background.Go(func() { a.scanner.Run(ctx) })
+	a.background.Go(func() { a.previews.Run(ctx) })
+	a.background.Go(func() { a.extractor.Run(ctx) })
+	a.background.Go(func() { a.Search.Run(ctx) })
+	a.background.Go(func() { a.versions.Run(ctx) })
+	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
+	a.background.Go(func() {
+		repeat(ctx, trashPurgeInterval, "purge expired trash", func(ctx context.Context) error {
+			return a.PurgeExpiredTrash(ctx, time.Now())
+		})
 	})
-	go a.Activity.Run(ctx)
-	go repeat(ctx, activityPurgeInterval, "purge old activity", func(ctx context.Context) error {
-		_, err := a.Activity.Store().PurgeOlderThan(ctx, time.Now().Add(-activity.Retention))
-		return err
+	a.background.Go(func() { a.Activity.Run(ctx) })
+	a.background.Go(func() {
+		repeat(ctx, activityPurgeInterval, "purge old activity", func(ctx context.Context) error {
+			_, err := a.Activity.Store().PurgeOlderThan(ctx, time.Now().Add(-activity.Retention))
+			return err
+		})
 	})
-	go repeat(ctx, logPurgeInterval, "purge old logs", func(context.Context) error {
-		removed, err := a.Logs.PurgeOlderThan(time.Now().AddDate(0, 0, 1-a.Config.LogRetentionDays))
-		if removed > 0 {
-			logger.Info("purged old log files", "files", removed)
-		}
-		return err
+	a.background.Go(func() {
+		repeat(ctx, logPurgeInterval, "purge old logs", func(context.Context) error {
+			removed, err := a.Logs.PurgeOlderThan(time.Now().AddDate(0, 0, 1-a.Config.LogRetentionDays))
+			if removed > 0 {
+				logger.Info("purged old log files", "files", removed)
+			}
+			return err
+		})
 	})
 }
 

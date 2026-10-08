@@ -8,9 +8,16 @@ import "package:web/web.dart" as web;
 import "package:polder/screens/viewer/editor_view.dart";
 
 class EditorView extends StatefulWidget {
-  const EditorView({required this.page, required this.onMessage, required this.onReady, super.key});
+  const EditorView({
+    required this.page,
+    required this.onMessage,
+    required this.onReady,
+    this.interactive = true,
+    super.key,
+  });
 
   final Uri page;
+  final bool interactive;
   final EditorMessageHandler onMessage;
   final ValueChanged<EditorChannel> onReady;
 
@@ -38,7 +45,10 @@ class _EditorViewState extends State<EditorView> implements EditorChannel {
   void didUpdateWidget(EditorView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.page != widget.page) _frame?.src = widget.page.toString();
+    if (oldWidget.interactive != widget.interactive) _applyInteractive();
   }
+
+  void _applyInteractive() => _frame?.style.pointerEvents = widget.interactive ? "auto" : "none";
 
   void _receive(web.MessageEvent event) {
     if (event.origin != widget.page.origin) return;
@@ -64,6 +74,7 @@ class _EditorViewState extends State<EditorView> implements EditorChannel {
         ..width = "100%"
         ..height = "100%";
       _frame = frame;
+      _applyInteractive();
       widget.onReady(this);
     },
   );

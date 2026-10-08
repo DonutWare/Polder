@@ -15,6 +15,7 @@ abstract class User with _$User {
     @JsonKey(unknownEnumValue: UserRole.user) @Default(UserRole.user) UserRole role,
     @Default(0) int quotaBytes,
     @Default(0) int usedBytes,
+    @Default(0) int historyBytes,
     @Default(false) bool disabled,
     DateTime? createdAt,
     int? trashRetentionOverrideDays,

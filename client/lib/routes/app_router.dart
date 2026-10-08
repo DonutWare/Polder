@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
 import "package:polder/models/account.dart";
+import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/scan_session.dart";
 import "package:polder/providers/account_provider.dart";
@@ -57,8 +58,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.editor,
-        redirect: (_, state) => state.extra is FileEntry ? null : AppRoutes.files,
-        builder: (_, state) => DocumentEditorScreen(entry: state.extra! as FileEntry),
+        redirect: (_, state) => state.extra is FileEntry || state.extra is EditorTarget ? null : AppRoutes.files,
+        builder: (_, state) => DocumentEditorScreen(
+          target: switch (state.extra) {
+            final EditorTarget target => target,
+            final extra => EditorTarget(extra! as FileEntry),
+          },
+        ),
       ),
       ShellRoute(
         builder: (_, state, child) => AppShell(location: state.uri.path, child: child),

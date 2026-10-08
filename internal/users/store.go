@@ -14,7 +14,10 @@ import (
 
 const selectUserColumns = `SELECT u.id, u.username, u.role, u.quota_bytes, u.disabled, u.created_at,
 	u.trash_retention_days, u.trash_retention_override_days,
-	COALESCE((SELECT SUM(f.size) FROM files f WHERE f.user_id = u.id), 0) FROM users u`
+	u.versions_enabled, u.versions_max_age_days, u.versions_max_per_file,
+	COALESCE((SELECT SUM(f.size) FROM files f WHERE f.user_id = u.id), 0),
+	COALESCE((SELECT SUM(k.stored_size) FROM version_chunks k WHERE k.user_id = u.id), 0)
+	+ COALESCE((SELECT SUM(v.size) FROM file_versions v WHERE v.user_id = u.id AND v.state = 'pending'), 0) FROM users u`
 
 type Store struct {
 	db *sql.DB
@@ -31,28 +34,50 @@ type rowScanner interface {
 func scanUser(row rowScanner) (User, error) {
 	var user User
 	var createdAt int64
-	var retention, retentionOverride sql.NullInt64
+	var retention, retentionOverride, versionsMaxAge, versionsMaxPerFile sql.NullInt64
+	var versionsEnabled sql.NullBool
+	var fileBytes int64
 	err := row.Scan(&user.ID, &user.Username, &user.Role, &user.QuotaBytes, &user.Disabled, &createdAt,
-		&retention, &retentionOverride, &user.UsedBytes)
+		&retention, &retentionOverride, &versionsEnabled, &versionsMaxAge, &versionsMaxPerFile, &fileBytes, &user.HistoryBytes)
 	user.CreatedAt = time.Unix(createdAt, 0).UTC()
-	user.TrashRetentionDays = optionalDays(retention)
-	user.TrashRetentionOverrideDays = optionalDays(retentionOverride)
+	user.TrashRetentionDays = optionalInt(retention)
+	user.TrashRetentionOverrideDays = optionalInt(retentionOverride)
+	user.Versions = VersionPreferences{
+		Enabled:    optionalBool(versionsEnabled),
+		MaxAgeDays: optionalInt(versionsMaxAge),
+		MaxPerFile: optionalInt(versionsMaxPerFile),
+	}
+	user.UsedBytes = fileBytes + user.HistoryBytes
 	return user, err
 }
 
-func optionalDays(value sql.NullInt64) *int {
+func optionalInt(value sql.NullInt64) *int {
 	if !value.Valid {
 		return nil
 	}
-	days := int(value.Int64)
-	return &days
+	converted := int(value.Int64)
+	return &converted
 }
 
-func nullableDays(days *int) any {
-	if days == nil {
+func optionalBool(value sql.NullBool) *bool {
+	if !value.Valid {
 		return nil
 	}
-	return *days
+	return &value.Bool
+}
+
+func nullableBool(value *bool) any {
+	if value == nil {
+		return nil
+	}
+	return *value
+}
+
+func nullableInt(value *int) any {
+	if value == nil {
+		return nil
+	}
+	return *value
 }
 
 func (s *Store) Count(ctx context.Context) (int, error) {
@@ -137,7 +162,7 @@ func (s *Store) Update(ctx context.Context, id int64, changes Changes, passwordH
 		if *override == ClearRetentionOverride {
 			override = nil
 		}
-		set("trash_retention_override_days", nullableDays(override))
+		set("trash_retention_override_days", nullableInt(override))
 	}
 	if len(assignments) == 0 {
 		return nil
@@ -149,7 +174,13 @@ func (s *Store) Update(ctx context.Context, id int64, changes Changes, passwordH
 }
 
 func (s *Store) SetTrashRetention(ctx context.Context, id int64, days *int) error {
-	_, err := s.db.ExecContext(ctx, `UPDATE users SET trash_retention_days = $1 WHERE id = $2`, nullableDays(days), id)
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET trash_retention_days = $1 WHERE id = $2`, nullableInt(days), id)
+	return err
+}
+
+func (s *Store) SetVersionPreferences(ctx context.Context, id int64, preferences VersionPreferences) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET versions_enabled = $1, versions_max_age_days = $2, versions_max_per_file = $3 WHERE id = $4`,
+		nullableBool(preferences.Enabled), nullableInt(preferences.MaxAgeDays), nullableInt(preferences.MaxPerFile), id)
 	return err
 }
 

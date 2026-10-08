@@ -3,6 +3,7 @@ package files
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -103,7 +104,7 @@ func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, 
 	storageID := storage.NewID()
 	err = s.disk.MoveToTrash(owner.Username, absolute, storageID, entry.Name)
 	if errors.Is(err, fs.ErrNotExist) {
-		return noUndo, removeTree(ctx, q, owner.ID, entry.Path)
+		return noUndo, s.removeTree(ctx, q, owner, entry.Path)
 	}
 	if err != nil {
 		return noUndo, fmt.Errorf("move to trash: %w", err)
@@ -112,23 +113,38 @@ func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, 
 		_ = os.Rename(s.disk.TrashItemPath(owner.Username, storageID, entry.Name), absolute)
 		_ = s.disk.RemoveTrashItem(owner.Username, storageID)
 	}
-	if err := insertTrashItem(ctx, q, owner.ID, entry, size, storageID); err != nil {
+	deletedAt := time.Now().UTC()
+	trashID, err := insertTrashItem(ctx, q, owner.ID, entry, size, storageID, deletedAt)
+	if err != nil {
 		undo()
 		return noUndo, err
 	}
-	if err := removeTree(ctx, q, owner.ID, entry.Path); err != nil {
+	if err := s.writeTrashSidecar(owner.Username, storageID, trashSidecar{OriginalPath: entry.Path, DeletedAt: deletedAt}); err != nil {
+		undo()
+		return noUndo, err
+	}
+	if err := attachVersionsToTrash(ctx, q, owner.ID, entry, trashID); err != nil {
+		undo()
+		return noUndo, err
+	}
+	if err := s.relocateHistoriesOfTrashItem(ctx, q, owner, trashID); err != nil {
+		undo()
+		return noUndo, err
+	}
+	if err := s.removeTree(ctx, q, owner, entry.Path); err != nil {
 		undo()
 		return noUndo, err
 	}
 	return undo, nil
 }
 
-func insertTrashItem(ctx context.Context, q querier, userID int64, entry Entry, size int64, storageID string) error {
-	_, err := q.ExecContext(ctx,
+func insertTrashItem(ctx context.Context, q querier, userID int64, entry Entry, size int64, storageID string, deletedAt time.Time) (int64, error) {
+	var id int64
+	err := q.QueryRowContext(ctx,
 		`INSERT INTO trash (user_id, original_path, name, is_dir, size, mime, hash, preview_state, storage_id, deleted_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-		userID, entry.Path, entry.Name, entry.IsDir, size, entry.Mime, entry.Hash, entry.PreviewState, storageID, time.Now().Unix())
-	return err
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
+		userID, entry.Path, entry.Name, entry.IsDir, size, entry.Mime, entry.Hash, entry.PreviewState, storageID, deletedAt.Unix()).Scan(&id)
+	return id, err
 }
 
 func treeSize(ctx context.Context, q querier, userID int64, entry Entry) (int64, error) {
@@ -174,6 +190,9 @@ func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int
 		}
 		undo = append(undo, func() { _ = os.Rename(absolute, source) })
 		if restored, changedFiles, err = s.indexRestoredTree(ctx, tx, owner, target, absolute); err != nil {
+			return err
+		}
+		if err := s.relinkVersionsFromTrash(ctx, tx, owner, item.ID, target); err != nil {
 			return err
 		}
 		_, err = tx.ExecContext(ctx, `DELETE FROM trash WHERE id = $1`, item.ID)
@@ -354,6 +373,15 @@ func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem
 	}
 	defer s.onContentRemoved()
 	var failures []error
+	unlock := s.locks.lock(owner.ID)
+	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
+		return s.removeVersionsOfTrashItems(ctx, tx, owner, items)
+	})
+	unlock()
+	if err != nil {
+		return err
+	}
+	defer s.onVersionsChanged()
 	for _, item := range items {
 		if _, err := s.db.ExecContext(ctx, `DELETE FROM trash WHERE id = $1`, item.ID); err != nil {
 			return err
@@ -363,4 +391,152 @@ func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem
 		}
 	}
 	return errors.Join(failures...)
+}
+
+type trashSidecar struct {
+	OriginalPath string    `json:"originalPath"`
+	DeletedAt    time.Time `json:"deletedAt"`
+}
+
+func (s *Service) writeTrashSidecar(username, storageID string, sidecar trashSidecar) error {
+	content, err := json.Marshal(sidecar)
+	if err != nil {
+		return err
+	}
+	return storage.WriteFileAtomically(s.disk.TrashSidecarPath(username, storageID), content)
+}
+
+func (s *Service) readTrashSidecar(username, storageID string) (trashSidecar, error) {
+	var sidecar trashSidecar
+	content, err := os.ReadFile(s.disk.TrashSidecarPath(username, storageID))
+	if err != nil {
+		return sidecar, err
+	}
+	if err := json.Unmarshal(content, &sidecar); err != nil {
+		return sidecar, err
+	}
+	cleanPath, err := storage.CleanPath(sidecar.OriginalPath)
+	if err != nil {
+		return sidecar, err
+	}
+	sidecar.OriginalPath = cleanPath
+	return sidecar, nil
+}
+
+func (s *Service) ReconcileTrash(ctx context.Context, owner users.User) (int, error) {
+	unlock := s.locks.lock(owner.ID)
+	defer unlock()
+	root := s.disk.UserTrashRoot(owner.Username)
+	entries, err := os.ReadDir(root)
+	if errors.Is(err, fs.ErrNotExist) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	recovered := 0
+	err = s.inTransaction(ctx, func(tx *sql.Tx) error {
+		recovered = 0
+		rows, err := tx.QueryContext(ctx, `SELECT storage_id FROM trash WHERE user_id = $1`, owner.ID)
+		if err != nil {
+			return err
+		}
+		storageIDs, err := scanValues[string](rows)
+		if err != nil {
+			return err
+		}
+		known := make(map[string]bool, len(storageIDs))
+		for _, storageID := range storageIDs {
+			known[storageID] = true
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				storageID, isSidecar := strings.CutSuffix(entry.Name(), ".json")
+				if _, err := os.Stat(filepath.Join(root, storageID)); isSidecar && errors.Is(err, fs.ErrNotExist) {
+					if err := os.Remove(filepath.Join(root, entry.Name())); err != nil {
+						return err
+					}
+				}
+				continue
+			}
+			if known[entry.Name()] || !isHex(entry.Name(), storageIDLength) {
+				continue
+			}
+			added, err := s.recoverTrashItem(ctx, tx, owner, entry.Name())
+			if err != nil {
+				return err
+			}
+			if added {
+				recovered++
+			}
+		}
+		return nil
+	})
+	return recovered, err
+}
+
+func (s *Service) recoverTrashItem(ctx context.Context, tx *sql.Tx, owner users.User, storageID string) (bool, error) {
+	directory := filepath.Join(s.disk.UserTrashRoot(owner.Username), storageID)
+	children, err := os.ReadDir(directory)
+	if err != nil {
+		return false, err
+	}
+	if len(children) != 1 {
+		logger.Warn("skip trash folder that does not hold exactly one item", "user", owner.Username, "folder", storageID)
+		return false, nil
+	}
+	name := children[0].Name()
+	absolute := filepath.Join(directory, name)
+	info, err := os.Lstat(absolute)
+	if err != nil {
+		return false, err
+	}
+	sidecar, err := s.readTrashSidecar(owner.Username, storageID)
+	if err != nil || path.Base(sidecar.OriginalPath) != name {
+		folder, statErr := os.Stat(directory)
+		if statErr != nil {
+			return false, statErr
+		}
+		sidecar = trashSidecar{OriginalPath: "/" + name, DeletedAt: folder.ModTime().UTC()}
+	}
+	var entry Entry
+	var size int64
+	switch {
+	case info.IsDir():
+		entry = newDirectoryEntry(owner.ID, sidecar.OriginalPath, info.ModTime().UTC())
+		if size, err = treeSizeOnDisk(absolute); err != nil {
+			return false, err
+		}
+	case info.Mode().IsRegular():
+		hash, err := hashFile(absolute)
+		if err != nil {
+			return false, err
+		}
+		entry = newFileEntry(owner.ID, sidecar.OriginalPath, info.Size(), info.ModTime().UTC(), hash)
+		entry.PreviewState = PreviewReady
+		size = info.Size()
+	default:
+		return false, nil
+	}
+	if _, err := insertTrashItem(ctx, tx, owner.ID, entry, size, storageID, sidecar.DeletedAt); err != nil {
+		return false, err
+	}
+	logger.Info("recovered trash item", "user", owner.Username, "path", sidecar.OriginalPath)
+	return true, nil
+}
+
+func treeSizeOnDisk(root string) (int64, error) {
+	var total int64
+	err := filepath.WalkDir(root, func(_ string, entry fs.DirEntry, err error) error {
+		if err != nil || !entry.Type().IsRegular() {
+			return err
+		}
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		total += info.Size()
+		return nil
+	})
+	return total, err
 }

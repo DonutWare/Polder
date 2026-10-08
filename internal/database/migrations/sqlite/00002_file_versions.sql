@@ -1,0 +1,55 @@
+-- +goose Up
+CREATE TABLE file_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    history_id TEXT NOT NULL,
+    file_id INTEGER NULL,
+    trash_id INTEGER NULL,
+    trash_path TEXT NULL,
+    size INTEGER NOT NULL,
+    hash TEXT NOT NULL,
+    modified_ns INTEGER NOT NULL,
+    replaced_at INTEGER NOT NULL,
+    state TEXT NOT NULL
+);
+CREATE INDEX file_versions_file ON file_versions(file_id, replaced_at);
+CREATE INDEX file_versions_user ON file_versions(user_id, replaced_at);
+CREATE INDEX file_versions_trash ON file_versions(trash_id);
+CREATE INDEX file_versions_state ON file_versions(state);
+CREATE INDEX file_versions_history ON file_versions(user_id, history_id);
+
+CREATE TABLE file_version_chunks (
+    version_id INTEGER NOT NULL REFERENCES file_versions(id) ON DELETE CASCADE,
+    idx INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    chunk_hash TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    PRIMARY KEY (version_id, idx)
+);
+CREATE INDEX file_version_chunks_hash ON file_version_chunks(user_id, chunk_hash);
+
+CREATE TABLE version_chunks (
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    hash TEXT NOT NULL,
+    stored_size INTEGER NOT NULL,
+    compressed BOOLEAN NOT NULL,
+    PRIMARY KEY (user_id, hash)
+);
+
+CREATE TABLE file_restores (
+    file_id INTEGER PRIMARY KEY REFERENCES files(id) ON DELETE CASCADE,
+    restore_count INTEGER NOT NULL
+);
+
+ALTER TABLE users ADD COLUMN versions_enabled BOOLEAN NULL;
+ALTER TABLE users ADD COLUMN versions_max_age_days INTEGER NULL;
+ALTER TABLE users ADD COLUMN versions_max_per_file INTEGER NULL;
+
+-- +goose Down
+ALTER TABLE users DROP COLUMN versions_max_per_file;
+ALTER TABLE users DROP COLUMN versions_max_age_days;
+ALTER TABLE users DROP COLUMN versions_enabled;
+DROP TABLE file_restores;
+DROP TABLE version_chunks;
+DROP TABLE file_version_chunks;
+DROP TABLE file_versions;

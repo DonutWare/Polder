@@ -18,6 +18,7 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
       UserRole.user,
   quotaBytes: (json['quotaBytes'] as num?)?.toInt() ?? 0,
   usedBytes: (json['usedBytes'] as num?)?.toInt() ?? 0,
+  historyBytes: (json['historyBytes'] as num?)?.toInt() ?? 0,
   disabled: json['disabled'] as bool? ?? false,
   createdAt: json['createdAt'] == null
       ? null
@@ -32,6 +33,7 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'role': _$UserRoleEnumMap[instance.role]!,
   'quotaBytes': instance.quotaBytes,
   'usedBytes': instance.usedBytes,
+  'historyBytes': instance.historyBytes,
   'disabled': instance.disabled,
   'createdAt': ?instance.createdAt?.toIso8601String(),
   'trashRetentionOverrideDays': ?instance.trashRetentionOverrideDays,
