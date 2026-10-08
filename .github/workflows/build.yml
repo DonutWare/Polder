@@ -309,6 +309,7 @@ jobs:
       APPIMAGE_EXTRACT_AND_RUN: 1
     defaults:
       run:
+        shell: bash
         working-directory: client
     steps:
       - name: Get packages
@@ -317,9 +318,11 @@ jobs:
           echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20260910T000000Z/ sid main" \
             > /etc/apt/sources.list.d/wpe-snapshot.list
           apt-get update -y
-          apt-get install -y --no-install-recommends ca-certificates curl wget git unzip xz-utils zip file \
+          apt-get install -y --no-install-recommends ca-certificates curl wget git jq unzip xz-utils zip file \
             clang g++ cmake ninja-build pkg-config patchelf libgtk-3-dev libsecret-1-dev libepoxy-dev libwayland-dev \
             libwpe-1.0-dev libwpebackend-fdo-1.0-dev libwpewebkit-2.0-dev=2.52.6-1 libwpewebkit-2.0-1=2.52.6-1
+          # The Flutter SDK in the tool cache is owned by the runner user, not the container's root.
+          git config --global --add safe.directory '*'
 
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
