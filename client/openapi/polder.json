@@ -119,12 +119,6 @@
             ],
             "nullable": true,
             "type": "string"
-          },
-          "trashRetentionOverrideDays": {
-            "description": "Days to keep this user's trash regardless of their own setting (0 keeps it forever); -1 removes the override",
-            "format": "int64",
-            "nullable": true,
-            "type": "integer"
           }
         },
         "type": "object"
@@ -1150,18 +1144,6 @@
         ],
         "type": "object"
       },
-      "RetentionRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "days": {
-            "description": "Days to keep trashed items, 0 keeps them forever; null or absent follows the server default",
-            "format": "int64",
-            "nullable": true,
-            "type": "integer"
-          }
-        },
-        "type": "object"
-      },
       "SearchStatus": {
         "additionalProperties": false,
         "properties": {
@@ -1300,25 +1282,21 @@
             "description": "Read the text inside files so search can find it",
             "type": "boolean"
           },
+          "trashEnabled": {
+            "description": "Move deleted items to the trash; off deletes them permanently for everyone",
+            "type": "boolean"
+          },
           "trashRetentionDays": {
-            "description": "Days trashed items are kept before they're deleted permanently; 0 keeps them forever",
+            "description": "Days trashed items are kept before they're deleted permanently; 0 keeps them forever. Users can only choose less",
             "format": "int64",
             "type": "integer"
-          },
-          "trashRetentionEnforced": {
-            "description": "Apply trashRetentionDays to every user, ignoring their own setting",
-            "type": "boolean"
           },
           "versionsEnabled": {
             "description": "Keep earlier versions of files when they're saved over; off turns history off for everyone",
             "type": "boolean"
           },
-          "versionsEnforced": {
-            "description": "Apply the server's history limits to every user, ignoring their own settings",
-            "type": "boolean"
-          },
           "versionsKeepAllHours": {
-            "description": "Hours during which every saved version is kept; older versions thin out gradually",
+            "description": "Hours during which every saved version is kept; older versions thin out gradually. Users can only choose less",
             "format": "int64",
             "type": "integer"
           },
@@ -1338,8 +1316,8 @@
           }
         },
         "required": [
+          "trashEnabled",
           "trashRetentionDays",
-          "trashRetentionEnforced",
           "searchContentEnabled",
           "ocrEnabled",
           "ocrLanguages",
@@ -1348,7 +1326,6 @@
           "welcomeMessage",
           "accentColor",
           "versionsEnabled",
-          "versionsEnforced",
           "versionsKeepAllHours",
           "versionsMaxAgeDays",
           "versionsMaxPerFile"
@@ -1395,29 +1372,24 @@
             "nullable": true,
             "type": "boolean"
           },
+          "trashEnabled": {
+            "description": "Move deleted items to the trash; off deletes them permanently for everyone",
+            "nullable": true,
+            "type": "boolean"
+          },
           "trashRetentionDays": {
-            "description": "Days trashed items are kept; 0 keeps them forever",
+            "description": "Days trashed items are kept; 0 keeps them forever. Users can only choose less",
             "format": "int64",
             "nullable": true,
             "type": "integer"
-          },
-          "trashRetentionEnforced": {
-            "description": "Apply trashRetentionDays to every user, ignoring their own setting",
-            "nullable": true,
-            "type": "boolean"
           },
           "versionsEnabled": {
             "description": "Keep earlier versions of files when they're saved over; off turns history off for everyone",
             "nullable": true,
             "type": "boolean"
           },
-          "versionsEnforced": {
-            "description": "Apply the server's history limits to every user, ignoring their own settings",
-            "nullable": true,
-            "type": "boolean"
-          },
           "versionsKeepAllHours": {
-            "description": "Hours during which every saved version is kept",
+            "description": "Hours during which every saved version is kept. Users can only choose less",
             "format": "int64",
             "maximum": 720,
             "minimum": 0,
@@ -1648,6 +1620,21 @@
         ],
         "type": "object"
       },
+      "TrashPreferences": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "description": "Days to keep trashed items, 0 for forever; absent follows the server",
+            "format": "int64",
+            "type": "integer"
+          },
+          "enabled": {
+            "description": "Whether deleted items go to the trash; absent follows the server",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "TrashRetention": {
         "additionalProperties": false,
         "properties": {
@@ -1656,36 +1643,39 @@
             "format": "int64",
             "type": "integer"
           },
-          "defaultDays": {
-            "description": "The server's default",
+          "enabled": {
+            "description": "Whether deleted items go to the trash; off deletes them permanently",
+            "type": "boolean"
+          },
+          "serverDays": {
+            "description": "The server's limit, which the user can only lower; 0 for no limit",
             "format": "int64",
             "type": "integer"
           },
-          "locked": {
-            "description": "True when an administrator decides, so the user's own setting has no effect",
+          "serverEnabled": {
+            "description": "Whether the server keeps a trash at all",
             "type": "boolean"
           },
           "source": {
-            "description": "Where days comes from; server and admin mean an administrator decides",
+            "description": "Whether the values come from the user's own choices or the server",
             "enum": [
               "default",
-              "user",
-              "server",
-              "admin"
+              "user"
             ],
             "type": "string"
           },
-          "userDays": {
-            "description": "The user's own choice; absent when they follow the server default",
-            "format": "int64",
-            "type": "integer"
+          "user": {
+            "$ref": "#/components/schemas/TrashPreferences",
+            "description": "The user's own choices; absent fields follow the server"
           }
         },
         "required": [
+          "enabled",
           "days",
           "source",
-          "locked",
-          "defaultDays"
+          "serverEnabled",
+          "serverDays",
+          "user"
         ],
         "type": "object"
       },
@@ -1780,16 +1770,6 @@
             ],
             "type": "string"
           },
-          "trashRetentionDays": {
-            "description": "Days the user chose to keep trashed items; absent follows the server default",
-            "format": "int64",
-            "type": "integer"
-          },
-          "trashRetentionOverrideDays": {
-            "description": "Days an administrator fixed for this user's trash; absent when not overridden",
-            "format": "int64",
-            "type": "integer"
-          },
           "usedBytes": {
             "description": "Bytes counted against the quota, including file history",
             "format": "int64",
@@ -1847,6 +1827,11 @@
             "description": "Whether to keep earlier versions of files; absent follows the server",
             "type": "boolean"
           },
+          "keepAllHours": {
+            "description": "Hours during which every saved version is kept; absent follows the server",
+            "format": "int64",
+            "type": "integer"
+          },
           "maxAgeDays": {
             "description": "Days to keep earlier versions, 0 for no age limit; absent follows the server",
             "format": "int64",
@@ -1883,10 +1868,6 @@
             "format": "int64",
             "type": "integer"
           },
-          "locked": {
-            "description": "True when an administrator decides, so the user's own settings have no effect",
-            "type": "boolean"
-          },
           "maxAgeDays": {
             "description": "Days earlier versions are kept; 0 for no age limit",
             "format": "int64",
@@ -1901,6 +1882,11 @@
             "description": "Whether the server keeps history at all",
             "type": "boolean"
           },
+          "serverKeepAllHours": {
+            "description": "The server's limit, which the user can only lower",
+            "format": "int64",
+            "type": "integer"
+          },
           "serverMaxAgeDays": {
             "description": "The server's limit, which the user can only lower; 0 for no age limit",
             "format": "int64",
@@ -1912,12 +1898,10 @@
             "type": "integer"
           },
           "source": {
-            "description": "Where the values come from; server means an administrator decides",
+            "description": "Whether the values come from the user's own choices or the server",
             "enum": [
               "default",
-              "user",
-              "server",
-              "admin"
+              "user"
             ],
             "type": "string"
           },
@@ -1932,8 +1916,8 @@
           "maxAgeDays",
           "maxPerFile",
           "source",
-          "locked",
           "serverEnabled",
+          "serverKeepAllHours",
           "serverMaxAgeDays",
           "serverMaxPerFile",
           "user"
@@ -5325,7 +5309,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RetentionRequest"
+                "$ref": "#/components/schemas/TrashPreferences"
               }
             }
           },

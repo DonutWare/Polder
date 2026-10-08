@@ -14,20 +14,19 @@ import (
 )
 
 const (
-	trashRetentionDaysKey     = "trash_retention_days"
-	trashRetentionEnforcedKey = "trash_retention_enforced"
-	searchContentEnabledKey   = "search_content_enabled"
-	ocrEnabledKey             = "ocr_enabled"
-	ocrLanguagesKey           = "ocr_languages"
-	ocrMaxPagesKey            = "ocr_max_pages"
-	instanceNameKey           = "instance_name"
-	welcomeMessageKey         = "welcome_message"
-	accentColorKey            = "accent_color"
-	versionsEnabledKey        = "versions_enabled"
-	versionsEnforcedKey       = "versions_enforced"
-	versionsKeepAllHoursKey   = "versions_keep_all_hours"
-	versionsMaxAgeDaysKey     = "versions_max_age_days"
-	versionsMaxPerFileKey     = "versions_max_per_file"
+	trashRetentionDaysKey   = "trash_retention_days"
+	trashEnabledKey         = "trash_enabled"
+	searchContentEnabledKey = "search_content_enabled"
+	ocrEnabledKey           = "ocr_enabled"
+	ocrLanguagesKey         = "ocr_languages"
+	ocrMaxPagesKey          = "ocr_max_pages"
+	instanceNameKey         = "instance_name"
+	welcomeMessageKey       = "welcome_message"
+	accentColorKey          = "accent_color"
+	versionsEnabledKey      = "versions_enabled"
+	versionsKeepAllHoursKey = "versions_keep_all_hours"
+	versionsMaxAgeDaysKey   = "versions_max_age_days"
+	versionsMaxPerFileKey   = "versions_max_per_file"
 
 	MaxOCRPages = 10000
 
@@ -41,37 +40,35 @@ var (
 )
 
 type ServerSettings struct {
-	TrashRetentionDays     int      `json:"trashRetentionDays" doc:"Days trashed items are kept before they're deleted permanently; 0 keeps them forever"`
-	TrashRetentionEnforced bool     `json:"trashRetentionEnforced" doc:"Apply trashRetentionDays to every user, ignoring their own setting"`
-	SearchContentEnabled   bool     `json:"searchContentEnabled" doc:"Read the text inside files so search can find it"`
-	OCREnabled             bool     `json:"ocrEnabled" doc:"Recognise text in images and scanned PDF pages"`
-	OCRLanguages           []string `json:"ocrLanguages" doc:"Tesseract models read in one pass: languages such as eng or jpn, or whole writing systems such as script/Latin or script/HanS. Missing models are downloaded when needed"`
-	OCRMaxPages            int      `json:"ocrMaxPages" doc:"The most PDF pages recognised per file"`
-	InstanceName           string   `json:"instanceName" doc:"Name the apps show for this server; empty shows the default"`
-	WelcomeMessage         string   `json:"welcomeMessage" doc:"Shown on the login screen; empty shows none"`
-	AccentColor            string   `json:"accentColor" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
-	VersionsEnabled        bool     `json:"versionsEnabled" doc:"Keep earlier versions of files when they're saved over; off turns history off for everyone"`
-	VersionsEnforced       bool     `json:"versionsEnforced" doc:"Apply the server's history limits to every user, ignoring their own settings"`
-	VersionsKeepAllHours   int      `json:"versionsKeepAllHours" doc:"Hours during which every saved version is kept; older versions thin out gradually"`
-	VersionsMaxAgeDays     int      `json:"versionsMaxAgeDays" doc:"Days earlier versions are kept; 0 for no age limit. Users can only choose less"`
-	VersionsMaxPerFile     int      `json:"versionsMaxPerFile" doc:"Most earlier versions kept per file; 0 for no count limit. Users can only choose fewer"`
+	TrashEnabled         bool     `json:"trashEnabled" doc:"Move deleted items to the trash; off deletes them permanently for everyone"`
+	TrashRetentionDays   int      `json:"trashRetentionDays" doc:"Days trashed items are kept before they're deleted permanently; 0 keeps them forever. Users can only choose less"`
+	SearchContentEnabled bool     `json:"searchContentEnabled" doc:"Read the text inside files so search can find it"`
+	OCREnabled           bool     `json:"ocrEnabled" doc:"Recognise text in images and scanned PDF pages"`
+	OCRLanguages         []string `json:"ocrLanguages" doc:"Tesseract models read in one pass: languages such as eng or jpn, or whole writing systems such as script/Latin or script/HanS. Missing models are downloaded when needed"`
+	OCRMaxPages          int      `json:"ocrMaxPages" doc:"The most PDF pages recognised per file"`
+	InstanceName         string   `json:"instanceName" doc:"Name the apps show for this server; empty shows the default"`
+	WelcomeMessage       string   `json:"welcomeMessage" doc:"Shown on the login screen; empty shows none"`
+	AccentColor          string   `json:"accentColor" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
+	VersionsEnabled      bool     `json:"versionsEnabled" doc:"Keep earlier versions of files when they're saved over; off turns history off for everyone"`
+	VersionsKeepAllHours int      `json:"versionsKeepAllHours" doc:"Hours during which every saved version is kept; older versions thin out gradually. Users can only choose less"`
+	VersionsMaxAgeDays   int      `json:"versionsMaxAgeDays" doc:"Days earlier versions are kept; 0 for no age limit. Users can only choose less"`
+	VersionsMaxPerFile   int      `json:"versionsMaxPerFile" doc:"Most earlier versions kept per file; 0 for no count limit. Users can only choose fewer"`
 }
 
 type ServerSettingsChanges struct {
-	TrashRetentionDays     *int      `json:"trashRetentionDays" required:"false" doc:"Days trashed items are kept; 0 keeps them forever"`
-	TrashRetentionEnforced *bool     `json:"trashRetentionEnforced" required:"false" doc:"Apply trashRetentionDays to every user, ignoring their own setting"`
-	SearchContentEnabled   *bool     `json:"searchContentEnabled" required:"false" doc:"Read the text inside files so search can find it"`
-	OCREnabled             *bool     `json:"ocrEnabled" required:"false" doc:"Recognise text in images and scanned PDF pages"`
-	OCRLanguages           *[]string `json:"ocrLanguages" required:"false" doc:"Tesseract models read in one pass: languages such as eng or jpn, or whole writing systems such as script/Latin or script/HanS. Missing models are downloaded when needed"`
-	OCRMaxPages            *int      `json:"ocrMaxPages" required:"false" minimum:"1" maximum:"10000" doc:"The most PDF pages recognised per file"`
-	InstanceName           *string   `json:"instanceName" required:"false" maxLength:"64" doc:"Name the apps show for this server; empty shows the default"`
-	WelcomeMessage         *string   `json:"welcomeMessage" required:"false" maxLength:"500" doc:"Shown on the login screen; empty shows none"`
-	AccentColor            *string   `json:"accentColor" required:"false" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
-	VersionsEnabled        *bool     `json:"versionsEnabled" required:"false" doc:"Keep earlier versions of files when they're saved over; off turns history off for everyone"`
-	VersionsEnforced       *bool     `json:"versionsEnforced" required:"false" doc:"Apply the server's history limits to every user, ignoring their own settings"`
-	VersionsKeepAllHours   *int      `json:"versionsKeepAllHours" required:"false" minimum:"0" maximum:"720" doc:"Hours during which every saved version is kept"`
-	VersionsMaxAgeDays     *int      `json:"versionsMaxAgeDays" required:"false" minimum:"0" maximum:"3650" doc:"Days earlier versions are kept; 0 for no age limit"`
-	VersionsMaxPerFile     *int      `json:"versionsMaxPerFile" required:"false" minimum:"0" maximum:"10000" doc:"Most earlier versions kept per file; 0 for no count limit"`
+	TrashEnabled         *bool     `json:"trashEnabled" required:"false" doc:"Move deleted items to the trash; off deletes them permanently for everyone"`
+	TrashRetentionDays   *int      `json:"trashRetentionDays" required:"false" doc:"Days trashed items are kept; 0 keeps them forever. Users can only choose less"`
+	SearchContentEnabled *bool     `json:"searchContentEnabled" required:"false" doc:"Read the text inside files so search can find it"`
+	OCREnabled           *bool     `json:"ocrEnabled" required:"false" doc:"Recognise text in images and scanned PDF pages"`
+	OCRLanguages         *[]string `json:"ocrLanguages" required:"false" doc:"Tesseract models read in one pass: languages such as eng or jpn, or whole writing systems such as script/Latin or script/HanS. Missing models are downloaded when needed"`
+	OCRMaxPages          *int      `json:"ocrMaxPages" required:"false" minimum:"1" maximum:"10000" doc:"The most PDF pages recognised per file"`
+	InstanceName         *string   `json:"instanceName" required:"false" maxLength:"64" doc:"Name the apps show for this server; empty shows the default"`
+	WelcomeMessage       *string   `json:"welcomeMessage" required:"false" maxLength:"500" doc:"Shown on the login screen; empty shows none"`
+	AccentColor          *string   `json:"accentColor" required:"false" doc:"Default accent color as #RRGGBB; empty uses the apps' own default"`
+	VersionsEnabled      *bool     `json:"versionsEnabled" required:"false" doc:"Keep earlier versions of files when they're saved over; off turns history off for everyone"`
+	VersionsKeepAllHours *int      `json:"versionsKeepAllHours" required:"false" minimum:"0" maximum:"720" doc:"Hours during which every saved version is kept. Users can only choose less"`
+	VersionsMaxAgeDays   *int      `json:"versionsMaxAgeDays" required:"false" minimum:"0" maximum:"3650" doc:"Days earlier versions are kept; 0 for no age limit"`
+	VersionsMaxPerFile   *int      `json:"versionsMaxPerFile" required:"false" minimum:"0" maximum:"10000" doc:"Most earlier versions kept per file; 0 for no count limit"`
 }
 
 func (c ServerSettingsChanges) validate() error {
@@ -99,10 +96,7 @@ func (c ServerSettingsChanges) validate() error {
 	if c.AccentColor != nil && *c.AccentColor != "" && !accentColorPattern.MatchString(*c.AccentColor) {
 		return apperr.Invalid("%q is not a color as #RRGGBB", *c.AccentColor)
 	}
-	if c.VersionsKeepAllHours != nil && (*c.VersionsKeepAllHours < 0 || *c.VersionsKeepAllHours > MaxVersionKeepAllHours) {
-		return apperr.Invalid("hours to keep every version must be between 0 and %d", MaxVersionKeepAllHours)
-	}
-	return ValidateVersionLimits(c.VersionsMaxAgeDays, c.VersionsMaxPerFile)
+	return ValidateVersionLimits(c.VersionsKeepAllHours, c.VersionsMaxAgeDays, c.VersionsMaxPerFile)
 }
 
 type Store struct {
@@ -132,9 +126,9 @@ func (s *Store) Get(ctx context.Context) (ServerSettings, error) {
 			if days, err := strconv.Atoi(value); err == nil {
 				current.TrashRetentionDays = days
 			}
-		case trashRetentionEnforcedKey:
-			if enforced, err := strconv.ParseBool(value); err == nil {
-				current.TrashRetentionEnforced = enforced
+		case trashEnabledKey:
+			if enabled, err := strconv.ParseBool(value); err == nil {
+				current.TrashEnabled = enabled
 			}
 		case searchContentEnabledKey:
 			if enabled, err := strconv.ParseBool(value); err == nil {
@@ -163,10 +157,6 @@ func (s *Store) Get(ctx context.Context) (ServerSettings, error) {
 			if enabled, err := strconv.ParseBool(value); err == nil {
 				current.VersionsEnabled = enabled
 			}
-		case versionsEnforcedKey:
-			if enforced, err := strconv.ParseBool(value); err == nil {
-				current.VersionsEnforced = enforced
-			}
 		case versionsKeepAllHoursKey:
 			if hours, err := strconv.Atoi(value); err == nil {
 				current.VersionsKeepAllHours = hours
@@ -192,8 +182,8 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	if changes.TrashRetentionDays != nil {
 		values[trashRetentionDaysKey] = strconv.Itoa(*changes.TrashRetentionDays)
 	}
-	if changes.TrashRetentionEnforced != nil {
-		values[trashRetentionEnforcedKey] = strconv.FormatBool(*changes.TrashRetentionEnforced)
+	if changes.TrashEnabled != nil {
+		values[trashEnabledKey] = strconv.FormatBool(*changes.TrashEnabled)
 	}
 	if changes.SearchContentEnabled != nil {
 		values[searchContentEnabledKey] = strconv.FormatBool(*changes.SearchContentEnabled)
@@ -219,9 +209,6 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	}
 	if changes.VersionsEnabled != nil {
 		values[versionsEnabledKey] = strconv.FormatBool(*changes.VersionsEnabled)
-	}
-	if changes.VersionsEnforced != nil {
-		values[versionsEnforcedKey] = strconv.FormatBool(*changes.VersionsEnforced)
 	}
 	if changes.VersionsKeepAllHours != nil {
 		values[versionsKeepAllHoursKey] = strconv.Itoa(*changes.VersionsKeepAllHours)

@@ -10,10 +10,13 @@ abstract final class RetentionOptions {
   static const _common = [7, 14, 30, 60, 90, 180, 365];
   static const forever = 0;
 
-  static List<int> including(int? current) => [
-    ...{..._common, if (current != null && current != forever) current}.toList()..sort(),
-    forever,
-  ];
+  static List<int> including(int? current, {int maximum = forever}) {
+    final options = {..._common, if (current != null && current != forever) current, if (maximum != forever) maximum};
+    return [
+      ...options.where((days) => maximum == forever || days <= maximum).toList()..sort(),
+      if (maximum == forever) forever,
+    ];
+  }
 }
 
 extension RetentionDuration on BuildContext {
@@ -26,6 +29,7 @@ Future<RetentionChoice?> showRetentionPicker(
   required String title,
   required int? selected,
   String? followDefaultLabel,
+  int maximum = RetentionOptions.forever,
 }) => showDialog<RetentionChoice>(
   context: context,
   builder: (context) {
@@ -38,7 +42,8 @@ Future<RetentionChoice?> showRetentionPicker(
       title: Text(title),
       children: [
         if (followDefaultLabel != null) option(null, followDefaultLabel),
-        for (final days in RetentionOptions.including(selected)) option(days, context.retentionDuration(days)),
+        for (final days in RetentionOptions.including(selected, maximum: maximum))
+          option(days, context.retentionDuration(days)),
       ],
     );
   },

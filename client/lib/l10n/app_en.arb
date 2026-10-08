@@ -143,8 +143,6 @@
 	"emptyTrash": "Empty trash",
 	"emptyTrashMessage": "Everything in the trash is deleted permanently. This can't be undone.",
 	"emptyTrashTitle": "Empty the trash?",
-	"enforceTrashRetention": "Apply to every user",
-	"enforceTrashRetentionHint": "Users can't choose their own. A retention set for one user still wins.",
 	"errorAlreadyExists": "Something with that name already exists.",
 	"errorConflict": "The item was changed by someone else. Refresh and try again.",
 	"errorForbidden": "You are not allowed to do that.",
@@ -409,7 +407,7 @@
 	"serverFolder": "Folder on the server",
 	"serverSearchGroup": "Search",
 	"serverTrashRetention": "Trash retention",
-	"serverTrashRetentionHint": "Default for every user: {duration}",
+	"serverTrashRetentionHint": "Default and upper limit for every user: {duration}",
 	"@serverTrashRetentionHint": {
 		"placeholders": {
 			"duration": {
@@ -512,7 +510,6 @@
 			}
 		}
 	},
-	"trashRetentionSetByAdmin": "Set by your administrator",
 	"trashSummary": "{count, plural, =1{1 item} other{{count} items}} · {size}",
 	"@trashSummary": {
 		"placeholders": {
@@ -537,7 +534,6 @@
 			}
 		}
 	},
-	"userTrashRetentionUsersChoice": "User's choice",
 	"wifiOnly": "Only on Wi-Fi",
 	"navActivity": "Activity",
 	"activityNow": "Now",
@@ -819,17 +815,27 @@
 	"versionsPerFile": "{count, plural, =0{No limit per file} =1{1 per file} other{{count} per file}}",
 	"@versionsPerFile": {"placeholders": {"count": {"type": "int"}}},
 	"versionsMaxPerFile": "Versions per file",
-	"versionsMaxPerFileHint": "0 means no limit. The server allows at most {limit}.",
+	"versionsMaxPerFileHint": "The server allows at most {limit}.",
 	"@versionsMaxPerFileHint": {"placeholders": {"limit": {"type": "String"}}},
 	"versionsMaxAge": "Keep versions for",
 	"versionsFollowServer": "Follow the server",
 	"versionsTurnOffTitle": "Turn off version history?",
 	"versionsTurnOffMessage": "All earlier versions of your files are deleted permanently.",
-	"versionsTurnOff": "Turn off",
+	"turnOff": "Turn off",
+	"versionsTurnedOffByAdmin": "Turned off by your administrator",
+	"versionsKeepAllHint": "The server allows at most {limit}.",
+	"@versionsKeepAllHint": {"placeholders": {"limit": {"type": "String"}}},
+	"trashKeep": "Move deleted items to the trash",
+	"trashKeepHint": "Deleted items can be restored until the trash is emptied. Off deletes them permanently.",
+	"trashTurnedOffByAdmin": "Turned off by your administrator. Deleted items are removed permanently.",
+	"trashTurnOffTitle": "Turn off the trash?",
+	"trashTurnOffMessage": "Everything in your trash is deleted permanently, and from now on deleting can't be undone.",
+	"serverTrashEnabledHint": "Turning this off empties every user's trash and makes deleting permanent.",
+	"serverTrashTurnOffMessage": "Every user's trash is emptied permanently, and from now on deleting can't be undone.",
 	"serverVersionsEnabled": "Keep earlier versions",
 	"serverVersionsEnabledHint": "Only changes made through Polder are kept. Turning this off deletes all history.",
 	"serverVersionsTurnOffMessage": "Earlier versions of every user's files are deleted permanently, and no new ones are kept.",
-	"serverVersionsKeepAll": "Keep every save for",
+	"versionsKeepAll": "Keep every save for",
 	"serverVersionsKeepAllHint": "After this, versions thin out: about one per hour after a day, fewer as they age.",
 	"versionsHours": "{count, plural, =0{Don't keep every save} =1{1 hour} other{{count} hours}}",
 	"@versionsHours": {"placeholders": {"count": {"type": "int"}}},
@@ -837,8 +843,6 @@
 	"serverVersionsMaxAge": "Keep versions for",
 	"serverVersionsMaxPerFile": "Versions per file",
 	"serverVersionsLimitHint": "Default and upper limit for every user",
-	"enforceVersions": "Apply to every user",
-	"enforceVersionsHint": "Users can't choose their own limits or turn history off.",
 	"quotaHistory": "{size} of that is version history",
 	"@quotaHistory": {"placeholders": {"size": {"type": "String"}}}
 }

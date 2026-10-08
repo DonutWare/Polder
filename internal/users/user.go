@@ -22,31 +22,35 @@ func (Role) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
 }
 
 const (
-	minPasswordLength      = 8
-	MaxRetentionDays       = 3650
-	ClearRetentionOverride = -1
+	minPasswordLength = 8
+	MaxRetentionDays  = 3650
 )
 
 var usernamePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9_.-]{1,31}$`)
 
 type User struct {
-	ID                         int64              `json:"id"`
-	Username                   string             `json:"username"`
-	Role                       Role               `json:"role"`
-	QuotaBytes                 int64              `json:"quotaBytes" doc:"Storage limit in bytes; 0 is unlimited"`
-	UsedBytes                  int64              `json:"usedBytes" doc:"Bytes counted against the quota, including file history"`
-	HistoryBytes               int64              `json:"historyBytes" doc:"Bytes used by earlier versions of files"`
-	Disabled                   bool               `json:"disabled"`
-	CreatedAt                  time.Time          `json:"createdAt"`
-	TrashRetentionDays         *int               `json:"trashRetentionDays,omitempty" required:"false" doc:"Days the user chose to keep trashed items; absent follows the server default"`
-	TrashRetentionOverrideDays *int               `json:"trashRetentionOverrideDays,omitempty" required:"false" doc:"Days an administrator fixed for this user's trash; absent when not overridden"`
-	Versions                   VersionPreferences `json:"-"`
+	ID           int64              `json:"id"`
+	Username     string             `json:"username"`
+	Role         Role               `json:"role"`
+	QuotaBytes   int64              `json:"quotaBytes" doc:"Storage limit in bytes; 0 is unlimited"`
+	UsedBytes    int64              `json:"usedBytes" doc:"Bytes counted against the quota, including file history"`
+	HistoryBytes int64              `json:"historyBytes" doc:"Bytes used by earlier versions of files"`
+	Disabled     bool               `json:"disabled"`
+	CreatedAt    time.Time          `json:"createdAt"`
+	Trash        TrashPreferences   `json:"-"`
+	Versions     VersionPreferences `json:"-"`
+}
+
+type TrashPreferences struct {
+	Enabled *bool `json:"enabled,omitempty" required:"false" doc:"Whether deleted items go to the trash; absent follows the server"`
+	Days    *int  `json:"days,omitempty" required:"false" doc:"Days to keep trashed items, 0 for forever; absent follows the server"`
 }
 
 type VersionPreferences struct {
-	Enabled    *bool `json:"enabled,omitempty" required:"false" doc:"Whether to keep earlier versions of files; absent follows the server"`
-	MaxAgeDays *int  `json:"maxAgeDays,omitempty" required:"false" doc:"Days to keep earlier versions, 0 for no age limit; absent follows the server"`
-	MaxPerFile *int  `json:"maxPerFile,omitempty" required:"false" doc:"Most earlier versions kept per file, 0 for no count limit; absent follows the server"`
+	Enabled      *bool `json:"enabled,omitempty" required:"false" doc:"Whether to keep earlier versions of files; absent follows the server"`
+	KeepAllHours *int  `json:"keepAllHours,omitempty" required:"false" doc:"Hours during which every saved version is kept; absent follows the server"`
+	MaxAgeDays   *int  `json:"maxAgeDays,omitempty" required:"false" doc:"Days to keep earlier versions, 0 for no age limit; absent follows the server"`
+	MaxPerFile   *int  `json:"maxPerFile,omitempty" required:"false" doc:"Most earlier versions kept per file, 0 for no count limit; absent follows the server"`
 }
 
 func (u User) IsAdmin() bool { return u.Role == RoleAdmin }
@@ -61,11 +65,10 @@ type NewUser struct {
 }
 
 type Changes struct {
-	Password                   *string `json:"password" required:"false"`
-	Role                       *Role   `json:"role" required:"false"`
-	QuotaBytes                 *int64  `json:"quotaBytes" required:"false" doc:"Storage limit in bytes; 0 is unlimited"`
-	Disabled                   *bool   `json:"disabled" required:"false"`
-	TrashRetentionOverrideDays *int    `json:"trashRetentionOverrideDays" required:"false" doc:"Days to keep this user's trash regardless of their own setting (0 keeps it forever); -1 removes the override"`
+	Password   *string `json:"password" required:"false"`
+	Role       *Role   `json:"role" required:"false"`
+	QuotaBytes *int64  `json:"quotaBytes" required:"false" doc:"Storage limit in bytes; 0 is unlimited"`
+	Disabled   *bool   `json:"disabled" required:"false"`
 }
 
 func (n NewUser) validate() error {
@@ -96,9 +99,6 @@ func (c Changes) validate() error {
 		if err := validateQuota(*c.QuotaBytes); err != nil {
 			return err
 		}
-	}
-	if c.TrashRetentionOverrideDays != nil && *c.TrashRetentionOverrideDays != ClearRetentionOverride {
-		return ValidateRetentionDays(*c.TrashRetentionOverrideDays)
 	}
 	return nil
 }

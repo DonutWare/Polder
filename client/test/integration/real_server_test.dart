@@ -158,24 +158,22 @@ void main() {
       await expectLater(api.restoreFromTrash(trashed.id), throwsA(isA<NotFoundException>()));
     });
 
-    test("an administrator's trash retention wins over the user's", () async {
+    test("the server's trash retention is the most a user can choose", () async {
       final admin = server.signedIn(adminTokens).api;
       final api = server.signedIn(userTokens).api;
-      final alice = (await admin.listUsers()).singleWhere((user) => user.username == "alice");
 
-      expect((await api.setTrashRetention(7)).source, RetentionSource.user);
-      await admin.updateUser(alice.id, const UpdateUserRequest(trashRetentionOverrideDays: 3));
-      final overridden = await api.trashRetention();
-      expect((overridden.days, overridden.source, overridden.locked), (3, RetentionSource.admin, true));
-
-      await admin.updateUser(
-        alice.id,
-        const UpdateUserRequest(trashRetentionOverrideDays: UpdateUserRequest.clearTrashRetentionOverride),
+      await admin.updateServerSettings(trashRetentionDays: 30);
+      await expectLater(
+        api.setTrashRetention(const TrashPreferences(days: 60)),
+        throwsA(isA<InvalidRequestException>()),
       );
-      expect((await admin.updateServerSettings(trashRetentionEnforced: true)).trashRetentionEnforced, isTrue);
-      expect((await api.trashRetention()).source, RetentionSource.server);
-      await admin.updateServerSettings(trashRetentionEnforced: false);
-      expect((await api.setTrashRetention(null)).source, RetentionSource.serverDefault);
+      expect((await api.setTrashRetention(const TrashPreferences(days: 7))).days, 7);
+      await admin.updateServerSettings(trashRetentionDays: 5);
+      expect((await api.trashRetention()).days, 5);
+
+      final off = await api.setTrashRetention(const TrashPreferences(enabled: false));
+      expect((off.enabled, off.serverEnabled), (false, true));
+      expect((await api.setTrashRetention(const TrashPreferences())).source, RetentionSource.serverDefault);
     });
   });
 

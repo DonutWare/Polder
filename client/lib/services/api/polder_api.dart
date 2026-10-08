@@ -185,9 +185,14 @@ class PolderApi {
 
   Future<VersionRetention> versionSettings() async => (await _service.getVersionSettings()).body!.toModel();
 
-  Future<VersionRetention> setVersionSettings({bool? enabled, int? maxAgeDays, int? maxPerFile}) async =>
+  Future<VersionRetention> setVersionSettings(VersionPreferences preferences) async =>
       (await _service.setVersionSettings(
-        body: wire.VersionPreferences(enabled: enabled, maxAgeDays: maxAgeDays, maxPerFile: maxPerFile),
+        body: wire.VersionPreferences(
+          enabled: preferences.enabled,
+          keepAllHours: preferences.keepAllHours,
+          maxAgeDays: preferences.maxAgeDays,
+          maxPerFile: preferences.maxPerFile,
+        ),
       )).body!.toModel();
 
   Future<Uint8List?> _thumbnail(Future<chopper.Response<Stream<List<int>>>> Function() request) async {
@@ -250,14 +255,15 @@ class PolderApi {
 
   Future<TrashRetention> trashRetention() async => (await _service.getTrashRetention()).body!.toModel();
 
-  Future<TrashRetention> setTrashRetention(int? days) async =>
-      (await _service.setTrashRetention(body: wire.RetentionRequest(days: days))).body!.toModel();
+  Future<TrashRetention> setTrashRetention(TrashPreferences preferences) async => (await _service.setTrashRetention(
+    body: wire.TrashPreferences(enabled: preferences.enabled, days: preferences.days),
+  )).body!.toModel();
 
   Future<ServerSettings> serverSettings() async => (await _service.getServerSettings()).body!.toModel();
 
   Future<ServerSettings> updateServerSettings({
+    bool? trashEnabled,
     int? trashRetentionDays,
-    bool? trashRetentionEnforced,
     bool? searchContentEnabled,
     bool? ocrEnabled,
     List<String>? ocrLanguages,
@@ -266,19 +272,17 @@ class PolderApi {
     String? welcomeMessage,
     String? accentColor,
     bool? versionsEnabled,
-    bool? versionsEnforced,
     int? versionsKeepAllHours,
     int? versionsMaxAgeDays,
     int? versionsMaxPerFile,
   }) async => (await _service.updateServerSettings(
     body: wire.ServerSettingsChanges(
       versionsEnabled: versionsEnabled,
-      versionsEnforced: versionsEnforced,
       versionsKeepAllHours: versionsKeepAllHours,
       versionsMaxAgeDays: versionsMaxAgeDays,
       versionsMaxPerFile: versionsMaxPerFile,
+      trashEnabled: trashEnabled,
       trashRetentionDays: trashRetentionDays,
-      trashRetentionEnforced: trashRetentionEnforced,
       searchContentEnabled: searchContentEnabled,
       ocrEnabled: ocrEnabled,
       ocrLanguages: ocrLanguages,

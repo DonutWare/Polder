@@ -86,28 +86,38 @@ func findTrashItem(ctx context.Context, q querier, userID, id int64) (TrashItem,
 	return item, err
 }
 
+type TrashPolicy func(ctx context.Context, owner users.User) bool
+
+func (s *Service) SetTrashPolicy(enabled TrashPolicy) {
+	s.trashEnabled = enabled
+}
+
+func (s *Service) keepsTrash(ctx context.Context, owner users.User) bool {
+	return s.trashEnabled == nil || s.trashEnabled(ctx, owner)
+}
+
 func (s *Service) ListTrash(ctx context.Context, owner users.User) ([]TrashItem, error) {
 	return queryTrashItems(ctx, s.db, `WHERE user_id = $1 ORDER BY deleted_at DESC, id DESC`, owner.ID)
 }
 
 func noUndo() {}
 
-func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, entry Entry) (func(), error) {
+func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, entry Entry) (int64, func(), error) {
 	absolute, err := s.disk.Resolve(owner.Username, entry.Path)
 	if err != nil {
-		return noUndo, err
+		return 0, noUndo, err
 	}
 	size, err := treeSize(ctx, q, owner.ID, entry)
 	if err != nil {
-		return noUndo, err
+		return 0, noUndo, err
 	}
 	storageID := storage.NewID()
 	err = s.disk.MoveToTrash(owner.Username, absolute, storageID, entry.Name)
 	if errors.Is(err, fs.ErrNotExist) {
-		return noUndo, s.removeTree(ctx, q, owner, entry.Path)
+		return 0, noUndo, s.removeTree(ctx, q, owner, entry.Path)
 	}
 	if err != nil {
-		return noUndo, fmt.Errorf("move to trash: %w", err)
+		return 0, noUndo, fmt.Errorf("move to trash: %w", err)
 	}
 	undo := func() {
 		_ = os.Rename(s.disk.TrashItemPath(owner.Username, storageID, entry.Name), absolute)
@@ -117,25 +127,25 @@ func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, 
 	trashID, err := insertTrashItem(ctx, q, owner.ID, entry, size, storageID, deletedAt)
 	if err != nil {
 		undo()
-		return noUndo, err
+		return 0, noUndo, err
 	}
 	if err := s.writeTrashSidecar(owner.Username, storageID, trashSidecar{OriginalPath: entry.Path, DeletedAt: deletedAt}); err != nil {
 		undo()
-		return noUndo, err
+		return 0, noUndo, err
 	}
 	if err := attachVersionsToTrash(ctx, q, owner.ID, entry, trashID); err != nil {
 		undo()
-		return noUndo, err
+		return 0, noUndo, err
 	}
 	if err := s.relocateHistoriesOfTrashItem(ctx, q, owner, trashID); err != nil {
 		undo()
-		return noUndo, err
+		return 0, noUndo, err
 	}
 	if err := s.removeTree(ctx, q, owner, entry.Path); err != nil {
 		undo()
-		return noUndo, err
+		return 0, noUndo, err
 	}
-	return undo, nil
+	return trashID, undo, nil
 }
 
 func insertTrashItem(ctx context.Context, q querier, userID int64, entry Entry, size int64, storageID string, deletedAt time.Time) (int64, error) {
@@ -224,7 +234,7 @@ func (s *Service) restoreTarget(ctx context.Context, q querier, owner users.User
 	}
 	switch mode {
 	case RestoreOverwrite:
-		undo, err := s.moveToTrash(ctx, q, owner, existing)
+		_, undo, err := s.moveToTrash(ctx, q, owner, existing)
 		return item.OriginalPath, undo, err
 	case RestoreKeepBoth:
 		target, err := s.freeRestorePath(ctx, q, owner, item.OriginalPath)
@@ -333,6 +343,17 @@ func (s *Service) DeleteFromTrash(ctx context.Context, owner users.User, id int6
 	}
 	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashDelete, Path: item.OriginalPath, IsDir: item.IsDir, Size: item.Size, Count: 1})
 	return nil
+}
+
+func (s *Service) purgeTrashItem(ctx context.Context, owner users.User, id int64) error {
+	item, err := findTrashItem(ctx, s.db, owner.ID, id)
+	if apperr.Is(err, apperr.KindNotFound) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return s.purge(ctx, owner, []TrashItem{item})
 }
 
 func (s *Service) EmptyTrash(ctx context.Context, owner users.User) error {

@@ -4,7 +4,7 @@ import "package:polder/models/file_entry.dart";
 
 part "trash.freezed.dart";
 
-enum RetentionSource { serverDefault, user, server, admin }
+enum RetentionSource { serverDefault, user }
 
 enum RestoreMode { fail, overwrite, keepBoth }
 
@@ -33,14 +33,22 @@ abstract class TrashRetention with _$TrashRetention {
   const TrashRetention._();
 
   const factory TrashRetention({
+    @Default(true) bool enabled,
     required int days,
     required RetentionSource source,
-    @Default(false) bool locked,
-    int? userDays,
-    required int defaultDays,
+    @Default(true) bool serverEnabled,
+    @Default(0) int serverDays,
+    @Default(TrashPreferences()) TrashPreferences user,
   }) = _TrashRetention;
 
   bool get keepsForever => days == 0;
+
+  bool get changeable => serverEnabled;
+}
+
+@freezed
+abstract class TrashPreferences with _$TrashPreferences {
+  const factory TrashPreferences({bool? enabled, int? days}) = _TrashPreferences;
 }
 
 @freezed

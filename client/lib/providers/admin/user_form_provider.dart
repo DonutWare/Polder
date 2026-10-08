@@ -27,8 +27,6 @@ class UserFormNotifier extends Notifier<UserForm> {
 
   void setDisabled(bool disabled) => state = state.copyWith(disabled: disabled);
 
-  void setTrashRetentionOverride(int? days) => state = state.copyWith(trashRetentionOverrideDays: days);
-
   Future<void> save() async {
     state = state.copyWith(saving: true);
     try {

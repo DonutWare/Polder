@@ -18,7 +18,6 @@ abstract class UserForm with _$UserForm {
     @Default("0") String quotaAmount,
     @Default(QuotaUnit.gb) QuotaUnit quotaUnit,
     @Default(false) bool disabled,
-    int? trashRetentionOverrideDays,
     @Default(false) bool saving,
   }) = _UserForm;
 
@@ -32,7 +31,6 @@ abstract class UserForm with _$UserForm {
       quotaAmount: _formatAmount(user.quotaBytes / unit.bytes),
       quotaUnit: unit,
       disabled: user.disabled,
-      trashRetentionOverrideDays: user.trashRetentionOverrideDays,
     );
   }
 
@@ -56,9 +54,6 @@ abstract class UserForm with _$UserForm {
       role: role == user.role ? null : role,
       quotaBytes: quotaBytes == user.quotaBytes ? null : quotaBytes,
       disabled: disabled == user.disabled ? null : disabled,
-      trashRetentionOverrideDays: trashRetentionOverrideDays == user.trashRetentionOverrideDays
-          ? null
-          : trashRetentionOverrideDays ?? UpdateUserRequest.clearTrashRetentionOverride,
     );
   }
 

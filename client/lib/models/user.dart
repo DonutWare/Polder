@@ -18,7 +18,6 @@ abstract class User with _$User {
     @Default(0) int historyBytes,
     @Default(false) bool disabled,
     DateTime? createdAt,
-    int? trashRetentionOverrideDays,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

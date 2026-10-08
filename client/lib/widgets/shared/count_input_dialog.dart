@@ -8,11 +8,12 @@ Future<int?> showCountInputDialog(
   required String title,
   required String label,
   required int initialValue,
+  int minimum = 0,
   int? maximum,
 }) async {
   bool isValid(String value) {
     final count = int.tryParse(value.trim());
-    return count != null && count >= 0 && (maximum == null || count <= maximum);
+    return count != null && count >= minimum && (maximum == null || count <= maximum);
   }
 
   final value = await showTextInputDialog(

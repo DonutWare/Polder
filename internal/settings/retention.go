@@ -3,6 +3,7 @@ package settings
 import (
 	"time"
 
+	"polder-server/internal/apperr"
 	"polder-server/internal/users"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -13,43 +14,55 @@ type RetentionSource string
 const (
 	RetentionDefault RetentionSource = "default"
 	RetentionUser    RetentionSource = "user"
-	RetentionServer  RetentionSource = "server"
-	RetentionAdmin   RetentionSource = "admin"
 )
 
 func (RetentionSource) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
-	s.Enum = []any{string(RetentionDefault), string(RetentionUser), string(RetentionServer), string(RetentionAdmin)}
+	s.Enum = []any{string(RetentionDefault), string(RetentionUser)}
 	return s
 }
 
 type TrashRetention struct {
-	Days        int             `json:"days" doc:"Days trashed items are kept before they're deleted permanently; 0 keeps them forever"`
-	Source      RetentionSource `json:"source" doc:"Where days comes from; server and admin mean an administrator decides"`
-	Locked      bool            `json:"locked" doc:"True when an administrator decides, so the user's own setting has no effect"`
-	UserDays    *int            `json:"userDays,omitempty" required:"false" doc:"The user's own choice; absent when they follow the server default"`
-	DefaultDays int             `json:"defaultDays" doc:"The server's default"`
+	Enabled       bool                   `json:"enabled" doc:"Whether deleted items go to the trash; off deletes them permanently"`
+	Days          int                    `json:"days" doc:"Days trashed items are kept before they're deleted permanently; 0 keeps them forever"`
+	Source        RetentionSource        `json:"source" doc:"Whether the values come from the user's own choices or the server"`
+	ServerEnabled bool                   `json:"serverEnabled" doc:"Whether the server keeps a trash at all"`
+	ServerDays    int                    `json:"serverDays" doc:"The server's limit, which the user can only lower; 0 for no limit"`
+	User          users.TrashPreferences `json:"user" doc:"The user's own choices; absent fields follow the server"`
 }
 
 func ResolveTrashRetention(server ServerSettings, user users.User) TrashRetention {
+	preferences := user.Trash
 	retention := TrashRetention{
-		Days:        server.TrashRetentionDays,
-		Source:      RetentionDefault,
-		UserDays:    user.TrashRetentionDays,
-		DefaultDays: server.TrashRetentionDays,
+		Enabled:       server.TrashEnabled && (preferences.Enabled == nil || *preferences.Enabled),
+		Days:          stricterLimit(preferences.Days, server.TrashRetentionDays),
+		Source:        RetentionDefault,
+		ServerEnabled: server.TrashEnabled,
+		ServerDays:    server.TrashRetentionDays,
+		User:          preferences,
 	}
-	switch {
-	case user.TrashRetentionOverrideDays != nil:
-		retention.Days, retention.Source = *user.TrashRetentionOverrideDays, RetentionAdmin
-	case server.TrashRetentionEnforced:
-		retention.Source = RetentionServer
-	case user.TrashRetentionDays != nil:
-		retention.Days, retention.Source = *user.TrashRetentionDays, RetentionUser
+	if preferences.Enabled != nil || preferences.Days != nil {
+		retention.Source = RetentionUser
 	}
-	retention.Locked = retention.Source == RetentionAdmin || retention.Source == RetentionServer
 	return retention
 }
 
+func ValidateTrashPreferences(server ServerSettings, preferences users.TrashPreferences) error {
+	if preferences.Days == nil {
+		return nil
+	}
+	if err := users.ValidateRetentionDays(*preferences.Days); err != nil {
+		return err
+	}
+	if exceedsLimit(*preferences.Days, server.TrashRetentionDays) {
+		return apperr.Invalid("trash retention can be at most %d days", server.TrashRetentionDays)
+	}
+	return nil
+}
+
 func (r TrashRetention) ExpiresAt(deletedAt time.Time) (time.Time, bool) {
+	if !r.Enabled {
+		return deletedAt, true
+	}
 	if r.Days <= 0 {
 		return time.Time{}, false
 	}
@@ -57,6 +70,9 @@ func (r TrashRetention) ExpiresAt(deletedAt time.Time) (time.Time, bool) {
 }
 
 func (r TrashRetention) Cutoff(now time.Time) (time.Time, bool) {
+	if !r.Enabled {
+		return now, true
+	}
 	if r.Days <= 0 {
 		return time.Time{}, false
 	}

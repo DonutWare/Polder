@@ -295,7 +295,7 @@ as int,
 /// @nodoc
 mixin _$UpdateUserRequest {
 
- String? get password; UserRole? get role; int? get quotaBytes; bool? get disabled; int? get trashRetentionOverrideDays;
+ String? get password; UserRole? get role; int? get quotaBytes; bool? get disabled;
 /// Create a copy of UpdateUserRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -309,20 +309,20 @@ $UpdateUserRequestCopyWith<UpdateUserRequest> get copyWith => _$UpdateUserReques
 @override
 bool operator ==(Object other) {
   final _this = this as UpdateUserRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateUserRequest&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled)&&(identical(other.trashRetentionOverrideDays, _this.trashRetentionOverrideDays) || other.trashRetentionOverrideDays == _this.trashRetentionOverrideDays));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UpdateUserRequest&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as UpdateUserRequest;
-  return Object.hash(runtimeType,_this.password,_this.role,_this.quotaBytes,_this.disabled,_this.trashRetentionOverrideDays);
+  return Object.hash(runtimeType,_this.password,_this.role,_this.quotaBytes,_this.disabled);
 }
 
 @override
 String toString() {
   final _this = this as UpdateUserRequest;
-  return 'UpdateUserRequest(password: ${_this.password}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes}, disabled: ${_this.disabled}, trashRetentionOverrideDays: ${_this.trashRetentionOverrideDays})';
+  return 'UpdateUserRequest(password: ${_this.password}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes}, disabled: ${_this.disabled})';
 }
 
 
@@ -333,7 +333,7 @@ abstract mixin class $UpdateUserRequestCopyWith<$Res>  {
   factory $UpdateUserRequestCopyWith(UpdateUserRequest value, $Res Function(UpdateUserRequest) _then) = _$UpdateUserRequestCopyWithImpl;
 @useResult
 $Res call({
- String? password, UserRole? role, int? quotaBytes, bool? disabled, int? trashRetentionOverrideDays
+ String? password, UserRole? role, int? quotaBytes, bool? disabled
 });
 
 
@@ -350,14 +350,13 @@ class _$UpdateUserRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateUserRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? password = freezed,Object? role = freezed,Object? quotaBytes = freezed,Object? disabled = freezed,Object? trashRetentionOverrideDays = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? password = freezed,Object? role = freezed,Object? quotaBytes = freezed,Object? disabled = freezed,}) {
   return _then(UpdateUserRequest(
 password: freezed == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String?,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole?,quotaBytes: freezed == quotaBytes ? _self.quotaBytes : quotaBytes // ignore: cast_nullable_to_non_nullable
 as int?,disabled: freezed == disabled ? _self.disabled : disabled // ignore: cast_nullable_to_non_nullable
-as bool?,trashRetentionOverrideDays: freezed == trashRetentionOverrideDays ? _self.trashRetentionOverrideDays : trashRetentionOverrideDays // ignore: cast_nullable_to_non_nullable
-as int?,
+as bool?,
   ));
 }
 
@@ -442,10 +441,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? password,  UserRole? role,  int? quotaBytes,  bool? disabled,  int? trashRetentionOverrideDays)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? password,  UserRole? role,  int? quotaBytes,  bool? disabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UpdateUserRequest() when $default != null:
-return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled,_that.trashRetentionOverrideDays);case _:
+return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled);case _:
   return orElse();
 
 }
@@ -463,10 +462,10 @@ return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? password,  UserRole? role,  int? quotaBytes,  bool? disabled,  int? trashRetentionOverrideDays)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? password,  UserRole? role,  int? quotaBytes,  bool? disabled)  $default,) {final _that = this;
 switch (_that) {
 case _UpdateUserRequest():
-return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled,_that.trashRetentionOverrideDays);case _:
+return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -483,10 +482,10 @@ return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? password,  UserRole? role,  int? quotaBytes,  bool? disabled,  int? trashRetentionOverrideDays)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? password,  UserRole? role,  int? quotaBytes,  bool? disabled)?  $default,) {final _that = this;
 switch (_that) {
 case _UpdateUserRequest() when $default != null:
-return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled,_that.trashRetentionOverrideDays);case _:
+return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled);case _:
   return null;
 
 }
@@ -498,14 +497,13 @@ return $default(_that.password,_that.role,_that.quotaBytes,_that.disabled,_that.
 @JsonSerializable()
 
 class _UpdateUserRequest extends UpdateUserRequest {
-  const _UpdateUserRequest({this.password, this.role, this.quotaBytes, this.disabled, this.trashRetentionOverrideDays}): super._();
+  const _UpdateUserRequest({this.password, this.role, this.quotaBytes, this.disabled}): super._();
   factory _UpdateUserRequest.fromJson(Map<String, dynamic> json) => _$UpdateUserRequestFromJson(json);
 
 @override final  String? password;
 @override final  UserRole? role;
 @override final  int? quotaBytes;
 @override final  bool? disabled;
-@override final  int? trashRetentionOverrideDays;
 
 /// Create a copy of UpdateUserRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -520,18 +518,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateUserRequest&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.trashRetentionOverrideDays, trashRetentionOverrideDays) || other.trashRetentionOverrideDays == trashRetentionOverrideDays));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UpdateUserRequest&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes)&&(identical(other.disabled, disabled) || other.disabled == disabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,password,role,quotaBytes,disabled,trashRetentionOverrideDays);
+    return Object.hash(runtimeType,password,role,quotaBytes,disabled);
 }
 
 @override
 String toString() {
-    return 'UpdateUserRequest(password: $password, role: $role, quotaBytes: $quotaBytes, disabled: $disabled, trashRetentionOverrideDays: $trashRetentionOverrideDays)';
+    return 'UpdateUserRequest(password: $password, role: $role, quotaBytes: $quotaBytes, disabled: $disabled)';
 }
 
 
@@ -542,7 +540,7 @@ abstract mixin class _$UpdateUserRequestCopyWith<$Res> implements $UpdateUserReq
   factory _$UpdateUserRequestCopyWith(_UpdateUserRequest value, $Res Function(_UpdateUserRequest) _then) = __$UpdateUserRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String? password, UserRole? role, int? quotaBytes, bool? disabled, int? trashRetentionOverrideDays
+ String? password, UserRole? role, int? quotaBytes, bool? disabled
 });
 
 
@@ -559,14 +557,13 @@ class __$UpdateUserRequestCopyWithImpl<$Res>
 
 /// Create a copy of UpdateUserRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? password = freezed,Object? role = freezed,Object? quotaBytes = freezed,Object? disabled = freezed,Object? trashRetentionOverrideDays = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? password = freezed,Object? role = freezed,Object? quotaBytes = freezed,Object? disabled = freezed,}) {
   return _then(_UpdateUserRequest(
 password: freezed == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String?,role: freezed == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole?,quotaBytes: freezed == quotaBytes ? _self.quotaBytes : quotaBytes // ignore: cast_nullable_to_non_nullable
 as int?,disabled: freezed == disabled ? _self.disabled : disabled // ignore: cast_nullable_to_non_nullable
-as bool?,trashRetentionOverrideDays: freezed == trashRetentionOverrideDays ? _self.trashRetentionOverrideDays : trashRetentionOverrideDays // ignore: cast_nullable_to_non_nullable
-as int?,
+as bool?,
   ));
 }
 

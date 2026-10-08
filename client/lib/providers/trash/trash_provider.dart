@@ -47,8 +47,8 @@ class TrashRetentionNotifier extends AsyncNotifier<TrashRetention> {
   @override
   Future<TrashRetention> build() => ref.watch(polderApiProvider).trashRetention();
 
-  Future<void> choose(int? days) async {
-    state = AsyncData(await ref.read(polderApiProvider).setTrashRetention(days));
+  Future<void> choose(TrashPreferences preferences) async {
+    state = AsyncData(await ref.read(polderApiProvider).setTrashRetention(preferences));
     ref.invalidate(trashProvider);
   }
 }

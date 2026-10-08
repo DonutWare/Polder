@@ -123,7 +123,6 @@ extension UserToModel on wire.User {
     historyBytes: historyBytes,
     disabled: disabled,
     createdAt: createdAt,
-    trashRetentionOverrideDays: trashRetentionOverrideDays,
   );
 }
 
@@ -144,17 +143,16 @@ extension TrashItemToModel on wire.TrashItem {
 
 extension TrashRetentionToModel on wire.TrashRetention {
   TrashRetention toModel() => TrashRetention(
+    enabled: enabled,
     days: days,
     source: switch (source) {
       wire.TrashRetentionSource.user => RetentionSource.user,
-      wire.TrashRetentionSource.server => RetentionSource.server,
-      wire.TrashRetentionSource.admin => RetentionSource.admin,
       wire.TrashRetentionSource.$default ||
       wire.TrashRetentionSource.swaggerGeneratedUnknown => RetentionSource.serverDefault,
     },
-    locked: locked,
-    userDays: userDays,
-    defaultDays: defaultDays,
+    serverEnabled: serverEnabled,
+    serverDays: serverDays,
+    user: TrashPreferences(enabled: user.enabled, days: user.days),
   );
 }
 
@@ -168,8 +166,8 @@ extension TrashListingToModel on wire.TrashListing {
 
 extension ServerSettingsToModel on wire.ServerSettings {
   ServerSettings toModel() => ServerSettings(
+    trashEnabled: trashEnabled,
     trashRetentionDays: trashRetentionDays,
-    trashRetentionEnforced: trashRetentionEnforced,
     searchContentEnabled: searchContentEnabled,
     ocrEnabled: ocrEnabled,
     ocrLanguages: ocrLanguages ?? const <String>[],
@@ -178,7 +176,6 @@ extension ServerSettingsToModel on wire.ServerSettings {
     welcomeMessage: welcomeMessage,
     accentColor: parseHexColor(accentColor),
     versionsEnabled: versionsEnabled,
-    versionsEnforced: versionsEnforced,
     versionsKeepAllHours: versionsKeepAllHours,
     versionsMaxAgeDays: versionsMaxAgeDays,
     versionsMaxPerFile: versionsMaxPerFile,
@@ -204,18 +201,19 @@ extension VersionRetentionToModel on wire.VersionRetention {
     maxPerFile: maxPerFile,
     source: switch (source) {
       wire.VersionRetentionSource.user => RetentionSource.user,
-      wire.VersionRetentionSource.server => RetentionSource.server,
-      wire.VersionRetentionSource.admin => RetentionSource.admin,
       wire.VersionRetentionSource.$default ||
       wire.VersionRetentionSource.swaggerGeneratedUnknown => RetentionSource.serverDefault,
     },
-    locked: locked,
     serverEnabled: serverEnabled,
+    serverKeepAllHours: serverKeepAllHours,
     serverMaxAgeDays: serverMaxAgeDays,
     serverMaxPerFile: serverMaxPerFile,
-    userEnabled: user.enabled,
-    userMaxAgeDays: user.maxAgeDays,
-    userMaxPerFile: user.maxPerFile,
+    user: VersionPreferences(
+      enabled: user.enabled,
+      keepAllHours: user.keepAllHours,
+      maxAgeDays: user.maxAgeDays,
+      maxPerFile: user.maxPerFile,
+    ),
   );
 }
 
@@ -287,7 +285,6 @@ extension UpdateUserRequestToWire on UpdateUserRequest {
     },
     quotaBytes: quotaBytes,
     disabled: disabled,
-    trashRetentionOverrideDays: trashRetentionOverrideDays,
   );
 }
 

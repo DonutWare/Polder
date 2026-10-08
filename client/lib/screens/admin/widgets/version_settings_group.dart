@@ -34,9 +34,9 @@ class ServerVersionSettingsGroup extends ConsumerWidget {
         if (settings.versionsEnabled) ...[
           NavEntry(
             icon: IconsaxPlusLinear.timer_1,
-            title: localized.serverVersionsKeepAll,
+            title: localized.versionsKeepAll,
             subtitle:
-                "${localized.versionsHours(settings.versionsKeepAllHours)}. ${localized.serverVersionsKeepAllHint}",
+                "${localized.versionsHours(settings.versionsKeepAllHours)} · ${localized.serverVersionsLimitHint}. ${localized.serverVersionsKeepAllHint}",
             onTap: () => _chooseKeepAll(context, notifier, settings),
           ),
           NavEntry(
@@ -53,13 +53,6 @@ class ServerVersionSettingsGroup extends ConsumerWidget {
                 "${context.retentionDuration(settings.versionsMaxAgeDays)} · ${localized.serverVersionsLimitHint}",
             onTap: () => _chooseAge(context, notifier, settings),
           ),
-          SwitchListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            title: Text(localized.enforceVersions),
-            subtitle: Text(localized.enforceVersionsHint),
-            value: settings.versionsEnforced,
-            onChanged: (enforced) => context.runWithFeedback(notifier.setVersionsEnforced(enforced)),
-          ),
         ],
       ],
     );
@@ -71,7 +64,7 @@ class ServerVersionSettingsGroup extends ConsumerWidget {
         context,
         title: context.localized.versionsTurnOffTitle,
         message: context.localized.serverVersionsTurnOffMessage,
-        confirmLabel: context.localized.versionsTurnOff,
+        confirmLabel: context.localized.turnOff,
         destructive: true,
       );
       if (!confirmed || !context.mounted) return;
@@ -82,7 +75,7 @@ class ServerVersionSettingsGroup extends ConsumerWidget {
   Future<void> _chooseKeepAll(BuildContext context, ServerSettingsNotifier notifier, ServerSettings settings) async {
     final hours = await showCountInputDialog(
       context,
-      title: context.localized.serverVersionsKeepAll,
+      title: context.localized.versionsKeepAll,
       label: context.localized.versionsHoursLabel,
       initialValue: settings.versionsKeepAllHours,
     );

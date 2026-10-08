@@ -21,47 +21,42 @@ class VersionSettingsGroup extends ConsumerWidget {
     final localized = context.localized;
     if (retention == null) return const SizedBox.shrink();
     final changeable = retention.changeable;
-    final lock = changeable ? null : const Icon(IconsaxPlusLinear.lock_1, size: 18);
-    final setByAdmin = changeable ? "" : " · ${localized.trashRetentionSetByAdmin}";
     return NavGroup(
       title: localized.versionHistory,
       children: [
         SwitchListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           title: Text(localized.versionsKeep),
-          subtitle: Text(localized.versionsKeepHint + setByAdmin),
+          subtitle: Text(changeable ? localized.versionsKeepHint : localized.versionsTurnedOffByAdmin),
           value: retention.enabled,
           onChanged: changeable ? (enabled) => _setEnabled(context, ref, retention, enabled) : null,
         ),
         if (retention.enabled) ...[
           NavEntry(
+            icon: IconsaxPlusLinear.timer_1,
+            title: localized.versionsKeepAll,
+            subtitle: localized.versionsHours(retention.keepAllHours),
+            onTap: () => _chooseKeepAll(context, ref, retention),
+          ),
+          NavEntry(
             icon: IconsaxPlusLinear.layer,
             title: localized.versionsMaxPerFile,
             subtitle: localized.versionsPerFile(retention.maxPerFile),
-            trailing: lock,
-            onTap: changeable ? () => _choosePerFile(context, ref, retention) : null,
+            onTap: () => _choosePerFile(context, ref, retention),
           ),
           NavEntry(
             icon: IconsaxPlusLinear.clock,
             title: localized.versionsMaxAge,
             subtitle: context.retentionDuration(retention.maxAgeDays),
-            trailing: lock,
-            onTap: changeable ? () => _chooseAge(context, ref, retention) : null,
+            onTap: () => _chooseAge(context, ref, retention),
           ),
         ],
       ],
     );
   }
 
-  Future<void> _save(
-    BuildContext context,
-    WidgetRef ref, {
-    required bool? enabled,
-    required int? maxAgeDays,
-    required int? maxPerFile,
-  }) => context.runWithFeedback(
-    ref.read(versionSettingsProvider.notifier).choose(enabled: enabled, maxAgeDays: maxAgeDays, maxPerFile: maxPerFile),
-  );
+  Future<void> _save(BuildContext context, WidgetRef ref, VersionPreferences preferences) =>
+      context.runWithFeedback(ref.read(versionSettingsProvider.notifier).choose(preferences));
 
   Future<void> _setEnabled(BuildContext context, WidgetRef ref, VersionRetention retention, bool enabled) async {
     if (!enabled) {
@@ -69,18 +64,24 @@ class VersionSettingsGroup extends ConsumerWidget {
         context,
         title: context.localized.versionsTurnOffTitle,
         message: context.localized.versionsTurnOffMessage,
-        confirmLabel: context.localized.versionsTurnOff,
+        confirmLabel: context.localized.turnOff,
         destructive: true,
       );
       if (!confirmed || !context.mounted) return;
     }
-    await _save(
+    await _save(context, ref, retention.user.copyWith(enabled: enabled));
+  }
+
+  Future<void> _chooseKeepAll(BuildContext context, WidgetRef ref, VersionRetention retention) async {
+    final limit = retention.serverKeepAllHours;
+    final hours = await showCountInputDialog(
       context,
-      ref,
-      enabled: enabled,
-      maxAgeDays: retention.userMaxAgeDays,
-      maxPerFile: retention.userMaxPerFile,
+      title: context.localized.versionsKeepAll,
+      label: context.localized.versionsKeepAllHint(context.localized.versionsHours(limit)),
+      initialValue: retention.keepAllHours,
+      maximum: limit,
     );
+    if (hours != null && context.mounted) await _save(context, ref, retention.user.copyWith(keepAllHours: hours));
   }
 
   Future<void> _choosePerFile(BuildContext context, WidgetRef ref, VersionRetention retention) async {
@@ -92,27 +93,21 @@ class VersionSettingsGroup extends ConsumerWidget {
           ? context.localized.versionsMaxPerFile
           : context.localized.versionsMaxPerFileHint(context.localized.versionsPerFile(limit)),
       initialValue: retention.maxPerFile,
+      minimum: limit == 0 ? 0 : 1,
       maximum: limit == 0 ? null : limit,
     );
-    if (count == null || !context.mounted) return;
-    await _save(context, ref, enabled: retention.userEnabled, maxAgeDays: retention.userMaxAgeDays, maxPerFile: count);
+    if (count != null && context.mounted) await _save(context, ref, retention.user.copyWith(maxPerFile: count));
   }
 
   Future<void> _chooseAge(BuildContext context, WidgetRef ref, VersionRetention retention) async {
     final choice = await showRetentionPicker(
       context,
       title: context.localized.versionsMaxAge,
-      selected: retention.userMaxAgeDays,
+      selected: retention.user.maxAgeDays,
       followDefaultLabel:
           "${context.localized.versionsFollowServer} (${context.retentionDuration(retention.serverMaxAgeDays)})",
+      maximum: retention.serverMaxAgeDays,
     );
-    if (choice == null || !context.mounted) return;
-    await _save(
-      context,
-      ref,
-      enabled: retention.userEnabled,
-      maxAgeDays: choice.days,
-      maxPerFile: retention.userMaxPerFile,
-    );
+    if (choice != null && context.mounted) await _save(context, ref, retention.user.copyWith(maxAgeDays: choice.days));
   }
 }

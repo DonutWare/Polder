@@ -31,11 +31,9 @@ type trashItem struct {
 }
 
 type trashRetention struct {
-	Days        int    `json:"days"`
-	Source      string `json:"source"`
-	Locked      bool   `json:"locked"`
-	UserDays    *int   `json:"userDays"`
-	DefaultDays int    `json:"defaultDays"`
+	Enabled bool   `json:"enabled"`
+	Days    int    `json:"days"`
+	Source  string `json:"source"`
 }
 
 type trashListing struct {
@@ -192,13 +190,10 @@ func TestUsersCannotTouchEachOthersTrash(t *testing.T) {
 	})
 }
 
-func TestTrashRetentionPrecedence(t *testing.T) {
+func TestServerTrashRetentionIsTheLimit(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		admin := server.setupAdmin()
 		alice := server.createUser(admin, "alice", 0)
-		var users []userResponse
-		admin.mustJSON(http.MethodGet, "/admin/users", nil, http.StatusOK, &users)
-		aliceURL := fmt.Sprintf("/admin/users/%d", users[1].ID)
 
 		retention := func() trashRetention {
 			var current trashRetention
@@ -207,32 +202,67 @@ func TestTrashRetentionPrecedence(t *testing.T) {
 		}
 		expect := func(days int, source string) {
 			t.Helper()
-			if current := retention(); current.Days != days || current.Source != source {
+			if current := retention(); current.Days != days || current.Source != source || !current.Enabled {
 				t.Fatalf("want %d days from %s, got %+v", days, source, current)
 			}
 		}
 
 		expect(30, "default")
-		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 7}, http.StatusOK, nil)
-		expect(7, "user")
+		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 60}, http.StatusBadRequest, nil)
+		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 0}, http.StatusBadRequest, nil)
+		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 10}, http.StatusOK, nil)
+		expect(10, "user")
 
-		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"trashRetentionDays": 60, "trashRetentionEnforced": true}, http.StatusOK, nil)
-		expect(60, "server")
+		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"trashRetentionDays": 5}, http.StatusOK, nil)
+		expect(5, "user")
 
-		admin.mustJSON(http.MethodPatch, aliceURL, map[string]any{"trashRetentionOverrideDays": 3}, http.StatusOK, nil)
-		expect(3, "admin")
-		if !retention().Locked {
-			t.Fatal("an administrator's override should lock the setting")
-		}
-
-		admin.mustJSON(http.MethodPatch, aliceURL, map[string]any{"trashRetentionOverrideDays": -1}, http.StatusOK, nil)
-		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"trashRetentionEnforced": false}, http.StatusOK, nil)
-		expect(7, "user")
-		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": nil}, http.StatusOK, nil)
-		expect(60, "default")
+		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"trashRetentionDays": 0}, http.StatusOK, nil)
+		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 0}, http.StatusOK, nil)
+		expect(0, "user")
+		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{}, http.StatusOK, nil)
+		expect(0, "default")
 
 		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 99999}, http.StatusBadRequest, nil)
 		alice.mustJSON(http.MethodGet, "/admin/settings", nil, http.StatusForbidden, nil)
+	})
+}
+
+func TestDeletesArePermanentWithoutTrash(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		admin := server.setupAdmin()
+		alice := server.createUser(admin, "alice", 0)
+		alice.put("/kept.txt", 0, []byte("x"), http.StatusOK, nil)
+		alice.mustJSON(http.MethodDelete, "/files?path=/kept.txt", nil, http.StatusNoContent, nil)
+
+		var retention trashRetention
+		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"enabled": false}, http.StatusOK, &retention)
+		if retention.Enabled {
+			t.Fatalf("the user turned the trash off: %+v", retention)
+		}
+		if items := alice.trash().Items; len(items) != 0 {
+			t.Fatalf("turning the trash off should empty it, have %d items", len(items))
+		}
+
+		alice.put("/gone.txt", 0, []byte("x"), http.StatusOK, nil)
+		alice.mustJSON(http.MethodDelete, "/files?path=/gone.txt", nil, http.StatusNoContent, nil)
+		if items := alice.trash().Items; len(items) != 0 {
+			t.Fatalf("a delete without trash should be permanent, have %d items", len(items))
+		}
+		if usage := alice.usage(); usage.UsedBytes != 0 {
+			t.Fatalf("a permanent delete should free its space: %+v", usage)
+		}
+
+		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"enabled": true}, http.StatusOK, nil)
+		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"trashEnabled": false}, http.StatusOK, nil)
+		alice.mustJSON(http.MethodGet, "/trash/retention", nil, http.StatusOK, &retention)
+		if retention.Enabled {
+			t.Fatalf("the server turned the trash off: %+v", retention)
+		}
+		alice.put("/also-gone.txt", 0, []byte("x"), http.StatusOK, nil)
+		alice.mustJSON(http.MethodDelete, "/files?path=/also-gone.txt", nil, http.StatusNoContent, nil)
+		if items := alice.trash().Items; len(items) != 0 {
+			t.Fatalf("a delete without trash should be permanent, have %d items", len(items))
+		}
 	})
 }
 
@@ -241,8 +271,8 @@ func TestExpiredTrashIsPurged(t *testing.T) {
 		admin := server.setupAdmin()
 		alice := server.createUser(admin, "alice", 0)
 		bob := server.createUser(admin, "bob", 0)
+		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"trashRetentionDays": 0}, http.StatusOK, nil)
 		alice.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 1}, http.StatusOK, nil)
-		bob.mustJSON(http.MethodPut, "/trash/retention", map[string]any{"days": 0}, http.StatusOK, nil)
 		for _, user := range []*client{alice, bob} {
 			user.put("/old.txt", 0, []byte("x"), http.StatusOK, nil)
 			user.mustJSON(http.MethodDelete, "/files?path=/old.txt", nil, http.StatusNoContent, nil)

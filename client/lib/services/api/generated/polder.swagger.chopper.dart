@@ -1462,7 +1462,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   @override
   Future<Response<TrashRetention>> _setTrashRetention({
-    required RetentionRequest? body,
+    required TrashPreferences? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
       summary: 'Choose how long deleted items stay in the trash',

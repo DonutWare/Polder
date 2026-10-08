@@ -36,6 +36,7 @@ type Service struct {
 	observers      []MutationFunc
 
 	versioningEnabled VersioningPolicy
+	trashEnabled      TrashPolicy
 	versionsChanged   []func()
 	rescanned         []func()
 }
@@ -228,11 +229,12 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 	if err != nil {
 		return err
 	}
-	unlock := s.locks.lock(owner.ID)
+	unlock := sync.OnceFunc(s.locks.lock(owner.ID))
 	defer unlock()
 
 	undo := func() {}
 	var current Entry
+	var trashID int64
 	err = s.inTransaction(ctx, func(tx *sql.Tx) error {
 		var err error
 		current, err = s.existingEntry(ctx, tx, owner.ID, cleanPath)
@@ -242,12 +244,18 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 		if baseRev > 0 && current.Rev != baseRev {
 			return apperr.Conflict(current, "%s changed since revision %d", cleanPath, baseRev)
 		}
-		undo, err = s.moveToTrash(ctx, tx, owner, current)
+		trashID, undo, err = s.moveToTrash(ctx, tx, owner, current)
 		return err
 	})
 	if err != nil {
 		undo()
 		return err
+	}
+	unlock()
+	if trashID != 0 && !s.keepsTrash(ctx, owner) {
+		if err := s.purgeTrashItem(ctx, owner, trashID); err != nil {
+			return err
+		}
 	}
 	s.onContentRemoved()
 	s.notify(ctx, Mutation{Owner: owner, Kind: MutationDelete, Path: current.Path, IsDir: current.IsDir, Size: current.Size})

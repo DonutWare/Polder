@@ -306,7 +306,7 @@ as DateTime?,
 /// @nodoc
 mixin _$TrashRetention {
 
- int get days; RetentionSource get source; bool get locked; int? get userDays; int get defaultDays;
+ bool get enabled; int get days; RetentionSource get source; bool get serverEnabled; int get serverDays; TrashPreferences get user;
 /// Create a copy of TrashRetention
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -318,20 +318,20 @@ $TrashRetentionCopyWith<TrashRetention> get copyWith => _$TrashRetentionCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as TrashRetention;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrashRetention&&(identical(other.days, _this.days) || other.days == _this.days)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.locked, _this.locked) || other.locked == _this.locked)&&(identical(other.userDays, _this.userDays) || other.userDays == _this.userDays)&&(identical(other.defaultDays, _this.defaultDays) || other.defaultDays == _this.defaultDays));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrashRetention&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.days, _this.days) || other.days == _this.days)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.serverEnabled, _this.serverEnabled) || other.serverEnabled == _this.serverEnabled)&&(identical(other.serverDays, _this.serverDays) || other.serverDays == _this.serverDays)&&(identical(other.user, _this.user) || other.user == _this.user));
 }
 
 
 @override
 int get hashCode {
   final _this = this as TrashRetention;
-  return Object.hash(runtimeType,_this.days,_this.source,_this.locked,_this.userDays,_this.defaultDays);
+  return Object.hash(runtimeType,_this.enabled,_this.days,_this.source,_this.serverEnabled,_this.serverDays,_this.user);
 }
 
 @override
 String toString() {
   final _this = this as TrashRetention;
-  return 'TrashRetention(days: ${_this.days}, source: ${_this.source}, locked: ${_this.locked}, userDays: ${_this.userDays}, defaultDays: ${_this.defaultDays})';
+  return 'TrashRetention(enabled: ${_this.enabled}, days: ${_this.days}, source: ${_this.source}, serverEnabled: ${_this.serverEnabled}, serverDays: ${_this.serverDays}, user: ${_this.user})';
 }
 
 
@@ -342,11 +342,11 @@ abstract mixin class $TrashRetentionCopyWith<$Res>  {
   factory $TrashRetentionCopyWith(TrashRetention value, $Res Function(TrashRetention) _then) = _$TrashRetentionCopyWithImpl;
 @useResult
 $Res call({
- int days, RetentionSource source, bool locked, int? userDays, int defaultDays
+ bool enabled, int days, RetentionSource source, bool serverEnabled, int serverDays, TrashPreferences user
 });
 
 
-
+$TrashPreferencesCopyWith<$Res> get user;
 
 }
 /// @nodoc
@@ -359,17 +359,27 @@ class _$TrashRetentionCopyWithImpl<$Res>
 
 /// Create a copy of TrashRetention
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? days = null,Object? source = null,Object? locked = null,Object? userDays = freezed,Object? defaultDays = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? days = null,Object? source = null,Object? serverEnabled = null,Object? serverDays = null,Object? user = null,}) {
   return _then(TrashRetention(
-days: null == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
+enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,days: null == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
 as int,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
-as RetentionSource,locked: null == locked ? _self.locked : locked // ignore: cast_nullable_to_non_nullable
-as bool,userDays: freezed == userDays ? _self.userDays : userDays // ignore: cast_nullable_to_non_nullable
-as int?,defaultDays: null == defaultDays ? _self.defaultDays : defaultDays // ignore: cast_nullable_to_non_nullable
-as int,
+as RetentionSource,serverEnabled: null == serverEnabled ? _self.serverEnabled : serverEnabled // ignore: cast_nullable_to_non_nullable
+as bool,serverDays: null == serverDays ? _self.serverDays : serverDays // ignore: cast_nullable_to_non_nullable
+as int,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as TrashPreferences,
   ));
 }
-
+/// Create a copy of TrashRetention
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TrashPreferencesCopyWith<$Res> get user {
+  
+  return $TrashPreferencesCopyWith<$Res>(_self.user, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}
 }
 
 
@@ -451,10 +461,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int days,  RetentionSource source,  bool locked,  int? userDays,  int defaultDays)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  int days,  RetentionSource source,  bool serverEnabled,  int serverDays,  TrashPreferences user)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TrashRetention() when $default != null:
-return $default(_that.days,_that.source,_that.locked,_that.userDays,_that.defaultDays);case _:
+return $default(_that.enabled,_that.days,_that.source,_that.serverEnabled,_that.serverDays,_that.user);case _:
   return orElse();
 
 }
@@ -472,10 +482,10 @@ return $default(_that.days,_that.source,_that.locked,_that.userDays,_that.defaul
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int days,  RetentionSource source,  bool locked,  int? userDays,  int defaultDays)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  int days,  RetentionSource source,  bool serverEnabled,  int serverDays,  TrashPreferences user)  $default,) {final _that = this;
 switch (_that) {
 case _TrashRetention():
-return $default(_that.days,_that.source,_that.locked,_that.userDays,_that.defaultDays);case _:
+return $default(_that.enabled,_that.days,_that.source,_that.serverEnabled,_that.serverDays,_that.user);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -492,10 +502,10 @@ return $default(_that.days,_that.source,_that.locked,_that.userDays,_that.defaul
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int days,  RetentionSource source,  bool locked,  int? userDays,  int defaultDays)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  int days,  RetentionSource source,  bool serverEnabled,  int serverDays,  TrashPreferences user)?  $default,) {final _that = this;
 switch (_that) {
 case _TrashRetention() when $default != null:
-return $default(_that.days,_that.source,_that.locked,_that.userDays,_that.defaultDays);case _:
+return $default(_that.enabled,_that.days,_that.source,_that.serverEnabled,_that.serverDays,_that.user);case _:
   return null;
 
 }
@@ -507,14 +517,15 @@ return $default(_that.days,_that.source,_that.locked,_that.userDays,_that.defaul
 
 
 class _TrashRetention extends TrashRetention {
-  const _TrashRetention({required this.days, required this.source, this.locked = false, this.userDays, required this.defaultDays}): super._();
+  const _TrashRetention({this.enabled = true, required this.days, required this.source, this.serverEnabled = true, this.serverDays = 0, this.user = const TrashPreferences()}): super._();
   
 
+@override@JsonKey() final  bool enabled;
 @override final  int days;
 @override final  RetentionSource source;
-@override@JsonKey() final  bool locked;
-@override final  int? userDays;
-@override final  int defaultDays;
+@override@JsonKey() final  bool serverEnabled;
+@override@JsonKey() final  int serverDays;
+@override@JsonKey() final  TrashPreferences user;
 
 /// Create a copy of TrashRetention
 /// with the given fields replaced by the non-null parameter values.
@@ -526,18 +537,18 @@ _$TrashRetentionCopyWith<_TrashRetention> get copyWith => __$TrashRetentionCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrashRetention&&(identical(other.days, days) || other.days == days)&&(identical(other.source, source) || other.source == source)&&(identical(other.locked, locked) || other.locked == locked)&&(identical(other.userDays, userDays) || other.userDays == userDays)&&(identical(other.defaultDays, defaultDays) || other.defaultDays == defaultDays));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrashRetention&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.days, days) || other.days == days)&&(identical(other.source, source) || other.source == source)&&(identical(other.serverEnabled, serverEnabled) || other.serverEnabled == serverEnabled)&&(identical(other.serverDays, serverDays) || other.serverDays == serverDays)&&(identical(other.user, user) || other.user == user));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,days,source,locked,userDays,defaultDays);
+    return Object.hash(runtimeType,enabled,days,source,serverEnabled,serverDays,user);
 }
 
 @override
 String toString() {
-    return 'TrashRetention(days: $days, source: $source, locked: $locked, userDays: $userDays, defaultDays: $defaultDays)';
+    return 'TrashRetention(enabled: $enabled, days: $days, source: $source, serverEnabled: $serverEnabled, serverDays: $serverDays, user: $user)';
 }
 
 
@@ -548,11 +559,11 @@ abstract mixin class _$TrashRetentionCopyWith<$Res> implements $TrashRetentionCo
   factory _$TrashRetentionCopyWith(_TrashRetention value, $Res Function(_TrashRetention) _then) = __$TrashRetentionCopyWithImpl;
 @override @useResult
 $Res call({
- int days, RetentionSource source, bool locked, int? userDays, int defaultDays
+ bool enabled, int days, RetentionSource source, bool serverEnabled, int serverDays, TrashPreferences user
 });
 
 
-
+@override $TrashPreferencesCopyWith<$Res> get user;
 
 }
 /// @nodoc
@@ -565,14 +576,291 @@ class __$TrashRetentionCopyWithImpl<$Res>
 
 /// Create a copy of TrashRetention
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? days = null,Object? source = null,Object? locked = null,Object? userDays = freezed,Object? defaultDays = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? days = null,Object? source = null,Object? serverEnabled = null,Object? serverDays = null,Object? user = null,}) {
   return _then(_TrashRetention(
-days: null == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
+enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,days: null == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
 as int,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
-as RetentionSource,locked: null == locked ? _self.locked : locked // ignore: cast_nullable_to_non_nullable
-as bool,userDays: freezed == userDays ? _self.userDays : userDays // ignore: cast_nullable_to_non_nullable
-as int?,defaultDays: null == defaultDays ? _self.defaultDays : defaultDays // ignore: cast_nullable_to_non_nullable
-as int,
+as RetentionSource,serverEnabled: null == serverEnabled ? _self.serverEnabled : serverEnabled // ignore: cast_nullable_to_non_nullable
+as bool,serverDays: null == serverDays ? _self.serverDays : serverDays // ignore: cast_nullable_to_non_nullable
+as int,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as TrashPreferences,
+  ));
+}
+
+/// Create a copy of TrashRetention
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TrashPreferencesCopyWith<$Res> get user {
+  
+  return $TrashPreferencesCopyWith<$Res>(_self.user, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$TrashPreferences {
+
+ bool? get enabled; int? get days;
+/// Create a copy of TrashPreferences
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TrashPreferencesCopyWith<TrashPreferences> get copyWith => _$TrashPreferencesCopyWithImpl<TrashPreferences>(this as TrashPreferences, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as TrashPreferences;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrashPreferences&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.days, _this.days) || other.days == _this.days));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as TrashPreferences;
+  return Object.hash(runtimeType,_this.enabled,_this.days);
+}
+
+@override
+String toString() {
+  final _this = this as TrashPreferences;
+  return 'TrashPreferences(enabled: ${_this.enabled}, days: ${_this.days})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TrashPreferencesCopyWith<$Res>  {
+  factory $TrashPreferencesCopyWith(TrashPreferences value, $Res Function(TrashPreferences) _then) = _$TrashPreferencesCopyWithImpl;
+@useResult
+$Res call({
+ bool? enabled, int? days
+});
+
+
+
+
+}
+/// @nodoc
+class _$TrashPreferencesCopyWithImpl<$Res>
+    implements $TrashPreferencesCopyWith<$Res> {
+  _$TrashPreferencesCopyWithImpl(this._self, this._then);
+
+  final TrashPreferences _self;
+  final $Res Function(TrashPreferences) _then;
+
+/// Create a copy of TrashPreferences
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = freezed,Object? days = freezed,}) {
+  return _then(TrashPreferences(
+enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool?,days: freezed == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [TrashPreferences].
+extension TrashPreferencesPatterns on TrashPreferences {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TrashPreferences value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _TrashPreferences() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TrashPreferences value)  $default,){
+final _that = this;
+switch (_that) {
+case _TrashPreferences():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TrashPreferences value)?  $default,){
+final _that = this;
+switch (_that) {
+case _TrashPreferences() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool? enabled,  int? days)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _TrashPreferences() when $default != null:
+return $default(_that.enabled,_that.days);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool? enabled,  int? days)  $default,) {final _that = this;
+switch (_that) {
+case _TrashPreferences():
+return $default(_that.enabled,_that.days);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool? enabled,  int? days)?  $default,) {final _that = this;
+switch (_that) {
+case _TrashPreferences() when $default != null:
+return $default(_that.enabled,_that.days);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _TrashPreferences implements TrashPreferences {
+  const _TrashPreferences({this.enabled, this.days});
+  
+
+@override final  bool? enabled;
+@override final  int? days;
+
+/// Create a copy of TrashPreferences
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TrashPreferencesCopyWith<_TrashPreferences> get copyWith => __$TrashPreferencesCopyWithImpl<_TrashPreferences>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TrashPreferences&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.days, days) || other.days == days));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,enabled,days);
+}
+
+@override
+String toString() {
+    return 'TrashPreferences(enabled: $enabled, days: $days)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TrashPreferencesCopyWith<$Res> implements $TrashPreferencesCopyWith<$Res> {
+  factory _$TrashPreferencesCopyWith(_TrashPreferences value, $Res Function(_TrashPreferences) _then) = __$TrashPreferencesCopyWithImpl;
+@override @useResult
+$Res call({
+ bool? enabled, int? days
+});
+
+
+
+
+}
+/// @nodoc
+class __$TrashPreferencesCopyWithImpl<$Res>
+    implements _$TrashPreferencesCopyWith<$Res> {
+  __$TrashPreferencesCopyWithImpl(this._self, this._then);
+
+  final _TrashPreferences _self;
+  final $Res Function(_TrashPreferences) _then;
+
+/// Create a copy of TrashPreferences
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = freezed,Object? days = freezed,}) {
+  return _then(_TrashPreferences(
+enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool?,days: freezed == days ? _self.days : days // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

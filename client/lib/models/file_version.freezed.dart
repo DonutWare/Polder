@@ -294,7 +294,7 @@ as bool,
 /// @nodoc
 mixin _$VersionRetention {
 
- bool get enabled; int get keepAllHours; int get maxAgeDays; int get maxPerFile; RetentionSource get source; bool get locked; bool get serverEnabled; int get serverMaxAgeDays; int get serverMaxPerFile; bool? get userEnabled; int? get userMaxAgeDays; int? get userMaxPerFile;
+ bool get enabled; int get keepAllHours; int get maxAgeDays; int get maxPerFile; RetentionSource get source; bool get serverEnabled; int get serverKeepAllHours; int get serverMaxAgeDays; int get serverMaxPerFile; VersionPreferences get user;
 /// Create a copy of VersionRetention
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -306,20 +306,20 @@ $VersionRetentionCopyWith<VersionRetention> get copyWith => _$VersionRetentionCo
 @override
 bool operator ==(Object other) {
   final _this = this as VersionRetention;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VersionRetention&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.keepAllHours, _this.keepAllHours) || other.keepAllHours == _this.keepAllHours)&&(identical(other.maxAgeDays, _this.maxAgeDays) || other.maxAgeDays == _this.maxAgeDays)&&(identical(other.maxPerFile, _this.maxPerFile) || other.maxPerFile == _this.maxPerFile)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.locked, _this.locked) || other.locked == _this.locked)&&(identical(other.serverEnabled, _this.serverEnabled) || other.serverEnabled == _this.serverEnabled)&&(identical(other.serverMaxAgeDays, _this.serverMaxAgeDays) || other.serverMaxAgeDays == _this.serverMaxAgeDays)&&(identical(other.serverMaxPerFile, _this.serverMaxPerFile) || other.serverMaxPerFile == _this.serverMaxPerFile)&&(identical(other.userEnabled, _this.userEnabled) || other.userEnabled == _this.userEnabled)&&(identical(other.userMaxAgeDays, _this.userMaxAgeDays) || other.userMaxAgeDays == _this.userMaxAgeDays)&&(identical(other.userMaxPerFile, _this.userMaxPerFile) || other.userMaxPerFile == _this.userMaxPerFile));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VersionRetention&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.keepAllHours, _this.keepAllHours) || other.keepAllHours == _this.keepAllHours)&&(identical(other.maxAgeDays, _this.maxAgeDays) || other.maxAgeDays == _this.maxAgeDays)&&(identical(other.maxPerFile, _this.maxPerFile) || other.maxPerFile == _this.maxPerFile)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.serverEnabled, _this.serverEnabled) || other.serverEnabled == _this.serverEnabled)&&(identical(other.serverKeepAllHours, _this.serverKeepAllHours) || other.serverKeepAllHours == _this.serverKeepAllHours)&&(identical(other.serverMaxAgeDays, _this.serverMaxAgeDays) || other.serverMaxAgeDays == _this.serverMaxAgeDays)&&(identical(other.serverMaxPerFile, _this.serverMaxPerFile) || other.serverMaxPerFile == _this.serverMaxPerFile)&&(identical(other.user, _this.user) || other.user == _this.user));
 }
 
 
 @override
 int get hashCode {
   final _this = this as VersionRetention;
-  return Object.hash(runtimeType,_this.enabled,_this.keepAllHours,_this.maxAgeDays,_this.maxPerFile,_this.source,_this.locked,_this.serverEnabled,_this.serverMaxAgeDays,_this.serverMaxPerFile,_this.userEnabled,_this.userMaxAgeDays,_this.userMaxPerFile);
+  return Object.hash(runtimeType,_this.enabled,_this.keepAllHours,_this.maxAgeDays,_this.maxPerFile,_this.source,_this.serverEnabled,_this.serverKeepAllHours,_this.serverMaxAgeDays,_this.serverMaxPerFile,_this.user);
 }
 
 @override
 String toString() {
   final _this = this as VersionRetention;
-  return 'VersionRetention(enabled: ${_this.enabled}, keepAllHours: ${_this.keepAllHours}, maxAgeDays: ${_this.maxAgeDays}, maxPerFile: ${_this.maxPerFile}, source: ${_this.source}, locked: ${_this.locked}, serverEnabled: ${_this.serverEnabled}, serverMaxAgeDays: ${_this.serverMaxAgeDays}, serverMaxPerFile: ${_this.serverMaxPerFile}, userEnabled: ${_this.userEnabled}, userMaxAgeDays: ${_this.userMaxAgeDays}, userMaxPerFile: ${_this.userMaxPerFile})';
+  return 'VersionRetention(enabled: ${_this.enabled}, keepAllHours: ${_this.keepAllHours}, maxAgeDays: ${_this.maxAgeDays}, maxPerFile: ${_this.maxPerFile}, source: ${_this.source}, serverEnabled: ${_this.serverEnabled}, serverKeepAllHours: ${_this.serverKeepAllHours}, serverMaxAgeDays: ${_this.serverMaxAgeDays}, serverMaxPerFile: ${_this.serverMaxPerFile}, user: ${_this.user})';
 }
 
 
@@ -330,11 +330,11 @@ abstract mixin class $VersionRetentionCopyWith<$Res>  {
   factory $VersionRetentionCopyWith(VersionRetention value, $Res Function(VersionRetention) _then) = _$VersionRetentionCopyWithImpl;
 @useResult
 $Res call({
- bool enabled, int keepAllHours, int maxAgeDays, int maxPerFile, RetentionSource source, bool locked, bool serverEnabled, int serverMaxAgeDays, int serverMaxPerFile, bool? userEnabled, int? userMaxAgeDays, int? userMaxPerFile
+ bool enabled, int keepAllHours, int maxAgeDays, int maxPerFile, RetentionSource source, bool serverEnabled, int serverKeepAllHours, int serverMaxAgeDays, int serverMaxPerFile, VersionPreferences user
 });
 
 
-
+$VersionPreferencesCopyWith<$Res> get user;
 
 }
 /// @nodoc
@@ -347,24 +347,31 @@ class _$VersionRetentionCopyWithImpl<$Res>
 
 /// Create a copy of VersionRetention
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? keepAllHours = null,Object? maxAgeDays = null,Object? maxPerFile = null,Object? source = null,Object? locked = null,Object? serverEnabled = null,Object? serverMaxAgeDays = null,Object? serverMaxPerFile = null,Object? userEnabled = freezed,Object? userMaxAgeDays = freezed,Object? userMaxPerFile = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = null,Object? keepAllHours = null,Object? maxAgeDays = null,Object? maxPerFile = null,Object? source = null,Object? serverEnabled = null,Object? serverKeepAllHours = null,Object? serverMaxAgeDays = null,Object? serverMaxPerFile = null,Object? user = null,}) {
   return _then(VersionRetention(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,keepAllHours: null == keepAllHours ? _self.keepAllHours : keepAllHours // ignore: cast_nullable_to_non_nullable
 as int,maxAgeDays: null == maxAgeDays ? _self.maxAgeDays : maxAgeDays // ignore: cast_nullable_to_non_nullable
 as int,maxPerFile: null == maxPerFile ? _self.maxPerFile : maxPerFile // ignore: cast_nullable_to_non_nullable
 as int,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
-as RetentionSource,locked: null == locked ? _self.locked : locked // ignore: cast_nullable_to_non_nullable
-as bool,serverEnabled: null == serverEnabled ? _self.serverEnabled : serverEnabled // ignore: cast_nullable_to_non_nullable
-as bool,serverMaxAgeDays: null == serverMaxAgeDays ? _self.serverMaxAgeDays : serverMaxAgeDays // ignore: cast_nullable_to_non_nullable
+as RetentionSource,serverEnabled: null == serverEnabled ? _self.serverEnabled : serverEnabled // ignore: cast_nullable_to_non_nullable
+as bool,serverKeepAllHours: null == serverKeepAllHours ? _self.serverKeepAllHours : serverKeepAllHours // ignore: cast_nullable_to_non_nullable
+as int,serverMaxAgeDays: null == serverMaxAgeDays ? _self.serverMaxAgeDays : serverMaxAgeDays // ignore: cast_nullable_to_non_nullable
 as int,serverMaxPerFile: null == serverMaxPerFile ? _self.serverMaxPerFile : serverMaxPerFile // ignore: cast_nullable_to_non_nullable
-as int,userEnabled: freezed == userEnabled ? _self.userEnabled : userEnabled // ignore: cast_nullable_to_non_nullable
-as bool?,userMaxAgeDays: freezed == userMaxAgeDays ? _self.userMaxAgeDays : userMaxAgeDays // ignore: cast_nullable_to_non_nullable
-as int?,userMaxPerFile: freezed == userMaxPerFile ? _self.userMaxPerFile : userMaxPerFile // ignore: cast_nullable_to_non_nullable
-as int?,
+as int,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as VersionPreferences,
   ));
 }
-
+/// Create a copy of VersionRetention
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$VersionPreferencesCopyWith<$Res> get user {
+  
+  return $VersionPreferencesCopyWith<$Res>(_self.user, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}
 }
 
 
@@ -446,10 +453,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  int keepAllHours,  int maxAgeDays,  int maxPerFile,  RetentionSource source,  bool locked,  bool serverEnabled,  int serverMaxAgeDays,  int serverMaxPerFile,  bool? userEnabled,  int? userMaxAgeDays,  int? userMaxPerFile)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enabled,  int keepAllHours,  int maxAgeDays,  int maxPerFile,  RetentionSource source,  bool serverEnabled,  int serverKeepAllHours,  int serverMaxAgeDays,  int serverMaxPerFile,  VersionPreferences user)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VersionRetention() when $default != null:
-return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile,_that.source,_that.locked,_that.serverEnabled,_that.serverMaxAgeDays,_that.serverMaxPerFile,_that.userEnabled,_that.userMaxAgeDays,_that.userMaxPerFile);case _:
+return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile,_that.source,_that.serverEnabled,_that.serverKeepAllHours,_that.serverMaxAgeDays,_that.serverMaxPerFile,_that.user);case _:
   return orElse();
 
 }
@@ -467,10 +474,10 @@ return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFi
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  int keepAllHours,  int maxAgeDays,  int maxPerFile,  RetentionSource source,  bool locked,  bool serverEnabled,  int serverMaxAgeDays,  int serverMaxPerFile,  bool? userEnabled,  int? userMaxAgeDays,  int? userMaxPerFile)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enabled,  int keepAllHours,  int maxAgeDays,  int maxPerFile,  RetentionSource source,  bool serverEnabled,  int serverKeepAllHours,  int serverMaxAgeDays,  int serverMaxPerFile,  VersionPreferences user)  $default,) {final _that = this;
 switch (_that) {
 case _VersionRetention():
-return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile,_that.source,_that.locked,_that.serverEnabled,_that.serverMaxAgeDays,_that.serverMaxPerFile,_that.userEnabled,_that.userMaxAgeDays,_that.userMaxPerFile);case _:
+return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile,_that.source,_that.serverEnabled,_that.serverKeepAllHours,_that.serverMaxAgeDays,_that.serverMaxPerFile,_that.user);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -487,10 +494,10 @@ return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFi
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  int keepAllHours,  int maxAgeDays,  int maxPerFile,  RetentionSource source,  bool locked,  bool serverEnabled,  int serverMaxAgeDays,  int serverMaxPerFile,  bool? userEnabled,  int? userMaxAgeDays,  int? userMaxPerFile)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enabled,  int keepAllHours,  int maxAgeDays,  int maxPerFile,  RetentionSource source,  bool serverEnabled,  int serverKeepAllHours,  int serverMaxAgeDays,  int serverMaxPerFile,  VersionPreferences user)?  $default,) {final _that = this;
 switch (_that) {
 case _VersionRetention() when $default != null:
-return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile,_that.source,_that.locked,_that.serverEnabled,_that.serverMaxAgeDays,_that.serverMaxPerFile,_that.userEnabled,_that.userMaxAgeDays,_that.userMaxPerFile);case _:
+return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile,_that.source,_that.serverEnabled,_that.serverKeepAllHours,_that.serverMaxAgeDays,_that.serverMaxPerFile,_that.user);case _:
   return null;
 
 }
@@ -502,7 +509,7 @@ return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFi
 
 
 class _VersionRetention extends VersionRetention {
-  const _VersionRetention({this.enabled = false, this.keepAllHours = 0, this.maxAgeDays = 0, this.maxPerFile = 0, this.source = RetentionSource.serverDefault, this.locked = false, this.serverEnabled = false, this.serverMaxAgeDays = 0, this.serverMaxPerFile = 0, this.userEnabled, this.userMaxAgeDays, this.userMaxPerFile}): super._();
+  const _VersionRetention({this.enabled = false, this.keepAllHours = 0, this.maxAgeDays = 0, this.maxPerFile = 0, this.source = RetentionSource.serverDefault, this.serverEnabled = false, this.serverKeepAllHours = 0, this.serverMaxAgeDays = 0, this.serverMaxPerFile = 0, this.user = const VersionPreferences()}): super._();
   
 
 @override@JsonKey() final  bool enabled;
@@ -510,13 +517,11 @@ class _VersionRetention extends VersionRetention {
 @override@JsonKey() final  int maxAgeDays;
 @override@JsonKey() final  int maxPerFile;
 @override@JsonKey() final  RetentionSource source;
-@override@JsonKey() final  bool locked;
 @override@JsonKey() final  bool serverEnabled;
+@override@JsonKey() final  int serverKeepAllHours;
 @override@JsonKey() final  int serverMaxAgeDays;
 @override@JsonKey() final  int serverMaxPerFile;
-@override final  bool? userEnabled;
-@override final  int? userMaxAgeDays;
-@override final  int? userMaxPerFile;
+@override@JsonKey() final  VersionPreferences user;
 
 /// Create a copy of VersionRetention
 /// with the given fields replaced by the non-null parameter values.
@@ -528,18 +533,18 @@ _$VersionRetentionCopyWith<_VersionRetention> get copyWith => __$VersionRetentio
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VersionRetention&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.keepAllHours, keepAllHours) || other.keepAllHours == keepAllHours)&&(identical(other.maxAgeDays, maxAgeDays) || other.maxAgeDays == maxAgeDays)&&(identical(other.maxPerFile, maxPerFile) || other.maxPerFile == maxPerFile)&&(identical(other.source, source) || other.source == source)&&(identical(other.locked, locked) || other.locked == locked)&&(identical(other.serverEnabled, serverEnabled) || other.serverEnabled == serverEnabled)&&(identical(other.serverMaxAgeDays, serverMaxAgeDays) || other.serverMaxAgeDays == serverMaxAgeDays)&&(identical(other.serverMaxPerFile, serverMaxPerFile) || other.serverMaxPerFile == serverMaxPerFile)&&(identical(other.userEnabled, userEnabled) || other.userEnabled == userEnabled)&&(identical(other.userMaxAgeDays, userMaxAgeDays) || other.userMaxAgeDays == userMaxAgeDays)&&(identical(other.userMaxPerFile, userMaxPerFile) || other.userMaxPerFile == userMaxPerFile));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VersionRetention&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.keepAllHours, keepAllHours) || other.keepAllHours == keepAllHours)&&(identical(other.maxAgeDays, maxAgeDays) || other.maxAgeDays == maxAgeDays)&&(identical(other.maxPerFile, maxPerFile) || other.maxPerFile == maxPerFile)&&(identical(other.source, source) || other.source == source)&&(identical(other.serverEnabled, serverEnabled) || other.serverEnabled == serverEnabled)&&(identical(other.serverKeepAllHours, serverKeepAllHours) || other.serverKeepAllHours == serverKeepAllHours)&&(identical(other.serverMaxAgeDays, serverMaxAgeDays) || other.serverMaxAgeDays == serverMaxAgeDays)&&(identical(other.serverMaxPerFile, serverMaxPerFile) || other.serverMaxPerFile == serverMaxPerFile)&&(identical(other.user, user) || other.user == user));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enabled,keepAllHours,maxAgeDays,maxPerFile,source,locked,serverEnabled,serverMaxAgeDays,serverMaxPerFile,userEnabled,userMaxAgeDays,userMaxPerFile);
+    return Object.hash(runtimeType,enabled,keepAllHours,maxAgeDays,maxPerFile,source,serverEnabled,serverKeepAllHours,serverMaxAgeDays,serverMaxPerFile,user);
 }
 
 @override
 String toString() {
-    return 'VersionRetention(enabled: $enabled, keepAllHours: $keepAllHours, maxAgeDays: $maxAgeDays, maxPerFile: $maxPerFile, source: $source, locked: $locked, serverEnabled: $serverEnabled, serverMaxAgeDays: $serverMaxAgeDays, serverMaxPerFile: $serverMaxPerFile, userEnabled: $userEnabled, userMaxAgeDays: $userMaxAgeDays, userMaxPerFile: $userMaxPerFile)';
+    return 'VersionRetention(enabled: $enabled, keepAllHours: $keepAllHours, maxAgeDays: $maxAgeDays, maxPerFile: $maxPerFile, source: $source, serverEnabled: $serverEnabled, serverKeepAllHours: $serverKeepAllHours, serverMaxAgeDays: $serverMaxAgeDays, serverMaxPerFile: $serverMaxPerFile, user: $user)';
 }
 
 
@@ -550,11 +555,11 @@ abstract mixin class _$VersionRetentionCopyWith<$Res> implements $VersionRetenti
   factory _$VersionRetentionCopyWith(_VersionRetention value, $Res Function(_VersionRetention) _then) = __$VersionRetentionCopyWithImpl;
 @override @useResult
 $Res call({
- bool enabled, int keepAllHours, int maxAgeDays, int maxPerFile, RetentionSource source, bool locked, bool serverEnabled, int serverMaxAgeDays, int serverMaxPerFile, bool? userEnabled, int? userMaxAgeDays, int? userMaxPerFile
+ bool enabled, int keepAllHours, int maxAgeDays, int maxPerFile, RetentionSource source, bool serverEnabled, int serverKeepAllHours, int serverMaxAgeDays, int serverMaxPerFile, VersionPreferences user
 });
 
 
-
+@override $VersionPreferencesCopyWith<$Res> get user;
 
 }
 /// @nodoc
@@ -567,20 +572,300 @@ class __$VersionRetentionCopyWithImpl<$Res>
 
 /// Create a copy of VersionRetention
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? keepAllHours = null,Object? maxAgeDays = null,Object? maxPerFile = null,Object? source = null,Object? locked = null,Object? serverEnabled = null,Object? serverMaxAgeDays = null,Object? serverMaxPerFile = null,Object? userEnabled = freezed,Object? userMaxAgeDays = freezed,Object? userMaxPerFile = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = null,Object? keepAllHours = null,Object? maxAgeDays = null,Object? maxPerFile = null,Object? source = null,Object? serverEnabled = null,Object? serverKeepAllHours = null,Object? serverMaxAgeDays = null,Object? serverMaxPerFile = null,Object? user = null,}) {
   return _then(_VersionRetention(
 enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,keepAllHours: null == keepAllHours ? _self.keepAllHours : keepAllHours // ignore: cast_nullable_to_non_nullable
 as int,maxAgeDays: null == maxAgeDays ? _self.maxAgeDays : maxAgeDays // ignore: cast_nullable_to_non_nullable
 as int,maxPerFile: null == maxPerFile ? _self.maxPerFile : maxPerFile // ignore: cast_nullable_to_non_nullable
 as int,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
-as RetentionSource,locked: null == locked ? _self.locked : locked // ignore: cast_nullable_to_non_nullable
-as bool,serverEnabled: null == serverEnabled ? _self.serverEnabled : serverEnabled // ignore: cast_nullable_to_non_nullable
-as bool,serverMaxAgeDays: null == serverMaxAgeDays ? _self.serverMaxAgeDays : serverMaxAgeDays // ignore: cast_nullable_to_non_nullable
+as RetentionSource,serverEnabled: null == serverEnabled ? _self.serverEnabled : serverEnabled // ignore: cast_nullable_to_non_nullable
+as bool,serverKeepAllHours: null == serverKeepAllHours ? _self.serverKeepAllHours : serverKeepAllHours // ignore: cast_nullable_to_non_nullable
+as int,serverMaxAgeDays: null == serverMaxAgeDays ? _self.serverMaxAgeDays : serverMaxAgeDays // ignore: cast_nullable_to_non_nullable
 as int,serverMaxPerFile: null == serverMaxPerFile ? _self.serverMaxPerFile : serverMaxPerFile // ignore: cast_nullable_to_non_nullable
-as int,userEnabled: freezed == userEnabled ? _self.userEnabled : userEnabled // ignore: cast_nullable_to_non_nullable
-as bool?,userMaxAgeDays: freezed == userMaxAgeDays ? _self.userMaxAgeDays : userMaxAgeDays // ignore: cast_nullable_to_non_nullable
-as int?,userMaxPerFile: freezed == userMaxPerFile ? _self.userMaxPerFile : userMaxPerFile // ignore: cast_nullable_to_non_nullable
+as int,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as VersionPreferences,
+  ));
+}
+
+/// Create a copy of VersionRetention
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$VersionPreferencesCopyWith<$Res> get user {
+  
+  return $VersionPreferencesCopyWith<$Res>(_self.user, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$VersionPreferences {
+
+ bool? get enabled; int? get keepAllHours; int? get maxAgeDays; int? get maxPerFile;
+/// Create a copy of VersionPreferences
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$VersionPreferencesCopyWith<VersionPreferences> get copyWith => _$VersionPreferencesCopyWithImpl<VersionPreferences>(this as VersionPreferences, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as VersionPreferences;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VersionPreferences&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.keepAllHours, _this.keepAllHours) || other.keepAllHours == _this.keepAllHours)&&(identical(other.maxAgeDays, _this.maxAgeDays) || other.maxAgeDays == _this.maxAgeDays)&&(identical(other.maxPerFile, _this.maxPerFile) || other.maxPerFile == _this.maxPerFile));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as VersionPreferences;
+  return Object.hash(runtimeType,_this.enabled,_this.keepAllHours,_this.maxAgeDays,_this.maxPerFile);
+}
+
+@override
+String toString() {
+  final _this = this as VersionPreferences;
+  return 'VersionPreferences(enabled: ${_this.enabled}, keepAllHours: ${_this.keepAllHours}, maxAgeDays: ${_this.maxAgeDays}, maxPerFile: ${_this.maxPerFile})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $VersionPreferencesCopyWith<$Res>  {
+  factory $VersionPreferencesCopyWith(VersionPreferences value, $Res Function(VersionPreferences) _then) = _$VersionPreferencesCopyWithImpl;
+@useResult
+$Res call({
+ bool? enabled, int? keepAllHours, int? maxAgeDays, int? maxPerFile
+});
+
+
+
+
+}
+/// @nodoc
+class _$VersionPreferencesCopyWithImpl<$Res>
+    implements $VersionPreferencesCopyWith<$Res> {
+  _$VersionPreferencesCopyWithImpl(this._self, this._then);
+
+  final VersionPreferences _self;
+  final $Res Function(VersionPreferences) _then;
+
+/// Create a copy of VersionPreferences
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? enabled = freezed,Object? keepAllHours = freezed,Object? maxAgeDays = freezed,Object? maxPerFile = freezed,}) {
+  return _then(VersionPreferences(
+enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool?,keepAllHours: freezed == keepAllHours ? _self.keepAllHours : keepAllHours // ignore: cast_nullable_to_non_nullable
+as int?,maxAgeDays: freezed == maxAgeDays ? _self.maxAgeDays : maxAgeDays // ignore: cast_nullable_to_non_nullable
+as int?,maxPerFile: freezed == maxPerFile ? _self.maxPerFile : maxPerFile // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [VersionPreferences].
+extension VersionPreferencesPatterns on VersionPreferences {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _VersionPreferences value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _VersionPreferences() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _VersionPreferences value)  $default,){
+final _that = this;
+switch (_that) {
+case _VersionPreferences():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _VersionPreferences value)?  $default,){
+final _that = this;
+switch (_that) {
+case _VersionPreferences() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool? enabled,  int? keepAllHours,  int? maxAgeDays,  int? maxPerFile)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _VersionPreferences() when $default != null:
+return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool? enabled,  int? keepAllHours,  int? maxAgeDays,  int? maxPerFile)  $default,) {final _that = this;
+switch (_that) {
+case _VersionPreferences():
+return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool? enabled,  int? keepAllHours,  int? maxAgeDays,  int? maxPerFile)?  $default,) {final _that = this;
+switch (_that) {
+case _VersionPreferences() when $default != null:
+return $default(_that.enabled,_that.keepAllHours,_that.maxAgeDays,_that.maxPerFile);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _VersionPreferences implements VersionPreferences {
+  const _VersionPreferences({this.enabled, this.keepAllHours, this.maxAgeDays, this.maxPerFile});
+  
+
+@override final  bool? enabled;
+@override final  int? keepAllHours;
+@override final  int? maxAgeDays;
+@override final  int? maxPerFile;
+
+/// Create a copy of VersionPreferences
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$VersionPreferencesCopyWith<_VersionPreferences> get copyWith => __$VersionPreferencesCopyWithImpl<_VersionPreferences>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VersionPreferences&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.keepAllHours, keepAllHours) || other.keepAllHours == keepAllHours)&&(identical(other.maxAgeDays, maxAgeDays) || other.maxAgeDays == maxAgeDays)&&(identical(other.maxPerFile, maxPerFile) || other.maxPerFile == maxPerFile));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,enabled,keepAllHours,maxAgeDays,maxPerFile);
+}
+
+@override
+String toString() {
+    return 'VersionPreferences(enabled: $enabled, keepAllHours: $keepAllHours, maxAgeDays: $maxAgeDays, maxPerFile: $maxPerFile)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$VersionPreferencesCopyWith<$Res> implements $VersionPreferencesCopyWith<$Res> {
+  factory _$VersionPreferencesCopyWith(_VersionPreferences value, $Res Function(_VersionPreferences) _then) = __$VersionPreferencesCopyWithImpl;
+@override @useResult
+$Res call({
+ bool? enabled, int? keepAllHours, int? maxAgeDays, int? maxPerFile
+});
+
+
+
+
+}
+/// @nodoc
+class __$VersionPreferencesCopyWithImpl<$Res>
+    implements _$VersionPreferencesCopyWith<$Res> {
+  __$VersionPreferencesCopyWithImpl(this._self, this._then);
+
+  final _VersionPreferences _self;
+  final $Res Function(_VersionPreferences) _then;
+
+/// Create a copy of VersionPreferences
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? enabled = freezed,Object? keepAllHours = freezed,Object? maxAgeDays = freezed,Object? maxPerFile = freezed,}) {
+  return _then(_VersionPreferences(
+enabled: freezed == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool?,keepAllHours: freezed == keepAllHours ? _self.keepAllHours : keepAllHours // ignore: cast_nullable_to_non_nullable
+as int?,maxAgeDays: freezed == maxAgeDays ? _self.maxAgeDays : maxAgeDays // ignore: cast_nullable_to_non_nullable
+as int?,maxPerFile: freezed == maxPerFile ? _self.maxPerFile : maxPerFile // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
 }

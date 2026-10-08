@@ -56,7 +56,8 @@ type App struct {
 	sync      *syncing.Service
 	versions  *versions.Worker
 
-	background sync.WaitGroup
+	trashPurgeRequests chan struct{}
+	background         sync.WaitGroup
 }
 
 func New(cfg config.Config) (*App, error) {
@@ -90,6 +91,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	userService := users.NewService(userStore, auth.Argon2Hasher{}, disk)
 	sessions := auth.NewSessions(db)
 	serverSettings := settings.NewStore(db, settings.ServerSettings{
+		TrashEnabled:         true,
 		TrashRetentionDays:   cfg.TrashRetentionDays,
 		SearchContentEnabled: true,
 		OCREnabled:           true,
@@ -101,6 +103,15 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		VersionsMaxPerFile:   settings.DefaultVersionMaxPerFile,
 	})
 	fileService := files.NewService(db, disk)
+	fileService.SetTrashPolicy(func(ctx context.Context, owner users.User) bool {
+		server, err := serverSettings.Get(ctx)
+		if err != nil {
+			logger.Warn("load trash settings", "user", owner.Username, "error", err)
+			return true
+		}
+		return settings.ResolveTrashRetention(server, owner).Enabled
+	})
+	trashPurgeRequests := make(chan struct{}, 1)
 	syncService := syncing.NewService(db, fileService)
 	versionWorker := versions.NewWorker(fileService, userStore, serverSettings)
 	activityHub := activity.NewHub(activity.NewStore(db))
@@ -172,6 +183,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Logs:                   logs,
 		Office:                 officeService,
 		Versions:               versionWorker,
+		RequestTrashPurge:      func() { requestWork(trashPurgeRequests) },
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		TrustedProxies:         trustedProxies,
 		Web:                    web,
@@ -191,6 +203,8 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		extractor: extractor,
 		sync:      syncService,
 		versions:  versionWorker,
+
+		trashPurgeRequests: trashPurgeRequests,
 	}, nil
 }
 
@@ -231,7 +245,7 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	a.background.Go(func() { a.versions.Run(ctx) })
 	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
 	a.background.Go(func() {
-		repeat(ctx, trashPurgeInterval, "purge expired trash", func(ctx context.Context) error {
+		repeatOnRequest(ctx, trashPurgeInterval, a.trashPurgeRequests, "purge expired trash", func(ctx context.Context) error {
 			return a.PurgeExpiredTrash(ctx, time.Now())
 		})
 	})
@@ -254,6 +268,10 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 }
 
 func repeat(ctx context.Context, interval time.Duration, task string, work func(context.Context) error) {
+	repeatOnRequest(ctx, interval, nil, task, work)
+}
+
+func repeatOnRequest(ctx context.Context, interval time.Duration, requests <-chan struct{}, task string, work func(context.Context) error) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for {
@@ -264,7 +282,15 @@ func repeat(ctx context.Context, interval time.Duration, task string, work func(
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
+		case <-requests:
 		}
+	}
+}
+
+func requestWork(requests chan<- struct{}) {
+	select {
+	case requests <- struct{}{}:
+	default:
 	}
 }
 

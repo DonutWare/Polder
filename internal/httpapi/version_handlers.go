@@ -117,17 +117,18 @@ func (a *API) getVersionSettings(ctx context.Context, _ *struct{}) (*jsonBody[se
 func (a *API) setVersionSettings(ctx context.Context, input *jsonBody[users.VersionPreferences]) (*jsonBody[settings.VersionRetention], error) {
 	owner := currentUser(ctx)
 	preferences := input.Body
-	if err := settings.ValidateVersionLimits(preferences.MaxAgeDays, preferences.MaxPerFile); err != nil {
+	server, err := a.settings.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := settings.ValidateVersionPreferences(server, preferences); err != nil {
 		return nil, err
 	}
 	if err := a.users.Store().SetVersionPreferences(ctx, owner.ID, preferences); err != nil {
 		return nil, err
 	}
 	owner.Versions = preferences
-	retention, err := a.versionRetention(ctx, owner)
-	if err != nil {
-		return nil, err
-	}
+	retention := settings.ResolveVersionRetention(server, owner)
 	if err := a.versions.ApplyRetention(ctx, owner); err != nil {
 		return nil, err
 	}

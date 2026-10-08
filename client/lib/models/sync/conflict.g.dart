@@ -10,12 +10,8 @@ _Conflict _$ConflictFromJson(Map<String, dynamic> json) => _Conflict(
   syncRootId: json['syncRootId'] as String,
   relativePath: json['relativePath'] as String,
   kind: $enumDecode(_$ConflictKindEnumMap, json['kind']),
-  local: json['local'] == null
-      ? null
-      : LocalFileState.fromJson(json['local'] as Map<String, dynamic>),
-  remote: json['remote'] == null
-      ? null
-      : FileEntry.fromJson(json['remote'] as Map<String, dynamic>),
+  local: json['local'] == null ? null : LocalFileState.fromJson(json['local'] as Map<String, dynamic>),
+  remote: json['remote'] == null ? null : FileEntry.fromJson(json['remote'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ConflictToJson(_Conflict instance) => <String, dynamic>{

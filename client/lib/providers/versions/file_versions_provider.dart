@@ -52,12 +52,8 @@ class VersionSettingsNotifier extends AsyncNotifier<VersionRetention> {
   @override
   Future<VersionRetention> build() => ref.watch(polderApiProvider).versionSettings();
 
-  Future<void> choose({required bool? enabled, required int? maxAgeDays, required int? maxPerFile}) async {
-    state = AsyncData(
-      await ref
-          .read(polderApiProvider)
-          .setVersionSettings(enabled: enabled, maxAgeDays: maxAgeDays, maxPerFile: maxPerFile),
-    );
+  Future<void> choose(VersionPreferences preferences) async {
+    state = AsyncData(await ref.read(polderApiProvider).setVersionSettings(preferences));
     ref.invalidate(currentUserProvider);
   }
 }

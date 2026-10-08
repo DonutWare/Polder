@@ -317,11 +317,7 @@ enum TrashRetentionSource {
   @JsonValue('default')
   $default('default'),
   @JsonValue('user')
-  user('user'),
-  @JsonValue('server')
-  server('server'),
-  @JsonValue('admin')
-  admin('admin');
+  user('user');
 
   final String? value;
 
@@ -349,11 +345,7 @@ enum VersionRetentionSource {
   @JsonValue('default')
   $default('default'),
   @JsonValue('user')
-  user('user'),
-  @JsonValue('server')
-  server('server'),
-  @JsonValue('admin')
-  admin('admin');
+  user('user');
 
   final String? value;
 

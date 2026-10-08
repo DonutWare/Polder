@@ -50,10 +50,6 @@ type attachmentOutput struct {
 	Body               func(huma.Context)
 }
 
-type retentionRequest struct {
-	Days *int `json:"days" required:"false" doc:"Days to keep trashed items, 0 keeps them forever; null or absent follows the server default"`
-}
-
 func (a *API) listTrash(ctx context.Context, _ *struct{}) (*jsonBody[trashListing], error) {
 	owner := currentUser(ctx)
 	retention, err := a.trashRetention(ctx, owner)
@@ -188,20 +184,25 @@ func (a *API) getTrashRetention(ctx context.Context, _ *struct{}) (*jsonBody[set
 	return respond(retention), nil
 }
 
-func (a *API) setTrashRetention(ctx context.Context, input *jsonBody[retentionRequest]) (*jsonBody[settings.TrashRetention], error) {
+func (a *API) setTrashRetention(ctx context.Context, input *jsonBody[users.TrashPreferences]) (*jsonBody[settings.TrashRetention], error) {
 	owner := currentUser(ctx)
-	if days := input.Body.Days; days != nil {
-		if err := users.ValidateRetentionDays(*days); err != nil {
-			return nil, err
-		}
-	}
-	if err := a.users.Store().SetTrashRetention(ctx, owner.ID, input.Body.Days); err != nil {
-		return nil, err
-	}
-	owner.TrashRetentionDays = input.Body.Days
-	retention, err := a.trashRetention(ctx, owner)
+	preferences := input.Body
+	server, err := a.settings.Get(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if err := settings.ValidateTrashPreferences(server, preferences); err != nil {
+		return nil, err
+	}
+	if err := a.users.Store().SetTrashPreferences(ctx, owner.ID, preferences); err != nil {
+		return nil, err
+	}
+	owner.Trash = preferences
+	retention := settings.ResolveTrashRetention(server, owner)
+	if !retention.Enabled {
+		if err := a.files.EmptyTrash(ctx, owner); err != nil {
+			return nil, err
+		}
 	}
 	return respond(retention), nil
 }

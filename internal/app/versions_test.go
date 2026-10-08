@@ -32,11 +32,11 @@ type versionListing struct {
 }
 
 type versionRetention struct {
-	Enabled    bool   `json:"enabled"`
-	MaxAgeDays int    `json:"maxAgeDays"`
-	MaxPerFile int    `json:"maxPerFile"`
-	Source     string `json:"source"`
-	Locked     bool   `json:"locked"`
+	Enabled      bool   `json:"enabled"`
+	KeepAllHours int    `json:"keepAllHours"`
+	MaxAgeDays   int    `json:"maxAgeDays"`
+	MaxPerFile   int    `json:"maxPerFile"`
+	Source       string `json:"source"`
 }
 
 type storageUsage struct {
@@ -262,9 +262,16 @@ func TestServerDecidesAboutHistory(t *testing.T) {
 		admin := server.setupAdmin()
 		alice := server.createUser(admin, "alice", 0)
 		var retention versionRetention
-		alice.mustJSON(http.MethodPut, "/versions/settings", map[string]any{"maxPerFile": 1, "maxAgeDays": 5000}, http.StatusBadRequest, nil)
-		alice.mustJSON(http.MethodPut, "/versions/settings", map[string]any{"maxPerFile": 1, "maxAgeDays": 1000}, http.StatusOK, &retention)
-		if retention.MaxPerFile != 1 || retention.MaxAgeDays != 90 || retention.Source != "user" || retention.Locked {
+		for _, beyondServer := range []map[string]any{
+			{"maxAgeDays": 1000},
+			{"maxAgeDays": 0},
+			{"maxPerFile": 101},
+			{"keepAllHours": 7},
+		} {
+			alice.mustJSON(http.MethodPut, "/versions/settings", beyondServer, http.StatusBadRequest, nil)
+		}
+		alice.mustJSON(http.MethodPut, "/versions/settings", map[string]any{"maxPerFile": 1, "maxAgeDays": 30, "keepAllHours": 2}, http.StatusOK, &retention)
+		if retention.MaxPerFile != 1 || retention.MaxAgeDays != 30 || retention.KeepAllHours != 2 || retention.Source != "user" {
 			t.Fatalf("user limits should apply within the server's: %+v", retention)
 		}
 		for _, content := range []string{"one", "two", "three"} {
@@ -274,13 +281,17 @@ func TestServerDecidesAboutHistory(t *testing.T) {
 			t.Fatal("the newest version should be the one kept")
 		}
 
-		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"versionsEnforced": true, "versionsMaxPerFile": 3}, http.StatusOK, nil)
+		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"versionsKeepAllHours": 1, "versionsMaxAgeDays": 10}, http.StatusOK, nil)
 		alice.mustJSON(http.MethodGet, "/versions/settings", nil, http.StatusOK, &retention)
-		if retention.MaxPerFile != 3 || retention.Source != "server" || !retention.Locked {
-			t.Fatalf("enforced server limits should win: %+v", retention)
+		if retention.KeepAllHours != 1 || retention.MaxAgeDays != 10 || retention.MaxPerFile != 1 {
+			t.Fatalf("lowered server limits should cap the user's: %+v", retention)
 		}
 
 		admin.mustJSON(http.MethodPatch, "/admin/settings", map[string]any{"versionsEnabled": false}, http.StatusOK, nil)
+		alice.mustJSON(http.MethodPut, "/versions/settings", map[string]any{"enabled": true}, http.StatusOK, &retention)
+		if retention.Enabled {
+			t.Fatalf("history the server turned off cannot be turned on by a user: %+v", retention)
+		}
 		alice.waitForVersionCount("/a.txt", 0)
 		alice.put("/a.txt", -1, []byte("four"), http.StatusOK, nil)
 		if count := len(alice.versions("/a.txt").Versions); count != 0 {

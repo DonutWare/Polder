@@ -9,6 +9,7 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/trash/trash_provider.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
@@ -70,10 +71,16 @@ class FileActionsMenu extends ConsumerWidget {
           await context.runWithFeedback(directory.moveTo(entry, destination));
         }
       case _FileAction.delete:
+        final keepsTrash = await ref
+            .read(trashRetentionProvider.future)
+            .then((retention) => retention.enabled, onError: (Object _) => true);
+        if (!context.mounted) return;
         final confirmed = await showConfirmDialog(
           context,
-          title: context.localized.deleteTitle(entry.name),
-          message: context.localized.deleteMessage,
+          title: keepsTrash
+              ? context.localized.deleteTitle(entry.name)
+              : context.localized.deletePermanentlyTitle(entry.name),
+          message: keepsTrash ? context.localized.deleteMessage : context.localized.deletePermanentlyMessage,
           confirmLabel: context.localized.delete,
           destructive: true,
         );

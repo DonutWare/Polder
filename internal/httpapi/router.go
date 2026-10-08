@@ -45,6 +45,8 @@ type API struct {
 	office   *office.Service
 	versions *versions.Worker
 	limiter  *failedAttemptLimiter
+
+	requestTrashPurge func()
 }
 
 type Dependencies struct {
@@ -62,6 +64,7 @@ type Dependencies struct {
 	Logs                   *logging.Files
 	Office                 *office.Service
 	Versions               *versions.Worker
+	RequestTrashPurge      func()
 	LoginAttemptsPerMinute int
 	TrustedProxies         []netip.Prefix
 	// Web serves the browser client for every path outside the API; nil serves only the API.
@@ -85,6 +88,8 @@ func NewRouter(deps Dependencies) http.Handler {
 		office:   deps.Office,
 		versions: deps.Versions,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+
+		requestTrashPurge: deps.RequestTrashPurge,
 	}
 
 	router := chi.NewRouter()

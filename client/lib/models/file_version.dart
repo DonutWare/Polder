@@ -27,16 +27,20 @@ abstract class VersionRetention with _$VersionRetention {
     @Default(0) int maxAgeDays,
     @Default(0) int maxPerFile,
     @Default(RetentionSource.serverDefault) RetentionSource source,
-    @Default(false) bool locked,
     @Default(false) bool serverEnabled,
+    @Default(0) int serverKeepAllHours,
     @Default(0) int serverMaxAgeDays,
     @Default(0) int serverMaxPerFile,
-    bool? userEnabled,
-    int? userMaxAgeDays,
-    int? userMaxPerFile,
+    @Default(VersionPreferences()) VersionPreferences user,
   }) = _VersionRetention;
 
-  bool get changeable => serverEnabled && !locked;
+  bool get changeable => serverEnabled;
+}
+
+@freezed
+abstract class VersionPreferences with _$VersionPreferences {
+  const factory VersionPreferences({bool? enabled, int? keepAllHours, int? maxAgeDays, int? maxPerFile}) =
+      _VersionPreferences;
 }
 
 @freezed
