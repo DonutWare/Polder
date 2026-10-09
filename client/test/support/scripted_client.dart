@@ -68,6 +68,8 @@ Map<String, dynamic> userJson({String role = "user"}) => {
   "historyBytes": 0,
   "disabled": false,
   "createdAt": "2026-09-30T12:00:00Z",
+  "profile": {"firstName": "", "lastName": "", "displayName": "", "email": "", "address": ""},
+  "appearance": <String, dynamic>{},
 };
 
 Map<String, dynamic> tokenJson(String access, String refresh) => {

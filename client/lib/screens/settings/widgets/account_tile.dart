@@ -1,13 +1,15 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/account.dart";
 import "package:polder/providers/account_provider.dart";
+import "package:polder/routes/app_routes.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
-import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/shared/user_avatar.dart";
 
 class AccountTile extends ConsumerWidget {
   const AccountTile({required this.account, super.key});
@@ -17,15 +19,18 @@ class AccountTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: const IconBadge(icon: IconsaxPlusLinear.user),
-      title: Text(account.user.username),
-      subtitle: Text(account.serverUrl, overflow: TextOverflow.ellipsis),
-      trailing: IconButton(
-        tooltip: context.localized.signOut,
-        icon: Icon(IconsaxPlusLinear.logout, color: cs.error),
-        onPressed: () => _confirmSignOut(context, ref.read(accountProvider.notifier)),
+    return InkWell(
+      onTap: () => context.go(AppRoutes.account),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 8, 12),
+        child: AccountIdentity(
+          avatarSize: 44,
+          trailing: IconButton(
+            tooltip: context.localized.signOut,
+            icon: Icon(IconsaxPlusLinear.logout, color: cs.error),
+            onPressed: () => _confirmSignOut(context, ref.read(accountProvider.notifier)),
+          ),
+        ),
       ),
     );
   }

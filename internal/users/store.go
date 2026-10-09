@@ -15,6 +15,7 @@ import (
 const selectUserColumns = `SELECT u.id, u.username, u.role, u.quota_bytes, u.disabled, u.created_at,
 	u.trash_enabled, u.trash_retention_days,
 	u.versions_enabled, u.versions_keep_all_hours, u.versions_max_age_days, u.versions_max_per_file,
+	u.first_name, u.last_name, u.display_name, u.email, u.age, u.address, u.avatar_id, u.avatar_type, u.theme, u.accent_color,
 	COALESCE((SELECT SUM(f.size) FROM files f WHERE f.user_id = u.id), 0),
 	COALESCE((SELECT SUM(k.stored_size) FROM version_chunks k WHERE k.user_id = u.id), 0)
 	+ COALESCE((SELECT SUM(v.size) FROM file_versions v WHERE v.user_id = u.id AND v.state = 'pending'), 0) FROM users u`
@@ -36,9 +37,14 @@ func scanUser(row rowScanner) (User, error) {
 	var createdAt int64
 	var retention, versionsKeepAll, versionsMaxAge, versionsMaxPerFile sql.NullInt64
 	var trashEnabled, versionsEnabled sql.NullBool
+	var age sql.NullInt64
+	var avatarID, avatarType, theme, accentColor sql.NullString
 	var fileBytes int64
+	profile := &user.Profile
 	err := row.Scan(&user.ID, &user.Username, &user.Role, &user.QuotaBytes, &user.Disabled, &createdAt,
-		&trashEnabled, &retention, &versionsEnabled, &versionsKeepAll, &versionsMaxAge, &versionsMaxPerFile, &fileBytes, &user.HistoryBytes)
+		&trashEnabled, &retention, &versionsEnabled, &versionsKeepAll, &versionsMaxAge, &versionsMaxPerFile,
+		&profile.FirstName, &profile.LastName, &profile.DisplayName, &profile.Email, &age, &profile.Address,
+		&avatarID, &avatarType, &theme, &accentColor, &fileBytes, &user.HistoryBytes)
 	user.CreatedAt = time.Unix(createdAt, 0).UTC()
 	user.Trash = TrashPreferences{
 		Enabled: optionalBool(trashEnabled),
@@ -49,6 +55,17 @@ func scanUser(row rowScanner) (User, error) {
 		KeepAllHours: optionalInt(versionsKeepAll),
 		MaxAgeDays:   optionalInt(versionsMaxAge),
 		MaxPerFile:   optionalInt(versionsMaxPerFile),
+	}
+	profile.Age = optionalInt(age)
+	if avatarID.Valid {
+		user.Avatar = &Avatar{ID: avatarID.String, ContentType: avatarType.String}
+	}
+	if theme.Valid {
+		chosen := Theme(theme.String)
+		user.Appearance.Theme = &chosen
+	}
+	if accentColor.Valid {
+		user.Appearance.AccentColor = &accentColor.String
 	}
 	user.UsedBytes = fileBytes + user.HistoryBytes
 	return user, err
@@ -186,6 +203,31 @@ func (s *Store) SetTrashPreferences(ctx context.Context, id int64, preferences T
 func (s *Store) SetVersionPreferences(ctx context.Context, id int64, preferences VersionPreferences) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE users SET versions_enabled = $1, versions_keep_all_hours = $2, versions_max_age_days = $3, versions_max_per_file = $4 WHERE id = $5`,
 		nullableBool(preferences.Enabled), nullableInt(preferences.KeepAllHours), nullableInt(preferences.MaxAgeDays), nullableInt(preferences.MaxPerFile), id)
+	return err
+}
+
+func (s *Store) SetProfile(ctx context.Context, id int64, profile Profile) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET first_name = $1, last_name = $2, display_name = $3, email = $4, age = $5, address = $6 WHERE id = $7`,
+		profile.FirstName, profile.LastName, profile.DisplayName, profile.Email, nullableInt(profile.Age), profile.Address, id)
+	return err
+}
+
+func (s *Store) SetAvatar(ctx context.Context, id int64, avatar *Avatar) error {
+	var avatarID, avatarType any
+	if avatar != nil {
+		avatarID, avatarType = avatar.ID, avatar.ContentType
+	}
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET avatar_id = $1, avatar_type = $2 WHERE id = $3`, avatarID, avatarType, id)
+	return err
+}
+
+func (s *Store) SetAppearance(ctx context.Context, id int64, appearance Appearance) error {
+	var theme any
+	if appearance.Theme != nil {
+		theme = string(*appearance.Theme)
+	}
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET theme = $1, accent_color = $2 WHERE id = $3`,
+		theme, nullableString(appearance.AccentColor), id)
 	return err
 }
 

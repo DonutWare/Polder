@@ -37,6 +37,9 @@ type User struct {
 	HistoryBytes int64              `json:"historyBytes" doc:"Bytes used by earlier versions of files"`
 	Disabled     bool               `json:"disabled"`
 	CreatedAt    time.Time          `json:"createdAt"`
+	Profile      Profile            `json:"profile"`
+	Avatar       *Avatar            `json:"avatar,omitempty" required:"false" doc:"Absent when the user has no icon of their own"`
+	Appearance   Appearance         `json:"appearance"`
 	Trash        TrashPreferences   `json:"-"`
 	Versions     VersionPreferences `json:"-"`
 }

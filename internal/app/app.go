@@ -182,6 +182,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Files:                  fileService,
 		Settings:               serverSettings,
 		Images:                 images,
+		Avatars:                settings.NewAvatars(cfg.AvatarDir()),
 		Sync:                   syncService,
 		Previews:               previews,
 		Activity:               activityHub,

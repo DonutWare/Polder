@@ -14,7 +14,6 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
-import "package:polder/widgets/shared/appearance_settings.dart";
 import "package:polder/widgets/shared/nav_group.dart";
 
 class SettingsScreen extends ConsumerWidget {
@@ -39,10 +38,6 @@ class SettingsScreen extends ConsumerWidget {
               ),
             const TrashSettingsGroup(),
             const VersionSettingsGroup(),
-            NavGroup(
-              title: localized.appearance,
-              children: const [Padding(padding: EdgeInsets.all(20), child: AppearanceSettings())],
-            ),
             if (isAdmin)
               NavGroup(
                 title: localized.administration,

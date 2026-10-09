@@ -1,17 +1,12 @@
-import "dart:typed_data";
-
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/appearance.dart";
 import "package:polder/models/branding.dart";
-import "package:polder/models/file_entry.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/providers/admin/server_settings_provider.dart";
 import "package:polder/providers/branding/branding_provider.dart";
-import "package:polder/providers/polder_api_provider.dart";
-import "package:polder/providers/service_providers.dart";
 import "package:polder/screens/login/widgets/login_backdrop.dart";
 import "package:polder/screens/login/widgets/login_header.dart";
 import "package:polder/theme/app_theme.dart";
@@ -22,7 +17,7 @@ import "package:polder/widgets/layout/app_page.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/icon_badge.dart";
 import "package:polder/widgets/shared/nav_group.dart";
-import "package:polder/widgets/shared/remote_image_picker_dialog.dart";
+import "package:polder/widgets/shared/image_source_menu.dart";
 import "package:polder/widgets/shared/server_icon.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
 
@@ -103,7 +98,7 @@ class AdminBrandingScreen extends ConsumerWidget {
                   icon: const Icon(IconsaxPlusLinear.trash),
                   onPressed: () => context.runWithFeedback(ref.read(brandingProvider.notifier).removeIcon()),
                 ),
-              _ImageSourceMenu(
+              ImageSourceMenu(
                 onSelected: (source) => _pickIcon(context, ref, source),
                 builder: (open) => IconButton(
                   tooltip: localized.change,
@@ -154,63 +149,12 @@ class AdminBrandingScreen extends ConsumerWidget {
     if (choice != null && context.mounted) await context.runWithFeedback(notifier.setAccentColor(choice.$1));
   }
 
-  Future<void> _pickIcon(BuildContext context, WidgetRef ref, _ImageSource source) async {
-    final images = await _pickImages(context, ref, source, multiple: false);
+  Future<void> _pickIcon(BuildContext context, WidgetRef ref, ImageSource source) async {
+    final images = await pickImages(context, ref, source, multiple: false);
     if (images.isEmpty || !context.mounted) return;
     final notifier = ref.read(brandingProvider.notifier);
     await context.runWithFeedback(images.first().then(notifier.setIcon));
   }
-}
-
-enum _ImageSource { device, files }
-
-typedef _ImageLoader = Future<Uint8List> Function();
-
-Future<List<_ImageLoader>> _pickImages(
-  BuildContext context,
-  WidgetRef ref,
-  _ImageSource source, {
-  required bool multiple,
-}) async {
-  switch (source) {
-    case _ImageSource.device:
-      final picked = await ref.read(filePickerServiceProvider).pickFiles();
-      return [
-        for (final file in picked)
-          () => file
-              .openRead()
-              .fold(BytesBuilder(copy: false), (bytes, chunk) => bytes..add(chunk))
-              .then((b) => b.takeBytes()),
-      ];
-    case _ImageSource.files:
-      final entries = await showRemoteImagePicker(context, multiple: multiple);
-      final api = ref.read(polderApiProvider);
-      return [for (final entry in entries ?? const <FileEntry>[]) () => api.downloadBytes(entry.path)];
-  }
-}
-
-class _ImageSourceMenu extends StatelessWidget {
-  const _ImageSourceMenu({required this.onSelected, required this.builder});
-
-  final ValueChanged<_ImageSource> onSelected;
-  final Widget Function(VoidCallback open) builder;
-
-  @override
-  Widget build(BuildContext context) => MenuAnchor(
-    menuChildren: [
-      MenuItemButton(
-        leadingIcon: const Icon(IconsaxPlusLinear.monitor_mobbile),
-        onPressed: () => onSelected(_ImageSource.device),
-        child: Text(context.localized.imageFromDevice),
-      ),
-      MenuItemButton(
-        leadingIcon: const Icon(IconsaxPlusLinear.folder_2),
-        onPressed: () => onSelected(_ImageSource.files),
-        child: Text(context.localized.imageFromFiles),
-      ),
-    ],
-    builder: (context, controller, _) => builder(() => controller.isOpen ? controller.close() : controller.open()),
-  );
 }
 
 class _IconPlaceholder extends StatelessWidget {
@@ -354,7 +298,7 @@ class _Backgrounds extends ConsumerWidget {
                   subtitle: Text(localized.loginBackgroundsHint(branding.backgrounds.length)),
                 ),
               ),
-              _ImageSourceMenu(
+              ImageSourceMenu(
                 onSelected: (source) => _add(context, ref, source),
                 builder: (open) => FilledButton.tonalIcon(
                   icon: const Icon(IconsaxPlusLinear.add),
@@ -382,8 +326,8 @@ class _Backgrounds extends ConsumerWidget {
     );
   }
 
-  Future<void> _add(BuildContext context, WidgetRef ref, _ImageSource source) async {
-    final images = await _pickImages(context, ref, source, multiple: true);
+  Future<void> _add(BuildContext context, WidgetRef ref, ImageSource source) async {
+    final images = await pickImages(context, ref, source, multiple: true);
     final notifier = ref.read(brandingProvider.notifier);
     for (final image in images) {
       if (!context.mounted || !await context.runWithFeedback(image().then(notifier.addBackground))) return;

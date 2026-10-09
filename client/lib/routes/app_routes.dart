@@ -13,6 +13,7 @@ abstract final class AppRoutes {
   static const trash = "/trash";
   static const settings = "/settings";
   static const about = "/settings/about";
+  static const account = "/settings/account";
 
   static const admin = "/admin";
   static const adminUsers = "/admin/users";

@@ -289,7 +289,7 @@ as String,
 /// @nodoc
 mixin _$Branding {
 
- String? get serverUrl; String get name; String get message;@_ColorConverter() Color? get accent; ServerImage? get icon; List<ServerImage> get backgrounds;
+ String? get serverUrl; String get name; String get message;@ColorConverter() Color? get accent; ServerImage? get icon; List<ServerImage> get backgrounds;
 /// Create a copy of Branding
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -327,7 +327,7 @@ abstract mixin class $BrandingCopyWith<$Res>  {
   factory $BrandingCopyWith(Branding value, $Res Function(Branding) _then) = _$BrandingCopyWithImpl;
 @useResult
 $Res call({
- String? serverUrl, String name, String message,@_ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds
+ String? serverUrl, String name, String message,@ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds
 });
 
 
@@ -449,7 +449,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @_ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Branding() when $default != null:
 return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds);case _:
@@ -470,7 +470,7 @@ return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @_ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)  $default,) {final _that = this;
 switch (_that) {
 case _Branding():
 return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds);case _:
@@ -490,7 +490,7 @@ return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? serverUrl,  String name,  String message, @_ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)?  $default,) {final _that = this;
 switch (_that) {
 case _Branding() when $default != null:
 return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds);case _:
@@ -505,13 +505,13 @@ return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon
 @JsonSerializable()
 
 class _Branding extends Branding {
-  const _Branding({this.serverUrl, this.name = "", this.message = "", @_ColorConverter() this.accent, this.icon,  List<ServerImage> backgrounds = const <ServerImage>[]}): _backgrounds = backgrounds,super._();
+  const _Branding({this.serverUrl, this.name = "", this.message = "", @ColorConverter() this.accent, this.icon,  List<ServerImage> backgrounds = const <ServerImage>[]}): _backgrounds = backgrounds,super._();
   factory _Branding.fromJson(Map<String, dynamic> json) => _$BrandingFromJson(json);
 
 @override final  String? serverUrl;
 @override@JsonKey() final  String name;
 @override@JsonKey() final  String message;
-@override@_ColorConverter() final  Color? accent;
+@override@ColorConverter() final  Color? accent;
 @override final  ServerImage? icon;
  final  List<ServerImage> _backgrounds;
 @override@JsonKey() List<ServerImage> get backgrounds {
@@ -556,7 +556,7 @@ abstract mixin class _$BrandingCopyWith<$Res> implements $BrandingCopyWith<$Res>
   factory _$BrandingCopyWith(_Branding value, $Res Function(_Branding) _then) = __$BrandingCopyWithImpl;
 @override @useResult
 $Res call({
- String? serverUrl, String name, String message,@_ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds
+ String? serverUrl, String name, String message,@ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds
 });
 
 

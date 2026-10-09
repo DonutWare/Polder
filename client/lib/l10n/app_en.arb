@@ -921,5 +921,17 @@
 	"noteTable": "Table",
 	"noteDivider": "Divider",
 	"noteLinkFile": "Link a file or note",
-	"noteAttachFiles": "Attach files"
+	"noteAttachFiles": "Attach files",
+	"profile": "Profile",
+	"accountSettingsHint": "Your name, picture and appearance",
+	"firstName": "First name",
+	"lastName": "Last name",
+	"displayName": "Display name",
+	"displayNameHint": "Shown instead of your first name",
+	"email": "Email",
+	"age": "Age",
+	"address": "Address",
+	"profileSaved": "Profile saved",
+	"userIcon": "Picture",
+	"userIconHint": "Without a picture, your initials are shown"
 }

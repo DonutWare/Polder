@@ -23,6 +23,7 @@ import "package:polder/screens/notes/notes_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/settings/about_screen.dart";
+import "package:polder/screens/settings/account_screen.dart";
 import "package:polder/screens/viewer/document_editor_screen.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
@@ -103,7 +104,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.settings,
             builder: (_, _) => const SettingsScreen(),
-            routes: [GoRoute(path: "about", builder: (_, _) => const AboutScreen())],
+            routes: [
+              GoRoute(path: "about", builder: (_, _) => const AboutScreen()),
+              GoRoute(path: "account", builder: (_, _) => const AccountScreen()),
+            ],
           ),
         ],
       ),

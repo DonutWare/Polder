@@ -4,6 +4,22 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:collection/collection.dart';
 
+enum AppearanceTheme {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('system')
+  system('system'),
+  @JsonValue('light')
+  light('light'),
+  @JsonValue('dark')
+  dark('dark');
+
+  final String? value;
+
+  const AppearanceTheme(this.value);
+}
+
 enum ChangeType {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

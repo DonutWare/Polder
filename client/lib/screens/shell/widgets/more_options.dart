@@ -12,12 +12,11 @@ import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
-import "package:polder/widgets/shared/appearance_settings.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
-import "package:polder/widgets/shared/icon_badge.dart";
 import "package:polder/widgets/shared/quota_bar.dart";
+import "package:polder/widgets/shared/user_avatar.dart";
 
-/// The side sheet behind the menu button: who is signed in, appearance, and the way into
+/// The side sheet behind the menu button: who is signed in, their account settings, and the way into
 /// (or out of) administration.
 class MoreOptions extends ConsumerWidget {
   const MoreOptions({this.inAdministration = false, super.key});
@@ -43,14 +42,17 @@ class MoreOptions extends ConsumerWidget {
         Container(
           margin: const EdgeInsets.fromLTRB(4, 4, 4, 8),
           padding: const EdgeInsets.only(bottom: 12),
+          clipBehavior: Clip.antiAlias,
           decoration: ShapeDecoration(color: colors.inset, shape: squircle(AppRadius.inset + 4)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ListTile(
-                leading: IconBadge(icon: isAdmin ? IconsaxPlusLinear.shield_tick : IconsaxPlusLinear.user),
-                title: Text(account?.user.username ?? ""),
-                subtitle: account == null ? null : Text(account.serverUrl, overflow: TextOverflow.ellipsis),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => go(AppRoutes.account),
+                  child: const Padding(padding: EdgeInsets.all(16), child: AccountIdentity(avatarSize: 44)),
+                ),
               ),
               const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: QuotaBar()),
             ],
@@ -71,9 +73,10 @@ class MoreOptions extends ConsumerWidget {
             onTap: () => go(AppRoutes.admin),
           ),
         ListTile(
-          leading: const Icon(IconsaxPlusLinear.brush_2),
-          title: Text(localized.appearance),
-          onTap: () => showAppearanceDialog(context),
+          leading: const Icon(IconsaxPlusLinear.user_edit),
+          title: Text(localized.account),
+          subtitle: Text(localized.accountSettingsHint),
+          onTap: () => go(AppRoutes.account),
         ),
         if (!inAdministration)
           for (final destination in ref.watch(secondaryShellDestinationsProvider))

@@ -97,3 +97,23 @@ func (s *Service) Delete(ctx context.Context, actor User, targetID int64) error 
 	}
 	return s.directories.ArchiveUserRoot(target.Username)
 }
+
+func (s *Service) SetProfile(ctx context.Context, id int64, profile Profile) (User, error) {
+	if err := profile.normalize(); err != nil {
+		return User{}, err
+	}
+	if err := s.store.SetProfile(ctx, id, profile); err != nil {
+		return User{}, err
+	}
+	return s.store.ByID(ctx, id)
+}
+
+func (s *Service) SetAppearance(ctx context.Context, id int64, appearance Appearance) (User, error) {
+	if err := appearance.normalize(); err != nil {
+		return User{}, err
+	}
+	if err := s.store.SetAppearance(ctx, id, appearance); err != nil {
+		return User{}, err
+	}
+	return s.store.ByID(ctx, id)
+}

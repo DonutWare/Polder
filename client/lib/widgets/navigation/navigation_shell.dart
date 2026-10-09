@@ -5,7 +5,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
-import "package:polder/widgets/layout/app_page.dart";
+import "package:polder/widgets/shared/user_avatar.dart";
 
 @immutable
 class NavItem {
@@ -31,9 +31,6 @@ class NavigationShell extends ConsumerWidget {
     required this.items,
     required this.selectedIndex,
     required this.onSelected,
-    required this.title,
-    required this.subtitle,
-    required this.mark,
     required this.child,
     this.secondaryItems = const [],
     this.sidebarFooter,
@@ -46,10 +43,6 @@ class NavigationShell extends ConsumerWidget {
   final List<NavItem> secondaryItems;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
-
-  final String title;
-  final String subtitle;
-  final Widget mark;
 
   final Widget? sidebarFooter;
 
@@ -115,9 +108,6 @@ class NavigationShell extends ConsumerWidget {
             secondaryItems: secondaryItems,
             selectedIndex: selectedIndex,
             onSelected: onSelected,
-            title: title,
-            subtitle: subtitle,
-            mark: mark,
             footer: sidebarFooter,
             exitAction: exit,
           )
@@ -125,7 +115,7 @@ class NavigationShell extends ConsumerWidget {
             width: 80,
             child: Column(
               children: [
-                const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: MoreOptionsButton()),
+                const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: _AvatarButton()),
                 _railGroup(items, 0),
                 const Spacer(),
                 if (secondaryItems.isNotEmpty) _railGroup(secondaryItems, items.length),
@@ -182,9 +172,6 @@ class _Sidebar extends ConsumerWidget {
     required this.items,
     required this.selectedIndex,
     required this.onSelected,
-    required this.title,
-    required this.subtitle,
-    required this.mark,
     this.secondaryItems = const [],
     this.footer,
     this.exitAction,
@@ -194,9 +181,6 @@ class _Sidebar extends ConsumerWidget {
   final List<NavItem> secondaryItems;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
-  final String title;
-  final String subtitle;
-  final Widget mark;
   final Widget? footer;
   final NavAction? exitAction;
 
@@ -213,58 +197,23 @@ class _Sidebar extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 8, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Tooltip(
-                    message: context.localized.moreOptions,
-                    child: Material(
-                      color: colors.inset,
-                      shape: squircle(AppRadius.inset),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () => SideSheetDrawer.of(context).open(),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            children: [
-                              mark,
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.titleSmall,
-                                    ),
-                                    Text(
-                                      subtitle,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Icon(IconsaxPlusLinear.arrow_swap, size: 16, color: cs.onSurfaceVariant),
-                            ],
-                          ),
-                        ),
-                      ),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+            child: Tooltip(
+              message: context.localized.moreOptions,
+              child: Material(
+                color: colors.inset,
+                shape: squircle(AppRadius.inset),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => SideSheetDrawer.of(context).open(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: AccountIdentity(
+                      trailing: Icon(IconsaxPlusLinear.arrow_swap, size: 16, color: cs.onSurfaceVariant),
                     ),
                   ),
                 ),
-                const SizedBox(width: 4),
-                IconButton(
-                  tooltip: context.localized.collapseSidebar,
-                  icon: Icon(rtl ? IconsaxPlusLinear.sidebar_right : IconsaxPlusLinear.sidebar_left),
-                  onPressed: ref.read(sidebarExpandedProvider.notifier).toggle,
-                ),
-              ],
+              ),
             ),
           ),
           Divider(color: colors.border),
@@ -273,7 +222,17 @@ class _Sidebar extends ConsumerWidget {
           const Spacer(),
           if (footer != null) Padding(padding: const EdgeInsets.fromLTRB(28, 8, 28, 8), child: footer),
           if (exit != null) _SidebarItem(icon: exit.icon, label: exit.label, selected: false, onTap: exit.onTap),
-          const SizedBox(height: 14),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(14, 4, 14, 16),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: IconButton(
+                tooltip: context.localized.collapseSidebar,
+                icon: Icon(rtl ? IconsaxPlusLinear.sidebar_right : IconsaxPlusLinear.sidebar_left),
+                onPressed: ref.read(sidebarExpandedProvider.notifier).toggle,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -293,6 +252,24 @@ class _Sidebar extends ConsumerWidget {
           onTap: () => onSelected(offset + i),
         ),
     ],
+  );
+}
+
+class _AvatarButton extends StatelessWidget {
+  const _AvatarButton();
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: context.localized.moreOptions,
+    child: Material(
+      color: Colors.transparent,
+      shape: squircle(AppRadius.inset),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => SideSheetDrawer.of(context).open(),
+        child: const Padding(padding: EdgeInsets.all(6), child: SignedInAvatar(size: 40)),
+      ),
+    ),
   );
 }
 

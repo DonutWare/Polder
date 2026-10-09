@@ -250,6 +250,10 @@ func (cfg Config) BrandingDir() string {
 	return filepath.Join(cfg.ConfigDir, "branding")
 }
 
+func (cfg Config) AvatarDir() string {
+	return filepath.Join(cfg.ConfigDir, "avatars")
+}
+
 func (cfg Config) JWTKeyPath() string {
 	return filepath.Join(cfg.ConfigDir, "jwt.key")
 }

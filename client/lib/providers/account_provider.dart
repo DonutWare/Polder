@@ -2,6 +2,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/account.dart";
 import "package:polder/models/token_pair.dart";
+import "package:polder/models/user.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/services/api/api_exceptions.dart";
@@ -29,6 +30,13 @@ class AccountNotifier extends AsyncNotifier<Account?> {
   Future<void> storeTokens(String accountId, TokenPair tokens) async {
     final account = state.value ?? await future;
     if (account?.id == accountId) await signIn(account!.withTokens(tokens));
+  }
+
+  Future<void> storeUser(User user) async {
+    final account = state.value ?? await future;
+    if (account != null && account.user.id == user.id && account.user != user) {
+      await signIn(account.copyWith(user: user));
+    }
   }
 
   /// Forgets [accountId] without telling the server, for a session the server already ended.

@@ -513,5 +513,17 @@
 	"noteTable": "Tabel",
 	"noteDivider": "Scheidingslijn",
 	"noteLinkFile": "Bestand of notitie linken",
-	"noteAttachFiles": "Bestanden bijvoegen"
+	"noteAttachFiles": "Bestanden bijvoegen",
+	"profile": "Profiel",
+	"accountSettingsHint": "Je naam, foto en weergave",
+	"firstName": "Voornaam",
+	"lastName": "Achternaam",
+	"displayName": "Weergavenaam",
+	"displayNameHint": "Wordt getoond in plaats van je voornaam",
+	"email": "E-mail",
+	"age": "Leeftijd",
+	"address": "Adres",
+	"profileSaved": "Profiel opgeslagen",
+	"userIcon": "Foto",
+	"userIconHint": "Zonder foto worden je initialen getoond"
 }

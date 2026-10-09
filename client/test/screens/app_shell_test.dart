@@ -80,7 +80,7 @@ void main() {
     await pumpShell(tester, UserRole.user);
     await openMoreOptions(tester);
 
-    expect(find.text("Appearance"), findsOneWidget);
+    expect(find.text("Account"), findsOneWidget);
     expect(find.text("Administration"), findsNothing);
   });
 
@@ -89,6 +89,6 @@ void main() {
 
     expect(find.text("Files"), findsOneWidget);
     expect(find.text("alice"), findsOneWidget);
-    expect(find.text("cloud.test"), findsOneWidget);
+    expect(find.text("alice@cloud.test"), findsOneWidget);
   });
 }

@@ -1,4 +1,4 @@
-import "package:flutter/widgets.dart";
+import "package:flutter/material.dart";
 
 import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
@@ -126,6 +126,37 @@ extension UserToModel on wire.User {
     historyBytes: historyBytes,
     disabled: disabled,
     createdAt: createdAt,
+    profile: profile.toModel(),
+    avatar: avatar == null ? null : ServerImage(id: avatar!.id, contentType: avatar!.contentType),
+    theme: switch (appearance.theme) {
+      wire.AppearanceTheme.system => ThemeMode.system,
+      wire.AppearanceTheme.light => ThemeMode.light,
+      wire.AppearanceTheme.dark => ThemeMode.dark,
+      wire.AppearanceTheme.swaggerGeneratedUnknown || null => null,
+    },
+    accent: parseHexColor(appearance.accentColor ?? ""),
+  );
+}
+
+extension ProfileToModel on wire.Profile {
+  UserProfile toModel() => UserProfile(
+    firstName: firstName,
+    lastName: lastName,
+    displayName: displayName,
+    email: email,
+    age: age,
+    address: address,
+  );
+}
+
+extension UserProfileToWire on UserProfile {
+  wire.Profile toWire() => wire.Profile(
+    firstName: firstName,
+    lastName: lastName,
+    displayName: displayName,
+    email: email,
+    age: age,
+    address: address,
   );
 }
 

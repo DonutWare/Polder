@@ -18,7 +18,7 @@ _Branding _$BrandingFromJson(Map<String, dynamic> json) => _Branding(
   serverUrl: json['serverUrl'] as String?,
   name: json['name'] as String? ?? "",
   message: json['message'] as String? ?? "",
-  accent: _$JsonConverterFromJson<int, Color>(json['accent'], const _ColorConverter().fromJson),
+  accent: _$JsonConverterFromJson<int, Color>(json['accent'], const ColorConverter().fromJson),
   icon: json['icon'] == null ? null : ServerImage.fromJson(json['icon'] as Map<String, dynamic>),
   backgrounds:
       (json['backgrounds'] as List<dynamic>?)?.map((e) => ServerImage.fromJson(e as Map<String, dynamic>)).toList() ??
@@ -29,7 +29,7 @@ Map<String, dynamic> _$BrandingToJson(_Branding instance) => <String, dynamic>{
   'serverUrl': ?instance.serverUrl,
   'name': instance.name,
   'message': instance.message,
-  'accent': ?_$JsonConverterToJson<int, Color>(instance.accent, const _ColorConverter().toJson),
+  'accent': ?_$JsonConverterToJson<int, Color>(instance.accent, const ColorConverter().toJson),
   'icon': ?instance.icon?.toJson(),
   'backgrounds': instance.backgrounds.map((e) => e.toJson()).toList(),
 };

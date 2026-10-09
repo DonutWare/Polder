@@ -28,6 +28,11 @@ abstract class Account with _$Account {
 
   String get id => "${user.username}@$serverUrl";
 
+  String get handle {
+    final authority = Uri.tryParse(serverUrl)?.authority ?? "";
+    return "${user.username}@${authority.isEmpty ? serverUrl : authority}";
+  }
+
   Account withTokens(TokenPair tokens) =>
       copyWith(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user: tokens.user);
 }

@@ -7,17 +7,8 @@ import "package:polder/models/appearance.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/theme/app_theme.dart";
+import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
-
-Future<void> showAppearanceDialog(BuildContext context) => showDialog<void>(
-  context: context,
-  builder: (context) => AlertDialog(
-    icon: const Icon(IconsaxPlusLinear.brush_2),
-    title: Text(context.localized.appearance),
-    content: const SizedBox(width: 360, child: SingleChildScrollView(child: AppearanceSettings())),
-    actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(context.localized.done))],
-  ),
-);
 
 extension AccentPresetLabel on AccentPreset {
   String label(AppLocalizations localized) => switch (this) {
@@ -62,7 +53,7 @@ class AppearanceSettings extends ConsumerWidget {
                   icon: icon,
                   label: name,
                   selected: appearance.mode == mode,
-                  onTap: () => notifier.setMode(mode),
+                  onTap: () => context.runWithFeedback(notifier.setMode(mode)),
                 ),
               ),
           ],
@@ -78,7 +69,7 @@ class AppearanceSettings extends ConsumerWidget {
               tooltip: appearance.systemAccent == null ? localized.systemAccentUnavailable : localized.themeSystem,
               system: true,
               selected: appearance.accent == null,
-              onTap: () => notifier.setAccent(null),
+              onTap: () => context.runWithFeedback(notifier.setAccent(null)),
             ),
             for (final preset in AccentPreset.values)
               if (preset == AccentPreset.polder)
@@ -86,14 +77,14 @@ class AppearanceSettings extends ConsumerWidget {
                   color: branding.accent ?? preset.color,
                   tooltip: branding.nameOr(preset.label(localized)),
                   selected: appearance.isAccent(branding.accent ?? preset.color),
-                  onTap: () => notifier.setAccent(branding.accent ?? preset.color),
+                  onTap: () => context.runWithFeedback(notifier.setAccent(branding.accent ?? preset.color)),
                 )
               else
                 _Swatch(
                   color: preset.color,
                   tooltip: preset.label(localized),
                   selected: appearance.isAccent(preset.color),
-                  onTap: () => notifier.setAccent(preset.color),
+                  onTap: () => context.runWithFeedback(notifier.setAccent(preset.color)),
                 ),
           ],
         ),

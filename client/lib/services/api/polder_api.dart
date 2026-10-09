@@ -1,5 +1,7 @@
 import "dart:typed_data";
 
+import "package:flutter/material.dart";
+
 import "package:chopper/chopper.dart" as chopper;
 
 import "package:polder/models/activity.dart";
@@ -70,6 +72,20 @@ class PolderApi {
   Future<void> logout(String refreshToken) => _service.logout(body: wire.RefreshRequest(refreshToken: refreshToken));
 
   Future<User> me() async => (await _service.getMe()).body!.toModel();
+
+  Future<User> setProfile(UserProfile profile) async =>
+      (await _service.setProfile(body: profile.toWire())).body!.toModel();
+
+  Future<User> setAppearance({required ThemeMode theme, required Color? accent}) async => (await _service.setAppearance(
+    body: wire.Appearance(
+      theme: wire.AppearanceTheme.values.byName(theme.name),
+      accentColor: accent == null ? null : hexColor(accent),
+    ),
+  )).body!.toModel();
+
+  Future<User> setAvatar(Uint8List bytes) async => (await _service.setAvatar(body: bytes)).body!.toModel();
+
+  Future<User> removeAvatar() async => (await _service.removeAvatar()).body!.toModel();
 
   Future<List<User>> listUsers() async => [for (final user in (await _service.listUsers()).body!) user.toModel()];
 

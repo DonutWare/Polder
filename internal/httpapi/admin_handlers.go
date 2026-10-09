@@ -65,6 +65,9 @@ func (a *API) deleteUser(ctx context.Context, input *userPath) (*struct{}, error
 	if err := a.users.Delete(ctx, currentUser(ctx), input.UserID); err != nil {
 		return nil, err
 	}
+	if err := a.avatars.Remove(input.UserID); err != nil {
+		usersLog.Warn("could not remove the deleted user's icon", "user", target.Username, "error", err)
+	}
 	usersLog.Info("user deleted; files archived", "user", target.Username, "by", currentUser(ctx).Username)
 	return nil, nil
 }

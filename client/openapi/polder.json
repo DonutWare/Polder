@@ -1,6 +1,42 @@
 {
   "components": {
     "schemas": {
+      "Appearance": {
+        "additionalProperties": false,
+        "properties": {
+          "accentColor": {
+            "description": "Accent color as #RRGGBB; absent follows the device",
+            "type": "string"
+          },
+          "theme": {
+            "description": "Absent until the user picks one",
+            "enum": [
+              "system",
+              "light",
+              "dark"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Avatar": {
+        "additionalProperties": false,
+        "properties": {
+          "contentType": {
+            "description": "Such as image/png or image/svg+xml",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contentType"
+        ],
+        "type": "object"
+      },
       "Branding": {
         "additionalProperties": false,
         "properties": {
@@ -1124,6 +1160,40 @@
         ],
         "type": "object"
       },
+      "Profile": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "age": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "displayName": {
+            "description": "Empty shows the first name instead",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "firstName": {
+            "description": "Empty shows the username instead",
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "displayName",
+          "email",
+          "address"
+        ],
+        "type": "object"
+      },
       "QueryFilter": {
         "additionalProperties": false,
         "properties": {
@@ -1910,6 +1980,13 @@
       "User": {
         "additionalProperties": false,
         "properties": {
+          "appearance": {
+            "$ref": "#/components/schemas/Appearance"
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/Avatar",
+            "description": "Absent when the user has no icon of their own"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -1925,6 +2002,9 @@
           "id": {
             "format": "int64",
             "type": "integer"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
           },
           "quotaBytes": {
             "description": "Storage limit in bytes; 0 is unlimited",
@@ -1955,7 +2035,9 @@
           "usedBytes",
           "historyBytes",
           "disabled",
-          "createdAt"
+          "createdAt",
+          "profile",
+          "appearance"
         ],
         "type": "object"
       },
@@ -2149,6 +2231,220 @@
   },
   "openapi": "3.0.3",
   "paths": {
+    "/api/v1/account/appearance": {
+      "put": {
+        "operationId": "setAppearance",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Appearance"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Choose the theme and accent color the apps use for the logged-in user",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/avatar": {
+      "delete": {
+        "operationId": "removeAvatar",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Go back to showing the logged-in user's initials",
+        "tags": [
+          "account"
+        ]
+      },
+      "put": {
+        "operationId": "setAvatar",
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace the logged-in user's icon with the image in the request body",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/profile": {
+      "put": {
+        "operationId": "setProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Profile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the logged-in user's name and contact details",
+        "tags": [
+          "account"
+        ]
+      }
+    },
     "/api/v1/activity": {
       "get": {
         "operationId": "listActivity",
@@ -4772,7 +5068,7 @@
             "bearer": []
           }
         ],
-        "summary": "List the folders and notes in a folder, with each note's title",
+        "summary": "List the folders and notes in a folder",
         "tags": [
           "notes"
         ]
@@ -6076,6 +6372,80 @@
         "summary": "Put a deleted item back where it was",
         "tags": [
           "trash"
+        ]
+      }
+    },
+    "/api/v1/users/{userID}/avatar/{imageID}": {
+      "get": {
+        "operationId": "getUserAvatar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "imageID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Icon image",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "A user's icon",
+        "tags": [
+          "users"
         ]
       }
     },

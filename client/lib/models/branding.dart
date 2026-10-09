@@ -24,7 +24,7 @@ abstract class Branding with _$Branding {
     String? serverUrl,
     @Default("") String name,
     @Default("") String message,
-    @_ColorConverter() Color? accent,
+    @ColorConverter() Color? accent,
     ServerImage? icon,
     @Default(<ServerImage>[]) List<ServerImage> backgrounds,
   }) = _Branding;
@@ -38,8 +38,8 @@ abstract class Branding with _$Branding {
   String backgroundUrl(ServerImage background) => "$serverUrl/api/v1/branding/backgrounds/${background.id}";
 }
 
-class _ColorConverter implements JsonConverter<Color, int> {
-  const _ColorConverter();
+class ColorConverter implements JsonConverter<Color, int> {
+  const ColorConverter();
 
   @override
   Color fromJson(int json) => Color(json);

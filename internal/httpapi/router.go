@@ -37,6 +37,7 @@ type API struct {
 	files    *files.Service
 	settings *settings.Store
 	images   *settings.Images
+	avatars  *settings.Avatars
 	sync     *syncing.Service
 	previews *preview.Worker
 	activity *activity.Hub
@@ -58,6 +59,7 @@ type Dependencies struct {
 	Files                  *files.Service
 	Settings               *settings.Store
 	Images                 *settings.Images
+	Avatars                *settings.Avatars
 	Sync                   *syncing.Service
 	Previews               *preview.Worker
 	Activity               *activity.Hub
@@ -82,6 +84,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		files:    deps.Files,
 		settings: deps.Settings,
 		images:   deps.Images,
+		avatars:  deps.Avatars,
 		sync:     deps.Sync,
 		previews: deps.Previews,
 		activity: deps.Activity,
@@ -153,6 +156,8 @@ func (a *API) routes(api huma.API) {
 		withResponse(http.StatusOK, "Icon image", binaryContent("application/octet-stream")))
 	register(v1, http.MethodGet, "/branding/backgrounds/{imageID}", "getBrandingBackground", "One of the login screen's backgrounds", a.brandingBackground,
 		withResponse(http.StatusOK, "Background image", binaryContent("application/octet-stream")))
+	register(v1, http.MethodGet, "/users/{userID}/avatar/{imageID}", "getUserAvatar", "A user's icon", a.userAvatar,
+		withResponse(http.StatusOK, "Icon image", binaryContent("application/octet-stream")))
 	register(v1, http.MethodPost, "/auth/login", "login", "Log in and get a token pair", a.login)
 	register(v1, http.MethodPost, "/auth/refresh", "refresh", "Exchange a refresh token for a new token pair", a.refresh)
 	register(v1, http.MethodPost, "/auth/logout", "logout", "Revoke a refresh token", a.logout)
@@ -164,6 +169,11 @@ func (a *API) routes(api huma.API) {
 	user.UseMiddleware(a.requireUser(api))
 	user.UseSimpleModifier(requiresAuth(api, http.StatusUnauthorized))
 	register(user, http.MethodGet, "/auth/me", "getMe", "The logged-in user", a.me)
+	register(user, http.MethodPut, "/account/profile", "setProfile", "Change the logged-in user's name and contact details", a.setProfile)
+	register(user, http.MethodPut, "/account/appearance", "setAppearance", "Choose the theme and accent color the apps use for the logged-in user", a.setAppearance)
+	register(user, http.MethodPut, "/account/avatar", "setAvatar", "Replace the logged-in user's icon with the image in the request body", a.setAvatar,
+		withRequestBody(binaryContent("application/octet-stream")))
+	register(user, http.MethodDelete, "/account/avatar", "removeAvatar", "Go back to showing the logged-in user's initials", a.removeAvatar)
 
 	register(user, http.MethodGet, "/files/list", "listFiles", "List a directory", a.listFiles)
 	register(user, http.MethodGet, "/files/stat", "statFile", "Get one file or directory", a.statFile)

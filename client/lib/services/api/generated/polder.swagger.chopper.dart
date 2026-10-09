@@ -19,6 +19,107 @@ final class _$Polder extends Polder {
   final Type definitionType = Polder;
 
   @override
+  Future<Response<User>> _setAppearance({
+    required Appearance? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose the theme and accent color the apps use for the logged-in user',
+      operationId: 'setAppearance',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/appearance');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<User, User>($request);
+  }
+
+  @override
+  Future<Response<User>> _removeAvatar({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Go back to showing the logged-in user\'s initials',
+      operationId: 'removeAvatar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/avatar');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<User, User>($request);
+  }
+
+  @override
+  Future<Response<User>> _setAvatar({
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Replace the logged-in user\'s icon with the image in the request body',
+      operationId: 'setAvatar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/avatar');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<User, User>($request);
+  }
+
+  @override
+  Future<Response<User>> _setProfile({
+    required Profile? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change the logged-in user\'s name and contact details',
+      operationId: 'setProfile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/profile');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<User, User>($request);
+  }
+
+  @override
   Future<Response<LogPage>> _listActivity({
     String? user,
     int? before,
@@ -1095,8 +1196,7 @@ final class _$Polder extends Polder {
     String? path,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary:
-          'List the folders and notes in a folder, with each note\'s title',
+      summary: 'List the folders and notes in a folder',
       operationId: 'listNotes',
       consumes: [],
       produces: [],
@@ -1714,6 +1814,31 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       tag: swaggerMetaData,
     );
     return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<String>> _getUserAvatar({
+    required int? userID,
+    required String? imageID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'A user\'s icon',
+      operationId: 'getUserAvatar',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["users"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/users/${userID}/avatar/${imageID}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<String, String>($request);
   }
 
   @override
