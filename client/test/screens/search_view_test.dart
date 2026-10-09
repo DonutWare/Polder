@@ -11,6 +11,7 @@ import "../support/provider_harness.dart";
 import "../support/scripted_client.dart";
 
 Map<String, dynamic> _entry(String path, {bool isDir = false}) => {
+  "id": 1,
   "path": path,
   "name": path.split("/").last,
   "isDir": isDir,

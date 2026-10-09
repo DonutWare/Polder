@@ -332,6 +332,11 @@
           "hash": {
             "type": "string"
           },
+          "id": {
+            "description": "Stable while the file exists, across renames, moves and overwrites",
+            "format": "int64",
+            "type": "integer"
+          },
           "isDir": {
             "type": "boolean"
           },
@@ -371,6 +376,7 @@
           }
         },
         "required": [
+          "id",
           "path",
           "name",
           "isDir",
@@ -576,6 +582,54 @@
         "required": [
           "id",
           "contentType"
+        ],
+        "type": "object"
+      },
+      "Incoming": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "description": "What made the link, such as markdown",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Entry",
+            "description": "The file that holds the link"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "source"
+        ],
+        "type": "object"
+      },
+      "LinksResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "incoming": {
+            "description": "Files that link to this one",
+            "items": {
+              "$ref": "#/components/schemas/Incoming"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "outgoing": {
+            "description": "What this file links to, in the order the links appear",
+            "items": {
+              "$ref": "#/components/schemas/Outgoing"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "outgoing",
+          "incoming"
         ],
         "type": "object"
       },
@@ -957,6 +1011,58 @@
         ],
         "type": "object"
       },
+      "NotesItem": {
+        "additionalProperties": false,
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/Entry"
+          },
+          "hasNotes": {
+            "description": "For a folder: whether notes other than its README are somewhere inside it",
+            "type": "boolean"
+          },
+          "hasReadme": {
+            "description": "For a folder: whether a README directly inside makes the folder a page",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entry"
+        ],
+        "type": "object"
+      },
+      "NotesListing": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "description": "The folders and notes in the folder; other files are left out",
+            "items": {
+              "$ref": "#/components/schemas/NotesItem"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "items"
+        ],
+        "type": "object"
+      },
+      "NotesSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "description": "Folder the notes view shows as its tree; absent until the user picks one",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "OfficeSessionRequest": {
         "additionalProperties": false,
         "properties": {
@@ -977,6 +1083,32 @@
         "required": [
           "path",
           "origin"
+        ],
+        "type": "object"
+      },
+      "Outgoing": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "description": "What made the link, such as markdown",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Entry",
+            "description": "The linked file; absent when it no longer exists"
+          },
+          "targetPath": {
+            "description": "Where the link points; the target's current path when it still exists",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "targetPath"
         ],
         "type": "object"
       },
@@ -1077,6 +1209,42 @@
         },
         "required": [
           "refreshToken"
+        ],
+        "type": "object"
+      },
+      "ResolveRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "description": "File ids to look up",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "maxItems": 500,
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "type": "object"
+      },
+      "ResolveResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "description": "The files that still exist, in no particular order; ids that are gone are left out",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "entries"
         ],
         "type": "object"
       },
@@ -3775,6 +3943,65 @@
         ]
       }
     },
+    "/api/v1/files/links": {
+      "get": {
+        "operationId": "listFileLinks",
+        "parameters": [
+          {
+            "description": "The file's id",
+            "explode": false,
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "description": "The file's id",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinksResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What a file links to and which files link to it",
+        "tags": [
+          "files"
+        ]
+      }
+    },
     "/api/v1/files/list": {
       "get": {
         "operationId": "listFiles",
@@ -4031,6 +4258,62 @@
           }
         ],
         "summary": "Get a JPEG thumbnail of an image, video or document",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/resolve": {
+      "post": {
+        "operationId": "resolveFiles",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolveResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Look files up by id, wherever they are now",
         "tags": [
           "files"
         ]
@@ -4434,6 +4717,164 @@
         "summary": "Make an earlier version the current file; the current content is kept as a version",
         "tags": [
           "files"
+        ]
+      }
+    },
+    "/api/v1/notes/list": {
+      "get": {
+        "operationId": "listNotes",
+        "parameters": [
+          {
+            "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the user's storage, such as /Photos/cat.jpg; empty means the root",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotesListing"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the folders and notes in a folder, with each note's title",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
+    "/api/v1/notes/settings": {
+      "get": {
+        "operationId": "getNotesSettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotesSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Which folder holds the user's notes",
+        "tags": [
+          "notes"
+        ]
+      },
+      "put": {
+        "operationId": "setNotesSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotesSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotesSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Choose the folder that holds the user's notes; it must already exist",
+        "tags": [
+          "notes"
         ]
       }
     },

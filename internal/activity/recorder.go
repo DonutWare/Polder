@@ -12,6 +12,9 @@ const rescanDetailLimit = 20
 
 func (h *Hub) FileMutation(ctx context.Context, mutation files.Mutation) {
 	h.publishDirectories(mutation.Owner.ID, changedPaths(mutation))
+	if mutation.Housekeeping {
+		return
+	}
 	if mutation.Kind == files.MutationWrite {
 		if transfer := transferFrom(ctx); transfer != nil {
 			h.complete(transfer, mutation.Size)

@@ -4,6 +4,7 @@ import "package:polder/routes/app_routes.dart";
 
 enum ShellDestination {
   files(AppRoutes.files),
+  notes(AppRoutes.notes),
   activity(AppRoutes.activity),
   sync(AppRoutes.sync),
   autoUpload(AppRoutes.autoUpload),
@@ -30,6 +31,7 @@ final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
   final platform = ref.watch(syncPlatformProvider);
   return [
     ShellDestination.files,
+    ShellDestination.notes,
     ShellDestination.activity,
     if (platform.supportsFolderSync) ShellDestination.sync,
     if (platform.supportsAutoUpload) ShellDestination.autoUpload,

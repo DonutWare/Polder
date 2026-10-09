@@ -7,6 +7,7 @@ part of 'file_entry.dart';
 // **************************************************************************
 
 _FileEntry _$FileEntryFromJson(Map<String, dynamic> json) => _FileEntry(
+  id: (json['id'] as num?)?.toInt() ?? 0,
   path: json['path'] as String,
   name: json['name'] as String,
   isDir: json['isDir'] as bool? ?? false,
@@ -22,6 +23,7 @@ _FileEntry _$FileEntryFromJson(Map<String, dynamic> json) => _FileEntry(
 );
 
 Map<String, dynamic> _$FileEntryToJson(_FileEntry instance) => <String, dynamic>{
+  'id': instance.id,
   'path': instance.path,
   'name': instance.name,
   'isDir': instance.isDir,

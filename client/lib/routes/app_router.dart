@@ -19,6 +19,7 @@ import "package:polder/screens/admin/admin_users_screen.dart";
 import "package:polder/screens/auto_upload/auto_upload_screen.dart";
 import "package:polder/screens/browser/browser_screen.dart";
 import "package:polder/screens/login/login_screen.dart";
+import "package:polder/screens/notes/notes_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/settings/about_screen.dart";
@@ -81,6 +82,10 @@ final routerProvider = Provider<GoRouter>((ref) {
               path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
               select: state.uri.queryParameters[AppRoutes.selectParameter],
             ),
+          ),
+          GoRoute(
+            path: AppRoutes.notes,
+            builder: (_, state) => NotesScreen(notePath: state.uri.queryParameters[AppRoutes.pathParameter]),
           ),
           GoRoute(
             path: AppRoutes.search,

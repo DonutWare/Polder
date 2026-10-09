@@ -1,6 +1,5 @@
 import "package:fake_async/fake_async.dart";
 import "package:flutter_test/flutter_test.dart";
-import "package:http/http.dart" as http;
 
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
@@ -8,19 +7,6 @@ import "package:polder/services/api/api_exceptions.dart";
 
 import "../support/fake_server.dart";
 import "../support/provider_harness.dart";
-import "../support/scripted_client.dart";
-
-class _ServerWithMe extends http.BaseClient {
-  _ServerWithMe(this.server);
-
-  final FakePolderServer server;
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    if (request.url.path == "/api/v1/auth/me") return jsonResponse(200, userJson());
-    return server.send(request);
-  }
-}
 
 void main() {
   late FakePolderServer server;
@@ -31,7 +17,7 @@ void main() {
     server = FakePolderServer()
       ..putFile("/b.txt", "b".codeUnits)
       ..putFile("/Photos/p.jpg", "p".codeUnits);
-    harness = ProviderHarness(httpClient: _ServerWithMe(server), account: account);
+    harness = ProviderHarness(httpClient: SignedInServer(server), account: account);
     harness.container.listen(directoryProvider("/"), (_, _) {});
   });
 
@@ -76,7 +62,7 @@ void main() {
   test("keeps refreshing while the server is indexing, then stops", () {
     fakeAsync((async) {
       server.indexing = true;
-      final indexing = ProviderHarness(httpClient: _ServerWithMe(server), account: account);
+      final indexing = ProviderHarness(httpClient: SignedInServer(server), account: account);
       indexing.container.read(accountProvider.future);
       async.flushMicrotasks();
       indexing.container.listen(directoryProvider("/"), (_, _) {});

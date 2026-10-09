@@ -45,6 +45,7 @@ type Worker struct {
 	cleanups chan struct{}
 	pdf      pdfRenderer
 	ffmpeg   ffmpegRenderer
+	markdown *markdownRenderer
 	office   *office.Service
 
 	officePausedUntil     time.Time
@@ -59,6 +60,7 @@ func NewWorker(fileService *files.Service, userStore *users.Store, cacheDir stri
 		queue:    make(chan job, queueCapacity),
 		cleanups: make(chan struct{}, 1),
 		ffmpeg:   newFFmpegRenderer(ffmpeg),
+		markdown: newMarkdownRenderer(cacheDir),
 		office:   officeService,
 	}
 	if !worker.ffmpeg.installed() {
@@ -141,11 +143,12 @@ type render func(ctx context.Context, file *os.File, entry files.Entry) (decoded
 
 type capabilities struct {
 	ffmpeg      bool
+	markdown    bool
 	convertible map[string]bool
 }
 
 func (w *Worker) currentCapabilities(ctx context.Context) capabilities {
-	current := capabilities{ffmpeg: w.ffmpeg.installed()}
+	current := capabilities{ffmpeg: w.ffmpeg.installed(), markdown: w.markdown.installed()}
 	if time.Now().After(w.officePausedUntil) {
 		current.convertible = w.office.ConvertibleMimes(ctx)
 	}
@@ -162,6 +165,10 @@ func (w *Worker) rendererFor(available capabilities, mimeType string) render {
 	case mimeType == pdfMime:
 		return func(_ context.Context, file *os.File, entry files.Entry) (decodedImage, error) {
 			return w.pdf.render(file, entry.Size, largestSize)
+		}
+	case available.markdown && mimeType == files.MarkdownMime:
+		return func(_ context.Context, file *os.File, _ files.Entry) (decodedImage, error) {
+			return w.markdown.render(file)
 		}
 	case available.ffmpeg && strings.HasPrefix(mimeType, "image/"):
 		return func(ctx context.Context, file *os.File, _ files.Entry) (decodedImage, error) {
@@ -182,7 +189,7 @@ func (w *Worker) rendererFor(available capabilities, mimeType string) render {
 
 func (w *Worker) requestNewlyPreviewable(ctx context.Context) {
 	available := w.currentCapabilities(ctx)
-	signature := fmt.Sprint(available.ffmpeg, slices.Sorted(maps.Keys(available.convertible)))
+	signature := fmt.Sprint(available.ffmpeg, available.markdown, slices.Sorted(maps.Keys(available.convertible)))
 	if signature == w.requestedCapabilities {
 		return
 	}

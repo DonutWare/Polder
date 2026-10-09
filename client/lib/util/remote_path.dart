@@ -14,6 +14,16 @@ abstract final class RemotePath {
 
   static String name(String path) => path == root ? "" : path.substring(path.lastIndexOf("/") + 1);
 
+  static String withoutExtension(String name) {
+    final dot = name.lastIndexOf(".");
+    return dot <= 0 ? name : name.substring(0, dot);
+  }
+
+  static String extension(String name) {
+    final dot = name.lastIndexOf(".");
+    return dot <= 0 ? "" : name.substring(dot + 1);
+  }
+
   static List<String> segments(String path) => path.split("/").where((segment) => segment.isNotEmpty).toList();
 
   static List<String> ancestry(String path) {

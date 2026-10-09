@@ -36,10 +36,11 @@ const (
 const (
 	directoryMime = "inode/directory"
 	fallbackMime  = "application/octet-stream"
+	MarkdownMime  = "text/markdown"
 )
 
 type Entry struct {
-	ID           int64          `json:"-"`
+	ID           int64          `json:"id" doc:"Stable while the file exists, across renames, moves and overwrites"`
 	UserID       int64          `json:"-"`
 	Path         string         `json:"path"`
 	Name         string         `json:"name"`
@@ -81,6 +82,12 @@ func newFileEntry(userID int64, cleanPath string, size int64, mtime time.Time, h
 		Meta:         map[string]any{},
 		PreviewState: PreviewPending,
 		TextState:    TextPending,
+	}
+}
+
+func init() {
+	for _, extension := range []string{".md", ".markdown"} {
+		_ = mime.AddExtensionType(extension, MarkdownMime)
 	}
 }
 

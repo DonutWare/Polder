@@ -14,6 +14,7 @@ import (
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/files"
+	"polder-server/internal/links"
 	"polder-server/internal/preview"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
@@ -280,4 +281,57 @@ func optionalTime(raw string) (time.Time, error) {
 		return time.Time{}, apperr.Invalid("mtime must be an RFC 3339 timestamp")
 	}
 	return parsed, nil
+}
+
+type resolveRequest struct {
+	IDs []int64 `json:"ids" maxItems:"500" doc:"File ids to look up"`
+}
+
+type resolveResponse struct {
+	Entries []files.Entry `json:"entries" doc:"The files that still exist, in no particular order; ids that are gone are left out"`
+}
+
+func (a *API) resolveFiles(ctx context.Context, input *jsonBody[resolveRequest]) (*jsonBody[resolveResponse], error) {
+	found, err := a.files.EntriesByID(ctx, currentUser(ctx).ID, input.Body.IDs)
+	if err != nil {
+		return nil, err
+	}
+	entries := make([]files.Entry, 0, len(found))
+	for _, entry := range found {
+		entries = append(entries, entry)
+	}
+	return respond(resolveResponse{Entries: entries}), nil
+}
+
+type linksInput struct {
+	ID int64 `query:"id" doc:"The file's id"`
+}
+
+type linksResponse struct {
+	Outgoing []links.Outgoing `json:"outgoing" doc:"What this file links to, in the order the links appear"`
+	Incoming []links.Incoming `json:"incoming" doc:"Files that link to this one"`
+}
+
+func (a *API) fileLinks(ctx context.Context, input *linksInput) (*jsonBody[linksResponse], error) {
+	owner := currentUser(ctx)
+	entry, err := a.files.EntryByID(ctx, owner.ID, input.ID)
+	if err != nil {
+		return nil, err
+	}
+	outgoing, err := a.links.Outgoing(ctx, owner, entry.ID)
+	if err != nil {
+		return nil, err
+	}
+	incoming, err := a.links.Incoming(ctx, owner, entry)
+	if err != nil {
+		return nil, err
+	}
+	return respond(linksResponse{Outgoing: nonNil(outgoing), Incoming: nonNil(incoming)}), nil
+}
+
+func nonNil[T any](items []T) []T {
+	if items == nil {
+		return []T{}
+	}
+	return items
 }

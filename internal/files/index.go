@@ -237,23 +237,37 @@ func saveEntry(ctx context.Context, q querier, entry Entry) (Entry, error) {
 	entry.Rev = rev
 	metaJSON, _ := json.Marshal(entry.Meta)
 
-	result, err := q.ExecContext(ctx,
+	err = q.QueryRowContext(ctx,
 		`UPDATE files SET is_dir = $1, size = $2, mtime_ns = $3, hash = $4, rev = $5, mime = $6, meta_json = $7, preview_state = $8, text_state = $9
-		 WHERE user_id = $10 AND path_key = $11`,
+		 WHERE user_id = $10 AND path_key = $11 RETURNING id`,
 		entry.IsDir, entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState,
-		entry.UserID, pathKey(entry.Path))
-	if err != nil {
-		return Entry{}, err
-	}
-	if updated, _ := result.RowsAffected(); updated > 0 {
+		entry.UserID, pathKey(entry.Path)).Scan(&entry.ID)
+	if err == nil {
 		return entry, nil
 	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return Entry{}, err
+	}
 
-	_, err = q.ExecContext(ctx,
+	if entry.ID != 0 {
+		var taken bool
+		if err := q.QueryRowContext(ctx, `SELECT EXISTS (SELECT 1 FROM files WHERE id = $1)`, entry.ID).Scan(&taken); err != nil {
+			return Entry{}, err
+		}
+		if !taken {
+			_, err = q.ExecContext(ctx,
+				`INSERT INTO files (id, user_id, path, path_key, parent_key, name, is_dir, size, mtime_ns, hash, rev, mime, meta_json, preview_state, text_state)
+				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+				entry.ID, entry.UserID, entry.Path, pathKey(entry.Path), pathKey(storage.ParentPath(entry.Path)), entry.Name, entry.IsDir,
+				entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState)
+			return entry, err
+		}
+	}
+	err = q.QueryRowContext(ctx,
 		`INSERT INTO files (user_id, path, path_key, parent_key, name, is_dir, size, mtime_ns, hash, rev, mime, meta_json, preview_state, text_state)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
 		entry.UserID, entry.Path, pathKey(entry.Path), pathKey(storage.ParentPath(entry.Path)), entry.Name, entry.IsDir,
-		entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState)
+		entry.Size, entry.Mtime.UnixNano(), entry.Hash, entry.Rev, entry.Mime, string(metaJSON), entry.PreviewState, entry.TextState).Scan(&entry.ID)
 	return entry, err
 }
 

@@ -45,7 +45,7 @@ RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} go 
 FROM debian:trixie-slim
 ARG TARGETARCH
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates media-types tesseract-ocr ffmpeg mesa-va-drivers \
+    && apt-get install -y --no-install-recommends ca-certificates media-types tesseract-ocr ffmpeg mesa-va-drivers fonts-noto-core fonts-noto-cjk fonts-noto-mono \
     && if [ "$TARGETARCH" = "amd64" ]; then \
         apt-get install -y --no-install-recommends intel-media-va-driver libmfx-gen1.2; \
     fi \

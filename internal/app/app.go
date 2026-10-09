@@ -18,6 +18,7 @@ import (
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
 	"polder-server/internal/httpapi"
+	"polder-server/internal/links"
 	"polder-server/internal/logging"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
@@ -38,6 +39,8 @@ const (
 	trashPurgeInterval    = time.Hour
 	activityPurgeInterval = time.Hour
 	logPurgeInterval      = 24 * time.Hour
+
+	attachmentCleanupInterval = 24 * time.Hour
 )
 
 type App struct {
@@ -55,6 +58,7 @@ type App struct {
 	extractor *extract.Worker
 	sync      *syncing.Service
 	versions  *versions.Worker
+	links     *links.Graph
 
 	trashPurgeRequests chan struct{}
 	background         sync.WaitGroup
@@ -166,6 +170,9 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		HWAccelDevice: cfg.VideoHWAccelDevice,
 	}, officeService)
 	fileService.OnContentChanged(previews.Enqueue)
+	linkGraph := links.NewGraph(db, fileService, userStore, links.Markdown{})
+	fileService.OnContentChanged(linkGraph.Enqueue)
+	fileService.OnMutation(linkGraph.FileMutation)
 	fileService.OnContentRemoved(previews.RequestCleanup)
 	logs := logging.NewFiles(cfg.LogDir())
 	handler := httpapi.NewRouter(httpapi.Dependencies{
@@ -183,6 +190,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Logs:                   logs,
 		Office:                 officeService,
 		Versions:               versionWorker,
+		Links:                  linkGraph,
 		RequestTrashPurge:      func() { requestWork(trashPurgeRequests) },
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		TrustedProxies:         trustedProxies,
@@ -203,6 +211,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		extractor: extractor,
 		sync:      syncService,
 		versions:  versionWorker,
+		links:     linkGraph,
 
 		trashPurgeRequests: trashPurgeRequests,
 	}, nil
@@ -243,10 +252,16 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	a.background.Go(func() { a.extractor.Run(ctx) })
 	a.background.Go(func() { a.Search.Run(ctx) })
 	a.background.Go(func() { a.versions.Run(ctx) })
+	a.background.Go(func() { a.links.Run(ctx) })
 	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
 	a.background.Go(func() {
 		repeatOnRequest(ctx, trashPurgeInterval, a.trashPurgeRequests, "purge expired trash", func(ctx context.Context) error {
 			return a.PurgeExpiredTrash(ctx, time.Now())
+		})
+	})
+	a.background.Go(func() {
+		repeat(ctx, attachmentCleanupInterval, "trash attachments no note links to", func(ctx context.Context) error {
+			return a.TrashUnlinkedAttachments(ctx, time.Now())
 		})
 	})
 	a.background.Go(func() { a.Activity.Run(ctx) })
@@ -292,6 +307,24 @@ func requestWork(requests chan<- struct{}) {
 	case requests <- struct{}{}:
 	default:
 	}
+}
+
+func (a *App) TrashUnlinkedAttachments(ctx context.Context, now time.Time) error {
+	allUsers, err := a.Users.List(ctx)
+	if err != nil {
+		return err
+	}
+	var failures []error
+	for _, user := range allUsers {
+		trashed, err := a.links.TrashUnlinkedAttachments(ctx, user, now)
+		if err != nil {
+			failures = append(failures, err)
+		}
+		if trashed > 0 {
+			logger.Info("moved attachments no note links to into the trash", "user", user.Username, "files", trashed)
+		}
+	}
+	return errors.Join(failures...)
 }
 
 func (a *App) PurgeExpiredTrash(ctx context.Context, now time.Time) error {

@@ -52,6 +52,10 @@ class FakePolderServer extends http.BaseClient {
   bool indexing = false;
   int rangeBytesServed = 0;
   int chunkBytesReceived = 0;
+  bool failNextPut = false;
+  final _ids = <String, int>{};
+
+  int idOf(String path) => _ids.putIfAbsent(path, () => _ids.length + 1);
   int wholeBytesReceived = 0;
   var _rev = 0;
   var _seq = 0;
@@ -109,6 +113,7 @@ class FakePolderServer extends http.BaseClient {
       ("PUT", "/files/content") => _put(query, body),
       ("POST", "/files/mkdir") => _mkdir(_decode(body)["path"] as String),
       ("POST", "/files/move") => _move(_decode(body)),
+      ("POST", "/files/resolve") => _resolve(_decode(body)),
       ("DELETE", "/files") => _delete(query),
       ("GET", "/sync/changes") => _changes(int.parse(query["cursor"] ?? "0")),
       ("GET", "/sync/manifest") => _manifest(query["path"]!),
@@ -119,6 +124,15 @@ class FakePolderServer extends http.BaseClient {
       ("DELETE", _) when segments.length == 3 && segments[1] == "uploads" => _abort(segments[2]),
       _ => throw const _HttpError(404, "not_found"),
     };
+  }
+
+  http.StreamedResponse _resolve(Map<String, dynamic> body) {
+    final wanted = (body["ids"] as List).cast<int>().toSet();
+    final entries = [
+      for (final MapEntry(key: path, value: id) in _ids.entries)
+        if (wanted.contains(id) && nodes.containsKey(path)) _entry(path),
+    ];
+    return _json(200, {"entries": entries});
   }
 
   http.StreamedResponse _list(String path) {
@@ -140,6 +154,10 @@ class FakePolderServer extends http.BaseClient {
   }
 
   http.StreamedResponse _put(Map<String, String> query, Uint8List body) {
+    if (failNextPut) {
+      failNextPut = false;
+      throw const _HttpError(500, "internal");
+    }
     final path = query["path"]!;
     _checkBaseRev(path, int.parse(query["baseRev"] ?? "0"));
     wholeBytesReceived += body.length;
@@ -172,6 +190,7 @@ class FakePolderServer extends http.BaseClient {
     for (final oldPath in moved) {
       final newPath = to + oldPath.substring(from.length);
       nodes[newPath] = nodes.remove(oldPath)!..rev = ++_rev;
+      if (_ids.remove(oldPath) case final id?) _ids[newPath] = id;
       changes.add({"seq": ++_seq, "type": "move", "path": newPath, "fromPath": oldPath, "entry": _entry(newPath)});
     }
   }
@@ -287,6 +306,7 @@ class FakePolderServer extends http.BaseClient {
   Map<String, dynamic> _entry(String path) {
     final node = _require(path);
     return {
+      "id": idOf(path),
       "path": path,
       "name": RemotePath.name(path),
       "isDir": node.isDir,
@@ -311,4 +331,16 @@ class _HttpError implements Exception {
   final int status;
   final String code;
   final Map<String, dynamic>? current;
+}
+
+class SignedInServer extends http.BaseClient {
+  SignedInServer(this.server);
+
+  final FakePolderServer server;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    if (request.url.path == "/api/v1/auth/me") return jsonResponse(200, userJson());
+    return server.send(request);
+  }
 }

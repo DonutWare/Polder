@@ -11,6 +11,7 @@ import "package:polder/services/api/polder_api.dart";
 import "../../support/scripted_client.dart";
 
 Map<String, dynamic> entryJson(String path) => {
+  "id": 1,
   "path": path,
   "name": path.split("/").last,
   "isDir": false,

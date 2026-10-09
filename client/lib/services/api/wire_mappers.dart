@@ -6,6 +6,8 @@ import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_links.dart";
+import "package:polder/models/note_item.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/search.dart";
@@ -22,6 +24,7 @@ import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 
 extension EntryToModel on wire.Entry {
   FileEntry toModel() => FileEntry(
+    id: id,
     path: path,
     name: name,
     isDir: isDir,
@@ -491,6 +494,22 @@ extension SuggestionsToModel on wire.Suggestions {
           isKey: suggestion.kind == wire.SuggestionKind.key,
           count: suggestion.count,
         ),
+    ],
+  );
+}
+
+extension NotesItemToModel on wire.NotesItem {
+  NoteItem toModel() => NoteItem(entry: entry.toModel(), hasNotes: hasNotes ?? false, hasReadme: hasReadme ?? false);
+}
+
+extension LinksResponseToModel on wire.LinksResponse {
+  FileLinks toModel() => FileLinks(
+    outgoing: [
+      for (final link in outgoing ?? <wire.Outgoing>[])
+        OutgoingLink(title: link.title, targetPath: link.targetPath, target: link.target?.toModel()),
+    ],
+    incoming: [
+      for (final link in incoming ?? <wire.Incoming>[]) IncomingLink(title: link.title, source: link.source.toModel()),
     ],
   );
 }

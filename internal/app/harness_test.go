@@ -124,6 +124,7 @@ type tokenPair struct {
 }
 
 type fileEntry struct {
+	ID           int64          `json:"id"`
 	Path         string         `json:"path"`
 	Name         string         `json:"name"`
 	IsDir        bool           `json:"isDir"`
@@ -194,6 +195,13 @@ func (c *client) put(path string, baseRev int64, content []byte, expectedStatus 
 	c.server.t.Helper()
 	query := fmt.Sprintf("/files/content?path=%s&baseRev=%d", url.QueryEscape(path), baseRev)
 	c.expect(c.request(http.MethodPut, query, bytes.NewReader(content), nil), expectedStatus, target)
+}
+
+func (c *client) stat(path string) fileEntry {
+	c.server.t.Helper()
+	var entry fileEntry
+	c.mustJSON(http.MethodGet, "/files/stat?path="+url.QueryEscape(path), nil, http.StatusOK, &entry)
+	return entry
 }
 
 func (c *client) download(path string, headers map[string]string) (*http.Response, []byte) {

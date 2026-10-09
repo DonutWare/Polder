@@ -6,6 +6,8 @@ abstract interface class PreferencesStore {
   Future<Map<String, dynamic>?> readJson(String key);
 
   Future<void> writeJson(String key, Map<String, dynamic> value);
+
+  Future<void> remove(String key);
 }
 
 class SharedPreferencesStore implements PreferencesStore {
@@ -22,6 +24,9 @@ class SharedPreferencesStore implements PreferencesStore {
 
   @override
   Future<void> writeJson(String key, Map<String, dynamic> value) => _preferences.setString(key, jsonEncode(value));
+
+  @override
+  Future<void> remove(String key) => _preferences.remove(key);
 }
 
 class InMemoryPreferencesStore implements PreferencesStore {
@@ -32,4 +37,7 @@ class InMemoryPreferencesStore implements PreferencesStore {
 
   @override
   Future<void> writeJson(String key, Map<String, dynamic> value) async => _values[key] = value;
+
+  @override
+  Future<void> remove(String key) async => _values.remove(key);
 }

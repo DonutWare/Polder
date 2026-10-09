@@ -712,6 +712,7 @@ extension $EditorSessionExtension on EditorSession {
 class Entry {
   const Entry({
     required this.hash,
+    required this.id,
     required this.isDir,
     required this.meta,
     required this.mime,
@@ -730,6 +731,8 @@ class Entry {
 
   @JsonKey(name: 'hash', includeIfNull: false)
   final String hash;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
   @JsonKey(name: 'isDir', includeIfNull: false)
   final bool isDir;
   @JsonKey(name: 'meta', includeIfNull: false)
@@ -760,6 +763,7 @@ class Entry {
     return identical(this, other) ||
         (other is Entry &&
             (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
             (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
             (identical(other.meta, meta) || const DeepCollectionEquality().equals(other.meta, meta)) &&
             (identical(other.mime, mime) || const DeepCollectionEquality().equals(other.mime, mime)) &&
@@ -775,6 +779,7 @@ class Entry {
   @override
   int get hashCode =>
       const DeepCollectionEquality().hash(hash) ^
+      const DeepCollectionEquality().hash(id) ^
       const DeepCollectionEquality().hash(isDir) ^
       const DeepCollectionEquality().hash(meta) ^
       const DeepCollectionEquality().hash(mime) ^
@@ -790,6 +795,7 @@ class Entry {
 extension $EntryExtension on Entry {
   Entry copyWith({
     String? hash,
+    int? id,
     bool? isDir,
     Map<String, dynamic>? meta,
     String? mime,
@@ -802,6 +808,7 @@ extension $EntryExtension on Entry {
   }) {
     return Entry(
       hash: hash ?? this.hash,
+      id: id ?? this.id,
       isDir: isDir ?? this.isDir,
       meta: meta ?? this.meta,
       mime: mime ?? this.mime,
@@ -816,6 +823,7 @@ extension $EntryExtension on Entry {
 
   Entry copyWithWrapped({
     Wrapped<String>? hash,
+    Wrapped<int>? id,
     Wrapped<bool>? isDir,
     Wrapped<Map<String, dynamic>>? meta,
     Wrapped<String>? mime,
@@ -828,6 +836,7 @@ extension $EntryExtension on Entry {
   }) {
     return Entry(
       hash: (hash != null ? hash.value : this.hash),
+      id: (id != null ? id.value : this.id),
       isDir: (isDir != null ? isDir.value : this.isDir),
       meta: (meta != null ? meta.value : this.meta),
       mime: (mime != null ? mime.value : this.mime),
@@ -1264,6 +1273,97 @@ extension $ImageInfoExtension on ImageInfo {
     return ImageInfo(
       contentType: (contentType != null ? contentType.value : this.contentType),
       id: (id != null ? id.value : this.id),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Incoming {
+  const Incoming({required this.kind, required this.source, required this.title});
+
+  factory Incoming.fromJson(Map<String, dynamic> json) => _$IncomingFromJson(json);
+
+  static const toJsonFactory = _$IncomingToJson;
+  Map<String, dynamic> toJson() => _$IncomingToJson(this);
+
+  @JsonKey(name: 'kind', includeIfNull: false)
+  final String kind;
+  @JsonKey(name: 'source', includeIfNull: false)
+  final Entry source;
+  @JsonKey(name: 'title', includeIfNull: false)
+  final String title;
+  static const fromJsonFactory = _$IncomingFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Incoming &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.source, source) || const DeepCollectionEquality().equals(other.source, source)) &&
+            (identical(other.title, title) || const DeepCollectionEquality().equals(other.title, title)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(source) ^
+      const DeepCollectionEquality().hash(title) ^
+      runtimeType.hashCode;
+}
+
+extension $IncomingExtension on Incoming {
+  Incoming copyWith({String? kind, Entry? source, String? title}) {
+    return Incoming(kind: kind ?? this.kind, source: source ?? this.source, title: title ?? this.title);
+  }
+
+  Incoming copyWithWrapped({Wrapped<String>? kind, Wrapped<Entry>? source, Wrapped<String>? title}) {
+    return Incoming(
+      kind: (kind != null ? kind.value : this.kind),
+      source: (source != null ? source.value : this.source),
+      title: (title != null ? title.value : this.title),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LinksResponse {
+  const LinksResponse({this.incoming, this.outgoing});
+
+  factory LinksResponse.fromJson(Map<String, dynamic> json) => _$LinksResponseFromJson(json);
+
+  static const toJsonFactory = _$LinksResponseToJson;
+  Map<String, dynamic> toJson() => _$LinksResponseToJson(this);
+
+  @JsonKey(name: 'incoming', includeIfNull: false, defaultValue: <Incoming>[])
+  final List<Incoming>? incoming;
+  @JsonKey(name: 'outgoing', includeIfNull: false, defaultValue: <Outgoing>[])
+  final List<Outgoing>? outgoing;
+  static const fromJsonFactory = _$LinksResponseFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LinksResponse &&
+            (identical(other.incoming, incoming) || const DeepCollectionEquality().equals(other.incoming, incoming)) &&
+            (identical(other.outgoing, outgoing) || const DeepCollectionEquality().equals(other.outgoing, outgoing)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(incoming) ^
+      const DeepCollectionEquality().hash(outgoing) ^
+      runtimeType.hashCode;
+}
+
+extension $LinksResponseExtension on LinksResponse {
+  LinksResponse copyWith({List<Incoming>? incoming, List<Outgoing>? outgoing}) {
+    return LinksResponse(incoming: incoming ?? this.incoming, outgoing: outgoing ?? this.outgoing);
+  }
+
+  LinksResponse copyWithWrapped({Wrapped<List<Incoming>?>? incoming, Wrapped<List<Outgoing>?>? outgoing}) {
+    return LinksResponse(
+      incoming: (incoming != null ? incoming.value : this.incoming),
+      outgoing: (outgoing != null ? outgoing.value : this.outgoing),
     );
   }
 }
@@ -2042,6 +2142,134 @@ extension $NewUserExtension on NewUser {
 }
 
 @JsonSerializable(explicitToJson: true)
+class NotesItem {
+  const NotesItem({required this.entry, this.hasNotes, this.hasReadme});
+
+  factory NotesItem.fromJson(Map<String, dynamic> json) => _$NotesItemFromJson(json);
+
+  static const toJsonFactory = _$NotesItemToJson;
+  Map<String, dynamic> toJson() => _$NotesItemToJson(this);
+
+  @JsonKey(name: 'entry', includeIfNull: false)
+  final Entry entry;
+  @JsonKey(name: 'hasNotes', includeIfNull: false)
+  final bool? hasNotes;
+  @JsonKey(name: 'hasReadme', includeIfNull: false)
+  final bool? hasReadme;
+  static const fromJsonFactory = _$NotesItemFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NotesItem &&
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.hasNotes, hasNotes) || const DeepCollectionEquality().equals(other.hasNotes, hasNotes)) &&
+            (identical(other.hasReadme, hasReadme) ||
+                const DeepCollectionEquality().equals(other.hasReadme, hasReadme)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(entry) ^
+      const DeepCollectionEquality().hash(hasNotes) ^
+      const DeepCollectionEquality().hash(hasReadme) ^
+      runtimeType.hashCode;
+}
+
+extension $NotesItemExtension on NotesItem {
+  NotesItem copyWith({Entry? entry, bool? hasNotes, bool? hasReadme}) {
+    return NotesItem(
+      entry: entry ?? this.entry,
+      hasNotes: hasNotes ?? this.hasNotes,
+      hasReadme: hasReadme ?? this.hasReadme,
+    );
+  }
+
+  NotesItem copyWithWrapped({Wrapped<Entry>? entry, Wrapped<bool?>? hasNotes, Wrapped<bool?>? hasReadme}) {
+    return NotesItem(
+      entry: (entry != null ? entry.value : this.entry),
+      hasNotes: (hasNotes != null ? hasNotes.value : this.hasNotes),
+      hasReadme: (hasReadme != null ? hasReadme.value : this.hasReadme),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NotesListing {
+  const NotesListing({this.items, required this.path});
+
+  factory NotesListing.fromJson(Map<String, dynamic> json) => _$NotesListingFromJson(json);
+
+  static const toJsonFactory = _$NotesListingToJson;
+  Map<String, dynamic> toJson() => _$NotesListingToJson(this);
+
+  @JsonKey(name: 'items', includeIfNull: false, defaultValue: <NotesItem>[])
+  final List<NotesItem>? items;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  static const fromJsonFactory = _$NotesListingFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NotesListing &&
+            (identical(other.items, items) || const DeepCollectionEquality().equals(other.items, items)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(items) ^ const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
+}
+
+extension $NotesListingExtension on NotesListing {
+  NotesListing copyWith({List<NotesItem>? items, String? path}) {
+    return NotesListing(items: items ?? this.items, path: path ?? this.path);
+  }
+
+  NotesListing copyWithWrapped({Wrapped<List<NotesItem>?>? items, Wrapped<String>? path}) {
+    return NotesListing(
+      items: (items != null ? items.value : this.items),
+      path: (path != null ? path.value : this.path),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NotesSettings {
+  const NotesSettings({this.path});
+
+  factory NotesSettings.fromJson(Map<String, dynamic> json) => _$NotesSettingsFromJson(json);
+
+  static const toJsonFactory = _$NotesSettingsToJson;
+  Map<String, dynamic> toJson() => _$NotesSettingsToJson(this);
+
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String? path;
+  static const fromJsonFactory = _$NotesSettingsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NotesSettings &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
+}
+
+extension $NotesSettingsExtension on NotesSettings {
+  NotesSettings copyWith({String? path}) {
+    return NotesSettings(path: path ?? this.path);
+  }
+
+  NotesSettings copyWithWrapped({Wrapped<String?>? path}) {
+    return NotesSettings(path: (path != null ? path.value : this.path));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class OfficeSessionRequest {
   const OfficeSessionRequest({required this.origin, required this.path, this.versionId});
 
@@ -2090,6 +2318,70 @@ extension $OfficeSessionRequestExtension on OfficeSessionRequest {
       origin: (origin != null ? origin.value : this.origin),
       path: (path != null ? path.value : this.path),
       versionId: (versionId != null ? versionId.value : this.versionId),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Outgoing {
+  const Outgoing({required this.kind, this.target, required this.targetPath, required this.title});
+
+  factory Outgoing.fromJson(Map<String, dynamic> json) => _$OutgoingFromJson(json);
+
+  static const toJsonFactory = _$OutgoingToJson;
+  Map<String, dynamic> toJson() => _$OutgoingToJson(this);
+
+  @JsonKey(name: 'kind', includeIfNull: false)
+  final String kind;
+  @JsonKey(name: 'target', includeIfNull: false)
+  final Entry? target;
+  @JsonKey(name: 'targetPath', includeIfNull: false)
+  final String targetPath;
+  @JsonKey(name: 'title', includeIfNull: false)
+  final String title;
+  static const fromJsonFactory = _$OutgoingFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Outgoing &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.target, target) || const DeepCollectionEquality().equals(other.target, target)) &&
+            (identical(other.targetPath, targetPath) ||
+                const DeepCollectionEquality().equals(other.targetPath, targetPath)) &&
+            (identical(other.title, title) || const DeepCollectionEquality().equals(other.title, title)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(target) ^
+      const DeepCollectionEquality().hash(targetPath) ^
+      const DeepCollectionEquality().hash(title) ^
+      runtimeType.hashCode;
+}
+
+extension $OutgoingExtension on Outgoing {
+  Outgoing copyWith({String? kind, Entry? target, String? targetPath, String? title}) {
+    return Outgoing(
+      kind: kind ?? this.kind,
+      target: target ?? this.target,
+      targetPath: targetPath ?? this.targetPath,
+      title: title ?? this.title,
+    );
+  }
+
+  Outgoing copyWithWrapped({
+    Wrapped<String>? kind,
+    Wrapped<Entry?>? target,
+    Wrapped<String>? targetPath,
+    Wrapped<String>? title,
+  }) {
+    return Outgoing(
+      kind: (kind != null ? kind.value : this.kind),
+      target: (target != null ? target.value : this.target),
+      targetPath: (targetPath != null ? targetPath.value : this.targetPath),
+      title: (title != null ? title.value : this.title),
     );
   }
 }
@@ -2294,6 +2586,74 @@ extension $RefreshRequestExtension on RefreshRequest {
       deviceName: (deviceName != null ? deviceName.value : this.deviceName),
       refreshToken: (refreshToken != null ? refreshToken.value : this.refreshToken),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ResolveRequest {
+  const ResolveRequest({this.ids});
+
+  factory ResolveRequest.fromJson(Map<String, dynamic> json) => _$ResolveRequestFromJson(json);
+
+  static const toJsonFactory = _$ResolveRequestToJson;
+  Map<String, dynamic> toJson() => _$ResolveRequestToJson(this);
+
+  @JsonKey(name: 'ids', includeIfNull: false, defaultValue: <int>[])
+  final List<int>? ids;
+  static const fromJsonFactory = _$ResolveRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ResolveRequest &&
+            (identical(other.ids, ids) || const DeepCollectionEquality().equals(other.ids, ids)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(ids) ^ runtimeType.hashCode;
+}
+
+extension $ResolveRequestExtension on ResolveRequest {
+  ResolveRequest copyWith({List<int>? ids}) {
+    return ResolveRequest(ids: ids ?? this.ids);
+  }
+
+  ResolveRequest copyWithWrapped({Wrapped<List<int>?>? ids}) {
+    return ResolveRequest(ids: (ids != null ? ids.value : this.ids));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ResolveResponse {
+  const ResolveResponse({this.entries});
+
+  factory ResolveResponse.fromJson(Map<String, dynamic> json) => _$ResolveResponseFromJson(json);
+
+  static const toJsonFactory = _$ResolveResponseToJson;
+  Map<String, dynamic> toJson() => _$ResolveResponseToJson(this);
+
+  @JsonKey(name: 'entries', includeIfNull: false, defaultValue: <Entry>[])
+  final List<Entry>? entries;
+  static const fromJsonFactory = _$ResolveResponseFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ResolveResponse &&
+            (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(entries) ^ runtimeType.hashCode;
+}
+
+extension $ResolveResponseExtension on ResolveResponse {
+  ResolveResponse copyWith({List<Entry>? entries}) {
+    return ResolveResponse(entries: entries ?? this.entries);
+  }
+
+  ResolveResponse copyWithWrapped({Wrapped<List<Entry>?>? entries}) {
+    return ResolveResponse(entries: (entries != null ? entries.value : this.entries));
   }
 }
 

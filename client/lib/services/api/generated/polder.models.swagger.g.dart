@@ -156,6 +156,7 @@ Map<String, dynamic> _$EditorSessionToJson(EditorSession instance) => <String, d
 
 Entry _$EntryFromJson(Map<String, dynamic> json) => Entry(
   hash: json['hash'] as String,
+  id: (json['id'] as num).toInt(),
   isDir: json['isDir'] as bool,
   meta: json['meta'] as Map<String, dynamic>,
   mime: json['mime'] as String,
@@ -169,6 +170,7 @@ Entry _$EntryFromJson(Map<String, dynamic> json) => Entry(
 
 Map<String, dynamic> _$EntryToJson(Entry instance) => <String, dynamic>{
   'hash': instance.hash,
+  'id': instance.id,
   'isDir': instance.isDir,
   'meta': instance.meta,
   'mime': instance.mime,
@@ -264,6 +266,30 @@ ImageInfo _$ImageInfoFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ImageInfoToJson(ImageInfo instance) => <String, dynamic>{
   'contentType': instance.contentType,
   'id': instance.id,
+};
+
+Incoming _$IncomingFromJson(Map<String, dynamic> json) => Incoming(
+  kind: json['kind'] as String,
+  source: Entry.fromJson(json['source'] as Map<String, dynamic>),
+  title: json['title'] as String,
+);
+
+Map<String, dynamic> _$IncomingToJson(Incoming instance) => <String, dynamic>{
+  'kind': instance.kind,
+  'source': instance.source.toJson(),
+  'title': instance.title,
+};
+
+LinksResponse _$LinksResponseFromJson(Map<String, dynamic> json) => LinksResponse(
+  incoming:
+      (json['incoming'] as List<dynamic>?)?.map((e) => Incoming.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  outgoing:
+      (json['outgoing'] as List<dynamic>?)?.map((e) => Outgoing.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$LinksResponseToJson(LinksResponse instance) => <String, dynamic>{
+  'incoming': ?instance.incoming?.map((e) => e.toJson()).toList(),
+  'outgoing': ?instance.outgoing?.map((e) => e.toJson()).toList(),
 };
 
 ListResponse _$ListResponseFromJson(Map<String, dynamic> json) => ListResponse(
@@ -436,6 +462,32 @@ Map<String, dynamic> _$NewUserToJson(NewUser instance) => <String, dynamic>{
   'username': instance.username,
 };
 
+NotesItem _$NotesItemFromJson(Map<String, dynamic> json) => NotesItem(
+  entry: Entry.fromJson(json['entry'] as Map<String, dynamic>),
+  hasNotes: json['hasNotes'] as bool?,
+  hasReadme: json['hasReadme'] as bool?,
+);
+
+Map<String, dynamic> _$NotesItemToJson(NotesItem instance) => <String, dynamic>{
+  'entry': instance.entry.toJson(),
+  'hasNotes': ?instance.hasNotes,
+  'hasReadme': ?instance.hasReadme,
+};
+
+NotesListing _$NotesListingFromJson(Map<String, dynamic> json) => NotesListing(
+  items: (json['items'] as List<dynamic>?)?.map((e) => NotesItem.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  path: json['path'] as String,
+);
+
+Map<String, dynamic> _$NotesListingToJson(NotesListing instance) => <String, dynamic>{
+  'items': ?instance.items?.map((e) => e.toJson()).toList(),
+  'path': instance.path,
+};
+
+NotesSettings _$NotesSettingsFromJson(Map<String, dynamic> json) => NotesSettings(path: json['path'] as String?);
+
+Map<String, dynamic> _$NotesSettingsToJson(NotesSettings instance) => <String, dynamic>{'path': ?instance.path};
+
 OfficeSessionRequest _$OfficeSessionRequestFromJson(Map<String, dynamic> json) => OfficeSessionRequest(
   origin: json['origin'] as String,
   path: json['path'] as String,
@@ -446,6 +498,20 @@ Map<String, dynamic> _$OfficeSessionRequestToJson(OfficeSessionRequest instance)
   'origin': instance.origin,
   'path': instance.path,
   'versionId': ?instance.versionId,
+};
+
+Outgoing _$OutgoingFromJson(Map<String, dynamic> json) => Outgoing(
+  kind: json['kind'] as String,
+  target: json['target'] == null ? null : Entry.fromJson(json['target'] as Map<String, dynamic>),
+  targetPath: json['targetPath'] as String,
+  title: json['title'] as String,
+);
+
+Map<String, dynamic> _$OutgoingToJson(Outgoing instance) => <String, dynamic>{
+  'kind': instance.kind,
+  'target': ?instance.target?.toJson(),
+  'targetPath': instance.targetPath,
+  'title': instance.title,
 };
 
 PathRequest _$PathRequestFromJson(Map<String, dynamic> json) => PathRequest(path: json['path'] as String);
@@ -486,6 +552,19 @@ RefreshRequest _$RefreshRequestFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$RefreshRequestToJson(RefreshRequest instance) => <String, dynamic>{
   'deviceName': ?instance.deviceName,
   'refreshToken': instance.refreshToken,
+};
+
+ResolveRequest _$ResolveRequestFromJson(Map<String, dynamic> json) =>
+    ResolveRequest(ids: (json['ids'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ?? []);
+
+Map<String, dynamic> _$ResolveRequestToJson(ResolveRequest instance) => <String, dynamic>{'ids': ?instance.ids};
+
+ResolveResponse _$ResolveResponseFromJson(Map<String, dynamic> json) => ResolveResponse(
+  entries: (json['entries'] as List<dynamic>?)?.map((e) => Entry.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$ResolveResponseToJson(ResolveResponse instance) => <String, dynamic>{
+  'entries': ?instance.entries?.map((e) => e.toJson()).toList(),
 };
 
 RestoreRequest _$RestoreRequestFromJson(Map<String, dynamic> json) =>

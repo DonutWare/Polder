@@ -83,6 +83,13 @@ func nullableInt(value *int) any {
 	return *value
 }
 
+func nullableString(value *string) any {
+	if value == nil {
+		return nil
+	}
+	return *value
+}
+
 func (s *Store) Count(ctx context.Context) (int, error) {
 	var count int
 	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users`).Scan(&count)
@@ -179,6 +186,22 @@ func (s *Store) SetTrashPreferences(ctx context.Context, id int64, preferences T
 func (s *Store) SetVersionPreferences(ctx context.Context, id int64, preferences VersionPreferences) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE users SET versions_enabled = $1, versions_keep_all_hours = $2, versions_max_age_days = $3, versions_max_per_file = $4 WHERE id = $5`,
 		nullableBool(preferences.Enabled), nullableInt(preferences.KeepAllHours), nullableInt(preferences.MaxAgeDays), nullableInt(preferences.MaxPerFile), id)
+	return err
+}
+
+func (s *Store) NotesPath(ctx context.Context, id int64) (*string, error) {
+	var notesPath sql.NullString
+	if err := s.db.QueryRowContext(ctx, `SELECT notes_path FROM users WHERE id = $1`, id).Scan(&notesPath); err != nil {
+		return nil, err
+	}
+	if !notesPath.Valid {
+		return nil, nil
+	}
+	return &notesPath.String, nil
+}
+
+func (s *Store) SetNotesPath(ctx context.Context, id int64, notesPath *string) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET notes_path = $1 WHERE id = $2`, nullableString(notesPath), id)
 	return err
 }
 

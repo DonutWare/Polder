@@ -1,15 +1,21 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
+import "package:polder/util/remote_path.dart";
+
 part "file_entry.freezed.dart";
 part "file_entry.g.dart";
 
 enum PreviewState { none, pending, ready, failed }
+
+const markdownMime = "text/markdown";
+const noteExtension = "md";
 
 @freezed
 abstract class FileEntry with _$FileEntry {
   const FileEntry._();
 
   const factory FileEntry({
+    @Default(0) int id,
     required String path,
     required String name,
     @Default(false) bool isDir,
@@ -33,6 +39,10 @@ abstract class FileEntry with _$FileEntry {
   bool get isAudio => mime.startsWith("audio/");
 
   bool get isPdf => mime == "application/pdf";
+
+  bool get isMarkdown => !isDir && mime == markdownMime;
+
+  String get displayName => isMarkdown ? RemotePath.withoutExtension(name) : name;
 
   int? get width => _metaInt("width");
 

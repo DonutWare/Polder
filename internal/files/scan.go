@@ -65,6 +65,11 @@ func (s *Service) Rescan(ctx context.Context, owner users.User) error {
 		defer s.indexing.Delete(owner.ID)
 	}
 
+	pending, err = s.applyRenames(ctx, owner, indexed, onDisk, pending)
+	if err != nil {
+		return err
+	}
+
 	var summary scanSummary
 	if removals := topmostMissingPaths(indexed, onDisk); len(removals) > 0 {
 		changes, err := s.applyRemovals(ctx, owner, removals)
@@ -189,6 +194,94 @@ func (s *Service) entryFromDisk(owner users.User, item diskItem, known Entry) (E
 		entry.Meta, entry.PreviewState, entry.TextState = known.Meta, known.PreviewState, known.TextState
 	}
 	return entry, nil
+}
+
+type renamedFile struct {
+	previous    Entry
+	destination string
+}
+
+func (s *Service) applyRenames(ctx context.Context, owner users.User, indexed map[string]Entry, onDisk map[string]diskItem, pending []diskItem) ([]diskItem, error) {
+	renames := s.findRenames(owner, indexed, onDisk, pending)
+	if len(renames) == 0 {
+		return pending, nil
+	}
+	unlock := s.locks.lock(owner.ID)
+	var moved []Entry
+	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
+		for _, rename := range renames {
+			if err := s.ensureParentDirectories(ctx, tx, owner, rename.destination); err != nil {
+				return err
+			}
+			relocated, err := relocateEntry(ctx, tx, rename.previous, rename.destination)
+			if err != nil {
+				return err
+			}
+			if err := s.relocateHistoriesOfTree(ctx, tx, owner, rename.destination); err != nil {
+				return err
+			}
+			moved = append(moved, relocated)
+		}
+		return nil
+	})
+	unlock()
+	if err != nil {
+		return pending, err
+	}
+	for i, relocated := range moved {
+		delete(indexed, renames[i].previous.Path)
+		indexed[relocated.Path] = relocated
+		s.onContentChanged(owner.ID, relocated.Path)
+		s.notify(ctx, Mutation{Owner: owner, Kind: MutationMove, Path: relocated.Path, FromPath: renames[i].previous.Path, Size: relocated.Size})
+	}
+	remaining := pending[:0]
+	for _, item := range pending {
+		if known, isKnown := indexed[item.path]; !isKnown || differs(known, item) {
+			remaining = append(remaining, item)
+		}
+	}
+	return remaining, nil
+}
+
+func (s *Service) findRenames(owner users.User, indexed map[string]Entry, onDisk map[string]diskItem, pending []diskItem) []renamedFile {
+	missingBySize := map[int64][]Entry{}
+	for indexedPath, entry := range indexed {
+		if _, present := onDisk[indexedPath]; !present && !entry.IsDir && !isInternalName(indexedPath) {
+			missingBySize[entry.Size] = append(missingBySize[entry.Size], entry)
+		}
+	}
+	if len(missingBySize) == 0 {
+		return nil
+	}
+	missingByHash := map[string][]Entry{}
+	for _, entries := range missingBySize {
+		for _, entry := range entries {
+			missingByHash[entry.Hash] = append(missingByHash[entry.Hash], entry)
+		}
+	}
+	arrivedByHash := map[string][]string{}
+	for _, item := range pending {
+		if _, isKnown := indexed[item.path]; isKnown || item.isDir || len(missingBySize[item.size]) == 0 {
+			continue
+		}
+		absolute, err := s.disk.Resolve(owner.Username, item.path)
+		if err != nil {
+			continue
+		}
+		hash, err := hashFile(absolute)
+		if err != nil {
+			continue
+		}
+		arrivedByHash[hash] = append(arrivedByHash[hash], item.path)
+	}
+	var renames []renamedFile
+	for hash, arrived := range arrivedByHash {
+		if missing := missingByHash[hash]; len(missing) == 1 && len(arrived) == 1 {
+			renames = append(renames, renamedFile{previous: missing[0], destination: arrived[0]})
+		}
+	}
+	sort.Slice(renames, func(i, j int) bool { return renames[i].destination < renames[j].destination })
+	return renames
 }
 
 func topmostMissingPaths(indexed map[string]Entry, onDisk map[string]diskItem) []string {

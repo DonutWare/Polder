@@ -52,6 +52,9 @@ dependencies:
   flutter_inappwebview_linux: ^0.1.0-beta.1
   web: ^1.1.1
   cached_network_image: ^4.0.4
+  markdown: ^7.3.1
+  re_highlight: ^0.0.3
+  livemd_flutter: 0.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

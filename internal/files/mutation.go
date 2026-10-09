@@ -44,6 +44,8 @@ type Mutation struct {
 	Size     int64
 	Count    int
 	Changes  []ScanChange
+
+	Housekeeping bool
 }
 
 type MutationFunc func(context.Context, Mutation)

@@ -9,7 +9,6 @@ import (
 	"image/png"
 	"io"
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"testing"
 	"time"
@@ -360,7 +359,7 @@ func uploadWithPreview(t *testing.T, user *client, path string, content []byte) 
 	var entry fileEntry
 	for deadline := time.Now().Add(10 * time.Second); entry.PreviewState != "ready" && time.Now().Before(deadline); {
 		time.Sleep(50 * time.Millisecond)
-		user.mustJSON(http.MethodGet, "/files/stat?path="+url.QueryEscape(path), nil, http.StatusOK, &entry)
+		entry = user.stat(path)
 	}
 	if entry.PreviewState != "ready" {
 		t.Fatalf("no preview for %s", path)

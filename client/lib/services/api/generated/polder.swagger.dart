@@ -813,6 +813,32 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///What a file links to and which files link to it
+  ///@param id The file's id
+  Future<chopper.Response<LinksResponse>> listFileLinks({int? id}) {
+    generatedMapping.putIfAbsent(LinksResponse, () => LinksResponse.fromJsonFactory);
+
+    return _listFileLinks(id: id);
+  }
+
+  ///What a file links to and which files link to it
+  ///@param id The file's id
+  @GET(path: '/api/v1/files/links')
+  Future<chopper.Response<LinksResponse>> _listFileLinks({
+    @Query('id') int? id,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What a file links to and which files link to it',
+      operationId: 'listFileLinks',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
   ///List a directory
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<ListResponse>> listFiles({String? path}) {
@@ -906,6 +932,30 @@ abstract class Polder extends ChopperService {
       description: '',
       summary: 'Get a JPEG thumbnail of an image, video or document',
       operationId: 'previewFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  ///Look files up by id, wherever they are now
+  Future<chopper.Response<ResolveResponse>> resolveFiles({required ResolveRequest? body}) {
+    generatedMapping.putIfAbsent(ResolveResponse, () => ResolveResponse.fromJsonFactory);
+
+    return _resolveFiles(body: body);
+  }
+
+  ///Look files up by id, wherever they are now
+  @POST(path: '/api/v1/files/resolve', optionalBody: true)
+  Future<chopper.Response<ResolveResponse>> _resolveFiles({
+    @Body() required ResolveRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Look files up by id, wherever they are now',
+      operationId: 'resolveFiles',
       consumes: [],
       produces: [],
       security: ["bearer"],
@@ -1067,6 +1117,79 @@ abstract class Polder extends ChopperService {
       produces: [],
       security: ["bearer"],
       tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  ///List the folders and notes in a folder, with each note's title
+  ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
+  Future<chopper.Response<NotesListing>> listNotes({String? path}) {
+    generatedMapping.putIfAbsent(NotesListing, () => NotesListing.fromJsonFactory);
+
+    return _listNotes(path: path);
+  }
+
+  ///List the folders and notes in a folder, with each note's title
+  ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
+  @GET(path: '/api/v1/notes/list')
+  Future<chopper.Response<NotesListing>> _listNotes({
+    @Query('path') String? path,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List the folders and notes in a folder, with each note\'s title',
+      operationId: 'listNotes',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notes"],
+      deprecated: false,
+    ),
+  });
+
+  ///Which folder holds the user's notes
+  Future<chopper.Response<NotesSettings>> getNotesSettings() {
+    generatedMapping.putIfAbsent(NotesSettings, () => NotesSettings.fromJsonFactory);
+
+    return _getNotesSettings();
+  }
+
+  ///Which folder holds the user's notes
+  @GET(path: '/api/v1/notes/settings')
+  Future<chopper.Response<NotesSettings>> _getNotesSettings({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Which folder holds the user\'s notes',
+      operationId: 'getNotesSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notes"],
+      deprecated: false,
+    ),
+  });
+
+  ///Choose the folder that holds the user's notes; it must already exist
+  Future<chopper.Response<NotesSettings>> setNotesSettings({required NotesSettings? body}) {
+    generatedMapping.putIfAbsent(NotesSettings, () => NotesSettings.fromJsonFactory);
+
+    return _setNotesSettings(body: body);
+  }
+
+  ///Choose the folder that holds the user's notes; it must already exist
+  @PUT(path: '/api/v1/notes/settings', optionalBody: true)
+  Future<chopper.Response<NotesSettings>> _setNotesSettings({
+    @Body() required NotesSettings? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose the folder that holds the user\'s notes; it must already exist',
+      operationId: 'setNotesSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notes"],
       deprecated: false,
     ),
   });

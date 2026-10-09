@@ -15,6 +15,7 @@ import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
+import "package:polder/util/unique_name.dart";
 import "package:polder/widgets/shared/fab_menu.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
 
@@ -50,6 +51,11 @@ class BrowserAddButton extends ConsumerWidget {
           ),
         ],
         [
+          FabMenuItem(
+            icon: IconsaxPlusLinear.note_2,
+            label: context.localized.noteNewNote,
+            onPressed: () => _createNote(context, ref),
+          ),
           for (final kind in NewDocumentKind.values)
             if (editor.extensionsFor(kind).isNotEmpty)
               FabMenuItem(
@@ -118,7 +124,7 @@ class BrowserAddButton extends ConsumerWidget {
       title: _title(context, kind),
       label: context.localized.name,
       confirmLabel: context.localized.create,
-      initialValue: _freeName(_label(context, kind), kind.defaultExtension(editor.extensionsFor(kind)), taken),
+      initialValue: uniqueName(_label(context, kind), kind.defaultExtension(editor.extensionsFor(kind)), taken),
       isValid: (value) {
         final name = value.trim();
         return RemotePath.isValidName(name) && creatable.contains(_extension(name));
@@ -131,16 +137,30 @@ class BrowserAddButton extends ConsumerWidget {
     if (created != null && context.mounted) await context.push(AppRoutes.editor, extra: created);
   }
 
+  Future<void> _createNote(BuildContext context, WidgetRef ref) async {
+    final taken = {for (final entry in ref.read(directoryProvider(path)).value?.entries ?? <FileEntry>[]) entry.name};
+    final name = await showTextInputDialog(
+      context,
+      title: context.localized.noteNewNote,
+      label: context.localized.name,
+      confirmLabel: context.localized.create,
+      initialValue: uniqueName(context.localized.noteDefaultName, noteExtension, taken),
+      isValid: (value) => RemotePath.isValidName(value.trim()) && !taken.contains(_withNoteExtension(value.trim())),
+    );
+    if (name == null || !context.mounted) return;
+    FileEntry? created;
+    final directory = ref.read(directoryProvider(path).notifier);
+    await context.runWithFeedback(
+      Future(() async => created = await directory.createEmptyFile(_withNoteExtension(name.trim()))),
+    );
+    if (created != null && context.mounted) context.go(AppRoutes.noteAt(created!.path));
+  }
+
+  static String _withNoteExtension(String name) =>
+      RemotePath.extension(name).toLowerCase() == noteExtension ? name : "$name.$noteExtension";
+
   static String _extension(String name) {
     final dot = name.lastIndexOf(".");
     return dot <= 0 ? "" : name.substring(dot + 1).toLowerCase();
-  }
-
-  static String _freeName(String base, String extension, Set<String> taken) {
-    var name = "$base.$extension";
-    for (var number = 2; taken.contains(name); number++) {
-      name = "$base $number.$extension";
-    }
-    return name;
   }
 }

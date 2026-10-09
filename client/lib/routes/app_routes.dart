@@ -1,6 +1,7 @@
 abstract final class AppRoutes {
   static const login = "/login";
   static const files = "/files";
+  static const notes = "/notes";
   static const search = "/search";
   static const scan = "/scan";
   static const pdf = "/pdf";
@@ -24,6 +25,13 @@ abstract final class AppRoutes {
 
   static String filesAt(String path, {String? select}) =>
       Uri(path: files, queryParameters: {pathParameter: path, selectParameter: ?select}).toString();
+
+  static String noteAt(String path) => Uri(path: notes, queryParameters: {pathParameter: path}).toString();
+
+  static bool isNoteLocation(String? location) {
+    final uri = location == null ? null : Uri.tryParse(location);
+    return uri != null && uri.path == notes && uri.queryParameters.containsKey(pathParameter);
+  }
 
   static String searchFor(String query) =>
       Uri(path: search, queryParameters: query.isEmpty ? null : {queryParameter: query}).toString();

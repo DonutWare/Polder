@@ -129,7 +129,12 @@ func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, 
 		undo()
 		return 0, noUndo, err
 	}
-	if err := s.writeTrashSidecar(owner.Username, storageID, trashSidecar{OriginalPath: entry.Path, DeletedAt: deletedAt}); err != nil {
+	fileIDs, err := treeFileIDs(ctx, q, owner.ID, entry)
+	if err != nil {
+		undo()
+		return 0, noUndo, err
+	}
+	if err := s.writeTrashSidecar(owner.Username, storageID, trashSidecar{OriginalPath: entry.Path, DeletedAt: deletedAt, FileIDs: fileIDs}); err != nil {
 		undo()
 		return 0, noUndo, err
 	}
@@ -155,6 +160,23 @@ func insertTrashItem(ctx context.Context, q querier, userID int64, entry Entry, 
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`,
 		userID, entry.Path, entry.Name, entry.IsDir, size, entry.Mime, entry.Hash, entry.PreviewState, storageID, deletedAt.Unix()).Scan(&id)
 	return id, err
+}
+
+func treeFileIDs(ctx context.Context, q querier, userID int64, entry Entry) (map[string]int64, error) {
+	ids := map[string]int64{".": entry.ID}
+	if !entry.IsDir {
+		return ids, nil
+	}
+	tree, err := listTree(ctx, q, userID, entry.Path)
+	if err != nil {
+		return nil, err
+	}
+	for _, descendant := range tree {
+		if relative, inside := strings.CutPrefix(descendant.Path, entry.Path+"/"); inside {
+			ids[relative] = descendant.ID
+		}
+	}
+	return ids, nil
 }
 
 func treeSize(ctx context.Context, q querier, userID int64, entry Entry) (int64, error) {
@@ -199,7 +221,11 @@ func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int
 			return fmt.Errorf("restore from trash: %w", err)
 		}
 		undo = append(undo, func() { _ = os.Rename(absolute, source) })
-		if restored, changedFiles, err = s.indexRestoredTree(ctx, tx, owner, target, absolute); err != nil {
+		sidecar, err := s.readTrashSidecar(owner.Username, item.storageID)
+		if err != nil {
+			logger.Warn("read trash details, restored files get new ids", "item", item.ID, "error", err)
+		}
+		if restored, changedFiles, err = s.indexRestoredTree(ctx, tx, owner, target, absolute, sidecar.FileIDs); err != nil {
 			return err
 		}
 		if err := s.relinkVersionsFromTrash(ctx, tx, owner, item.ID, target); err != nil {
@@ -270,7 +296,7 @@ func (s *Service) freeRestorePath(ctx context.Context, q querier, owner users.Us
 	return "", apperr.AlreadyExists("no free name to restore %s under", originalPath)
 }
 
-func (s *Service) indexRestoredTree(ctx context.Context, q querier, owner users.User, target, absolute string) (Entry, []string, error) {
+func (s *Service) indexRestoredTree(ctx context.Context, q querier, owner users.User, target, absolute string, fileIDs map[string]int64) (Entry, []string, error) {
 	var root Entry
 	var changedFiles []string
 	err := filepath.WalkDir(absolute, func(current string, dirEntry fs.DirEntry, err error) error {
@@ -301,6 +327,7 @@ func (s *Service) indexRestoredTree(ctx context.Context, q querier, owner users.
 			entry = newFileEntry(owner.ID, cleanPath, info.Size(), info.ModTime().UTC(), hash)
 			changedFiles = append(changedFiles, cleanPath)
 		}
+		entry.ID = fileIDs[filepath.ToSlash(relative)]
 		saved, err := saveEntry(ctx, q, entry)
 		if cleanPath == target {
 			root = saved
@@ -415,8 +442,9 @@ func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem
 }
 
 type trashSidecar struct {
-	OriginalPath string    `json:"originalPath"`
-	DeletedAt    time.Time `json:"deletedAt"`
+	OriginalPath string           `json:"originalPath"`
+	DeletedAt    time.Time        `json:"deletedAt"`
+	FileIDs      map[string]int64 `json:"fileIds,omitempty"`
 }
 
 func (s *Service) writeTrashSidecar(username, storageID string, sidecar trashSidecar) error {

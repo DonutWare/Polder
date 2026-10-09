@@ -14,7 +14,7 @@ class AsyncValueView<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (value) {
-    AsyncValue(:final value?, hasValue: true) => data(value),
+    AsyncValue(hasValue: true) => data(value.value as T),
     AsyncError(:final error) => ErrorView(error: error, onRetry: onRetry),
     _ => const CenteredProgress(),
   };

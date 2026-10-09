@@ -10,6 +10,7 @@ import "package:polder/screens/browser/widgets/file_details_sheet.dart";
 
 Future<void> openEntry(BuildContext context, FileEntry entry) async {
   if (entry.isDir) return context.go(AppRoutes.filesAt(entry.path));
+  if (entry.isMarkdown) return context.go(AppRoutes.noteAt(entry.path));
   if (entry.isPdf) {
     await context.push(AppRoutes.pdf, extra: entry);
     return;

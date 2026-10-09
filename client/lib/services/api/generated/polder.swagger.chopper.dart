@@ -777,6 +777,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<LinksResponse>> _listFileLinks({
+    int? id,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What a file links to and which files link to it',
+      operationId: 'listFileLinks',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/links');
+    final Map<String, dynamic> $params = <String, dynamic>{'id': id};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<LinksResponse, LinksResponse>($request);
+  }
+
+  @override
   Future<Response<ListResponse>> _listFiles({
     String? path,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -882,6 +908,32 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<ResolveResponse>> _resolveFiles({
+    required ResolveRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Look files up by id, wherever they are now',
+      operationId: 'resolveFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/resolve');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<ResolveResponse, ResolveResponse>($request);
   }
 
   @override
@@ -1036,6 +1088,82 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<NotesListing>> _listNotes({
+    String? path,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'List the folders and notes in a folder, with each note\'s title',
+      operationId: 'listNotes',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notes"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/notes/list');
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<NotesListing, NotesListing>($request);
+  }
+
+  @override
+  Future<Response<NotesSettings>> _getNotesSettings({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Which folder holds the user\'s notes',
+      operationId: 'getNotesSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notes"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/notes/settings');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<NotesSettings, NotesSettings>($request);
+  }
+
+  @override
+  Future<Response<NotesSettings>> _setNotesSettings({
+    required NotesSettings? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose the folder that holds the user\'s notes; it must already exist',
+      operationId: 'setNotesSettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notes"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/notes/settings');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<NotesSettings, NotesSettings>($request);
   }
 
   @override

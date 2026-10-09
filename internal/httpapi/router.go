@@ -19,6 +19,7 @@ import (
 	"polder-server/internal/auth"
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
+	"polder-server/internal/links"
 	"polder-server/internal/logging"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
@@ -44,6 +45,7 @@ type API struct {
 	logs     *logging.Files
 	office   *office.Service
 	versions *versions.Worker
+	links    *links.Graph
 	limiter  *failedAttemptLimiter
 
 	requestTrashPurge func()
@@ -64,6 +66,7 @@ type Dependencies struct {
 	Logs                   *logging.Files
 	Office                 *office.Service
 	Versions               *versions.Worker
+	Links                  *links.Graph
 	RequestTrashPurge      func()
 	LoginAttemptsPerMinute int
 	TrustedProxies         []netip.Prefix
@@ -87,6 +90,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		logs:     deps.Logs,
 		office:   deps.Office,
 		versions: deps.Versions,
+		links:    deps.Links,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 
 		requestTrashPurge: deps.RequestTrashPurge,
@@ -163,6 +167,8 @@ func (a *API) routes(api huma.API) {
 
 	register(user, http.MethodGet, "/files/list", "listFiles", "List a directory", a.listFiles)
 	register(user, http.MethodGet, "/files/stat", "statFile", "Get one file or directory", a.statFile)
+	register(user, http.MethodGet, "/files/links", "listFileLinks", "What a file links to and which files link to it", a.fileLinks)
+	register(user, http.MethodPost, "/files/resolve", "resolveFiles", "Look files up by id, wherever they are now", a.resolveFiles)
 	register(user, http.MethodGet, "/files/content", "downloadFile", "Download a file; supports Range and conditional requests", a.downloadFile,
 		withResponse(http.StatusOK, "File content", binaryContent("application/octet-stream")))
 	register(user, http.MethodPut, "/files/content", "uploadFile", "Upload a whole file as the request body", a.uploadFile,
@@ -182,6 +188,10 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodDelete, "/files/versions/{versionID}", "deleteFileVersion", "Delete one earlier version permanently", a.deleteVersion)
 	register(user, http.MethodGet, "/versions/settings", "getVersionSettings", "How long earlier versions of files are kept", a.getVersionSettings)
 	register(user, http.MethodPut, "/versions/settings", "setVersionSettings", "Choose how long earlier versions of files are kept, within the server's limits", a.setVersionSettings)
+
+	register(user, http.MethodGet, "/notes/list", "listNotes", "List the folders and notes in a folder", a.listNotes)
+	register(user, http.MethodGet, "/notes/settings", "getNotesSettings", "Which folder holds the user's notes", a.getNotesSettings)
+	register(user, http.MethodPut, "/notes/settings", "setNotesSettings", "Choose the folder that holds the user's notes; it must already exist", a.setNotesSettings)
 
 	register(user, http.MethodGet, "/search", "searchFiles", "Find files and folders by name, text inside them, type, date and size", a.searchFiles,
 		withDescription(searchDescription))

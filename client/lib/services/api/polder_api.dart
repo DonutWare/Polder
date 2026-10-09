@@ -9,8 +9,10 @@ import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_links.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
+import "package:polder/models/note_item.dart";
 import "package:polder/models/search.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
@@ -82,6 +84,22 @@ class PolderApi {
   Future<DirectoryListing> list(String path) async => (await _service.listFiles(path: path)).body!.toModel();
 
   Future<FileEntry> stat(String path) async => (await _service.statFile(path: path)).body!.toModel();
+
+  Future<List<FileEntry>> filesById(Iterable<int> ids) async {
+    final response = await _service.resolveFiles(body: wire.ResolveRequest(ids: ids.toList()));
+    return [for (final entry in response.body!.entries ?? <wire.Entry>[]) entry.toModel()];
+  }
+
+  Future<FileLinks> fileLinks(int id) async => (await _service.listFileLinks(id: id)).body!.toModel();
+
+  Future<List<NoteItem>> listNotes(String path) async => [
+    for (final item in (await _service.listNotes(path: path)).body!.items ?? <wire.NotesItem>[]) item.toModel(),
+  ];
+
+  Future<String?> notesFolder() async => (await _service.getNotesSettings()).body!.path;
+
+  Future<String?> setNotesFolder(String? path) async =>
+      (await _service.setNotesSettings(body: wire.NotesSettings(path: path))).body!.path;
 
   Future<SearchResults> search(String query, {int limit = 50, int offset = 0}) async =>
       (await _service.searchFiles(q: query, limit: limit, offset: offset)).body!.toModel();

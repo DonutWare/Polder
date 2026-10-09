@@ -8,6 +8,7 @@ import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder/widgets/layout/mouse_navigation.dart";
 import "package:polder/widgets/layout/window_titlebar.dart";
 
 class PolderApp extends ConsumerStatefulWidget {
@@ -44,7 +45,9 @@ class _PolderAppState extends ConsumerState<PolderApp> {
       themeMode: appearance.mode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: (_, child) => DesktopTray(child: WindowTitlebar(child: child!)),
+      builder: (_, child) => DesktopTray(
+        child: WindowTitlebar(child: MouseNavigation(child: child!)),
+      ),
       routerConfig: ref.watch(routerProvider),
     );
   }

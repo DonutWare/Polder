@@ -2,22 +2,15 @@ import "dart:async";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:polder/models/server_event.dart";
-import "package:polder/providers/activity/activity_scope_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
-import "package:polder/providers/realtime/events_provider.dart";
+import "package:polder/providers/realtime/files_changed_provider.dart";
 
 final directoryRefresherProvider = Provider<void>((ref) {
-  final client = ref.watch(eventsClientProvider);
-  final selfId = ref.watch(selfUserIdProvider);
-  if (client == null || selfId == null) return;
-
   final pending = <String, Timer>{};
   Timer? quota;
-  final subscription = client.events.listen((event) {
-    if (event is! FilesChangedEvent || event.userId != selfId) return;
-    for (final directory in event.dirs) {
+  ref.listen(filesChangedProvider, (_, next) {
+    for (final directory in next.value ?? const <String>[]) {
       pending[directory]?.cancel();
       pending[directory] = Timer(DirectoryRefresher.debounce, () {
         pending.remove(directory);
@@ -32,7 +25,6 @@ final directoryRefresherProvider = Provider<void>((ref) {
     });
   });
   ref.onDispose(() {
-    subscription.cancel();
     for (final timer in pending.values) {
       timer.cancel();
     }

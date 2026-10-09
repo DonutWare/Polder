@@ -241,7 +241,7 @@ func waitForPreview(t *testing.T, user *client, path string) fileEntry {
 	t.Helper()
 	var entry fileEntry
 	for deadline := time.Now().Add(time.Minute); time.Now().Before(deadline); time.Sleep(50 * time.Millisecond) {
-		user.mustJSON(http.MethodGet, "/files/stat?path="+url.QueryEscape(path), nil, http.StatusOK, &entry)
+		entry = user.stat(path)
 		if entry.PreviewState != "pending" {
 			return entry
 		}

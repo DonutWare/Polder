@@ -23,6 +23,7 @@ type WriteRequest struct {
 	Mtime        time.Time
 	ExpectedHash string
 	Content      io.Reader
+	Housekeeping bool
 }
 
 type stagedFile struct {
@@ -73,7 +74,7 @@ func (s *Service) Write(ctx context.Context, owner users.User, request WriteRequ
 	if exists && current.Hash != entry.Hash {
 		s.onContentRemoved()
 	}
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationWrite, Path: entry.Path, Size: entry.Size})
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationWrite, Path: entry.Path, Size: entry.Size, Housekeeping: request.Housekeeping})
 	return entry, nil
 }
 
@@ -159,7 +160,7 @@ func (s *Service) commit(ctx context.Context, owner users.User, cleanPath, absol
 		if budget != unlimitedBudget && staged.size > budget {
 			return apperr.QuotaExceeded("this upload exceeds your storage quota")
 		}
-		capture := exists && current.Hash != staged.hash && keepsHistory
+		capture := exists && current.Hash != staged.hash && keepsHistory && !request.Housekeeping
 		if capture && budget != unlimitedBudget {
 			filesAfterWrite := owner.QuotaBytes - budget + staged.size
 			var evicted bool

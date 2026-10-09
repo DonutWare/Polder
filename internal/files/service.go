@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/storage"
@@ -132,6 +133,20 @@ func (s *Service) List(ctx context.Context, owner users.User, rawPath string) (s
 	}
 	entries, err := listChildren(ctx, s.db, owner.ID, directory.Path)
 	return directory.Path, entries, err
+}
+
+func (s *Service) DescendantPaths(ctx context.Context, owner users.User, folder, mimeType string) ([]string, error) {
+	prefix := folder + "/"
+	if folder == storage.RootPath {
+		prefix = storage.RootPath
+	}
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT path FROM files WHERE user_id = $1 AND mime = $2 AND is_dir = FALSE AND SUBSTR(path, 1, $3) = $4`,
+		owner.ID, mimeType, utf8.RuneCountInString(prefix), prefix)
+	if err != nil {
+		return nil, err
+	}
+	return scanValues[string](rows)
 }
 
 func (s *Service) Open(ctx context.Context, owner users.User, rawPath string) (*os.File, Entry, error) {
@@ -394,6 +409,18 @@ func (s *Service) AllEntries(ctx context.Context, userID int64) ([]Entry, error)
 
 func (s *Service) EntriesByID(ctx context.Context, userID int64, ids []int64) (map[int64]Entry, error) {
 	return entriesByID(ctx, s.db, userID, ids)
+}
+
+func (s *Service) EntryByID(ctx context.Context, userID, id int64) (Entry, error) {
+	found, err := entriesByID(ctx, s.db, userID, []int64{id})
+	if err != nil {
+		return Entry{}, err
+	}
+	entry, ok := found[id]
+	if !ok {
+		return Entry{}, apperr.NotFound("no file with id %d", id)
+	}
+	return entry, nil
 }
 
 func (s *Service) LatestChangeSeq(ctx context.Context, userID int64) (int64, error) {

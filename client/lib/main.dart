@@ -11,7 +11,7 @@ import "package:polder/util/device_name.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
 import "package:polder/widgets/shared/polder_logo.dart";
 
-Future<void> main() async => () async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
   await initializeBackgroundSync();
@@ -25,4 +25,4 @@ Future<void> main() async => () async {
       child: const PolderApp(),
     ),
   );
-}();
+}

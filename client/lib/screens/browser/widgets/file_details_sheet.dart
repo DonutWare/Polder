@@ -5,9 +5,12 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/notes/file_links_provider.dart";
 import "package:polder/providers/versions/file_versions_provider.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
+import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/util/byte_format.dart";
 import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
@@ -63,6 +66,7 @@ class FileDetailsSheet extends ConsumerWidget {
                   valueColor: Theme.of(context).colorScheme.primary,
                 ),
               ),
+            if (!entry.isDir && entry.id > 0) _LinkedFrom(entry: entry),
             const SizedBox(height: 16),
             FilledButton.icon(
               icon: const Icon(IconsaxPlusLinear.document_download),
@@ -75,6 +79,39 @@ class FileDetailsSheet extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LinkedFrom extends ConsumerWidget {
+  const _LinkedFrom({required this.entry});
+
+  final FileEntry entry;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final incoming = ref.watch(fileLinksProvider(entry.id)).value?.incoming ?? const [];
+    final sources = {for (final link in incoming) link.source.id: link.source}.values;
+    if (sources.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 16),
+        Text(context.localized.noteLinkedFrom, style: Theme.of(context).textTheme.titleSmall),
+        for (final source in sources)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            dense: true,
+            leading: FileTypeIcon(entry: source, size: 22),
+            title: Text(source.name),
+            subtitle: Text(source.path),
+            onTap: () {
+              final navigator = Navigator.of(context);
+              navigator.pop();
+              openEntry(navigator.context, source);
+            },
+          ),
+      ],
     );
   }
 }
