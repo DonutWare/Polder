@@ -132,7 +132,7 @@ const (
 // apiConfig serves the OpenAPI document built from the registered operations at
 // /api/v1/openapi.json (and .yaml), and an interactive reference at /api/v1/docs.
 func apiConfig() huma.Config {
-	config := huma.DefaultConfig("Polder API", "1.0.0")
+	config := huma.DefaultConfig("Polder API", "0.0.1")
 	config.Info.Description = "File storage and sync. Log in with POST /auth/login and send the access token " +
 		"as `Authorization: Bearer <token>`; renew it with POST /auth/refresh before it expires."
 	config.OpenAPIPath = apiPrefix + "/openapi"
@@ -256,6 +256,8 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodGet, "/admin/logs/files", "listLogFiles", "The log files, one per day, newest first", a.listLogFiles)
 	register(admin, http.MethodGet, "/admin/logs/files/{name}", "downloadLogFile", "Download one day's log file as JSON lines", a.downloadLogFile,
 		withResponse(http.StatusOK, "Log file", binaryContent("application/x-ndjson")))
+
+	register(user, http.MethodGet, "/server/info", "getServerInfo", "Version, commit and build of the server binary", a.getServerInfo)
 }
 
 func register[I, O any](api huma.API, method, path, id, summary string, handler func(context.Context, *I) (*O, error), options ...func(*huma.Operation)) {

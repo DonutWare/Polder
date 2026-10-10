@@ -38,8 +38,8 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 COPY --from=web /web/ ./internal/webui/dist/
-ARG TARGETOS TARGETARCH TARGETVARIANT
-RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} go build -trimpath -ldflags="-s -w" -o /out/polder ./cmd/polder \
+ARG TARGETOS TARGETARCH TARGETVARIANT VERSION= BUILD_NUMBER=
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH GOARM=${TARGETVARIANT#v} go build -trimpath -ldflags="-s -w ${VERSION:+-X polder-server/internal/version.Current=$VERSION} ${BUILD_NUMBER:+-X polder-server/internal/version.BuildNumber=$BUILD_NUMBER}" -o /out/polder ./cmd/polder \
     && mkdir -p /out/config /out/data
 
 FROM debian:trixie-slim

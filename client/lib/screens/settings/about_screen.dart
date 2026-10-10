@@ -1,23 +1,24 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:url_launcher/url_launcher.dart";
-
 import "package:polder/providers/app/package_info_provider.dart";
+import "package:polder/providers/polder_system_info_provider.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
 import "package:polder/widgets/shared/polder_logo.dart";
+import "package:url_launcher/url_launcher.dart";
 
 typedef _Link = ({String name, String platform, String url, IconData icon, Color? color});
 
-const _socials = <_Link>[
+final _socials = <_Link>[
   (
     name: "GitHub",
     platform: "GitHub",
     url: "https://github.com/DonutWare/Polder",
-    icon: IconsaxPlusLinear.code,
+    icon: FontAwesomeIcons.githubAlt.data,
     color: null,
   ),
 ];
@@ -48,6 +49,7 @@ class AboutScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final localized = context.localized;
     final info = ref.watch(packageInfoProvider).value;
+    final serverInfo = ref.watch(polderServerInfoProvider).value;
     final version = info == null ? null : "${info.version} (${info.buildNumber})";
     const divider = FractionallySizedBox(widthFactor: 0.25, child: Divider(indent: 16, endIndent: 16));
     return AppPage(
@@ -64,7 +66,9 @@ class AboutScreen extends ConsumerWidget {
                 Column(
                   children: [
                     Text(localized.aboutLegalese, textAlign: TextAlign.center),
+                    const SizedBox(height: 8),
                     if (version != null) Text(localized.aboutVersion(version)),
+                    if (serverInfo != null) Text(localized.aboutServerInfo(serverInfo.version, serverInfo.buildNumber)),
                     const SizedBox(height: 16),
                     Text(localized.aboutCreatedBy),
                   ],

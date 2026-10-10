@@ -1386,6 +1386,29 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   }
 
   @override
+  Future<Response<ServerInfo>> _getServerInfo({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Version, commit and build of the server binary',
+      operationId: 'getServerInfo',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["server"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/server/info');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<ServerInfo, ServerInfo>($request);
+  }
+
+  @override
   Future<Response<SetupStatus>> _getSetupStatus({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',

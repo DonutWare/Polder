@@ -1,81 +1,95 @@
-# polder-server
 
-The Go backend for Polder a cross-platform sync app.
+<h1 align="center">
+  <br>
+    <a href="https://github.com/DonutWare/Polder"><img src="./client/assets/icon/desktop_icon.png" alt="Polder" width="200"></a>
+  <br>
+  Polder
+  <br>
+</h1>
 
-The [Polder client](client/) (Flutter) lives in this repository too, so the server can embed its web build and API changes land in both in one commit.
+<h4 align="center">A cross-platform synchronization platform backend built in <a href="https://go.dev/" target="_blank">Go</a>, with the frontend built on top of <a href="https://flutter.dev/" target="_blank">Flutter</a>.</h4>
 
-## Run
+<p align="center">
+  <a href="#key-features">Key Features</a> •
+  <a href="#screenshots">Screenshots</a> •
+  <a href="#planned-features">Planned Features</a> •
+  <a href="#download">Download</a> •
+  <a href="#how-to-contribute">Contributing</a> •
+  <a href="#credits">Credits</a> •
+  <a href="#license">License</a>
+</p>
 
-```sh
-mkdir -p config data
-POLDER_UID=$(id -u) POLDER_GID=$(id -g) docker compose up -d --build
-curl http://localhost:6060/healthz
-```
+<div align="center">
+  
+  [![Build](https://github.com/DonutWare/Polder/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build.yml)
+  [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/DonutWare/Polder/total)](https://github.com/DonutWare/Polder/releases/latest)
+  [![GitHub Release](https://img.shields.io/github/v/release/DonutWare/Polder?display_name=tag)](https://github.com/DonutWare/Polder/releases/latest)
+  [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
+  
+</div>
 
-That image includes the web app. Set `POLDER_WEB=none` for an API-only image, which skips the Flutter build.
 
-Without Docker:
 
-```sh
-scripts/build-web.sh  
-POLDER_CONFIG_DIR=./config POLDER_DATA_DIR=./data go run ./cmd/polder
-```
+## Key Features
 
-The first login creates the admin account.
+* Synchronise - For desktop keep any folder in sync for mobile you can auto upload files like pictures
+* Versioning - Keep versions of any file edits with custom retention periods
+* Trash - Files are never removed entirely use trash to recover files remove by accident
+* Notes - Create a knowledgedatabase link notes inside of another note
+* Collabora online support - Edit documents directly on all platforms.
+* Platforms
+  - Android
+  - Web + Docker
+  - macOS
+  - Windows 
+  - iOS 
+  - Linux 
+ 
+## Screenshots
 
-Search also finds text inside files. Text in images and scanned PDFs is read with
-[Tesseract](https://github.com/tesseract-ocr/tesseract), which the Docker image includes; without Docker, install
-`tesseract` or OCR stays off. Its models are downloaded into the config directory when first needed
-(`POLDER_OCR_MODEL_URL` changes the source, `POLDER_TESSERACT` the program). Administrators choose the models and can
-turn OCR or content search off under Administration.
+## Planned Features
 
-Documents (Word, spreadsheets, presentations, OpenDocument and the rest Collabora lists) open in an editor
-inside the app when [Collabora Online](https://www.collaboraonline.com/code/) is set up: `docker compose --profile
-office up -d` with `POLDER_COLLABORA_URL=http://collabora:9980`. Polder proxies Collabora's `/browser`, `/cool` and
-`/hosting` paths, so clients only need Polder's address, and Collabora saves back through Polder's WOPI endpoints
-at `POLDER_WOPI_URL` (in compose, `http://polder:6060`). Behind https, set `COLLABORA_SSL_TERMINATION=true`, and let
-`/cool` upgrade to a WebSocket like `/api/v1/events`.
+* Virtual file system
+* Sharing urls
+* Groups/Collaborations
+* WebDAV
+* 
 
-Thumbnails of videos, and of images other than JPEG, PNG, GIF and WebP (HEIC, AVIF, TIFF and the like), come from
-[FFmpeg](https://ffmpeg.org), which the Docker image includes; without Docker, install `ffmpeg` and `ffprobe` or those
-files get none (`POLDER_FFMPEG` changes the program). HDR is tone-mapped when ffmpeg has the `zscale` filter. Decoding
-uses a GPU when one is available (`POLDER_VIDEO_HWACCEL`: `auto`, `vaapi`, `qsv`, `cuda` or `none`);
-`docker-compose.yml` shows how to pass an Intel, AMD or NVIDIA GPU through.
+## Download
 
-Documents show the picture of their first page that office suites save inside OpenDocument and Office Open XML files.
-Word and Excel often save none; with Collabora set up, it draws those, and every other type it can open. Collabora
-accepts that from private networks by default, so a Collabora on a public address needs Polder's address in its
-`net.post_allow.host` setting.
+The latest executables for Windows, macOS, Linux, iOS, Android and Web can be found on the [releases page](https://github.com/DonutWare/Polder/releases).
 
-Clients receive live activity (transfers in progress, folder changes) over a WebSocket at
-`/api/v1/events`. Behind a reverse proxy, let that path upgrade: in nginx, `proxy_http_version 1.1`
-with `Upgrade` and `Connection` headers passed through.
+You can pull the Docker version using the following tags: ```ghcr.io/donutware/polder:latest```. or ```ghcr.io/donutware/polder:nightly```
 
-## Docker image
+> [!WARNING]
+> (Windows) Some flutter applications are marked as false positives by windows defender for more info see [this issue](https://github.com/DonutWare/Polder/issues/197#issuecomment-2568906874).
 
-```sh
-docker build -t polder-server .                          # API only
-docker build --build-arg WEB=client -t polder-server .   # with the web app from client/
-```
+## How to Contribute
+Interested in contributing? Here are a couple of ways you can help:
 
-## Development
+### 🐛 Reporting Bugs
+- Before reporting a bug, **please ensure** that the issue hasn't been reported already.
+- When submitting a bug report, provide detailed steps on how the bug can be reproduced. This will help us to understand and fix the issue faster.
+- Bug reports are appreciated and very helpful!
 
-```sh
-go test ./...
-golangci-lint run ./...
-scripts/test-client.sh   # the client's integration tests against this server
-scripts/gen-client.sh    # after changing the API: regenerate the client's API code
-scripts/dev-office.sh    # run the server with the document editor (Collabora in Docker)
-```
+### 🚀 Submitting Pull Requests
+- **Pull requests are always welcome!** 
+- For new features or large changes, please open a discussion or issue first to ensure that no one else is already working on it.
+- **Keep pull requests short and focused**: try to avoid fixing multiple issues in a single pull request. This helps make the review process smoother and quicker.
 
-The client's API code is generated from this server's OpenAPI document. `polder openapi` prints it,
-and `scripts/gen-client.sh` writes it to `client/openapi/polder.json` and regenerates
-`client/lib/services/api/generated`. Commit it with the server change; CI fails while the document
-there differs from the server's.
+<!-- ### 🌐 Translations 
+<a href="https://hosted.weblate.org/engage/Polder/">
+<img src="https://hosted.weblate.org/widget/Polder/Polder/multi-auto.svg" alt="Translation status" />
+</a>
 
-To also run the tests against PostgreSQL:
+Thank you for helping to make this project better! 🙌 -->
 
-```sh
-docker run -d --rm --name polder-test-postgres -e POSTGRES_PASSWORD=testpass -e POSTGRES_DB=polder -p 55432:5432 postgres:18
-POLDER_TEST_POSTGRES_DSN='postgres://postgres:testpass@127.0.0.1:55432/polder?sslmode=disable' go test ./...
-```
+## Credits
+
+This software uses the following open source packages:
+- [Flutter](https://flutter.dev/)
+- [Go](htt[s://go.dev])
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0. More information about the license can be found in [this file](./LICENSE).

@@ -14,8 +14,7 @@ part 'polder.models.swagger.g.dart';
 class Appearance {
   const Appearance({this.accentColor, this.theme});
 
-  factory Appearance.fromJson(Map<String, dynamic> json) =>
-      _$AppearanceFromJson(json);
+  factory Appearance.fromJson(Map<String, dynamic> json) => _$AppearanceFromJson(json);
 
   static const toJsonFactory = _$AppearanceToJson;
   Map<String, dynamic> toJson() => _$AppearanceToJson(this);
@@ -36,12 +35,8 @@ class Appearance {
     return identical(this, other) ||
         (other is Appearance &&
             (identical(other.accentColor, accentColor) ||
-                const DeepCollectionEquality().equals(
-                  other.accentColor,
-                  accentColor,
-                )) &&
-            (identical(other.theme, theme) ||
-                const DeepCollectionEquality().equals(other.theme, theme)));
+                const DeepCollectionEquality().equals(other.accentColor, accentColor)) &&
+            (identical(other.theme, theme) || const DeepCollectionEquality().equals(other.theme, theme)));
   }
 
   @override
@@ -53,16 +48,10 @@ class Appearance {
 
 extension $AppearanceExtension on Appearance {
   Appearance copyWith({String? accentColor, enums.AppearanceTheme? theme}) {
-    return Appearance(
-      accentColor: accentColor ?? this.accentColor,
-      theme: theme ?? this.theme,
-    );
+    return Appearance(accentColor: accentColor ?? this.accentColor, theme: theme ?? this.theme);
   }
 
-  Appearance copyWithWrapped({
-    Wrapped<String?>? accentColor,
-    Wrapped<enums.AppearanceTheme?>? theme,
-  }) {
+  Appearance copyWithWrapped({Wrapped<String?>? accentColor, Wrapped<enums.AppearanceTheme?>? theme}) {
     return Appearance(
       accentColor: (accentColor != null ? accentColor.value : this.accentColor),
       theme: (theme != null ? theme.value : this.theme),
@@ -90,27 +79,18 @@ class Avatar {
     return identical(this, other) ||
         (other is Avatar &&
             (identical(other.contentType, contentType) ||
-                const DeepCollectionEquality().equals(
-                  other.contentType,
-                  contentType,
-                )) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)));
+                const DeepCollectionEquality().equals(other.contentType, contentType)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(contentType) ^
-      const DeepCollectionEquality().hash(id) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(contentType) ^ const DeepCollectionEquality().hash(id) ^ runtimeType.hashCode;
 }
 
 extension $AvatarExtension on Avatar {
   Avatar copyWith({String? contentType, String? id}) {
-    return Avatar(
-      contentType: contentType ?? this.contentType,
-      id: id ?? this.id,
-    );
+    return Avatar(contentType: contentType ?? this.contentType, id: id ?? this.id);
   }
 
   Avatar copyWithWrapped({Wrapped<String>? contentType, Wrapped<String>? id}) {
@@ -123,27 +103,16 @@ extension $AvatarExtension on Avatar {
 
 @JsonSerializable(explicitToJson: true)
 class Branding {
-  const Branding({
-    required this.accentColor,
-    this.backgrounds,
-    this.icon,
-    required this.message,
-    required this.name,
-  });
+  const Branding({required this.accentColor, this.backgrounds, this.icon, required this.message, required this.name});
 
-  factory Branding.fromJson(Map<String, dynamic> json) =>
-      _$BrandingFromJson(json);
+  factory Branding.fromJson(Map<String, dynamic> json) => _$BrandingFromJson(json);
 
   static const toJsonFactory = _$BrandingToJson;
   Map<String, dynamic> toJson() => _$BrandingToJson(this);
 
   @JsonKey(name: 'accentColor', includeIfNull: false)
   final String accentColor;
-  @JsonKey(
-    name: 'backgrounds',
-    includeIfNull: false,
-    defaultValue: <ImageInfo>[],
-  )
+  @JsonKey(name: 'backgrounds', includeIfNull: false, defaultValue: <ImageInfo>[])
   final List<ImageInfo>? backgrounds;
   @JsonKey(name: 'icon', includeIfNull: false)
   final ImageInfo? icon;
@@ -158,24 +127,12 @@ class Branding {
     return identical(this, other) ||
         (other is Branding &&
             (identical(other.accentColor, accentColor) ||
-                const DeepCollectionEquality().equals(
-                  other.accentColor,
-                  accentColor,
-                )) &&
+                const DeepCollectionEquality().equals(other.accentColor, accentColor)) &&
             (identical(other.backgrounds, backgrounds) ||
-                const DeepCollectionEquality().equals(
-                  other.backgrounds,
-                  backgrounds,
-                )) &&
-            (identical(other.icon, icon) ||
-                const DeepCollectionEquality().equals(other.icon, icon)) &&
-            (identical(other.message, message) ||
-                const DeepCollectionEquality().equals(
-                  other.message,
-                  message,
-                )) &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)));
+                const DeepCollectionEquality().equals(other.backgrounds, backgrounds)) &&
+            (identical(other.icon, icon) || const DeepCollectionEquality().equals(other.icon, icon)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)));
   }
 
   @override
@@ -224,13 +181,7 @@ extension $BrandingExtension on Branding {
 
 @JsonSerializable(explicitToJson: true)
 class Change {
-  const Change({
-    this.entry,
-    this.fromPath,
-    required this.path,
-    required this.seq,
-    required this.type,
-  });
+  const Change({this.entry, this.fromPath, required this.path, required this.seq, required this.type});
 
   factory Change.fromJson(Map<String, dynamic> json) => _$ChangeFromJson(json);
 
@@ -245,12 +196,7 @@ class Change {
   final String path;
   @JsonKey(name: 'seq', includeIfNull: false)
   final int seq;
-  @JsonKey(
-    name: 'type',
-    includeIfNull: false,
-    toJson: changeTypeToJson,
-    fromJson: changeTypeFromJson,
-  )
+  @JsonKey(name: 'type', includeIfNull: false, toJson: changeTypeToJson, fromJson: changeTypeFromJson)
   final enums.ChangeType type;
   static const fromJsonFactory = _$ChangeFromJson;
 
@@ -258,19 +204,11 @@ class Change {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Change &&
-            (identical(other.entry, entry) ||
-                const DeepCollectionEquality().equals(other.entry, entry)) &&
-            (identical(other.fromPath, fromPath) ||
-                const DeepCollectionEquality().equals(
-                  other.fromPath,
-                  fromPath,
-                )) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
-            (identical(other.seq, seq) ||
-                const DeepCollectionEquality().equals(other.seq, seq)) &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)));
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.fromPath, fromPath) || const DeepCollectionEquality().equals(other.fromPath, fromPath)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.seq, seq) || const DeepCollectionEquality().equals(other.seq, seq)) &&
+            (identical(other.type, type) || const DeepCollectionEquality().equals(other.type, type)));
   }
 
   @override
@@ -284,13 +222,7 @@ class Change {
 }
 
 extension $ChangeExtension on Change {
-  Change copyWith({
-    Entry? entry,
-    String? fromPath,
-    String? path,
-    int? seq,
-    enums.ChangeType? type,
-  }) {
+  Change copyWith({Entry? entry, String? fromPath, String? path, int? seq, enums.ChangeType? type}) {
     return Change(
       entry: entry ?? this.entry,
       fromPath: fromPath ?? this.fromPath,
@@ -321,8 +253,7 @@ extension $ChangeExtension on Change {
 class ChangePage {
   const ChangePage({this.changes, required this.cursor, required this.hasMore});
 
-  factory ChangePage.fromJson(Map<String, dynamic> json) =>
-      _$ChangePageFromJson(json);
+  factory ChangePage.fromJson(Map<String, dynamic> json) => _$ChangePageFromJson(json);
 
   static const toJsonFactory = _$ChangePageToJson;
   Map<String, dynamic> toJson() => _$ChangePageToJson(this);
@@ -339,15 +270,9 @@ class ChangePage {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ChangePage &&
-            (identical(other.changes, changes) ||
-                const DeepCollectionEquality().equals(
-                  other.changes,
-                  changes,
-                )) &&
-            (identical(other.cursor, cursor) ||
-                const DeepCollectionEquality().equals(other.cursor, cursor)) &&
-            (identical(other.hasMore, hasMore) ||
-                const DeepCollectionEquality().equals(other.hasMore, hasMore)));
+            (identical(other.changes, changes) || const DeepCollectionEquality().equals(other.changes, changes)) &&
+            (identical(other.cursor, cursor) || const DeepCollectionEquality().equals(other.cursor, cursor)) &&
+            (identical(other.hasMore, hasMore) || const DeepCollectionEquality().equals(other.hasMore, hasMore)));
   }
 
   @override
@@ -367,11 +292,7 @@ extension $ChangePageExtension on ChangePage {
     );
   }
 
-  ChangePage copyWithWrapped({
-    Wrapped<List<Change>?>? changes,
-    Wrapped<int>? cursor,
-    Wrapped<bool>? hasMore,
-  }) {
+  ChangePage copyWithWrapped({Wrapped<List<Change>?>? changes, Wrapped<int>? cursor, Wrapped<bool>? hasMore}) {
     return ChangePage(
       changes: (changes != null ? changes.value : this.changes),
       cursor: (cursor != null ? cursor.value : this.cursor),
@@ -384,8 +305,7 @@ extension $ChangePageExtension on ChangePage {
 class Changes {
   const Changes({this.disabled, this.password, this.quotaBytes, this.role});
 
-  factory Changes.fromJson(Map<String, dynamic> json) =>
-      _$ChangesFromJson(json);
+  factory Changes.fromJson(Map<String, dynamic> json) => _$ChangesFromJson(json);
 
   static const toJsonFactory = _$ChangesToJson;
   Map<String, dynamic> toJson() => _$ChangesToJson(this);
@@ -396,12 +316,7 @@ class Changes {
   final String? password;
   @JsonKey(name: 'quotaBytes', includeIfNull: false)
   final int? quotaBytes;
-  @JsonKey(
-    name: 'role',
-    includeIfNull: false,
-    toJson: changesRoleNullableToJson,
-    fromJson: changesRoleNullableFromJson,
-  )
+  @JsonKey(name: 'role', includeIfNull: false, toJson: changesRoleNullableToJson, fromJson: changesRoleNullableFromJson)
   final enums.ChangesRole? role;
   static const fromJsonFactory = _$ChangesFromJson;
 
@@ -409,23 +324,11 @@ class Changes {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Changes &&
-            (identical(other.disabled, disabled) ||
-                const DeepCollectionEquality().equals(
-                  other.disabled,
-                  disabled,
-                )) &&
-            (identical(other.password, password) ||
-                const DeepCollectionEquality().equals(
-                  other.password,
-                  password,
-                )) &&
+            (identical(other.disabled, disabled) || const DeepCollectionEquality().equals(other.disabled, disabled)) &&
+            (identical(other.password, password) || const DeepCollectionEquality().equals(other.password, password)) &&
             (identical(other.quotaBytes, quotaBytes) ||
-                const DeepCollectionEquality().equals(
-                  other.quotaBytes,
-                  quotaBytes,
-                )) &&
-            (identical(other.role, role) ||
-                const DeepCollectionEquality().equals(other.role, role)));
+                const DeepCollectionEquality().equals(other.quotaBytes, quotaBytes)) &&
+            (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)));
   }
 
   @override
@@ -438,12 +341,7 @@ class Changes {
 }
 
 extension $ChangesExtension on Changes {
-  Changes copyWith({
-    bool? disabled,
-    String? password,
-    int? quotaBytes,
-    enums.ChangesRole? role,
-  }) {
+  Changes copyWith({bool? disabled, String? password, int? quotaBytes, enums.ChangesRole? role}) {
     return Changes(
       disabled: disabled ?? this.disabled,
       password: password ?? this.password,
@@ -488,12 +386,9 @@ class Chunk {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Chunk &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.offset, offset) ||
-                const DeepCollectionEquality().equals(other.offset, offset)) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.offset, offset) || const DeepCollectionEquality().equals(other.offset, offset)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
@@ -506,18 +401,10 @@ class Chunk {
 
 extension $ChunkExtension on Chunk {
   Chunk copyWith({String? hash, int? offset, int? size}) {
-    return Chunk(
-      hash: hash ?? this.hash,
-      offset: offset ?? this.offset,
-      size: size ?? this.size,
-    );
+    return Chunk(hash: hash ?? this.hash, offset: offset ?? this.offset, size: size ?? this.size);
   }
 
-  Chunk copyWithWrapped({
-    Wrapped<String>? hash,
-    Wrapped<int>? offset,
-    Wrapped<int>? size,
-  }) {
+  Chunk copyWithWrapped({Wrapped<String>? hash, Wrapped<int>? offset, Wrapped<int>? size}) {
     return Chunk(
       hash: (hash != null ? hash.value : this.hash),
       offset: (offset != null ? offset.value : this.offset),
@@ -530,8 +417,7 @@ extension $ChunkExtension on Chunk {
 class ChunkRef {
   const ChunkRef({required this.hash, required this.size});
 
-  factory ChunkRef.fromJson(Map<String, dynamic> json) =>
-      _$ChunkRefFromJson(json);
+  factory ChunkRef.fromJson(Map<String, dynamic> json) => _$ChunkRefFromJson(json);
 
   static const toJsonFactory = _$ChunkRefToJson;
   Map<String, dynamic> toJson() => _$ChunkRefToJson(this);
@@ -546,17 +432,13 @@ class ChunkRef {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ChunkRef &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(hash) ^
-      const DeepCollectionEquality().hash(size) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(hash) ^ const DeepCollectionEquality().hash(size) ^ runtimeType.hashCode;
 }
 
 extension $ChunkRefExtension on ChunkRef {
@@ -565,24 +447,15 @@ extension $ChunkRefExtension on ChunkRef {
   }
 
   ChunkRef copyWithWrapped({Wrapped<String>? hash, Wrapped<int>? size}) {
-    return ChunkRef(
-      hash: (hash != null ? hash.value : this.hash),
-      size: (size != null ? size.value : this.size),
-    );
+    return ChunkRef(hash: (hash != null ? hash.value : this.hash), size: (size != null ? size.value : this.size));
   }
 }
 
 @JsonSerializable(explicitToJson: true)
 class ClientMessage {
-  const ClientMessage({
-    this.scope,
-    this.token,
-    required this.type,
-    this.userId,
-  });
+  const ClientMessage({this.scope, this.token, required this.type, this.userId});
 
-  factory ClientMessage.fromJson(Map<String, dynamic> json) =>
-      _$ClientMessageFromJson(json);
+  factory ClientMessage.fromJson(Map<String, dynamic> json) => _$ClientMessageFromJson(json);
 
   static const toJsonFactory = _$ClientMessageToJson;
   Map<String, dynamic> toJson() => _$ClientMessageToJson(this);
@@ -596,12 +469,7 @@ class ClientMessage {
   final enums.ClientMessageScope? scope;
   @JsonKey(name: 'token', includeIfNull: false)
   final String? token;
-  @JsonKey(
-    name: 'type',
-    includeIfNull: false,
-    toJson: clientMessageTypeToJson,
-    fromJson: clientMessageTypeFromJson,
-  )
+  @JsonKey(name: 'type', includeIfNull: false, toJson: clientMessageTypeToJson, fromJson: clientMessageTypeFromJson)
   final enums.ClientMessageType type;
   @JsonKey(name: 'userId', includeIfNull: false)
   final int? userId;
@@ -611,14 +479,10 @@ class ClientMessage {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ClientMessage &&
-            (identical(other.scope, scope) ||
-                const DeepCollectionEquality().equals(other.scope, scope)) &&
-            (identical(other.token, token) ||
-                const DeepCollectionEquality().equals(other.token, token)) &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.userId, userId) ||
-                const DeepCollectionEquality().equals(other.userId, userId)));
+            (identical(other.scope, scope) || const DeepCollectionEquality().equals(other.scope, scope)) &&
+            (identical(other.token, token) || const DeepCollectionEquality().equals(other.token, token)) &&
+            (identical(other.type, type) || const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)));
   }
 
   @override
@@ -631,12 +495,7 @@ class ClientMessage {
 }
 
 extension $ClientMessageExtension on ClientMessage {
-  ClientMessage copyWith({
-    enums.ClientMessageScope? scope,
-    String? token,
-    enums.ClientMessageType? type,
-    int? userId,
-  }) {
+  ClientMessage copyWith({enums.ClientMessageScope? scope, String? token, enums.ClientMessageType? type, int? userId}) {
     return ClientMessage(
       scope: scope ?? this.scope,
       token: token ?? this.token,
@@ -664,8 +523,7 @@ extension $ClientMessageExtension on ClientMessage {
 class CreatableApp {
   const CreatableApp({required this.app, this.extensions});
 
-  factory CreatableApp.fromJson(Map<String, dynamic> json) =>
-      _$CreatableAppFromJson(json);
+  factory CreatableApp.fromJson(Map<String, dynamic> json) => _$CreatableAppFromJson(json);
 
   static const toJsonFactory = _$CreatableAppToJson;
   Map<String, dynamic> toJson() => _$CreatableAppToJson(this);
@@ -680,34 +538,22 @@ class CreatableApp {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is CreatableApp &&
-            (identical(other.app, app) ||
-                const DeepCollectionEquality().equals(other.app, app)) &&
+            (identical(other.app, app) || const DeepCollectionEquality().equals(other.app, app)) &&
             (identical(other.extensions, extensions) ||
-                const DeepCollectionEquality().equals(
-                  other.extensions,
-                  extensions,
-                )));
+                const DeepCollectionEquality().equals(other.extensions, extensions)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(app) ^
-      const DeepCollectionEquality().hash(extensions) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(app) ^ const DeepCollectionEquality().hash(extensions) ^ runtimeType.hashCode;
 }
 
 extension $CreatableAppExtension on CreatableApp {
   CreatableApp copyWith({String? app, List<String>? extensions}) {
-    return CreatableApp(
-      app: app ?? this.app,
-      extensions: extensions ?? this.extensions,
-    );
+    return CreatableApp(app: app ?? this.app, extensions: extensions ?? this.extensions);
   }
 
-  CreatableApp copyWithWrapped({
-    Wrapped<String>? app,
-    Wrapped<List<String>?>? extensions,
-  }) {
+  CreatableApp copyWithWrapped({Wrapped<String>? app, Wrapped<List<String>?>? extensions}) {
     return CreatableApp(
       app: (app != null ? app.value : this.app),
       extensions: (extensions != null ? extensions.value : this.extensions),
@@ -717,14 +563,9 @@ extension $CreatableAppExtension on CreatableApp {
 
 @JsonSerializable(explicitToJson: true)
 class CredentialsRequest {
-  const CredentialsRequest({
-    this.deviceName,
-    required this.password,
-    required this.username,
-  });
+  const CredentialsRequest({this.deviceName, required this.password, required this.username});
 
-  factory CredentialsRequest.fromJson(Map<String, dynamic> json) =>
-      _$CredentialsRequestFromJson(json);
+  factory CredentialsRequest.fromJson(Map<String, dynamic> json) => _$CredentialsRequestFromJson(json);
 
   static const toJsonFactory = _$CredentialsRequestToJson;
   Map<String, dynamic> toJson() => _$CredentialsRequestToJson(this);
@@ -742,20 +583,9 @@ class CredentialsRequest {
     return identical(this, other) ||
         (other is CredentialsRequest &&
             (identical(other.deviceName, deviceName) ||
-                const DeepCollectionEquality().equals(
-                  other.deviceName,
-                  deviceName,
-                )) &&
-            (identical(other.password, password) ||
-                const DeepCollectionEquality().equals(
-                  other.password,
-                  password,
-                )) &&
-            (identical(other.username, username) ||
-                const DeepCollectionEquality().equals(
-                  other.username,
-                  username,
-                )));
+                const DeepCollectionEquality().equals(other.deviceName, deviceName)) &&
+            (identical(other.password, password) || const DeepCollectionEquality().equals(other.password, password)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
   }
 
   @override
@@ -767,11 +597,7 @@ class CredentialsRequest {
 }
 
 extension $CredentialsRequestExtension on CredentialsRequest {
-  CredentialsRequest copyWith({
-    String? deviceName,
-    String? password,
-    String? username,
-  }) {
+  CredentialsRequest copyWith({String? deviceName, String? password, String? username}) {
     return CredentialsRequest(
       deviceName: deviceName ?? this.deviceName,
       password: password ?? this.password,
@@ -803,43 +629,22 @@ class EditorCapabilities {
     this.viewableMimes,
   });
 
-  factory EditorCapabilities.fromJson(Map<String, dynamic> json) =>
-      _$EditorCapabilitiesFromJson(json);
+  factory EditorCapabilities.fromJson(Map<String, dynamic> json) => _$EditorCapabilitiesFromJson(json);
 
   static const toJsonFactory = _$EditorCapabilitiesToJson;
   Map<String, dynamic> toJson() => _$EditorCapabilitiesToJson(this);
 
-  @JsonKey(
-    name: 'creatable',
-    includeIfNull: false,
-    defaultValue: <CreatableApp>[],
-  )
+  @JsonKey(name: 'creatable', includeIfNull: false, defaultValue: <CreatableApp>[])
   final List<CreatableApp>? creatable;
-  @JsonKey(
-    name: 'editableExtensions',
-    includeIfNull: false,
-    defaultValue: <String>[],
-  )
+  @JsonKey(name: 'editableExtensions', includeIfNull: false, defaultValue: <String>[])
   final List<String>? editableExtensions;
-  @JsonKey(
-    name: 'editableMimes',
-    includeIfNull: false,
-    defaultValue: <String>[],
-  )
+  @JsonKey(name: 'editableMimes', includeIfNull: false, defaultValue: <String>[])
   final List<String>? editableMimes;
   @JsonKey(name: 'enabled', includeIfNull: false)
   final bool enabled;
-  @JsonKey(
-    name: 'viewableExtensions',
-    includeIfNull: false,
-    defaultValue: <String>[],
-  )
+  @JsonKey(name: 'viewableExtensions', includeIfNull: false, defaultValue: <String>[])
   final List<String>? viewableExtensions;
-  @JsonKey(
-    name: 'viewableMimes',
-    includeIfNull: false,
-    defaultValue: <String>[],
-  )
+  @JsonKey(name: 'viewableMimes', includeIfNull: false, defaultValue: <String>[])
   final List<String>? viewableMimes;
   static const fromJsonFactory = _$EditorCapabilitiesFromJson;
 
@@ -848,35 +653,16 @@ class EditorCapabilities {
     return identical(this, other) ||
         (other is EditorCapabilities &&
             (identical(other.creatable, creatable) ||
-                const DeepCollectionEquality().equals(
-                  other.creatable,
-                  creatable,
-                )) &&
+                const DeepCollectionEquality().equals(other.creatable, creatable)) &&
             (identical(other.editableExtensions, editableExtensions) ||
-                const DeepCollectionEquality().equals(
-                  other.editableExtensions,
-                  editableExtensions,
-                )) &&
+                const DeepCollectionEquality().equals(other.editableExtensions, editableExtensions)) &&
             (identical(other.editableMimes, editableMimes) ||
-                const DeepCollectionEquality().equals(
-                  other.editableMimes,
-                  editableMimes,
-                )) &&
-            (identical(other.enabled, enabled) ||
-                const DeepCollectionEquality().equals(
-                  other.enabled,
-                  enabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.editableMimes, editableMimes)) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
             (identical(other.viewableExtensions, viewableExtensions) ||
-                const DeepCollectionEquality().equals(
-                  other.viewableExtensions,
-                  viewableExtensions,
-                )) &&
+                const DeepCollectionEquality().equals(other.viewableExtensions, viewableExtensions)) &&
             (identical(other.viewableMimes, viewableMimes) ||
-                const DeepCollectionEquality().equals(
-                  other.viewableMimes,
-                  viewableMimes,
-                )));
+                const DeepCollectionEquality().equals(other.viewableMimes, viewableMimes)));
   }
 
   @override
@@ -919,19 +705,11 @@ extension $EditorCapabilitiesExtension on EditorCapabilities {
   }) {
     return EditorCapabilities(
       creatable: (creatable != null ? creatable.value : this.creatable),
-      editableExtensions: (editableExtensions != null
-          ? editableExtensions.value
-          : this.editableExtensions),
-      editableMimes: (editableMimes != null
-          ? editableMimes.value
-          : this.editableMimes),
+      editableExtensions: (editableExtensions != null ? editableExtensions.value : this.editableExtensions),
+      editableMimes: (editableMimes != null ? editableMimes.value : this.editableMimes),
       enabled: (enabled != null ? enabled.value : this.enabled),
-      viewableExtensions: (viewableExtensions != null
-          ? viewableExtensions.value
-          : this.viewableExtensions),
-      viewableMimes: (viewableMimes != null
-          ? viewableMimes.value
-          : this.viewableMimes),
+      viewableExtensions: (viewableExtensions != null ? viewableExtensions.value : this.viewableExtensions),
+      viewableMimes: (viewableMimes != null ? viewableMimes.value : this.viewableMimes),
     );
   }
 }
@@ -946,8 +724,7 @@ class EditorSession {
     required this.readOnly,
   });
 
-  factory EditorSession.fromJson(Map<String, dynamic> json) =>
-      _$EditorSessionFromJson(json);
+  factory EditorSession.fromJson(Map<String, dynamic> json) => _$EditorSessionFromJson(json);
 
   static const toJsonFactory = _$EditorSessionToJson;
   Map<String, dynamic> toJson() => _$EditorSessionToJson(this);
@@ -969,30 +746,13 @@ class EditorSession {
     return identical(this, other) ||
         (other is EditorSession &&
             (identical(other.accessToken, accessToken) ||
-                const DeepCollectionEquality().equals(
-                  other.accessToken,
-                  accessToken,
-                )) &&
+                const DeepCollectionEquality().equals(other.accessToken, accessToken)) &&
             (identical(other.accessTokenTtl, accessTokenTtl) ||
-                const DeepCollectionEquality().equals(
-                  other.accessTokenTtl,
-                  accessTokenTtl,
-                )) &&
+                const DeepCollectionEquality().equals(other.accessTokenTtl, accessTokenTtl)) &&
             (identical(other.editorUrl, editorUrl) ||
-                const DeepCollectionEquality().equals(
-                  other.editorUrl,
-                  editorUrl,
-                )) &&
-            (identical(other.hostPage, hostPage) ||
-                const DeepCollectionEquality().equals(
-                  other.hostPage,
-                  hostPage,
-                )) &&
-            (identical(other.readOnly, readOnly) ||
-                const DeepCollectionEquality().equals(
-                  other.readOnly,
-                  readOnly,
-                )));
+                const DeepCollectionEquality().equals(other.editorUrl, editorUrl)) &&
+            (identical(other.hostPage, hostPage) || const DeepCollectionEquality().equals(other.hostPage, hostPage)) &&
+            (identical(other.readOnly, readOnly) || const DeepCollectionEquality().equals(other.readOnly, readOnly)));
   }
 
   @override
@@ -1031,9 +791,7 @@ extension $EditorSessionExtension on EditorSession {
   }) {
     return EditorSession(
       accessToken: (accessToken != null ? accessToken.value : this.accessToken),
-      accessTokenTtl: (accessTokenTtl != null
-          ? accessTokenTtl.value
-          : this.accessTokenTtl),
+      accessTokenTtl: (accessTokenTtl != null ? accessTokenTtl.value : this.accessTokenTtl),
       editorUrl: (editorUrl != null ? editorUrl.value : this.editorUrl),
       hostPage: (hostPage != null ? hostPage.value : this.hostPage),
       readOnly: (readOnly != null ? readOnly.value : this.readOnly),
@@ -1095,31 +853,18 @@ class Entry {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Entry &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.isDir, isDir) ||
-                const DeepCollectionEquality().equals(other.isDir, isDir)) &&
-            (identical(other.meta, meta) ||
-                const DeepCollectionEquality().equals(other.meta, meta)) &&
-            (identical(other.mime, mime) ||
-                const DeepCollectionEquality().equals(other.mime, mime)) &&
-            (identical(other.mtime, mtime) ||
-                const DeepCollectionEquality().equals(other.mtime, mtime)) &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.meta, meta) || const DeepCollectionEquality().equals(other.meta, meta)) &&
+            (identical(other.mime, mime) || const DeepCollectionEquality().equals(other.mime, mime)) &&
+            (identical(other.mtime, mtime) || const DeepCollectionEquality().equals(other.mtime, mtime)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
             (identical(other.previewState, previewState) ||
-                const DeepCollectionEquality().equals(
-                  other.previewState,
-                  previewState,
-                )) &&
-            (identical(other.rev, rev) ||
-                const DeepCollectionEquality().equals(other.rev, rev)) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+                const DeepCollectionEquality().equals(other.previewState, previewState)) &&
+            (identical(other.rev, rev) || const DeepCollectionEquality().equals(other.rev, rev)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
@@ -1189,9 +934,7 @@ extension $EntryExtension on Entry {
       mtime: (mtime != null ? mtime.value : this.mtime),
       name: (name != null ? name.value : this.name),
       path: (path != null ? path.value : this.path),
-      previewState: (previewState != null
-          ? previewState.value
-          : this.previewState),
+      previewState: (previewState != null ? previewState.value : this.previewState),
       rev: (rev != null ? rev.value : this.rev),
       size: (size != null ? size.value : this.size),
     );
@@ -1202,8 +945,7 @@ extension $EntryExtension on Entry {
 class ErrorDetail {
   const ErrorDetail({required this.code, required this.message});
 
-  factory ErrorDetail.fromJson(Map<String, dynamic> json) =>
-      _$ErrorDetailFromJson(json);
+  factory ErrorDetail.fromJson(Map<String, dynamic> json) => _$ErrorDetailFromJson(json);
 
   static const toJsonFactory = _$ErrorDetailToJson;
   Map<String, dynamic> toJson() => _$ErrorDetailToJson(this);
@@ -1218,31 +960,21 @@ class ErrorDetail {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ErrorDetail &&
-            (identical(other.code, code) ||
-                const DeepCollectionEquality().equals(other.code, code)) &&
-            (identical(other.message, message) ||
-                const DeepCollectionEquality().equals(other.message, message)));
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(code) ^
-      const DeepCollectionEquality().hash(message) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(code) ^ const DeepCollectionEquality().hash(message) ^ runtimeType.hashCode;
 }
 
 extension $ErrorDetailExtension on ErrorDetail {
   ErrorDetail copyWith({String? code, String? message}) {
-    return ErrorDetail(
-      code: code ?? this.code,
-      message: message ?? this.message,
-    );
+    return ErrorDetail(code: code ?? this.code, message: message ?? this.message);
   }
 
-  ErrorDetail copyWithWrapped({
-    Wrapped<String>? code,
-    Wrapped<String>? message,
-  }) {
+  ErrorDetail copyWithWrapped({Wrapped<String>? code, Wrapped<String>? message}) {
     return ErrorDetail(
       code: (code != null ? code.value : this.code),
       message: (message != null ? message.value : this.message),
@@ -1254,8 +986,7 @@ extension $ErrorDetailExtension on ErrorDetail {
 class ErrorResponse {
   const ErrorResponse({this.current, required this.error});
 
-  factory ErrorResponse.fromJson(Map<String, dynamic> json) =>
-      _$ErrorResponseFromJson(json);
+  factory ErrorResponse.fromJson(Map<String, dynamic> json) => _$ErrorResponseFromJson(json);
 
   static const toJsonFactory = _$ErrorResponseToJson;
   Map<String, dynamic> toJson() => _$ErrorResponseToJson(this);
@@ -1270,34 +1001,21 @@ class ErrorResponse {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ErrorResponse &&
-            (identical(other.current, current) ||
-                const DeepCollectionEquality().equals(
-                  other.current,
-                  current,
-                )) &&
-            (identical(other.error, error) ||
-                const DeepCollectionEquality().equals(other.error, error)));
+            (identical(other.current, current) || const DeepCollectionEquality().equals(other.current, current)) &&
+            (identical(other.error, error) || const DeepCollectionEquality().equals(other.error, error)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(current) ^
-      const DeepCollectionEquality().hash(error) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(current) ^ const DeepCollectionEquality().hash(error) ^ runtimeType.hashCode;
 }
 
 extension $ErrorResponseExtension on ErrorResponse {
   ErrorResponse copyWith({dynamic current, ErrorDetail? error}) {
-    return ErrorResponse(
-      current: current ?? this.current,
-      error: error ?? this.error,
-    );
+    return ErrorResponse(current: current ?? this.current, error: error ?? this.error);
   }
 
-  ErrorResponse copyWithWrapped({
-    Wrapped<dynamic>? current,
-    Wrapped<ErrorDetail>? error,
-  }) {
+  ErrorResponse copyWithWrapped({Wrapped<dynamic>? current, Wrapped<ErrorDetail>? error}) {
     return ErrorResponse(
       current: (current != null ? current.value : this.current),
       error: (error != null ? error.value : this.error),
@@ -1320,8 +1038,7 @@ class EventMessage {
     required this.userId,
   });
 
-  factory EventMessage.fromJson(Map<String, dynamic> json) =>
-      _$EventMessageFromJson(json);
+  factory EventMessage.fromJson(Map<String, dynamic> json) => _$EventMessageFromJson(json);
 
   static const toJsonFactory = _$EventMessageToJson;
   Map<String, dynamic> toJson() => _$EventMessageToJson(this);
@@ -1343,18 +1060,9 @@ class EventMessage {
   final enums.EventMessageStatus? status;
   @JsonKey(name: 'transfer', includeIfNull: false)
   final LiveTransfer? transfer;
-  @JsonKey(
-    name: 'transfers',
-    includeIfNull: false,
-    defaultValue: <LiveTransfer>[],
-  )
+  @JsonKey(name: 'transfers', includeIfNull: false, defaultValue: <LiveTransfer>[])
   final List<LiveTransfer>? transfers;
-  @JsonKey(
-    name: 'type',
-    includeIfNull: false,
-    toJson: eventMessageTypeToJson,
-    fromJson: eventMessageTypeFromJson,
-  )
+  @JsonKey(name: 'type', includeIfNull: false, toJson: eventMessageTypeToJson, fromJson: eventMessageTypeFromJson)
   final enums.EventMessageType type;
   @JsonKey(name: 'user', includeIfNull: false)
   final User? user;
@@ -1366,35 +1074,17 @@ class EventMessage {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is EventMessage &&
-            (identical(other.code, code) ||
-                const DeepCollectionEquality().equals(other.code, code)) &&
-            (identical(other.dirs, dirs) ||
-                const DeepCollectionEquality().equals(other.dirs, dirs)) &&
-            (identical(other.entry, entry) ||
-                const DeepCollectionEquality().equals(other.entry, entry)) &&
-            (identical(other.message, message) ||
-                const DeepCollectionEquality().equals(
-                  other.message,
-                  message,
-                )) &&
-            (identical(other.status, status) ||
-                const DeepCollectionEquality().equals(other.status, status)) &&
-            (identical(other.transfer, transfer) ||
-                const DeepCollectionEquality().equals(
-                  other.transfer,
-                  transfer,
-                )) &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.dirs, dirs) || const DeepCollectionEquality().equals(other.dirs, dirs)) &&
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.transfer, transfer) || const DeepCollectionEquality().equals(other.transfer, transfer)) &&
             (identical(other.transfers, transfers) ||
-                const DeepCollectionEquality().equals(
-                  other.transfers,
-                  transfers,
-                )) &&
-            (identical(other.type, type) ||
-                const DeepCollectionEquality().equals(other.type, type)) &&
-            (identical(other.user, user) ||
-                const DeepCollectionEquality().equals(other.user, user)) &&
-            (identical(other.userId, userId) ||
-                const DeepCollectionEquality().equals(other.userId, userId)));
+                const DeepCollectionEquality().equals(other.transfers, transfers)) &&
+            (identical(other.type, type) || const DeepCollectionEquality().equals(other.type, type)) &&
+            (identical(other.user, user) || const DeepCollectionEquality().equals(other.user, user)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)));
   }
 
   @override
@@ -1468,24 +1158,14 @@ extension $EventMessageExtension on EventMessage {
 
 @JsonSerializable(explicitToJson: true)
 class ExtractionStatus {
-  const ExtractionStatus({
-    required this.ocr,
-    this.ocrProblem,
-    required this.pending,
-  });
+  const ExtractionStatus({required this.ocr, this.ocrProblem, required this.pending});
 
-  factory ExtractionStatus.fromJson(Map<String, dynamic> json) =>
-      _$ExtractionStatusFromJson(json);
+  factory ExtractionStatus.fromJson(Map<String, dynamic> json) => _$ExtractionStatusFromJson(json);
 
   static const toJsonFactory = _$ExtractionStatusToJson;
   Map<String, dynamic> toJson() => _$ExtractionStatusToJson(this);
 
-  @JsonKey(
-    name: 'ocr',
-    includeIfNull: false,
-    toJson: extractionStatusOcrToJson,
-    fromJson: extractionStatusOcrFromJson,
-  )
+  @JsonKey(name: 'ocr', includeIfNull: false, toJson: extractionStatusOcrToJson, fromJson: extractionStatusOcrFromJson)
   final enums.ExtractionStatusOcr ocr;
   @JsonKey(name: 'ocrProblem', includeIfNull: false)
   final String? ocrProblem;
@@ -1497,15 +1177,10 @@ class ExtractionStatus {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtractionStatus &&
-            (identical(other.ocr, ocr) ||
-                const DeepCollectionEquality().equals(other.ocr, ocr)) &&
+            (identical(other.ocr, ocr) || const DeepCollectionEquality().equals(other.ocr, ocr)) &&
             (identical(other.ocrProblem, ocrProblem) ||
-                const DeepCollectionEquality().equals(
-                  other.ocrProblem,
-                  ocrProblem,
-                )) &&
-            (identical(other.pending, pending) ||
-                const DeepCollectionEquality().equals(other.pending, pending)));
+                const DeepCollectionEquality().equals(other.ocrProblem, ocrProblem)) &&
+            (identical(other.pending, pending) || const DeepCollectionEquality().equals(other.pending, pending)));
   }
 
   @override
@@ -1517,11 +1192,7 @@ class ExtractionStatus {
 }
 
 extension $ExtractionStatusExtension on ExtractionStatus {
-  ExtractionStatus copyWith({
-    enums.ExtractionStatusOcr? ocr,
-    String? ocrProblem,
-    int? pending,
-  }) {
+  ExtractionStatus copyWith({enums.ExtractionStatusOcr? ocr, String? ocrProblem, int? pending}) {
     return ExtractionStatus(
       ocr: ocr ?? this.ocr,
       ocrProblem: ocrProblem ?? this.ocrProblem,
@@ -1546,8 +1217,7 @@ extension $ExtractionStatusExtension on ExtractionStatus {
 class FacetCount {
   const FacetCount({required this.count, required this.value});
 
-  factory FacetCount.fromJson(Map<String, dynamic> json) =>
-      _$FacetCountFromJson(json);
+  factory FacetCount.fromJson(Map<String, dynamic> json) => _$FacetCountFromJson(json);
 
   static const toJsonFactory = _$FacetCountToJson;
   Map<String, dynamic> toJson() => _$FacetCountToJson(this);
@@ -1562,17 +1232,13 @@ class FacetCount {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is FacetCount &&
-            (identical(other.count, count) ||
-                const DeepCollectionEquality().equals(other.count, count)) &&
-            (identical(other.value, value) ||
-                const DeepCollectionEquality().equals(other.value, value)));
+            (identical(other.count, count) || const DeepCollectionEquality().equals(other.count, count)) &&
+            (identical(other.value, value) || const DeepCollectionEquality().equals(other.value, value)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(count) ^
-      const DeepCollectionEquality().hash(value) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(count) ^ const DeepCollectionEquality().hash(value) ^ runtimeType.hashCode;
 }
 
 extension $FacetCountExtension on FacetCount {
@@ -1607,17 +1273,13 @@ class Facets {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Facets &&
-            (identical(other.exts, exts) ||
-                const DeepCollectionEquality().equals(other.exts, exts)) &&
-            (identical(other.types, types) ||
-                const DeepCollectionEquality().equals(other.types, types)));
+            (identical(other.exts, exts) || const DeepCollectionEquality().equals(other.exts, exts)) &&
+            (identical(other.types, types) || const DeepCollectionEquality().equals(other.types, types)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(exts) ^
-      const DeepCollectionEquality().hash(types) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(exts) ^ const DeepCollectionEquality().hash(types) ^ runtimeType.hashCode;
 }
 
 extension $FacetsExtension on Facets {
@@ -1625,14 +1287,8 @@ extension $FacetsExtension on Facets {
     return Facets(exts: exts ?? this.exts, types: types ?? this.types);
   }
 
-  Facets copyWithWrapped({
-    Wrapped<List<FacetCount>?>? exts,
-    Wrapped<List<FacetCount>?>? types,
-  }) {
-    return Facets(
-      exts: (exts != null ? exts.value : this.exts),
-      types: (types != null ? types.value : this.types),
-    );
+  Facets copyWithWrapped({Wrapped<List<FacetCount>?>? exts, Wrapped<List<FacetCount>?>? types}) {
+    return Facets(exts: (exts != null ? exts.value : this.exts), types: (types != null ? types.value : this.types));
   }
 }
 
@@ -1640,8 +1296,7 @@ extension $FacetsExtension on Facets {
 class HealthStatus {
   const HealthStatus({required this.status});
 
-  factory HealthStatus.fromJson(Map<String, dynamic> json) =>
-      _$HealthStatusFromJson(json);
+  factory HealthStatus.fromJson(Map<String, dynamic> json) => _$HealthStatusFromJson(json);
 
   static const toJsonFactory = _$HealthStatusToJson;
   Map<String, dynamic> toJson() => _$HealthStatusToJson(this);
@@ -1654,13 +1309,11 @@ class HealthStatus {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is HealthStatus &&
-            (identical(other.status, status) ||
-                const DeepCollectionEquality().equals(other.status, status)));
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(status) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(status) ^ runtimeType.hashCode;
 }
 
 extension $HealthStatusExtension on HealthStatus {
@@ -1677,8 +1330,7 @@ extension $HealthStatusExtension on HealthStatus {
 class ImageInfo {
   const ImageInfo({required this.contentType, required this.id});
 
-  factory ImageInfo.fromJson(Map<String, dynamic> json) =>
-      _$ImageInfoFromJson(json);
+  factory ImageInfo.fromJson(Map<String, dynamic> json) => _$ImageInfoFromJson(json);
 
   static const toJsonFactory = _$ImageInfoToJson;
   Map<String, dynamic> toJson() => _$ImageInfoToJson(this);
@@ -1694,33 +1346,21 @@ class ImageInfo {
     return identical(this, other) ||
         (other is ImageInfo &&
             (identical(other.contentType, contentType) ||
-                const DeepCollectionEquality().equals(
-                  other.contentType,
-                  contentType,
-                )) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)));
+                const DeepCollectionEquality().equals(other.contentType, contentType)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(contentType) ^
-      const DeepCollectionEquality().hash(id) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(contentType) ^ const DeepCollectionEquality().hash(id) ^ runtimeType.hashCode;
 }
 
 extension $ImageInfoExtension on ImageInfo {
   ImageInfo copyWith({String? contentType, String? id}) {
-    return ImageInfo(
-      contentType: contentType ?? this.contentType,
-      id: id ?? this.id,
-    );
+    return ImageInfo(contentType: contentType ?? this.contentType, id: id ?? this.id);
   }
 
-  ImageInfo copyWithWrapped({
-    Wrapped<String>? contentType,
-    Wrapped<String>? id,
-  }) {
+  ImageInfo copyWithWrapped({Wrapped<String>? contentType, Wrapped<String>? id}) {
     return ImageInfo(
       contentType: (contentType != null ? contentType.value : this.contentType),
       id: (id != null ? id.value : this.id),
@@ -1730,14 +1370,9 @@ extension $ImageInfoExtension on ImageInfo {
 
 @JsonSerializable(explicitToJson: true)
 class Incoming {
-  const Incoming({
-    required this.kind,
-    required this.source,
-    required this.title,
-  });
+  const Incoming({required this.kind, required this.source, required this.title});
 
-  factory Incoming.fromJson(Map<String, dynamic> json) =>
-      _$IncomingFromJson(json);
+  factory Incoming.fromJson(Map<String, dynamic> json) => _$IncomingFromJson(json);
 
   static const toJsonFactory = _$IncomingToJson;
   Map<String, dynamic> toJson() => _$IncomingToJson(this);
@@ -1754,12 +1389,9 @@ class Incoming {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Incoming &&
-            (identical(other.kind, kind) ||
-                const DeepCollectionEquality().equals(other.kind, kind)) &&
-            (identical(other.source, source) ||
-                const DeepCollectionEquality().equals(other.source, source)) &&
-            (identical(other.title, title) ||
-                const DeepCollectionEquality().equals(other.title, title)));
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.source, source) || const DeepCollectionEquality().equals(other.source, source)) &&
+            (identical(other.title, title) || const DeepCollectionEquality().equals(other.title, title)));
   }
 
   @override
@@ -1772,18 +1404,10 @@ class Incoming {
 
 extension $IncomingExtension on Incoming {
   Incoming copyWith({String? kind, Entry? source, String? title}) {
-    return Incoming(
-      kind: kind ?? this.kind,
-      source: source ?? this.source,
-      title: title ?? this.title,
-    );
+    return Incoming(kind: kind ?? this.kind, source: source ?? this.source, title: title ?? this.title);
   }
 
-  Incoming copyWithWrapped({
-    Wrapped<String>? kind,
-    Wrapped<Entry>? source,
-    Wrapped<String>? title,
-  }) {
+  Incoming copyWithWrapped({Wrapped<String>? kind, Wrapped<Entry>? source, Wrapped<String>? title}) {
     return Incoming(
       kind: (kind != null ? kind.value : this.kind),
       source: (source != null ? source.value : this.source),
@@ -1796,8 +1420,7 @@ extension $IncomingExtension on Incoming {
 class LinksResponse {
   const LinksResponse({this.incoming, this.outgoing});
 
-  factory LinksResponse.fromJson(Map<String, dynamic> json) =>
-      _$LinksResponseFromJson(json);
+  factory LinksResponse.fromJson(Map<String, dynamic> json) => _$LinksResponseFromJson(json);
 
   static const toJsonFactory = _$LinksResponseToJson;
   Map<String, dynamic> toJson() => _$LinksResponseToJson(this);
@@ -1812,16 +1435,8 @@ class LinksResponse {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is LinksResponse &&
-            (identical(other.incoming, incoming) ||
-                const DeepCollectionEquality().equals(
-                  other.incoming,
-                  incoming,
-                )) &&
-            (identical(other.outgoing, outgoing) ||
-                const DeepCollectionEquality().equals(
-                  other.outgoing,
-                  outgoing,
-                )));
+            (identical(other.incoming, incoming) || const DeepCollectionEquality().equals(other.incoming, incoming)) &&
+            (identical(other.outgoing, outgoing) || const DeepCollectionEquality().equals(other.outgoing, outgoing)));
   }
 
   @override
@@ -1833,16 +1448,10 @@ class LinksResponse {
 
 extension $LinksResponseExtension on LinksResponse {
   LinksResponse copyWith({List<Incoming>? incoming, List<Outgoing>? outgoing}) {
-    return LinksResponse(
-      incoming: incoming ?? this.incoming,
-      outgoing: outgoing ?? this.outgoing,
-    );
+    return LinksResponse(incoming: incoming ?? this.incoming, outgoing: outgoing ?? this.outgoing);
   }
 
-  LinksResponse copyWithWrapped({
-    Wrapped<List<Incoming>?>? incoming,
-    Wrapped<List<Outgoing>?>? outgoing,
-  }) {
+  LinksResponse copyWithWrapped({Wrapped<List<Incoming>?>? incoming, Wrapped<List<Outgoing>?>? outgoing}) {
     return LinksResponse(
       incoming: (incoming != null ? incoming.value : this.incoming),
       outgoing: (outgoing != null ? outgoing.value : this.outgoing),
@@ -1852,14 +1461,9 @@ extension $LinksResponseExtension on LinksResponse {
 
 @JsonSerializable(explicitToJson: true)
 class ListResponse {
-  const ListResponse({
-    this.entries,
-    required this.indexing,
-    required this.path,
-  });
+  const ListResponse({this.entries, required this.indexing, required this.path});
 
-  factory ListResponse.fromJson(Map<String, dynamic> json) =>
-      _$ListResponseFromJson(json);
+  factory ListResponse.fromJson(Map<String, dynamic> json) => _$ListResponseFromJson(json);
 
   static const toJsonFactory = _$ListResponseToJson;
   Map<String, dynamic> toJson() => _$ListResponseToJson(this);
@@ -1876,18 +1480,9 @@ class ListResponse {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ListResponse &&
-            (identical(other.entries, entries) ||
-                const DeepCollectionEquality().equals(
-                  other.entries,
-                  entries,
-                )) &&
-            (identical(other.indexing, indexing) ||
-                const DeepCollectionEquality().equals(
-                  other.indexing,
-                  indexing,
-                )) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)));
+            (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)) &&
+            (identical(other.indexing, indexing) || const DeepCollectionEquality().equals(other.indexing, indexing)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
   }
 
   @override
@@ -1900,18 +1495,10 @@ class ListResponse {
 
 extension $ListResponseExtension on ListResponse {
   ListResponse copyWith({List<Entry>? entries, bool? indexing, String? path}) {
-    return ListResponse(
-      entries: entries ?? this.entries,
-      indexing: indexing ?? this.indexing,
-      path: path ?? this.path,
-    );
+    return ListResponse(entries: entries ?? this.entries, indexing: indexing ?? this.indexing, path: path ?? this.path);
   }
 
-  ListResponse copyWithWrapped({
-    Wrapped<List<Entry>?>? entries,
-    Wrapped<bool>? indexing,
-    Wrapped<String>? path,
-  }) {
+  ListResponse copyWithWrapped({Wrapped<List<Entry>?>? entries, Wrapped<bool>? indexing, Wrapped<String>? path}) {
     return ListResponse(
       entries: (entries != null ? entries.value : this.entries),
       indexing: (indexing != null ? indexing.value : this.indexing),
@@ -1936,8 +1523,7 @@ class LiveTransfer {
     required this.username,
   });
 
-  factory LiveTransfer.fromJson(Map<String, dynamic> json) =>
-      _$LiveTransferFromJson(json);
+  factory LiveTransfer.fromJson(Map<String, dynamic> json) => _$LiveTransferFromJson(json);
 
   static const toJsonFactory = _$LiveTransferToJson;
   Map<String, dynamic> toJson() => _$LiveTransferToJson(this);
@@ -1975,40 +1561,19 @@ class LiveTransfer {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is LiveTransfer &&
-            (identical(other.bytes, bytes) ||
-                const DeepCollectionEquality().equals(other.bytes, bytes)) &&
-            (identical(other.clientId, clientId) ||
-                const DeepCollectionEquality().equals(
-                  other.clientId,
-                  clientId,
-                )) &&
-            (identical(other.device, device) ||
-                const DeepCollectionEquality().equals(other.device, device)) &&
+            (identical(other.bytes, bytes) || const DeepCollectionEquality().equals(other.bytes, bytes)) &&
+            (identical(other.clientId, clientId) || const DeepCollectionEquality().equals(other.clientId, clientId)) &&
+            (identical(other.device, device) || const DeepCollectionEquality().equals(other.device, device)) &&
             (identical(other.direction, direction) ||
-                const DeepCollectionEquality().equals(
-                  other.direction,
-                  direction,
-                )) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
-            (identical(other.rate, rate) ||
-                const DeepCollectionEquality().equals(other.rate, rate)) &&
+                const DeepCollectionEquality().equals(other.direction, direction)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.rate, rate) || const DeepCollectionEquality().equals(other.rate, rate)) &&
             (identical(other.startedAt, startedAt) ||
-                const DeepCollectionEquality().equals(
-                  other.startedAt,
-                  startedAt,
-                )) &&
-            (identical(other.total, total) ||
-                const DeepCollectionEquality().equals(other.total, total)) &&
-            (identical(other.userId, userId) ||
-                const DeepCollectionEquality().equals(other.userId, userId)) &&
-            (identical(other.username, username) ||
-                const DeepCollectionEquality().equals(
-                  other.username,
-                  username,
-                )));
+                const DeepCollectionEquality().equals(other.startedAt, startedAt)) &&
+            (identical(other.total, total) || const DeepCollectionEquality().equals(other.total, total)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
   }
 
   @override
@@ -2089,17 +1654,12 @@ extension $LiveTransferExtension on LiveTransfer {
 class LiveTransfers {
   const LiveTransfers({this.transfers});
 
-  factory LiveTransfers.fromJson(Map<String, dynamic> json) =>
-      _$LiveTransfersFromJson(json);
+  factory LiveTransfers.fromJson(Map<String, dynamic> json) => _$LiveTransfersFromJson(json);
 
   static const toJsonFactory = _$LiveTransfersToJson;
   Map<String, dynamic> toJson() => _$LiveTransfersToJson(this);
 
-  @JsonKey(
-    name: 'transfers',
-    includeIfNull: false,
-    defaultValue: <LiveTransfer>[],
-  )
+  @JsonKey(name: 'transfers', includeIfNull: false, defaultValue: <LiveTransfer>[])
   final List<LiveTransfer>? transfers;
   static const fromJsonFactory = _$LiveTransfersFromJson;
 
@@ -2108,15 +1668,11 @@ class LiveTransfers {
     return identical(this, other) ||
         (other is LiveTransfers &&
             (identical(other.transfers, transfers) ||
-                const DeepCollectionEquality().equals(
-                  other.transfers,
-                  transfers,
-                )));
+                const DeepCollectionEquality().equals(other.transfers, transfers)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(transfers) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(transfers) ^ runtimeType.hashCode;
 }
 
 extension $LiveTransfersExtension on LiveTransfers {
@@ -2125,9 +1681,7 @@ extension $LiveTransfersExtension on LiveTransfers {
   }
 
   LiveTransfers copyWithWrapped({Wrapped<List<LiveTransfer>?>? transfers}) {
-    return LiveTransfers(
-      transfers: (transfers != null ? transfers.value : this.transfers),
-    );
+    return LiveTransfers(transfers: (transfers != null ? transfers.value : this.transfers));
   }
 }
 
@@ -2135,8 +1689,7 @@ extension $LiveTransfersExtension on LiveTransfers {
 class LogComponents {
   const LogComponents({this.components});
 
-  factory LogComponents.fromJson(Map<String, dynamic> json) =>
-      _$LogComponentsFromJson(json);
+  factory LogComponents.fromJson(Map<String, dynamic> json) => _$LogComponentsFromJson(json);
 
   static const toJsonFactory = _$LogComponentsToJson;
   Map<String, dynamic> toJson() => _$LogComponentsToJson(this);
@@ -2150,15 +1703,11 @@ class LogComponents {
     return identical(this, other) ||
         (other is LogComponents &&
             (identical(other.components, components) ||
-                const DeepCollectionEquality().equals(
-                  other.components,
-                  components,
-                )));
+                const DeepCollectionEquality().equals(other.components, components)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(components) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(components) ^ runtimeType.hashCode;
 }
 
 extension $LogComponentsExtension on LogComponents {
@@ -2167,9 +1716,7 @@ extension $LogComponentsExtension on LogComponents {
   }
 
   LogComponents copyWithWrapped({Wrapped<List<String>?>? components}) {
-    return LogComponents(
-      components: (components != null ? components.value : this.components),
-    );
+    return LogComponents(components: (components != null ? components.value : this.components));
   }
 }
 
@@ -2193,8 +1740,7 @@ class LogEntry {
     required this.username,
   });
 
-  factory LogEntry.fromJson(Map<String, dynamic> json) =>
-      _$LogEntryFromJson(json);
+  factory LogEntry.fromJson(Map<String, dynamic> json) => _$LogEntryFromJson(json);
 
   static const toJsonFactory = _$LogEntryToJson;
   Map<String, dynamic> toJson() => _$LogEntryToJson(this);
@@ -2217,23 +1763,13 @@ class LogEntry {
   final int id;
   @JsonKey(name: 'isDir', includeIfNull: false)
   final bool isDir;
-  @JsonKey(
-    name: 'kind',
-    includeIfNull: false,
-    toJson: logEntryKindToJson,
-    fromJson: logEntryKindFromJson,
-  )
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: logEntryKindToJson, fromJson: logEntryKindFromJson)
   final enums.LogEntryKind kind;
   @JsonKey(name: 'path', includeIfNull: false)
   final String path;
   @JsonKey(name: 'size', includeIfNull: false)
   final int? size;
-  @JsonKey(
-    name: 'status',
-    includeIfNull: false,
-    toJson: logEntryStatusToJson,
-    fromJson: logEntryStatusFromJson,
-  )
+  @JsonKey(name: 'status', includeIfNull: false, toJson: logEntryStatusToJson, fromJson: logEntryStatusFromJson)
   final enums.LogEntryStatus status;
   @JsonKey(name: 'userId', includeIfNull: false)
   final int userId;
@@ -2245,48 +1781,23 @@ class LogEntry {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is LogEntry &&
-            (identical(other.bytes, bytes) ||
-                const DeepCollectionEquality().equals(other.bytes, bytes)) &&
-            (identical(other.count, count) ||
-                const DeepCollectionEquality().equals(other.count, count)) &&
+            (identical(other.bytes, bytes) || const DeepCollectionEquality().equals(other.bytes, bytes)) &&
+            (identical(other.count, count) || const DeepCollectionEquality().equals(other.count, count)) &&
             (identical(other.createdAt, createdAt) ||
-                const DeepCollectionEquality().equals(
-                  other.createdAt,
-                  createdAt,
-                )) &&
-            (identical(other.detail, detail) ||
-                const DeepCollectionEquality().equals(other.detail, detail)) &&
-            (identical(other.device, device) ||
-                const DeepCollectionEquality().equals(other.device, device)) &&
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.detail, detail) || const DeepCollectionEquality().equals(other.detail, detail)) &&
+            (identical(other.device, device) || const DeepCollectionEquality().equals(other.device, device)) &&
             (identical(other.durationMs, durationMs) ||
-                const DeepCollectionEquality().equals(
-                  other.durationMs,
-                  durationMs,
-                )) &&
-            (identical(other.fromPath, fromPath) ||
-                const DeepCollectionEquality().equals(
-                  other.fromPath,
-                  fromPath,
-                )) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.isDir, isDir) ||
-                const DeepCollectionEquality().equals(other.isDir, isDir)) &&
-            (identical(other.kind, kind) ||
-                const DeepCollectionEquality().equals(other.kind, kind)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)) &&
-            (identical(other.status, status) ||
-                const DeepCollectionEquality().equals(other.status, status)) &&
-            (identical(other.userId, userId) ||
-                const DeepCollectionEquality().equals(other.userId, userId)) &&
-            (identical(other.username, username) ||
-                const DeepCollectionEquality().equals(
-                  other.username,
-                  username,
-                )));
+                const DeepCollectionEquality().equals(other.durationMs, durationMs)) &&
+            (identical(other.fromPath, fromPath) || const DeepCollectionEquality().equals(other.fromPath, fromPath)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.userId, userId) || const DeepCollectionEquality().equals(other.userId, userId)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
   }
 
   @override
@@ -2387,8 +1898,7 @@ extension $LogEntryExtension on LogEntry {
 class LogFiles {
   const LogFiles({this.files});
 
-  factory LogFiles.fromJson(Map<String, dynamic> json) =>
-      _$LogFilesFromJson(json);
+  factory LogFiles.fromJson(Map<String, dynamic> json) => _$LogFilesFromJson(json);
 
   static const toJsonFactory = _$LogFilesToJson;
   Map<String, dynamic> toJson() => _$LogFilesToJson(this);
@@ -2401,13 +1911,11 @@ class LogFiles {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is LogFiles &&
-            (identical(other.files, files) ||
-                const DeepCollectionEquality().equals(other.files, files)));
+            (identical(other.files, files) || const DeepCollectionEquality().equals(other.files, files)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(files) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(files) ^ runtimeType.hashCode;
 }
 
 extension $LogFilesExtension on LogFiles {
@@ -2424,8 +1932,7 @@ extension $LogFilesExtension on LogFiles {
 class LogPage {
   const LogPage({this.entries, required this.nextCursor});
 
-  factory LogPage.fromJson(Map<String, dynamic> json) =>
-      _$LogPageFromJson(json);
+  factory LogPage.fromJson(Map<String, dynamic> json) => _$LogPageFromJson(json);
 
   static const toJsonFactory = _$LogPageToJson;
   Map<String, dynamic> toJson() => _$LogPageToJson(this);
@@ -2440,16 +1947,9 @@ class LogPage {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is LogPage &&
-            (identical(other.entries, entries) ||
-                const DeepCollectionEquality().equals(
-                  other.entries,
-                  entries,
-                )) &&
+            (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)) &&
             (identical(other.nextCursor, nextCursor) ||
-                const DeepCollectionEquality().equals(
-                  other.nextCursor,
-                  nextCursor,
-                )));
+                const DeepCollectionEquality().equals(other.nextCursor, nextCursor)));
   }
 
   @override
@@ -2461,16 +1961,10 @@ class LogPage {
 
 extension $LogPageExtension on LogPage {
   LogPage copyWith({List<LogEntry>? entries, int? nextCursor}) {
-    return LogPage(
-      entries: entries ?? this.entries,
-      nextCursor: nextCursor ?? this.nextCursor,
-    );
+    return LogPage(entries: entries ?? this.entries, nextCursor: nextCursor ?? this.nextCursor);
   }
 
-  LogPage copyWithWrapped({
-    Wrapped<List<LogEntry>?>? entries,
-    Wrapped<int>? nextCursor,
-  }) {
+  LogPage copyWithWrapped({Wrapped<List<LogEntry>?>? entries, Wrapped<int>? nextCursor}) {
     return LogPage(
       entries: (entries != null ? entries.value : this.entries),
       nextCursor: (nextCursor != null ? nextCursor.value : this.nextCursor),
@@ -2480,16 +1974,9 @@ extension $LogPageExtension on LogPage {
 
 @JsonSerializable(explicitToJson: true)
 class Manifest {
-  const Manifest({
-    this.chunks,
-    required this.hash,
-    required this.path,
-    required this.rev,
-    required this.size,
-  });
+  const Manifest({this.chunks, required this.hash, required this.path, required this.rev, required this.size});
 
-  factory Manifest.fromJson(Map<String, dynamic> json) =>
-      _$ManifestFromJson(json);
+  factory Manifest.fromJson(Map<String, dynamic> json) => _$ManifestFromJson(json);
 
   static const toJsonFactory = _$ManifestToJson;
   Map<String, dynamic> toJson() => _$ManifestToJson(this);
@@ -2510,16 +1997,11 @@ class Manifest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Manifest &&
-            (identical(other.chunks, chunks) ||
-                const DeepCollectionEquality().equals(other.chunks, chunks)) &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
-            (identical(other.rev, rev) ||
-                const DeepCollectionEquality().equals(other.rev, rev)) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+            (identical(other.chunks, chunks) || const DeepCollectionEquality().equals(other.chunks, chunks)) &&
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.rev, rev) || const DeepCollectionEquality().equals(other.rev, rev)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
@@ -2533,13 +2015,7 @@ class Manifest {
 }
 
 extension $ManifestExtension on Manifest {
-  Manifest copyWith({
-    List<Chunk>? chunks,
-    String? hash,
-    String? path,
-    int? rev,
-    int? size,
-  }) {
+  Manifest copyWith({List<Chunk>? chunks, String? hash, String? path, int? rev, int? size}) {
     return Manifest(
       chunks: chunks ?? this.chunks,
       hash: hash ?? this.hash,
@@ -2568,13 +2044,7 @@ extension $ManifestExtension on Manifest {
 
 @JsonSerializable(explicitToJson: true)
 class Match {
-  const Match({
-    required this.entry,
-    this.nameMatches,
-    required this.score,
-    this.snippet,
-    this.snippetMatches,
-  });
+  const Match({required this.entry, this.nameMatches, required this.score, this.snippet, this.snippetMatches});
 
   factory Match.fromJson(Map<String, dynamic> json) => _$MatchFromJson(json);
 
@@ -2583,21 +2053,13 @@ class Match {
 
   @JsonKey(name: 'entry', includeIfNull: false)
   final Entry entry;
-  @JsonKey(
-    name: 'nameMatches',
-    includeIfNull: false,
-    defaultValue: <TextSpan>[],
-  )
+  @JsonKey(name: 'nameMatches', includeIfNull: false, defaultValue: <TextSpan>[])
   final List<TextSpan>? nameMatches;
   @JsonKey(name: 'score', includeIfNull: false)
   final double score;
   @JsonKey(name: 'snippet', includeIfNull: false)
   final String? snippet;
-  @JsonKey(
-    name: 'snippetMatches',
-    includeIfNull: false,
-    defaultValue: <TextSpan>[],
-  )
+  @JsonKey(name: 'snippetMatches', includeIfNull: false, defaultValue: <TextSpan>[])
   final List<TextSpan>? snippetMatches;
   static const fromJsonFactory = _$MatchFromJson;
 
@@ -2605,25 +2067,13 @@ class Match {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Match &&
-            (identical(other.entry, entry) ||
-                const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
             (identical(other.nameMatches, nameMatches) ||
-                const DeepCollectionEquality().equals(
-                  other.nameMatches,
-                  nameMatches,
-                )) &&
-            (identical(other.score, score) ||
-                const DeepCollectionEquality().equals(other.score, score)) &&
-            (identical(other.snippet, snippet) ||
-                const DeepCollectionEquality().equals(
-                  other.snippet,
-                  snippet,
-                )) &&
+                const DeepCollectionEquality().equals(other.nameMatches, nameMatches)) &&
+            (identical(other.score, score) || const DeepCollectionEquality().equals(other.score, score)) &&
+            (identical(other.snippet, snippet) || const DeepCollectionEquality().equals(other.snippet, snippet)) &&
             (identical(other.snippetMatches, snippetMatches) ||
-                const DeepCollectionEquality().equals(
-                  other.snippetMatches,
-                  snippetMatches,
-                )));
+                const DeepCollectionEquality().equals(other.snippetMatches, snippetMatches)));
   }
 
   @override
@@ -2665,9 +2115,7 @@ extension $MatchExtension on Match {
       nameMatches: (nameMatches != null ? nameMatches.value : this.nameMatches),
       score: (score != null ? score.value : this.score),
       snippet: (snippet != null ? snippet.value : this.snippet),
-      snippetMatches: (snippetMatches != null
-          ? snippetMatches.value
-          : this.snippetMatches),
+      snippetMatches: (snippetMatches != null ? snippetMatches.value : this.snippetMatches),
     );
   }
 }
@@ -2676,8 +2124,7 @@ extension $MatchExtension on Match {
 class MoveRequest {
   const MoveRequest({this.baseRev, required this.from, required this.to});
 
-  factory MoveRequest.fromJson(Map<String, dynamic> json) =>
-      _$MoveRequestFromJson(json);
+  factory MoveRequest.fromJson(Map<String, dynamic> json) => _$MoveRequestFromJson(json);
 
   static const toJsonFactory = _$MoveRequestToJson;
   Map<String, dynamic> toJson() => _$MoveRequestToJson(this);
@@ -2694,15 +2141,9 @@ class MoveRequest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is MoveRequest &&
-            (identical(other.baseRev, baseRev) ||
-                const DeepCollectionEquality().equals(
-                  other.baseRev,
-                  baseRev,
-                )) &&
-            (identical(other.from, from) ||
-                const DeepCollectionEquality().equals(other.from, from)) &&
-            (identical(other.to, to) ||
-                const DeepCollectionEquality().equals(other.to, to)));
+            (identical(other.baseRev, baseRev) || const DeepCollectionEquality().equals(other.baseRev, baseRev)) &&
+            (identical(other.from, from) || const DeepCollectionEquality().equals(other.from, from)) &&
+            (identical(other.to, to) || const DeepCollectionEquality().equals(other.to, to)));
   }
 
   @override
@@ -2715,18 +2156,10 @@ class MoveRequest {
 
 extension $MoveRequestExtension on MoveRequest {
   MoveRequest copyWith({int? baseRev, String? from, String? to}) {
-    return MoveRequest(
-      baseRev: baseRev ?? this.baseRev,
-      from: from ?? this.from,
-      to: to ?? this.to,
-    );
+    return MoveRequest(baseRev: baseRev ?? this.baseRev, from: from ?? this.from, to: to ?? this.to);
   }
 
-  MoveRequest copyWithWrapped({
-    Wrapped<int?>? baseRev,
-    Wrapped<String>? from,
-    Wrapped<String>? to,
-  }) {
+  MoveRequest copyWithWrapped({Wrapped<int?>? baseRev, Wrapped<String>? from, Wrapped<String>? to}) {
     return MoveRequest(
       baseRev: (baseRev != null ? baseRev.value : this.baseRev),
       from: (from != null ? from.value : this.from),
@@ -2737,15 +2170,9 @@ extension $MoveRequestExtension on MoveRequest {
 
 @JsonSerializable(explicitToJson: true)
 class NewUser {
-  const NewUser({
-    required this.password,
-    this.quotaBytes,
-    required this.role,
-    required this.username,
-  });
+  const NewUser({required this.password, this.quotaBytes, required this.role, required this.username});
 
-  factory NewUser.fromJson(Map<String, dynamic> json) =>
-      _$NewUserFromJson(json);
+  factory NewUser.fromJson(Map<String, dynamic> json) => _$NewUserFromJson(json);
 
   static const toJsonFactory = _$NewUserToJson;
   Map<String, dynamic> toJson() => _$NewUserToJson(this);
@@ -2754,12 +2181,7 @@ class NewUser {
   final String password;
   @JsonKey(name: 'quotaBytes', includeIfNull: false)
   final int? quotaBytes;
-  @JsonKey(
-    name: 'role',
-    includeIfNull: false,
-    toJson: newUserRoleToJson,
-    fromJson: newUserRoleFromJson,
-  )
+  @JsonKey(name: 'role', includeIfNull: false, toJson: newUserRoleToJson, fromJson: newUserRoleFromJson)
   final enums.NewUserRole role;
   @JsonKey(name: 'username', includeIfNull: false)
   final String username;
@@ -2769,23 +2191,11 @@ class NewUser {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is NewUser &&
-            (identical(other.password, password) ||
-                const DeepCollectionEquality().equals(
-                  other.password,
-                  password,
-                )) &&
+            (identical(other.password, password) || const DeepCollectionEquality().equals(other.password, password)) &&
             (identical(other.quotaBytes, quotaBytes) ||
-                const DeepCollectionEquality().equals(
-                  other.quotaBytes,
-                  quotaBytes,
-                )) &&
-            (identical(other.role, role) ||
-                const DeepCollectionEquality().equals(other.role, role)) &&
-            (identical(other.username, username) ||
-                const DeepCollectionEquality().equals(
-                  other.username,
-                  username,
-                )));
+                const DeepCollectionEquality().equals(other.quotaBytes, quotaBytes)) &&
+            (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
   }
 
   @override
@@ -2798,12 +2208,7 @@ class NewUser {
 }
 
 extension $NewUserExtension on NewUser {
-  NewUser copyWith({
-    String? password,
-    int? quotaBytes,
-    enums.NewUserRole? role,
-    String? username,
-  }) {
+  NewUser copyWith({String? password, int? quotaBytes, enums.NewUserRole? role, String? username}) {
     return NewUser(
       password: password ?? this.password,
       quotaBytes: quotaBytes ?? this.quotaBytes,
@@ -2831,8 +2236,7 @@ extension $NewUserExtension on NewUser {
 class NotesItem {
   const NotesItem({required this.entry, this.hasNotes, this.hasReadme});
 
-  factory NotesItem.fromJson(Map<String, dynamic> json) =>
-      _$NotesItemFromJson(json);
+  factory NotesItem.fromJson(Map<String, dynamic> json) => _$NotesItemFromJson(json);
 
   static const toJsonFactory = _$NotesItemToJson;
   Map<String, dynamic> toJson() => _$NotesItemToJson(this);
@@ -2849,18 +2253,10 @@ class NotesItem {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is NotesItem &&
-            (identical(other.entry, entry) ||
-                const DeepCollectionEquality().equals(other.entry, entry)) &&
-            (identical(other.hasNotes, hasNotes) ||
-                const DeepCollectionEquality().equals(
-                  other.hasNotes,
-                  hasNotes,
-                )) &&
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.hasNotes, hasNotes) || const DeepCollectionEquality().equals(other.hasNotes, hasNotes)) &&
             (identical(other.hasReadme, hasReadme) ||
-                const DeepCollectionEquality().equals(
-                  other.hasReadme,
-                  hasReadme,
-                )));
+                const DeepCollectionEquality().equals(other.hasReadme, hasReadme)));
   }
 
   @override
@@ -2880,11 +2276,7 @@ extension $NotesItemExtension on NotesItem {
     );
   }
 
-  NotesItem copyWithWrapped({
-    Wrapped<Entry>? entry,
-    Wrapped<bool?>? hasNotes,
-    Wrapped<bool?>? hasReadme,
-  }) {
+  NotesItem copyWithWrapped({Wrapped<Entry>? entry, Wrapped<bool?>? hasNotes, Wrapped<bool?>? hasReadme}) {
     return NotesItem(
       entry: (entry != null ? entry.value : this.entry),
       hasNotes: (hasNotes != null ? hasNotes.value : this.hasNotes),
@@ -2897,8 +2289,7 @@ extension $NotesItemExtension on NotesItem {
 class NotesListing {
   const NotesListing({this.items, required this.path});
 
-  factory NotesListing.fromJson(Map<String, dynamic> json) =>
-      _$NotesListingFromJson(json);
+  factory NotesListing.fromJson(Map<String, dynamic> json) => _$NotesListingFromJson(json);
 
   static const toJsonFactory = _$NotesListingToJson;
   Map<String, dynamic> toJson() => _$NotesListingToJson(this);
@@ -2913,17 +2304,13 @@ class NotesListing {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is NotesListing &&
-            (identical(other.items, items) ||
-                const DeepCollectionEquality().equals(other.items, items)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)));
+            (identical(other.items, items) || const DeepCollectionEquality().equals(other.items, items)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(items) ^
-      const DeepCollectionEquality().hash(path) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(items) ^ const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
 }
 
 extension $NotesListingExtension on NotesListing {
@@ -2931,10 +2318,7 @@ extension $NotesListingExtension on NotesListing {
     return NotesListing(items: items ?? this.items, path: path ?? this.path);
   }
 
-  NotesListing copyWithWrapped({
-    Wrapped<List<NotesItem>?>? items,
-    Wrapped<String>? path,
-  }) {
+  NotesListing copyWithWrapped({Wrapped<List<NotesItem>?>? items, Wrapped<String>? path}) {
     return NotesListing(
       items: (items != null ? items.value : this.items),
       path: (path != null ? path.value : this.path),
@@ -2946,8 +2330,7 @@ extension $NotesListingExtension on NotesListing {
 class NotesSettings {
   const NotesSettings({this.path});
 
-  factory NotesSettings.fromJson(Map<String, dynamic> json) =>
-      _$NotesSettingsFromJson(json);
+  factory NotesSettings.fromJson(Map<String, dynamic> json) => _$NotesSettingsFromJson(json);
 
   static const toJsonFactory = _$NotesSettingsToJson;
   Map<String, dynamic> toJson() => _$NotesSettingsToJson(this);
@@ -2960,13 +2343,11 @@ class NotesSettings {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is NotesSettings &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)));
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
 }
 
 extension $NotesSettingsExtension on NotesSettings {
@@ -2981,14 +2362,9 @@ extension $NotesSettingsExtension on NotesSettings {
 
 @JsonSerializable(explicitToJson: true)
 class OfficeSessionRequest {
-  const OfficeSessionRequest({
-    required this.origin,
-    required this.path,
-    this.versionId,
-  });
+  const OfficeSessionRequest({required this.origin, required this.path, this.versionId});
 
-  factory OfficeSessionRequest.fromJson(Map<String, dynamic> json) =>
-      _$OfficeSessionRequestFromJson(json);
+  factory OfficeSessionRequest.fromJson(Map<String, dynamic> json) => _$OfficeSessionRequestFromJson(json);
 
   static const toJsonFactory = _$OfficeSessionRequestToJson;
   Map<String, dynamic> toJson() => _$OfficeSessionRequestToJson(this);
@@ -3005,15 +2381,10 @@ class OfficeSessionRequest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is OfficeSessionRequest &&
-            (identical(other.origin, origin) ||
-                const DeepCollectionEquality().equals(other.origin, origin)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.origin, origin) || const DeepCollectionEquality().equals(other.origin, origin)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
             (identical(other.versionId, versionId) ||
-                const DeepCollectionEquality().equals(
-                  other.versionId,
-                  versionId,
-                )));
+                const DeepCollectionEquality().equals(other.versionId, versionId)));
   }
 
   @override
@@ -3025,11 +2396,7 @@ class OfficeSessionRequest {
 }
 
 extension $OfficeSessionRequestExtension on OfficeSessionRequest {
-  OfficeSessionRequest copyWith({
-    String? origin,
-    String? path,
-    int? versionId,
-  }) {
+  OfficeSessionRequest copyWith({String? origin, String? path, int? versionId}) {
     return OfficeSessionRequest(
       origin: origin ?? this.origin,
       path: path ?? this.path,
@@ -3037,11 +2404,7 @@ extension $OfficeSessionRequestExtension on OfficeSessionRequest {
     );
   }
 
-  OfficeSessionRequest copyWithWrapped({
-    Wrapped<String>? origin,
-    Wrapped<String>? path,
-    Wrapped<int?>? versionId,
-  }) {
+  OfficeSessionRequest copyWithWrapped({Wrapped<String>? origin, Wrapped<String>? path, Wrapped<int?>? versionId}) {
     return OfficeSessionRequest(
       origin: (origin != null ? origin.value : this.origin),
       path: (path != null ? path.value : this.path),
@@ -3052,15 +2415,9 @@ extension $OfficeSessionRequestExtension on OfficeSessionRequest {
 
 @JsonSerializable(explicitToJson: true)
 class Outgoing {
-  const Outgoing({
-    required this.kind,
-    this.target,
-    required this.targetPath,
-    required this.title,
-  });
+  const Outgoing({required this.kind, this.target, required this.targetPath, required this.title});
 
-  factory Outgoing.fromJson(Map<String, dynamic> json) =>
-      _$OutgoingFromJson(json);
+  factory Outgoing.fromJson(Map<String, dynamic> json) => _$OutgoingFromJson(json);
 
   static const toJsonFactory = _$OutgoingToJson;
   Map<String, dynamic> toJson() => _$OutgoingToJson(this);
@@ -3079,17 +2436,11 @@ class Outgoing {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Outgoing &&
-            (identical(other.kind, kind) ||
-                const DeepCollectionEquality().equals(other.kind, kind)) &&
-            (identical(other.target, target) ||
-                const DeepCollectionEquality().equals(other.target, target)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.target, target) || const DeepCollectionEquality().equals(other.target, target)) &&
             (identical(other.targetPath, targetPath) ||
-                const DeepCollectionEquality().equals(
-                  other.targetPath,
-                  targetPath,
-                )) &&
-            (identical(other.title, title) ||
-                const DeepCollectionEquality().equals(other.title, title)));
+                const DeepCollectionEquality().equals(other.targetPath, targetPath)) &&
+            (identical(other.title, title) || const DeepCollectionEquality().equals(other.title, title)));
   }
 
   @override
@@ -3102,12 +2453,7 @@ class Outgoing {
 }
 
 extension $OutgoingExtension on Outgoing {
-  Outgoing copyWith({
-    String? kind,
-    Entry? target,
-    String? targetPath,
-    String? title,
-  }) {
+  Outgoing copyWith({String? kind, Entry? target, String? targetPath, String? title}) {
     return Outgoing(
       kind: kind ?? this.kind,
       target: target ?? this.target,
@@ -3135,8 +2481,7 @@ extension $OutgoingExtension on Outgoing {
 class PathRequest {
   const PathRequest({required this.path});
 
-  factory PathRequest.fromJson(Map<String, dynamic> json) =>
-      _$PathRequestFromJson(json);
+  factory PathRequest.fromJson(Map<String, dynamic> json) => _$PathRequestFromJson(json);
 
   static const toJsonFactory = _$PathRequestToJson;
   Map<String, dynamic> toJson() => _$PathRequestToJson(this);
@@ -3149,13 +2494,11 @@ class PathRequest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is PathRequest &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)));
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
 }
 
 extension $PathRequestExtension on PathRequest {
@@ -3179,8 +2522,7 @@ class Profile {
     required this.lastName,
   });
 
-  factory Profile.fromJson(Map<String, dynamic> json) =>
-      _$ProfileFromJson(json);
+  factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
 
   static const toJsonFactory = _$ProfileToJson;
   Map<String, dynamic> toJson() => _$ProfileToJson(this);
@@ -3203,30 +2545,14 @@ class Profile {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Profile &&
-            (identical(other.address, address) ||
-                const DeepCollectionEquality().equals(
-                  other.address,
-                  address,
-                )) &&
-            (identical(other.age, age) ||
-                const DeepCollectionEquality().equals(other.age, age)) &&
+            (identical(other.address, address) || const DeepCollectionEquality().equals(other.address, address)) &&
+            (identical(other.age, age) || const DeepCollectionEquality().equals(other.age, age)) &&
             (identical(other.displayName, displayName) ||
-                const DeepCollectionEquality().equals(
-                  other.displayName,
-                  displayName,
-                )) &&
-            (identical(other.email, email) ||
-                const DeepCollectionEquality().equals(other.email, email)) &&
+                const DeepCollectionEquality().equals(other.displayName, displayName)) &&
+            (identical(other.email, email) || const DeepCollectionEquality().equals(other.email, email)) &&
             (identical(other.firstName, firstName) ||
-                const DeepCollectionEquality().equals(
-                  other.firstName,
-                  firstName,
-                )) &&
-            (identical(other.lastName, lastName) ||
-                const DeepCollectionEquality().equals(
-                  other.lastName,
-                  lastName,
-                )));
+                const DeepCollectionEquality().equals(other.firstName, firstName)) &&
+            (identical(other.lastName, lastName) || const DeepCollectionEquality().equals(other.lastName, lastName)));
   }
 
   @override
@@ -3280,35 +2606,18 @@ extension $ProfileExtension on Profile {
 
 @JsonSerializable(explicitToJson: true)
 class QueryFilter {
-  const QueryFilter({
-    required this.end,
-    required this.key,
-    required this.op,
-    required this.start,
-    this.values,
-  });
+  const QueryFilter({required this.end, required this.key, required this.op, required this.start, this.values});
 
-  factory QueryFilter.fromJson(Map<String, dynamic> json) =>
-      _$QueryFilterFromJson(json);
+  factory QueryFilter.fromJson(Map<String, dynamic> json) => _$QueryFilterFromJson(json);
 
   static const toJsonFactory = _$QueryFilterToJson;
   Map<String, dynamic> toJson() => _$QueryFilterToJson(this);
 
   @JsonKey(name: 'end', includeIfNull: false)
   final int end;
-  @JsonKey(
-    name: 'key',
-    includeIfNull: false,
-    toJson: queryFilterKeyToJson,
-    fromJson: queryFilterKeyFromJson,
-  )
+  @JsonKey(name: 'key', includeIfNull: false, toJson: queryFilterKeyToJson, fromJson: queryFilterKeyFromJson)
   final enums.QueryFilterKey key;
-  @JsonKey(
-    name: 'op',
-    includeIfNull: false,
-    toJson: queryFilterOpToJson,
-    fromJson: queryFilterOpFromJson,
-  )
+  @JsonKey(name: 'op', includeIfNull: false, toJson: queryFilterOpToJson, fromJson: queryFilterOpFromJson)
   final enums.QueryFilterOp op;
   @JsonKey(name: 'start', includeIfNull: false)
   final int start;
@@ -3320,16 +2629,11 @@ class QueryFilter {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is QueryFilter &&
-            (identical(other.end, end) ||
-                const DeepCollectionEquality().equals(other.end, end)) &&
-            (identical(other.key, key) ||
-                const DeepCollectionEquality().equals(other.key, key)) &&
-            (identical(other.op, op) ||
-                const DeepCollectionEquality().equals(other.op, op)) &&
-            (identical(other.start, start) ||
-                const DeepCollectionEquality().equals(other.start, start)) &&
-            (identical(other.values, values) ||
-                const DeepCollectionEquality().equals(other.values, values)));
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.key, key) || const DeepCollectionEquality().equals(other.key, key)) &&
+            (identical(other.op, op) || const DeepCollectionEquality().equals(other.op, op)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.values, values) || const DeepCollectionEquality().equals(other.values, values)));
   }
 
   @override
@@ -3378,14 +2682,9 @@ extension $QueryFilterExtension on QueryFilter {
 
 @JsonSerializable(explicitToJson: true)
 class QueryWarning {
-  const QueryWarning({
-    required this.end,
-    required this.message,
-    required this.start,
-  });
+  const QueryWarning({required this.end, required this.message, required this.start});
 
-  factory QueryWarning.fromJson(Map<String, dynamic> json) =>
-      _$QueryWarningFromJson(json);
+  factory QueryWarning.fromJson(Map<String, dynamic> json) => _$QueryWarningFromJson(json);
 
   static const toJsonFactory = _$QueryWarningToJson;
   Map<String, dynamic> toJson() => _$QueryWarningToJson(this);
@@ -3402,15 +2701,9 @@ class QueryWarning {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is QueryWarning &&
-            (identical(other.end, end) ||
-                const DeepCollectionEquality().equals(other.end, end)) &&
-            (identical(other.message, message) ||
-                const DeepCollectionEquality().equals(
-                  other.message,
-                  message,
-                )) &&
-            (identical(other.start, start) ||
-                const DeepCollectionEquality().equals(other.start, start)));
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)));
   }
 
   @override
@@ -3423,18 +2716,10 @@ class QueryWarning {
 
 extension $QueryWarningExtension on QueryWarning {
   QueryWarning copyWith({int? end, String? message, int? start}) {
-    return QueryWarning(
-      end: end ?? this.end,
-      message: message ?? this.message,
-      start: start ?? this.start,
-    );
+    return QueryWarning(end: end ?? this.end, message: message ?? this.message, start: start ?? this.start);
   }
 
-  QueryWarning copyWithWrapped({
-    Wrapped<int>? end,
-    Wrapped<String>? message,
-    Wrapped<int>? start,
-  }) {
+  QueryWarning copyWithWrapped({Wrapped<int>? end, Wrapped<String>? message, Wrapped<int>? start}) {
     return QueryWarning(
       end: (end != null ? end.value : this.end),
       message: (message != null ? message.value : this.message),
@@ -3447,8 +2732,7 @@ extension $QueryWarningExtension on QueryWarning {
 class RefreshRequest {
   const RefreshRequest({this.deviceName, required this.refreshToken});
 
-  factory RefreshRequest.fromJson(Map<String, dynamic> json) =>
-      _$RefreshRequestFromJson(json);
+  factory RefreshRequest.fromJson(Map<String, dynamic> json) => _$RefreshRequestFromJson(json);
 
   static const toJsonFactory = _$RefreshRequestToJson;
   Map<String, dynamic> toJson() => _$RefreshRequestToJson(this);
@@ -3464,15 +2748,9 @@ class RefreshRequest {
     return identical(this, other) ||
         (other is RefreshRequest &&
             (identical(other.deviceName, deviceName) ||
-                const DeepCollectionEquality().equals(
-                  other.deviceName,
-                  deviceName,
-                )) &&
+                const DeepCollectionEquality().equals(other.deviceName, deviceName)) &&
             (identical(other.refreshToken, refreshToken) ||
-                const DeepCollectionEquality().equals(
-                  other.refreshToken,
-                  refreshToken,
-                )));
+                const DeepCollectionEquality().equals(other.refreshToken, refreshToken)));
   }
 
   @override
@@ -3484,21 +2762,13 @@ class RefreshRequest {
 
 extension $RefreshRequestExtension on RefreshRequest {
   RefreshRequest copyWith({String? deviceName, String? refreshToken}) {
-    return RefreshRequest(
-      deviceName: deviceName ?? this.deviceName,
-      refreshToken: refreshToken ?? this.refreshToken,
-    );
+    return RefreshRequest(deviceName: deviceName ?? this.deviceName, refreshToken: refreshToken ?? this.refreshToken);
   }
 
-  RefreshRequest copyWithWrapped({
-    Wrapped<String?>? deviceName,
-    Wrapped<String>? refreshToken,
-  }) {
+  RefreshRequest copyWithWrapped({Wrapped<String?>? deviceName, Wrapped<String>? refreshToken}) {
     return RefreshRequest(
       deviceName: (deviceName != null ? deviceName.value : this.deviceName),
-      refreshToken: (refreshToken != null
-          ? refreshToken.value
-          : this.refreshToken),
+      refreshToken: (refreshToken != null ? refreshToken.value : this.refreshToken),
     );
   }
 }
@@ -3507,8 +2777,7 @@ extension $RefreshRequestExtension on RefreshRequest {
 class ResolveRequest {
   const ResolveRequest({this.ids});
 
-  factory ResolveRequest.fromJson(Map<String, dynamic> json) =>
-      _$ResolveRequestFromJson(json);
+  factory ResolveRequest.fromJson(Map<String, dynamic> json) => _$ResolveRequestFromJson(json);
 
   static const toJsonFactory = _$ResolveRequestToJson;
   Map<String, dynamic> toJson() => _$ResolveRequestToJson(this);
@@ -3521,13 +2790,11 @@ class ResolveRequest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ResolveRequest &&
-            (identical(other.ids, ids) ||
-                const DeepCollectionEquality().equals(other.ids, ids)));
+            (identical(other.ids, ids) || const DeepCollectionEquality().equals(other.ids, ids)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(ids) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(ids) ^ runtimeType.hashCode;
 }
 
 extension $ResolveRequestExtension on ResolveRequest {
@@ -3544,8 +2811,7 @@ extension $ResolveRequestExtension on ResolveRequest {
 class ResolveResponse {
   const ResolveResponse({this.entries});
 
-  factory ResolveResponse.fromJson(Map<String, dynamic> json) =>
-      _$ResolveResponseFromJson(json);
+  factory ResolveResponse.fromJson(Map<String, dynamic> json) => _$ResolveResponseFromJson(json);
 
   static const toJsonFactory = _$ResolveResponseToJson;
   Map<String, dynamic> toJson() => _$ResolveResponseToJson(this);
@@ -3558,13 +2824,11 @@ class ResolveResponse {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ResolveResponse &&
-            (identical(other.entries, entries) ||
-                const DeepCollectionEquality().equals(other.entries, entries)));
+            (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(entries) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(entries) ^ runtimeType.hashCode;
 }
 
 extension $ResolveResponseExtension on ResolveResponse {
@@ -3573,9 +2837,7 @@ extension $ResolveResponseExtension on ResolveResponse {
   }
 
   ResolveResponse copyWithWrapped({Wrapped<List<Entry>?>? entries}) {
-    return ResolveResponse(
-      entries: (entries != null ? entries.value : this.entries),
-    );
+    return ResolveResponse(entries: (entries != null ? entries.value : this.entries));
   }
 }
 
@@ -3583,8 +2845,7 @@ extension $ResolveResponseExtension on ResolveResponse {
 class RestoreRequest {
   const RestoreRequest({this.onConflict});
 
-  factory RestoreRequest.fromJson(Map<String, dynamic> json) =>
-      _$RestoreRequestFromJson(json);
+  factory RestoreRequest.fromJson(Map<String, dynamic> json) => _$RestoreRequestFromJson(json);
 
   static const toJsonFactory = _$RestoreRequestToJson;
   Map<String, dynamic> toJson() => _$RestoreRequestToJson(this);
@@ -3596,12 +2857,8 @@ class RestoreRequest {
     fromJson: restoreRequestOnConflictOnConflictNullableFromJson,
   )
   final enums.RestoreRequestOnConflict? onConflict;
-  static enums.RestoreRequestOnConflict?
-  restoreRequestOnConflictOnConflictNullableFromJson(Object? value) =>
-      restoreRequestOnConflictNullableFromJson(
-        value,
-        enums.RestoreRequestOnConflict.fail,
-      );
+  static enums.RestoreRequestOnConflict? restoreRequestOnConflictOnConflictNullableFromJson(Object? value) =>
+      restoreRequestOnConflictNullableFromJson(value, enums.RestoreRequestOnConflict.fail);
 
   static const fromJsonFactory = _$RestoreRequestFromJson;
 
@@ -3610,15 +2867,11 @@ class RestoreRequest {
     return identical(this, other) ||
         (other is RestoreRequest &&
             (identical(other.onConflict, onConflict) ||
-                const DeepCollectionEquality().equals(
-                  other.onConflict,
-                  onConflict,
-                )));
+                const DeepCollectionEquality().equals(other.onConflict, onConflict)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(onConflict) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(onConflict) ^ runtimeType.hashCode;
 }
 
 extension $RestoreRequestExtension on RestoreRequest {
@@ -3626,12 +2879,8 @@ extension $RestoreRequestExtension on RestoreRequest {
     return RestoreRequest(onConflict: onConflict ?? this.onConflict);
   }
 
-  RestoreRequest copyWithWrapped({
-    Wrapped<enums.RestoreRequestOnConflict?>? onConflict,
-  }) {
-    return RestoreRequest(
-      onConflict: (onConflict != null ? onConflict.value : this.onConflict),
-    );
+  RestoreRequest copyWithWrapped({Wrapped<enums.RestoreRequestOnConflict?>? onConflict}) {
+    return RestoreRequest(onConflict: (onConflict != null ? onConflict.value : this.onConflict));
   }
 }
 
@@ -3646,8 +2895,7 @@ class Results {
     this.warnings,
   });
 
-  factory Results.fromJson(Map<String, dynamic> json) =>
-      _$ResultsFromJson(json);
+  factory Results.fromJson(Map<String, dynamic> json) => _$ResultsFromJson(json);
 
   static const toJsonFactory = _$ResultsToJson;
   Map<String, dynamic> toJson() => _$ResultsToJson(this);
@@ -3662,11 +2910,7 @@ class Results {
   final List<Match>? results;
   @JsonKey(name: 'total', includeIfNull: false)
   final int total;
-  @JsonKey(
-    name: 'warnings',
-    includeIfNull: false,
-    defaultValue: <QueryWarning>[],
-  )
+  @JsonKey(name: 'warnings', includeIfNull: false, defaultValue: <QueryWarning>[])
   final List<QueryWarning>? warnings;
   static const fromJsonFactory = _$ResultsFromJson;
 
@@ -3674,27 +2918,12 @@ class Results {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Results &&
-            (identical(other.facets, facets) ||
-                const DeepCollectionEquality().equals(other.facets, facets)) &&
-            (identical(other.filters, filters) ||
-                const DeepCollectionEquality().equals(
-                  other.filters,
-                  filters,
-                )) &&
-            (identical(other.query, query) ||
-                const DeepCollectionEquality().equals(other.query, query)) &&
-            (identical(other.results, results) ||
-                const DeepCollectionEquality().equals(
-                  other.results,
-                  results,
-                )) &&
-            (identical(other.total, total) ||
-                const DeepCollectionEquality().equals(other.total, total)) &&
-            (identical(other.warnings, warnings) ||
-                const DeepCollectionEquality().equals(
-                  other.warnings,
-                  warnings,
-                )));
+            (identical(other.facets, facets) || const DeepCollectionEquality().equals(other.facets, facets)) &&
+            (identical(other.filters, filters) || const DeepCollectionEquality().equals(other.filters, filters)) &&
+            (identical(other.query, query) || const DeepCollectionEquality().equals(other.query, query)) &&
+            (identical(other.results, results) || const DeepCollectionEquality().equals(other.results, results)) &&
+            (identical(other.total, total) || const DeepCollectionEquality().equals(other.total, total)) &&
+            (identical(other.warnings, warnings) || const DeepCollectionEquality().equals(other.warnings, warnings)));
   }
 
   @override
@@ -3748,14 +2977,9 @@ extension $ResultsExtension on Results {
 
 @JsonSerializable(explicitToJson: true)
 class SearchStatus {
-  const SearchStatus({
-    required this.documents,
-    required this.extraction,
-    this.lastSync,
-  });
+  const SearchStatus({required this.documents, required this.extraction, this.lastSync});
 
-  factory SearchStatus.fromJson(Map<String, dynamic> json) =>
-      _$SearchStatusFromJson(json);
+  factory SearchStatus.fromJson(Map<String, dynamic> json) => _$SearchStatusFromJson(json);
 
   static const toJsonFactory = _$SearchStatusToJson;
   Map<String, dynamic> toJson() => _$SearchStatusToJson(this);
@@ -3773,20 +2997,10 @@ class SearchStatus {
     return identical(this, other) ||
         (other is SearchStatus &&
             (identical(other.documents, documents) ||
-                const DeepCollectionEquality().equals(
-                  other.documents,
-                  documents,
-                )) &&
+                const DeepCollectionEquality().equals(other.documents, documents)) &&
             (identical(other.extraction, extraction) ||
-                const DeepCollectionEquality().equals(
-                  other.extraction,
-                  extraction,
-                )) &&
-            (identical(other.lastSync, lastSync) ||
-                const DeepCollectionEquality().equals(
-                  other.lastSync,
-                  lastSync,
-                )));
+                const DeepCollectionEquality().equals(other.extraction, extraction)) &&
+            (identical(other.lastSync, lastSync) || const DeepCollectionEquality().equals(other.lastSync, lastSync)));
   }
 
   @override
@@ -3798,11 +3012,7 @@ class SearchStatus {
 }
 
 extension $SearchStatusExtension on SearchStatus {
-  SearchStatus copyWith({
-    int? documents,
-    ExtractionStatus? extraction,
-    DateTime? lastSync,
-  }) {
+  SearchStatus copyWith({int? documents, ExtractionStatus? extraction, DateTime? lastSync}) {
     return SearchStatus(
       documents: documents ?? this.documents,
       extraction: extraction ?? this.extraction,
@@ -3824,6 +3034,50 @@ extension $SearchStatusExtension on SearchStatus {
 }
 
 @JsonSerializable(explicitToJson: true)
+class ServerInfo {
+  const ServerInfo({required this.buildNumber, required this.version});
+
+  factory ServerInfo.fromJson(Map<String, dynamic> json) => _$ServerInfoFromJson(json);
+
+  static const toJsonFactory = _$ServerInfoToJson;
+  Map<String, dynamic> toJson() => _$ServerInfoToJson(this);
+
+  @JsonKey(name: 'buildNumber', includeIfNull: false)
+  final String buildNumber;
+  @JsonKey(name: 'version', includeIfNull: false)
+  final String version;
+  static const fromJsonFactory = _$ServerInfoFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ServerInfo &&
+            (identical(other.buildNumber, buildNumber) ||
+                const DeepCollectionEquality().equals(other.buildNumber, buildNumber)) &&
+            (identical(other.version, version) || const DeepCollectionEquality().equals(other.version, version)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(buildNumber) ^
+      const DeepCollectionEquality().hash(version) ^
+      runtimeType.hashCode;
+}
+
+extension $ServerInfoExtension on ServerInfo {
+  ServerInfo copyWith({String? buildNumber, String? version}) {
+    return ServerInfo(buildNumber: buildNumber ?? this.buildNumber, version: version ?? this.version);
+  }
+
+  ServerInfo copyWithWrapped({Wrapped<String>? buildNumber, Wrapped<String>? version}) {
+    return ServerInfo(
+      buildNumber: (buildNumber != null ? buildNumber.value : this.buildNumber),
+      version: (version != null ? version.value : this.version),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class ServerLogEntry {
   const ServerLogEntry({
     required this.attrs,
@@ -3834,8 +3088,7 @@ class ServerLogEntry {
     this.time,
   });
 
-  factory ServerLogEntry.fromJson(Map<String, dynamic> json) =>
-      _$ServerLogEntryFromJson(json);
+  factory ServerLogEntry.fromJson(Map<String, dynamic> json) => _$ServerLogEntryFromJson(json);
 
   static const toJsonFactory = _$ServerLogEntryToJson;
   Map<String, dynamic> toJson() => _$ServerLogEntryToJson(this);
@@ -3858,24 +3111,13 @@ class ServerLogEntry {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ServerLogEntry &&
-            (identical(other.attrs, attrs) ||
-                const DeepCollectionEquality().equals(other.attrs, attrs)) &&
+            (identical(other.attrs, attrs) || const DeepCollectionEquality().equals(other.attrs, attrs)) &&
             (identical(other.component, component) ||
-                const DeepCollectionEquality().equals(
-                  other.component,
-                  component,
-                )) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.level, level) ||
-                const DeepCollectionEquality().equals(other.level, level)) &&
-            (identical(other.message, message) ||
-                const DeepCollectionEquality().equals(
-                  other.message,
-                  message,
-                )) &&
-            (identical(other.time, time) ||
-                const DeepCollectionEquality().equals(other.time, time)));
+                const DeepCollectionEquality().equals(other.component, component)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.level, level) || const DeepCollectionEquality().equals(other.level, level)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.time, time) || const DeepCollectionEquality().equals(other.time, time)));
   }
 
   @override
@@ -3929,14 +3171,9 @@ extension $ServerLogEntryExtension on ServerLogEntry {
 
 @JsonSerializable(explicitToJson: true)
 class ServerLogFile {
-  const ServerLogFile({
-    required this.day,
-    required this.name,
-    required this.size,
-  });
+  const ServerLogFile({required this.day, required this.name, required this.size});
 
-  factory ServerLogFile.fromJson(Map<String, dynamic> json) =>
-      _$ServerLogFileFromJson(json);
+  factory ServerLogFile.fromJson(Map<String, dynamic> json) => _$ServerLogFileFromJson(json);
 
   static const toJsonFactory = _$ServerLogFileToJson;
   Map<String, dynamic> toJson() => _$ServerLogFileToJson(this);
@@ -3953,12 +3190,9 @@ class ServerLogFile {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ServerLogFile &&
-            (identical(other.day, day) ||
-                const DeepCollectionEquality().equals(other.day, day)) &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+            (identical(other.day, day) || const DeepCollectionEquality().equals(other.day, day)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
@@ -3971,18 +3205,10 @@ class ServerLogFile {
 
 extension $ServerLogFileExtension on ServerLogFile {
   ServerLogFile copyWith({DateTime? day, String? name, int? size}) {
-    return ServerLogFile(
-      day: day ?? this.day,
-      name: name ?? this.name,
-      size: size ?? this.size,
-    );
+    return ServerLogFile(day: day ?? this.day, name: name ?? this.name, size: size ?? this.size);
   }
 
-  ServerLogFile copyWithWrapped({
-    Wrapped<DateTime>? day,
-    Wrapped<String>? name,
-    Wrapped<int>? size,
-  }) {
+  ServerLogFile copyWithWrapped({Wrapped<DateTime>? day, Wrapped<String>? name, Wrapped<int>? size}) {
     return ServerLogFile(
       day: (day != null ? day.value : this.day),
       name: (name != null ? name.value : this.name),
@@ -3995,17 +3221,12 @@ extension $ServerLogFileExtension on ServerLogFile {
 class ServerLogPage {
   const ServerLogPage({this.entries, required this.nextCursor});
 
-  factory ServerLogPage.fromJson(Map<String, dynamic> json) =>
-      _$ServerLogPageFromJson(json);
+  factory ServerLogPage.fromJson(Map<String, dynamic> json) => _$ServerLogPageFromJson(json);
 
   static const toJsonFactory = _$ServerLogPageToJson;
   Map<String, dynamic> toJson() => _$ServerLogPageToJson(this);
 
-  @JsonKey(
-    name: 'entries',
-    includeIfNull: false,
-    defaultValue: <ServerLogEntry>[],
-  )
+  @JsonKey(name: 'entries', includeIfNull: false, defaultValue: <ServerLogEntry>[])
   final List<ServerLogEntry>? entries;
   @JsonKey(name: 'nextCursor', includeIfNull: false)
   final String nextCursor;
@@ -4015,16 +3236,9 @@ class ServerLogPage {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ServerLogPage &&
-            (identical(other.entries, entries) ||
-                const DeepCollectionEquality().equals(
-                  other.entries,
-                  entries,
-                )) &&
+            (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)) &&
             (identical(other.nextCursor, nextCursor) ||
-                const DeepCollectionEquality().equals(
-                  other.nextCursor,
-                  nextCursor,
-                )));
+                const DeepCollectionEquality().equals(other.nextCursor, nextCursor)));
   }
 
   @override
@@ -4036,16 +3250,10 @@ class ServerLogPage {
 
 extension $ServerLogPageExtension on ServerLogPage {
   ServerLogPage copyWith({List<ServerLogEntry>? entries, String? nextCursor}) {
-    return ServerLogPage(
-      entries: entries ?? this.entries,
-      nextCursor: nextCursor ?? this.nextCursor,
-    );
+    return ServerLogPage(entries: entries ?? this.entries, nextCursor: nextCursor ?? this.nextCursor);
   }
 
-  ServerLogPage copyWithWrapped({
-    Wrapped<List<ServerLogEntry>?>? entries,
-    Wrapped<String>? nextCursor,
-  }) {
+  ServerLogPage copyWithWrapped({Wrapped<List<ServerLogEntry>?>? entries, Wrapped<String>? nextCursor}) {
     return ServerLogPage(
       entries: (entries != null ? entries.value : this.entries),
       nextCursor: (nextCursor != null ? nextCursor.value : this.nextCursor),
@@ -4071,8 +3279,7 @@ class ServerSettings {
     required this.welcomeMessage,
   });
 
-  factory ServerSettings.fromJson(Map<String, dynamic> json) =>
-      _$ServerSettingsFromJson(json);
+  factory ServerSettings.fromJson(Map<String, dynamic> json) => _$ServerSettingsFromJson(json);
 
   static const toJsonFactory = _$ServerSettingsToJson;
   Map<String, dynamic> toJson() => _$ServerSettingsToJson(this);
@@ -4110,70 +3317,31 @@ class ServerSettings {
     return identical(this, other) ||
         (other is ServerSettings &&
             (identical(other.accentColor, accentColor) ||
-                const DeepCollectionEquality().equals(
-                  other.accentColor,
-                  accentColor,
-                )) &&
+                const DeepCollectionEquality().equals(other.accentColor, accentColor)) &&
             (identical(other.instanceName, instanceName) ||
-                const DeepCollectionEquality().equals(
-                  other.instanceName,
-                  instanceName,
-                )) &&
+                const DeepCollectionEquality().equals(other.instanceName, instanceName)) &&
             (identical(other.ocrEnabled, ocrEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.ocrEnabled,
-                  ocrEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.ocrEnabled, ocrEnabled)) &&
             (identical(other.ocrLanguages, ocrLanguages) ||
-                const DeepCollectionEquality().equals(
-                  other.ocrLanguages,
-                  ocrLanguages,
-                )) &&
+                const DeepCollectionEquality().equals(other.ocrLanguages, ocrLanguages)) &&
             (identical(other.ocrMaxPages, ocrMaxPages) ||
-                const DeepCollectionEquality().equals(
-                  other.ocrMaxPages,
-                  ocrMaxPages,
-                )) &&
+                const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
             (identical(other.searchContentEnabled, searchContentEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.searchContentEnabled,
-                  searchContentEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
             (identical(other.trashEnabled, trashEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.trashEnabled,
-                  trashEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.trashEnabled, trashEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
-                const DeepCollectionEquality().equals(
-                  other.trashRetentionDays,
-                  trashRetentionDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
             (identical(other.versionsEnabled, versionsEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsEnabled,
-                  versionsEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsEnabled, versionsEnabled)) &&
             (identical(other.versionsKeepAllHours, versionsKeepAllHours) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsKeepAllHours,
-                  versionsKeepAllHours,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsKeepAllHours, versionsKeepAllHours)) &&
             (identical(other.versionsMaxAgeDays, versionsMaxAgeDays) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsMaxAgeDays,
-                  versionsMaxAgeDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsMaxAgeDays, versionsMaxAgeDays)) &&
             (identical(other.versionsMaxPerFile, versionsMaxPerFile) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsMaxPerFile,
-                  versionsMaxPerFile,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsMaxPerFile, versionsMaxPerFile)) &&
             (identical(other.welcomeMessage, welcomeMessage) ||
-                const DeepCollectionEquality().equals(
-                  other.welcomeMessage,
-                  welcomeMessage,
-                )));
+                const DeepCollectionEquality().equals(other.welcomeMessage, welcomeMessage)));
   }
 
   @override
@@ -4244,38 +3412,18 @@ extension $ServerSettingsExtension on ServerSettings {
   }) {
     return ServerSettings(
       accentColor: (accentColor != null ? accentColor.value : this.accentColor),
-      instanceName: (instanceName != null
-          ? instanceName.value
-          : this.instanceName),
+      instanceName: (instanceName != null ? instanceName.value : this.instanceName),
       ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
-      ocrLanguages: (ocrLanguages != null
-          ? ocrLanguages.value
-          : this.ocrLanguages),
+      ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
       ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
-      searchContentEnabled: (searchContentEnabled != null
-          ? searchContentEnabled.value
-          : this.searchContentEnabled),
-      trashEnabled: (trashEnabled != null
-          ? trashEnabled.value
-          : this.trashEnabled),
-      trashRetentionDays: (trashRetentionDays != null
-          ? trashRetentionDays.value
-          : this.trashRetentionDays),
-      versionsEnabled: (versionsEnabled != null
-          ? versionsEnabled.value
-          : this.versionsEnabled),
-      versionsKeepAllHours: (versionsKeepAllHours != null
-          ? versionsKeepAllHours.value
-          : this.versionsKeepAllHours),
-      versionsMaxAgeDays: (versionsMaxAgeDays != null
-          ? versionsMaxAgeDays.value
-          : this.versionsMaxAgeDays),
-      versionsMaxPerFile: (versionsMaxPerFile != null
-          ? versionsMaxPerFile.value
-          : this.versionsMaxPerFile),
-      welcomeMessage: (welcomeMessage != null
-          ? welcomeMessage.value
-          : this.welcomeMessage),
+      searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
+      trashEnabled: (trashEnabled != null ? trashEnabled.value : this.trashEnabled),
+      trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
+      versionsEnabled: (versionsEnabled != null ? versionsEnabled.value : this.versionsEnabled),
+      versionsKeepAllHours: (versionsKeepAllHours != null ? versionsKeepAllHours.value : this.versionsKeepAllHours),
+      versionsMaxAgeDays: (versionsMaxAgeDays != null ? versionsMaxAgeDays.value : this.versionsMaxAgeDays),
+      versionsMaxPerFile: (versionsMaxPerFile != null ? versionsMaxPerFile.value : this.versionsMaxPerFile),
+      welcomeMessage: (welcomeMessage != null ? welcomeMessage.value : this.welcomeMessage),
     );
   }
 }
@@ -4298,8 +3446,7 @@ class ServerSettingsChanges {
     this.welcomeMessage,
   });
 
-  factory ServerSettingsChanges.fromJson(Map<String, dynamic> json) =>
-      _$ServerSettingsChangesFromJson(json);
+  factory ServerSettingsChanges.fromJson(Map<String, dynamic> json) => _$ServerSettingsChangesFromJson(json);
 
   static const toJsonFactory = _$ServerSettingsChangesToJson;
   Map<String, dynamic> toJson() => _$ServerSettingsChangesToJson(this);
@@ -4337,70 +3484,31 @@ class ServerSettingsChanges {
     return identical(this, other) ||
         (other is ServerSettingsChanges &&
             (identical(other.accentColor, accentColor) ||
-                const DeepCollectionEquality().equals(
-                  other.accentColor,
-                  accentColor,
-                )) &&
+                const DeepCollectionEquality().equals(other.accentColor, accentColor)) &&
             (identical(other.instanceName, instanceName) ||
-                const DeepCollectionEquality().equals(
-                  other.instanceName,
-                  instanceName,
-                )) &&
+                const DeepCollectionEquality().equals(other.instanceName, instanceName)) &&
             (identical(other.ocrEnabled, ocrEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.ocrEnabled,
-                  ocrEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.ocrEnabled, ocrEnabled)) &&
             (identical(other.ocrLanguages, ocrLanguages) ||
-                const DeepCollectionEquality().equals(
-                  other.ocrLanguages,
-                  ocrLanguages,
-                )) &&
+                const DeepCollectionEquality().equals(other.ocrLanguages, ocrLanguages)) &&
             (identical(other.ocrMaxPages, ocrMaxPages) ||
-                const DeepCollectionEquality().equals(
-                  other.ocrMaxPages,
-                  ocrMaxPages,
-                )) &&
+                const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
             (identical(other.searchContentEnabled, searchContentEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.searchContentEnabled,
-                  searchContentEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
             (identical(other.trashEnabled, trashEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.trashEnabled,
-                  trashEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.trashEnabled, trashEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
-                const DeepCollectionEquality().equals(
-                  other.trashRetentionDays,
-                  trashRetentionDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
             (identical(other.versionsEnabled, versionsEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsEnabled,
-                  versionsEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsEnabled, versionsEnabled)) &&
             (identical(other.versionsKeepAllHours, versionsKeepAllHours) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsKeepAllHours,
-                  versionsKeepAllHours,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsKeepAllHours, versionsKeepAllHours)) &&
             (identical(other.versionsMaxAgeDays, versionsMaxAgeDays) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsMaxAgeDays,
-                  versionsMaxAgeDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsMaxAgeDays, versionsMaxAgeDays)) &&
             (identical(other.versionsMaxPerFile, versionsMaxPerFile) ||
-                const DeepCollectionEquality().equals(
-                  other.versionsMaxPerFile,
-                  versionsMaxPerFile,
-                )) &&
+                const DeepCollectionEquality().equals(other.versionsMaxPerFile, versionsMaxPerFile)) &&
             (identical(other.welcomeMessage, welcomeMessage) ||
-                const DeepCollectionEquality().equals(
-                  other.welcomeMessage,
-                  welcomeMessage,
-                )));
+                const DeepCollectionEquality().equals(other.welcomeMessage, welcomeMessage)));
   }
 
   @override
@@ -4471,38 +3579,18 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
   }) {
     return ServerSettingsChanges(
       accentColor: (accentColor != null ? accentColor.value : this.accentColor),
-      instanceName: (instanceName != null
-          ? instanceName.value
-          : this.instanceName),
+      instanceName: (instanceName != null ? instanceName.value : this.instanceName),
       ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
-      ocrLanguages: (ocrLanguages != null
-          ? ocrLanguages.value
-          : this.ocrLanguages),
+      ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
       ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
-      searchContentEnabled: (searchContentEnabled != null
-          ? searchContentEnabled.value
-          : this.searchContentEnabled),
-      trashEnabled: (trashEnabled != null
-          ? trashEnabled.value
-          : this.trashEnabled),
-      trashRetentionDays: (trashRetentionDays != null
-          ? trashRetentionDays.value
-          : this.trashRetentionDays),
-      versionsEnabled: (versionsEnabled != null
-          ? versionsEnabled.value
-          : this.versionsEnabled),
-      versionsKeepAllHours: (versionsKeepAllHours != null
-          ? versionsKeepAllHours.value
-          : this.versionsKeepAllHours),
-      versionsMaxAgeDays: (versionsMaxAgeDays != null
-          ? versionsMaxAgeDays.value
-          : this.versionsMaxAgeDays),
-      versionsMaxPerFile: (versionsMaxPerFile != null
-          ? versionsMaxPerFile.value
-          : this.versionsMaxPerFile),
-      welcomeMessage: (welcomeMessage != null
-          ? welcomeMessage.value
-          : this.welcomeMessage),
+      searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
+      trashEnabled: (trashEnabled != null ? trashEnabled.value : this.trashEnabled),
+      trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
+      versionsEnabled: (versionsEnabled != null ? versionsEnabled.value : this.versionsEnabled),
+      versionsKeepAllHours: (versionsKeepAllHours != null ? versionsKeepAllHours.value : this.versionsKeepAllHours),
+      versionsMaxAgeDays: (versionsMaxAgeDays != null ? versionsMaxAgeDays.value : this.versionsMaxAgeDays),
+      versionsMaxPerFile: (versionsMaxPerFile != null ? versionsMaxPerFile.value : this.versionsMaxPerFile),
+      welcomeMessage: (welcomeMessage != null ? welcomeMessage.value : this.welcomeMessage),
     );
   }
 }
@@ -4511,8 +3599,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
 class SetupStatus {
   const SetupStatus({required this.needsSetup});
 
-  factory SetupStatus.fromJson(Map<String, dynamic> json) =>
-      _$SetupStatusFromJson(json);
+  factory SetupStatus.fromJson(Map<String, dynamic> json) => _$SetupStatusFromJson(json);
 
   static const toJsonFactory = _$SetupStatusToJson;
   Map<String, dynamic> toJson() => _$SetupStatusToJson(this);
@@ -4526,15 +3613,11 @@ class SetupStatus {
     return identical(this, other) ||
         (other is SetupStatus &&
             (identical(other.needsSetup, needsSetup) ||
-                const DeepCollectionEquality().equals(
-                  other.needsSetup,
-                  needsSetup,
-                )));
+                const DeepCollectionEquality().equals(other.needsSetup, needsSetup)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(needsSetup) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(needsSetup) ^ runtimeType.hashCode;
 }
 
 extension $SetupStatusExtension on SetupStatus {
@@ -4543,23 +3626,15 @@ extension $SetupStatusExtension on SetupStatus {
   }
 
   SetupStatus copyWithWrapped({Wrapped<bool>? needsSetup}) {
-    return SetupStatus(
-      needsSetup: (needsSetup != null ? needsSetup.value : this.needsSetup),
-    );
+    return SetupStatus(needsSetup: (needsSetup != null ? needsSetup.value : this.needsSetup));
   }
 }
 
 @JsonSerializable(explicitToJson: true)
 class Suggestion {
-  const Suggestion({
-    required this.count,
-    required this.insert,
-    required this.kind,
-    required this.value,
-  });
+  const Suggestion({required this.count, required this.insert, required this.kind, required this.value});
 
-  factory Suggestion.fromJson(Map<String, dynamic> json) =>
-      _$SuggestionFromJson(json);
+  factory Suggestion.fromJson(Map<String, dynamic> json) => _$SuggestionFromJson(json);
 
   static const toJsonFactory = _$SuggestionToJson;
   Map<String, dynamic> toJson() => _$SuggestionToJson(this);
@@ -4568,12 +3643,7 @@ class Suggestion {
   final int count;
   @JsonKey(name: 'insert', includeIfNull: false)
   final String insert;
-  @JsonKey(
-    name: 'kind',
-    includeIfNull: false,
-    toJson: suggestionKindToJson,
-    fromJson: suggestionKindFromJson,
-  )
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: suggestionKindToJson, fromJson: suggestionKindFromJson)
   final enums.SuggestionKind kind;
   @JsonKey(name: 'value', includeIfNull: false)
   final String value;
@@ -4583,14 +3653,10 @@ class Suggestion {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Suggestion &&
-            (identical(other.count, count) ||
-                const DeepCollectionEquality().equals(other.count, count)) &&
-            (identical(other.insert, insert) ||
-                const DeepCollectionEquality().equals(other.insert, insert)) &&
-            (identical(other.kind, kind) ||
-                const DeepCollectionEquality().equals(other.kind, kind)) &&
-            (identical(other.value, value) ||
-                const DeepCollectionEquality().equals(other.value, value)));
+            (identical(other.count, count) || const DeepCollectionEquality().equals(other.count, count)) &&
+            (identical(other.insert, insert) || const DeepCollectionEquality().equals(other.insert, insert)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.value, value) || const DeepCollectionEquality().equals(other.value, value)));
   }
 
   @override
@@ -4603,12 +3669,7 @@ class Suggestion {
 }
 
 extension $SuggestionExtension on Suggestion {
-  Suggestion copyWith({
-    int? count,
-    String? insert,
-    enums.SuggestionKind? kind,
-    String? value,
-  }) {
+  Suggestion copyWith({int? count, String? insert, enums.SuggestionKind? kind, String? value}) {
     return Suggestion(
       count: count ?? this.count,
       insert: insert ?? this.insert,
@@ -4636,8 +3697,7 @@ extension $SuggestionExtension on Suggestion {
 class Suggestions {
   const Suggestions({required this.end, required this.start, this.suggestions});
 
-  factory Suggestions.fromJson(Map<String, dynamic> json) =>
-      _$SuggestionsFromJson(json);
+  factory Suggestions.fromJson(Map<String, dynamic> json) => _$SuggestionsFromJson(json);
 
   static const toJsonFactory = _$SuggestionsToJson;
   Map<String, dynamic> toJson() => _$SuggestionsToJson(this);
@@ -4646,11 +3706,7 @@ class Suggestions {
   final int end;
   @JsonKey(name: 'start', includeIfNull: false)
   final int start;
-  @JsonKey(
-    name: 'suggestions',
-    includeIfNull: false,
-    defaultValue: <Suggestion>[],
-  )
+  @JsonKey(name: 'suggestions', includeIfNull: false, defaultValue: <Suggestion>[])
   final List<Suggestion>? suggestions;
   static const fromJsonFactory = _$SuggestionsFromJson;
 
@@ -4658,15 +3714,10 @@ class Suggestions {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is Suggestions &&
-            (identical(other.end, end) ||
-                const DeepCollectionEquality().equals(other.end, end)) &&
-            (identical(other.start, start) ||
-                const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
             (identical(other.suggestions, suggestions) ||
-                const DeepCollectionEquality().equals(
-                  other.suggestions,
-                  suggestions,
-                )));
+                const DeepCollectionEquality().equals(other.suggestions, suggestions)));
   }
 
   @override
@@ -4679,18 +3730,10 @@ class Suggestions {
 
 extension $SuggestionsExtension on Suggestions {
   Suggestions copyWith({int? end, int? start, List<Suggestion>? suggestions}) {
-    return Suggestions(
-      end: end ?? this.end,
-      start: start ?? this.start,
-      suggestions: suggestions ?? this.suggestions,
-    );
+    return Suggestions(end: end ?? this.end, start: start ?? this.start, suggestions: suggestions ?? this.suggestions);
   }
 
-  Suggestions copyWithWrapped({
-    Wrapped<int>? end,
-    Wrapped<int>? start,
-    Wrapped<List<Suggestion>?>? suggestions,
-  }) {
+  Suggestions copyWithWrapped({Wrapped<int>? end, Wrapped<int>? start, Wrapped<List<Suggestion>?>? suggestions}) {
     return Suggestions(
       end: (end != null ? end.value : this.end),
       start: (start != null ? start.value : this.start),
@@ -4703,8 +3746,7 @@ extension $SuggestionsExtension on Suggestions {
 class TextSpan {
   const TextSpan({required this.end, required this.start});
 
-  factory TextSpan.fromJson(Map<String, dynamic> json) =>
-      _$TextSpanFromJson(json);
+  factory TextSpan.fromJson(Map<String, dynamic> json) => _$TextSpanFromJson(json);
 
   static const toJsonFactory = _$TextSpanToJson;
   Map<String, dynamic> toJson() => _$TextSpanToJson(this);
@@ -4719,17 +3761,13 @@ class TextSpan {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is TextSpan &&
-            (identical(other.end, end) ||
-                const DeepCollectionEquality().equals(other.end, end)) &&
-            (identical(other.start, start) ||
-                const DeepCollectionEquality().equals(other.start, start)));
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(end) ^
-      const DeepCollectionEquality().hash(start) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(end) ^ const DeepCollectionEquality().hash(start) ^ runtimeType.hashCode;
 }
 
 extension $TextSpanExtension on TextSpan {
@@ -4738,24 +3776,15 @@ extension $TextSpanExtension on TextSpan {
   }
 
   TextSpan copyWithWrapped({Wrapped<int>? end, Wrapped<int>? start}) {
-    return TextSpan(
-      end: (end != null ? end.value : this.end),
-      start: (start != null ? start.value : this.start),
-    );
+    return TextSpan(end: (end != null ? end.value : this.end), start: (start != null ? start.value : this.start));
   }
 }
 
 @JsonSerializable(explicitToJson: true)
 class TokenPair {
-  const TokenPair({
-    required this.accessToken,
-    required this.expiresIn,
-    required this.refreshToken,
-    required this.user,
-  });
+  const TokenPair({required this.accessToken, required this.expiresIn, required this.refreshToken, required this.user});
 
-  factory TokenPair.fromJson(Map<String, dynamic> json) =>
-      _$TokenPairFromJson(json);
+  factory TokenPair.fromJson(Map<String, dynamic> json) => _$TokenPairFromJson(json);
 
   static const toJsonFactory = _$TokenPairToJson;
   Map<String, dynamic> toJson() => _$TokenPairToJson(this);
@@ -4775,22 +3804,12 @@ class TokenPair {
     return identical(this, other) ||
         (other is TokenPair &&
             (identical(other.accessToken, accessToken) ||
-                const DeepCollectionEquality().equals(
-                  other.accessToken,
-                  accessToken,
-                )) &&
+                const DeepCollectionEquality().equals(other.accessToken, accessToken)) &&
             (identical(other.expiresIn, expiresIn) ||
-                const DeepCollectionEquality().equals(
-                  other.expiresIn,
-                  expiresIn,
-                )) &&
+                const DeepCollectionEquality().equals(other.expiresIn, expiresIn)) &&
             (identical(other.refreshToken, refreshToken) ||
-                const DeepCollectionEquality().equals(
-                  other.refreshToken,
-                  refreshToken,
-                )) &&
-            (identical(other.user, user) ||
-                const DeepCollectionEquality().equals(other.user, user)));
+                const DeepCollectionEquality().equals(other.refreshToken, refreshToken)) &&
+            (identical(other.user, user) || const DeepCollectionEquality().equals(other.user, user)));
   }
 
   @override
@@ -4803,12 +3822,7 @@ class TokenPair {
 }
 
 extension $TokenPairExtension on TokenPair {
-  TokenPair copyWith({
-    String? accessToken,
-    int? expiresIn,
-    String? refreshToken,
-    User? user,
-  }) {
+  TokenPair copyWith({String? accessToken, int? expiresIn, String? refreshToken, User? user}) {
     return TokenPair(
       accessToken: accessToken ?? this.accessToken,
       expiresIn: expiresIn ?? this.expiresIn,
@@ -4826,9 +3840,7 @@ extension $TokenPairExtension on TokenPair {
     return TokenPair(
       accessToken: (accessToken != null ? accessToken.value : this.accessToken),
       expiresIn: (expiresIn != null ? expiresIn.value : this.expiresIn),
-      refreshToken: (refreshToken != null
-          ? refreshToken.value
-          : this.refreshToken),
+      refreshToken: (refreshToken != null ? refreshToken.value : this.refreshToken),
       user: (user != null ? user.value : this.user),
     );
   }
@@ -4849,8 +3861,7 @@ class TrashItem {
     required this.size,
   });
 
-  factory TrashItem.fromJson(Map<String, dynamic> json) =>
-      _$TrashItemFromJson(json);
+  factory TrashItem.fromJson(Map<String, dynamic> json) => _$TrashItemFromJson(json);
 
   static const toJsonFactory = _$TrashItemToJson;
   Map<String, dynamic> toJson() => _$TrashItemToJson(this);
@@ -4887,37 +3898,19 @@ class TrashItem {
     return identical(this, other) ||
         (other is TrashItem &&
             (identical(other.deletedAt, deletedAt) ||
-                const DeepCollectionEquality().equals(
-                  other.deletedAt,
-                  deletedAt,
-                )) &&
+                const DeepCollectionEquality().equals(other.deletedAt, deletedAt)) &&
             (identical(other.expiresAt, expiresAt) ||
-                const DeepCollectionEquality().equals(
-                  other.expiresAt,
-                  expiresAt,
-                )) &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.isDir, isDir) ||
-                const DeepCollectionEquality().equals(other.isDir, isDir)) &&
-            (identical(other.mime, mime) ||
-                const DeepCollectionEquality().equals(other.mime, mime)) &&
-            (identical(other.name, name) ||
-                const DeepCollectionEquality().equals(other.name, name)) &&
+                const DeepCollectionEquality().equals(other.expiresAt, expiresAt)) &&
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.mime, mime) || const DeepCollectionEquality().equals(other.mime, mime)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
             (identical(other.originalPath, originalPath) ||
-                const DeepCollectionEquality().equals(
-                  other.originalPath,
-                  originalPath,
-                )) &&
+                const DeepCollectionEquality().equals(other.originalPath, originalPath)) &&
             (identical(other.previewState, previewState) ||
-                const DeepCollectionEquality().equals(
-                  other.previewState,
-                  previewState,
-                )) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+                const DeepCollectionEquality().equals(other.previewState, previewState)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
@@ -4982,12 +3975,8 @@ extension $TrashItemExtension on TrashItem {
       isDir: (isDir != null ? isDir.value : this.isDir),
       mime: (mime != null ? mime.value : this.mime),
       name: (name != null ? name.value : this.name),
-      originalPath: (originalPath != null
-          ? originalPath.value
-          : this.originalPath),
-      previewState: (previewState != null
-          ? previewState.value
-          : this.previewState),
+      originalPath: (originalPath != null ? originalPath.value : this.originalPath),
+      previewState: (previewState != null ? previewState.value : this.previewState),
       size: (size != null ? size.value : this.size),
     );
   }
@@ -4995,14 +3984,9 @@ extension $TrashItemExtension on TrashItem {
 
 @JsonSerializable(explicitToJson: true)
 class TrashListing {
-  const TrashListing({
-    this.items,
-    required this.retention,
-    required this.totalBytes,
-  });
+  const TrashListing({this.items, required this.retention, required this.totalBytes});
 
-  factory TrashListing.fromJson(Map<String, dynamic> json) =>
-      _$TrashListingFromJson(json);
+  factory TrashListing.fromJson(Map<String, dynamic> json) => _$TrashListingFromJson(json);
 
   static const toJsonFactory = _$TrashListingToJson;
   Map<String, dynamic> toJson() => _$TrashListingToJson(this);
@@ -5019,18 +4003,11 @@ class TrashListing {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is TrashListing &&
-            (identical(other.items, items) ||
-                const DeepCollectionEquality().equals(other.items, items)) &&
+            (identical(other.items, items) || const DeepCollectionEquality().equals(other.items, items)) &&
             (identical(other.retention, retention) ||
-                const DeepCollectionEquality().equals(
-                  other.retention,
-                  retention,
-                )) &&
+                const DeepCollectionEquality().equals(other.retention, retention)) &&
             (identical(other.totalBytes, totalBytes) ||
-                const DeepCollectionEquality().equals(
-                  other.totalBytes,
-                  totalBytes,
-                )));
+                const DeepCollectionEquality().equals(other.totalBytes, totalBytes)));
   }
 
   @override
@@ -5042,11 +4019,7 @@ class TrashListing {
 }
 
 extension $TrashListingExtension on TrashListing {
-  TrashListing copyWith({
-    List<TrashItem>? items,
-    TrashRetention? retention,
-    int? totalBytes,
-  }) {
+  TrashListing copyWith({List<TrashItem>? items, TrashRetention? retention, int? totalBytes}) {
     return TrashListing(
       items: items ?? this.items,
       retention: retention ?? this.retention,
@@ -5071,8 +4044,7 @@ extension $TrashListingExtension on TrashListing {
 class TrashPreferences {
   const TrashPreferences({this.days, this.enabled});
 
-  factory TrashPreferences.fromJson(Map<String, dynamic> json) =>
-      _$TrashPreferencesFromJson(json);
+  factory TrashPreferences.fromJson(Map<String, dynamic> json) => _$TrashPreferencesFromJson(json);
 
   static const toJsonFactory = _$TrashPreferencesToJson;
   Map<String, dynamic> toJson() => _$TrashPreferencesToJson(this);
@@ -5087,31 +4059,21 @@ class TrashPreferences {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is TrashPreferences &&
-            (identical(other.days, days) ||
-                const DeepCollectionEquality().equals(other.days, days)) &&
-            (identical(other.enabled, enabled) ||
-                const DeepCollectionEquality().equals(other.enabled, enabled)));
+            (identical(other.days, days) || const DeepCollectionEquality().equals(other.days, days)) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)));
   }
 
   @override
   int get hashCode =>
-      const DeepCollectionEquality().hash(days) ^
-      const DeepCollectionEquality().hash(enabled) ^
-      runtimeType.hashCode;
+      const DeepCollectionEquality().hash(days) ^ const DeepCollectionEquality().hash(enabled) ^ runtimeType.hashCode;
 }
 
 extension $TrashPreferencesExtension on TrashPreferences {
   TrashPreferences copyWith({int? days, bool? enabled}) {
-    return TrashPreferences(
-      days: days ?? this.days,
-      enabled: enabled ?? this.enabled,
-    );
+    return TrashPreferences(days: days ?? this.days, enabled: enabled ?? this.enabled);
   }
 
-  TrashPreferences copyWithWrapped({
-    Wrapped<int?>? days,
-    Wrapped<bool?>? enabled,
-  }) {
+  TrashPreferences copyWithWrapped({Wrapped<int?>? days, Wrapped<bool?>? enabled}) {
     return TrashPreferences(
       days: (days != null ? days.value : this.days),
       enabled: (enabled != null ? enabled.value : this.enabled),
@@ -5130,8 +4092,7 @@ class TrashRetention {
     required this.user,
   });
 
-  factory TrashRetention.fromJson(Map<String, dynamic> json) =>
-      _$TrashRetentionFromJson(json);
+  factory TrashRetention.fromJson(Map<String, dynamic> json) => _$TrashRetentionFromJson(json);
 
   static const toJsonFactory = _$TrashRetentionToJson;
   Map<String, dynamic> toJson() => _$TrashRetentionToJson(this);
@@ -5159,27 +4120,14 @@ class TrashRetention {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is TrashRetention &&
-            (identical(other.days, days) ||
-                const DeepCollectionEquality().equals(other.days, days)) &&
-            (identical(other.enabled, enabled) ||
-                const DeepCollectionEquality().equals(
-                  other.enabled,
-                  enabled,
-                )) &&
+            (identical(other.days, days) || const DeepCollectionEquality().equals(other.days, days)) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
             (identical(other.serverDays, serverDays) ||
-                const DeepCollectionEquality().equals(
-                  other.serverDays,
-                  serverDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.serverDays, serverDays)) &&
             (identical(other.serverEnabled, serverEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.serverEnabled,
-                  serverEnabled,
-                )) &&
-            (identical(other.source, source) ||
-                const DeepCollectionEquality().equals(other.source, source)) &&
-            (identical(other.user, user) ||
-                const DeepCollectionEquality().equals(other.user, user)));
+                const DeepCollectionEquality().equals(other.serverEnabled, serverEnabled)) &&
+            (identical(other.source, source) || const DeepCollectionEquality().equals(other.source, source)) &&
+            (identical(other.user, user) || const DeepCollectionEquality().equals(other.user, user)));
   }
 
   @override
@@ -5224,9 +4172,7 @@ extension $TrashRetentionExtension on TrashRetention {
       days: (days != null ? days.value : this.days),
       enabled: (enabled != null ? enabled.value : this.enabled),
       serverDays: (serverDays != null ? serverDays.value : this.serverDays),
-      serverEnabled: (serverEnabled != null
-          ? serverEnabled.value
-          : this.serverEnabled),
+      serverEnabled: (serverEnabled != null ? serverEnabled.value : this.serverEnabled),
       source: (source != null ? source.value : this.source),
       user: (user != null ? user.value : this.user),
     );
@@ -5244,8 +4190,7 @@ class UploadRequest {
     required this.size,
   });
 
-  factory UploadRequest.fromJson(Map<String, dynamic> json) =>
-      _$UploadRequestFromJson(json);
+  factory UploadRequest.fromJson(Map<String, dynamic> json) => _$UploadRequestFromJson(json);
 
   static const toJsonFactory = _$UploadRequestToJson;
   Map<String, dynamic> toJson() => _$UploadRequestToJson(this);
@@ -5268,21 +4213,12 @@ class UploadRequest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is UploadRequest &&
-            (identical(other.baseRev, baseRev) ||
-                const DeepCollectionEquality().equals(
-                  other.baseRev,
-                  baseRev,
-                )) &&
-            (identical(other.chunks, chunks) ||
-                const DeepCollectionEquality().equals(other.chunks, chunks)) &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.mtime, mtime) ||
-                const DeepCollectionEquality().equals(other.mtime, mtime)) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+            (identical(other.baseRev, baseRev) || const DeepCollectionEquality().equals(other.baseRev, baseRev)) &&
+            (identical(other.chunks, chunks) || const DeepCollectionEquality().equals(other.chunks, chunks)) &&
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.mtime, mtime) || const DeepCollectionEquality().equals(other.mtime, mtime)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
@@ -5338,8 +4274,7 @@ extension $UploadRequestExtension on UploadRequest {
 class UploadStatus {
   const UploadStatus({this.missing, required this.uploadId});
 
-  factory UploadStatus.fromJson(Map<String, dynamic> json) =>
-      _$UploadStatusFromJson(json);
+  factory UploadStatus.fromJson(Map<String, dynamic> json) => _$UploadStatusFromJson(json);
 
   static const toJsonFactory = _$UploadStatusToJson;
   Map<String, dynamic> toJson() => _$UploadStatusToJson(this);
@@ -5354,16 +4289,8 @@ class UploadStatus {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is UploadStatus &&
-            (identical(other.missing, missing) ||
-                const DeepCollectionEquality().equals(
-                  other.missing,
-                  missing,
-                )) &&
-            (identical(other.uploadId, uploadId) ||
-                const DeepCollectionEquality().equals(
-                  other.uploadId,
-                  uploadId,
-                )));
+            (identical(other.missing, missing) || const DeepCollectionEquality().equals(other.missing, missing)) &&
+            (identical(other.uploadId, uploadId) || const DeepCollectionEquality().equals(other.uploadId, uploadId)));
   }
 
   @override
@@ -5375,16 +4302,10 @@ class UploadStatus {
 
 extension $UploadStatusExtension on UploadStatus {
   UploadStatus copyWith({List<String>? missing, String? uploadId}) {
-    return UploadStatus(
-      missing: missing ?? this.missing,
-      uploadId: uploadId ?? this.uploadId,
-    );
+    return UploadStatus(missing: missing ?? this.missing, uploadId: uploadId ?? this.uploadId);
   }
 
-  UploadStatus copyWithWrapped({
-    Wrapped<List<String>?>? missing,
-    Wrapped<String>? uploadId,
-  }) {
+  UploadStatus copyWithWrapped({Wrapped<List<String>?>? missing, Wrapped<String>? uploadId}) {
     return UploadStatus(
       missing: (missing != null ? missing.value : this.missing),
       uploadId: (uploadId != null ? uploadId.value : this.uploadId),
@@ -5429,12 +4350,7 @@ class User {
   final Profile profile;
   @JsonKey(name: 'quotaBytes', includeIfNull: false)
   final int quotaBytes;
-  @JsonKey(
-    name: 'role',
-    includeIfNull: false,
-    toJson: userRoleToJson,
-    fromJson: userRoleFromJson,
-  )
+  @JsonKey(name: 'role', includeIfNull: false, toJson: userRoleToJson, fromJson: userRoleFromJson)
   final enums.UserRole role;
   @JsonKey(name: 'usedBytes', includeIfNull: false)
   final int usedBytes;
@@ -5447,51 +4363,21 @@ class User {
     return identical(this, other) ||
         (other is User &&
             (identical(other.appearance, appearance) ||
-                const DeepCollectionEquality().equals(
-                  other.appearance,
-                  appearance,
-                )) &&
-            (identical(other.avatar, avatar) ||
-                const DeepCollectionEquality().equals(other.avatar, avatar)) &&
+                const DeepCollectionEquality().equals(other.appearance, appearance)) &&
+            (identical(other.avatar, avatar) || const DeepCollectionEquality().equals(other.avatar, avatar)) &&
             (identical(other.createdAt, createdAt) ||
-                const DeepCollectionEquality().equals(
-                  other.createdAt,
-                  createdAt,
-                )) &&
-            (identical(other.disabled, disabled) ||
-                const DeepCollectionEquality().equals(
-                  other.disabled,
-                  disabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.disabled, disabled) || const DeepCollectionEquality().equals(other.disabled, disabled)) &&
             (identical(other.historyBytes, historyBytes) ||
-                const DeepCollectionEquality().equals(
-                  other.historyBytes,
-                  historyBytes,
-                )) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
-            (identical(other.profile, profile) ||
-                const DeepCollectionEquality().equals(
-                  other.profile,
-                  profile,
-                )) &&
+                const DeepCollectionEquality().equals(other.historyBytes, historyBytes)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.profile, profile) || const DeepCollectionEquality().equals(other.profile, profile)) &&
             (identical(other.quotaBytes, quotaBytes) ||
-                const DeepCollectionEquality().equals(
-                  other.quotaBytes,
-                  quotaBytes,
-                )) &&
-            (identical(other.role, role) ||
-                const DeepCollectionEquality().equals(other.role, role)) &&
+                const DeepCollectionEquality().equals(other.quotaBytes, quotaBytes)) &&
+            (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)) &&
             (identical(other.usedBytes, usedBytes) ||
-                const DeepCollectionEquality().equals(
-                  other.usedBytes,
-                  usedBytes,
-                )) &&
-            (identical(other.username, username) ||
-                const DeepCollectionEquality().equals(
-                  other.username,
-                  username,
-                )));
+                const DeepCollectionEquality().equals(other.usedBytes, usedBytes)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
   }
 
   @override
@@ -5557,9 +4443,7 @@ extension $UserExtension on User {
       avatar: (avatar != null ? avatar.value : this.avatar),
       createdAt: (createdAt != null ? createdAt.value : this.createdAt),
       disabled: (disabled != null ? disabled.value : this.disabled),
-      historyBytes: (historyBytes != null
-          ? historyBytes.value
-          : this.historyBytes),
+      historyBytes: (historyBytes != null ? historyBytes.value : this.historyBytes),
       id: (id != null ? id.value : this.id),
       profile: (profile != null ? profile.value : this.profile),
       quotaBytes: (quotaBytes != null ? quotaBytes.value : this.quotaBytes),
@@ -5572,15 +4456,9 @@ extension $UserExtension on User {
 
 @JsonSerializable(explicitToJson: true)
 class VersionListing {
-  const VersionListing({
-    required this.current,
-    required this.path,
-    required this.retention,
-    this.versions,
-  });
+  const VersionListing({required this.current, required this.path, required this.retention, this.versions});
 
-  factory VersionListing.fromJson(Map<String, dynamic> json) =>
-      _$VersionListingFromJson(json);
+  factory VersionListing.fromJson(Map<String, dynamic> json) => _$VersionListingFromJson(json);
 
   static const toJsonFactory = _$VersionListingToJson;
   Map<String, dynamic> toJson() => _$VersionListingToJson(this);
@@ -5591,11 +4469,7 @@ class VersionListing {
   final String path;
   @JsonKey(name: 'retention', includeIfNull: false)
   final VersionRetention retention;
-  @JsonKey(
-    name: 'versions',
-    includeIfNull: false,
-    defaultValue: <VersionView>[],
-  )
+  @JsonKey(name: 'versions', includeIfNull: false, defaultValue: <VersionView>[])
   final List<VersionView>? versions;
   static const fromJsonFactory = _$VersionListingFromJson;
 
@@ -5603,23 +4477,11 @@ class VersionListing {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is VersionListing &&
-            (identical(other.current, current) ||
-                const DeepCollectionEquality().equals(
-                  other.current,
-                  current,
-                )) &&
-            (identical(other.path, path) ||
-                const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.current, current) || const DeepCollectionEquality().equals(other.current, current)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
             (identical(other.retention, retention) ||
-                const DeepCollectionEquality().equals(
-                  other.retention,
-                  retention,
-                )) &&
-            (identical(other.versions, versions) ||
-                const DeepCollectionEquality().equals(
-                  other.versions,
-                  versions,
-                )));
+                const DeepCollectionEquality().equals(other.retention, retention)) &&
+            (identical(other.versions, versions) || const DeepCollectionEquality().equals(other.versions, versions)));
   }
 
   @override
@@ -5632,12 +4494,7 @@ class VersionListing {
 }
 
 extension $VersionListingExtension on VersionListing {
-  VersionListing copyWith({
-    Entry? current,
-    String? path,
-    VersionRetention? retention,
-    List<VersionView>? versions,
-  }) {
+  VersionListing copyWith({Entry? current, String? path, VersionRetention? retention, List<VersionView>? versions}) {
     return VersionListing(
       current: current ?? this.current,
       path: path ?? this.path,
@@ -5663,15 +4520,9 @@ extension $VersionListingExtension on VersionListing {
 
 @JsonSerializable(explicitToJson: true)
 class VersionPreferences {
-  const VersionPreferences({
-    this.enabled,
-    this.keepAllHours,
-    this.maxAgeDays,
-    this.maxPerFile,
-  });
+  const VersionPreferences({this.enabled, this.keepAllHours, this.maxAgeDays, this.maxPerFile});
 
-  factory VersionPreferences.fromJson(Map<String, dynamic> json) =>
-      _$VersionPreferencesFromJson(json);
+  factory VersionPreferences.fromJson(Map<String, dynamic> json) => _$VersionPreferencesFromJson(json);
 
   static const toJsonFactory = _$VersionPreferencesToJson;
   Map<String, dynamic> toJson() => _$VersionPreferencesToJson(this);
@@ -5690,26 +4541,13 @@ class VersionPreferences {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is VersionPreferences &&
-            (identical(other.enabled, enabled) ||
-                const DeepCollectionEquality().equals(
-                  other.enabled,
-                  enabled,
-                )) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
             (identical(other.keepAllHours, keepAllHours) ||
-                const DeepCollectionEquality().equals(
-                  other.keepAllHours,
-                  keepAllHours,
-                )) &&
+                const DeepCollectionEquality().equals(other.keepAllHours, keepAllHours)) &&
             (identical(other.maxAgeDays, maxAgeDays) ||
-                const DeepCollectionEquality().equals(
-                  other.maxAgeDays,
-                  maxAgeDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.maxAgeDays, maxAgeDays)) &&
             (identical(other.maxPerFile, maxPerFile) ||
-                const DeepCollectionEquality().equals(
-                  other.maxPerFile,
-                  maxPerFile,
-                )));
+                const DeepCollectionEquality().equals(other.maxPerFile, maxPerFile)));
   }
 
   @override
@@ -5722,12 +4560,7 @@ class VersionPreferences {
 }
 
 extension $VersionPreferencesExtension on VersionPreferences {
-  VersionPreferences copyWith({
-    bool? enabled,
-    int? keepAllHours,
-    int? maxAgeDays,
-    int? maxPerFile,
-  }) {
+  VersionPreferences copyWith({bool? enabled, int? keepAllHours, int? maxAgeDays, int? maxPerFile}) {
     return VersionPreferences(
       enabled: enabled ?? this.enabled,
       keepAllHours: keepAllHours ?? this.keepAllHours,
@@ -5744,9 +4577,7 @@ extension $VersionPreferencesExtension on VersionPreferences {
   }) {
     return VersionPreferences(
       enabled: (enabled != null ? enabled.value : this.enabled),
-      keepAllHours: (keepAllHours != null
-          ? keepAllHours.value
-          : this.keepAllHours),
+      keepAllHours: (keepAllHours != null ? keepAllHours.value : this.keepAllHours),
       maxAgeDays: (maxAgeDays != null ? maxAgeDays.value : this.maxAgeDays),
       maxPerFile: (maxPerFile != null ? maxPerFile.value : this.maxPerFile),
     );
@@ -5757,8 +4588,7 @@ extension $VersionPreferencesExtension on VersionPreferences {
 class VersionRestoreRequest {
   const VersionRestoreRequest({this.baseRev});
 
-  factory VersionRestoreRequest.fromJson(Map<String, dynamic> json) =>
-      _$VersionRestoreRequestFromJson(json);
+  factory VersionRestoreRequest.fromJson(Map<String, dynamic> json) => _$VersionRestoreRequestFromJson(json);
 
   static const toJsonFactory = _$VersionRestoreRequestToJson;
   Map<String, dynamic> toJson() => _$VersionRestoreRequestToJson(this);
@@ -5771,13 +4601,11 @@ class VersionRestoreRequest {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is VersionRestoreRequest &&
-            (identical(other.baseRev, baseRev) ||
-                const DeepCollectionEquality().equals(other.baseRev, baseRev)));
+            (identical(other.baseRev, baseRev) || const DeepCollectionEquality().equals(other.baseRev, baseRev)));
   }
 
   @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(baseRev) ^ runtimeType.hashCode;
+  int get hashCode => const DeepCollectionEquality().hash(baseRev) ^ runtimeType.hashCode;
 }
 
 extension $VersionRestoreRequestExtension on VersionRestoreRequest {
@@ -5786,9 +4614,7 @@ extension $VersionRestoreRequestExtension on VersionRestoreRequest {
   }
 
   VersionRestoreRequest copyWithWrapped({Wrapped<int?>? baseRev}) {
-    return VersionRestoreRequest(
-      baseRev: (baseRev != null ? baseRev.value : this.baseRev),
-    );
+    return VersionRestoreRequest(baseRev: (baseRev != null ? baseRev.value : this.baseRev));
   }
 }
 
@@ -5807,8 +4633,7 @@ class VersionRetention {
     required this.user,
   });
 
-  factory VersionRetention.fromJson(Map<String, dynamic> json) =>
-      _$VersionRetentionFromJson(json);
+  factory VersionRetention.fromJson(Map<String, dynamic> json) => _$VersionRetentionFromJson(json);
 
   static const toJsonFactory = _$VersionRetentionToJson;
   Map<String, dynamic> toJson() => _$VersionRetentionToJson(this);
@@ -5844,50 +4669,23 @@ class VersionRetention {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is VersionRetention &&
-            (identical(other.enabled, enabled) ||
-                const DeepCollectionEquality().equals(
-                  other.enabled,
-                  enabled,
-                )) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
             (identical(other.keepAllHours, keepAllHours) ||
-                const DeepCollectionEquality().equals(
-                  other.keepAllHours,
-                  keepAllHours,
-                )) &&
+                const DeepCollectionEquality().equals(other.keepAllHours, keepAllHours)) &&
             (identical(other.maxAgeDays, maxAgeDays) ||
-                const DeepCollectionEquality().equals(
-                  other.maxAgeDays,
-                  maxAgeDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.maxAgeDays, maxAgeDays)) &&
             (identical(other.maxPerFile, maxPerFile) ||
-                const DeepCollectionEquality().equals(
-                  other.maxPerFile,
-                  maxPerFile,
-                )) &&
+                const DeepCollectionEquality().equals(other.maxPerFile, maxPerFile)) &&
             (identical(other.serverEnabled, serverEnabled) ||
-                const DeepCollectionEquality().equals(
-                  other.serverEnabled,
-                  serverEnabled,
-                )) &&
+                const DeepCollectionEquality().equals(other.serverEnabled, serverEnabled)) &&
             (identical(other.serverKeepAllHours, serverKeepAllHours) ||
-                const DeepCollectionEquality().equals(
-                  other.serverKeepAllHours,
-                  serverKeepAllHours,
-                )) &&
+                const DeepCollectionEquality().equals(other.serverKeepAllHours, serverKeepAllHours)) &&
             (identical(other.serverMaxAgeDays, serverMaxAgeDays) ||
-                const DeepCollectionEquality().equals(
-                  other.serverMaxAgeDays,
-                  serverMaxAgeDays,
-                )) &&
+                const DeepCollectionEquality().equals(other.serverMaxAgeDays, serverMaxAgeDays)) &&
             (identical(other.serverMaxPerFile, serverMaxPerFile) ||
-                const DeepCollectionEquality().equals(
-                  other.serverMaxPerFile,
-                  serverMaxPerFile,
-                )) &&
-            (identical(other.source, source) ||
-                const DeepCollectionEquality().equals(other.source, source)) &&
-            (identical(other.user, user) ||
-                const DeepCollectionEquality().equals(other.user, user)));
+                const DeepCollectionEquality().equals(other.serverMaxPerFile, serverMaxPerFile)) &&
+            (identical(other.source, source) || const DeepCollectionEquality().equals(other.source, source)) &&
+            (identical(other.user, user) || const DeepCollectionEquality().equals(other.user, user)));
   }
 
   @override
@@ -5946,23 +4744,13 @@ extension $VersionRetentionExtension on VersionRetention {
   }) {
     return VersionRetention(
       enabled: (enabled != null ? enabled.value : this.enabled),
-      keepAllHours: (keepAllHours != null
-          ? keepAllHours.value
-          : this.keepAllHours),
+      keepAllHours: (keepAllHours != null ? keepAllHours.value : this.keepAllHours),
       maxAgeDays: (maxAgeDays != null ? maxAgeDays.value : this.maxAgeDays),
       maxPerFile: (maxPerFile != null ? maxPerFile.value : this.maxPerFile),
-      serverEnabled: (serverEnabled != null
-          ? serverEnabled.value
-          : this.serverEnabled),
-      serverKeepAllHours: (serverKeepAllHours != null
-          ? serverKeepAllHours.value
-          : this.serverKeepAllHours),
-      serverMaxAgeDays: (serverMaxAgeDays != null
-          ? serverMaxAgeDays.value
-          : this.serverMaxAgeDays),
-      serverMaxPerFile: (serverMaxPerFile != null
-          ? serverMaxPerFile.value
-          : this.serverMaxPerFile),
+      serverEnabled: (serverEnabled != null ? serverEnabled.value : this.serverEnabled),
+      serverKeepAllHours: (serverKeepAllHours != null ? serverKeepAllHours.value : this.serverKeepAllHours),
+      serverMaxAgeDays: (serverMaxAgeDays != null ? serverMaxAgeDays.value : this.serverMaxAgeDays),
+      serverMaxPerFile: (serverMaxPerFile != null ? serverMaxPerFile.value : this.serverMaxPerFile),
       source: (source != null ? source.value : this.source),
       user: (user != null ? user.value : this.user),
     );
@@ -5980,8 +4768,7 @@ class VersionView {
     required this.size,
   });
 
-  factory VersionView.fromJson(Map<String, dynamic> json) =>
-      _$VersionViewFromJson(json);
+  factory VersionView.fromJson(Map<String, dynamic> json) => _$VersionViewFromJson(json);
 
   static const toJsonFactory = _$VersionViewToJson;
   Map<String, dynamic> toJson() => _$VersionViewToJson(this);
@@ -6005,26 +4792,14 @@ class VersionView {
     return identical(this, other) ||
         (other is VersionView &&
             (identical(other.hasPreview, hasPreview) ||
-                const DeepCollectionEquality().equals(
-                  other.hasPreview,
-                  hasPreview,
-                )) &&
-            (identical(other.hash, hash) ||
-                const DeepCollectionEquality().equals(other.hash, hash)) &&
-            (identical(other.id, id) ||
-                const DeepCollectionEquality().equals(other.id, id)) &&
+                const DeepCollectionEquality().equals(other.hasPreview, hasPreview)) &&
+            (identical(other.hash, hash) || const DeepCollectionEquality().equals(other.hash, hash)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
             (identical(other.modifiedAt, modifiedAt) ||
-                const DeepCollectionEquality().equals(
-                  other.modifiedAt,
-                  modifiedAt,
-                )) &&
+                const DeepCollectionEquality().equals(other.modifiedAt, modifiedAt)) &&
             (identical(other.replacedAt, replacedAt) ||
-                const DeepCollectionEquality().equals(
-                  other.replacedAt,
-                  replacedAt,
-                )) &&
-            (identical(other.size, size) ||
-                const DeepCollectionEquality().equals(other.size, size)));
+                const DeepCollectionEquality().equals(other.replacedAt, replacedAt)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
   @override
@@ -6084,39 +4859,24 @@ String? appearanceThemeToJson(enums.AppearanceTheme appearanceTheme) {
   return appearanceTheme.value;
 }
 
-enums.AppearanceTheme appearanceThemeFromJson(
-  Object? appearanceTheme, [
-  enums.AppearanceTheme? defaultValue,
-]) {
-  return enums.AppearanceTheme.values.firstWhereOrNull(
-        (e) => e.value == appearanceTheme,
-      ) ??
+enums.AppearanceTheme appearanceThemeFromJson(Object? appearanceTheme, [enums.AppearanceTheme? defaultValue]) {
+  return enums.AppearanceTheme.values.firstWhereOrNull((e) => e.value == appearanceTheme) ??
       defaultValue ??
       enums.AppearanceTheme.swaggerGeneratedUnknown;
 }
 
-enums.AppearanceTheme? appearanceThemeNullableFromJson(
-  Object? appearanceTheme, [
-  enums.AppearanceTheme? defaultValue,
-]) {
+enums.AppearanceTheme? appearanceThemeNullableFromJson(Object? appearanceTheme, [enums.AppearanceTheme? defaultValue]) {
   if (appearanceTheme == null) {
     return null;
   }
-  return enums.AppearanceTheme.values.firstWhereOrNull(
-        (e) => e.value == appearanceTheme,
-      ) ??
-      defaultValue;
+  return enums.AppearanceTheme.values.firstWhereOrNull((e) => e.value == appearanceTheme) ?? defaultValue;
 }
 
-String appearanceThemeExplodedListToJson(
-  List<enums.AppearanceTheme>? appearanceTheme,
-) {
+String appearanceThemeExplodedListToJson(List<enums.AppearanceTheme>? appearanceTheme) {
   return appearanceTheme?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> appearanceThemeListToJson(
-  List<enums.AppearanceTheme>? appearanceTheme,
-) {
+List<String> appearanceThemeListToJson(List<enums.AppearanceTheme>? appearanceTheme) {
   if (appearanceTheme == null) {
     return [];
   }
@@ -6132,9 +4892,7 @@ List<enums.AppearanceTheme> appearanceThemeListFromJson(
     return defaultValue ?? [];
   }
 
-  return appearanceTheme
-      .map((e) => appearanceThemeFromJson(e.toString()))
-      .toList();
+  return appearanceTheme.map((e) => appearanceThemeFromJson(e.toString())).toList();
 }
 
 List<enums.AppearanceTheme>? appearanceThemeNullableListFromJson(
@@ -6145,9 +4903,7 @@ List<enums.AppearanceTheme>? appearanceThemeNullableListFromJson(
     return defaultValue;
   }
 
-  return appearanceTheme
-      .map((e) => appearanceThemeFromJson(e.toString()))
-      .toList();
+  return appearanceTheme.map((e) => appearanceThemeFromJson(e.toString())).toList();
 }
 
 String? changeTypeNullableToJson(enums.ChangeType? changeType) {
@@ -6158,28 +4914,17 @@ String? changeTypeToJson(enums.ChangeType changeType) {
   return changeType.value;
 }
 
-enums.ChangeType changeTypeFromJson(
-  Object? changeType, [
-  enums.ChangeType? defaultValue,
-]) {
-  return enums.ChangeType.values.firstWhereOrNull(
-        (e) => e.value == changeType,
-      ) ??
+enums.ChangeType changeTypeFromJson(Object? changeType, [enums.ChangeType? defaultValue]) {
+  return enums.ChangeType.values.firstWhereOrNull((e) => e.value == changeType) ??
       defaultValue ??
       enums.ChangeType.swaggerGeneratedUnknown;
 }
 
-enums.ChangeType? changeTypeNullableFromJson(
-  Object? changeType, [
-  enums.ChangeType? defaultValue,
-]) {
+enums.ChangeType? changeTypeNullableFromJson(Object? changeType, [enums.ChangeType? defaultValue]) {
   if (changeType == null) {
     return null;
   }
-  return enums.ChangeType.values.firstWhereOrNull(
-        (e) => e.value == changeType,
-      ) ??
-      defaultValue;
+  return enums.ChangeType.values.firstWhereOrNull((e) => e.value == changeType) ?? defaultValue;
 }
 
 String changeTypeExplodedListToJson(List<enums.ChangeType>? changeType) {
@@ -6194,10 +4939,7 @@ List<String> changeTypeListToJson(List<enums.ChangeType>? changeType) {
   return changeType.map((e) => e.value!).toList();
 }
 
-List<enums.ChangeType> changeTypeListFromJson(
-  List? changeType, [
-  List<enums.ChangeType>? defaultValue,
-]) {
+List<enums.ChangeType> changeTypeListFromJson(List? changeType, [List<enums.ChangeType>? defaultValue]) {
   if (changeType == null) {
     return defaultValue ?? [];
   }
@@ -6205,10 +4947,7 @@ List<enums.ChangeType> changeTypeListFromJson(
   return changeType.map((e) => changeTypeFromJson(e.toString())).toList();
 }
 
-List<enums.ChangeType>? changeTypeNullableListFromJson(
-  List? changeType, [
-  List<enums.ChangeType>? defaultValue,
-]) {
+List<enums.ChangeType>? changeTypeNullableListFromJson(List? changeType, [List<enums.ChangeType>? defaultValue]) {
   if (changeType == null) {
     return defaultValue;
   }
@@ -6224,28 +4963,17 @@ String? changesRoleToJson(enums.ChangesRole changesRole) {
   return changesRole.value;
 }
 
-enums.ChangesRole changesRoleFromJson(
-  Object? changesRole, [
-  enums.ChangesRole? defaultValue,
-]) {
-  return enums.ChangesRole.values.firstWhereOrNull(
-        (e) => e.value == changesRole,
-      ) ??
+enums.ChangesRole changesRoleFromJson(Object? changesRole, [enums.ChangesRole? defaultValue]) {
+  return enums.ChangesRole.values.firstWhereOrNull((e) => e.value == changesRole) ??
       defaultValue ??
       enums.ChangesRole.swaggerGeneratedUnknown;
 }
 
-enums.ChangesRole? changesRoleNullableFromJson(
-  Object? changesRole, [
-  enums.ChangesRole? defaultValue,
-]) {
+enums.ChangesRole? changesRoleNullableFromJson(Object? changesRole, [enums.ChangesRole? defaultValue]) {
   if (changesRole == null) {
     return null;
   }
-  return enums.ChangesRole.values.firstWhereOrNull(
-        (e) => e.value == changesRole,
-      ) ??
-      defaultValue;
+  return enums.ChangesRole.values.firstWhereOrNull((e) => e.value == changesRole) ?? defaultValue;
 }
 
 String changesRoleExplodedListToJson(List<enums.ChangesRole>? changesRole) {
@@ -6260,10 +4988,7 @@ List<String> changesRoleListToJson(List<enums.ChangesRole>? changesRole) {
   return changesRole.map((e) => e.value!).toList();
 }
 
-List<enums.ChangesRole> changesRoleListFromJson(
-  List? changesRole, [
-  List<enums.ChangesRole>? defaultValue,
-]) {
+List<enums.ChangesRole> changesRoleListFromJson(List? changesRole, [List<enums.ChangesRole>? defaultValue]) {
   if (changesRole == null) {
     return defaultValue ?? [];
   }
@@ -6271,10 +4996,7 @@ List<enums.ChangesRole> changesRoleListFromJson(
   return changesRole.map((e) => changesRoleFromJson(e.toString())).toList();
 }
 
-List<enums.ChangesRole>? changesRoleNullableListFromJson(
-  List? changesRole, [
-  List<enums.ChangesRole>? defaultValue,
-]) {
+List<enums.ChangesRole>? changesRoleNullableListFromJson(List? changesRole, [List<enums.ChangesRole>? defaultValue]) {
   if (changesRole == null) {
     return defaultValue;
   }
@@ -6282,9 +5004,7 @@ List<enums.ChangesRole>? changesRoleNullableListFromJson(
   return changesRole.map((e) => changesRoleFromJson(e.toString())).toList();
 }
 
-String? clientMessageScopeNullableToJson(
-  enums.ClientMessageScope? clientMessageScope,
-) {
+String? clientMessageScopeNullableToJson(enums.ClientMessageScope? clientMessageScope) {
   return clientMessageScope?.value;
 }
 
@@ -6296,9 +5016,7 @@ enums.ClientMessageScope clientMessageScopeFromJson(
   Object? clientMessageScope, [
   enums.ClientMessageScope? defaultValue,
 ]) {
-  return enums.ClientMessageScope.values.firstWhereOrNull(
-        (e) => e.value == clientMessageScope,
-      ) ??
+  return enums.ClientMessageScope.values.firstWhereOrNull((e) => e.value == clientMessageScope) ??
       defaultValue ??
       enums.ClientMessageScope.swaggerGeneratedUnknown;
 }
@@ -6310,21 +5028,14 @@ enums.ClientMessageScope? clientMessageScopeNullableFromJson(
   if (clientMessageScope == null) {
     return null;
   }
-  return enums.ClientMessageScope.values.firstWhereOrNull(
-        (e) => e.value == clientMessageScope,
-      ) ??
-      defaultValue;
+  return enums.ClientMessageScope.values.firstWhereOrNull((e) => e.value == clientMessageScope) ?? defaultValue;
 }
 
-String clientMessageScopeExplodedListToJson(
-  List<enums.ClientMessageScope>? clientMessageScope,
-) {
+String clientMessageScopeExplodedListToJson(List<enums.ClientMessageScope>? clientMessageScope) {
   return clientMessageScope?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> clientMessageScopeListToJson(
-  List<enums.ClientMessageScope>? clientMessageScope,
-) {
+List<String> clientMessageScopeListToJson(List<enums.ClientMessageScope>? clientMessageScope) {
   if (clientMessageScope == null) {
     return [];
   }
@@ -6340,9 +5051,7 @@ List<enums.ClientMessageScope> clientMessageScopeListFromJson(
     return defaultValue ?? [];
   }
 
-  return clientMessageScope
-      .map((e) => clientMessageScopeFromJson(e.toString()))
-      .toList();
+  return clientMessageScope.map((e) => clientMessageScopeFromJson(e.toString())).toList();
 }
 
 List<enums.ClientMessageScope>? clientMessageScopeNullableListFromJson(
@@ -6353,14 +5062,10 @@ List<enums.ClientMessageScope>? clientMessageScopeNullableListFromJson(
     return defaultValue;
   }
 
-  return clientMessageScope
-      .map((e) => clientMessageScopeFromJson(e.toString()))
-      .toList();
+  return clientMessageScope.map((e) => clientMessageScopeFromJson(e.toString())).toList();
 }
 
-String? clientMessageTypeNullableToJson(
-  enums.ClientMessageType? clientMessageType,
-) {
+String? clientMessageTypeNullableToJson(enums.ClientMessageType? clientMessageType) {
   return clientMessageType?.value;
 }
 
@@ -6368,13 +5073,8 @@ String? clientMessageTypeToJson(enums.ClientMessageType clientMessageType) {
   return clientMessageType.value;
 }
 
-enums.ClientMessageType clientMessageTypeFromJson(
-  Object? clientMessageType, [
-  enums.ClientMessageType? defaultValue,
-]) {
-  return enums.ClientMessageType.values.firstWhereOrNull(
-        (e) => e.value == clientMessageType,
-      ) ??
+enums.ClientMessageType clientMessageTypeFromJson(Object? clientMessageType, [enums.ClientMessageType? defaultValue]) {
+  return enums.ClientMessageType.values.firstWhereOrNull((e) => e.value == clientMessageType) ??
       defaultValue ??
       enums.ClientMessageType.swaggerGeneratedUnknown;
 }
@@ -6386,21 +5086,14 @@ enums.ClientMessageType? clientMessageTypeNullableFromJson(
   if (clientMessageType == null) {
     return null;
   }
-  return enums.ClientMessageType.values.firstWhereOrNull(
-        (e) => e.value == clientMessageType,
-      ) ??
-      defaultValue;
+  return enums.ClientMessageType.values.firstWhereOrNull((e) => e.value == clientMessageType) ?? defaultValue;
 }
 
-String clientMessageTypeExplodedListToJson(
-  List<enums.ClientMessageType>? clientMessageType,
-) {
+String clientMessageTypeExplodedListToJson(List<enums.ClientMessageType>? clientMessageType) {
   return clientMessageType?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> clientMessageTypeListToJson(
-  List<enums.ClientMessageType>? clientMessageType,
-) {
+List<String> clientMessageTypeListToJson(List<enums.ClientMessageType>? clientMessageType) {
   if (clientMessageType == null) {
     return [];
   }
@@ -6416,9 +5109,7 @@ List<enums.ClientMessageType> clientMessageTypeListFromJson(
     return defaultValue ?? [];
   }
 
-  return clientMessageType
-      .map((e) => clientMessageTypeFromJson(e.toString()))
-      .toList();
+  return clientMessageType.map((e) => clientMessageTypeFromJson(e.toString())).toList();
 }
 
 List<enums.ClientMessageType>? clientMessageTypeNullableListFromJson(
@@ -6429,14 +5120,10 @@ List<enums.ClientMessageType>? clientMessageTypeNullableListFromJson(
     return defaultValue;
   }
 
-  return clientMessageType
-      .map((e) => clientMessageTypeFromJson(e.toString()))
-      .toList();
+  return clientMessageType.map((e) => clientMessageTypeFromJson(e.toString())).toList();
 }
 
-String? entryPreviewStateNullableToJson(
-  enums.EntryPreviewState? entryPreviewState,
-) {
+String? entryPreviewStateNullableToJson(enums.EntryPreviewState? entryPreviewState) {
   return entryPreviewState?.value;
 }
 
@@ -6444,13 +5131,8 @@ String? entryPreviewStateToJson(enums.EntryPreviewState entryPreviewState) {
   return entryPreviewState.value;
 }
 
-enums.EntryPreviewState entryPreviewStateFromJson(
-  Object? entryPreviewState, [
-  enums.EntryPreviewState? defaultValue,
-]) {
-  return enums.EntryPreviewState.values.firstWhereOrNull(
-        (e) => e.value == entryPreviewState,
-      ) ??
+enums.EntryPreviewState entryPreviewStateFromJson(Object? entryPreviewState, [enums.EntryPreviewState? defaultValue]) {
+  return enums.EntryPreviewState.values.firstWhereOrNull((e) => e.value == entryPreviewState) ??
       defaultValue ??
       enums.EntryPreviewState.swaggerGeneratedUnknown;
 }
@@ -6462,21 +5144,14 @@ enums.EntryPreviewState? entryPreviewStateNullableFromJson(
   if (entryPreviewState == null) {
     return null;
   }
-  return enums.EntryPreviewState.values.firstWhereOrNull(
-        (e) => e.value == entryPreviewState,
-      ) ??
-      defaultValue;
+  return enums.EntryPreviewState.values.firstWhereOrNull((e) => e.value == entryPreviewState) ?? defaultValue;
 }
 
-String entryPreviewStateExplodedListToJson(
-  List<enums.EntryPreviewState>? entryPreviewState,
-) {
+String entryPreviewStateExplodedListToJson(List<enums.EntryPreviewState>? entryPreviewState) {
   return entryPreviewState?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> entryPreviewStateListToJson(
-  List<enums.EntryPreviewState>? entryPreviewState,
-) {
+List<String> entryPreviewStateListToJson(List<enums.EntryPreviewState>? entryPreviewState) {
   if (entryPreviewState == null) {
     return [];
   }
@@ -6492,9 +5167,7 @@ List<enums.EntryPreviewState> entryPreviewStateListFromJson(
     return defaultValue ?? [];
   }
 
-  return entryPreviewState
-      .map((e) => entryPreviewStateFromJson(e.toString()))
-      .toList();
+  return entryPreviewState.map((e) => entryPreviewStateFromJson(e.toString())).toList();
 }
 
 List<enums.EntryPreviewState>? entryPreviewStateNullableListFromJson(
@@ -6505,14 +5178,10 @@ List<enums.EntryPreviewState>? entryPreviewStateNullableListFromJson(
     return defaultValue;
   }
 
-  return entryPreviewState
-      .map((e) => entryPreviewStateFromJson(e.toString()))
-      .toList();
+  return entryPreviewState.map((e) => entryPreviewStateFromJson(e.toString())).toList();
 }
 
-String? eventMessageStatusNullableToJson(
-  enums.EventMessageStatus? eventMessageStatus,
-) {
+String? eventMessageStatusNullableToJson(enums.EventMessageStatus? eventMessageStatus) {
   return eventMessageStatus?.value;
 }
 
@@ -6524,9 +5193,7 @@ enums.EventMessageStatus eventMessageStatusFromJson(
   Object? eventMessageStatus, [
   enums.EventMessageStatus? defaultValue,
 ]) {
-  return enums.EventMessageStatus.values.firstWhereOrNull(
-        (e) => e.value == eventMessageStatus,
-      ) ??
+  return enums.EventMessageStatus.values.firstWhereOrNull((e) => e.value == eventMessageStatus) ??
       defaultValue ??
       enums.EventMessageStatus.swaggerGeneratedUnknown;
 }
@@ -6538,21 +5205,14 @@ enums.EventMessageStatus? eventMessageStatusNullableFromJson(
   if (eventMessageStatus == null) {
     return null;
   }
-  return enums.EventMessageStatus.values.firstWhereOrNull(
-        (e) => e.value == eventMessageStatus,
-      ) ??
-      defaultValue;
+  return enums.EventMessageStatus.values.firstWhereOrNull((e) => e.value == eventMessageStatus) ?? defaultValue;
 }
 
-String eventMessageStatusExplodedListToJson(
-  List<enums.EventMessageStatus>? eventMessageStatus,
-) {
+String eventMessageStatusExplodedListToJson(List<enums.EventMessageStatus>? eventMessageStatus) {
   return eventMessageStatus?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> eventMessageStatusListToJson(
-  List<enums.EventMessageStatus>? eventMessageStatus,
-) {
+List<String> eventMessageStatusListToJson(List<enums.EventMessageStatus>? eventMessageStatus) {
   if (eventMessageStatus == null) {
     return [];
   }
@@ -6568,9 +5228,7 @@ List<enums.EventMessageStatus> eventMessageStatusListFromJson(
     return defaultValue ?? [];
   }
 
-  return eventMessageStatus
-      .map((e) => eventMessageStatusFromJson(e.toString()))
-      .toList();
+  return eventMessageStatus.map((e) => eventMessageStatusFromJson(e.toString())).toList();
 }
 
 List<enums.EventMessageStatus>? eventMessageStatusNullableListFromJson(
@@ -6581,14 +5239,10 @@ List<enums.EventMessageStatus>? eventMessageStatusNullableListFromJson(
     return defaultValue;
   }
 
-  return eventMessageStatus
-      .map((e) => eventMessageStatusFromJson(e.toString()))
-      .toList();
+  return eventMessageStatus.map((e) => eventMessageStatusFromJson(e.toString())).toList();
 }
 
-String? eventMessageTypeNullableToJson(
-  enums.EventMessageType? eventMessageType,
-) {
+String? eventMessageTypeNullableToJson(enums.EventMessageType? eventMessageType) {
   return eventMessageType?.value;
 }
 
@@ -6596,13 +5250,8 @@ String? eventMessageTypeToJson(enums.EventMessageType eventMessageType) {
   return eventMessageType.value;
 }
 
-enums.EventMessageType eventMessageTypeFromJson(
-  Object? eventMessageType, [
-  enums.EventMessageType? defaultValue,
-]) {
-  return enums.EventMessageType.values.firstWhereOrNull(
-        (e) => e.value == eventMessageType,
-      ) ??
+enums.EventMessageType eventMessageTypeFromJson(Object? eventMessageType, [enums.EventMessageType? defaultValue]) {
+  return enums.EventMessageType.values.firstWhereOrNull((e) => e.value == eventMessageType) ??
       defaultValue ??
       enums.EventMessageType.swaggerGeneratedUnknown;
 }
@@ -6614,21 +5263,14 @@ enums.EventMessageType? eventMessageTypeNullableFromJson(
   if (eventMessageType == null) {
     return null;
   }
-  return enums.EventMessageType.values.firstWhereOrNull(
-        (e) => e.value == eventMessageType,
-      ) ??
-      defaultValue;
+  return enums.EventMessageType.values.firstWhereOrNull((e) => e.value == eventMessageType) ?? defaultValue;
 }
 
-String eventMessageTypeExplodedListToJson(
-  List<enums.EventMessageType>? eventMessageType,
-) {
+String eventMessageTypeExplodedListToJson(List<enums.EventMessageType>? eventMessageType) {
   return eventMessageType?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> eventMessageTypeListToJson(
-  List<enums.EventMessageType>? eventMessageType,
-) {
+List<String> eventMessageTypeListToJson(List<enums.EventMessageType>? eventMessageType) {
   if (eventMessageType == null) {
     return [];
   }
@@ -6644,9 +5286,7 @@ List<enums.EventMessageType> eventMessageTypeListFromJson(
     return defaultValue ?? [];
   }
 
-  return eventMessageType
-      .map((e) => eventMessageTypeFromJson(e.toString()))
-      .toList();
+  return eventMessageType.map((e) => eventMessageTypeFromJson(e.toString())).toList();
 }
 
 List<enums.EventMessageType>? eventMessageTypeNullableListFromJson(
@@ -6657,20 +5297,14 @@ List<enums.EventMessageType>? eventMessageTypeNullableListFromJson(
     return defaultValue;
   }
 
-  return eventMessageType
-      .map((e) => eventMessageTypeFromJson(e.toString()))
-      .toList();
+  return eventMessageType.map((e) => eventMessageTypeFromJson(e.toString())).toList();
 }
 
-String? extractionStatusOcrNullableToJson(
-  enums.ExtractionStatusOcr? extractionStatusOcr,
-) {
+String? extractionStatusOcrNullableToJson(enums.ExtractionStatusOcr? extractionStatusOcr) {
   return extractionStatusOcr?.value;
 }
 
-String? extractionStatusOcrToJson(
-  enums.ExtractionStatusOcr extractionStatusOcr,
-) {
+String? extractionStatusOcrToJson(enums.ExtractionStatusOcr extractionStatusOcr) {
   return extractionStatusOcr.value;
 }
 
@@ -6678,9 +5312,7 @@ enums.ExtractionStatusOcr extractionStatusOcrFromJson(
   Object? extractionStatusOcr, [
   enums.ExtractionStatusOcr? defaultValue,
 ]) {
-  return enums.ExtractionStatusOcr.values.firstWhereOrNull(
-        (e) => e.value == extractionStatusOcr,
-      ) ??
+  return enums.ExtractionStatusOcr.values.firstWhereOrNull((e) => e.value == extractionStatusOcr) ??
       defaultValue ??
       enums.ExtractionStatusOcr.swaggerGeneratedUnknown;
 }
@@ -6692,21 +5324,14 @@ enums.ExtractionStatusOcr? extractionStatusOcrNullableFromJson(
   if (extractionStatusOcr == null) {
     return null;
   }
-  return enums.ExtractionStatusOcr.values.firstWhereOrNull(
-        (e) => e.value == extractionStatusOcr,
-      ) ??
-      defaultValue;
+  return enums.ExtractionStatusOcr.values.firstWhereOrNull((e) => e.value == extractionStatusOcr) ?? defaultValue;
 }
 
-String extractionStatusOcrExplodedListToJson(
-  List<enums.ExtractionStatusOcr>? extractionStatusOcr,
-) {
+String extractionStatusOcrExplodedListToJson(List<enums.ExtractionStatusOcr>? extractionStatusOcr) {
   return extractionStatusOcr?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> extractionStatusOcrListToJson(
-  List<enums.ExtractionStatusOcr>? extractionStatusOcr,
-) {
+List<String> extractionStatusOcrListToJson(List<enums.ExtractionStatusOcr>? extractionStatusOcr) {
   if (extractionStatusOcr == null) {
     return [];
   }
@@ -6722,9 +5347,7 @@ List<enums.ExtractionStatusOcr> extractionStatusOcrListFromJson(
     return defaultValue ?? [];
   }
 
-  return extractionStatusOcr
-      .map((e) => extractionStatusOcrFromJson(e.toString()))
-      .toList();
+  return extractionStatusOcr.map((e) => extractionStatusOcrFromJson(e.toString())).toList();
 }
 
 List<enums.ExtractionStatusOcr>? extractionStatusOcrNullableListFromJson(
@@ -6735,20 +5358,14 @@ List<enums.ExtractionStatusOcr>? extractionStatusOcrNullableListFromJson(
     return defaultValue;
   }
 
-  return extractionStatusOcr
-      .map((e) => extractionStatusOcrFromJson(e.toString()))
-      .toList();
+  return extractionStatusOcr.map((e) => extractionStatusOcrFromJson(e.toString())).toList();
 }
 
-String? liveTransferDirectionNullableToJson(
-  enums.LiveTransferDirection? liveTransferDirection,
-) {
+String? liveTransferDirectionNullableToJson(enums.LiveTransferDirection? liveTransferDirection) {
   return liveTransferDirection?.value;
 }
 
-String? liveTransferDirectionToJson(
-  enums.LiveTransferDirection liveTransferDirection,
-) {
+String? liveTransferDirectionToJson(enums.LiveTransferDirection liveTransferDirection) {
   return liveTransferDirection.value;
 }
 
@@ -6756,9 +5373,7 @@ enums.LiveTransferDirection liveTransferDirectionFromJson(
   Object? liveTransferDirection, [
   enums.LiveTransferDirection? defaultValue,
 ]) {
-  return enums.LiveTransferDirection.values.firstWhereOrNull(
-        (e) => e.value == liveTransferDirection,
-      ) ??
+  return enums.LiveTransferDirection.values.firstWhereOrNull((e) => e.value == liveTransferDirection) ??
       defaultValue ??
       enums.LiveTransferDirection.swaggerGeneratedUnknown;
 }
@@ -6770,21 +5385,14 @@ enums.LiveTransferDirection? liveTransferDirectionNullableFromJson(
   if (liveTransferDirection == null) {
     return null;
   }
-  return enums.LiveTransferDirection.values.firstWhereOrNull(
-        (e) => e.value == liveTransferDirection,
-      ) ??
-      defaultValue;
+  return enums.LiveTransferDirection.values.firstWhereOrNull((e) => e.value == liveTransferDirection) ?? defaultValue;
 }
 
-String liveTransferDirectionExplodedListToJson(
-  List<enums.LiveTransferDirection>? liveTransferDirection,
-) {
+String liveTransferDirectionExplodedListToJson(List<enums.LiveTransferDirection>? liveTransferDirection) {
   return liveTransferDirection?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> liveTransferDirectionListToJson(
-  List<enums.LiveTransferDirection>? liveTransferDirection,
-) {
+List<String> liveTransferDirectionListToJson(List<enums.LiveTransferDirection>? liveTransferDirection) {
   if (liveTransferDirection == null) {
     return [];
   }
@@ -6800,9 +5408,7 @@ List<enums.LiveTransferDirection> liveTransferDirectionListFromJson(
     return defaultValue ?? [];
   }
 
-  return liveTransferDirection
-      .map((e) => liveTransferDirectionFromJson(e.toString()))
-      .toList();
+  return liveTransferDirection.map((e) => liveTransferDirectionFromJson(e.toString())).toList();
 }
 
 List<enums.LiveTransferDirection>? liveTransferDirectionNullableListFromJson(
@@ -6813,9 +5419,7 @@ List<enums.LiveTransferDirection>? liveTransferDirectionNullableListFromJson(
     return defaultValue;
   }
 
-  return liveTransferDirection
-      .map((e) => liveTransferDirectionFromJson(e.toString()))
-      .toList();
+  return liveTransferDirection.map((e) => liveTransferDirectionFromJson(e.toString())).toList();
 }
 
 String? logEntryKindNullableToJson(enums.LogEntryKind? logEntryKind) {
@@ -6826,28 +5430,17 @@ String? logEntryKindToJson(enums.LogEntryKind logEntryKind) {
   return logEntryKind.value;
 }
 
-enums.LogEntryKind logEntryKindFromJson(
-  Object? logEntryKind, [
-  enums.LogEntryKind? defaultValue,
-]) {
-  return enums.LogEntryKind.values.firstWhereOrNull(
-        (e) => e.value == logEntryKind,
-      ) ??
+enums.LogEntryKind logEntryKindFromJson(Object? logEntryKind, [enums.LogEntryKind? defaultValue]) {
+  return enums.LogEntryKind.values.firstWhereOrNull((e) => e.value == logEntryKind) ??
       defaultValue ??
       enums.LogEntryKind.swaggerGeneratedUnknown;
 }
 
-enums.LogEntryKind? logEntryKindNullableFromJson(
-  Object? logEntryKind, [
-  enums.LogEntryKind? defaultValue,
-]) {
+enums.LogEntryKind? logEntryKindNullableFromJson(Object? logEntryKind, [enums.LogEntryKind? defaultValue]) {
   if (logEntryKind == null) {
     return null;
   }
-  return enums.LogEntryKind.values.firstWhereOrNull(
-        (e) => e.value == logEntryKind,
-      ) ??
-      defaultValue;
+  return enums.LogEntryKind.values.firstWhereOrNull((e) => e.value == logEntryKind) ?? defaultValue;
 }
 
 String logEntryKindExplodedListToJson(List<enums.LogEntryKind>? logEntryKind) {
@@ -6862,10 +5455,7 @@ List<String> logEntryKindListToJson(List<enums.LogEntryKind>? logEntryKind) {
   return logEntryKind.map((e) => e.value!).toList();
 }
 
-List<enums.LogEntryKind> logEntryKindListFromJson(
-  List? logEntryKind, [
-  List<enums.LogEntryKind>? defaultValue,
-]) {
+List<enums.LogEntryKind> logEntryKindListFromJson(List? logEntryKind, [List<enums.LogEntryKind>? defaultValue]) {
   if (logEntryKind == null) {
     return defaultValue ?? [];
   }
@@ -6892,39 +5482,24 @@ String? logEntryStatusToJson(enums.LogEntryStatus logEntryStatus) {
   return logEntryStatus.value;
 }
 
-enums.LogEntryStatus logEntryStatusFromJson(
-  Object? logEntryStatus, [
-  enums.LogEntryStatus? defaultValue,
-]) {
-  return enums.LogEntryStatus.values.firstWhereOrNull(
-        (e) => e.value == logEntryStatus,
-      ) ??
+enums.LogEntryStatus logEntryStatusFromJson(Object? logEntryStatus, [enums.LogEntryStatus? defaultValue]) {
+  return enums.LogEntryStatus.values.firstWhereOrNull((e) => e.value == logEntryStatus) ??
       defaultValue ??
       enums.LogEntryStatus.swaggerGeneratedUnknown;
 }
 
-enums.LogEntryStatus? logEntryStatusNullableFromJson(
-  Object? logEntryStatus, [
-  enums.LogEntryStatus? defaultValue,
-]) {
+enums.LogEntryStatus? logEntryStatusNullableFromJson(Object? logEntryStatus, [enums.LogEntryStatus? defaultValue]) {
   if (logEntryStatus == null) {
     return null;
   }
-  return enums.LogEntryStatus.values.firstWhereOrNull(
-        (e) => e.value == logEntryStatus,
-      ) ??
-      defaultValue;
+  return enums.LogEntryStatus.values.firstWhereOrNull((e) => e.value == logEntryStatus) ?? defaultValue;
 }
 
-String logEntryStatusExplodedListToJson(
-  List<enums.LogEntryStatus>? logEntryStatus,
-) {
+String logEntryStatusExplodedListToJson(List<enums.LogEntryStatus>? logEntryStatus) {
   return logEntryStatus?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> logEntryStatusListToJson(
-  List<enums.LogEntryStatus>? logEntryStatus,
-) {
+List<String> logEntryStatusListToJson(List<enums.LogEntryStatus>? logEntryStatus) {
   if (logEntryStatus == null) {
     return [];
   }
@@ -6940,9 +5515,7 @@ List<enums.LogEntryStatus> logEntryStatusListFromJson(
     return defaultValue ?? [];
   }
 
-  return logEntryStatus
-      .map((e) => logEntryStatusFromJson(e.toString()))
-      .toList();
+  return logEntryStatus.map((e) => logEntryStatusFromJson(e.toString())).toList();
 }
 
 List<enums.LogEntryStatus>? logEntryStatusNullableListFromJson(
@@ -6953,9 +5526,7 @@ List<enums.LogEntryStatus>? logEntryStatusNullableListFromJson(
     return defaultValue;
   }
 
-  return logEntryStatus
-      .map((e) => logEntryStatusFromJson(e.toString()))
-      .toList();
+  return logEntryStatus.map((e) => logEntryStatusFromJson(e.toString())).toList();
 }
 
 String? newUserRoleNullableToJson(enums.NewUserRole? newUserRole) {
@@ -6966,28 +5537,17 @@ String? newUserRoleToJson(enums.NewUserRole newUserRole) {
   return newUserRole.value;
 }
 
-enums.NewUserRole newUserRoleFromJson(
-  Object? newUserRole, [
-  enums.NewUserRole? defaultValue,
-]) {
-  return enums.NewUserRole.values.firstWhereOrNull(
-        (e) => e.value == newUserRole,
-      ) ??
+enums.NewUserRole newUserRoleFromJson(Object? newUserRole, [enums.NewUserRole? defaultValue]) {
+  return enums.NewUserRole.values.firstWhereOrNull((e) => e.value == newUserRole) ??
       defaultValue ??
       enums.NewUserRole.swaggerGeneratedUnknown;
 }
 
-enums.NewUserRole? newUserRoleNullableFromJson(
-  Object? newUserRole, [
-  enums.NewUserRole? defaultValue,
-]) {
+enums.NewUserRole? newUserRoleNullableFromJson(Object? newUserRole, [enums.NewUserRole? defaultValue]) {
   if (newUserRole == null) {
     return null;
   }
-  return enums.NewUserRole.values.firstWhereOrNull(
-        (e) => e.value == newUserRole,
-      ) ??
-      defaultValue;
+  return enums.NewUserRole.values.firstWhereOrNull((e) => e.value == newUserRole) ?? defaultValue;
 }
 
 String newUserRoleExplodedListToJson(List<enums.NewUserRole>? newUserRole) {
@@ -7002,10 +5562,7 @@ List<String> newUserRoleListToJson(List<enums.NewUserRole>? newUserRole) {
   return newUserRole.map((e) => e.value!).toList();
 }
 
-List<enums.NewUserRole> newUserRoleListFromJson(
-  List? newUserRole, [
-  List<enums.NewUserRole>? defaultValue,
-]) {
+List<enums.NewUserRole> newUserRoleListFromJson(List? newUserRole, [List<enums.NewUserRole>? defaultValue]) {
   if (newUserRole == null) {
     return defaultValue ?? [];
   }
@@ -7013,10 +5570,7 @@ List<enums.NewUserRole> newUserRoleListFromJson(
   return newUserRole.map((e) => newUserRoleFromJson(e.toString())).toList();
 }
 
-List<enums.NewUserRole>? newUserRoleNullableListFromJson(
-  List? newUserRole, [
-  List<enums.NewUserRole>? defaultValue,
-]) {
+List<enums.NewUserRole>? newUserRoleNullableListFromJson(List? newUserRole, [List<enums.NewUserRole>? defaultValue]) {
   if (newUserRole == null) {
     return defaultValue;
   }
@@ -7032,39 +5586,24 @@ String? queryFilterKeyToJson(enums.QueryFilterKey queryFilterKey) {
   return queryFilterKey.value;
 }
 
-enums.QueryFilterKey queryFilterKeyFromJson(
-  Object? queryFilterKey, [
-  enums.QueryFilterKey? defaultValue,
-]) {
-  return enums.QueryFilterKey.values.firstWhereOrNull(
-        (e) => e.value == queryFilterKey,
-      ) ??
+enums.QueryFilterKey queryFilterKeyFromJson(Object? queryFilterKey, [enums.QueryFilterKey? defaultValue]) {
+  return enums.QueryFilterKey.values.firstWhereOrNull((e) => e.value == queryFilterKey) ??
       defaultValue ??
       enums.QueryFilterKey.swaggerGeneratedUnknown;
 }
 
-enums.QueryFilterKey? queryFilterKeyNullableFromJson(
-  Object? queryFilterKey, [
-  enums.QueryFilterKey? defaultValue,
-]) {
+enums.QueryFilterKey? queryFilterKeyNullableFromJson(Object? queryFilterKey, [enums.QueryFilterKey? defaultValue]) {
   if (queryFilterKey == null) {
     return null;
   }
-  return enums.QueryFilterKey.values.firstWhereOrNull(
-        (e) => e.value == queryFilterKey,
-      ) ??
-      defaultValue;
+  return enums.QueryFilterKey.values.firstWhereOrNull((e) => e.value == queryFilterKey) ?? defaultValue;
 }
 
-String queryFilterKeyExplodedListToJson(
-  List<enums.QueryFilterKey>? queryFilterKey,
-) {
+String queryFilterKeyExplodedListToJson(List<enums.QueryFilterKey>? queryFilterKey) {
   return queryFilterKey?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> queryFilterKeyListToJson(
-  List<enums.QueryFilterKey>? queryFilterKey,
-) {
+List<String> queryFilterKeyListToJson(List<enums.QueryFilterKey>? queryFilterKey) {
   if (queryFilterKey == null) {
     return [];
   }
@@ -7080,9 +5619,7 @@ List<enums.QueryFilterKey> queryFilterKeyListFromJson(
     return defaultValue ?? [];
   }
 
-  return queryFilterKey
-      .map((e) => queryFilterKeyFromJson(e.toString()))
-      .toList();
+  return queryFilterKey.map((e) => queryFilterKeyFromJson(e.toString())).toList();
 }
 
 List<enums.QueryFilterKey>? queryFilterKeyNullableListFromJson(
@@ -7093,9 +5630,7 @@ List<enums.QueryFilterKey>? queryFilterKeyNullableListFromJson(
     return defaultValue;
   }
 
-  return queryFilterKey
-      .map((e) => queryFilterKeyFromJson(e.toString()))
-      .toList();
+  return queryFilterKey.map((e) => queryFilterKeyFromJson(e.toString())).toList();
 }
 
 String? queryFilterOpNullableToJson(enums.QueryFilterOp? queryFilterOp) {
@@ -7106,33 +5641,20 @@ String? queryFilterOpToJson(enums.QueryFilterOp queryFilterOp) {
   return queryFilterOp.value;
 }
 
-enums.QueryFilterOp queryFilterOpFromJson(
-  Object? queryFilterOp, [
-  enums.QueryFilterOp? defaultValue,
-]) {
-  return enums.QueryFilterOp.values.firstWhereOrNull(
-        (e) => e.value == queryFilterOp,
-      ) ??
+enums.QueryFilterOp queryFilterOpFromJson(Object? queryFilterOp, [enums.QueryFilterOp? defaultValue]) {
+  return enums.QueryFilterOp.values.firstWhereOrNull((e) => e.value == queryFilterOp) ??
       defaultValue ??
       enums.QueryFilterOp.swaggerGeneratedUnknown;
 }
 
-enums.QueryFilterOp? queryFilterOpNullableFromJson(
-  Object? queryFilterOp, [
-  enums.QueryFilterOp? defaultValue,
-]) {
+enums.QueryFilterOp? queryFilterOpNullableFromJson(Object? queryFilterOp, [enums.QueryFilterOp? defaultValue]) {
   if (queryFilterOp == null) {
     return null;
   }
-  return enums.QueryFilterOp.values.firstWhereOrNull(
-        (e) => e.value == queryFilterOp,
-      ) ??
-      defaultValue;
+  return enums.QueryFilterOp.values.firstWhereOrNull((e) => e.value == queryFilterOp) ?? defaultValue;
 }
 
-String queryFilterOpExplodedListToJson(
-  List<enums.QueryFilterOp>? queryFilterOp,
-) {
+String queryFilterOpExplodedListToJson(List<enums.QueryFilterOp>? queryFilterOp) {
   return queryFilterOp?.map((e) => e.value!).join(',') ?? '';
 }
 
@@ -7144,10 +5666,7 @@ List<String> queryFilterOpListToJson(List<enums.QueryFilterOp>? queryFilterOp) {
   return queryFilterOp.map((e) => e.value!).toList();
 }
 
-List<enums.QueryFilterOp> queryFilterOpListFromJson(
-  List? queryFilterOp, [
-  List<enums.QueryFilterOp>? defaultValue,
-]) {
+List<enums.QueryFilterOp> queryFilterOpListFromJson(List? queryFilterOp, [List<enums.QueryFilterOp>? defaultValue]) {
   if (queryFilterOp == null) {
     return defaultValue ?? [];
   }
@@ -7166,15 +5685,11 @@ List<enums.QueryFilterOp>? queryFilterOpNullableListFromJson(
   return queryFilterOp.map((e) => queryFilterOpFromJson(e.toString())).toList();
 }
 
-String? restoreRequestOnConflictNullableToJson(
-  enums.RestoreRequestOnConflict? restoreRequestOnConflict,
-) {
+String? restoreRequestOnConflictNullableToJson(enums.RestoreRequestOnConflict? restoreRequestOnConflict) {
   return restoreRequestOnConflict?.value;
 }
 
-String? restoreRequestOnConflictToJson(
-  enums.RestoreRequestOnConflict restoreRequestOnConflict,
-) {
+String? restoreRequestOnConflictToJson(enums.RestoreRequestOnConflict restoreRequestOnConflict) {
   return restoreRequestOnConflict.value;
 }
 
@@ -7182,9 +5697,7 @@ enums.RestoreRequestOnConflict restoreRequestOnConflictFromJson(
   Object? restoreRequestOnConflict, [
   enums.RestoreRequestOnConflict? defaultValue,
 ]) {
-  return enums.RestoreRequestOnConflict.values.firstWhereOrNull(
-        (e) => e.value == restoreRequestOnConflict,
-      ) ??
+  return enums.RestoreRequestOnConflict.values.firstWhereOrNull((e) => e.value == restoreRequestOnConflict) ??
       defaultValue ??
       enums.RestoreRequestOnConflict.swaggerGeneratedUnknown;
 }
@@ -7196,21 +5709,15 @@ enums.RestoreRequestOnConflict? restoreRequestOnConflictNullableFromJson(
   if (restoreRequestOnConflict == null) {
     return null;
   }
-  return enums.RestoreRequestOnConflict.values.firstWhereOrNull(
-        (e) => e.value == restoreRequestOnConflict,
-      ) ??
+  return enums.RestoreRequestOnConflict.values.firstWhereOrNull((e) => e.value == restoreRequestOnConflict) ??
       defaultValue;
 }
 
-String restoreRequestOnConflictExplodedListToJson(
-  List<enums.RestoreRequestOnConflict>? restoreRequestOnConflict,
-) {
+String restoreRequestOnConflictExplodedListToJson(List<enums.RestoreRequestOnConflict>? restoreRequestOnConflict) {
   return restoreRequestOnConflict?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> restoreRequestOnConflictListToJson(
-  List<enums.RestoreRequestOnConflict>? restoreRequestOnConflict,
-) {
+List<String> restoreRequestOnConflictListToJson(List<enums.RestoreRequestOnConflict>? restoreRequestOnConflict) {
   if (restoreRequestOnConflict == null) {
     return [];
   }
@@ -7226,13 +5733,10 @@ List<enums.RestoreRequestOnConflict> restoreRequestOnConflictListFromJson(
     return defaultValue ?? [];
   }
 
-  return restoreRequestOnConflict
-      .map((e) => restoreRequestOnConflictFromJson(e.toString()))
-      .toList();
+  return restoreRequestOnConflict.map((e) => restoreRequestOnConflictFromJson(e.toString())).toList();
 }
 
-List<enums.RestoreRequestOnConflict>?
-restoreRequestOnConflictNullableListFromJson(
+List<enums.RestoreRequestOnConflict>? restoreRequestOnConflictNullableListFromJson(
   List? restoreRequestOnConflict, [
   List<enums.RestoreRequestOnConflict>? defaultValue,
 ]) {
@@ -7240,9 +5744,7 @@ restoreRequestOnConflictNullableListFromJson(
     return defaultValue;
   }
 
-  return restoreRequestOnConflict
-      .map((e) => restoreRequestOnConflictFromJson(e.toString()))
-      .toList();
+  return restoreRequestOnConflict.map((e) => restoreRequestOnConflictFromJson(e.toString())).toList();
 }
 
 String? suggestionKindNullableToJson(enums.SuggestionKind? suggestionKind) {
@@ -7253,39 +5755,24 @@ String? suggestionKindToJson(enums.SuggestionKind suggestionKind) {
   return suggestionKind.value;
 }
 
-enums.SuggestionKind suggestionKindFromJson(
-  Object? suggestionKind, [
-  enums.SuggestionKind? defaultValue,
-]) {
-  return enums.SuggestionKind.values.firstWhereOrNull(
-        (e) => e.value == suggestionKind,
-      ) ??
+enums.SuggestionKind suggestionKindFromJson(Object? suggestionKind, [enums.SuggestionKind? defaultValue]) {
+  return enums.SuggestionKind.values.firstWhereOrNull((e) => e.value == suggestionKind) ??
       defaultValue ??
       enums.SuggestionKind.swaggerGeneratedUnknown;
 }
 
-enums.SuggestionKind? suggestionKindNullableFromJson(
-  Object? suggestionKind, [
-  enums.SuggestionKind? defaultValue,
-]) {
+enums.SuggestionKind? suggestionKindNullableFromJson(Object? suggestionKind, [enums.SuggestionKind? defaultValue]) {
   if (suggestionKind == null) {
     return null;
   }
-  return enums.SuggestionKind.values.firstWhereOrNull(
-        (e) => e.value == suggestionKind,
-      ) ??
-      defaultValue;
+  return enums.SuggestionKind.values.firstWhereOrNull((e) => e.value == suggestionKind) ?? defaultValue;
 }
 
-String suggestionKindExplodedListToJson(
-  List<enums.SuggestionKind>? suggestionKind,
-) {
+String suggestionKindExplodedListToJson(List<enums.SuggestionKind>? suggestionKind) {
   return suggestionKind?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> suggestionKindListToJson(
-  List<enums.SuggestionKind>? suggestionKind,
-) {
+List<String> suggestionKindListToJson(List<enums.SuggestionKind>? suggestionKind) {
   if (suggestionKind == null) {
     return [];
   }
@@ -7301,9 +5788,7 @@ List<enums.SuggestionKind> suggestionKindListFromJson(
     return defaultValue ?? [];
   }
 
-  return suggestionKind
-      .map((e) => suggestionKindFromJson(e.toString()))
-      .toList();
+  return suggestionKind.map((e) => suggestionKindFromJson(e.toString())).toList();
 }
 
 List<enums.SuggestionKind>? suggestionKindNullableListFromJson(
@@ -7314,20 +5799,14 @@ List<enums.SuggestionKind>? suggestionKindNullableListFromJson(
     return defaultValue;
   }
 
-  return suggestionKind
-      .map((e) => suggestionKindFromJson(e.toString()))
-      .toList();
+  return suggestionKind.map((e) => suggestionKindFromJson(e.toString())).toList();
 }
 
-String? trashItemPreviewStateNullableToJson(
-  enums.TrashItemPreviewState? trashItemPreviewState,
-) {
+String? trashItemPreviewStateNullableToJson(enums.TrashItemPreviewState? trashItemPreviewState) {
   return trashItemPreviewState?.value;
 }
 
-String? trashItemPreviewStateToJson(
-  enums.TrashItemPreviewState trashItemPreviewState,
-) {
+String? trashItemPreviewStateToJson(enums.TrashItemPreviewState trashItemPreviewState) {
   return trashItemPreviewState.value;
 }
 
@@ -7335,9 +5814,7 @@ enums.TrashItemPreviewState trashItemPreviewStateFromJson(
   Object? trashItemPreviewState, [
   enums.TrashItemPreviewState? defaultValue,
 ]) {
-  return enums.TrashItemPreviewState.values.firstWhereOrNull(
-        (e) => e.value == trashItemPreviewState,
-      ) ??
+  return enums.TrashItemPreviewState.values.firstWhereOrNull((e) => e.value == trashItemPreviewState) ??
       defaultValue ??
       enums.TrashItemPreviewState.swaggerGeneratedUnknown;
 }
@@ -7349,21 +5826,14 @@ enums.TrashItemPreviewState? trashItemPreviewStateNullableFromJson(
   if (trashItemPreviewState == null) {
     return null;
   }
-  return enums.TrashItemPreviewState.values.firstWhereOrNull(
-        (e) => e.value == trashItemPreviewState,
-      ) ??
-      defaultValue;
+  return enums.TrashItemPreviewState.values.firstWhereOrNull((e) => e.value == trashItemPreviewState) ?? defaultValue;
 }
 
-String trashItemPreviewStateExplodedListToJson(
-  List<enums.TrashItemPreviewState>? trashItemPreviewState,
-) {
+String trashItemPreviewStateExplodedListToJson(List<enums.TrashItemPreviewState>? trashItemPreviewState) {
   return trashItemPreviewState?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> trashItemPreviewStateListToJson(
-  List<enums.TrashItemPreviewState>? trashItemPreviewState,
-) {
+List<String> trashItemPreviewStateListToJson(List<enums.TrashItemPreviewState>? trashItemPreviewState) {
   if (trashItemPreviewState == null) {
     return [];
   }
@@ -7379,9 +5849,7 @@ List<enums.TrashItemPreviewState> trashItemPreviewStateListFromJson(
     return defaultValue ?? [];
   }
 
-  return trashItemPreviewState
-      .map((e) => trashItemPreviewStateFromJson(e.toString()))
-      .toList();
+  return trashItemPreviewState.map((e) => trashItemPreviewStateFromJson(e.toString())).toList();
 }
 
 List<enums.TrashItemPreviewState>? trashItemPreviewStateNullableListFromJson(
@@ -7392,20 +5860,14 @@ List<enums.TrashItemPreviewState>? trashItemPreviewStateNullableListFromJson(
     return defaultValue;
   }
 
-  return trashItemPreviewState
-      .map((e) => trashItemPreviewStateFromJson(e.toString()))
-      .toList();
+  return trashItemPreviewState.map((e) => trashItemPreviewStateFromJson(e.toString())).toList();
 }
 
-String? trashRetentionSourceNullableToJson(
-  enums.TrashRetentionSource? trashRetentionSource,
-) {
+String? trashRetentionSourceNullableToJson(enums.TrashRetentionSource? trashRetentionSource) {
   return trashRetentionSource?.value;
 }
 
-String? trashRetentionSourceToJson(
-  enums.TrashRetentionSource trashRetentionSource,
-) {
+String? trashRetentionSourceToJson(enums.TrashRetentionSource trashRetentionSource) {
   return trashRetentionSource.value;
 }
 
@@ -7413,9 +5875,7 @@ enums.TrashRetentionSource trashRetentionSourceFromJson(
   Object? trashRetentionSource, [
   enums.TrashRetentionSource? defaultValue,
 ]) {
-  return enums.TrashRetentionSource.values.firstWhereOrNull(
-        (e) => e.value == trashRetentionSource,
-      ) ??
+  return enums.TrashRetentionSource.values.firstWhereOrNull((e) => e.value == trashRetentionSource) ??
       defaultValue ??
       enums.TrashRetentionSource.swaggerGeneratedUnknown;
 }
@@ -7427,21 +5887,14 @@ enums.TrashRetentionSource? trashRetentionSourceNullableFromJson(
   if (trashRetentionSource == null) {
     return null;
   }
-  return enums.TrashRetentionSource.values.firstWhereOrNull(
-        (e) => e.value == trashRetentionSource,
-      ) ??
-      defaultValue;
+  return enums.TrashRetentionSource.values.firstWhereOrNull((e) => e.value == trashRetentionSource) ?? defaultValue;
 }
 
-String trashRetentionSourceExplodedListToJson(
-  List<enums.TrashRetentionSource>? trashRetentionSource,
-) {
+String trashRetentionSourceExplodedListToJson(List<enums.TrashRetentionSource>? trashRetentionSource) {
   return trashRetentionSource?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> trashRetentionSourceListToJson(
-  List<enums.TrashRetentionSource>? trashRetentionSource,
-) {
+List<String> trashRetentionSourceListToJson(List<enums.TrashRetentionSource>? trashRetentionSource) {
   if (trashRetentionSource == null) {
     return [];
   }
@@ -7457,9 +5910,7 @@ List<enums.TrashRetentionSource> trashRetentionSourceListFromJson(
     return defaultValue ?? [];
   }
 
-  return trashRetentionSource
-      .map((e) => trashRetentionSourceFromJson(e.toString()))
-      .toList();
+  return trashRetentionSource.map((e) => trashRetentionSourceFromJson(e.toString())).toList();
 }
 
 List<enums.TrashRetentionSource>? trashRetentionSourceNullableListFromJson(
@@ -7470,9 +5921,7 @@ List<enums.TrashRetentionSource>? trashRetentionSourceNullableListFromJson(
     return defaultValue;
   }
 
-  return trashRetentionSource
-      .map((e) => trashRetentionSourceFromJson(e.toString()))
-      .toList();
+  return trashRetentionSource.map((e) => trashRetentionSourceFromJson(e.toString())).toList();
 }
 
 String? userRoleNullableToJson(enums.UserRole? userRole) {
@@ -7483,24 +5932,17 @@ String? userRoleToJson(enums.UserRole userRole) {
   return userRole.value;
 }
 
-enums.UserRole userRoleFromJson(
-  Object? userRole, [
-  enums.UserRole? defaultValue,
-]) {
+enums.UserRole userRoleFromJson(Object? userRole, [enums.UserRole? defaultValue]) {
   return enums.UserRole.values.firstWhereOrNull((e) => e.value == userRole) ??
       defaultValue ??
       enums.UserRole.swaggerGeneratedUnknown;
 }
 
-enums.UserRole? userRoleNullableFromJson(
-  Object? userRole, [
-  enums.UserRole? defaultValue,
-]) {
+enums.UserRole? userRoleNullableFromJson(Object? userRole, [enums.UserRole? defaultValue]) {
   if (userRole == null) {
     return null;
   }
-  return enums.UserRole.values.firstWhereOrNull((e) => e.value == userRole) ??
-      defaultValue;
+  return enums.UserRole.values.firstWhereOrNull((e) => e.value == userRole) ?? defaultValue;
 }
 
 String userRoleExplodedListToJson(List<enums.UserRole>? userRole) {
@@ -7515,10 +5957,7 @@ List<String> userRoleListToJson(List<enums.UserRole>? userRole) {
   return userRole.map((e) => e.value!).toList();
 }
 
-List<enums.UserRole> userRoleListFromJson(
-  List? userRole, [
-  List<enums.UserRole>? defaultValue,
-]) {
+List<enums.UserRole> userRoleListFromJson(List? userRole, [List<enums.UserRole>? defaultValue]) {
   if (userRole == null) {
     return defaultValue ?? [];
   }
@@ -7526,10 +5965,7 @@ List<enums.UserRole> userRoleListFromJson(
   return userRole.map((e) => userRoleFromJson(e.toString())).toList();
 }
 
-List<enums.UserRole>? userRoleNullableListFromJson(
-  List? userRole, [
-  List<enums.UserRole>? defaultValue,
-]) {
+List<enums.UserRole>? userRoleNullableListFromJson(List? userRole, [List<enums.UserRole>? defaultValue]) {
   if (userRole == null) {
     return defaultValue;
   }
@@ -7537,15 +5973,11 @@ List<enums.UserRole>? userRoleNullableListFromJson(
   return userRole.map((e) => userRoleFromJson(e.toString())).toList();
 }
 
-String? versionRetentionSourceNullableToJson(
-  enums.VersionRetentionSource? versionRetentionSource,
-) {
+String? versionRetentionSourceNullableToJson(enums.VersionRetentionSource? versionRetentionSource) {
   return versionRetentionSource?.value;
 }
 
-String? versionRetentionSourceToJson(
-  enums.VersionRetentionSource versionRetentionSource,
-) {
+String? versionRetentionSourceToJson(enums.VersionRetentionSource versionRetentionSource) {
   return versionRetentionSource.value;
 }
 
@@ -7553,9 +5985,7 @@ enums.VersionRetentionSource versionRetentionSourceFromJson(
   Object? versionRetentionSource, [
   enums.VersionRetentionSource? defaultValue,
 ]) {
-  return enums.VersionRetentionSource.values.firstWhereOrNull(
-        (e) => e.value == versionRetentionSource,
-      ) ??
+  return enums.VersionRetentionSource.values.firstWhereOrNull((e) => e.value == versionRetentionSource) ??
       defaultValue ??
       enums.VersionRetentionSource.swaggerGeneratedUnknown;
 }
@@ -7567,21 +5997,14 @@ enums.VersionRetentionSource? versionRetentionSourceNullableFromJson(
   if (versionRetentionSource == null) {
     return null;
   }
-  return enums.VersionRetentionSource.values.firstWhereOrNull(
-        (e) => e.value == versionRetentionSource,
-      ) ??
-      defaultValue;
+  return enums.VersionRetentionSource.values.firstWhereOrNull((e) => e.value == versionRetentionSource) ?? defaultValue;
 }
 
-String versionRetentionSourceExplodedListToJson(
-  List<enums.VersionRetentionSource>? versionRetentionSource,
-) {
+String versionRetentionSourceExplodedListToJson(List<enums.VersionRetentionSource>? versionRetentionSource) {
   return versionRetentionSource?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> versionRetentionSourceListToJson(
-  List<enums.VersionRetentionSource>? versionRetentionSource,
-) {
+List<String> versionRetentionSourceListToJson(List<enums.VersionRetentionSource>? versionRetentionSource) {
   if (versionRetentionSource == null) {
     return [];
   }
@@ -7597,9 +6020,7 @@ List<enums.VersionRetentionSource> versionRetentionSourceListFromJson(
     return defaultValue ?? [];
   }
 
-  return versionRetentionSource
-      .map((e) => versionRetentionSourceFromJson(e.toString()))
-      .toList();
+  return versionRetentionSource.map((e) => versionRetentionSourceFromJson(e.toString())).toList();
 }
 
 List<enums.VersionRetentionSource>? versionRetentionSourceNullableListFromJson(
@@ -7610,20 +6031,14 @@ List<enums.VersionRetentionSource>? versionRetentionSourceNullableListFromJson(
     return defaultValue;
   }
 
-  return versionRetentionSource
-      .map((e) => versionRetentionSourceFromJson(e.toString()))
-      .toList();
+  return versionRetentionSource.map((e) => versionRetentionSourceFromJson(e.toString())).toList();
 }
 
-String? apiV1AdminLogsGetLevelNullableToJson(
-  enums.ApiV1AdminLogsGetLevel? apiV1AdminLogsGetLevel,
-) {
+String? apiV1AdminLogsGetLevelNullableToJson(enums.ApiV1AdminLogsGetLevel? apiV1AdminLogsGetLevel) {
   return apiV1AdminLogsGetLevel?.value;
 }
 
-String? apiV1AdminLogsGetLevelToJson(
-  enums.ApiV1AdminLogsGetLevel apiV1AdminLogsGetLevel,
-) {
+String? apiV1AdminLogsGetLevelToJson(enums.ApiV1AdminLogsGetLevel apiV1AdminLogsGetLevel) {
   return apiV1AdminLogsGetLevel.value;
 }
 
@@ -7631,9 +6046,7 @@ enums.ApiV1AdminLogsGetLevel apiV1AdminLogsGetLevelFromJson(
   Object? apiV1AdminLogsGetLevel, [
   enums.ApiV1AdminLogsGetLevel? defaultValue,
 ]) {
-  return enums.ApiV1AdminLogsGetLevel.values.firstWhereOrNull(
-        (e) => e.value == apiV1AdminLogsGetLevel,
-      ) ??
+  return enums.ApiV1AdminLogsGetLevel.values.firstWhereOrNull((e) => e.value == apiV1AdminLogsGetLevel) ??
       defaultValue ??
       enums.ApiV1AdminLogsGetLevel.swaggerGeneratedUnknown;
 }
@@ -7645,21 +6058,14 @@ enums.ApiV1AdminLogsGetLevel? apiV1AdminLogsGetLevelNullableFromJson(
   if (apiV1AdminLogsGetLevel == null) {
     return null;
   }
-  return enums.ApiV1AdminLogsGetLevel.values.firstWhereOrNull(
-        (e) => e.value == apiV1AdminLogsGetLevel,
-      ) ??
-      defaultValue;
+  return enums.ApiV1AdminLogsGetLevel.values.firstWhereOrNull((e) => e.value == apiV1AdminLogsGetLevel) ?? defaultValue;
 }
 
-String apiV1AdminLogsGetLevelExplodedListToJson(
-  List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevel,
-) {
+String apiV1AdminLogsGetLevelExplodedListToJson(List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevel) {
   return apiV1AdminLogsGetLevel?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<String> apiV1AdminLogsGetLevelListToJson(
-  List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevel,
-) {
+List<String> apiV1AdminLogsGetLevelListToJson(List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevel) {
   if (apiV1AdminLogsGetLevel == null) {
     return [];
   }
@@ -7675,9 +6081,7 @@ List<enums.ApiV1AdminLogsGetLevel> apiV1AdminLogsGetLevelListFromJson(
     return defaultValue ?? [];
   }
 
-  return apiV1AdminLogsGetLevel
-      .map((e) => apiV1AdminLogsGetLevelFromJson(e.toString()))
-      .toList();
+  return apiV1AdminLogsGetLevel.map((e) => apiV1AdminLogsGetLevelFromJson(e.toString())).toList();
 }
 
 List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevelNullableListFromJson(
@@ -7688,20 +6092,14 @@ List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevelNullableListFromJson(
     return defaultValue;
   }
 
-  return apiV1AdminLogsGetLevel
-      .map((e) => apiV1AdminLogsGetLevelFromJson(e.toString()))
-      .toList();
+  return apiV1AdminLogsGetLevel.map((e) => apiV1AdminLogsGetLevelFromJson(e.toString())).toList();
 }
 
-int? apiV1FilesPreviewGetSizeNullableToJson(
-  enums.ApiV1FilesPreviewGetSize? apiV1FilesPreviewGetSize,
-) {
+int? apiV1FilesPreviewGetSizeNullableToJson(enums.ApiV1FilesPreviewGetSize? apiV1FilesPreviewGetSize) {
   return apiV1FilesPreviewGetSize?.value;
 }
 
-int? apiV1FilesPreviewGetSizeToJson(
-  enums.ApiV1FilesPreviewGetSize apiV1FilesPreviewGetSize,
-) {
+int? apiV1FilesPreviewGetSizeToJson(enums.ApiV1FilesPreviewGetSize apiV1FilesPreviewGetSize) {
   return apiV1FilesPreviewGetSize.value;
 }
 
@@ -7709,9 +6107,7 @@ enums.ApiV1FilesPreviewGetSize apiV1FilesPreviewGetSizeFromJson(
   Object? apiV1FilesPreviewGetSize, [
   enums.ApiV1FilesPreviewGetSize? defaultValue,
 ]) {
-  return enums.ApiV1FilesPreviewGetSize.values.firstWhereOrNull(
-        (e) => e.value == apiV1FilesPreviewGetSize,
-      ) ??
+  return enums.ApiV1FilesPreviewGetSize.values.firstWhereOrNull((e) => e.value == apiV1FilesPreviewGetSize) ??
       defaultValue ??
       enums.ApiV1FilesPreviewGetSize.swaggerGeneratedUnknown;
 }
@@ -7723,21 +6119,15 @@ enums.ApiV1FilesPreviewGetSize? apiV1FilesPreviewGetSizeNullableFromJson(
   if (apiV1FilesPreviewGetSize == null) {
     return null;
   }
-  return enums.ApiV1FilesPreviewGetSize.values.firstWhereOrNull(
-        (e) => e.value == apiV1FilesPreviewGetSize,
-      ) ??
+  return enums.ApiV1FilesPreviewGetSize.values.firstWhereOrNull((e) => e.value == apiV1FilesPreviewGetSize) ??
       defaultValue;
 }
 
-String apiV1FilesPreviewGetSizeExplodedListToJson(
-  List<enums.ApiV1FilesPreviewGetSize>? apiV1FilesPreviewGetSize,
-) {
+String apiV1FilesPreviewGetSizeExplodedListToJson(List<enums.ApiV1FilesPreviewGetSize>? apiV1FilesPreviewGetSize) {
   return apiV1FilesPreviewGetSize?.map((e) => e.value!).join(',') ?? '';
 }
 
-List<int> apiV1FilesPreviewGetSizeListToJson(
-  List<enums.ApiV1FilesPreviewGetSize>? apiV1FilesPreviewGetSize,
-) {
+List<int> apiV1FilesPreviewGetSizeListToJson(List<enums.ApiV1FilesPreviewGetSize>? apiV1FilesPreviewGetSize) {
   if (apiV1FilesPreviewGetSize == null) {
     return [];
   }
@@ -7753,13 +6143,10 @@ List<enums.ApiV1FilesPreviewGetSize> apiV1FilesPreviewGetSizeListFromJson(
     return defaultValue ?? [];
   }
 
-  return apiV1FilesPreviewGetSize
-      .map((e) => apiV1FilesPreviewGetSizeFromJson(e))
-      .toList();
+  return apiV1FilesPreviewGetSize.map((e) => apiV1FilesPreviewGetSizeFromJson(e)).toList();
 }
 
-List<enums.ApiV1FilesPreviewGetSize>?
-apiV1FilesPreviewGetSizeNullableListFromJson(
+List<enums.ApiV1FilesPreviewGetSize>? apiV1FilesPreviewGetSizeNullableListFromJson(
   List? apiV1FilesPreviewGetSize, [
   List<enums.ApiV1FilesPreviewGetSize>? defaultValue,
 ]) {
@@ -7767,78 +6154,62 @@ apiV1FilesPreviewGetSizeNullableListFromJson(
     return defaultValue;
   }
 
-  return apiV1FilesPreviewGetSize
-      .map((e) => apiV1FilesPreviewGetSizeFromJson(e))
-      .toList();
+  return apiV1FilesPreviewGetSize.map((e) => apiV1FilesPreviewGetSizeFromJson(e)).toList();
 }
 
 int? apiV1FilesVersionsVersionIDPreviewGetSizeNullableToJson(
-  enums.ApiV1FilesVersionsVersionIDPreviewGetSize?
-  apiV1FilesVersionsVersionIDPreviewGetSize,
+  enums.ApiV1FilesVersionsVersionIDPreviewGetSize? apiV1FilesVersionsVersionIDPreviewGetSize,
 ) {
   return apiV1FilesVersionsVersionIDPreviewGetSize?.value;
 }
 
 int? apiV1FilesVersionsVersionIDPreviewGetSizeToJson(
-  enums.ApiV1FilesVersionsVersionIDPreviewGetSize
-  apiV1FilesVersionsVersionIDPreviewGetSize,
+  enums.ApiV1FilesVersionsVersionIDPreviewGetSize apiV1FilesVersionsVersionIDPreviewGetSize,
 ) {
   return apiV1FilesVersionsVersionIDPreviewGetSize.value;
 }
 
-enums.ApiV1FilesVersionsVersionIDPreviewGetSize
-apiV1FilesVersionsVersionIDPreviewGetSizeFromJson(
+enums.ApiV1FilesVersionsVersionIDPreviewGetSize apiV1FilesVersionsVersionIDPreviewGetSizeFromJson(
   Object? apiV1FilesVersionsVersionIDPreviewGetSize, [
   enums.ApiV1FilesVersionsVersionIDPreviewGetSize? defaultValue,
 ]) {
-  return enums.ApiV1FilesVersionsVersionIDPreviewGetSize.values
-          .firstWhereOrNull(
-            (e) => e.value == apiV1FilesVersionsVersionIDPreviewGetSize,
-          ) ??
+  return enums.ApiV1FilesVersionsVersionIDPreviewGetSize.values.firstWhereOrNull(
+        (e) => e.value == apiV1FilesVersionsVersionIDPreviewGetSize,
+      ) ??
       defaultValue ??
       enums.ApiV1FilesVersionsVersionIDPreviewGetSize.swaggerGeneratedUnknown;
 }
 
-enums.ApiV1FilesVersionsVersionIDPreviewGetSize?
-apiV1FilesVersionsVersionIDPreviewGetSizeNullableFromJson(
+enums.ApiV1FilesVersionsVersionIDPreviewGetSize? apiV1FilesVersionsVersionIDPreviewGetSizeNullableFromJson(
   Object? apiV1FilesVersionsVersionIDPreviewGetSize, [
   enums.ApiV1FilesVersionsVersionIDPreviewGetSize? defaultValue,
 ]) {
   if (apiV1FilesVersionsVersionIDPreviewGetSize == null) {
     return null;
   }
-  return enums.ApiV1FilesVersionsVersionIDPreviewGetSize.values
-          .firstWhereOrNull(
-            (e) => e.value == apiV1FilesVersionsVersionIDPreviewGetSize,
-          ) ??
+  return enums.ApiV1FilesVersionsVersionIDPreviewGetSize.values.firstWhereOrNull(
+        (e) => e.value == apiV1FilesVersionsVersionIDPreviewGetSize,
+      ) ??
       defaultValue;
 }
 
 String apiV1FilesVersionsVersionIDPreviewGetSizeExplodedListToJson(
-  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>?
-  apiV1FilesVersionsVersionIDPreviewGetSize,
+  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>? apiV1FilesVersionsVersionIDPreviewGetSize,
 ) {
-  return apiV1FilesVersionsVersionIDPreviewGetSize
-          ?.map((e) => e.value!)
-          .join(',') ??
-      '';
+  return apiV1FilesVersionsVersionIDPreviewGetSize?.map((e) => e.value!).join(',') ?? '';
 }
 
 List<int> apiV1FilesVersionsVersionIDPreviewGetSizeListToJson(
-  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>?
-  apiV1FilesVersionsVersionIDPreviewGetSize,
+  List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>? apiV1FilesVersionsVersionIDPreviewGetSize,
 ) {
   if (apiV1FilesVersionsVersionIDPreviewGetSize == null) {
     return [];
   }
 
-  return apiV1FilesVersionsVersionIDPreviewGetSize
-      .map((e) => e.value!)
-      .toList();
+  return apiV1FilesVersionsVersionIDPreviewGetSize.map((e) => e.value!).toList();
 }
 
-List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>
-apiV1FilesVersionsVersionIDPreviewGetSizeListFromJson(
+List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize> apiV1FilesVersionsVersionIDPreviewGetSizeListFromJson(
   List? apiV1FilesVersionsVersionIDPreviewGetSize, [
   List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>? defaultValue,
 ]) {
@@ -7851,8 +6222,7 @@ apiV1FilesVersionsVersionIDPreviewGetSizeListFromJson(
       .toList();
 }
 
-List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>?
-apiV1FilesVersionsVersionIDPreviewGetSizeNullableListFromJson(
+List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>? apiV1FilesVersionsVersionIDPreviewGetSizeNullableListFromJson(
   List? apiV1FilesVersionsVersionIDPreviewGetSize, [
   List<enums.ApiV1FilesVersionsVersionIDPreviewGetSize>? defaultValue,
 ]) {
@@ -7871,9 +6241,7 @@ int? apiV1TrashItemIDPreviewGetSizeNullableToJson(
   return apiV1TrashItemIDPreviewGetSize?.value;
 }
 
-int? apiV1TrashItemIDPreviewGetSizeToJson(
-  enums.ApiV1TrashItemIDPreviewGetSize apiV1TrashItemIDPreviewGetSize,
-) {
+int? apiV1TrashItemIDPreviewGetSizeToJson(enums.ApiV1TrashItemIDPreviewGetSize apiV1TrashItemIDPreviewGetSize) {
   return apiV1TrashItemIDPreviewGetSize.value;
 }
 
@@ -7888,8 +6256,7 @@ enums.ApiV1TrashItemIDPreviewGetSize apiV1TrashItemIDPreviewGetSizeFromJson(
       enums.ApiV1TrashItemIDPreviewGetSize.swaggerGeneratedUnknown;
 }
 
-enums.ApiV1TrashItemIDPreviewGetSize?
-apiV1TrashItemIDPreviewGetSizeNullableFromJson(
+enums.ApiV1TrashItemIDPreviewGetSize? apiV1TrashItemIDPreviewGetSizeNullableFromJson(
   Object? apiV1TrashItemIDPreviewGetSize, [
   enums.ApiV1TrashItemIDPreviewGetSize? defaultValue,
 ]) {
@@ -7918,8 +6285,7 @@ List<int> apiV1TrashItemIDPreviewGetSizeListToJson(
   return apiV1TrashItemIDPreviewGetSize.map((e) => e.value!).toList();
 }
 
-List<enums.ApiV1TrashItemIDPreviewGetSize>
-apiV1TrashItemIDPreviewGetSizeListFromJson(
+List<enums.ApiV1TrashItemIDPreviewGetSize> apiV1TrashItemIDPreviewGetSizeListFromJson(
   List? apiV1TrashItemIDPreviewGetSize, [
   List<enums.ApiV1TrashItemIDPreviewGetSize>? defaultValue,
 ]) {
@@ -7927,13 +6293,10 @@ apiV1TrashItemIDPreviewGetSizeListFromJson(
     return defaultValue ?? [];
   }
 
-  return apiV1TrashItemIDPreviewGetSize
-      .map((e) => apiV1TrashItemIDPreviewGetSizeFromJson(e))
-      .toList();
+  return apiV1TrashItemIDPreviewGetSize.map((e) => apiV1TrashItemIDPreviewGetSizeFromJson(e)).toList();
 }
 
-List<enums.ApiV1TrashItemIDPreviewGetSize>?
-apiV1TrashItemIDPreviewGetSizeNullableListFromJson(
+List<enums.ApiV1TrashItemIDPreviewGetSize>? apiV1TrashItemIDPreviewGetSizeNullableListFromJson(
   List? apiV1TrashItemIDPreviewGetSize, [
   List<enums.ApiV1TrashItemIDPreviewGetSize>? defaultValue,
 ]) {
@@ -7941,9 +6304,7 @@ apiV1TrashItemIDPreviewGetSizeNullableListFromJson(
     return defaultValue;
   }
 
-  return apiV1TrashItemIDPreviewGetSize
-      .map((e) => apiV1TrashItemIDPreviewGetSizeFromJson(e))
-      .toList();
+  return apiV1TrashItemIDPreviewGetSize.map((e) => apiV1TrashItemIDPreviewGetSizeFromJson(e)).toList();
 }
 
 // ignore: unused_element

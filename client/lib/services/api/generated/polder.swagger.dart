@@ -155,11 +155,7 @@ abstract class Polder extends ChopperService {
   ///@param user me, all, or a user id; anything but your own activity needs the administrator role
   ///@param before Cursor from the previous page; 0 starts at the newest
   ///@param limit Maximum number of entries to return; the server caps it
-  Future<chopper.Response<LogPage>> listActivity({
-    String? user,
-    int? before,
-    int? limit,
-  }) {
+  Future<chopper.Response<LogPage>> listActivity({String? user, int? before, int? limit}) {
     generatedMapping.putIfAbsent(LogPage, () => LogPage.fromJsonFactory);
 
     return _listActivity(user: user, before: before, limit: limit);
@@ -190,10 +186,7 @@ abstract class Polder extends ChopperService {
   ///Uploads and downloads in progress
   ///@param user me, all, or a user id; anything but your own transfers needs the administrator role
   Future<chopper.Response<LiveTransfers>> listLiveTransfers({String? user}) {
-    generatedMapping.putIfAbsent(
-      LiveTransfers,
-      () => LiveTransfers.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(LiveTransfers, () => LiveTransfers.fromJsonFactory);
 
     return _listLiveTransfers(user: user);
   }
@@ -217,9 +210,7 @@ abstract class Polder extends ChopperService {
   });
 
   ///Add the image in the request body to the login screen's backgrounds
-  Future<chopper.Response<Branding>> addBrandingBackground({
-    required Object? body,
-  }) {
+  Future<chopper.Response<Branding>> addBrandingBackground({required Object? body}) {
     generatedMapping.putIfAbsent(Branding, () => Branding.fromJsonFactory);
 
     return _addBrandingBackground(body: body);
@@ -244,9 +235,7 @@ abstract class Polder extends ChopperService {
 
   ///Remove one of the login screen's backgrounds
   ///@param imageID
-  Future<chopper.Response> removeBrandingBackground({
-    required String? imageID,
-  }) {
+  Future<chopper.Response> removeBrandingBackground({required String? imageID}) {
     return _removeBrandingBackground(imageID: imageID);
   }
 
@@ -326,18 +315,9 @@ abstract class Polder extends ChopperService {
     String? before,
     int? limit,
   }) {
-    generatedMapping.putIfAbsent(
-      ServerLogPage,
-      () => ServerLogPage.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(ServerLogPage, () => ServerLogPage.fromJsonFactory);
 
-    return _listLogs(
-      level: level?.value?.toString(),
-      component: component,
-      q: q,
-      before: before,
-      limit: limit,
-    );
+    return _listLogs(level: level?.value?.toString(), component: component, q: q, before: before, limit: limit);
   }
 
   ///Page through the server log, newest first
@@ -368,10 +348,7 @@ abstract class Polder extends ChopperService {
 
   ///Parts of the server that appear in the log
   Future<chopper.Response<LogComponents>> listLogComponents() {
-    generatedMapping.putIfAbsent(
-      LogComponents,
-      () => LogComponents.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(LogComponents, () => LogComponents.fromJsonFactory);
 
     return _listLogComponents();
   }
@@ -417,9 +394,7 @@ abstract class Polder extends ChopperService {
 
   ///Download one day's log file as JSON lines
   ///@param name
-  Future<chopper.Response<Stream<List<int>>>> downloadLogFile({
-    required String? name,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadLogFile({required String? name}) {
     return _downloadLogFile(name: name);
   }
 
@@ -443,10 +418,7 @@ abstract class Polder extends ChopperService {
 
   ///State of the search index and of reading text from files
   Future<chopper.Response<SearchStatus>> getSearchStatus() {
-    generatedMapping.putIfAbsent(
-      SearchStatus,
-      () => SearchStatus.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(SearchStatus, () => SearchStatus.fromJsonFactory);
 
     return _getSearchStatus();
   }
@@ -490,10 +462,7 @@ abstract class Polder extends ChopperService {
 
   ///Server-wide settings
   Future<chopper.Response<ServerSettings>> getServerSettings() {
-    generatedMapping.putIfAbsent(
-      ServerSettings,
-      () => ServerSettings.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
 
     return _getServerSettings();
   }
@@ -515,13 +484,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Change server-wide settings
-  Future<chopper.Response<ServerSettings>> updateServerSettings({
-    required ServerSettingsChanges? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      ServerSettings,
-      () => ServerSettings.fromJsonFactory,
-    );
+  Future<chopper.Response<ServerSettings>> updateServerSettings({required ServerSettingsChanges? body}) {
+    generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
 
     return _updateServerSettings(body: body);
   }
@@ -616,10 +580,7 @@ abstract class Polder extends ChopperService {
 
   ///Change a user; password changes and disabling log the user out
   ///@param userID
-  Future<chopper.Response<User>> updateUser({
-    required int? userID,
-    required Changes? body,
-  }) {
+  Future<chopper.Response<User>> updateUser({required int? userID, required Changes? body}) {
     generatedMapping.putIfAbsent(User, () => User.fromJsonFactory);
 
     return _updateUser(userID: userID, body: body);
@@ -645,9 +606,7 @@ abstract class Polder extends ChopperService {
   });
 
   ///Log in and get a token pair
-  Future<chopper.Response<TokenPair>> login({
-    required CredentialsRequest? body,
-  }) {
+  Future<chopper.Response<TokenPair>> login({required CredentialsRequest? body}) {
     generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
 
     return _login(body: body);
@@ -764,9 +723,7 @@ abstract class Polder extends ChopperService {
 
   ///One of the login screen's backgrounds
   ///@param imageID
-  Future<chopper.Response<String>> getBrandingBackground({
-    required String? imageID,
-  }) {
+  Future<chopper.Response<String>> getBrandingBackground({required String? imageID}) {
     return _getBrandingBackground(imageID: imageID);
   }
 
@@ -954,10 +911,7 @@ abstract class Polder extends ChopperService {
   ///What a file links to and which files link to it
   ///@param id The file's id
   Future<chopper.Response<LinksResponse>> listFileLinks({int? id}) {
-    generatedMapping.putIfAbsent(
-      LinksResponse,
-      () => LinksResponse.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(LinksResponse, () => LinksResponse.fromJsonFactory);
 
     return _listFileLinks(id: id);
   }
@@ -983,10 +937,7 @@ abstract class Polder extends ChopperService {
   ///List a directory
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<ListResponse>> listFiles({String? path}) {
-    generatedMapping.putIfAbsent(
-      ListResponse,
-      () => ListResponse.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(ListResponse, () => ListResponse.fromJsonFactory);
 
     return _listFiles(path: path);
   }
@@ -1060,10 +1011,7 @@ abstract class Polder extends ChopperService {
   ///Get a JPEG thumbnail of an image, video or document
   ///@param path
   ///@param size Thumbnail width and height in pixels
-  Future<chopper.Response<Stream<List<int>>>> previewFile({
-    String? path,
-    enums.ApiV1FilesPreviewGetSize? size,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> previewFile({String? path, enums.ApiV1FilesPreviewGetSize? size}) {
     return _previewFile(path: path, size: size?.value?.toString());
   }
 
@@ -1088,13 +1036,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Look files up by id, wherever they are now
-  Future<chopper.Response<ResolveResponse>> resolveFiles({
-    required ResolveRequest? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      ResolveResponse,
-      () => ResolveResponse.fromJsonFactory,
-    );
+  Future<chopper.Response<ResolveResponse>> resolveFiles({required ResolveRequest? body}) {
+    generatedMapping.putIfAbsent(ResolveResponse, () => ResolveResponse.fromJsonFactory);
 
     return _resolveFiles(body: body);
   }
@@ -1145,10 +1088,7 @@ abstract class Polder extends ChopperService {
   ///List a file's earlier versions, newest first
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<VersionListing>> listFileVersions({String? path}) {
-    generatedMapping.putIfAbsent(
-      VersionListing,
-      () => VersionListing.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(VersionListing, () => VersionListing.fromJsonFactory);
 
     return _listFileVersions(path: path);
   }
@@ -1197,9 +1137,7 @@ abstract class Polder extends ChopperService {
 
   ///Download an earlier version of a file
   ///@param versionID
-  Future<chopper.Response<Stream<List<int>>>> downloadFileVersion({
-    required int? versionID,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadFileVersion({required int? versionID}) {
     return _downloadFileVersion(versionID: versionID);
   }
 
@@ -1228,10 +1166,7 @@ abstract class Polder extends ChopperService {
     required int? versionID,
     enums.ApiV1FilesVersionsVersionIDPreviewGetSize? size,
   }) {
-    return _previewFileVersion(
-      versionID: versionID,
-      size: size?.value?.toString(),
-    );
+    return _previewFileVersion(versionID: versionID, size: size?.value?.toString());
   }
 
   ///Get a JPEG thumbnail of an earlier version
@@ -1256,10 +1191,7 @@ abstract class Polder extends ChopperService {
 
   ///Make an earlier version the current file; the current content is kept as a version
   ///@param versionID
-  Future<chopper.Response<Entry>> restoreFileVersion({
-    required int? versionID,
-    required VersionRestoreRequest? body,
-  }) {
+  Future<chopper.Response<Entry>> restoreFileVersion({required int? versionID, required VersionRestoreRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _restoreFileVersion(versionID: versionID, body: body);
@@ -1287,10 +1219,7 @@ abstract class Polder extends ChopperService {
   ///List the folders and notes in a folder
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<NotesListing>> listNotes({String? path}) {
-    generatedMapping.putIfAbsent(
-      NotesListing,
-      () => NotesListing.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(NotesListing, () => NotesListing.fromJsonFactory);
 
     return _listNotes(path: path);
   }
@@ -1315,10 +1244,7 @@ abstract class Polder extends ChopperService {
 
   ///Which folder holds the user's notes
   Future<chopper.Response<NotesSettings>> getNotesSettings() {
-    generatedMapping.putIfAbsent(
-      NotesSettings,
-      () => NotesSettings.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(NotesSettings, () => NotesSettings.fromJsonFactory);
 
     return _getNotesSettings();
   }
@@ -1340,13 +1266,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Choose the folder that holds the user's notes; it must already exist
-  Future<chopper.Response<NotesSettings>> setNotesSettings({
-    required NotesSettings? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      NotesSettings,
-      () => NotesSettings.fromJsonFactory,
-    );
+  Future<chopper.Response<NotesSettings>> setNotesSettings({required NotesSettings? body}) {
+    generatedMapping.putIfAbsent(NotesSettings, () => NotesSettings.fromJsonFactory);
 
     return _setNotesSettings(body: body);
   }
@@ -1370,10 +1291,7 @@ abstract class Polder extends ChopperService {
 
   ///Which files the document editor can open
   Future<chopper.Response<EditorCapabilities>> getOfficeCapabilities() {
-    generatedMapping.putIfAbsent(
-      EditorCapabilities,
-      () => EditorCapabilities.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(EditorCapabilities, () => EditorCapabilities.fromJsonFactory);
 
     return _getOfficeCapabilities();
   }
@@ -1395,13 +1313,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Let the document editor open a file
-  Future<chopper.Response<EditorSession>> startOfficeSession({
-    required OfficeSessionRequest? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      EditorSession,
-      () => EditorSession.fromJsonFactory,
-    );
+  Future<chopper.Response<EditorSession>> startOfficeSession({required OfficeSessionRequest? body}) {
+    generatedMapping.putIfAbsent(EditorSession, () => EditorSession.fromJsonFactory);
 
     return _startOfficeSession(body: body);
   }
@@ -1427,11 +1340,7 @@ abstract class Polder extends ChopperService {
   ///@param q What to look for; see the operation description for tags
   ///@param limit
   ///@param offset
-  Future<chopper.Response<Results>> searchFiles({
-    String? q,
-    int? limit,
-    int? offset,
-  }) {
+  Future<chopper.Response<Results>> searchFiles({String? q, int? limit, int? offset}) {
     generatedMapping.putIfAbsent(Results, () => Results.fromJsonFactory);
 
     return _searchFiles(q: q, limit: limit, offset: offset);
@@ -1470,14 +1379,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///Complete the search tag under the cursor
   ///@param q
   ///@param cursor Caret position in the query, in UTF-16 code units
-  Future<chopper.Response<Suggestions>> suggestSearch({
-    String? q,
-    int? cursor,
-  }) {
-    generatedMapping.putIfAbsent(
-      Suggestions,
-      () => Suggestions.fromJsonFactory,
-    );
+  Future<chopper.Response<Suggestions>> suggestSearch({String? q, int? cursor}) {
+    generatedMapping.putIfAbsent(Suggestions, () => Suggestions.fromJsonFactory);
 
     return _suggestSearch(q: q, cursor: cursor);
   }
@@ -1502,12 +1405,32 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     ),
   });
 
+  ///Version, commit and build of the server binary
+  Future<chopper.Response<ServerInfo>> getServerInfo() {
+    generatedMapping.putIfAbsent(ServerInfo, () => ServerInfo.fromJsonFactory);
+
+    return _getServerInfo();
+  }
+
+  ///Version, commit and build of the server binary
+  @GET(path: '/api/v1/server/info')
+  Future<chopper.Response<ServerInfo>> _getServerInfo({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Version, commit and build of the server binary',
+      operationId: 'getServerInfo',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["server"],
+      deprecated: false,
+    ),
+  });
+
   ///Whether the server still needs its first account
   Future<chopper.Response<SetupStatus>> getSetupStatus() {
-    generatedMapping.putIfAbsent(
-      SetupStatus,
-      () => SetupStatus.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(SetupStatus, () => SetupStatus.fromJsonFactory);
 
     return _getSetupStatus();
   }
@@ -1529,9 +1452,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Create the first administrator account
-  Future<chopper.Response<TokenPair>> setup({
-    required CredentialsRequest? body,
-  }) {
+  Future<chopper.Response<TokenPair>> setup({required CredentialsRequest? body}) {
     generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
 
     return _setup(body: body);
@@ -1610,13 +1531,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Start a chunked upload; returns the chunks the server is missing
-  Future<chopper.Response<UploadStatus>> createUpload({
-    required UploadRequest? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      UploadStatus,
-      () => UploadStatus.fromJsonFactory,
-    );
+  Future<chopper.Response<UploadStatus>> createUpload({required UploadRequest? body}) {
+    generatedMapping.putIfAbsent(UploadStatus, () => UploadStatus.fromJsonFactory);
 
     return _createUpload(body: body);
   }
@@ -1628,8 +1544,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary:
-          'Start a chunked upload; returns the chunks the server is missing',
+      summary: 'Start a chunked upload; returns the chunks the server is missing',
       operationId: 'createUpload',
       consumes: [],
       produces: [],
@@ -1665,13 +1580,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Get the chunks an upload is still missing
   ///@param uploadID
-  Future<chopper.Response<UploadStatus>> getUpload({
-    required String? uploadID,
-  }) {
-    generatedMapping.putIfAbsent(
-      UploadStatus,
-      () => UploadStatus.fromJsonFactory,
-    );
+  Future<chopper.Response<UploadStatus>> getUpload({required String? uploadID}) {
+    generatedMapping.putIfAbsent(UploadStatus, () => UploadStatus.fromJsonFactory);
 
     return _getUpload(uploadID: uploadID);
   }
@@ -1697,21 +1607,14 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///Send one chunk as the request body
   ///@param uploadID
   ///@param chunkHash Lowercase hex SHA-256 of the chunk
-  Future<chopper.Response> putChunk({
-    required String? uploadID,
-    required String? chunkHash,
-    required Object? body,
-  }) {
+  Future<chopper.Response> putChunk({required String? uploadID, required String? chunkHash, required Object? body}) {
     return _putChunk(uploadID: uploadID, chunkHash: chunkHash, body: body);
   }
 
   ///Send one chunk as the request body
   ///@param uploadID
   ///@param chunkHash Lowercase hex SHA-256 of the chunk
-  @PUT(
-    path: '/api/v1/sync/uploads/{uploadID}/chunks/{chunkHash}',
-    optionalBody: true,
-  )
+  @PUT(path: '/api/v1/sync/uploads/{uploadID}/chunks/{chunkHash}', optionalBody: true)
   Future<chopper.Response> _putChunk({
     @Path('uploadID') required String? uploadID,
     @Path('chunkHash') required String? chunkHash,
@@ -1778,10 +1681,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///List deleted items, most recent first
   Future<chopper.Response<TrashListing>> listTrash() {
-    generatedMapping.putIfAbsent(
-      TrashListing,
-      () => TrashListing.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(TrashListing, () => TrashListing.fromJsonFactory);
 
     return _listTrash();
   }
@@ -1804,10 +1704,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///How long deleted items stay in the trash
   Future<chopper.Response<TrashRetention>> getTrashRetention() {
-    generatedMapping.putIfAbsent(
-      TrashRetention,
-      () => TrashRetention.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(TrashRetention, () => TrashRetention.fromJsonFactory);
 
     return _getTrashRetention();
   }
@@ -1829,13 +1726,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Choose how long deleted items stay in the trash
-  Future<chopper.Response<TrashRetention>> setTrashRetention({
-    required TrashPreferences? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      TrashRetention,
-      () => TrashRetention.fromJsonFactory,
-    );
+  Future<chopper.Response<TrashRetention>> setTrashRetention({required TrashPreferences? body}) {
+    generatedMapping.putIfAbsent(TrashRetention, () => TrashRetention.fromJsonFactory);
 
     return _setTrashRetention(body: body);
   }
@@ -1883,9 +1775,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Download a deleted item without restoring it; a directory comes as a zip
   ///@param itemID
-  Future<chopper.Response<Stream<List<int>>>> downloadTrashItem({
-    required int? itemID,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadTrashItem({required int? itemID}) {
     return _downloadTrashItem(itemID: itemID);
   }
 
@@ -1939,10 +1829,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Put a deleted item back where it was
   ///@param itemID
-  Future<chopper.Response<Entry>> restoreTrashItem({
-    required int? itemID,
-    required RestoreRequest? body,
-  }) {
+  Future<chopper.Response<Entry>> restoreTrashItem({required int? itemID, required RestoreRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _restoreTrashItem(itemID: itemID, body: body);
@@ -1970,10 +1857,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///A user's icon
   ///@param userID
   ///@param imageID
-  Future<chopper.Response<String>> getUserAvatar({
-    required int? userID,
-    required String? imageID,
-  }) {
+  Future<chopper.Response<String>> getUserAvatar({required int? userID, required String? imageID}) {
     return _getUserAvatar(userID: userID, imageID: imageID);
   }
 
@@ -1999,10 +1883,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///How long earlier versions of files are kept
   Future<chopper.Response<VersionRetention>> getVersionSettings() {
-    generatedMapping.putIfAbsent(
-      VersionRetention,
-      () => VersionRetention.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(VersionRetention, () => VersionRetention.fromJsonFactory);
 
     return _getVersionSettings();
   }
@@ -2024,13 +1905,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Choose how long earlier versions of files are kept, within the server's limits
-  Future<chopper.Response<VersionRetention>> setVersionSettings({
-    required VersionPreferences? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      VersionRetention,
-      () => VersionRetention.fromJsonFactory,
-    );
+  Future<chopper.Response<VersionRetention>> setVersionSettings({required VersionPreferences? body}) {
+    generatedMapping.putIfAbsent(VersionRetention, () => VersionRetention.fromJsonFactory);
 
     return _setVersionSettings(body: body);
   }
@@ -2054,10 +1930,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Health check
   Future<chopper.Response<HealthStatus>> health() {
-    generatedMapping.putIfAbsent(
-      HealthStatus,
-      () => HealthStatus.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(HealthStatus, () => HealthStatus.fromJsonFactory);
 
     return _health();
   }
@@ -2119,15 +1992,12 @@ class $CustomJsonDecoder {
     return jsonFactory(values);
   }
 
-  List<T> _decodeList<T>(Iterable values) =>
-      values.where((v) => v != null).map<T>((v) => decode<T>(v) as T).toList();
+  List<T> _decodeList<T>(Iterable values) => values.where((v) => v != null).map<T>((v) => decode<T>(v) as T).toList();
 }
 
 class $JsonSerializableConverter extends chopper.JsonConverter {
   @override
-  FutureOr<chopper.Response<ResultType>> convertResponse<ResultType, Item>(
-    chopper.Response response,
-  ) async {
+  FutureOr<chopper.Response<ResultType>> convertResponse<ResultType, Item>(chopper.Response response) async {
     if (response.bodyString.isEmpty) {
       // In rare cases, when let's say 204 (no content) is returned -
       // we cannot decode the missing json with the result type specified
@@ -2139,17 +2009,11 @@ class $JsonSerializableConverter extends chopper.JsonConverter {
     }
 
     if (ResultType == DateTime) {
-      return response.copyWith(
-        body: DateTime.parse(
-          (response.body as String).replaceAll('"', ''),
-        ) as ResultType,
-      );
+      return response.copyWith(body: DateTime.parse((response.body as String).replaceAll('"', '')) as ResultType);
     }
 
     final jsonRes = await super.convertResponse(response);
-    return jsonRes.copyWith<ResultType>(
-      body: $jsonDecoder.decode<Item>(jsonRes.body) as ResultType,
-    );
+    return jsonRes.copyWith<ResultType>(body: $jsonDecoder.decode<Item>(jsonRes.body) as ResultType);
   }
 }
 

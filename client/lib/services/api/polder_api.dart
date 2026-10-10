@@ -3,7 +3,6 @@ import "dart:typed_data";
 import "package:flutter/material.dart";
 
 import "package:chopper/chopper.dart" as chopper;
-
 import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/branding.dart";
@@ -16,6 +15,7 @@ import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
 import "package:polder/models/search.dart";
+import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
@@ -294,6 +294,8 @@ class PolderApi {
   )).body!.toModel();
 
   Future<ServerSettings> serverSettings() async => (await _service.getServerSettings()).body!.toModel();
+
+  Future<ServerInfo> serverInfo() async => (await _service.getServerInfo()).body!.toModel();
 
   Future<ServerSettings> updateServerSettings({
     bool? trashEnabled,

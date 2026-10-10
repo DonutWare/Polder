@@ -6,7 +6,6 @@ on:
       - "v*"
     branches:
       - main
-      - develop
   pull_request:
     paths:
       - client/pubspec.yaml
@@ -454,6 +453,8 @@ jobs:
           build-args: |
             WEB=client
             FLUTTER_VERSION=${{ needs.fetch-info.outputs.flutter_version }}
+            VERSION=${{ needs.fetch-info.outputs.build_type == 'nightly' && needs.fetch-info.outputs.nightly_version || needs.fetch-info.outputs.version_name }}
+            BUILD_NUMBER=${{ github.run_number }}
           push: ${{ steps.tags.outputs.push == 'true' }}
           tags: ${{ steps.tags.outputs.tags }}
           labels: |

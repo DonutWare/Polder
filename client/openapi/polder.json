@@ -1406,6 +1406,22 @@
         ],
         "type": "object"
       },
+      "ServerInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "buildNumber": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "buildNumber"
+        ],
+        "type": "object"
+      },
       "ServerLogEntry": {
         "additionalProperties": false,
         "properties": {
@@ -2227,7 +2243,7 @@
   "info": {
     "description": "File storage and sync. Log in with POST /auth/login and send the access token as `Authorization: Bearer \u003ctoken\u003e`; renew it with POST /auth/refresh before it expires.",
     "title": "Polder API",
-    "version": "1.0.0"
+    "version": "0.0.1"
   },
   "openapi": "3.0.3",
   "paths": {
@@ -5423,6 +5439,52 @@
         "summary": "Complete the search tag under the cursor",
         "tags": [
           "search"
+        ]
+      }
+    },
+    "/api/v1/server/info": {
+      "get": {
+        "operationId": "getServerInfo",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfo"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Version, commit and build of the server binary",
+        "tags": [
+          "server"
         ]
       }
     },

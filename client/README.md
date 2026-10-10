@@ -4,10 +4,12 @@ The Flutter app for Polder, for Android, iOS, macOS, Windows, Linux and the web.
 
 ## Development
 
+Check the [fvm file](../client/.fvmrc) for the current flutter version
+
 ```sh
 flutter pub get
-dart run build_runner build   # freezed / json / drift / the API client
-flutter run -d macos          # or linux, windows, a device
+dart run build_runner build   
+flutter run -d macos          
 ```
 
 The document editor is a webview (`flutter_inappwebview`). On Linux it uses WPE WebKit through

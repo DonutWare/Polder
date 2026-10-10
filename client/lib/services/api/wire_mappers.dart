@@ -2,19 +2,20 @@ import "package:flutter/material.dart";
 
 import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
+import "package:polder/models/branding.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_links.dart";
-import "package:polder/models/note_item.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
+import "package:polder/models/note_item.dart";
 import "package:polder/models/search.dart";
 import "package:polder/models/server_event.dart";
+import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
-import "package:polder/models/branding.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
@@ -196,6 +197,10 @@ extension TrashListingToModel on wire.TrashListing {
     totalBytes: totalBytes,
     retention: retention.toModel(),
   );
+}
+
+extension ServerInfoToModel on wire.ServerInfo {
+  ServerInfo toModel() => ServerInfo(version: version, buildNumber: buildNumber);
 }
 
 extension ServerSettingsToModel on wire.ServerSettings {

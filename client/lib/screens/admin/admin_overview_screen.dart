@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:polder/models/user.dart";
 import "package:polder/providers/admin/admin_users_provider.dart";
 import "package:polder/routes/app_routes.dart";
@@ -11,8 +10,8 @@ import "package:polder/screens/admin/widgets/admin_stats_grid.dart";
 import "package:polder/screens/admin/widgets/search_settings_group.dart";
 import "package:polder/screens/admin/widgets/storage_by_user_card.dart";
 import "package:polder/screens/admin/widgets/trash_settings_group.dart";
-import "package:polder/screens/admin/widgets/version_settings_group.dart";
 import "package:polder/screens/admin/widgets/user_form_dialog.dart";
+import "package:polder/screens/admin/widgets/version_settings_group.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";

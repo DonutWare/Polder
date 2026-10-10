@@ -18,6 +18,7 @@ import (
 	"polder-server/internal/config"
 	"polder-server/internal/httpapi"
 	"polder-server/internal/logging"
+	"polder-server/internal/version"
 )
 
 const shutdownTimeout = 15 * time.Second
@@ -26,6 +27,7 @@ var logger = logging.For("server")
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel()})))
+	println("Polder version", version.Current, "starting up...")
 	if len(os.Args) > 1 && os.Args[1] == "healthcheck" {
 		os.Exit(healthcheck())
 	}

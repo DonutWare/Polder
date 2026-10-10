@@ -13,5 +13,5 @@ cat "$spec" > "$client_dir/openapi/polder.json"
   cd "$client_dir"
   rm -rf lib/services/api/generated
   dart run build_runner build
-  dart format lib/services/api/generated
+  dart format --line-length=120 lib/services/api/generated lib/models
 )

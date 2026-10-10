@@ -6,10 +6,21 @@
 	"aboutLegalese": "Create your own private polder and sync your files.",
 	"aboutLicenses": "Licenses",
 	"aboutSocials": "Socials",
-	"aboutVersion": "Version {version}",
+	"aboutVersion": "Application version {version}",
 	"@aboutVersion": {
 		"placeholders": {
 			"version": {
+				"type": "String"
+			}
+		}
+	},
+	"aboutServerInfo": "Server version {version} ({buildNumber})",
+	"@aboutServerInfo": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"buildNumber": {
 				"type": "String"
 			}
 		}
@@ -771,7 +782,13 @@
 	"serverName": "Server name",
 	"serverNameHint": "Shown on the login screen, in the sidebar and as the window title",
 	"brandingDefault": "{value} (default)",
-	"@brandingDefault": {"placeholders": {"value": {"type": "String"}}},
+	"@brandingDefault": {
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
 	"welcomeMessage": "Welcome message",
 	"welcomeMessageNone": "Not shown",
 	"brandingAccent": "Default accent color",
@@ -782,7 +799,13 @@
 	"serverIconHint": "Shown on the login screen and in the sidebar",
 	"loginBackgrounds": "Login backgrounds",
 	"loginBackgroundsHint": "{count, plural, =0{None; images you add are shown in turn behind the login screen} =1{1 image} other{{count} images, shown in turn}}",
-	"@loginBackgroundsHint": {"placeholders": {"count": {"type": "int"}}},
+	"@loginBackgroundsHint": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"brandingHint": "Name, colors, icon and login screen",
 	"brandingIdentityGroup": "Name and colors",
 	"brandingImagesGroup": "Images",
@@ -792,11 +815,23 @@
 	"chooseImages": "Choose images",
 	"noImagesInFolder": "No images or folders here",
 	"addSelected": "{count, plural, =0{Add} other{Add {count}}}",
-	"@addSelected": {"placeholders": {"count": {"type": "int"}}},
+	"@addSelected": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"versionHistory": "Version history",
 	"versions": "Versions",
 	"versionCount": "{count, plural, =0{None yet} =1{1 earlier version} other{{count} earlier versions}}",
-	"@versionCount": {"placeholders": {"count": {"type": "int"}}},
+	"@versionCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"versionCurrent": "Current version",
 	"versionHistoryEmpty": "No earlier versions yet. When this file is saved over, the previous content is kept here.",
 	"versionHistoryOff": "Version history is turned off, so earlier versions aren't kept.",
@@ -808,15 +843,33 @@
 	"versionDeleteTitle": "Delete this version?",
 	"versionDeleteMessage": "This version is deleted permanently.",
 	"versionViewing": "Version from {date}, read only",
-	"@versionViewing": {"placeholders": {"date": {"type": "String"}}},
+	"@versionViewing": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
 	"versionBackToCurrent": "Back to current",
 	"versionsKeep": "Keep earlier versions",
 	"versionsKeepHint": "When a file is saved over, its previous content is kept. Versions count towards your storage.",
 	"versionsPerFile": "{count, plural, =0{No limit per file} =1{1 per file} other{{count} per file}}",
-	"@versionsPerFile": {"placeholders": {"count": {"type": "int"}}},
+	"@versionsPerFile": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"versionsMaxPerFile": "Versions per file",
 	"versionsMaxPerFileHint": "The server allows at most {limit}.",
-	"@versionsMaxPerFileHint": {"placeholders": {"limit": {"type": "String"}}},
+	"@versionsMaxPerFileHint": {
+		"placeholders": {
+			"limit": {
+				"type": "String"
+			}
+		}
+	},
 	"versionsMaxAge": "Keep versions for",
 	"versionsFollowServer": "Follow the server",
 	"versionsTurnOffTitle": "Turn off version history?",
@@ -824,7 +877,13 @@
 	"turnOff": "Turn off",
 	"versionsTurnedOffByAdmin": "Turned off by your administrator",
 	"versionsKeepAllHint": "The server allows at most {limit}.",
-	"@versionsKeepAllHint": {"placeholders": {"limit": {"type": "String"}}},
+	"@versionsKeepAllHint": {
+		"placeholders": {
+			"limit": {
+				"type": "String"
+			}
+		}
+	},
 	"trashKeep": "Move deleted items to the trash",
 	"trashKeepHint": "Deleted items can be restored until the trash is emptied. Off deletes them permanently.",
 	"trashTurnedOffByAdmin": "Turned off by your administrator. Deleted items are removed permanently.",
@@ -838,13 +897,25 @@
 	"versionsKeepAll": "Keep every save for",
 	"serverVersionsKeepAllHint": "After this, versions thin out: about one per hour after a day, fewer as they age.",
 	"versionsHours": "{count, plural, =0{Don't keep every save} =1{1 hour} other{{count} hours}}",
-	"@versionsHours": {"placeholders": {"count": {"type": "int"}}},
+	"@versionsHours": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"versionsHoursLabel": "Hours",
 	"serverVersionsMaxAge": "Keep versions for",
 	"serverVersionsMaxPerFile": "Versions per file",
 	"serverVersionsLimitHint": "Default and upper limit for every user",
 	"quotaHistory": "{size} of that is version history",
-	"@quotaHistory": {"placeholders": {"size": {"type": "String"}}},
+	"@quotaHistory": {
+		"placeholders": {
+			"size": {
+				"type": "String"
+			}
+		}
+	},
 	"navNotes": "Notes",
 	"searchKeywordsNotes": "notes, markdown, wiki, knowledge base, pages, journal",
 	"notesSetupTitle": "Set up notes",
@@ -855,7 +926,13 @@
 	"notesFolderIsFile": "That's a file, not a folder.",
 	"notesFolderExistsTitle": "Folder already exists",
 	"notesFolderExistsMessage": "{path} already exists. Use it as your notes folder? The markdown files in it become pages.",
-	"@notesFolderExistsMessage": {"placeholders": {"path": {"type": "String"}}},
+	"@notesFolderExistsMessage": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
 	"notesUseExistingFolder": "Use this folder",
 	"notesChooseAnotherName": "Choose another name",
 	"notesChangeFolder": "Change notes folder",
@@ -868,7 +945,13 @@
 	"noteMove": "Move",
 	"noteShowInFiles": "Show in files",
 	"noteDeleteTitle": "Delete {title}?",
-	"@noteDeleteTitle": {"placeholders": {"title": {"type": "String"}}},
+	"@noteDeleteTitle": {
+		"placeholders": {
+			"title": {
+				"type": "String"
+			}
+		}
+	},
 	"noteDeleteMessage": "The page goes to the trash.",
 	"noteDeleteWithChildrenMessage": "The page and its subpages go to the trash.",
 	"noteSaved": "Saved",
@@ -885,16 +968,34 @@
 	"noteNoBacklinks": "Nothing links here yet.",
 	"noteNoLinks": "This note doesn't link to anything.",
 	"noteBrokenLink": "Not found: {path}",
-	"@noteBrokenLink": {"placeholders": {"path": {"type": "String"}}},
+	"@noteBrokenLink": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
 	"noteLinkMissing": "The linked file no longer exists.",
 	"noteLinkSearch": "Search",
 	"noteLinkBrowse": "Browse",
 	"noteLinkThisFolder": "Link to this folder",
 	"noteNotText": "This file isn't plain UTF-8 text, so it can't be edited here.",
 	"noteDraftFound": "Unsaved changes from {time} were found on this device.",
-	"@noteDraftFound": {"placeholders": {"time": {"type": "String"}}},
+	"@noteDraftFound": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
 	"noteDraftFoundChanged": "Unsaved changes from {time} were found, but the note has changed since.",
-	"@noteDraftFoundChanged": {"placeholders": {"time": {"type": "String"}}},
+	"@noteDraftFoundChanged": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
 	"noteRecoverDraft": "Recover",
 	"noteDiscardDraft": "Discard",
 	"noteConflict": "This note was changed somewhere else.",
@@ -906,7 +1007,13 @@
 	"noteRedo": "Redo",
 	"noteHeading": "Heading",
 	"noteHeadingLevel": "Heading {level}",
-	"@noteHeadingLevel": {"placeholders": {"level": {"type": "int"}}},
+	"@noteHeadingLevel": {
+		"placeholders": {
+			"level": {
+				"type": "int"
+			}
+		}
+	},
 	"noteParagraph": "Normal text",
 	"noteBold": "Bold",
 	"noteItalic": "Italic",
