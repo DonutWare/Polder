@@ -1305,5 +1305,11 @@
 				"type": "String"
 			}
 		}
-	}
+	},
+	"finderLocationDisabled": "Turn on Polder in System Settings › General › Login Items & Extensions › File Providers to see your files in Finder.",
+	"openSystemSettings": "Open System Settings",
+	"showInFinder": "Show in Finder",
+	"showInFinderHint": "Browse your files in Finder; they download when you open them",
+	"finderRemoveTitle": "Remove from Finder?",
+	"finderRemoveMessage": "Files downloaded for offline use are removed from this Mac. They stay on the server."
 }

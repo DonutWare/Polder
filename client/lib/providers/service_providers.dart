@@ -1,13 +1,17 @@
+import "package:flutter/foundation.dart";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:http/http.dart" as http;
 import "package:web_socket_channel/web_socket_channel.dart";
 
 import "package:polder/services/device/device_conditions.dart";
+import "package:polder/services/mount/finder_location.dart";
 import "package:polder/services/realtime/events_client.dart";
 import "package:polder/services/storage/credentials_store.dart";
 import "package:polder/services/storage/preferences_store.dart";
 import "package:polder/services/transfer/document_scanner_service.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
+import "package:polder/util/flavor.dart";
 import "package:polder/util/hosted_server.dart";
 
 final credentialsStoreProvider = Provider<CredentialsStore>((ref) => platformCredentialsStore());
@@ -19,6 +23,12 @@ final filePickerServiceProvider = Provider<FilePickerService>((ref) => const Pla
 final documentScannerServiceProvider = Provider<DocumentScannerService>((ref) => const NativeDocumentScannerService());
 
 final deviceConditionsProvider = Provider<DeviceConditions>((ref) => PlatformDeviceConditions());
+
+final finderLocationProvider = Provider<FinderLocation?>(
+  (ref) => desktopIntegrationsEnabled && !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS
+      ? const ChannelFinderLocation()
+      : null,
+);
 
 final deviceNameProvider = Provider<String>((ref) => throw UnimplementedError("Resolved in main"));
 

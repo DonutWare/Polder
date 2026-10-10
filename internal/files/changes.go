@@ -13,6 +13,7 @@ type Change struct {
 	Type     ChangeType `json:"type"`
 	Path     string     `json:"path"`
 	FromPath string     `json:"fromPath,omitempty"`
+	FileID   int64      `json:"fileId,omitempty" doc:"For a delete, the id the file or directory had; 0 when it was not known"`
 	Entry    *Entry     `json:"entry" required:"false" doc:"The entry after the change; null for a delete, or when a later change superseded it"`
 }
 
@@ -24,7 +25,7 @@ type ChangePage struct {
 
 // Upserts are only reported while they are the entry's latest revision. Deletes and moves are always
 // reported, because a client needs them to know a path went away even when a later change superseded them.
-const changeFeedQuery = `SELECT c.id, c.change_type, c.path, c.from_path, ` + entryColumns + `
+const changeFeedQuery = `SELECT c.id, c.change_type, c.path, c.from_path, c.file_id, ` + entryColumns + `
 	FROM changes c
 	LEFT JOIN files f ON f.user_id = c.user_id AND f.path_key = c.path_key AND f.rev = c.id
 	WHERE c.user_id = $1 AND c.id > $2
@@ -32,6 +33,11 @@ const changeFeedQuery = `SELECT c.id, c.change_type, c.path, c.from_path, ` + en
 	LIMIT $3`
 
 func (s *Service) Changes(ctx context.Context, userID, cursor int64, limit int) (ChangePage, error) {
+	if cursor < 0 {
+		var latest sql.NullInt64
+		err := s.db.QueryRowContext(ctx, `SELECT MAX(id) FROM changes WHERE user_id = $1`, userID).Scan(&latest)
+		return ChangePage{Changes: []Change{}, Cursor: latest.Int64}, err
+	}
 	limit = min(max(limit, 1), MaxChangePageSize)
 	rows, err := s.db.QueryContext(ctx, changeFeedQuery, userID, cursor, limit+1)
 	if err != nil {
@@ -61,16 +67,17 @@ func (s *Service) Changes(ctx context.Context, userID, cursor int64, limit int) 
 
 func scanChangeRow(rows *sql.Rows) (Change, bool, error) {
 	var change Change
-	var id, userID, size, mtimeNanos, rev sql.NullInt64
+	var fileID, id, userID, size, mtimeNanos, rev sql.NullInt64
 	var fromPath, filePath, name, hash, mime, metaJSON, previewState, textState sql.NullString
 	var isDir sql.NullBool
-	err := rows.Scan(&change.Seq, &change.Type, &change.Path, &fromPath,
+	err := rows.Scan(&change.Seq, &change.Type, &change.Path, &fromPath, &fileID,
 		&id, &userID, &filePath, &name, &isDir, &size, &mtimeNanos, &hash, &rev, &mime, &metaJSON, &previewState, &textState)
 	if err != nil {
 		return Change{}, false, err
 	}
 	change.FromPath = fromPath.String
 	if change.Type == changeDelete {
+		change.FileID = fileID.Int64
 		return change, true, nil
 	}
 	if !id.Valid {

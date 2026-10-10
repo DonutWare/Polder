@@ -197,6 +197,7 @@ func (a *API) routes(api huma.API) {
 	user.UseMiddleware(a.requireUser(api))
 	user.UseSimpleModifier(requiresAuth(api, http.StatusUnauthorized))
 	register(user, http.MethodGet, "/auth/me", "getMe", "The logged-in user", a.me)
+	register(user, http.MethodPost, "/auth/sessions", "startSession", "Start another session for the logged-in user, such as for a file provider on this device", a.startSession, created)
 	register(user, http.MethodPut, "/account/profile", "setProfile", "Change the logged-in user's name and contact details", a.setProfile)
 	register(user, http.MethodPut, "/account/password", "changePassword", "Change the logged-in user's password; their other sessions are logged out", a.changePassword)
 	register(user, http.MethodPut, "/account/appearance", "setAppearance", "Choose the theme and accent color the apps use for the logged-in user", a.setAppearance)

@@ -39,6 +39,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>PolderAppGroup</key>
+	<string>$(TeamIdentifierPrefix)org.knaapen.polder</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoadsInWebContent</key>

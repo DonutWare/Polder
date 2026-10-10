@@ -118,6 +118,10 @@ func (s *Service) Refresh(ctx context.Context, refreshToken, deviceName string) 
 	return s.tokenPair(user, session, rotatedToken)
 }
 
+func (s *Service) StartSession(ctx context.Context, user users.User, deviceName string) (TokenPair, error) {
+	return s.startSession(ctx, user, deviceName)
+}
+
 func (s *Service) Logout(ctx context.Context, refreshToken string) error {
 	session, revoked, err := s.sessions.Revoke(ctx, refreshToken)
 	if err != nil || !revoked {

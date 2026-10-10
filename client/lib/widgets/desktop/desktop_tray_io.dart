@@ -14,11 +14,12 @@ import "package:polder/providers/sync/sync_paused_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/util/byte_format.dart";
+import "package:polder/util/flavor.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:tray_manager/tray_manager.dart" as tray;
 import "package:window_manager/window_manager.dart";
 
-final _isDesktop = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+final _isDesktop = desktopIntegrationsEnabled && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
 
 Future<void> initializeDesktopWindow() async {
   if (!_isDesktop) return;

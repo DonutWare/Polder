@@ -4,3 +4,7 @@ import "package:flutter/services.dart";
 const isDevFlavor = appFlavor == "dev";
 
 const devFlavorOrange = Color(0xFFFF8A1F);
+
+const desktopIntegrationsInDevFlavor = false;
+
+const desktopIntegrationsEnabled = !isDevFlavor || desktopIntegrationsInDevFlavor;

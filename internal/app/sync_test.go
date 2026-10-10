@@ -24,6 +24,7 @@ type changePage struct {
 		Type     string     `json:"type"`
 		Path     string     `json:"path"`
 		FromPath string     `json:"fromPath"`
+		FileID   int64      `json:"fileId"`
 		Entry    *fileEntry `json:"entry"`
 	} `json:"changes"`
 	Cursor  int64 `json:"cursor"`
@@ -109,6 +110,44 @@ func TestChangeFeedKeepsSupersededMoves(t *testing.T) {
 		}
 		if page.Changes[0].Entry != nil {
 			t.Fatalf("a superseded move should not carry an entry: %+v", page.Changes[0].Entry)
+		}
+	})
+}
+
+func TestChangeFeedNamesTheIdOfADeletedEntry(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		alice.put("/Photos/a.jpg", 0, []byte("jpeg"), http.StatusOK, nil)
+		photos := alice.stat("/Photos")
+
+		var before changePage
+		alice.mustJSON(http.MethodGet, "/sync/changes?cursor=0", nil, http.StatusOK, &before)
+		alice.mustJSON(http.MethodDelete, "/files?path=/Photos", nil, http.StatusNoContent, nil)
+
+		var page changePage
+		alice.mustJSON(http.MethodGet, fmt.Sprintf("/sync/changes?cursor=%d", before.Cursor), nil, http.StatusOK, &page)
+		if len(page.Changes) != 1 || page.Changes[0].Type != "delete" || page.Changes[0].FileID != photos.ID {
+			t.Fatalf("changes = %+v, want the delete of /Photos with id %d", page.Changes, photos.ID)
+		}
+	})
+}
+
+func TestChangeFeedTellsTheLatestCursor(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		var fresh changePage
+		alice.mustJSON(http.MethodGet, "/sync/changes?cursor=-1", nil, http.StatusOK, &fresh)
+		if fresh.Cursor != 0 || len(fresh.Changes) != 0 {
+			t.Fatalf("a user without changes should get cursor 0: %+v", fresh)
+		}
+
+		alice.put("/a.txt", 0, []byte("one"), http.StatusOK, nil)
+		var all changePage
+		alice.mustJSON(http.MethodGet, "/sync/changes?cursor=0", nil, http.StatusOK, &all)
+		var latest changePage
+		alice.mustJSON(http.MethodGet, "/sync/changes?cursor=-1", nil, http.StatusOK, &latest)
+		if latest.Cursor != all.Cursor || len(latest.Changes) != 0 || latest.HasMore {
+			t.Fatalf("latest = %+v, want cursor %d without changes", latest, all.Cursor)
 		}
 	})
 }

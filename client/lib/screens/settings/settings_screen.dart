@@ -8,6 +8,7 @@ import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/settings/widgets/account_tile.dart";
+import "package:polder/screens/settings/widgets/finder_settings_group.dart";
 import "package:polder/screens/settings/widgets/trash_settings_group.dart";
 import "package:polder/screens/settings/widgets/version_settings_group.dart";
 import "package:polder/theme/app_theme.dart";
@@ -36,6 +37,7 @@ class SettingsScreen extends ConsumerWidget {
                 title: localized.account,
                 children: [AccountTile(account: account)],
               ),
+            const FinderSettingsGroup(),
             const TrashSettingsGroup(),
             const VersionSettingsGroup(),
             if (isAdmin)

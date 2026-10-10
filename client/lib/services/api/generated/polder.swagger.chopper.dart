@@ -705,6 +705,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<TokenPair>> _startSession({
+    required SessionRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start another session for the logged-in user, such as for a file provider on this device',
+      operationId: 'startSession',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/sessions');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<TokenPair, TokenPair>($request);
+  }
+
+  @override
   Future<Response<Branding>> _getBranding({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',

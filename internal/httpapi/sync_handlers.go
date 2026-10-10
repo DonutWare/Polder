@@ -12,7 +12,7 @@ import (
 )
 
 type changesInput struct {
-	Cursor int64 `query:"cursor" default:"0" doc:"Cursor from the previous page; 0 starts from the beginning"`
+	Cursor int64 `query:"cursor" default:"0" doc:"Cursor from the previous page; 0 starts from the beginning, -1 returns no changes and only the latest cursor"`
 	Limit  int   `query:"limit" default:"1000" doc:"Maximum number of changes to return; the server caps it"`
 }
 

@@ -24,6 +24,10 @@ type refreshRequest struct {
 	DeviceName   string `json:"deviceName" required:"false" doc:"Current name of the device, replaces the one stored on the session"`
 }
 
+type sessionRequest struct {
+	DeviceName string `json:"deviceName" required:"false" doc:"Name of the device the session is for"`
+}
+
 type setupStatus struct {
 	NeedsSetup bool `json:"needsSetup" doc:"True until the first administrator account exists"`
 }
@@ -82,6 +86,15 @@ func (a *API) refresh(ctx context.Context, input *jsonBody[refreshRequest]) (*js
 
 func (a *API) logout(ctx context.Context, input *jsonBody[refreshRequest]) (*struct{}, error) {
 	return nil, a.auth.Logout(ctx, input.Body.RefreshToken)
+}
+
+func (a *API) startSession(ctx context.Context, input *jsonBody[sessionRequest]) (*jsonBody[auth.TokenPair], error) {
+	tokens, err := a.auth.StartSession(ctx, currentUser(ctx), input.Body.DeviceName)
+	if err != nil {
+		return nil, err
+	}
+	authLog.Info("session started", "user", tokens.User.Username, "device", input.Body.DeviceName)
+	return respond(tokens), nil
 }
 
 func (a *API) me(ctx context.Context, _ *struct{}) (*jsonBody[users.User], error) {

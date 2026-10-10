@@ -6,6 +6,7 @@ import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/deep_link/deep_link_provider.dart";
+import "package:polder/providers/desktop/finder_location_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
@@ -36,6 +37,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(showInFinderProvider);
     final appearance = ref.watch(appearanceProvider);
     final branding = ref.watch(brandingProvider);
     final seed = appearance.seedWith(branding.accent);

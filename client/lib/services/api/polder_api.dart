@@ -74,6 +74,9 @@ class PolderApi {
 
   Future<void> logout(String refreshToken) => _service.logout(body: wire.RefreshRequest(refreshToken: refreshToken));
 
+  Future<TokenPair> startSession({required String deviceName}) async =>
+      (await _service.startSession(body: wire.SessionRequest(deviceName: deviceName))).body!.toModel();
+
   Future<User> me() async => (await _service.getMe()).body!.toModel();
 
   Future<User> setProfile(UserProfile profile) async =>

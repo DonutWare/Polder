@@ -761,6 +761,32 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Start another session for the logged-in user, such as for a file provider on this device
+  Future<chopper.Response<TokenPair>> startSession({
+    required SessionRequest? body,
+  }) {
+    generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
+
+    return _startSession(body: body);
+  }
+
+  ///Start another session for the logged-in user, such as for a file provider on this device
+  @POST(path: '/api/v1/auth/sessions', optionalBody: true)
+  Future<chopper.Response<TokenPair>> _startSession({
+    @Body() required SessionRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start another session for the logged-in user, such as for a file provider on this device',
+      operationId: 'startSession',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
   ///How the apps present this server, shown before logging in
   Future<chopper.Response<Branding>> getBranding() {
     generatedMapping.putIfAbsent(Branding, () => Branding.fromJsonFactory);
@@ -2954,7 +2980,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Page through changes since a cursor
-  ///@param cursor Cursor from the previous page; 0 starts from the beginning
+  ///@param cursor Cursor from the previous page; 0 starts from the beginning, -1 returns no changes and only the latest cursor
   ///@param limit Maximum number of changes to return; the server caps it
   Future<chopper.Response<ChangePage>> listChanges({int? cursor, int? limit}) {
     generatedMapping.putIfAbsent(ChangePage, () => ChangePage.fromJsonFactory);
@@ -2963,7 +2989,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   }
 
   ///Page through changes since a cursor
-  ///@param cursor Cursor from the previous page; 0 starts from the beginning
+  ///@param cursor Cursor from the previous page; 0 starts from the beginning, -1 returns no changes and only the latest cursor
   ///@param limit Maximum number of changes to return; the server caps it
   @GET(path: '/api/v1/sync/changes')
   Future<chopper.Response<ChangePage>> _listChanges({

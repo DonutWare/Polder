@@ -333,6 +333,7 @@ extension $BrandingExtension on Branding {
 class Change {
   const Change({
     this.entry,
+    this.fileId,
     this.fromPath,
     required this.path,
     required this.seq,
@@ -346,6 +347,8 @@ class Change {
 
   @JsonKey(name: 'entry', includeIfNull: false)
   final Entry? entry;
+  @JsonKey(name: 'fileId', includeIfNull: false)
+  final int? fileId;
   @JsonKey(name: 'fromPath', includeIfNull: false)
   final String? fromPath;
   @JsonKey(name: 'path', includeIfNull: false)
@@ -367,6 +370,8 @@ class Change {
         (other is Change &&
             (identical(other.entry, entry) ||
                 const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.fileId, fileId) ||
+                const DeepCollectionEquality().equals(other.fileId, fileId)) &&
             (identical(other.fromPath, fromPath) ||
                 const DeepCollectionEquality().equals(
                   other.fromPath,
@@ -383,6 +388,7 @@ class Change {
   @override
   int get hashCode =>
       const DeepCollectionEquality().hash(entry) ^
+      const DeepCollectionEquality().hash(fileId) ^
       const DeepCollectionEquality().hash(fromPath) ^
       const DeepCollectionEquality().hash(path) ^
       const DeepCollectionEquality().hash(seq) ^
@@ -393,6 +399,7 @@ class Change {
 extension $ChangeExtension on Change {
   Change copyWith({
     Entry? entry,
+    int? fileId,
     String? fromPath,
     String? path,
     int? seq,
@@ -400,6 +407,7 @@ extension $ChangeExtension on Change {
   }) {
     return Change(
       entry: entry ?? this.entry,
+      fileId: fileId ?? this.fileId,
       fromPath: fromPath ?? this.fromPath,
       path: path ?? this.path,
       seq: seq ?? this.seq,
@@ -409,6 +417,7 @@ extension $ChangeExtension on Change {
 
   Change copyWithWrapped({
     Wrapped<Entry?>? entry,
+    Wrapped<int?>? fileId,
     Wrapped<String?>? fromPath,
     Wrapped<String>? path,
     Wrapped<int>? seq,
@@ -416,6 +425,7 @@ extension $ChangeExtension on Change {
   }) {
     return Change(
       entry: (entry != null ? entry.value : this.entry),
+      fileId: (fileId != null ? fileId.value : this.fileId),
       fromPath: (fromPath != null ? fromPath.value : this.fromPath),
       path: (path != null ? path.value : this.path),
       seq: (seq != null ? seq.value : this.seq),
@@ -6504,6 +6514,48 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       welcomeMessage: (welcomeMessage != null
           ? welcomeMessage.value
           : this.welcomeMessage),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class SessionRequest {
+  const SessionRequest({this.deviceName});
+
+  factory SessionRequest.fromJson(Map<String, dynamic> json) =>
+      _$SessionRequestFromJson(json);
+
+  static const toJsonFactory = _$SessionRequestToJson;
+  Map<String, dynamic> toJson() => _$SessionRequestToJson(this);
+
+  @JsonKey(name: 'deviceName', includeIfNull: false)
+  final String? deviceName;
+  static const fromJsonFactory = _$SessionRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is SessionRequest &&
+            (identical(other.deviceName, deviceName) ||
+                const DeepCollectionEquality().equals(
+                  other.deviceName,
+                  deviceName,
+                )));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(deviceName) ^ runtimeType.hashCode;
+}
+
+extension $SessionRequestExtension on SessionRequest {
+  SessionRequest copyWith({String? deviceName}) {
+    return SessionRequest(deviceName: deviceName ?? this.deviceName);
+  }
+
+  SessionRequest copyWithWrapped({Wrapped<String?>? deviceName}) {
+    return SessionRequest(
+      deviceName: (deviceName != null ? deviceName.value : this.deviceName),
     );
   }
 }

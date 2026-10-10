@@ -40,6 +40,25 @@ func TestLoginRefreshRotationAndLogout(t *testing.T) {
 	})
 }
 
+func TestStartedSessionRefreshesIndependently(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		server.setupAdmin()
+		var first tokenPair
+		server.anonymous().mustJSON(http.MethodPost, "/auth/login", map[string]string{"username": "admin", "password": "adminpass1", "deviceName": "laptop"}, http.StatusOK, &first)
+		signedIn := &client{server: server, token: first.AccessToken}
+
+		var started tokenPair
+		signedIn.mustJSON(http.MethodPost, "/auth/sessions", map[string]string{"deviceName": "laptop (Finder)"}, http.StatusCreated, &started)
+		if started.User.Username != "admin" || started.RefreshToken == first.RefreshToken {
+			t.Fatalf("started session = %+v", started)
+		}
+
+		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": first.RefreshToken}, http.StatusOK, nil)
+		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": started.RefreshToken}, http.StatusOK, nil)
+		server.anonymous().mustJSON(http.MethodPost, "/auth/sessions", map[string]string{}, http.StatusUnauthorized, nil)
+	})
+}
+
 func TestRequestsWithoutTokenAreRejected(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		server.anonymous().mustJSON(http.MethodGet, "/files/list", nil, http.StatusUnauthorized, nil)

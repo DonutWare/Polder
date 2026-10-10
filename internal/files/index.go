@@ -197,20 +197,20 @@ func sortForListing(entries []Entry) {
 }
 
 func recordChange(ctx context.Context, q querier, userID int64, cleanPath string, changeType ChangeType) (int64, error) {
-	return insertChange(ctx, q, userID, cleanPath, changeType, sql.NullString{})
+	return insertChange(ctx, q, userID, cleanPath, changeType, sql.NullString{}, sql.NullInt64{})
 }
 
-func insertChange(ctx context.Context, q querier, userID int64, cleanPath string, changeType ChangeType, fromPath sql.NullString) (int64, error) {
+func insertChange(ctx context.Context, q querier, userID int64, cleanPath string, changeType ChangeType, fromPath sql.NullString, fileID sql.NullInt64) (int64, error) {
 	var id int64
 	err := q.QueryRowContext(ctx,
-		`INSERT INTO changes (user_id, path, path_key, change_type, from_path, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-		userID, cleanPath, pathKey(cleanPath), changeType, fromPath, time.Now().Unix()).Scan(&id)
+		`INSERT INTO changes (user_id, path, path_key, change_type, from_path, file_id, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+		userID, cleanPath, pathKey(cleanPath), changeType, fromPath, fileID, time.Now().Unix()).Scan(&id)
 	return id, err
 }
 
 // relocateEntry moves an indexed entry to a new path in place, so it keeps its id and cached chunks.
 func relocateEntry(ctx context.Context, q querier, entry Entry, newPath string) (Entry, error) {
-	rev, err := insertChange(ctx, q, entry.UserID, newPath, changeMove, sql.NullString{String: entry.Path, Valid: true})
+	rev, err := insertChange(ctx, q, entry.UserID, newPath, changeMove, sql.NullString{String: entry.Path, Valid: true}, sql.NullInt64{})
 	if err != nil {
 		return Entry{}, err
 	}
@@ -269,14 +269,19 @@ func saveEntry(ctx context.Context, q querier, entry Entry) (Entry, error) {
 }
 
 func (s *Service) removeTree(ctx context.Context, q querier, owner users.User, cleanPath string) error {
-	if _, err := recordChange(ctx, q, owner.ID, cleanPath, changeDelete); err != nil {
+	var fileID sql.NullInt64
+	err := q.QueryRowContext(ctx, `SELECT id FROM files WHERE user_id = $1 AND path_key = $2`, owner.ID, pathKey(cleanPath)).Scan(&fileID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+	if _, err := insertChange(ctx, q, owner.ID, cleanPath, changeDelete, sql.NullString{}, fileID); err != nil {
 		return err
 	}
 	if err := s.removeVersionsOfTree(ctx, q, owner, cleanPath); err != nil {
 		return err
 	}
 	prefix := cleanPath + "/"
-	_, err := q.ExecContext(ctx, `DELETE FROM files WHERE user_id = $1 AND (path_key = $2 OR SUBSTR(path, 1, $3) = $4)`,
+	_, err = q.ExecContext(ctx, `DELETE FROM files WHERE user_id = $1 AND (path_key = $2 OR SUBSTR(path, 1, $3) = $4)`,
 		owner.ID, pathKey(cleanPath), utf8.RuneCountInString(prefix), prefix)
 	return err
 }

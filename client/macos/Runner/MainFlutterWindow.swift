@@ -4,6 +4,7 @@ import FlutterMacOS
 class MainFlutterWindow: NSWindow {
   private var titlebarChannel: FlutterMethodChannel?
   private var appChannel: FlutterMethodChannel?
+  private var finderLocation: FinderLocation?
   private var isSyncing = false
   private var quitConfirmed = false
 
@@ -48,6 +49,7 @@ class MainFlutterWindow: NSWindow {
       }
     }
     appChannel = app
+    finderLocation = FinderLocation(messenger: flutterViewController.engine.binaryMessenger)
 
     NotificationCenter.default.addObserver(
       forName: NSWindow.willEnterFullScreenNotification, object: self, queue: .main

@@ -648,5 +648,11 @@
 	"nothingSelected": "Kies iets aan de linkerkant",
 	"sharedByWithPermission": "Gedeeld door {name} · {permission}",
 	"shareWithName": "Delen met {name}",
-	"sharedWithName": "Gedeeld met {name}"
+	"sharedWithName": "Gedeeld met {name}",
+	"finderLocationDisabled": "Zet Polder aan in Systeeminstellingen › Algemeen › Inlogonderdelen en extensies › Bestandsaanbieders om je bestanden in Finder te zien.",
+	"openSystemSettings": "Open Systeeminstellingen",
+	"showInFinder": "Tonen in Finder",
+	"showInFinderHint": "Blader door je bestanden in Finder; ze worden gedownload zodra je ze opent",
+	"finderRemoveTitle": "Verwijderen uit Finder?",
+	"finderRemoveMessage": "Bestanden die voor offline gebruik zijn gedownload, worden van deze Mac verwijderd. Ze blijven op de server staan."
 }

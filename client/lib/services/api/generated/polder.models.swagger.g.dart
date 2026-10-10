@@ -87,6 +87,7 @@ Change _$ChangeFromJson(Map<String, dynamic> json) => Change(
   entry: json['entry'] == null
       ? null
       : Entry.fromJson(json['entry'] as Map<String, dynamic>),
+  fileId: (json['fileId'] as num?)?.toInt(),
   fromPath: json['fromPath'] as String?,
   path: json['path'] as String,
   seq: (json['seq'] as num).toInt(),
@@ -95,6 +96,7 @@ Change _$ChangeFromJson(Map<String, dynamic> json) => Change(
 
 Map<String, dynamic> _$ChangeToJson(Change instance) => <String, dynamic>{
   'entry': ?instance.entry?.toJson(),
+  'fileId': ?instance.fileId,
   'fromPath': ?instance.fromPath,
   'path': instance.path,
   'seq': instance.seq,
@@ -1384,6 +1386,12 @@ Map<String, dynamic> _$ServerSettingsChangesToJson(
   'versionsMaxPerFile': ?instance.versionsMaxPerFile,
   'welcomeMessage': ?instance.welcomeMessage,
 };
+
+SessionRequest _$SessionRequestFromJson(Map<String, dynamic> json) =>
+    SessionRequest(deviceName: json['deviceName'] as String?);
+
+Map<String, dynamic> _$SessionRequestToJson(SessionRequest instance) =>
+    <String, dynamic>{'deviceName': ?instance.deviceName};
 
 SetupStatus _$SetupStatusFromJson(Map<String, dynamic> json) =>
     SetupStatus(needsSetup: json['needsSetup'] as bool);
