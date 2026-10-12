@@ -2,24 +2,20 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element_parameter
 
-import 'package:json_annotation/json_annotation.dart';
-import 'package:json_annotation/json_annotation.dart' as json;
-import 'package:collection/collection.dart';
-
-import 'polder.models.swagger.dart';
-
-import 'package:chopper/chopper.dart';
-
-import 'client_mapping.dart';
-
 import 'dart:async';
 
+import 'package:chopper/chopper.dart';
+import 'package:chopper/chopper.dart' as chopper;
+import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart' show MultipartFile;
-import 'package:chopper/chopper.dart' as chopper;
+import 'package:json_annotation/json_annotation.dart';
+import 'package:json_annotation/json_annotation.dart' as json;
 
+import 'client_mapping.dart';
 import 'polder.enums.swagger.dart' as enums;
 import 'polder.metadata.swagger.dart';
+import 'polder.models.swagger.dart';
 export 'polder.enums.swagger.dart';
 export 'polder.models.swagger.dart';
 
@@ -900,6 +896,28 @@ abstract class Polder extends ChopperService {
       description: '',
       summary: 'Upload a whole file as the request body',
       operationId: 'uploadFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
+  Future<chopper.Response<Entry>> copyFile({required CopyRequest? body}) {
+    generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
+
+    return _copyFile(body: body);
+  }
+
+  @POST(path: '/api/v1/files/copy', optionalBody: true)
+  Future<chopper.Response<Entry>> _copyFile({
+    @Body() required CopyRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Copy a file, or a directory with everything in it',
+      operationId: 'copyFile',
       consumes: [],
       produces: [],
       security: ["bearer"],

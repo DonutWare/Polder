@@ -185,6 +185,7 @@ func (a *API) routes(api huma.API) {
 		withRequestBody(binaryContent("application/octet-stream")))
 	register(user, http.MethodPost, "/files/mkdir", "makeDirectory", "Create a directory", a.makeDirectory, created)
 	register(user, http.MethodPost, "/files/move", "moveFile", "Move or rename a file or directory", a.moveFile)
+	register(user, http.MethodPost, "/files/copy", "copyFile", "Copy a file, or a directory with everything in it", a.copyFile)
 	register(user, http.MethodDelete, "/files", "deleteFile", "Delete a file or directory", a.deleteFile)
 	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image, video or document", a.previewFile,
 		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))

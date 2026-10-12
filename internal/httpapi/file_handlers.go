@@ -36,6 +36,11 @@ type moveRequest struct {
 	BaseRev int64  `json:"baseRev" required:"false" doc:"Revision the client last saw of the source; 0 or -1 skips the check"`
 }
 
+type copyRequest struct {
+	From string `json:"from"`
+	To   string `json:"to" doc:"Where the copy goes; nothing may exist there yet"`
+}
+
 // Huma reads parameters only from an input's own fields, not from embedded structs.
 type pathQuery struct {
 	Path string `query:"path" doc:"Path inside the user's storage, such as /Photos/cat.jpg; empty means the root"`
@@ -235,6 +240,14 @@ func (a *API) makeDirectory(ctx context.Context, input *jsonBody[pathRequest]) (
 
 func (a *API) moveFile(ctx context.Context, input *jsonBody[moveRequest]) (*jsonBody[files.Entry], error) {
 	entry, err := a.files.Move(ctx, currentUser(ctx), input.Body.From, input.Body.To, input.Body.BaseRev)
+	if err != nil {
+		return nil, err
+	}
+	return respond(entry), nil
+}
+
+func (a *API) copyFile(ctx context.Context, input *jsonBody[copyRequest]) (*jsonBody[files.Entry], error) {
+	entry, err := a.files.Copy(ctx, currentUser(ctx), input.Body.From, input.Body.To)
 	if err != nil {
 		return nil, err
 	}

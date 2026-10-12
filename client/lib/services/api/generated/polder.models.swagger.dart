@@ -520,6 +520,44 @@ extension $ClientMessageExtension on ClientMessage {
 }
 
 @JsonSerializable(explicitToJson: true)
+class CopyRequest {
+  const CopyRequest({required this.from, required this.to});
+
+  factory CopyRequest.fromJson(Map<String, dynamic> json) => _$CopyRequestFromJson(json);
+
+  static const toJsonFactory = _$CopyRequestToJson;
+  Map<String, dynamic> toJson() => _$CopyRequestToJson(this);
+
+  @JsonKey(name: 'from', includeIfNull: false)
+  final String from;
+  @JsonKey(name: 'to', includeIfNull: false)
+  final String to;
+  static const fromJsonFactory = _$CopyRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is CopyRequest &&
+            (identical(other.from, from) || const DeepCollectionEquality().equals(other.from, from)) &&
+            (identical(other.to, to) || const DeepCollectionEquality().equals(other.to, to)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(from) ^ const DeepCollectionEquality().hash(to) ^ runtimeType.hashCode;
+}
+
+extension $CopyRequestExtension on CopyRequest {
+  CopyRequest copyWith({String? from, String? to}) {
+    return CopyRequest(from: from ?? this.from, to: to ?? this.to);
+  }
+
+  CopyRequest copyWithWrapped({Wrapped<String>? from, Wrapped<String>? to}) {
+    return CopyRequest(from: (from != null ? from.value : this.from), to: (to != null ? to.value : this.to));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class CreatableApp {
   const CreatableApp({required this.app, this.extensions});
 

@@ -1002,7 +1002,7 @@
 	"noteConflictTheirs": "Use theirs",
 	"noteConflictMine": "Keep mine",
 	"noteConflictCopy": "Save mine as copy",
-	"noteCopySuffix": "copy",
+	"copySuffix": "copy",
 	"noteUndo": "Undo",
 	"noteRedo": "Redo",
 	"noteHeading": "Heading",
@@ -1040,5 +1040,57 @@
 	"address": "Address",
 	"profileSaved": "Profile saved",
 	"userIcon": "Picture",
-	"userIconHint": "Without a picture, your initials are shown"
+	"userIconHint": "Without a picture, your initials are shown",
+	"open": "Open",
+	"deleteItemsTitle": "{count, plural, =1{Delete 1 item?} other{Delete {count} items?}}",
+	"@deleteItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"deletePermanentlyItemsTitle": "{count, plural, =1{Delete 1 item permanently?} other{Delete {count} items permanently?}}",
+	"@deletePermanentlyItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"copy": "Copy",
+	"moveEntryTitle": "Move \"{name}\" to…",
+	"@moveEntryTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"moveItemsTitle": "{count, plural, =1{Move 1 item to…} other{Move {count} items to…}}",
+	"@moveItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"moveHere": "Move here",
+	"copyEntryTitle": "Copy \"{name}\" to…",
+	"@copyEntryTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"copyItemsTitle": "{count, plural, =1{Copy 1 item to…} other{Copy {count} items to…}}",
+	"@copyItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"copyHere": "Copy here"
 }

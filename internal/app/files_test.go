@@ -148,6 +148,38 @@ func TestMkdirMoveAndDelete(t *testing.T) {
 	})
 }
 
+func TestCopyDuplicatesFilesAndFolders(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 100)
+		alice.put("/Photos/2026/a.jpg", 0, []byte("jpeg"), http.StatusOK, nil)
+		alice.put("/notes.txt", 0, []byte("notes"), http.StatusOK, nil)
+
+		var copied fileEntry
+		alice.mustJSON(http.MethodPost, "/files/copy", map[string]any{"from": "/Photos", "to": "/Backup/Photos"}, http.StatusOK, &copied)
+		if copied.Path != "/Backup/Photos" || !copied.IsDir {
+			t.Fatalf("unexpected copy result %+v", copied)
+		}
+		if _, content := alice.download("/Backup/Photos/2026/a.jpg", nil); string(content) != "jpeg" {
+			t.Fatalf("copied content is %q", content)
+		}
+		alice.mustJSON(http.MethodGet, "/files/stat?path=/Photos/2026/a.jpg", nil, http.StatusOK, nil)
+
+		alice.mustJSON(http.MethodPost, "/files/copy", map[string]any{"from": "/notes.txt", "to": "/notes copy.txt"}, http.StatusOK, &copied)
+		if copied.Path != "/notes copy.txt" || copied.Size != 5 {
+			t.Fatalf("unexpected copy result %+v", copied)
+		}
+		alice.mustJSON(http.MethodPost, "/files/copy", map[string]any{"from": "/notes.txt", "to": "/notes copy.txt"}, http.StatusConflict, nil)
+		alice.mustJSON(http.MethodPost, "/files/copy", map[string]any{"from": "/Photos", "to": "/Photos/inside"}, http.StatusBadRequest, nil)
+
+		var exceeded errorResponse
+		alice.put("/big.bin", 0, bytes.Repeat([]byte("b"), 80), http.StatusOK, nil)
+		alice.mustJSON(http.MethodPost, "/files/copy", map[string]any{"from": "/big.bin", "to": "/big 2.bin"}, http.StatusInsufficientStorage, &exceeded)
+		if exceeded.Error.Code != "quota_exceeded" {
+			t.Fatalf("unexpected error %+v", exceeded)
+		}
+	})
+}
+
 func TestQuotaIsEnforced(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 100)

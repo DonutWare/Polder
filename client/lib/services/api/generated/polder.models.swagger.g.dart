@@ -112,6 +112,14 @@ Map<String, dynamic> _$ClientMessageToJson(ClientMessage instance) => <String, d
   'userId': ?instance.userId,
 };
 
+CopyRequest _$CopyRequestFromJson(Map<String, dynamic> json) =>
+    CopyRequest(from: json['from'] as String, to: json['to'] as String);
+
+Map<String, dynamic> _$CopyRequestToJson(CopyRequest instance) => <String, dynamic>{
+  'from': instance.from,
+  'to': instance.to,
+};
+
 CreatableApp _$CreatableAppFromJson(Map<String, dynamic> json) => CreatableApp(
   app: json['app'] as String,
   extensions: (json['extensions'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],

@@ -325,6 +325,60 @@ func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo str
 	return moved, nil
 }
 
+func (s *Service) Copy(ctx context.Context, owner users.User, rawFrom, rawTo string) (Entry, error) {
+	from, err := nonRootPath(rawFrom)
+	if err != nil {
+		return Entry{}, err
+	}
+	to, err := nonRootPath(rawTo)
+	if err != nil {
+		return Entry{}, err
+	}
+	if storage.IsSameOrDescendant(to, from) {
+		return Entry{}, apperr.Invalid("cannot copy %s into itself", from)
+	}
+	if _, err := s.existingEntry(ctx, s.db, owner.ID, from); err != nil {
+		return Entry{}, err
+	}
+	// Parents sort before their children, so every folder exists before what goes in it.
+	tree, err := listTree(ctx, s.db, owner.ID, from)
+	if err != nil {
+		return Entry{}, err
+	}
+	var copied Entry
+	for _, entry := range tree {
+		target := to + strings.TrimPrefix(entry.Path, from)
+		var created Entry
+		if entry.IsDir {
+			created, err = s.Mkdir(ctx, owner, target)
+		} else {
+			created, err = s.copyFile(ctx, owner, entry, target)
+		}
+		if err != nil {
+			return copied, err
+		}
+		if target == to {
+			copied = created
+		}
+	}
+	return copied, nil
+}
+
+func (s *Service) copyFile(ctx context.Context, owner users.User, source Entry, target string) (Entry, error) {
+	file, _, err := s.Open(ctx, owner, source.Path)
+	if err != nil {
+		return Entry{}, err
+	}
+	defer file.Close()
+	return s.Write(ctx, owner, WriteRequest{
+		Path:         target,
+		BaseRev:      BaseRevMustNotExist,
+		Mtime:        source.Mtime,
+		ExpectedHash: source.Hash,
+		Content:      file,
+	})
+}
+
 func (s *Service) renameOnDisk(owner users.User, from, to string) error {
 	absoluteFrom, err := s.disk.Resolve(owner.Username, from)
 	if err != nil {

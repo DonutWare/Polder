@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_list_tile.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/screens/browser/widgets/selection_highlight.dart";
@@ -43,30 +44,39 @@ class _FileListViewState extends State<FileListView> {
   }
 
   @override
-  Widget build(BuildContext context) => ListView.builder(
-    controller: _scroll,
-    padding: widget.padding,
-    itemCount: widget.items.length,
-    itemBuilder: (context, index) {
-      final item = widget.items[index];
-      final entry = item.entry;
-      final content = switch (item) {
-        BrowserItem(:final pendingFolder?) => PendingFolderListTile(name: pendingFolder),
-        _ when entry == null => PendingFileListTile(upload: item.pending!),
-        _ => FileListTile(parentPath: widget.parentPath, entry: entry, pending: item.pending, busy: item.busy),
-      };
-      return GroupedTile(
-        key: ValueKey(item.name),
-        index: index,
-        count: widget.items.length,
-        child: item.name == widget.select
-            ? SelectionHighlight(
-                key: ValueKey("selected-${item.name}"),
-                shape: (side) => GroupedTile.shapeFor(index, widget.items.length, side: side),
-                child: content,
-              )
-            : content,
-      );
-    },
+  Widget build(BuildContext context) => BrowserSelectionArea(
+    parentPath: widget.parentPath,
+    slots: [for (final item in widget.items) item.entry?.name],
+    child: ListView.builder(
+      controller: _scroll,
+      padding: widget.padding,
+      itemCount: widget.items.length,
+      itemBuilder: (context, index) {
+        final item = widget.items[index];
+        final entry = item.entry;
+        final content = switch (item) {
+          BrowserItem(:final pendingFolder?) => PendingFolderListTile(name: pendingFolder),
+          _ when entry == null => PendingFileListTile(upload: item.pending!),
+          _ => SelectableEntry(
+            parentPath: widget.parentPath,
+            entry: entry,
+            builder: (context, interaction) =>
+                FileListTile(entry: entry, interaction: interaction, pending: item.pending, busy: item.busy),
+          ),
+        };
+        return GroupedTile(
+          key: ValueKey(item.name),
+          index: index,
+          count: widget.items.length,
+          child: item.name == widget.select
+              ? SelectionHighlight(
+                  key: ValueKey("selected-${item.name}"),
+                  shape: (side) => GroupedTile.shapeFor(index, widget.items.length, side: side),
+                  child: content,
+                )
+              : content,
+        );
+      },
+    ),
   );
 }

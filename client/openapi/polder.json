@@ -232,6 +232,23 @@
         ],
         "type": "object"
       },
+      "CopyRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "description": "Where the copy goes; nothing may exist there yet",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "type": "object"
+      },
       "CreatableApp": {
         "additionalProperties": false,
         "properties": {
@@ -4250,6 +4267,62 @@
           }
         ],
         "summary": "Upload a whole file as the request body",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/copy": {
+      "post": {
+        "operationId": "copyFile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Copy a file, or a directory with everything in it",
         "tags": [
           "files"
         ]

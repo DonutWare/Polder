@@ -495,7 +495,7 @@
 	"noteConflictTheirs": "Die versie gebruiken",
 	"noteConflictMine": "Mijn versie houden",
 	"noteConflictCopy": "Mijn versie als kopie opslaan",
-	"noteCopySuffix": "kopie",
+	"copySuffix": "kopie",
 	"noteUndo": "Ongedaan maken",
 	"noteRedo": "Opnieuw",
 	"noteHeading": "Kop",
@@ -526,5 +526,15 @@
 	"address": "Adres",
 	"profileSaved": "Profiel opgeslagen",
 	"userIcon": "Foto",
-	"userIconHint": "Zonder foto worden je initialen getoond"
+	"userIconHint": "Zonder foto worden je initialen getoond",
+	"open": "Openen",
+	"deleteItemsTitle": "{count, plural, =1{1 item verwijderen?} other{{count} items verwijderen?}}",
+	"deletePermanentlyItemsTitle": "{count, plural, =1{1 item definitief verwijderen?} other{{count} items definitief verwijderen?}}",
+	"copy": "Kopiëren",
+	"moveEntryTitle": "\"{name}\" verplaatsen naar…",
+	"moveItemsTitle": "{count, plural, =1{1 item verplaatsen naar…} other{{count} items verplaatsen naar…}}",
+	"moveHere": "Hierheen verplaatsen",
+	"copyEntryTitle": "\"{name}\" kopiëren naar…",
+	"copyItemsTitle": "{count, plural, =1{1 item kopiëren naar…} other{{count} items kopiëren naar…}}",
+	"copyHere": "Hierheen kopiëren"
 }

@@ -10,6 +10,7 @@ class AppPage extends StatelessWidget {
   const AppPage({
     required this.title,
     required this.body,
+    this.leading,
     this.actions,
     this.bottom,
     this.floatingActionButton,
@@ -17,6 +18,7 @@ class AppPage extends StatelessWidget {
   });
 
   final Widget title;
+  final Widget? leading;
   final List<Widget>? actions;
   final PreferredSizeWidget? bottom;
   final Widget? floatingActionButton;
@@ -25,7 +27,11 @@ class AppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isRoot = !(ModalRoute.of(context)?.impliesAppBarDismissal ?? false);
-    final showMenu = isRoot && WindowSize.of(context) == WindowSize.compact && SideSheetDrawer.maybeOf(context) != null;
+    final showMenu =
+        leading == null &&
+        isRoot &&
+        WindowSize.of(context) == WindowSize.compact &&
+        SideSheetDrawer.maybeOf(context) != null;
     final navigationBarOverlap = MediaQuery.paddingOf(context).bottom - MediaQuery.viewPaddingOf(context).bottom;
     final fab = floatingActionButton;
     return Scaffold(
@@ -39,8 +45,8 @@ class AppPage extends StatelessWidget {
       appBar: AppBar(
         flexibleSpace: const AppBarFade(),
         toolbarHeight: isRoot ? 64 : null,
-        leading: showMenu ? const MoreOptionsButton() : null,
-        titleSpacing: showMenu ? 4 : null,
+        leading: leading ?? (showMenu ? const MoreOptionsButton() : null),
+        titleSpacing: showMenu || leading != null ? 4 : null,
         title: title,
         actions: [if (isRoot) const SearchButton(), ...?actions, const SizedBox(width: 8)],
         bottom: bottom,

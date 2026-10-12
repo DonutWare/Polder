@@ -229,7 +229,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
         await context.runWithFeedback(_notifier.keepMine());
       case _ConflictChoice.copy:
         final folder = RemotePath.parent(document.entry.path);
-        final base = "${RemotePath.withoutExtension(document.entry.name)} (${context.localized.noteCopySuffix})";
+        final base = "${RemotePath.withoutExtension(document.entry.name)} (${context.localized.copySuffix})";
         final extension = RemotePath.extension(document.entry.name);
         await context.runWithFeedback(
           Future(() async {

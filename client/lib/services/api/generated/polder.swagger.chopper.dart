@@ -878,6 +878,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<Entry>> _copyFile({
+    required CopyRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Copy a file, or a directory with everything in it',
+      operationId: 'copyFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/copy');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
   Future<Response<LinksResponse>> _listFileLinks({
     int? id,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(

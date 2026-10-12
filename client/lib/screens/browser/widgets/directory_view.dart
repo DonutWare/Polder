@@ -6,6 +6,7 @@ import "package:polder/models/directory_listing.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/browser/browser_view_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/file_grid_view.dart";
 import "package:polder/screens/browser/widgets/file_list_view.dart";
@@ -26,6 +27,7 @@ class DirectoryView extends ConsumerWidget {
     final notifier = ref.read(directoryProvider(path).notifier);
     final pending = ref.watch(pendingUploadsProvider(path));
     final busyFolders = ref.watch(busyFoldersProvider(path));
+    ref.watch(editorCapabilitiesProvider);
     return AsyncValueView<DirectoryListing>(
       value: ref.watch(directoryProvider(path)),
       onRetry: notifier.refresh,

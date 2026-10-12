@@ -25,7 +25,12 @@ const fakeDiscovery = `<?xml version="1.0" encoding="utf-8"?>
   </app>
   <app name="draw">
     <action ext="vsdx" name="view" urlsrc="http://collabora:9980/browser/abc/cool.html?"/>
+    <action ext="jpg" name="view" urlsrc="http://collabora:9980/browser/abc/cool.html?"/>
+    <action ext="pdf" name="view" urlsrc="http://collabora:9980/browser/abc/cool.html?"/>
   </app>
+  <app name="image/gif"><action ext="" name="view" urlsrc="http://collabora:9980/browser/abc/cool.html?"/></app>
+  <app name="application/pdf"><action ext="" name="view" urlsrc="http://collabora:9980/browser/abc/cool.html?"/></app>
+  <app name="application/vnd.visio"><action ext="" name="view" urlsrc="http://collabora:9980/browser/abc/cool.html?"/></app>
   <app name="Capabilities"><action ext="" name="getinfo" urlsrc="http://collabora:9980/hosting/capabilities"/></app>
 </net-zone></wopi-discovery>`
 
@@ -94,6 +99,7 @@ func TestOfficeCapabilitiesComeFromDiscovery(t *testing.T) {
 		Enabled            bool     `json:"enabled"`
 		EditableExtensions []string `json:"editableExtensions"`
 		ViewableExtensions []string `json:"viewableExtensions"`
+		ViewableMimes      []string `json:"viewableMimes"`
 		Creatable          []struct {
 			App        string   `json:"app"`
 			Extensions []string `json:"extensions"`
@@ -101,7 +107,8 @@ func TestOfficeCapabilitiesComeFromDiscovery(t *testing.T) {
 	}
 	alice.mustJSON(http.MethodGet, "/office/capabilities", nil, http.StatusOK, &capabilities)
 	if !capabilities.Enabled || strings.Join(capabilities.EditableExtensions, ",") != "docx,odt" ||
-		strings.Join(capabilities.ViewableExtensions, ",") != "vsdx" {
+		strings.Join(capabilities.ViewableExtensions, ",") != "vsdx" ||
+		strings.Join(capabilities.ViewableMimes, ",") != "application/vnd.visio" {
 		t.Fatalf("unexpected capabilities %+v", capabilities)
 	}
 	creatable := map[string]string{}

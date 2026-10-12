@@ -113,6 +113,7 @@ class FakePolderServer extends http.BaseClient {
       ("PUT", "/files/content") => _put(query, body),
       ("POST", "/files/mkdir") => _mkdir(_decode(body)["path"] as String),
       ("POST", "/files/move") => _move(_decode(body)),
+      ("POST", "/files/copy") => _copy(_decode(body)),
       ("POST", "/files/resolve") => _resolve(_decode(body)),
       ("DELETE", "/files") => _delete(query),
       ("GET", "/sync/changes") => _changes(int.parse(query["cursor"] ?? "0")),
@@ -178,6 +179,25 @@ class FakePolderServer extends http.BaseClient {
     final to = body["to"] as String;
     _checkBaseRev(from, body["baseRev"] as int? ?? -1);
     movePath(from, to);
+    return _json(200, _entry(to));
+  }
+
+  http.StreamedResponse _copy(Map<String, dynamic> body) {
+    final from = body["from"] as String;
+    final to = body["to"] as String;
+    _require(from);
+    if (nodes.containsKey(to)) throw const _HttpError(409, "conflict");
+    _ensureParents(to);
+    final copied = nodes.keys.where((key) => key == from || RemotePath.isWithin(key, from)).toList()
+      ..sort((a, b) => a.length.compareTo(b.length));
+    for (final oldPath in copied) {
+      final source = nodes[oldPath]!;
+      final newPath = to + oldPath.substring(from.length);
+      nodes[newPath] = source.isDir
+          ? FakeNode.dir(++_rev, source.mtime)
+          : FakeNode.file(Uint8List.fromList(source.bytes), ++_rev, source.mtime);
+      _emitUpsert(newPath);
+    }
     return _json(200, _entry(to));
   }
 

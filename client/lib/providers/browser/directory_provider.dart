@@ -59,18 +59,74 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> {
   Future<void> rename(FileEntry entry, String newName) =>
       _mutate(() => _api.move(from: entry.path, to: RemotePath.join(path, newName), baseRev: entry.rev));
 
-  Future<void> moveTo(FileEntry entry, String destination) async {
-    await _mutate(() => _api.move(from: entry.path, to: RemotePath.join(destination, entry.name), baseRev: entry.rev));
-    if (ref.mounted) ref.invalidate(directoryProvider(destination));
+  Future<void> moveTo(FileEntry entry, String destination) => moveAllTo([entry], destination);
+
+  Future<void> moveAllTo(Iterable<FileEntry> entries, String destination) async {
+    try {
+      await _mutateEach(
+        entries,
+        (entry) => _api.move(from: entry.path, to: RemotePath.join(destination, entry.name), baseRev: entry.rev),
+      );
+    } finally {
+      if (ref.mounted) ref.invalidate(directoryProvider(destination));
+    }
   }
 
-  Future<void> delete(FileEntry entry) => _mutate(() => _api.delete(entry.path, baseRev: entry.rev));
+  /// Copies [entries] into [destination]. One whose name is taken there is called "name (copy)" instead,
+  /// numbered when that is taken too; [copySuffix] is the localized word for "copy".
+  Future<void> copyAllTo(Iterable<FileEntry> entries, String destination, {required String copySuffix}) async {
+    try {
+      final taken = {for (final entry in (await _api.list(destination)).entries) entry.name};
+      await _mutateEach(entries, (entry) {
+        final name = _freeName(entry, taken, copySuffix);
+        taken.add(name);
+        return _api.copy(from: entry.path, to: RemotePath.join(destination, name));
+      });
+    } finally {
+      if (ref.mounted && destination != path) ref.invalidate(directoryProvider(destination));
+    }
+  }
 
-  Future<void> _mutate(Future<Object?> Function() action) async {
-    await action();
-    if (!ref.mounted) return;
-    ref.invalidate(currentUserProvider);
-    ref.read(syncSchedulerProvider)?.requestRun();
-    await refresh();
+  static String _freeName(FileEntry entry, Set<String> taken, String copySuffix) {
+    if (!taken.contains(entry.name)) return entry.name;
+    final base = entry.isDir ? entry.name : RemotePath.withoutExtension(entry.name);
+    final extension = entry.isDir ? "" : RemotePath.extension(entry.name);
+    for (var number = 1; ; number++) {
+      final name =
+          "$base (${number == 1 ? copySuffix : "$copySuffix $number"})${extension.isEmpty ? "" : ".$extension"}";
+      if (!taken.contains(name)) return name;
+    }
+  }
+
+  Future<void> delete(FileEntry entry) => deleteAll([entry]);
+
+  Future<void> deleteAll(Iterable<FileEntry> entries) =>
+      _mutateEach(entries, (entry) => _api.delete(entry.path, baseRev: entry.rev));
+
+  // One failing entry doesn't stop the others; the first failure is rethrown once all were tried.
+  Future<void> _mutateEach(Iterable<FileEntry> entries, Future<Object?> Function(FileEntry entry) action) =>
+      _mutate(() async {
+        (Object, StackTrace)? failure;
+        for (final entry in entries) {
+          try {
+            await action(entry);
+          } catch (error, stack) {
+            failure ??= (error, stack);
+          }
+        }
+        if (failure case (final error, final stack)) Error.throwWithStackTrace(error, stack);
+      });
+
+  // The listing is refreshed even when the action fails, since part of it may have gone through.
+  Future<void> _mutate(Future<void> Function() action) async {
+    try {
+      await action();
+    } finally {
+      if (ref.mounted) {
+        ref.invalidate(currentUserProvider);
+        ref.read(syncSchedulerProvider)?.requestRun();
+        await refresh();
+      }
+    }
   }
 }

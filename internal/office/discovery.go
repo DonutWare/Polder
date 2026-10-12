@@ -137,6 +137,9 @@ func parseDiscovery(body io.Reader) (apps, error) {
 					return apps{}, err
 				}
 				current := action{editable: raw.Name == "edit", path: editorPath}
+				if !isDocument(app.Name, raw.Ext, current.editable) {
+					continue
+				}
 				if strings.Contains(app.Name, "/") {
 					merge(found.byMime, app.Name, current)
 				}
@@ -147,6 +150,25 @@ func parseDiscovery(body io.Reader) (apps, error) {
 		}
 	}
 	return found, nil
+}
+
+var mediaExtensions = map[string]bool{
+	"bmp": true, "emf": true, "gif": true, "heic": true, "jpe": true, "jpeg": true, "jpg": true, "png": true,
+	"svg": true, "svgz": true, "tif": true, "tiff": true, "webp": true, "wmf": true,
+}
+
+func isDocument(appName, extension string, editable bool) bool {
+	mimeType := strings.ToLower(appName)
+	extension = strings.ToLower(extension)
+	for _, prefix := range []string{"image/", "audio/", "video/"} {
+		if strings.HasPrefix(mimeType, prefix) {
+			return false
+		}
+	}
+	if mediaExtensions[extension] {
+		return false
+	}
+	return editable || (mimeType != "application/pdf" && extension != "pdf")
 }
 
 func merge(into map[string]action, key string, next action) {

@@ -181,6 +181,10 @@ class PolderApi {
         body: wire.MoveRequest(from: from, to: to, baseRev: baseRev),
       )).body!.toModel();
 
+  Future<FileEntry> copy({required String from, required String to}) async => (await _service.copyFile(
+    body: wire.CopyRequest(from: from, to: to),
+  )).body!.toModel();
+
   Future<void> delete(String path, {int baseRev = -1}) => _service.deleteFile(path: path, baseRev: baseRev);
 
   Future<Uint8List?> preview(String path, {int size = 256}) => _thumbnail(
