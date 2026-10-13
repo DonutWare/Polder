@@ -165,6 +165,8 @@ func (a *API) routes(api huma.API) {
 		withSocketMessages(api), withResponse(http.StatusSwitchingProtocols, "WebSocket connection; every message the server sends has this shape",
 			map[string]*huma.MediaType{"application/json": {Schema: api.OpenAPI().Components.Schemas.Schema(reflect.TypeFor[eventMessage](), true, "")}}))
 
+	register(v1, http.MethodGet, "/server/info", "getServerInfo", "Version, commit and build of the server binary", a.getServerInfo)
+
 	user := huma.NewGroup(v1)
 	user.UseMiddleware(a.requireUser(api))
 	user.UseSimpleModifier(requiresAuth(api, http.StatusUnauthorized))
@@ -258,7 +260,6 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodGet, "/admin/logs/files/{name}", "downloadLogFile", "Download one day's log file as JSON lines", a.downloadLogFile,
 		withResponse(http.StatusOK, "Log file", binaryContent("application/x-ndjson")))
 
-	register(user, http.MethodGet, "/server/info", "getServerInfo", "Version, commit and build of the server binary", a.getServerInfo)
 }
 
 func register[I, O any](api huma.API, method, path, id, summary string, handler func(context.Context, *I) (*O, error), options ...func(*huma.Operation)) {
