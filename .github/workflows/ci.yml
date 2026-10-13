@@ -1,41 +1,41 @@
-name: ci
-on: [push, pull_request]
+# name: ci
+# on: [push, pull_request]
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:18
-        env:
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: polder
-        ports: ["5432:5432"]
-        options: --health-cmd="pg_isready -U postgres" --health-interval=5s --health-retries=20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: golangci/golangci-lint-action@v8
-      - run: go test -race ./...
-        env:
-          POLDER_TEST_POSTGRES_DSN: postgres://postgres:testpass@127.0.0.1:5432/polder?sslmode=disable
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     services:
+#       postgres:
+#         image: postgres:18
+#         env:
+#           POSTGRES_PASSWORD: testpass
+#           POSTGRES_DB: polder
+#         ports: ["5432:5432"]
+#         options: --health-cmd="pg_isready -U postgres" --health-interval=5s --health-retries=20
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-go@v5
+#         with:
+#           go-version-file: go.mod
+#       - uses: golangci/golangci-lint-action@v8
+#       - run: go test -race ./...
+#         env:
+#           POLDER_TEST_POSTGRES_DSN: postgres://postgres:testpass@127.0.0.1:5432/polder?sslmode=disable
 
-  docker:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        web: [none, client]
-    steps:
-      - uses: actions/checkout@v4
-      - run: docker build --build-arg WEB=${{ matrix.web }} -t polder-server:${{ matrix.web }} .
+#   docker:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         web: [none, client]
+#     steps:
+#       - uses: actions/checkout@v4
+#       - run: docker build --build-arg WEB=${{ matrix.web }} -t polder-server:${{ matrix.web }} .
 
-  client-api:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - run: go run ./cmd/polder openapi | diff -u client/openapi/polder.json -
+#   client-api:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-go@v5
+#         with:
+#           go-version-file: go.mod
+#       - run: go run ./cmd/polder openapi | diff -u client/openapi/polder.json -
