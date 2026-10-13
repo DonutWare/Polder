@@ -10,7 +10,7 @@ import "package:polder/services/transfer/document_scanner_service.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
 import "package:polder/util/hosted_server.dart";
 
-final credentialsStoreProvider = Provider<CredentialsStore>((ref) => const SecureCredentialsStore());
+final credentialsStoreProvider = Provider<CredentialsStore>((ref) => platformCredentialsStore());
 
 final preferencesStoreProvider = Provider<PreferencesStore>((ref) => SharedPreferencesStore());
 

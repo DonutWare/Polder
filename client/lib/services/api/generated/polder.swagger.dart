@@ -1,3 +1,4 @@
+import 'dart:async';
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:polder/util/credential_rules.dart";
 import 'package:chopper/chopper.dart';

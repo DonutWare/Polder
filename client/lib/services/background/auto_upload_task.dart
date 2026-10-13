@@ -20,7 +20,7 @@ import "package:polder/util/device_name.dart";
 void autoUploadCallbackDispatcher() {
   WidgetsFlutterBinding.ensureInitialized();
   Workmanager().executeTask((_, _) async {
-    await const AutoUploadTask(credentials: SecureCredentialsStore()).run();
+    await AutoUploadTask(credentials: platformCredentialsStore()).run();
     return true;
   });
 }
