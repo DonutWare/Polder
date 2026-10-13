@@ -51,10 +51,12 @@ class LoginNotifier extends Notifier<LoginState> {
 
   void setPassword(String value) => state = state.copyWith(password: value, failure: null);
 
+  void setPasswordConfirmation(String value) => state = state.copyWith(passwordConfirmation: value, failure: null);
+
   void backToServer() {
     if (state.serverLocked) return;
     ref.read(brandingProvider.notifier).clear();
-    state = state.copyWith(step: LoginStep.server, password: "", failure: null);
+    state = state.copyWith(step: LoginStep.server, password: "", passwordConfirmation: "", failure: null);
   }
 
   Future<void> connect() => _run(() async {

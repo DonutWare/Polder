@@ -15,10 +15,40 @@ void main() {
   });
 
   test("zero means unlimited and is valid", () {
-    const form = UserForm(username: "new", password: "pw", quotaAmount: "0");
+    const form = UserForm(username: "new", password: "password1", passwordConfirmation: "password1", quotaAmount: "0");
 
     expect(form.isValid, isTrue);
     expect(form.toCreateRequest().quotaBytes, 0);
+  });
+
+  test("a password typed differently twice is invalid", () {
+    const form = UserForm(username: "new", password: "password1", passwordConfirmation: "password2");
+
+    expect(form.passwordsMatch, isFalse);
+    expect(form.isValid, isFalse);
+  });
+
+  test("a new password for an existing user needs confirming", () {
+    final form = UserForm.forUser(user).copyWith(password: "newpass1");
+
+    expect(form.isValid, isFalse);
+    expect(form.copyWith(passwordConfirmation: "newpass1").isValid, isTrue);
+  });
+
+  test("a new user needs a username and password the server accepts", () {
+    const form = UserForm(username: "new", password: "password1", passwordConfirmation: "password1");
+
+    expect(form.isValid, isTrue);
+    expect(form.copyWith(username: "New User").isValid, isFalse);
+    expect(form.copyWith(username: "n").isValid, isFalse);
+    expect(form.copyWith(password: "short", passwordConfirmation: "short").isValid, isFalse);
+  });
+
+  test("an existing user may keep their password but not get a short one", () {
+    final form = UserForm.forUser(user);
+
+    expect(form.isValid, isTrue);
+    expect(form.copyWith(password: "short", passwordConfirmation: "short").isValid, isFalse);
   });
 
   test("quota amounts convert with the chosen unit", () {

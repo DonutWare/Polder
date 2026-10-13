@@ -1,7 +1,7 @@
 import "package:freezed_annotation/freezed_annotation.dart";
-
 import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/user.dart";
+import "package:polder/util/credential_rules.dart";
 import "package:polder/util/quota_unit.dart";
 
 part "user_form.freezed.dart";
@@ -14,6 +14,7 @@ abstract class UserForm with _$UserForm {
     User? original,
     @Default("") String username,
     @Default("") String password,
+    @Default("") String passwordConfirmation,
     @Default(UserRole.user) UserRole role,
     @Default("0") String quotaAmount,
     @Default(QuotaUnit.gb) QuotaUnit quotaUnit,
@@ -42,7 +43,13 @@ abstract class UserForm with _$UserForm {
 
   int get quotaBytes => quotaUnit.toBytes(_amount ?? 0);
 
-  bool get isValid => isQuotaValid && (!isNew || username.trim().isNotEmpty && password.isNotEmpty);
+  bool get passwordsMatch => password == passwordConfirmation;
+
+  bool get isUsernameValid => !isNew || CredentialRules.isValidUsername(username);
+
+  bool get isPasswordValid => password.isEmpty ? !isNew : CredentialRules.isValidPassword(password);
+
+  bool get isValid => isQuotaValid && passwordsMatch && isUsernameValid && isPasswordValid;
 
   CreateUserRequest toCreateRequest() =>
       CreateUserRequest(username: username.trim(), password: password, role: role, quotaBytes: quotaBytes);

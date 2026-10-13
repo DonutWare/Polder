@@ -1,16 +1,14 @@
-// coverage:ignore-file
-// ignore_for_file: type=lint
-// ignore_for_file: unused_element_parameter
-
-import 'dart:async';
-
+import "package:freezed_annotation/freezed_annotation.dart";
+import "package:polder/util/credential_rules.dart";
 import 'package:chopper/chopper.dart';
 import 'package:chopper/chopper.dart' as chopper;
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart' show MultipartFile;
+import "package:iconsax_plus/iconsax_plus.dart";
 import 'package:json_annotation/json_annotation.dart';
 import 'package:json_annotation/json_annotation.dart' as json;
+import "package:polder/util/localization_helper.dart";
 
 import 'client_mapping.dart';
 import 'polder.enums.swagger.dart' as enums;
@@ -115,6 +113,28 @@ abstract class Polder extends ChopperService {
       description: '',
       summary: 'Replace the logged-in user\'s icon with the image in the request body',
       operationId: 'setAvatar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change the logged-in user's password; their other sessions are logged out
+  Future<chopper.Response> changePassword({required PasswordChange? body}) {
+    return _changePassword(body: body);
+  }
+
+  ///Change the logged-in user's password; their other sessions are logged out
+  @PUT(path: '/api/v1/account/password', optionalBody: true)
+  Future<chopper.Response> _changePassword({
+    @Body() required PasswordChange? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change the logged-in user\'s password; their other sessions are logged out',
+      operationId: 'changePassword',
       consumes: [],
       produces: [],
       security: ["bearer"],
@@ -910,6 +930,7 @@ abstract class Polder extends ChopperService {
     return _copyFile(body: body);
   }
 
+  ///Copy a file, or a directory with everything in it
   @POST(path: '/api/v1/files/copy', optionalBody: true)
   Future<chopper.Response<Entry>> _copyFile({
     @Body() required CopyRequest? body,
@@ -1440,7 +1461,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       operationId: 'getServerInfo',
       consumes: [],
       produces: [],
-      security: ["bearer"],
+      security: [],
       tags: ["server"],
       deprecated: false,
     ),

@@ -8,7 +8,10 @@ import "package:polder/models/account.dart";
 import "package:polder/models/user.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/util/action_feedback.dart";
+import "package:polder/util/api_error_localization.dart";
+import "package:polder/util/credential_rules.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
@@ -16,6 +19,7 @@ import "package:polder/widgets/shared/appearance_settings.dart";
 import "package:polder/widgets/shared/image_source_menu.dart";
 import "package:polder/widgets/shared/loading_button.dart";
 import "package:polder/widgets/shared/nav_group.dart";
+import "package:polder/widgets/shared/password_field.dart";
 import "package:polder/widgets/shared/user_avatar.dart";
 
 class AccountScreen extends ConsumerWidget {
@@ -42,6 +46,7 @@ class AccountScreen extends ConsumerWidget {
                     title: localized.profile,
                     children: [_ProfileForm(user: account.user)],
                   ),
+                  NavGroup(title: localized.changePassword, children: const [_PasswordForm()]),
                   NavGroup(
                     title: localized.appearance,
                     children: const [Padding(padding: EdgeInsets.all(20), child: AppearanceSettings())],
@@ -235,5 +240,120 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (succeeded) messenger.showSnackBar(SnackBar(content: Text(saved)));
+  }
+}
+
+class _PasswordForm extends ConsumerStatefulWidget {
+  const _PasswordForm();
+
+  @override
+  ConsumerState<_PasswordForm> createState() => _PasswordFormState();
+}
+
+class _PasswordFormState extends ConsumerState<_PasswordForm> {
+  final _current = TextEditingController();
+  final _new = TextEditingController();
+  final _confirmation = TextEditingController();
+
+  late final _controllers = [_current, _new, _confirmation];
+
+  var _saving = false;
+  var _currentIncorrect = false;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final controller in _controllers) {
+      controller.addListener(_changed);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _changed() => setState(() {});
+
+  bool get _matches => _new.text == _confirmation.text;
+
+  bool get _newValid => CredentialRules.isValidPassword(_new.text);
+
+  bool get _canSave => _current.text.isNotEmpty && _newValid && _matches && !_saving;
+
+  @override
+  Widget build(BuildContext context) {
+    final localized = context.localized;
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: AutofillGroup(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 16,
+          children: [
+            PasswordField(
+              controller: _current,
+              label: localized.currentPassword,
+              autofillHints: const [AutofillHints.password],
+              textInputAction: TextInputAction.next,
+              errorText: _currentIncorrect ? localized.currentPasswordIncorrect : null,
+              onChanged: (_) => _currentIncorrect = false,
+            ),
+            PasswordField(
+              controller: _new,
+              label: localized.newPassword,
+              autofillHints: const [AutofillHints.newPassword],
+              textInputAction: TextInputAction.next,
+              helperText: localized.passwordRequirements(CredentialRules.minPasswordLength),
+              errorText: _new.text.isEmpty || _newValid
+                  ? null
+                  : localized.passwordRequirements(CredentialRules.minPasswordLength),
+            ),
+            PasswordField(
+              controller: _confirmation,
+              label: localized.confirmNewPassword,
+              autofillHints: const [AutofillHints.newPassword],
+              errorText: _confirmation.text.isEmpty || _matches ? null : localized.passwordsDoNotMatch,
+              helperText: localized.changePasswordHint,
+              onSubmitted: (_) => _canSave ? _save() : null,
+            ),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: LoadingButton(
+                label: localized.changePassword,
+                loading: _saving,
+                onPressed: _canSave ? _save : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _save() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final localizations = context.localized;
+    setState(() => _saving = true);
+    final notifier = ref.read(currentUserProvider.notifier);
+    var succeeded = false;
+    try {
+      await notifier.changePassword(currentPassword: _current.text, newPassword: _new.text);
+      succeeded = true;
+    } on ForbiddenException {
+      _currentIncorrect = true;
+    } on ApiException catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text(localizations.describeError(error))));
+    }
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (!succeeded) return;
+    for (final controller in _controllers) {
+      controller.clear();
+    }
+    messenger.showSnackBar(SnackBar(content: Text(localizations.passwordChanged)));
   }
 }

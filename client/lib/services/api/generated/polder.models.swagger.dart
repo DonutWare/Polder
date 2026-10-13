@@ -1,10 +1,10 @@
 // coverage:ignore-file
 // ignore_for_file: type=lint
 
-import 'package:json_annotation/json_annotation.dart';
-import 'package:collection/collection.dart';
-
 import 'dart:convert';
+
+import 'package:collection/collection.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 import 'polder.enums.swagger.dart' as enums;
 
@@ -2511,6 +2511,54 @@ extension $OutgoingExtension on Outgoing {
       target: (target != null ? target.value : this.target),
       targetPath: (targetPath != null ? targetPath.value : this.targetPath),
       title: (title != null ? title.value : this.title),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class PasswordChange {
+  const PasswordChange({required this.currentPassword, required this.newPassword});
+
+  factory PasswordChange.fromJson(Map<String, dynamic> json) => _$PasswordChangeFromJson(json);
+
+  static const toJsonFactory = _$PasswordChangeToJson;
+  Map<String, dynamic> toJson() => _$PasswordChangeToJson(this);
+
+  @JsonKey(name: 'currentPassword', includeIfNull: false)
+  final String currentPassword;
+  @JsonKey(name: 'newPassword', includeIfNull: false)
+  final String newPassword;
+  static const fromJsonFactory = _$PasswordChangeFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is PasswordChange &&
+            (identical(other.currentPassword, currentPassword) ||
+                const DeepCollectionEquality().equals(other.currentPassword, currentPassword)) &&
+            (identical(other.newPassword, newPassword) ||
+                const DeepCollectionEquality().equals(other.newPassword, newPassword)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(currentPassword) ^
+      const DeepCollectionEquality().hash(newPassword) ^
+      runtimeType.hashCode;
+}
+
+extension $PasswordChangeExtension on PasswordChange {
+  PasswordChange copyWith({String? currentPassword, String? newPassword}) {
+    return PasswordChange(
+      currentPassword: currentPassword ?? this.currentPassword,
+      newPassword: newPassword ?? this.newPassword,
+    );
+  }
+
+  PasswordChange copyWithWrapped({Wrapped<String>? currentPassword, Wrapped<String>? newPassword}) {
+    return PasswordChange(
+      currentPassword: (currentPassword != null ? currentPassword.value : this.currentPassword),
+      newPassword: (newPassword != null ? newPassword.value : this.newPassword),
     );
   }
 }

@@ -90,6 +90,20 @@ func (s *Service) Login(ctx context.Context, username, password, deviceName stri
 	return s.startSession(ctx, user, deviceName)
 }
 
+func (s *Service) ChangePassword(ctx context.Context, user users.User, sessionID int64, currentPassword, newPassword string) error {
+	passwordHash, err := s.users.Store().PasswordHash(ctx, user.ID)
+	if err != nil {
+		return err
+	}
+	if !s.hasher.Verify(currentPassword, passwordHash) {
+		return apperr.Forbidden("current password is incorrect")
+	}
+	if _, err := s.users.Update(ctx, user, user.ID, users.Changes{Password: &newPassword}); err != nil {
+		return err
+	}
+	return s.sessions.RevokeOthersForUser(ctx, user.ID, sessionID)
+}
+
 var dummyHash, _ = Argon2Hasher{}.Hash("timing-equalizer")
 
 func (s *Service) Refresh(ctx context.Context, refreshToken, deviceName string) (TokenPair, error) {

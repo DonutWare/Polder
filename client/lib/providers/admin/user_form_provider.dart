@@ -19,6 +19,8 @@ class UserFormNotifier extends Notifier<UserForm> {
 
   void setPassword(String value) => state = state.copyWith(password: value);
 
+  void setPasswordConfirmation(String value) => state = state.copyWith(passwordConfirmation: value);
+
   void setRole(UserRole role) => state = state.copyWith(role: role);
 
   void setQuotaAmount(String value) => state = state.copyWith(quotaAmount: value);

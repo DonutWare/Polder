@@ -538,6 +538,14 @@ Map<String, dynamic> _$OutgoingToJson(Outgoing instance) => <String, dynamic>{
   'title': instance.title,
 };
 
+PasswordChange _$PasswordChangeFromJson(Map<String, dynamic> json) =>
+    PasswordChange(currentPassword: json['currentPassword'] as String, newPassword: json['newPassword'] as String);
+
+Map<String, dynamic> _$PasswordChangeToJson(PasswordChange instance) => <String, dynamic>{
+  'currentPassword': instance.currentPassword,
+  'newPassword': instance.newPassword,
+};
+
 PathRequest _$PathRequestFromJson(Map<String, dynamic> json) => PathRequest(path: json['path'] as String);
 
 Map<String, dynamic> _$PathRequestToJson(PathRequest instance) => <String, dynamic>{'path': instance.path};

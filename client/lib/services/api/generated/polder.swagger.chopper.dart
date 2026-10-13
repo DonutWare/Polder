@@ -94,6 +94,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<dynamic>> _changePassword({
+    required PasswordChange? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change the logged-in user\'s password; their other sessions are logged out',
+      operationId: 'changePassword',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/password');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<User>> _setProfile({
     required Profile? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -1419,7 +1445,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       operationId: 'getServerInfo',
       consumes: [],
       produces: [],
-      security: ["bearer"],
+      security: [],
       tags: ["server"],
       deprecated: false,
     ),

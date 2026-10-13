@@ -76,6 +76,11 @@ class PolderApi {
   Future<User> setProfile(UserProfile profile) async =>
       (await _service.setProfile(body: profile.toWire())).body!.toModel();
 
+  Future<void> changePassword({required String currentPassword, required String newPassword}) =>
+      _service.changePassword(
+        body: wire.PasswordChange(currentPassword: currentPassword, newPassword: newPassword),
+      );
+
   Future<User> setAppearance({required ThemeMode theme, required Color? accent}) async => (await _service.setAppearance(
     body: wire.Appearance(
       theme: wire.AppearanceTheme.values.byName(theme.name),

@@ -3,6 +3,9 @@ package httpapi
 import (
 	"context"
 
+	"github.com/danielgtaylor/huma/v2"
+
+	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/settings"
 	"polder-server/internal/users"
@@ -13,6 +16,38 @@ const maxAvatarBytes = 2 << 20
 type avatarPath struct {
 	UserID  int64  `path:"userID"`
 	ImageID string `path:"imageID"`
+}
+
+type passwordChange struct {
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword     string `json:"newPassword"`
+}
+
+type changePasswordInput struct {
+	Body    passwordChange
+	address string
+}
+
+func (i *changePasswordInput) Resolve(ctx huma.Context) []error {
+	i.address = clientAddress(ctx.RemoteAddr())
+	return nil
+}
+
+func (a *API) changePassword(ctx context.Context, input *changePasswordInput) (*struct{}, error) {
+	user := currentUser(ctx)
+	if !a.limiter.allowed(input.address) {
+		authLog.Warn("password change refused: too many failed attempts", "user", user.Username, "address", input.address)
+		return nil, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
+	}
+	err := a.auth.ChangePassword(ctx, user, activity.ActorFrom(ctx).SessionID, input.Body.CurrentPassword, input.Body.NewPassword)
+	if apperr.Is(err, apperr.KindForbidden) {
+		a.limiter.recordFailure(input.address)
+	}
+	if err != nil {
+		return nil, err
+	}
+	authLog.Info("password changed; other sessions logged out", "user", user.Username, "address", input.address)
+	return nil, nil
 }
 
 func (a *API) setProfile(ctx context.Context, input *jsonBody[users.Profile]) (*jsonBody[users.User], error) {

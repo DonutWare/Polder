@@ -46,3 +46,24 @@ func TestRequestsWithoutTokenAreRejected(t *testing.T) {
 		server.anonymous().mustJSON(http.MethodGet, "/healthz", nil, http.StatusOK, nil)
 	})
 }
+
+func TestUsersChangeTheirOwnPassword(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		admin := server.setupAdmin()
+		server.createUser(admin, "alice", 0)
+
+		var current, other tokenPair
+		server.anonymous().mustJSON(http.MethodPost, "/auth/login", map[string]string{"username": "alice", "password": "password1"}, http.StatusOK, &current)
+		server.anonymous().mustJSON(http.MethodPost, "/auth/login", map[string]string{"username": "alice", "password": "password1"}, http.StatusOK, &other)
+		alice := &client{server: server, token: current.AccessToken}
+
+		alice.mustJSON(http.MethodPut, "/account/password", map[string]string{"currentPassword": "wrong-password", "newPassword": "password2"}, http.StatusForbidden, nil)
+		alice.mustJSON(http.MethodPut, "/account/password", map[string]string{"currentPassword": "password1", "newPassword": "short"}, http.StatusBadRequest, nil)
+		alice.mustJSON(http.MethodPut, "/account/password", map[string]string{"currentPassword": "password1", "newPassword": "password2"}, http.StatusNoContent, nil)
+
+		server.anonymous().mustJSON(http.MethodPost, "/auth/login", map[string]string{"username": "alice", "password": "password1"}, http.StatusUnauthorized, nil)
+		server.login("alice", "password2")
+		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": current.RefreshToken}, http.StatusOK, nil)
+		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": other.RefreshToken}, http.StatusUnauthorized, nil)
+	})
+}

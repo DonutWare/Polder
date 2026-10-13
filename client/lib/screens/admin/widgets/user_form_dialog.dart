@@ -8,8 +8,10 @@ import "package:polder/providers/admin/user_form_provider.dart";
 import "package:polder/screens/admin/widgets/quota_input.dart";
 import "package:polder/screens/admin/widgets/role_selector.dart";
 import "package:polder/util/action_feedback.dart";
+import "package:polder/util/credential_rules.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/loading_button.dart";
+import "package:polder/widgets/shared/password_field.dart";
 
 Future<void> showUserFormDialog(BuildContext context, {User? user}) => showDialog<void>(
   context: context,
@@ -40,14 +42,33 @@ class UserFormDialog extends ConsumerWidget {
               if (form.isNew)
                 TextFormField(
                   initialValue: form.username,
-                  decoration: InputDecoration(labelText: localized.username),
+                  decoration: InputDecoration(
+                    labelText: localized.username,
+                    helperText: localized.usernameRequirements,
+                    helperMaxLines: 2,
+                    errorText: form.username.isEmpty || form.isUsernameValid ? null : localized.usernameRequirements,
+                    errorMaxLines: 2,
+                  ),
                   onChanged: notifier.setUsername,
                 ),
-              TextFormField(
-                obscureText: true,
-                decoration: InputDecoration(labelText: form.isNew ? localized.password : localized.newPasswordOptional),
+              PasswordField(
+                label: form.isNew ? localized.password : localized.newPasswordOptional,
+                autofillHints: const [AutofillHints.newPassword],
+                helperText: localized.passwordRequirements(CredentialRules.minPasswordLength),
+                errorText: form.password.isEmpty || form.isPasswordValid
+                    ? null
+                    : localized.passwordRequirements(CredentialRules.minPasswordLength),
                 onChanged: notifier.setPassword,
               ),
+              if (form.isNew || form.password.isNotEmpty || form.passwordConfirmation.isNotEmpty)
+                PasswordField(
+                  label: form.isNew ? localized.confirmPassword : localized.confirmNewPassword,
+                  autofillHints: const [AutofillHints.newPassword],
+                  errorText: form.passwordConfirmation.isEmpty || form.passwordsMatch
+                      ? null
+                      : localized.passwordsDoNotMatch,
+                  onChanged: notifier.setPasswordConfirmation,
+                ),
               RoleSelector(role: form.role, onChanged: notifier.setRole),
               QuotaInput(
                 amount: form.quotaAmount,

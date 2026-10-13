@@ -86,6 +86,11 @@ func (s *Sessions) RevokeAllForUser(ctx context.Context, userID int64) error {
 	return err
 }
 
+func (s *Sessions) RevokeOthersForUser(ctx context.Context, userID, keepID int64) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM sessions WHERE user_id = $1 AND id <> $2`, userID, keepID)
+	return err
+}
+
 func newRefreshToken() (token, tokenHash string) {
 	buffer := make([]byte, 32)
 	_, _ = rand.Read(buffer)

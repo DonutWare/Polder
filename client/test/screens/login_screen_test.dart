@@ -87,6 +87,64 @@ void main() {
     expect(find.text("Create administrator"), findsOneWidget);
   });
 
+  testWidgets("setup only submits once the password is typed the same twice", (tester) async {
+    needsSetup = true;
+    await connect(tester);
+
+    await tester.enterText(find.byKey(CredentialsStep.usernameFieldKey), "admin");
+    await tester.enterText(find.byKey(CredentialsStep.passwordFieldKey), "secret12");
+    await tester.enterText(find.byKey(CredentialsStep.passwordConfirmationFieldKey), "secret13");
+    await tester.pump();
+
+    expect(find.text("Passwords don't match"), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
+
+    await tester.enterText(find.byKey(CredentialsStep.passwordConfirmationFieldKey), "secret12");
+    await tester.pump();
+
+    expect(find.text("Passwords don't match"), findsNothing);
+    expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNotNull);
+  });
+
+  testWidgets("setup explains and enforces the server's username and password rules", (tester) async {
+    needsSetup = true;
+    await connect(tester);
+
+    expect(find.text("At least 8 characters"), findsOneWidget);
+
+    await tester.enterText(find.byKey(CredentialsStep.usernameFieldKey), "Admin");
+    await tester.enterText(find.byKey(CredentialsStep.passwordFieldKey), "short");
+    await tester.enterText(find.byKey(CredentialsStep.passwordConfirmationFieldKey), "short");
+    await tester.pump();
+
+    expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
+
+    await tester.enterText(find.byKey(CredentialsStep.usernameFieldKey), "admin");
+    await tester.enterText(find.byKey(CredentialsStep.passwordFieldKey), "longenough");
+    await tester.enterText(find.byKey(CredentialsStep.passwordConfirmationFieldKey), "longenough");
+    await tester.pump();
+
+    expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNotNull);
+  });
+
+  testWidgets("the password can be shown while typing", (tester) async {
+    await connect(tester);
+    bool obscured() => tester
+        .widget<EditableText>(
+          find.descendant(of: find.byKey(CredentialsStep.passwordFieldKey), matching: find.byType(EditableText)),
+        )
+        .obscureText;
+
+    expect(find.byKey(CredentialsStep.passwordConfirmationFieldKey), findsNothing);
+    expect(obscured(), isTrue);
+
+    await tester.tap(find.byTooltip("Show password"));
+    await tester.pump();
+
+    expect(obscured(), isFalse);
+    expect(find.byTooltip("Hide password"), findsOneWidget);
+  });
+
   testWidgets("wrong credentials show an error", (tester) async {
     await connect(tester);
 

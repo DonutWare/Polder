@@ -25,6 +25,9 @@ class CurrentUserNotifier extends AsyncNotifier<User> {
 
   Future<void> saveProfile(UserProfile profile) async => _apply(await ref.read(polderApiProvider).setProfile(profile));
 
+  Future<void> changePassword({required String currentPassword, required String newPassword}) =>
+      ref.read(polderApiProvider).changePassword(currentPassword: currentPassword, newPassword: newPassword);
+
   Future<void> setAvatar(Uint8List bytes) async =>
       _apply(await ref.read(polderApiProvider).setAvatar(await shrinkIcon(bytes)));
 

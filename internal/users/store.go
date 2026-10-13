@@ -148,6 +148,15 @@ func (s *Store) CredentialsByUsername(ctx context.Context, username string) (Use
 	return user, passwordHash, err
 }
 
+func (s *Store) PasswordHash(ctx context.Context, id int64) (string, error) {
+	var passwordHash string
+	err := s.db.QueryRowContext(ctx, `SELECT password_hash FROM users WHERE id = $1`, id).Scan(&passwordHash)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", apperr.NotFound("user not found")
+	}
+	return passwordHash, err
+}
+
 func (s *Store) List(ctx context.Context) ([]User, error) {
 	rows, err := s.db.QueryContext(ctx, selectUserColumns+` ORDER BY u.username`)
 	if err != nil {

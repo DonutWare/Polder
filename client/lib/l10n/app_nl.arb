@@ -538,5 +538,18 @@
 	"moveHere": "Hierheen verplaatsen",
 	"copyEntryTitle": "\"{name}\" kopiëren naar…",
 	"copyItemsTitle": "{count, plural, =1{1 item kopiëren naar…} other{{count} items kopiëren naar…}}",
-	"copyHere": "Hierheen kopiëren"
+	"copyHere": "Hierheen kopiëren",
+	"showPassword": "Wachtwoord tonen",
+	"hidePassword": "Wachtwoord verbergen",
+	"confirmPassword": "Bevestig wachtwoord",
+	"confirmNewPassword": "Bevestig nieuw wachtwoord",
+	"passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
+	"changePassword": "Wachtwoord wijzigen",
+	"changePasswordHint": "Je andere apparaten worden na de wijziging afgemeld.",
+	"currentPassword": "Huidig wachtwoord",
+	"newPassword": "Nieuw wachtwoord",
+	"currentPasswordIncorrect": "Huidig wachtwoord is onjuist",
+	"passwordChanged": "Wachtwoord gewijzigd",
+	"usernameRequirements": "2–32 tekens: kleine letters, cijfers, '.', '_' of '-', beginnend met een letter of cijfer",
+	"passwordRequirements": "Minstens {count} tekens"
 }

@@ -1094,5 +1094,25 @@
 			}
 		}
 	},
-	"copyHere": "Copy here"
+	"copyHere": "Copy here",
+	"showPassword": "Show password",
+	"hidePassword": "Hide password",
+	"confirmPassword": "Confirm password",
+	"confirmNewPassword": "Confirm new password",
+	"passwordsDoNotMatch": "Passwords don't match",
+	"changePassword": "Change password",
+	"changePasswordHint": "Your other devices are signed out after the change.",
+	"currentPassword": "Current password",
+	"newPassword": "New password",
+	"currentPasswordIncorrect": "Current password is incorrect",
+	"passwordChanged": "Password changed",
+	"usernameRequirements": "2–32 characters: lowercase letters, digits, '.', '_' or '-', starting with a letter or digit",
+	"passwordRequirements": "At least {count} characters",
+	"@passwordRequirements": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	}
 }
