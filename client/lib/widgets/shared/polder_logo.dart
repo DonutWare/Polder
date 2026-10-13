@@ -3,6 +3,7 @@ import "dart:ui" as ui;
 import "package:flutter/material.dart";
 
 import "package:flutter_svg/flutter_svg.dart";
+import "package:polder/util/flavor.dart";
 import "package:polder/util/localization_helper.dart";
 
 const _polderSvg = SvgAssetLoader("assets/icon/polder.svg");
@@ -17,8 +18,9 @@ class PolderIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final colors = isDevFlavor ? const [devFlavorOrange, devFlavorOrange] : [cs.primary, cs.secondary];
     return ShaderMask(
-      shaderCallback: (bounds) => ui.Gradient.linear(bounds.topLeft, bounds.bottomRight, [cs.primary, cs.secondary]),
+      shaderCallback: (bounds) => ui.Gradient.linear(bounds.topLeft, bounds.bottomRight, colors),
       child: SvgPicture(
         _polderSvg,
         width: size,

@@ -69,10 +69,12 @@ dev_dependencies:
   chopper_generator: ^8.7.1
   swagger_dart_code_generator: ^4.1.1
   stream_channel: ^2.1.4
-  flutter_launcher_icons: ^0.14.4
+  icons_launcher: ^3.1.0
 
 flutter:
   generate: true
+  # Builds without --flavor are release builds; use --flavor dev for the side-by-side debug app.
+  default-flavor: prod
 
   uses-material-design: true
 

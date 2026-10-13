@@ -1,0 +1,24 @@
+# Release ("prod") icons, written to the default locations shared by every flavor:
+#   dart run icons_launcher:create
+# The orange "dev" icons live in icons_launcher-dev.yaml.
+icons_launcher:
+  image_path: "assets/icon/app_icon.png"
+  platforms:
+    android:
+      enable: true
+      image_path: "assets/icon/android_legacy.png"
+      adaptive_background_color: "#24E2F2"
+      adaptive_foreground_image: "assets/icon/android_foreground.png"
+      adaptive_monochrome_image: "assets/icon/android_monochrome.png"
+    ios:
+      enable: true
+      image_path: "assets/icon/app_icon.png"
+    macos:
+      enable: true
+      image_path: "assets/icon/desktop_icon.png"
+    windows:
+      enable: true
+      image_path: "assets/icon/windows_icon.png"
+    web:
+      enable: true
+      image_path: "assets/icon/app_icon.png"

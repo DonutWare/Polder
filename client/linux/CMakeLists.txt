@@ -50,6 +50,14 @@ endfunction()
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
+# `--flavor dev` builds a side-by-side app with its own ID, so its settings, data
+# and keyring entries stay separate from the release app.
+set(APP_TITLE "Polder")
+if(FLUTTER_APP_FLAVOR STREQUAL "dev")
+  set(APPLICATION_ID "org.knaapen.polder.dev")
+  set(APP_TITLE "Polder Dev")
+endif()
+
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)

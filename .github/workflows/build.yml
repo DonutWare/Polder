@@ -159,18 +159,18 @@ jobs:
         if: needs.fetch-info.outputs.build_type == 'development'
         run: |
           mkdir -p build/app/outputs/android_artifacts
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-debug.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-armeabi-v7a.apk || true
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-debug.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-arm64-v8a.apk || true
-          cp build/app/outputs/flutter-apk/app-x86_64-debug.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-x86_64.apk || true
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-prod-debug.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-armeabi-v7a.apk || true
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-prod-debug.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-arm64-v8a.apk || true
+          cp build/app/outputs/flutter-apk/app-x86_64-prod-debug.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-x86_64.apk || true
 
       - name: Rename APK and AAB
         if: needs.fetch-info.outputs.build_type != 'development'
         run: |
           mkdir -p build/app/outputs/android_artifacts
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-armeabi-v7a.apk || true
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-arm64-v8a.apk || true
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-x86_64.apk || true
-          mv build/app/outputs/bundle/release/app-release.aab build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}.aab
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-prod-release.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-armeabi-v7a.apk || true
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-prod-release.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-arm64-v8a.apk || true
+          cp build/app/outputs/flutter-apk/app-x86_64-prod-release.apk build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}-x86_64.apk || true
+          mv build/app/outputs/bundle/prodRelease/app-prod-release.aab build/app/outputs/android_artifacts/${{ env.ARTIFACT_SUFFIX }}.aab
 
       - name: Archive Android artifacts
         uses: actions/upload-artifact@v4
@@ -213,7 +213,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: polder-windows-portable
-          path: client\build\windows\x64\runner\Release\
+          path: client\build\windows\x64\prod\runner\Release\
 
       - name: Archive Windows installer artifact
         uses: actions/upload-artifact@v4
@@ -295,7 +295,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: polder-macOS
-          path: client/build/macos/Build/Products/Release/macOS.dmg
+          path: client/build/macos/Build/Products/Release-prod/macOS.dmg
 
   # flutter_inappwebview_linux only compiles against WPE WebKit 2.50-2.52: older releases lack APIs it uses and 2.54
   # removed one. Ubuntu doesn't ship WPE at all, so build on Debian with 2.52 pinned from the archive snapshot.
@@ -347,17 +347,17 @@ jobs:
 
       - name: Fix RPATH
         run: |
-          for lib in "build/linux/x64/release/bundle/lib"/*.so; do
+          for lib in "build/linux/x64/prod/release/bundle/lib"/*.so; do
             [[ -f "$lib" && -n "$(patchelf --print-rpath "$lib")" ]] && \
             patchelf --set-rpath '$ORIGIN' "$lib"
           done
-          patchelf --set-rpath '$ORIGIN/lib' "build/linux/x64/release/bundle/polder"
+          patchelf --set-rpath '$ORIGIN/lib' "build/linux/x64/prod/release/bundle/polder"
 
       - name: Archive Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: polder-linux
-          path: client/build/linux/x64/release/bundle
+          path: client/build/linux/x64/prod/release/bundle
 
       - name: Build AppImage
         run: |

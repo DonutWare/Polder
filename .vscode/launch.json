@@ -66,21 +66,39 @@
 			}
 		},
 		{
-			"name": "Client",
+			"name": "Client (Dev)",
 			"type": "dart",
 			"request": "launch",
 			"program": "lib/main.dart",
-			"cwd": "${workspaceFolder}/client"
+			"cwd": "${workspaceFolder}/client",
+			"args": [
+				"--flavor",
+				"dev"
+			]
 		},
 		{
-			"name": "Client (Profile)",
-			"args": [
-				"--profile"
-			],
+			"name": "Client (Dev, Profile)",
 			"type": "dart",
 			"request": "launch",
 			"program": "lib/main.dart",
-			"cwd": "${workspaceFolder}/client"
+			"cwd": "${workspaceFolder}/client",
+			"flutterMode": "profile",
+			"args": [
+				"--flavor",
+				"dev"
+			]
+		},
+		{
+			"name": "Client (Release)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client",
+			"flutterMode": "release",
+			"args": [
+				"--flavor",
+				"prod"
+			]
 		},
 		{
 			"name": "Server tests (end-to-end)",
@@ -123,7 +141,7 @@
 			"name": "Server + Client",
 			"configurations": [
 				"Server",
-				"Client"
+				"Client (Dev)"
 			],
 			"stopAll": true
 		},
@@ -131,7 +149,7 @@
 			"name": "Server (Collabora) + Client",
 			"configurations": [
 				"Server (Collabora)",
-				"Client"
+				"Client (Dev)"
 			],
 			"stopAll": true
 		},
@@ -139,7 +157,7 @@
 			"name": "Server (Euro-Office) + Client",
 			"configurations": [
 				"Server (Euro-Office)",
-				"Client"
+				"Client (Dev)"
 			],
 			"stopAll": true
 		}

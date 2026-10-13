@@ -2,8 +2,8 @@
 set -e
 
 APP_NAME="Polder"
-APP_PATH="build/macos/Build/Products/Release/Polder.app"
-DMG_PATH="build/macos/Build/Products/Release/macOS.dmg"
+APP_PATH="build/macos/Build/Products/Release-prod/Polder.app"
+DMG_PATH="build/macos/Build/Products/Release-prod/macOS.dmg"
 TEMP_DMG_DIR="dmg_temp"
 
 if [ ! -d "$APP_PATH" ]; then

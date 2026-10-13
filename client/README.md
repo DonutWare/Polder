@@ -9,8 +9,20 @@ Check the [fvm file](../client/.fvmrc) for the current flutter version
 ```sh
 flutter pub get
 dart run build_runner build   
-flutter run -d macos          
+flutter run -d macos --flavor dev
 ```
+
+### Flavors
+
+| Flavor | App id | Name | Icon |
+| --- | --- | --- | --- |
+| `prod` (default) | `org.knaapen.polder` | Polder | cyan |
+| `dev` | `org.knaapen.polder.dev` | Polder Dev | orange |
+
+`dev` installs next to the release app with its own settings, data and stored login, so debugging never touches
+the live install. Android, iOS, macOS, Windows and Linux support it; the web has a single build. Builds without
+`--flavor` use `prod`. Icons come from `icons_launcher.yaml` (`dart run icons_launcher:create`) and
+`icons_launcher-dev.yaml` (`dart run icons_launcher:create --flavor dev`).
 
 The document editor is a webview (`flutter_inappwebview`). On Linux it uses WPE WebKit through
 `flutter_inappwebview_linux`, which needs the WPE WebKit libraries installed to build and run; see that package's

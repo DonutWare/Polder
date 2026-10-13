@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
 
 import "package:polder/models/account.dart";
+import "package:polder/util/flavor.dart";
 
 abstract interface class CredentialsStore {
   Future<Account?> load();
@@ -17,7 +18,11 @@ class SecureCredentialsStore implements CredentialsStore {
 
   // The data protection keychain needs a team-signed build with a keychain-access-groups
   // entitlement; the legacy file-based keychain works for ad-hoc signed builds too.
-  static const _macOptions = MacOsOptions(usesDataProtectionKeychain: false);
+  // That keychain is shared by every app, so the dev flavor needs its own service name.
+  static const _macOptions = MacOsOptions(
+    usesDataProtectionKeychain: false,
+    accountName: isDevFlavor ? "org.knaapen.polder.dev" : AppleOptions.defaultAccountName,
+  );
 
   static const _key = "polder.account";
 

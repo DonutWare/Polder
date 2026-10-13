@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="ic_launcher_background">#24E2F2</color>
+	<color name="ic_launcher_background">#FF24E2F2</color>
 	<color name="cunning_done_button_inner_circle_color">#24E2F2</color>
 	<color name="cunning_black">#043E43</color>
 	<color name="cunning_page_progress_label_text">#24E2F2</color>

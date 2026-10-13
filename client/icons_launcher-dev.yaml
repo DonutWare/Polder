@@ -1,0 +1,20 @@
+# Orange "dev" flavor icons:
+#   dart run icons_launcher:create --flavor dev
+# Writes android/app/src/dev/res and the devAppIcon asset catalogs for iOS/macOS.
+# Windows has no flavor-aware output, so its icon is generated once into
+# windows/runner/resources/app_icon_dev.ico (see windows/runner/CMakeLists.txt).
+icons_launcher:
+  image_path: "assets/icon/dev/app_icon.png"
+  platforms:
+    android:
+      enable: true
+      image_path: "assets/icon/dev/android_legacy.png"
+      adaptive_background_color: "#FF8A1F"
+      adaptive_foreground_image: "assets/icon/dev/android_foreground.png"
+      adaptive_monochrome_image: "assets/icon/dev/android_monochrome.png"
+    ios:
+      enable: true
+      image_path: "assets/icon/dev/app_icon.png"
+    macos:
+      enable: true
+      image_path: "assets/icon/dev/desktop_icon.png"
