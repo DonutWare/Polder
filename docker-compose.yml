@@ -17,7 +17,9 @@ services:
     environment:
       POLDER_DB_DRIVER: ${POLDER_DB_DRIVER:-sqlite}
       POLDER_DB_DSN: ${POLDER_DB_DSN:-}
+      # Set one of these two for a document editor; see the collabora and eurooffice services.
       POLDER_COLLABORA_URL: ${POLDER_COLLABORA_URL:-}
+      POLDER_EURO_OFFICE_URL: ${POLDER_EURO_OFFICE_URL:-}
       POLDER_WOPI_URL: ${POLDER_WOPI_URL:-http://polder:6060}
       # How videos and photos are decoded for previews: auto picks any GPU passed through below and
       # otherwise uses the CPU. Force one with vaapi (Intel, AMD), qsv (Intel Quick Sync), cuda
@@ -62,7 +64,7 @@ services:
       interval: 10s
       retries: 10
 
-  # Optional document editor: `docker compose --profile office up -d` with
+  # Optional document editor Collabora: `docker compose --profile office up -d` with
   # POLDER_COLLABORA_URL=http://collabora:9980. Clients reach it through Polder, so it has no port
   # of its own. Polder also has it draw thumbnails of documents that carry none. Set
   # COLLABORA_SSL_TERMINATION=true when Polder is served over https.
@@ -80,3 +82,19 @@ services:
         --o:ssl.termination=${COLLABORA_SSL_TERMINATION:-false}
         --o:admin_console.enable=false
         --o:welcome.enable=false
+
+  # Optional document editor Euro-Office: `docker compose --profile eurooffice up -d` with
+  # POLDER_EURO_OFFICE_URL=http://eurooffice. Like Collabora, clients reach it through Polder
+  # (under /eurooffice/), and it draws thumbnails of documents that carry none. It takes the
+  # protocol clients use from Polder, so https needs nothing extra here.
+  eurooffice:
+    profiles: ["eurooffice"]
+    image: ghcr.io/euro-office/documentserver:latest
+    restart: unless-stopped
+    environment:
+      # Polder talks to it over WOPI, which is off by default.
+      WOPI_ENABLED: "true"
+      # Polder's address on the compose network is a private one.
+      ALLOW_PRIVATE_IP_ADDRESS: "true"
+      # Only used inside Euro-Office; at least 32 characters.
+      JWT_SECRET: ${EURO_OFFICE_JWT_SECRET:-change-me-to-a-secret-of-32-characters}

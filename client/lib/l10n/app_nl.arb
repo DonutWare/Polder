@@ -376,6 +376,8 @@
 	"presentationKind": "Presentatie",
 	"newSpreadsheet": "Nieuw rekenblad",
 	"newPresentation": "Nieuwe presentatie",
+	"pdfKind": "PDF",
+	"newPdf": "Nieuwe pdf",
 	"brandingGroup": "Huisstijl",
 	"serverName": "Servernaam",
 	"serverNameHint": "Zichtbaar op het inlogscherm, in de zijbalk en als venstertitel",

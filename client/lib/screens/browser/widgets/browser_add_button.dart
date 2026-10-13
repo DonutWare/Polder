@@ -72,18 +72,21 @@ class BrowserAddButton extends ConsumerWidget {
     NewDocumentKind.document => IconsaxPlusLinear.document_text,
     NewDocumentKind.spreadsheet => IconsaxPlusLinear.grid_5,
     NewDocumentKind.presentation => IconsaxPlusLinear.presention_chart,
+    NewDocumentKind.pdf => IconsaxPlusLinear.document_1,
   };
 
   static String _label(BuildContext context, NewDocumentKind kind) => switch (kind) {
     NewDocumentKind.document => context.localized.documentKind,
     NewDocumentKind.spreadsheet => context.localized.spreadsheetKind,
     NewDocumentKind.presentation => context.localized.presentationKind,
+    NewDocumentKind.pdf => context.localized.pdfKind,
   };
 
   static String _title(BuildContext context, NewDocumentKind kind) => switch (kind) {
     NewDocumentKind.document => context.localized.newDocument,
     NewDocumentKind.spreadsheet => context.localized.newSpreadsheet,
     NewDocumentKind.presentation => context.localized.newPresentation,
+    NewDocumentKind.pdf => context.localized.newPdf,
   };
 
   Future<void> _scan(BuildContext context, WidgetRef ref) async {

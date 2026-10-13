@@ -273,34 +273,37 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
         body: AsyncValueView<EditorSession>(
           value: _session,
           onRetry: _start,
-          data: (session) => Column(
-            children: [
-              if (_version case final version?)
-                MaterialBanner(
-                  leading: const Icon(IconsaxPlusLinear.clock),
-                  content: Text(context.localized.versionViewing(version.modifiedAt.formatted(context))),
-                  actions: [
-                    TextButton(
-                      onPressed: () => _showVersion(null),
-                      child: Text(context.localized.versionBackToCurrent),
-                    ),
-                    FilledButton(onPressed: _restoreShownVersion, child: Text(context.localized.versionRestore)),
-                  ],
+          data: (session) => SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                if (_version case final version?)
+                  MaterialBanner(
+                    leading: const Icon(IconsaxPlusLinear.clock),
+                    content: Text(context.localized.versionViewing(version.modifiedAt.formatted(context))),
+                    actions: [
+                      TextButton(
+                        onPressed: () => _showVersion(null),
+                        child: Text(context.localized.versionBackToCurrent),
+                      ),
+                      FilledButton(onPressed: _restoreShownVersion, child: Text(context.localized.versionRestore)),
+                    ],
+                  ),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      EditorView(
+                        page: _page(session, language),
+                        onMessage: _onMessage,
+                        onReady: (channel) => _channel = channel,
+                        interactive: _coveringLayers == 0,
+                      ),
+                      if (!_loaded) const Positioned.fill(child: IgnorePointer(child: CenteredProgress())),
+                    ],
+                  ),
                 ),
-              Expanded(
-                child: Stack(
-                  children: [
-                    EditorView(
-                      page: _page(session, language),
-                      onMessage: _onMessage,
-                      onReady: (channel) => _channel = channel,
-                      interactive: _coveringLayers == 0,
-                    ),
-                    if (!_loaded) const Positioned.fill(child: IgnorePointer(child: CenteredProgress())),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

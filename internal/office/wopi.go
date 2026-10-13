@@ -18,6 +18,7 @@ import (
 )
 
 // Collabora sends back the LastModifiedTime it was given to detect saves over newer content.
+// Euro-Office does not, and saves only once everyone has closed the document.
 const wopiTime = "2006-01-02T15:04:05.000000Z"
 
 // documentChanged makes Collabora ask whether to overwrite the newer file or reload it.
@@ -98,6 +99,9 @@ type fileInfo struct {
 	SupportsUpdate          bool   `json:"SupportsUpdate"`
 	SupportsRename          bool   `json:"SupportsRename"`
 	PostMessageOrigin       string `json:"PostMessageOrigin,omitempty"`
+	// FileVersionPostMessage has Euro-Office show a version history entry that asks the app,
+	// with UI_FileVersions, to show the file's history.
+	FileVersionPostMessage bool `json:"FileVersionPostMessage,omitempty"`
 }
 
 func (s *Service) checkFileInfo(w http.ResponseWriter, r *http.Request) {
@@ -118,6 +122,7 @@ func (s *Service) checkFileInfo(w http.ResponseWriter, r *http.Request) {
 		SupportsLocks:           true,
 		SupportsUpdate:          true,
 		PostMessageOrigin:       granted.grant.Origin,
+		FileVersionPostMessage:  s.kind == EuroOffice,
 	}
 	if version := granted.version; version != nil {
 		info.BaseFileName = versionFileName(granted.entry.Name, *version)
@@ -181,6 +186,15 @@ func (s *Service) putFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !savedOverCurrent(r, granted.entry.Mtime) {
+		writeRaw(w, http.StatusConflict, documentChanged)
+		return
+	}
+	// An editor that opened the file before an older version was restored would save over it,
+	// as Euro-Office does when it saves after the last editor closed.
+	if restores, err := s.files.RestoreCount(r.Context(), granted.entry.ID); err != nil {
+		s.fail(w, r, err)
+		return
+	} else if restores != granted.grant.Generation {
 		writeRaw(w, http.StatusConflict, documentChanged)
 		return
 	}

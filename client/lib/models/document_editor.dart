@@ -37,7 +37,8 @@ abstract class EditorCapabilities with _$EditorCapabilities {
 enum NewDocumentKind {
   document("writer", "docx"),
   spreadsheet("calc", "xlsx"),
-  presentation("impress", "pptx");
+  presentation("impress", "pptx"),
+  pdf("pdf", "pdf");
 
   const NewDocumentKind(this.app, this.preferredExtension);
 

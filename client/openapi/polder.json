@@ -253,11 +253,11 @@
         "additionalProperties": false,
         "properties": {
           "app": {
-            "description": "Collabora's name for the application, such as writer, calc or impress",
+            "description": "The application, such as writer, calc or impress, named as Collabora names it whichever editor is used",
             "type": "string"
           },
           "extensions": {
-            "description": "Lower case, without the dot, in Collabora's order",
+            "description": "Lower case, without the dot, in the editor's order",
             "items": {
               "type": "string"
             },

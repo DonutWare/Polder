@@ -23,11 +23,12 @@ const (
 
 type action struct {
 	editable bool
-	// path is the editor page on the Collabora server, which this server proxies under the same path.
+	// path is the editor page on the editor's server, which this server proxies under the same
+	// path, after the service's prefix.
 	path string
 }
 
-// apps is what Collabora's discovery document says it can open, by MIME type and by extension, and
+// apps is what the editor's discovery document says it can open, by MIME type and by extension, and
 // the extensions it can start a new file in, by Collabora app such as writer or calc.
 type apps struct {
 	byMime      map[string]action
@@ -54,15 +55,15 @@ type discovery struct {
 	fetchedAt time.Time
 }
 
-func newDiscovery(collabora *url.URL) *discovery {
+func newDiscovery(editor *url.URL) *discovery {
 	return &discovery{
-		endpoint: collabora.JoinPath("hosting", "discovery").String(),
+		endpoint: editor.JoinPath("hosting", "discovery").String(),
 		client:   &http.Client{Timeout: discoveryTimeout},
 	}
 }
 
 // get returns the cached discovery, fetching it again once it is old, and soon after a failure
-// since Collabora usually starts after this server.
+// since the editor usually starts after this server.
 func (d *discovery) get(ctx context.Context) (apps, error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -75,7 +76,7 @@ func (d *discovery) get(ctx context.Context) (apps, error) {
 	if err != nil {
 		d.err = err
 		if d.apps.byMime != nil {
-			logger.Warn("refresh Collabora discovery; keeping the previous one", "error", err)
+			logger.Warn("refresh editor discovery; keeping the previous one", "error", err)
 			return d.apps, nil
 		}
 		return apps{}, err
@@ -91,11 +92,11 @@ func (d *discovery) fetch(ctx context.Context) (apps, error) {
 	}
 	response, err := d.client.Do(request)
 	if err != nil {
-		return apps{}, fmt.Errorf("fetch Collabora discovery: %w", err)
+		return apps{}, fmt.Errorf("fetch editor discovery: %w", err)
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return apps{}, fmt.Errorf("fetch Collabora discovery: status %d", response.StatusCode)
+		return apps{}, fmt.Errorf("fetch editor discovery: status %d", response.StatusCode)
 	}
 	return parseDiscovery(response.Body)
 }
@@ -116,16 +117,16 @@ type discoveryDocument struct {
 func parseDiscovery(body io.Reader) (apps, error) {
 	var document discoveryDocument
 	if err := xml.NewDecoder(body).Decode(&document); err != nil {
-		return apps{}, fmt.Errorf("parse Collabora discovery: %w", err)
+		return apps{}, fmt.Errorf("parse editor discovery: %w", err)
 	}
 	found := apps{byMime: map[string]action{}, byExtension: map[string]action{}, creatable: map[string][]string{}}
 	for _, zone := range document.Zones {
 		for _, app := range zone.Apps {
 			for _, raw := range app.Actions {
 				if raw.Name == "editnew" && raw.Ext != "" {
-					extension := strings.ToLower(raw.Ext)
-					if !slices.Contains(found.creatable[app.Name], extension) {
-						found.creatable[app.Name] = append(found.creatable[app.Name], extension)
+					name, extension := creatableApp(app.Name), strings.ToLower(raw.Ext)
+					if !slices.Contains(found.creatable[name], extension) {
+						found.creatable[name] = append(found.creatable[name], extension)
 					}
 					continue
 				}
@@ -150,6 +151,17 @@ func parseDiscovery(body io.Reader) (apps, error) {
 		}
 	}
 	return found, nil
+}
+
+// Euro-Office names its applications after Microsoft's; clients know them by Collabora's names.
+var collaboraApps = map[string]string{"word": "writer", "excel": "calc", "powerpoint": "impress"}
+
+func creatableApp(name string) string {
+	name = strings.ToLower(name)
+	if collabora, ok := collaboraApps[name]; ok {
+		return collabora
+	}
+	return name
 }
 
 var mediaExtensions = map[string]bool{
@@ -180,12 +192,12 @@ func merge(into map[string]action, key string, next action) {
 
 var placeholders = regexp.MustCompile(`<[^>]*>`)
 
-// editorPath keeps only the path of an urlsrc such as http://collabora:9980/browser/abc/cool.html?<ui=UI_LLCC&>,
-// since browsers reach Collabora through this server.
+// editorPath keeps only the path of an urlsrc such as http://collabora:9980/browser/abc/cool.html?<ui=UI_LLCC&>
+// or http://eurooffice/hosting/wopi/word/edit?<rs=DC_LLCC&>, since browsers reach the editor through this server.
 func editorPath(urlsrc string) (string, error) {
 	parsed, err := url.Parse(placeholders.ReplaceAllString(urlsrc, ""))
 	if err != nil || parsed.Path == "" {
-		return "", fmt.Errorf("parse Collabora discovery: bad urlsrc %q", urlsrc)
+		return "", fmt.Errorf("parse editor discovery: bad urlsrc %q", urlsrc)
 	}
 	return parsed.EscapedPath(), nil
 }

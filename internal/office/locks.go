@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// WOPI locks only live as long as the editing session, and Collabora locks again after a restart,
+// WOPI locks only live as long as the editing session, and the editor locks again after a restart,
 // so they are kept in memory.
 const lockLifetime = 30 * time.Minute
 

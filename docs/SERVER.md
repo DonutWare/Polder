@@ -7,7 +7,7 @@ storage, sync, authentication, search, and the optional Flutter web app.
 
 - Go 1.27+
 - Flutter, for the client or web app
-- Docker, for Docker and Collabora workflows
+- Docker, for Docker and document editor (Collabora Online or Euro-Office) workflows
 
 ## Run
 
@@ -31,6 +31,47 @@ The server listens on `http://localhost:6060` by default. Check it with:
 curl http://localhost:6060/healthz
 ```
 
+## Document editor
+
+Documents can be edited in the apps through an optional editor that speaks
+WOPI: [Collabora Online](https://www.collaboraonline.com/code/) or
+[Euro-Office](https://github.com/Euro-Office/DocumentServer). Set up at most
+one of them. Without either, documents still open as previews. Clients only
+talk to Polder, which proxies the editor (Euro-Office under `/eurooffice/`). The
+editor also draws thumbnails of documents that don't include one.
+
+| Setting | Environment variable | Meaning |
+| --- | --- | --- |
+| `collaboraUrl` | `POLDER_COLLABORA_URL` | Where Polder reaches Collabora Online |
+| `euroOfficeUrl` | `POLDER_EURO_OFFICE_URL` | Where Polder reaches Euro-Office |
+| `wopiUrl` | `POLDER_WOPI_URL` | Where the editor reaches Polder |
+
+With Docker Compose, start the editor's profile next to Polder.
+
+Collabora Online:
+
+```sh
+POLDER_COLLABORA_URL=http://collabora:9980 \
+  docker compose --profile office up -d
+```
+
+Euro-Office:
+
+```sh
+POLDER_EURO_OFFICE_URL=http://eurooffice \
+EURO_OFFICE_JWT_SECRET=$(openssl rand -hex 32) \
+  docker compose --profile eurooffice up -d
+```
+
+If you run Euro-Office yourself, start `ghcr.io/euro-office/documentserver` with
+`WOPI_ENABLED=true`, because WOPI is off by default. If it reaches Polder at a
+private address, also set `ALLOW_PRIVATE_IP_ADDRESS=true`. Euro-Office saves a
+document back to Polder only after everyone has closed it.
+
+Euro-Office has two other limits. It doesn't read Polder's colour palette,
+so it only follows light or dark mode. A version restore made while a document
+is open discards that session's unsaved edits.
+
 ## Development
 
 Use the launch configurations in `.vscode/launch.json` for the server, the
@@ -44,8 +85,12 @@ golangci-lint run ./...
 scripts/build-web.sh
 scripts/gen-client.sh
 scripts/test-client.sh
-scripts/dev-office.sh
+scripts/dev-office.sh             # server + Collabora Online in Docker
+scripts/dev-office.sh eurooffice  # server + Euro-Office in Docker
 ```
+
+The launch configurations `Server (Collabora)` and `Server (Euro-Office)` start
+the editor in Docker and then debug the server against it.
 
 After changing the API, run `scripts/gen-client.sh` and commit the updated
 OpenAPI document and generated client code. See [client/README.md](../client/README.md)

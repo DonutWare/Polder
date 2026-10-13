@@ -21,7 +21,7 @@ type grant struct {
 	SessionID  int64
 	Device     string
 	ReadOnly   bool
-	// Origin is the page that embeds the editor, which Collabora posts its messages to.
+	// Origin is the page that embeds the editor, which the editor posts its messages to.
 	Origin    string
 	ExpiresAt time.Time
 }

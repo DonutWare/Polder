@@ -45,9 +45,13 @@ type Config struct {
 	// TrustedProxies are the addresses or ranges of reverse proxies whose X-Forwarded-For and
 	// X-Real-IP headers name the client. Requests from anywhere else are taken at their address.
 	TrustedProxies []string `yaml:"trustedProxies"`
-	// CollaboraURL is where Collabora Online listens, as seen from this server. Without it there is no document editor.
+	// CollaboraURL is where Collabora Online listens, as seen from this server. Without it or
+	// EuroOfficeURL there is no document editor.
 	CollaboraURL string `yaml:"collaboraUrl"`
-	// WOPIURL is where Collabora reaches this server; it defaults to the listen address on localhost.
+	// EuroOfficeURL is where the Euro-Office Document Server listens, as seen from this server. It
+	// takes the place of Collabora, so only one of the two is set.
+	EuroOfficeURL string `yaml:"euroOfficeUrl"`
+	// WOPIURL is where the document editor reaches this server; it defaults to the listen address on localhost.
 	WOPIURL            string `yaml:"wopiUrl"`
 	FFmpegPath         string `yaml:"ffmpegPath"`
 	VideoHWAccel       string `yaml:"videoHwaccel"`
@@ -110,6 +114,7 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.TesseractPath = envOr("POLDER_TESSERACT", cfg.TesseractPath)
 	cfg.OCRModelURL = envOr("POLDER_OCR_MODEL_URL", cfg.OCRModelURL)
 	cfg.CollaboraURL = envOr("POLDER_COLLABORA_URL", cfg.CollaboraURL)
+	cfg.EuroOfficeURL = envOr("POLDER_EURO_OFFICE_URL", cfg.EuroOfficeURL)
 	cfg.WOPIURL = envOr("POLDER_WOPI_URL", cfg.WOPIURL)
 	cfg.FFmpegPath = envOr("POLDER_FFMPEG", cfg.FFmpegPath)
 	cfg.VideoHWAccel = envOr("POLDER_VIDEO_HWACCEL", cfg.VideoHWAccel)
@@ -166,7 +171,10 @@ func (cfg Config) validate() error {
 	if _, err := cfg.TrustedProxyRanges(); err != nil {
 		return err
 	}
-	for name, value := range map[string]string{"collaboraUrl": cfg.CollaboraURL, "wopiUrl": cfg.WOPIURL} {
+	if cfg.CollaboraURL != "" && cfg.EuroOfficeURL != "" {
+		return errors.New("collaboraUrl and euroOfficeUrl are both set; choose one document editor")
+	}
+	for name, value := range map[string]string{"collaboraUrl": cfg.CollaboraURL, "euroOfficeUrl": cfg.EuroOfficeURL, "wopiUrl": cfg.WOPIURL} {
 		if value == "" {
 			continue
 		}

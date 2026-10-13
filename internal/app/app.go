@@ -158,8 +158,11 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		searchService.Close()
 		return nil, err
 	}
-	officeService, err := office.New(office.Options{CollaboraURL: cfg.CollaboraURL, WOPIBaseURL: cfg.WOPIBaseURL()},
-		fileService, authService, tokens)
+	officeService, err := office.New(office.Options{
+		CollaboraURL:  cfg.CollaboraURL,
+		EuroOfficeURL: cfg.EuroOfficeURL,
+		WOPIBaseURL:   cfg.WOPIBaseURL(),
+	}, fileService, authService, tokens)
 	if err != nil {
 		searchService.Close()
 		return nil, err

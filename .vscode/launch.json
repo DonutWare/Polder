@@ -32,6 +32,40 @@
 			}
 		},
 		{
+			"name": "Server (Collabora)",
+			"type": "go",
+			"request": "launch",
+			"mode": "debug",
+			"program": "${workspaceFolder}/cmd/polder",
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "Start collabora online docker",
+			"env": {
+				"POLDER_LISTEN": ":6060",
+				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
+				"POLDER_DATA_DIR": "${workspaceFolder}/data",
+				"POLDER_COLLABORA_URL": "http://localhost:9980",
+				"POLDER_WOPI_URL": "http://host.docker.internal:6060",
+				"POLDER_DEBUG": "1"
+			}
+		},
+		{
+			"name": "Server (Euro-Office)",
+			"type": "go",
+			"request": "launch",
+			"mode": "debug",
+			"program": "${workspaceFolder}/cmd/polder",
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "Start euro office docker",
+			"env": {
+				"POLDER_LISTEN": ":6060",
+				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
+				"POLDER_DATA_DIR": "${workspaceFolder}/data",
+				"POLDER_EURO_OFFICE_URL": "http://localhost:9981",
+				"POLDER_WOPI_URL": "http://host.docker.internal:6060",
+				"POLDER_DEBUG": "1"
+			}
+		},
+		{
 			"name": "Client",
 			"type": "dart",
 			"request": "launch",
@@ -89,6 +123,22 @@
 			"name": "Server + Client",
 			"configurations": [
 				"Server",
+				"Client"
+			],
+			"stopAll": true
+		},
+		{
+			"name": "Server (Collabora) + Client",
+			"configurations": [
+				"Server (Collabora)",
+				"Client"
+			],
+			"stopAll": true
+		},
+		{
+			"name": "Server (Euro-Office) + Client",
+			"configurations": [
+				"Server (Euro-Office)",
 				"Client"
 			],
 			"stopAll": true

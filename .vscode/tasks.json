@@ -13,8 +13,30 @@
 			"label": "Run backend with collabora online docker",
 			"detail": "Run the backend with Collabora Online using Docker",
 			"type": "shell",
-			"command": "scripts/dev-office.sh",
+			"command": "sh scripts/dev-office.sh collabora",
 			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Run backend with euro office docker",
+			"detail": "Run the backend with Euro-Office using Docker",
+			"type": "shell",
+			"command": "sh scripts/dev-office.sh eurooffice",
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Start collabora online docker",
+			"detail": "Start Collabora Online in Docker on :9980, for the Server (Collabora) launch configuration",
+			"type": "shell",
+			"command": "sh scripts/dev-office.sh collabora --editor-only",
+			"problemMatcher": []
+		},
+		{
+			"label": "Start euro office docker",
+			"detail": "Start Euro-Office in Docker on :9981, for the Server (Euro-Office) launch configuration",
+			"type": "shell",
+			"command": "sh scripts/dev-office.sh eurooffice --editor-only",
 			"problemMatcher": []
 		},
 		{
@@ -99,9 +121,23 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Docker: up with Collabora",
+			"detail": "Build the image with the web app and start it on :6060 with Collabora Online",
+			"type": "shell",
+			"command": "mkdir -p config data && POLDER_UID=$(id -u) POLDER_GID=$(id -g) POLDER_COLLABORA_URL=http://collabora:9980 docker compose --profile office up -d --build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Docker: up with Euro-Office",
+			"detail": "Build the image with the web app and start it on :6060 with Euro-Office",
+			"type": "shell",
+			"command": "mkdir -p config data && POLDER_UID=$(id -u) POLDER_GID=$(id -g) POLDER_EURO_OFFICE_URL=http://eurooffice docker compose --profile eurooffice up -d --build",
+			"problemMatcher": []
+		},
+		{
 			"label": "Docker: down",
 			"type": "shell",
-			"command": "docker compose down",
+			"command": "docker compose --profile office --profile eurooffice down",
 			"problemMatcher": []
 		},
 		{

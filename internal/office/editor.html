@@ -21,6 +21,8 @@
 
   const office = document.getElementById("office");
   const parentOrigin = params.get("parent");
+  // Set by the server: collabora or eurooffice.
+  const editor = document.documentElement.dataset.editor;
   document.body.style.background = params.get("background") || "";
 
   const toApp = (message) => {
@@ -38,7 +40,7 @@
     if (event.source === office.contentWindow) {
       let message;
       try { message = typeof event.data === "string" ? JSON.parse(event.data) : event.data; } catch { return; }
-      // Collabora only takes messages after the host says it is listening.
+      // Collabora only takes messages after the host says it is listening; Euro-Office takes them anyway.
       if (message.MessageId === "App_LoadingStatus" && message.Values && message.Values.Status === "Frame_Ready") {
         toEditor({ MessageId: "Host_PostmessageReady" });
       }
@@ -55,6 +57,7 @@
   // page colour matches the theme. Inverting what is underneath keeps it visible on any page. Collabora's
   // content security policy blocks <style> elements, but not stylesheets adopted from script.
   office.addEventListener("load", () => {
+    if (editor !== "collabora") return;
     try {
       const page = office.contentDocument;
       const sheet = new page.defaultView.CSSStyleSheet();
@@ -67,7 +70,13 @@
   });
 
   const form = document.getElementById("open");
-  form.action = params.get("src") || "";
+  let src = params.get("src") || "";
+  // Euro-Office ignores Collabora's ui_defaults and css_variables, and takes only light (1) or dark (2).
+  if (editor === "eurooffice" && src) {
+    const dark = /(^|;)UITheme=dark(;|$)/.test(params.get("ui_defaults") || "");
+    src += (src.includes("?") ? "&" : "?") + "thm=" + (dark ? "2" : "1");
+  }
+  form.action = src;
   for (const name of ["access_token", "access_token_ttl", "ui_defaults", "css_variables"]) {
     if (!params.has(name)) continue;
     const input = document.createElement("input");

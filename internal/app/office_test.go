@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -33,6 +34,47 @@ const fakeDiscovery = `<?xml version="1.0" encoding="utf-8"?>
   <app name="application/vnd.visio"><action ext="" name="view" urlsrc="http://collabora:9980/browser/abc/cool.html?"/></app>
   <app name="Capabilities"><action ext="" name="getinfo" urlsrc="http://collabora:9980/hosting/capabilities"/></app>
 </net-zone></wopi-discovery>`
+
+// fakeEuroOfficeDiscovery follows Euro-Office's discovery: apps named after Microsoft's, with the
+// same actions repeated under MIME types, and editors under /hosting/wopi.
+const fakeEuroOfficeDiscovery = `<?xml version="1.0" encoding="utf-8"?>
+<wopi-discovery><net-zone name="external-http">
+  <app name="Word" favIconUrl="http://eurooffice/web-apps/favicon.ico">
+    <action name="view" ext="docx" urlsrc="http://eurooffice/hosting/wopi/word/view?&lt;rs=DC_LLCC&amp;&gt;"/>
+    <action name="embedview" ext="docx" urlsrc="http://eurooffice/hosting/wopi/word/view?embed=1&amp;"/>
+    <action name="edit" ext="docx" default="true" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/word/edit?&lt;rs=DC_LLCC&amp;&gt;"/>
+    <action name="mobileEdit" ext="docx" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/word/edit?mobile=1&amp;"/>
+    <action name="editnew" ext="docx" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/word/edit?"/>
+  </app>
+  <app name="Excel">
+    <action name="edit" ext="xlsx" default="true" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/cell/edit?"/>
+    <action name="editnew" ext="xlsx" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/cell/edit?"/>
+  </app>
+  <app name="PowerPoint">
+    <action name="editnew" ext="pptx" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/slide/edit?"/>
+  </app>
+  <app name="Pdf">
+    <action name="edit" ext="pdf" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/pdf/edit?"/>
+    <action name="editnew" ext="pdf" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/pdf/edit?"/>
+  </app>
+  <app name="application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+    <action name="edit" ext="" default="true" requires="locks,update" urlsrc="http://eurooffice/hosting/wopi/word/edit?"/>
+  </app>
+</net-zone></wopi-discovery>`
+
+func startEuroOfficeServer(t *testing.T) *testServer {
+	t.Helper()
+	euroOffice := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/hosting/discovery":
+			_, _ = io.WriteString(w, fakeEuroOfficeDiscovery)
+		default:
+			_, _ = io.WriteString(w, "eurooffice "+r.Host+" "+r.Header.Get("X-Forwarded-Prefix")+" "+r.URL.RequestURI())
+		}
+	}))
+	t.Cleanup(euroOffice.Close)
+	return startServer(t, config.DriverSQLite, "", func(cfg *config.Config) { cfg.EuroOfficeURL = euroOffice.URL })
+}
 
 func startOfficeServer(t *testing.T) *testServer {
 	t.Helper()
@@ -268,6 +310,104 @@ func TestOfficeProxiesCollabora(t *testing.T) {
 	defer page.Body.Close()
 	if page.StatusCode != http.StatusOK || !strings.HasPrefix(page.Header.Get("Content-Type"), "text/html") {
 		t.Fatalf("editor page: %d %s", page.StatusCode, page.Header.Get("Content-Type"))
+	}
+}
+
+func TestEuroOfficeEditsThroughTheSameWOPIEndpoints(t *testing.T) {
+	server := startEuroOfficeServer(t)
+	alice := server.createUser(server.setupAdmin(), "alice", 0)
+	alice.put("/report.docx", 0, []byte("first draft"), http.StatusOK, nil)
+
+	var capabilities struct {
+		Enabled            bool     `json:"enabled"`
+		EditableExtensions []string `json:"editableExtensions"`
+		Creatable          []struct {
+			App        string   `json:"app"`
+			Extensions []string `json:"extensions"`
+		} `json:"creatable"`
+	}
+	alice.mustJSON(http.MethodGet, "/office/capabilities", nil, http.StatusOK, &capabilities)
+	creatable := map[string]string{}
+	for _, app := range capabilities.Creatable {
+		creatable[app.App] = strings.Join(app.Extensions, ",")
+	}
+	if !capabilities.Enabled || strings.Join(capabilities.EditableExtensions, ",") != "docx,pdf,xlsx" ||
+		len(creatable) != 4 || creatable["writer"] != "docx" || creatable["calc"] != "xlsx" || creatable["impress"] != "pptx" ||
+		creatable["pdf"] != "pdf" {
+		t.Fatalf("unexpected capabilities %+v", capabilities)
+	}
+
+	session := alice.startOfficeSession("/report.docx", http.StatusCreated)
+	if !strings.HasPrefix(session.EditorURL, "/eurooffice/hosting/wopi/word/edit?WOPISrc=") || session.ReadOnly {
+		t.Fatalf("unexpected session %+v", session)
+	}
+	response, info := server.wopi(session, http.MethodGet, "", nil, nil)
+	if response.StatusCode != http.StatusOK || !strings.Contains(info, `"FileVersionPostMessage":true`) {
+		t.Fatalf("CheckFileInfo: %d %s", response.StatusCode, info)
+	}
+	response, _ = server.wopi(session, http.MethodPost, "", nil, map[string]string{"X-WOPI-Override": "LOCK", "X-WOPI-Lock": "eo"})
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("LOCK: %d", response.StatusCode)
+	}
+	// Euro-Office saves without Collabora's timestamp header.
+	response, _ = server.wopi(session, http.MethodPost, "/contents", []byte("second draft"), map[string]string{"X-WOPI-Lock": "eo"})
+	if response.StatusCode != http.StatusOK {
+		t.Fatalf("PutFile: %d", response.StatusCode)
+	}
+	if _, onServer := alice.download("/report.docx", nil); string(onServer) != "second draft" {
+		t.Fatalf("saved content not stored: %q", onServer)
+	}
+}
+
+func TestEuroOfficeIsProxiedUnderItsPrefix(t *testing.T) {
+	server := startEuroOfficeServer(t)
+	response, err := http.Get(server.server.URL + "/eurooffice/9.3.1-abc/web-apps/apps/api/documents/api.js?x=1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	body, _ := io.ReadAll(response.Body)
+	host := strings.TrimPrefix(server.server.URL, "http://")
+	if response.StatusCode != http.StatusOK || string(body) != "eurooffice "+host+" /eurooffice /9.3.1-abc/web-apps/apps/api/documents/api.js?x=1" {
+		t.Fatalf("proxy: %d %q", response.StatusCode, body)
+	}
+
+	collaboraPath, err := http.Get(server.server.URL + "/browser/abc/cool.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	collaboraPath.Body.Close()
+	if collaboraPath.StatusCode == http.StatusOK {
+		t.Fatal("Collabora's paths are proxied to Euro-Office")
+	}
+
+	page, err := http.Get(server.server.URL + "/office/editor")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer page.Body.Close()
+	html, _ := io.ReadAll(page.Body)
+	if page.StatusCode != http.StatusOK || !strings.Contains(string(html), `<html data-editor="eurooffice">`) {
+		t.Fatalf("editor page: %d", page.StatusCode)
+	}
+}
+
+func TestOfficeDoesNotSaveOverARestoredVersion(t *testing.T) {
+	server := startOfficeServer(t)
+	alice := server.createUser(server.setupAdmin(), "alice", 0)
+	alice.put("/report.docx", 0, []byte("v1"), http.StatusOK, nil)
+	alice.put("/report.docx", -1, []byte("v2"), http.StatusOK, nil)
+	listing := alice.waitForVersionCount("/report.docx", 1)
+
+	session := alice.startOfficeSession("/report.docx", http.StatusCreated)
+	alice.mustJSON(http.MethodPost, fmt.Sprintf("/files/versions/%d/restore", listing.Versions[0].ID), map[string]any{}, http.StatusOK, nil)
+
+	response, body := server.wopi(session, http.MethodPost, "/contents", []byte("late save"), nil)
+	if response.StatusCode != http.StatusConflict || !strings.Contains(body, "1010") {
+		t.Fatalf("save from before the restore: %d %s", response.StatusCode, body)
+	}
+	if _, onServer := alice.download("/report.docx", nil); string(onServer) != "v1" {
+		t.Fatalf("restored version overwritten: %q", onServer)
 	}
 }
 

@@ -36,7 +36,7 @@
 * Versioning - Keep versions of any file edits with custom retention periods
 * Trash - Files are never removed entirely use trash to recover files remove by accident
 * Notes - Create a knowledgedatabase link notes inside of another note
-* Collabora online support - Edit documents directly on all platforms.
+* Collabora Online or Euro-Office support - Edit documents directly on all platforms.
 * Platforms
   - Android
   - Web + Docker

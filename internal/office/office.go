@@ -20,14 +20,41 @@ import (
 
 var logger = logging.For("office")
 
+// Editor names the document editor this server works with. Both speak WOPI, so they share the
+// endpoints, tokens, locks and conversions; they differ in where browsers reach them.
+type Editor string
+
+const (
+	Collabora  Editor = "collabora"
+	EuroOffice Editor = "eurooffice"
+)
+
+func (e Editor) String() string {
+	if e == EuroOffice {
+		return "Euro-Office"
+	}
+	return "Collabora"
+}
+
+// euroOfficePrefix is where browsers reach Euro-Office on this server. Its pages and assets sit
+// at the root of its own server, under versioned paths, so it is proxied under a prefix of its own
+// rather than path by path as Collabora is.
+const euroOfficePrefix = "/eurooffice"
+
 type Options struct {
-	// CollaboraURL is empty when there is no document editor.
-	CollaboraURL string
-	WOPIBaseURL  string
+	// CollaboraURL and EuroOfficeURL are both empty when there is no document editor, and at most
+	// one is set.
+	CollaboraURL  string
+	EuroOfficeURL string
+	WOPIBaseURL   string
 }
 
 type Service struct {
-	collabora *url.URL
+	kind   Editor
+	editor *url.URL
+	// prefix is the path browsers reach the editor's own pages under, empty when they sit at the
+	// same paths as on the editor's server.
+	prefix    string
 	wopiBase  string
 	discovery *discovery
 	converter *http.Client
@@ -45,21 +72,29 @@ func New(options Options, fileService *files.Service, authService *auth.Service,
 		files:    fileService,
 		auth:     authService,
 	}
-	if options.CollaboraURL == "" {
+	editorURL := options.CollaboraURL
+	switch {
+	case options.CollaboraURL != "" && options.EuroOfficeURL != "":
+		return nil, fmt.Errorf("both Collabora and Euro-Office are set up; choose one document editor")
+	case options.CollaboraURL != "":
+		service.kind = Collabora
+	case options.EuroOfficeURL != "":
+		service.kind, service.prefix, editorURL = EuroOffice, euroOfficePrefix, options.EuroOfficeURL
+	default:
 		return service, nil
 	}
-	collabora, err := url.Parse(options.CollaboraURL)
+	editor, err := url.Parse(editorURL)
 	if err != nil {
-		return nil, fmt.Errorf("collabora URL: %w", err)
+		return nil, fmt.Errorf("%s URL: %w", service.kind, err)
 	}
-	service.collabora = collabora
-	service.discovery = newDiscovery(collabora)
+	service.editor = editor
+	service.discovery = newDiscovery(editor)
 	service.converter = &http.Client{Timeout: convertTimeout}
 	return service, nil
 }
 
 func (s *Service) Enabled() bool {
-	return s != nil && s.collabora != nil
+	return s != nil && s.editor != nil
 }
 
 type EditorCapabilities struct {
@@ -72,8 +107,8 @@ type EditorCapabilities struct {
 }
 
 type CreatableApp struct {
-	App        string   `json:"app" doc:"Collabora's name for the application, such as writer, calc or impress"`
-	Extensions []string `json:"extensions" doc:"Lower case, without the dot, in Collabora's order"`
+	App        string   `json:"app" doc:"The application, such as writer, calc or impress, named as Collabora names it whichever editor is used"`
+	Extensions []string `json:"extensions" doc:"Lower case, without the dot, in the editor's order"`
 }
 
 func (s *Service) Capabilities(ctx context.Context) EditorCapabilities {
@@ -170,7 +205,7 @@ func (s *Service) StartSession(ctx context.Context, owner users.User, rawPath, o
 	}
 	query := url.Values{"WOPISrc": {fmt.Sprintf("%s/wopi/files/%s", s.wopiBase, wopiFileID(entry.ID, generation, versionID))}}
 	return EditorSession{
-		EditorURL:      editor.path + "?" + query.Encode(),
+		EditorURL:      s.prefix + editor.path + "?" + query.Encode(),
 		HostPage:       editorPagePath,
 		AccessToken:    token,
 		AccessTokenTTL: issued.ExpiresAt.UnixMilli(),

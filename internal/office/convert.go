@@ -54,7 +54,8 @@ func (s *Service) ConvertToPDF(ctx context.Context, name string, content io.Read
 		writer.CloseWithError(err)
 	}()
 
-	endpoint := s.collabora.JoinPath("cool", "convert-to", "pdf").String()
+	// Euro-Office answers at Collabora's address for conversions too.
+	endpoint := s.editor.JoinPath("cool", "convert-to", "pdf").String()
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, body)
 	if err != nil {
 		body.Close()
@@ -73,7 +74,7 @@ func (s *Service) ConvertToPDF(ctx context.Context, name string, content io.Read
 		return response.Body, nil
 	}
 	response.Body.Close()
-	if response.StatusCode == http.StatusForbidden {
+	if response.StatusCode == http.StatusForbidden && s.kind == Collabora {
 		return nil, fmt.Errorf("%w: Collabora refuses conversions from this server; add its address to Collabora's net.post_allow.host",
 			ErrUnavailable)
 	}

@@ -778,6 +778,8 @@
 	"presentationKind": "Presentation",
 	"newSpreadsheet": "New spreadsheet",
 	"newPresentation": "New presentation",
+	"pdfKind": "PDF",
+	"newPdf": "New PDF",
 	"brandingGroup": "Branding",
 	"serverName": "Server name",
 	"serverNameHint": "Shown on the login screen, in the sidebar and as the window title",

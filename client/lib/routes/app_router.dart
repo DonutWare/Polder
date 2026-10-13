@@ -10,6 +10,7 @@ import "package:polder/models/scan_session.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/routes/route_extra_codec.dart";
 import "package:polder/screens/activity/activity_screen.dart";
 import "package:polder/screens/admin/admin_branding_screen.dart";
 import "package:polder/screens/admin/admin_logs_screen.dart";
@@ -44,6 +45,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(isAdminProvider, (_, next) => isAdmin.value = next);
   final router = GoRouter(
     initialLocation: AppRoutes.files,
+    extraCodec: const RouteExtraCodec(),
     refreshListenable: Listenable.merge([account, isAdmin]),
     redirect: (_, state) => AppRedirect.resolve(account.value, state.uri, isAdmin: isAdmin.value),
     routes: [
