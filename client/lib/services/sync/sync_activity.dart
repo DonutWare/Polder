@@ -6,7 +6,7 @@ import "package:polder/services/sync/sync_ignore_rules.dart";
 import "package:polder/services/sync/sync_paths.dart";
 import "package:polder/util/throughput_meter.dart";
 
-enum LocalSyncPhase { waiting, preparing, uploading }
+enum LocalSyncPhase { waiting, preparing, uploading, downloading }
 
 class LocalSyncItem {
   const LocalSyncItem({
@@ -14,6 +14,7 @@ class LocalSyncItem {
     required this.relativePath,
     required this.remotePath,
     required this.phase,
+    this.isDownload = false,
     this.noticedAt,
     this.bytes = 0,
     this.total,
@@ -24,6 +25,7 @@ class LocalSyncItem {
   final String relativePath;
   final String remotePath;
   final LocalSyncPhase phase;
+  final bool isDownload;
 
   /// When the folder watcher last saw it change; null for files a sync run found by itself.
   final DateTime? noticedAt;
@@ -53,17 +55,24 @@ class LocalSyncItem {
     return path;
   }
 
-  LocalSyncItem copyWith({LocalSyncPhase? phase, int? bytes, int? total, int? rate, DateTime? noticedAt}) =>
-      LocalSyncItem(
-        rootId: rootId,
-        relativePath: relativePath,
-        remotePath: remotePath,
-        phase: phase ?? this.phase,
-        noticedAt: noticedAt ?? this.noticedAt,
-        bytes: bytes ?? this.bytes,
-        total: total ?? this.total,
-        rate: rate ?? this.rate,
-      );
+  LocalSyncItem copyWith({
+    LocalSyncPhase? phase,
+    bool? isDownload,
+    int? bytes,
+    int? total,
+    int? rate,
+    DateTime? noticedAt,
+  }) => LocalSyncItem(
+    rootId: rootId,
+    relativePath: relativePath,
+    remotePath: remotePath,
+    phase: phase ?? this.phase,
+    isDownload: isDownload ?? this.isDownload,
+    noticedAt: noticedAt ?? this.noticedAt,
+    bytes: bytes ?? this.bytes,
+    total: total ?? this.total,
+    rate: rate ?? this.rate,
+  );
 }
 
 enum CancelReason { removed, changed, stopped, paused }
@@ -126,6 +135,7 @@ class SyncActivity {
   static const notifyInterval = Duration(milliseconds: 150);
   static const _ownWriteWindow = Duration(seconds: 5);
   static const _maxListedPerFolder = 2000;
+  static const _ownWritesPruneAt = 1000;
 
   final DateTime Function() _clock;
   final _changes = StreamController<Map<String, LocalSyncItem>>.broadcast();
@@ -139,10 +149,12 @@ class SyncActivity {
   final Map<String, CancelToken> _runs = {};
   final Map<String, int> _completed = {};
   Timer? _pendingNotify;
+  var _changedSincePending = false;
+  Map<String, int> _emittedCompleted = const {};
 
   Map<String, LocalSyncItem> get items => Map.unmodifiable(_items);
 
-  Map<String, int> get completed => Map.unmodifiable(_completed);
+  Map<String, int> get completed => _emittedCompleted;
 
   Stream<Map<String, LocalSyncItem>> get changes => _changes.stream;
 
@@ -203,7 +215,7 @@ class SyncActivity {
     if (notify) _notify();
   }
 
-  void enqueue(SyncRoot root, Iterable<String> relativePaths) {
+  void enqueue(SyncRoot root, Iterable<String> relativePaths, {bool downloads = false}) {
     var added = false;
     for (final relativePath in relativePaths) {
       final key = _key(root.id, relativePath);
@@ -213,6 +225,7 @@ class SyncActivity {
         relativePath: relativePath,
         remotePath: SyncPaths(root).remotePath(relativePath),
         phase: LocalSyncPhase.waiting,
+        isDownload: downloads,
       );
       added = true;
     }
@@ -229,7 +242,6 @@ class SyncActivity {
     final before = _items.length;
     _items.removeWhere((key, _) => matches(key));
     if (_items.length != before) {
-      _forgetFinishedGroups();
       _notify();
     }
   }
@@ -255,13 +267,13 @@ class SyncActivity {
                 relativePath: item.relativePath,
                 remotePath: item.remotePath,
                 phase: LocalSyncPhase.waiting,
+                isDownload: item.isDownload,
                 noticedAt: now,
               )
             : item,
       );
     } else {
       _items.removeWhere((key, _) => key.startsWith(prefix));
-      _forgetFinishedGroups();
     }
     _notify();
   }
@@ -285,7 +297,13 @@ class SyncActivity {
                   remotePath: SyncPaths(root).remotePath(relativePath),
                   phase: phase,
                 ))
-            .copyWith(phase: phase, bytes: 0, total: total, rate: 0);
+            .copyWith(
+              phase: phase,
+              isDownload: phase == LocalSyncPhase.downloading ? true : null,
+              bytes: 0,
+              total: total,
+              rate: 0,
+            );
     _itemMeters.remove(key);
     _notify();
     final token = _tokens[key];
@@ -298,17 +316,17 @@ class SyncActivity {
     if (current == null) return;
     final sent = bytes - current.bytes;
     final meter = _itemMeters.putIfAbsent(key, () => ThroughputMeter(clock: _clock))..add(sent);
-    if (current.phase == LocalSyncPhase.uploading) {
-      _uploads.add(sent);
+    if (current.phase == LocalSyncPhase.uploading) _uploads.add(sent);
+    if (current.phase == LocalSyncPhase.uploading || current.phase == LocalSyncPhase.downloading) {
       _groupMeters.putIfAbsent(current.group, () => ThroughputMeter(clock: _clock)).add(sent);
     }
     _items[key] = current.copyWith(bytes: bytes, rate: meter.rate);
-    _notify(throttled: true);
+    _notify();
   }
 
   void downloaded(int bytes) {
     _downloads.add(bytes);
-    _notify(throttled: true);
+    _notify();
   }
 
   void done(String rootId, String relativePath) {
@@ -318,7 +336,6 @@ class SyncActivity {
     final finished = _items.remove(key);
     if (finished == null) return;
     _completed.update(finished.group, (count) => count + 1, ifAbsent: () => 1);
-    _forgetFinishedGroups();
     _notify();
   }
 
@@ -329,12 +346,17 @@ class SyncActivity {
     _itemMeters.removeWhere((key, _) => !_items.containsKey(key));
   }
 
-  void expectWrite(String rootId, String relativePath) => _ownWrites[_key(rootId, relativePath)] = _clock();
+  void expectWrite(String rootId, String relativePath) {
+    final now = _clock();
+    if (_ownWrites.length >= _ownWritesPruneAt) {
+      _ownWrites.removeWhere((_, at) => now.difference(at) > _ownWriteWindow);
+    }
+    _ownWrites[_key(rootId, relativePath)] = now;
+  }
 
   bool _isOwnWrite(String rootId, String relativePath) {
-    final now = _clock();
-    _ownWrites.removeWhere((_, at) => now.difference(at) > _ownWriteWindow);
-    return _ownWrites.containsKey(_key(rootId, relativePath));
+    final at = _ownWrites[_key(rootId, relativePath)];
+    return at != null && _clock().difference(at) <= _ownWriteWindow;
   }
 
   void settle(String rootId, DateTime runStartedAt) {
@@ -348,23 +370,29 @@ class SyncActivity {
       _itemMeters.remove(key);
     }
     if (settled.isNotEmpty) {
-      _forgetFinishedGroups();
       _notify();
     }
   }
 
-  void _notify({bool throttled = false}) {
+  void _notify() {
     if (_changes.isClosed) return;
-    if (!throttled) {
-      _pendingNotify?.cancel();
-      _pendingNotify = null;
-      _changes.add(items);
+    if (_pendingNotify != null) {
+      _changedSincePending = true;
       return;
     }
-    _pendingNotify ??= Timer(notifyInterval, () {
+    _emit();
+    _pendingNotify = Timer(notifyInterval, () {
       _pendingNotify = null;
-      if (!_changes.isClosed) _changes.add(items);
+      if (!_changedSincePending) return;
+      _changedSincePending = false;
+      _notify();
     });
+  }
+
+  void _emit() {
+    _forgetFinishedGroups();
+    _emittedCompleted = Map.unmodifiable(_completed);
+    _changes.add(items);
   }
 
   void dispose() {

@@ -8,6 +8,7 @@ import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/api_error_localization.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/icon_badge.dart";
 import "package:polder/widgets/shared/level_bar.dart";
 import "package:polder/widgets/shared/section_header.dart";
@@ -30,10 +31,11 @@ class TransfersSheet extends ConsumerWidget {
             ),
           ),
           Flexible(
-            child: ListView(
-              shrinkWrap: true,
+            child: ListView.builder(
+              shrinkWrap: transfers.length < sheetShrinkWrapLimit,
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
-              children: [for (final transfer in transfers.reversed) _TransferTile(transfer: transfer)],
+              itemCount: transfers.length,
+              itemBuilder: (context, index) => _TransferTile(transfer: transfers[transfers.length - 1 - index]),
             ),
           ),
         ],

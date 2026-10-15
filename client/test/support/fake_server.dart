@@ -24,20 +24,34 @@ class FakeNode {
 }
 
 class FakeUpload {
-  FakeUpload({
-    required this.path,
-    required this.baseRev,
-    required this.hash,
-    required this.mtime,
-    required this.chunks,
-  });
+  FakeUpload.fromJson(Map<String, dynamic> json)
+    : path = json["path"] as String,
+      baseRev = json["baseRev"] as int,
+      hash = json["hash"] as String,
+      mtime = DateTime.parse(json["mtime"] as String),
+      chunks = [
+        for (final chunk in (json["chunks"] as List<dynamic>).cast<Map<String, dynamic>>())
+          (chunk["hash"] as String, chunk["size"] as int),
+      ];
 
   final String path;
   final int baseRev;
   final String hash;
   final DateTime mtime;
   final List<(String, int)> chunks;
-  final Map<String, Uint8List> received = {};
+  Map<String, dynamic>? result;
+}
+
+class FakeBatch {
+  FakeBatch(this.files);
+
+  final List<FakeUpload> files;
+  final Map<String, Uint8List> staged = {};
+  final Set<String> corrupt = {};
+
+  Iterable<FakeUpload> get unfinished => files.where((file) => file.result == null);
+
+  List<Map<String, dynamic>> get results => [for (final file in files) ?file.result];
 }
 
 class FakePolderServer extends http.BaseClient {
@@ -47,7 +61,7 @@ class FakePolderServer extends http.BaseClient {
 
   final Map<String, FakeNode> nodes = {};
   final List<Map<String, dynamic>> changes = [];
-  final Map<String, FakeUpload> uploads = {};
+  final Map<String, FakeBatch> batches = {};
   final List<String> requests = [];
   bool indexing = false;
   int rangeBytesServed = 0;
@@ -59,7 +73,7 @@ class FakePolderServer extends http.BaseClient {
   int wholeBytesReceived = 0;
   var _rev = 0;
   var _seq = 0;
-  var _uploadIds = 0;
+  var _batchIds = 0;
 
   void putFile(String path, List<int> bytes, {DateTime? mtime}) {
     _ensureParents(path);
@@ -84,11 +98,13 @@ class FakePolderServer extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final body = await request.finalize().toBytes();
     final uri = request.url;
     final route = uri.path.replaceFirst("/api/v1", "");
     requests.add("${request.method} $route");
     try {
+      final streamed = _streamedBatch(request.method, route);
+      if (streamed != null) return await _receiveStream(streamed, request.finalize());
+      final body = await request.finalize().toBytes();
       return _route(request.method, route, uri.queryParameters, request.headers, body);
     } on _HttpError catch (error) {
       return _json(error.status, {
@@ -118,11 +134,10 @@ class FakePolderServer extends http.BaseClient {
       ("DELETE", "/files") => _delete(query),
       ("GET", "/sync/changes") => _changes(int.parse(query["cursor"] ?? "0")),
       ("GET", "/sync/manifest") => _manifest(query["path"]!),
-      ("POST", "/sync/uploads") => _createUpload(_decode(body)),
-      ("PUT", _) when segments.length == 5 && segments[3] == "chunks" => _putChunk(segments[2], segments[4], body),
-      ("POST", _) when segments.length == 4 && segments[3] == "commit" => _commit(segments[2]),
-      ("GET", _) when segments.length == 3 && segments[1] == "uploads" => _uploadStatus(segments[2]),
-      ("DELETE", _) when segments.length == 3 && segments[1] == "uploads" => _abort(segments[2]),
+      ("POST", "/sync/batches") => _createBatch(_decode(body)),
+      ("POST", "/sync/downloads") => _downloadBatch(_decode(body)),
+      ("GET", _) when segments.length == 3 && segments[1] == "batches" => _batchStatus(segments[2]),
+      ("DELETE", _) when segments.length == 3 && segments[1] == "batches" => _abortBatch(segments[2]),
       _ => throw const _HttpError(404, "not_found"),
     };
   }
@@ -234,64 +249,147 @@ class FakePolderServer extends http.BaseClient {
     return _json(200, {...manifest.copyWith(path: path, rev: node.rev).toJson()});
   }
 
-  http.StreamedResponse _createUpload(Map<String, dynamic> body) {
-    final path = body["path"] as String;
-    _checkBaseRev(path, body["baseRev"] as int);
-    final chunks = [
-      for (final chunk in (body["chunks"] as List<dynamic>).cast<Map<String, dynamic>>())
-        (chunk["hash"] as String, chunk["size"] as int),
+  http.StreamedResponse _downloadBatch(Map<String, dynamic> body) {
+    final out = BytesBuilder();
+    for (final file in (body["files"] as List<dynamic>).cast<Map<String, dynamic>>()) {
+      final path = file["path"] as String;
+      final node = nodes[path];
+      final error = switch (node) {
+        null || FakeNode(isDir: true) => "not_found",
+        _ when (file["rev"] as int? ?? 0) > 0 && node.rev != file["rev"] => "precondition_failed",
+        _ => null,
+      };
+      final header = error == null
+          ? {"path": path, "rev": node!.rev, "size": node.bytes.length, "hash": node.hash}
+          : {
+              "path": path,
+              "size": 0,
+              "error": {"code": error, "message": error},
+            };
+      out.add(utf8.encode("${jsonEncode(header)}\n"));
+      if (error == null) out.add(node!.bytes);
+    }
+    return bytesResponse(200, out.takeBytes());
+  }
+
+  String? _streamedBatch(String method, String route) {
+    final segments = route.split("/").where((segment) => segment.isNotEmpty).toList();
+    final isStream = method == "PUT" && segments.length == 4 && segments[1] == "batches" && segments[3] == "stream";
+    return isStream ? segments[2] : null;
+  }
+
+  http.StreamedResponse _createBatch(Map<String, dynamic> body) {
+    final files = [
+      for (final file in (body["files"] as List<dynamic>).cast<Map<String, dynamic>>()) FakeUpload.fromJson(file),
     ];
-    final upload = FakeUpload(
-      path: path,
-      baseRev: body["baseRev"] as int,
-      hash: body["hash"] as String,
-      mtime: DateTime.parse(body["mtime"] as String),
-      chunks: chunks,
-    );
-    final id = "u${_uploadIds++}";
-    uploads[id] = upload;
-    return _json(200, {"uploadId": id, "missing": _missing(upload)});
+    final batch = FakeBatch(files);
+    for (final file in files) {
+      try {
+        _checkBaseRev(file.path, file.baseRev);
+      } on _HttpError catch (error) {
+        file.result = _failure(file.path, error);
+      }
+    }
+    for (final other in batches.values) {
+      batch.staged.addAll(other.staged);
+    }
+    final id = "b${_batchIds++}";
+    batches[id] = batch;
+    return _json(201, _status(id, batch));
   }
 
-  http.StreamedResponse _putChunk(String id, String hash, Uint8List body) {
-    final upload = uploads[id] ?? (throw const _HttpError(404, "not_found"));
-    if (sha256.convert(body).toString() != hash) throw const _HttpError(400, "invalid_request");
-    chunkBytesReceived += body.length;
-    upload.received[hash] = body;
-    return emptyResponse(204);
+  http.StreamedResponse _batchStatus(String id) {
+    final batch = batches[id] ?? (throw const _HttpError(404, "not_found"));
+    return _json(200, _status(id, batch));
   }
 
-  http.StreamedResponse _uploadStatus(String id) {
-    final upload = uploads[id] ?? (throw const _HttpError(404, "not_found"));
-    return _json(200, {"uploadId": id, "missing": _missing(upload)});
+  Future<http.StreamedResponse> _receiveStream(String id, Stream<List<int>> body) async {
+    final batch = batches[id] ?? (throw const _HttpError(404, "not_found"));
+    final missing = _missing(batch);
+    final pending = BytesBuilder();
+    var next = 0;
+    try {
+      await for (final piece in body) {
+        pending.add(piece);
+        while (next < missing.length && pending.length >= missing[next].$2) {
+          final bytes = pending.takeBytes();
+          final (hash, size) = missing[next++];
+          _stage(batch, hash, Uint8List.sublistView(bytes, 0, size));
+          pending.add(Uint8List.sublistView(bytes, size));
+        }
+      }
+    } on Exception catch (error) {
+      throw http.ClientException("$error");
+    }
+    if (next < missing.length) throw const _HttpError(400, "invalid_request");
+    for (final file in batch.unfinished) {
+      file.result = _commitFile(batch, file);
+    }
+    batches.remove(id);
+    return _json(200, _status(id, batch));
   }
 
-  http.StreamedResponse _commit(String id) {
-    final upload = uploads.remove(id) ?? (throw const _HttpError(404, "not_found"));
-    _checkBaseRev(upload.path, upload.baseRev);
-    final known = _knownChunks(upload.path);
+  void _stage(FakeBatch batch, String hash, Uint8List bytes) {
+    chunkBytesReceived += bytes.length;
+    if (sha256.convert(bytes).toString() == hash) {
+      batch.staged[hash] = Uint8List.fromList(bytes);
+    } else {
+      batch.corrupt.add(hash);
+    }
+  }
+
+  Map<String, dynamic> _commitFile(FakeBatch batch, FakeUpload file) {
+    if (file.chunks.any((chunk) => batch.corrupt.contains(chunk.$1))) {
+      return _failure(file.path, const _HttpError(412, "precondition_failed"));
+    }
+    try {
+      _checkBaseRev(file.path, file.baseRev);
+    } on _HttpError catch (error) {
+      return _failure(file.path, error);
+    }
+    final known = _reusableChunks(file);
     final builder = BytesBuilder();
-    for (final (hash, _) in upload.chunks) {
-      builder.add(upload.received[hash] ?? known[hash]!);
+    for (final (hash, _) in file.chunks) {
+      builder.add(batch.staged[hash] ?? known[hash]!);
     }
     final bytes = builder.takeBytes();
-    if (sha256.convert(bytes).toString() != upload.hash) throw const _HttpError(400, "invalid_request");
-    putFile(upload.path, bytes, mtime: upload.mtime);
-    return _json(200, _entry(upload.path));
+    if (sha256.convert(bytes).toString() != file.hash) {
+      return _failure(file.path, const _HttpError(400, "invalid_request"));
+    }
+    putFile(file.path, bytes, mtime: file.mtime);
+    return {"path": file.path, "entry": _entry(file.path)};
   }
 
-  http.StreamedResponse _abort(String id) {
-    uploads.remove(id);
+  Map<String, dynamic> _failure(String path, _HttpError error) => {
+    "path": path,
+    "error": {"code": error.code, "message": error.code, "current": ?error.current},
+  };
+
+  http.StreamedResponse _abortBatch(String id) {
+    batches.remove(id);
     return emptyResponse(204);
   }
 
-  List<String> _missing(FakeUpload upload) {
-    final known = _knownChunks(upload.path);
-    return {
-      for (final (hash, _) in upload.chunks)
-        if (!known.containsKey(hash) && !upload.received.containsKey(hash)) hash,
-    }.toList();
+  Map<String, dynamic> _status(String id, FakeBatch batch) => {
+    "batchId": id,
+    "missing": [
+      for (final (hash, size) in _missing(batch)) {"hash": hash, "size": size},
+    ],
+    "results": batch.results,
+  };
+
+  List<(String, int)> _missing(FakeBatch batch) {
+    final missing = <String, int>{};
+    for (final file in batch.unfinished) {
+      final known = _reusableChunks(file);
+      for (final (hash, size) in file.chunks) {
+        if (!known.containsKey(hash) && !batch.staged.containsKey(hash)) missing.putIfAbsent(hash, () => size);
+      }
+    }
+    return [for (final MapEntry(:key, :value) in missing.entries) (key, value)];
   }
+
+  Map<String, Uint8List> _reusableChunks(FakeUpload file) => file.chunks.length > 1 ? _knownChunks(file.path) : {};
 
   Map<String, Uint8List> _knownChunks(String path) {
     final node = nodes[path];

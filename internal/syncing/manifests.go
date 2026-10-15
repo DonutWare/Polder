@@ -19,8 +19,9 @@ type Manifest struct {
 }
 
 type Service struct {
-	db    *sql.DB
-	files *files.Service
+	db        *sql.DB
+	files     *files.Service
+	streaming streamLocks
 }
 
 func NewService(db *sql.DB, fileService *files.Service) *Service {

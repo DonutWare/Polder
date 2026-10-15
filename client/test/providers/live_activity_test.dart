@@ -19,8 +19,10 @@ import "../support/fake_web_socket.dart";
 import "../support/provider_harness.dart";
 import "../support/scripted_client.dart";
 
-LiveTransfer _transfer(String id, String path, {int userId = 1, String? clientId}) =>
-    wire.LiveTransfer.fromJson(transferJson(id: id, path: path, userId: userId, clientId: clientId)).toModel();
+LiveTransfer _transfer(String id, String path, {int userId = 1, String? clientId, String direction = "upload"}) =>
+    wire.LiveTransfer.fromJson(
+      transferJson(id: id, path: path, userId: userId, clientId: clientId, direction: direction),
+    ).toModel();
 
 FileEntry _file(String name, {bool isDir = false}) =>
     FileEntry(path: "/$name", name: name, isDir: isDir, mtime: DateTime.utc(2026));
@@ -60,8 +62,8 @@ void main() {
         ]),
       );
       expect(harness.container.read(uploadsIntoDirectoryProvider("/Photos")).map((t) => t.id), ["b"]);
-      expect(harness.container.read(busyFoldersProvider("/")), {"Photos"});
-      expect(harness.container.read(busyFoldersProvider("/Photos")), {"2026"});
+      expect(harness.container.read(busyFoldersProvider("/")), {"Photos": TransferDirectionKind.upload});
+      expect(harness.container.read(busyFoldersProvider("/Photos")), {"2026": TransferDirectionKind.upload});
     });
   });
 
@@ -77,7 +79,7 @@ void main() {
     const root = SyncRoot(id: "r", accountId: "a", localPath: "/local", remotePath: "/Docs");
 
     Future<Map<String, NowGroup>> groups() async {
-      await pumpEventQueue();
+      await Future<void>.delayed(SyncActivity.notifyInterval * 2);
       return {for (final group in harness.container.read(nowGroupsProvider)) group.folder: group};
     }
 
@@ -103,6 +105,23 @@ void main() {
 
       expect(all["/Docs/Trip"]!.isBatch, isTrue);
       expect(all["/Docs"]!.isBatch, isFalse);
+    });
+
+    test("sync downloads group per folder like uploads, without the server's own transfer next to them", () async {
+      harness.container.read(syncActivityProvider)
+        ..enqueue(root, ["Trip/a.jpg", "Trip/b.jpg", "Trip/c.jpg"], downloads: true)
+        ..begin(root, "Trip/a.jpg", LocalSyncPhase.downloading, total: 10)
+        ..done(root.id, "Trip/c.jpg");
+      harness.container
+          .read(liveTransfersProvider.notifier)
+          .apply(SnapshotEvent([_transfer("batch", "/Docs/Trip", direction: "download")]));
+
+      final all = await groups();
+
+      expect(all.keys, ["/Docs/Trip"]);
+      final trip = all["/Docs/Trip"]!;
+      expect((trip.downloading, trip.waiting, trip.uploading, trip.completed, trip.totalFiles), (1, 1, 0, 1, 3));
+      expect(harness.container.read(busyFoldersProvider("/Docs")), {"Trip": TransferDirectionKind.download});
     });
 
     test("transfers the server reports group by folder and count what finished", () async {
@@ -137,16 +156,25 @@ void main() {
     });
 
     test("folders still on their way show up among the folders", () {
-      final items = mergePendingUploads([_file("Alpha", isDir: true), _file("a.txt")], [], busyFolders: {"Beta"});
+      final items = mergePendingUploads(
+        [_file("Alpha", isDir: true), _file("a.txt")],
+        [],
+        busyFolders: {"Beta": TransferDirectionKind.download},
+      );
       expect(items.map((item) => item.name), ["Alpha", "Beta", "a.txt"]);
       expect(items[1].pendingFolder, "Beta");
+      expect(items[1].syncing, TransferDirectionKind.download);
     });
 
     test("lie over the file they replace", () {
-      final items = mergePendingUploads([_file("b.txt")], [upload], busyFolders: {"b.txt"});
+      final items = mergePendingUploads(
+        [_file("b.txt")],
+        [upload],
+        busyFolders: {"b.txt": TransferDirectionKind.upload},
+      );
       expect(items.single.entry?.name, "b.txt");
       expect(items.single.pending, same(upload));
-      expect(items.single.busy, isFalse);
+      expect(items.single.syncing, isNull);
     });
   });
 

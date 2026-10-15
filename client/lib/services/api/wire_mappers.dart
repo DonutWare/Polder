@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "package:polder/models/activity.dart";
+import "package:polder/models/api_error.dart";
 import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/branding.dart";
 import "package:polder/models/change.dart";
@@ -19,8 +20,9 @@ import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
-import "package:polder/models/upload_session.dart";
+import "package:polder/models/upload_batch.dart";
 import "package:polder/models/user.dart";
+import "package:polder/services/api/api_error_mapper.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 
 extension EntryToModel on wire.Entry {
@@ -298,8 +300,26 @@ extension RestoreModeToWire on RestoreMode {
   };
 }
 
-extension UploadStatusToModel on wire.UploadStatus {
-  UploadSession toModel() => UploadSession(uploadId: uploadId, missing: missing ?? const []);
+extension BatchStatusToModel on wire.BatchStatus {
+  UploadBatchStatus toModel() => UploadBatchStatus(
+    batchId: batchId,
+    missing: [for (final chunk in missing ?? <wire.ChunkRef>[]) UploadChunkSpec(hash: chunk.hash, size: chunk.size)],
+    results: [for (final result in results ?? <wire.FileResult>[]) result.toModel()],
+  );
+}
+
+extension FileResultToModel on wire.FileResult {
+  UploadFileResult toModel() => UploadFileResult(
+    path: path,
+    entry: entry?.toModel(),
+    error: switch (error) {
+      final wire.FileError error => ApiErrorMapper.fromError(
+        ApiError(code: error.code, message: error.message),
+        current: error.current?.toModel(),
+      ),
+      null => null,
+    },
+  );
 }
 
 extension CreateUserRequestToWire on CreateUserRequest {

@@ -9,8 +9,9 @@ import (
 
 	"github.com/klippa-app/go-pdfium"
 	"github.com/klippa-app/go-pdfium/requests"
-	"github.com/klippa-app/go-pdfium/webassembly"
 	"golang.org/x/image/draw"
+
+	"polder-server/internal/pdfpool"
 )
 
 const (
@@ -28,7 +29,7 @@ type pdfReader struct {
 func (r *pdfReader) instance() (pdfium.Pdfium, error) {
 	r.used = true
 	if r.pool == nil {
-		pool, err := webassembly.Init(webassembly.Config{MinIdle: 0, MaxIdle: 1, MaxTotal: 1})
+		pool, err := pdfpool.New()
 		if err != nil {
 			return nil, err
 		}

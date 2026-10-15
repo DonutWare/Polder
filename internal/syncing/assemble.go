@@ -21,18 +21,24 @@ func (source chunkSource) fromCurrentFile() bool {
 	return source.stagedPath == ""
 }
 
-func (s *Service) availableChunkSources(ctx context.Context, owner users.User, target upload) (map[string]chunkSource, error) {
+func (s *Service) availableChunkSources(ctx context.Context, owner users.User, batchID string, request UploadRequest) (map[string]chunkSource, error) {
 	sources := map[string]chunkSource{}
-	if err := s.addCurrentFileChunks(ctx, owner, target.request.Path, sources); err != nil {
-		return nil, err
+	if mayReuseCurrentFile(request) {
+		if err := s.addCurrentFileChunks(ctx, owner, request.Path, sources); err != nil {
+			return nil, err
+		}
 	}
-	for _, chunk := range target.request.Chunks {
-		stagedPath := s.stagedChunkPath(target.id, chunk.Hash)
+	for _, chunk := range request.Chunks {
+		stagedPath := s.stagedChunkPath(batchID, chunk.Hash)
 		if _, err := os.Stat(stagedPath); err == nil {
 			sources[chunk.Hash] = chunkSource{stagedPath: stagedPath, size: chunk.Size}
 		}
 	}
 	return sources, nil
+}
+
+func mayReuseCurrentFile(request UploadRequest) bool {
+	return len(request.Chunks) > 1
 }
 
 func (s *Service) addCurrentFileChunks(ctx context.Context, owner users.User, cleanPath string, sources map[string]chunkSource) error {
@@ -50,10 +56,10 @@ func (s *Service) addCurrentFileChunks(ctx context.Context, owner users.User, cl
 	return nil
 }
 
-func (s *Service) assemble(ctx context.Context, owner users.User, target upload, sources map[string]chunkSource) (io.ReadCloser, error) {
-	ordered := make([]chunkSource, 0, len(target.request.Chunks))
+func (s *Service) assemble(ctx context.Context, owner users.User, request UploadRequest, sources map[string]chunkSource) (io.ReadCloser, error) {
+	ordered := make([]chunkSource, 0, len(request.Chunks))
 	needsCurrentFile := false
-	for _, chunk := range target.request.Chunks {
+	for _, chunk := range request.Chunks {
 		source, available := sources[chunk.Hash]
 		if !available {
 			return nil, apperr.Invalid("chunk %s has not been uploaded yet", chunk.Hash)
@@ -64,7 +70,7 @@ func (s *Service) assemble(ctx context.Context, owner users.User, target upload,
 
 	var currentFile *os.File
 	if needsCurrentFile {
-		file, _, err := s.files.Open(ctx, owner, target.request.Path)
+		file, _, err := s.files.Open(ctx, owner, request.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +117,7 @@ func (r *chunkSequenceReader) openNext() error {
 	}
 	file, err := os.Open(source.stagedPath)
 	if errors.Is(err, fs.ErrNotExist) {
-		return apperr.Invalid("staged chunk disappeared, resume the upload")
+		return apperr.Invalid("staged chunk disappeared, upload the file again")
 	}
 	if err != nil {
 		return err

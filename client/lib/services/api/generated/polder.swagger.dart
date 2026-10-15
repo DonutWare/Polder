@@ -1,20 +1,25 @@
-import 'dart:async';
-import "package:freezed_annotation/freezed_annotation.dart";
-import "package:polder/util/credential_rules.dart";
-import 'package:chopper/chopper.dart';
-import 'package:chopper/chopper.dart' as chopper;
-import 'package:collection/collection.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/http.dart' show MultipartFile;
-import "package:iconsax_plus/iconsax_plus.dart";
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element_parameter
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:json_annotation/json_annotation.dart' as json;
-import "package:polder/util/localization_helper.dart";
+import 'package:collection/collection.dart';
+
+import 'polder.models.swagger.dart';
+
+import 'package:chopper/chopper.dart';
 
 import 'client_mapping.dart';
+
+import 'dart:async';
+
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart' show MultipartFile;
+import 'package:chopper/chopper.dart' as chopper;
+
 import 'polder.enums.swagger.dart' as enums;
 import 'polder.metadata.swagger.dart';
-import 'polder.models.swagger.dart';
 export 'polder.enums.swagger.dart';
 export 'polder.models.swagger.dart';
 
@@ -925,6 +930,7 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Copy a file, or a directory with everything in it
   Future<chopper.Response<Entry>> copyFile({required CopyRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
@@ -1515,6 +1521,107 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     ),
   });
 
+  ///Start uploading a batch of files; returns the chunks the server is missing
+  Future<chopper.Response<BatchStatus>> createUploadBatch({required BatchRequest? body}) {
+    generatedMapping.putIfAbsent(BatchStatus, () => BatchStatus.fromJsonFactory);
+
+    return _createUploadBatch(body: body);
+  }
+
+  ///Start uploading a batch of files; returns the chunks the server is missing
+  @POST(path: '/api/v1/sync/batches', optionalBody: true)
+  Future<chopper.Response<BatchStatus>> _createUploadBatch({
+    @Body() required BatchRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start uploading a batch of files; returns the chunks the server is missing',
+      operationId: 'createUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  });
+
+  ///Cancel a batch; files already stored stay
+  ///@param batchID
+  Future<chopper.Response> abortUploadBatch({required String? batchID}) {
+    return _abortUploadBatch(batchID: batchID);
+  }
+
+  ///Cancel a batch; files already stored stay
+  ///@param batchID
+  @DELETE(path: '/api/v1/sync/batches/{batchID}')
+  Future<chopper.Response> _abortUploadBatch({
+    @Path('batchID') required String? batchID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Cancel a batch; files already stored stay',
+      operationId: 'abortUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  });
+
+  ///Get the chunks a batch is still missing and the files that are done
+  ///@param batchID
+  Future<chopper.Response<BatchStatus>> getUploadBatch({required String? batchID}) {
+    generatedMapping.putIfAbsent(BatchStatus, () => BatchStatus.fromJsonFactory);
+
+    return _getUploadBatch(batchID: batchID);
+  }
+
+  ///Get the chunks a batch is still missing and the files that are done
+  ///@param batchID
+  @GET(path: '/api/v1/sync/batches/{batchID}')
+  Future<chopper.Response<BatchStatus>> _getUploadBatch({
+    @Path('batchID') required String? batchID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get the chunks a batch is still missing and the files that are done',
+      operationId: 'getUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  });
+
+  ///Send the missing chunks back to back as one body; each file is stored once it is complete
+  ///@param batchID
+  Future<chopper.Response<BatchStatus>> streamUploadBatch({required String? batchID, required Object? body}) {
+    generatedMapping.putIfAbsent(BatchStatus, () => BatchStatus.fromJsonFactory);
+
+    return _streamUploadBatch(batchID: batchID, body: body);
+  }
+
+  ///Send the missing chunks back to back as one body; each file is stored once it is complete
+  ///@param batchID
+  @PUT(path: '/api/v1/sync/batches/{batchID}/stream', optionalBody: true)
+  Future<chopper.Response<BatchStatus>> _streamUploadBatch({
+    @Path('batchID') required String? batchID,
+    @Body() required Object? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Send the missing chunks back to back as one body; each file is stored once it is complete',
+      operationId: 'streamUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  });
+
   ///Page through changes since a cursor
   ///@param cursor Cursor from the previous page; 0 starts from the beginning
   ///@param limit Maximum number of changes to return; the server caps it
@@ -1544,6 +1651,28 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     ),
   });
 
+  ///Send several files in one response: per file a JSON header line, then exactly size bytes of content
+  Future<chopper.Response<Stream<List<int>>>> downloadSyncFiles({required DownloadRequest? body}) {
+    return _downloadSyncFiles(body: body);
+  }
+
+  ///Send several files in one response: per file a JSON header line, then exactly size bytes of content
+  @POST(path: '/api/v1/sync/downloads', optionalBody: true)
+  Future<chopper.Response<Stream<List<int>>>> _downloadSyncFiles({
+    @Body() required DownloadRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Send several files in one response: per file a JSON header line, then exactly size bytes of content',
+      operationId: 'downloadSyncFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  });
+
   ///Get a file's chunk manifest for delta sync
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<Manifest>> getManifest({String? path}) {
@@ -1562,134 +1691,6 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       description: '',
       summary: 'Get a file\'s chunk manifest for delta sync',
       operationId: 'getManifest',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  });
-
-  ///Start a chunked upload; returns the chunks the server is missing
-  Future<chopper.Response<UploadStatus>> createUpload({required UploadRequest? body}) {
-    generatedMapping.putIfAbsent(UploadStatus, () => UploadStatus.fromJsonFactory);
-
-    return _createUpload(body: body);
-  }
-
-  ///Start a chunked upload; returns the chunks the server is missing
-  @POST(path: '/api/v1/sync/uploads', optionalBody: true)
-  Future<chopper.Response<UploadStatus>> _createUpload({
-    @Body() required UploadRequest? body,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Start a chunked upload; returns the chunks the server is missing',
-      operationId: 'createUpload',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  });
-
-  ///Cancel an upload
-  ///@param uploadID
-  Future<chopper.Response> abortUpload({required String? uploadID}) {
-    return _abortUpload(uploadID: uploadID);
-  }
-
-  ///Cancel an upload
-  ///@param uploadID
-  @DELETE(path: '/api/v1/sync/uploads/{uploadID}')
-  Future<chopper.Response> _abortUpload({
-    @Path('uploadID') required String? uploadID,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Cancel an upload',
-      operationId: 'abortUpload',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  });
-
-  ///Get the chunks an upload is still missing
-  ///@param uploadID
-  Future<chopper.Response<UploadStatus>> getUpload({required String? uploadID}) {
-    generatedMapping.putIfAbsent(UploadStatus, () => UploadStatus.fromJsonFactory);
-
-    return _getUpload(uploadID: uploadID);
-  }
-
-  ///Get the chunks an upload is still missing
-  ///@param uploadID
-  @GET(path: '/api/v1/sync/uploads/{uploadID}')
-  Future<chopper.Response<UploadStatus>> _getUpload({
-    @Path('uploadID') required String? uploadID,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Get the chunks an upload is still missing',
-      operationId: 'getUpload',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  });
-
-  ///Send one chunk as the request body
-  ///@param uploadID
-  ///@param chunkHash Lowercase hex SHA-256 of the chunk
-  Future<chopper.Response> putChunk({required String? uploadID, required String? chunkHash, required Object? body}) {
-    return _putChunk(uploadID: uploadID, chunkHash: chunkHash, body: body);
-  }
-
-  ///Send one chunk as the request body
-  ///@param uploadID
-  ///@param chunkHash Lowercase hex SHA-256 of the chunk
-  @PUT(path: '/api/v1/sync/uploads/{uploadID}/chunks/{chunkHash}', optionalBody: true)
-  Future<chopper.Response> _putChunk({
-    @Path('uploadID') required String? uploadID,
-    @Path('chunkHash') required String? chunkHash,
-    @Body() required Object? body,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Send one chunk as the request body',
-      operationId: 'putChunk',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  });
-
-  ///Assemble the uploaded chunks into the file
-  ///@param uploadID
-  Future<chopper.Response<Entry>> commitUpload({required String? uploadID}) {
-    generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
-
-    return _commitUpload(uploadID: uploadID);
-  }
-
-  ///Assemble the uploaded chunks into the file
-  ///@param uploadID
-  @POST(path: '/api/v1/sync/uploads/{uploadID}/commit', optionalBody: true)
-  Future<chopper.Response<Entry>> _commitUpload({
-    @Path('uploadID') required String? uploadID,
-    @chopper.Tag()
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Assemble the uploaded chunks into the file',
-      operationId: 'commitUpload',
       consumes: [],
       produces: [],
       security: ["bearer"],

@@ -25,6 +25,9 @@ targets:
             - url: "/api/v1/files/content"
               method: get
               overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/sync/downloads"
+              method: post
+              overridden_value: "Stream<List<int>>"
             - url: "/api/v1/files/preview"
               method: get
               overridden_value: "Stream<List<int>>"

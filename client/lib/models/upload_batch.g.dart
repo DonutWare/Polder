@@ -1,20 +1,10 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'upload_session.dart';
+part of 'upload_batch.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
-
-_UploadSession _$UploadSessionFromJson(Map<String, dynamic> json) => _UploadSession(
-  uploadId: json['uploadId'] as String,
-  missing: (json['missing'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const <String>[],
-);
-
-Map<String, dynamic> _$UploadSessionToJson(_UploadSession instance) => <String, dynamic>{
-  'uploadId': instance.uploadId,
-  'missing': instance.missing,
-};
 
 _UploadChunkSpec _$UploadChunkSpecFromJson(Map<String, dynamic> json) =>
     _UploadChunkSpec(hash: json['hash'] as String, size: (json['size'] as num).toInt());

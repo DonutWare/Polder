@@ -56,14 +56,11 @@ func (c *client) links(id int64) linksResponse {
 	return response
 }
 
-func (c *client) waitForLinks(id int64, done func(linksResponse) error) linksResponse {
+func (c *client) waitForLinks(id int64, done func(linksResponse) error) {
 	c.server.t.Helper()
-	var response linksResponse
 	eventually(c.server.t, func() error {
-		response = c.links(id)
-		return done(response)
+		return done(c.links(id))
 	})
-	return response
 }
 
 func expectSummary(got, want []string) error {

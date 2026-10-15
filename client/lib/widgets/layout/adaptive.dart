@@ -27,6 +27,8 @@ enum WindowSize {
 
 final sidebarExpandedProvider = NotifierProvider<SidebarExpanded, bool>(SidebarExpanded.new);
 
+const sheetShrinkWrapLimit = 30;
+
 class SidebarExpanded extends Notifier<bool> {
   @override
   bool build() => true;

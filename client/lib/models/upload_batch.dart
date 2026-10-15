@@ -1,14 +1,10 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
-part "upload_session.freezed.dart";
-part "upload_session.g.dart";
+import "package:polder/models/file_entry.dart";
+import "package:polder/services/api/api_exceptions.dart";
 
-@freezed
-abstract class UploadSession with _$UploadSession {
-  const factory UploadSession({required String uploadId, @Default(<String>[]) List<String> missing}) = _UploadSession;
-
-  factory UploadSession.fromJson(Map<String, dynamic> json) => _$UploadSessionFromJson(json);
-}
+part "upload_batch.freezed.dart";
+part "upload_batch.g.dart";
 
 @freezed
 abstract class UploadChunkSpec with _$UploadChunkSpec {
@@ -29,4 +25,22 @@ abstract class UploadRequest with _$UploadRequest {
   }) = _UploadRequest;
 
   factory UploadRequest.fromJson(Map<String, dynamic> json) => _$UploadRequestFromJson(json);
+}
+
+class UploadFileResult {
+  const UploadFileResult({required this.path, this.entry, this.error});
+
+  final String path;
+  final FileEntry? entry;
+  final ApiException? error;
+}
+
+class UploadBatchStatus {
+  const UploadBatchStatus({required this.batchId, this.missing = const [], this.results = const []});
+
+  final String batchId;
+  final List<UploadChunkSpec> missing;
+  final List<UploadFileResult> results;
+
+  int get missingBytes => missing.fold(0, (sum, chunk) => sum + chunk.size);
 }

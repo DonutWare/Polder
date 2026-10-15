@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:io";
+import "dart:math";
 
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
@@ -143,7 +144,26 @@ void main() {
       engine = SyncEngine(api: api, store: store, deviceName: "Laptop", activity: activity);
     });
 
-    test("a big file goes from preparing to uploading to done", () async {
+    test("remote files are listed as downloads in their folder and count as done once stored", () async {
+      for (var i = 0; i < 5; i++) {
+        server.putFile("/Docs/Trip/photo$i.jpg", randomBytes(1000, seed: i));
+      }
+      final seen = <LocalSyncItem>[];
+      final subscription = activity.changes.listen((items) => seen.addAll(items.values));
+      addTearDown(subscription.cancel);
+
+      final report = await engine.run(root);
+
+      expect(report.downloaded, 6, reason: report.errors.join("\n"));
+      expect(
+        seen.where((item) => item.relativePath.startsWith("Trip/")),
+        everyElement(isA<LocalSyncItem>().having((item) => item.isDownload, "isDownload", isTrue)),
+      );
+      expect(seen.map((item) => item.group).toSet(), {"root:Trip"});
+      expect(activity.items, isEmpty);
+    });
+
+    test("a big file only moves forward through its phases until it is done", () async {
       final content = randomBytes(6 * 1024 * 1024);
       await local("video.bin").writeAsBytes(content);
       final phases = <LocalSyncPhase>[];
@@ -157,7 +177,8 @@ void main() {
 
       expect(report.uploaded, 1, reason: report.errors.join("\n"));
       expect(server.contentOf("/Docs/video.bin"), content);
-      expect(phases, [LocalSyncPhase.waiting, LocalSyncPhase.preparing, LocalSyncPhase.uploading]);
+      expect(phases.first, LocalSyncPhase.waiting);
+      expect(phases, [...phases]..sort((a, b) => a.index.compareTo(b.index)));
       expect(activity.items, isEmpty);
     });
 
@@ -211,7 +232,7 @@ void main() {
         final preparing = items.values.where((item) => item.phase == LocalSyncPhase.preparing);
         if (preparing.isEmpty) return;
         folderBeforeHashing ??= server.nodes["/Docs/Trip"]?.isDir ?? false;
-        if (server.requests.contains("POST /sync/uploads")) preparingAfterFirstUpload = true;
+        if (server.requests.contains("POST /sync/batches")) preparingAfterFirstUpload = true;
       });
       addTearDown(subscription.cancel);
 
@@ -223,18 +244,14 @@ void main() {
       expect(activity.items, isEmpty);
     });
 
-    test("the whole batch is listed as waiting before the first file is prepared", () async {
-      int? listedBeforePreparing;
-      final subscription = activity.changes.listen((items) {
-        if (items.values.any((item) => item.phase == LocalSyncPhase.preparing)) {
-          listedBeforePreparing ??= items.length;
-        }
-      });
+    test("the whole batch is listed at once", () async {
+      var mostListed = 0;
+      final subscription = activity.changes.listen((items) => mostListed = max(mostListed, items.length));
       addTearDown(subscription.cancel);
 
       await engine.run(root);
 
-      expect(listedBeforePreparing, 10);
+      expect(mostListed, 10);
     });
 
     test("stopping a sync folder ends its run at once and aborts the upload in flight", () async {
@@ -247,7 +264,7 @@ void main() {
       expect(report.hasFailures, isFalse, reason: report.errors.join("\n"));
       expect(report.deferred, greaterThan(0));
       expect(report.uploaded, lessThan(11));
-      expect(server.uploads, isEmpty, reason: "the interrupted upload is aborted");
+      expect(server.batches, isEmpty, reason: "the interrupted upload is aborted");
       expect(activity.items, isEmpty);
     });
 
@@ -263,7 +280,7 @@ void main() {
       final paused = await engine.run(root);
       expect(paused.hasFailures, isFalse, reason: paused.errors.join("\n"));
       expect(paused.deferred, 1);
-      expect(server.uploads, hasLength(1), reason: "the server keeps the session for later");
+      expect(server.batches, hasLength(1), reason: "the server keeps the batch for later");
       expect(activity.items.values.single.phase, LocalSyncPhase.waiting);
       final sentBeforePause = server.chunkBytesReceived;
 
@@ -306,7 +323,7 @@ void main() {
     test("pausing does not wait for a chunk stuck on the network", () async {
       await local("movie.bin").writeAsBytes(randomBytes(8 * 1024 * 1024));
       onRequest = (request) {
-        if (request.url.path.contains("/chunks/")) activity.cancelAll(CancelReason.paused);
+        if (request.url.path.endsWith("/stream")) activity.cancelAll(CancelReason.paused);
       };
 
       final report = await engine.run(root).timeout(const Duration(seconds: 5));
@@ -319,7 +336,7 @@ void main() {
     test("stopping does not wait for a download stuck on the network, and leaves nothing behind", () async {
       server.putFile("/Docs/big.iso", randomBytes(6 * 1024 * 1024));
       onRequest = (request) {
-        if (request.headers.containsKey("Range")) activity.cancelRoot(root.id, CancelReason.stopped);
+        if (request.url.path.endsWith("/files/content")) activity.cancelRoot(root.id, CancelReason.stopped);
       };
 
       final report = await engine.run(root).timeout(const Duration(seconds: 5));
@@ -373,8 +390,18 @@ class _ChunkWatcher extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
-    if (request.method == "PUT" && request.url.path.contains("/chunks/")) _onChunk();
-    return _server.send(request);
+    if (!request.url.path.endsWith("/stream")) return _server.send(request);
+    final watched = http.StreamedRequest(request.method, request.url)
+      ..headers.addAll(request.headers)
+      ..contentLength = request.contentLength;
+    request
+        .finalize()
+        .map((chunk) {
+          _onChunk();
+          return chunk;
+        })
+        .listen(watched.sink.add, onError: watched.sink.addError, onDone: watched.sink.close);
+    return _server.send(watched);
   }
 }
 
@@ -387,7 +414,7 @@ class _StallingClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final stalls = request.url.path.contains("/chunks/") || request.headers.containsKey("Range");
+    final stalls = request.url.path.endsWith("/stream") || request.url.path.endsWith("/files/content");
     _onRequest(request);
     if (stalls) await _network;
     return _server.send(request);

@@ -2,27 +2,25 @@ package syncing
 
 import (
 	"context"
-	"crypto/sha256"
-	"database/sql"
-	"encoding/hex"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"io"
-	"io/fs"
 	"os"
-	"path/filepath"
 	"regexp"
 	"time"
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/chunker"
 	"polder-server/internal/files"
+	"polder-server/internal/logging"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
 )
 
-const UploadLifetime = 24 * time.Hour
+var logger = logging.For("sync")
+
+const (
+	UploadLifetime = 24 * time.Hour
+	MaxBatchFiles  = 1000
+)
 
 var sha256Pattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
 
@@ -40,15 +38,58 @@ type UploadRequest struct {
 	Chunks  []ChunkRef `json:"chunks" doc:"The file's chunks in order"`
 }
 
-type UploadStatus struct {
-	UploadID string   `json:"uploadId"`
-	Missing  []string `json:"missing"`
+type BatchRequest struct {
+	Files []UploadRequest `json:"files" minItems:"1" maxItems:"1000" doc:"The files to upload; each path at most once"`
 }
 
-type upload struct {
-	id      string
-	userID  int64
+type FileError struct {
+	Code    string       `json:"code" doc:"Machine-readable error code, such as conflict or quota_exceeded"`
+	Message string       `json:"message"`
+	Current *files.Entry `json:"current,omitempty" required:"false" doc:"The server's current entry, sent with conflict and already_exists errors"`
+}
+
+type FileResult struct {
+	Path  string       `json:"path"`
+	Entry *files.Entry `json:"entry,omitempty" required:"false" doc:"The stored file, when it was committed"`
+	Error *FileError   `json:"error,omitempty" required:"false" doc:"Why the file was not stored"`
+}
+
+type BatchStatus struct {
+	BatchID string       `json:"batchId"`
+	Missing []ChunkRef   `json:"missing" doc:"The chunks the server still needs, in the order to stream them"`
+	Results []FileResult `json:"results" doc:"The files that are finished, stored or failed; the batch is gone once every file is here"`
+}
+
+type batch struct {
+	id     string
+	userID int64
+	files  []batchFile
+}
+
+type batchFile struct {
+	idx     int
 	request UploadRequest
+	result  *FileResult
+}
+
+func (b batch) unfinishedFiles() []batchFile {
+	var unfinished []batchFile
+	for _, file := range b.files {
+		if file.result == nil {
+			unfinished = append(unfinished, file)
+		}
+	}
+	return unfinished
+}
+
+func (b batch) results() []FileResult {
+	results := []FileResult{}
+	for _, file := range b.files {
+		if file.result != nil {
+			results = append(results, *file.result)
+		}
+	}
+	return results
 }
 
 func (r *UploadRequest) validate() error {
@@ -71,29 +112,83 @@ func (r *UploadRequest) validate() error {
 		total += chunk.Size
 	}
 	if total != r.Size {
-		return apperr.Invalid("chunk sizes add up to %d, expected %d", total, r.Size)
+		return apperr.Invalid("chunk sizes add up to %d, expected %d for %s", total, r.Size, r.Path)
 	}
 	return nil
 }
 
-func (s *Service) CreateUpload(ctx context.Context, owner users.User, request UploadRequest) (UploadStatus, error) {
+func (r *BatchRequest) validate() error {
+	if len(r.Files) == 0 || len(r.Files) > MaxBatchFiles {
+		return apperr.Invalid("a batch holds 1 to %d files", MaxBatchFiles)
+	}
+	seen := make(map[string]bool, len(r.Files))
+	for i := range r.Files {
+		if err := r.Files[i].validate(); err != nil {
+			return err
+		}
+		if seen[r.Files[i].Path] {
+			return apperr.Invalid("%s is in the batch more than once", r.Files[i].Path)
+		}
+		seen[r.Files[i].Path] = true
+	}
+	return nil
+}
+
+func (s *Service) CreateBatch(ctx context.Context, owner users.User, request BatchRequest) (BatchStatus, error) {
 	if err := request.validate(); err != nil {
-		return UploadStatus{}, err
+		return BatchStatus{}, err
 	}
-	if err := s.checkUploadAllowed(ctx, owner, request); err != nil {
-		return UploadStatus{}, err
+	accepted, err := s.rejectDisallowedFiles(ctx, owner, request.Files)
+	if err != nil {
+		return BatchStatus{}, err
 	}
-	created := upload{id: storage.NewID(), userID: owner.ID, request: request}
+	created := batch{id: storage.NewID(), userID: owner.ID, files: accepted}
 	if err := os.MkdirAll(s.stagingDir(created.id), 0o750); err != nil {
-		return UploadStatus{}, err
+		return BatchStatus{}, err
 	}
-	if err := s.insertUpload(ctx, created); err != nil {
-		return UploadStatus{}, err
+	if err := s.adoptChunksStagedByOtherBatches(ctx, owner, created); err != nil {
+		return BatchStatus{}, err
+	}
+	if err := s.insertBatch(ctx, created); err != nil {
+		return BatchStatus{}, err
 	}
 	return s.status(ctx, owner, created)
 }
 
-func (s *Service) checkUploadAllowed(ctx context.Context, owner users.User, request UploadRequest) error {
+func (s *Service) rejectDisallowedFiles(ctx context.Context, owner users.User, requests []UploadRequest) ([]batchFile, error) {
+	remaining, err := s.remainingQuota(ctx, owner)
+	if err != nil {
+		return nil, err
+	}
+	checked := make([]batchFile, 0, len(requests))
+	for i, request := range requests {
+		file := batchFile{idx: i, request: request}
+		if err := s.checkFileAllowed(ctx, owner, request, &remaining); err != nil {
+			result, err := resultForError(request.Path, err)
+			if err != nil {
+				return nil, err
+			}
+			file.result = &result
+		}
+		checked = append(checked, file)
+	}
+	return checked, nil
+}
+
+const unlimitedQuota int64 = -1
+
+func (s *Service) remainingQuota(ctx context.Context, owner users.User) (int64, error) {
+	if owner.HasUnlimitedQuota() {
+		return unlimitedQuota, nil
+	}
+	used, err := s.files.FileBytes(ctx, owner.ID)
+	if err != nil {
+		return 0, err
+	}
+	return owner.QuotaBytes - used, nil
+}
+
+func (s *Service) checkFileAllowed(ctx context.Context, owner users.User, request UploadRequest, remainingQuota *int64) error {
 	current, exists, err := s.currentEntry(ctx, owner, request.Path)
 	if err != nil {
 		return err
@@ -101,16 +196,14 @@ func (s *Service) checkUploadAllowed(ctx context.Context, owner users.User, requ
 	if err := files.CheckWritePreconditions(current, exists, request.BaseRev); err != nil {
 		return err
 	}
-	if owner.HasUnlimitedQuota() {
+	if *remainingQuota == unlimitedQuota {
 		return nil
 	}
-	used, err := s.files.FileBytes(ctx, owner.ID)
-	if err != nil {
-		return err
+	growth := request.Size - current.Size
+	if growth > *remainingQuota {
+		return apperr.QuotaExceeded("%s exceeds your storage quota", request.Path)
 	}
-	if used-current.Size+request.Size > owner.QuotaBytes {
-		return apperr.QuotaExceeded("this upload exceeds your storage quota")
-	}
+	*remainingQuota -= growth
 	return nil
 }
 
@@ -122,220 +215,37 @@ func (s *Service) currentEntry(ctx context.Context, owner users.User, cleanPath 
 	return entry, err == nil, err
 }
 
-func (s *Service) UploadStatus(ctx context.Context, owner users.User, uploadID string) (UploadStatus, error) {
-	found, err := s.loadUpload(ctx, owner, uploadID)
+func resultForError(filePath string, err error) (FileResult, error) {
+	appErr, ok := errors.AsType[*apperr.Error](err)
+	if !ok {
+		return FileResult{}, err
+	}
+	failure := &FileError{Code: string(appErr.Kind), Message: appErr.Message}
+	if current, ok := appErr.Current.(files.Entry); ok {
+		failure.Current = &current
+	}
+	return FileResult{Path: filePath, Error: failure}, nil
+}
+
+func (s *Service) BatchStatus(ctx context.Context, owner users.User, batchID string) (BatchStatus, error) {
+	found, err := s.loadBatch(ctx, owner, batchID)
 	if err != nil {
-		return UploadStatus{}, err
+		return BatchStatus{}, err
 	}
 	return s.status(ctx, owner, found)
 }
 
-func (s *Service) status(ctx context.Context, owner users.User, target upload) (UploadStatus, error) {
-	sources, err := s.availableChunkSources(ctx, owner, target)
+func (s *Service) status(ctx context.Context, owner users.User, target batch) (BatchStatus, error) {
+	plan, err := s.planBatch(ctx, owner, target)
 	if err != nil {
-		return UploadStatus{}, err
+		return BatchStatus{}, err
 	}
-	missing := []string{}
-	seen := map[string]bool{}
-	for _, chunk := range target.request.Chunks {
-		if _, available := sources[chunk.Hash]; !available && !seen[chunk.Hash] {
-			missing = append(missing, chunk.Hash)
-			seen[chunk.Hash] = true
-		}
-	}
-	return UploadStatus{UploadID: target.id, Missing: missing}, nil
+	return BatchStatus{BatchID: target.id, Missing: plan.missing, Results: target.results()}, nil
 }
 
-func (s *Service) Remaining(ctx context.Context, owner users.User, uploadID string) (string, int64, error) {
-	found, err := s.loadUpload(ctx, owner, uploadID)
-	if err != nil {
-		return "", 0, err
-	}
-	status, err := s.status(ctx, owner, found)
-	if err != nil {
-		return "", 0, err
-	}
-	return found.request.Path, MissingBytes(found.request.Chunks, status.Missing), nil
-}
-
-func MissingBytes(chunks []ChunkRef, missing []string) int64 {
-	wanted := make(map[string]bool, len(missing))
-	for _, hash := range missing {
-		wanted[hash] = true
-	}
-	var total int64
-	for _, chunk := range chunks {
-		if wanted[chunk.Hash] {
-			total += chunk.Size
-			delete(wanted, chunk.Hash)
-		}
-	}
-	return total
-}
-
-func (s *Service) PutChunk(ctx context.Context, owner users.User, uploadID, chunkHash string, body io.Reader) error {
-	target, err := s.loadUpload(ctx, owner, uploadID)
-	if err != nil {
+func (s *Service) AbortBatch(ctx context.Context, owner users.User, batchID string) error {
+	if _, err := s.loadBatch(ctx, owner, batchID); err != nil {
 		return err
 	}
-	if !target.expectsChunk(chunkHash) {
-		return apperr.Invalid("chunk %s is not part of this upload", chunkHash)
-	}
-	return s.storeVerifiedChunk(target.id, chunkHash, body)
-}
-
-func (u upload) expectsChunk(chunkHash string) bool {
-	for _, chunk := range u.request.Chunks {
-		if chunk.Hash == chunkHash {
-			return true
-		}
-	}
-	return false
-}
-
-func (s *Service) storeVerifiedChunk(uploadID, chunkHash string, body io.Reader) error {
-	temp, err := os.CreateTemp(s.stagingDir(uploadID), "incoming-*")
-	if err != nil {
-		return err
-	}
-	defer os.Remove(temp.Name())
-
-	hasher := sha256.New()
-	written, copyErr := io.Copy(io.MultiWriter(temp, hasher), io.LimitReader(body, chunker.MaxSize+1))
-	if err := errors.Join(copyErr, temp.Close()); err != nil {
-		return fmt.Errorf("store chunk: %w", err)
-	}
-	if written > chunker.MaxSize {
-		return apperr.Invalid("chunk is larger than %d bytes", chunker.MaxSize)
-	}
-	if actual := hex.EncodeToString(hasher.Sum(nil)); actual != chunkHash {
-		return apperr.Invalid("chunk hash mismatch: got %s", actual)
-	}
-	return os.Rename(temp.Name(), s.stagedChunkPath(uploadID, chunkHash))
-}
-
-func (s *Service) CommitUpload(ctx context.Context, owner users.User, uploadID string) (files.Entry, error) {
-	target, err := s.loadUpload(ctx, owner, uploadID)
-	if err != nil {
-		return files.Entry{}, err
-	}
-	sources, err := s.availableChunkSources(ctx, owner, target)
-	if err != nil {
-		return files.Entry{}, err
-	}
-	content, err := s.assemble(ctx, owner, target, sources)
-	if err != nil {
-		return files.Entry{}, err
-	}
-	defer content.Close()
-
-	entry, err := s.files.Write(ctx, owner, files.WriteRequest{
-		Path:         target.request.Path,
-		BaseRev:      target.request.BaseRev,
-		Mtime:        target.request.Mtime,
-		ExpectedHash: target.request.Hash,
-		Content:      content,
-	})
-	if err != nil {
-		return files.Entry{}, err
-	}
-	return entry, s.removeUpload(ctx, target.id)
-}
-
-func (s *Service) AbortUpload(ctx context.Context, owner users.User, uploadID string) error {
-	target, err := s.loadUpload(ctx, owner, uploadID)
-	if err != nil {
-		return err
-	}
-	return s.removeUpload(ctx, target.id)
-}
-
-func (s *Service) RemoveExpiredUploads(ctx context.Context) error {
-	expired, err := s.expiredUploadIDs(ctx)
-	if err != nil {
-		return err
-	}
-	for _, id := range expired {
-		if err := s.removeUpload(ctx, id); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (s *Service) expiredUploadIDs(ctx context.Context) ([]string, error) {
-	cutoff := time.Now().Add(-UploadLifetime).Unix()
-	rows, err := s.db.QueryContext(ctx, `SELECT id FROM uploads WHERE created_at < $1`, cutoff)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var expired []string
-	for rows.Next() {
-		var id string
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		expired = append(expired, id)
-	}
-	return expired, rows.Err()
-}
-
-func (s *Service) insertUpload(ctx context.Context, created upload) error {
-	chunksJSON, err := json.Marshal(created.request.Chunks)
-	if err != nil {
-		return err
-	}
-	request := created.request
-	_, err = s.db.ExecContext(ctx,
-		`INSERT INTO uploads (id, user_id, path, base_rev, size, hash, mtime_ns, chunks_json, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		created.id, created.userID, request.Path, request.BaseRev, request.Size, request.Hash, unixNanosOrZero(request.Mtime),
-		string(chunksJSON), time.Now().Unix())
-	return err
-}
-
-func (s *Service) loadUpload(ctx context.Context, owner users.User, uploadID string) (upload, error) {
-	found := upload{id: uploadID}
-	var mtimeNanos int64
-	var chunksJSON string
-	err := s.db.QueryRowContext(ctx,
-		`SELECT user_id, path, base_rev, size, hash, mtime_ns, chunks_json FROM uploads WHERE id = $1`, uploadID).
-		Scan(&found.userID, &found.request.Path, &found.request.BaseRev, &found.request.Size, &found.request.Hash, &mtimeNanos, &chunksJSON)
-	if errors.Is(err, sql.ErrNoRows) || (err == nil && found.userID != owner.ID) {
-		return upload{}, apperr.NotFound("upload not found")
-	}
-	if err != nil {
-		return upload{}, err
-	}
-	if mtimeNanos != 0 {
-		found.request.Mtime = time.Unix(0, mtimeNanos).UTC()
-	}
-	return found, json.Unmarshal([]byte(chunksJSON), &found.request.Chunks)
-}
-
-func (s *Service) removeUpload(ctx context.Context, uploadID string) error {
-	if _, err := s.db.ExecContext(ctx, `DELETE FROM uploads WHERE id = $1`, uploadID); err != nil {
-		return err
-	}
-	err := os.RemoveAll(s.stagingDir(uploadID))
-	if errors.Is(err, fs.ErrNotExist) {
-		return nil
-	}
-	return err
-}
-
-func (s *Service) stagingDir(uploadID string) string {
-	return filepath.Join(s.files.Disk().UploadsDir(), uploadID)
-}
-
-func (s *Service) stagedChunkPath(uploadID, chunkHash string) string {
-	return filepath.Join(s.stagingDir(uploadID), chunkHash)
-}
-
-func unixNanosOrZero(moment time.Time) int64 {
-	if moment.IsZero() {
-		return 0
-	}
-	return moment.UnixNano()
+	return s.removeBatch(ctx, batchID)
 }

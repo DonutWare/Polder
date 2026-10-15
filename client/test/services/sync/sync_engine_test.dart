@@ -2,6 +2,7 @@ import "dart:io";
 import "dart:typed_data";
 
 import "package:flutter_test/flutter_test.dart";
+import "package:http/http.dart" as http;
 
 import "package:polder/models/sync/conflict.dart";
 import "package:polder/models/sync/sync_entry.dart";
@@ -80,6 +81,86 @@ void main() {
     expect(report.uploaded, 1);
     expect(server.contentOf("/Docs/video.bin"), edited);
     expect(server.chunkBytesReceived, lessThan(original.length ~/ 2));
+  });
+
+  test("many small files are uploaded in a few streamed batches instead of a request each", () async {
+    final slowEngine = SyncEngine(
+      api: PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: _SlowNetwork(server))),
+      store: store,
+      deviceName: "Laptop",
+    );
+    for (var i = 0; i < 300; i++) {
+      await local("notes/note-$i.txt").create(recursive: true);
+      await local("notes/note-$i.txt").writeAsString("note $i");
+    }
+
+    final report = await slowEngine.run(root);
+
+    expect(report.uploaded, 301, reason: report.errors.join("\n"));
+    expect(String.fromCharCodes(server.contentOf("/Docs/notes/note-123.txt")!), "note 123");
+    expect(server.requests.where((request) => request.endsWith("/stream")).length, lessThan(30));
+    expect(server.requests.where((request) => request == "PUT /files/content"), isEmpty);
+  });
+
+  test("many small remote files download in a few batched responses", () async {
+    final slowEngine = SyncEngine(
+      api: PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: _SlowNetwork(server))),
+      store: store,
+      deviceName: "Laptop",
+    );
+    for (var i = 0; i < 300; i++) {
+      server.putFile("/Docs/notes/note-$i.txt", "note $i".codeUnits);
+    }
+    server.requests.clear();
+
+    final watch = Stopwatch()..start();
+    final report = await slowEngine.run(root);
+
+    expect(report.downloaded, 301, reason: report.errors.join("\n"));
+    expect(await local("notes/note-123.txt").readAsString(), "note 123");
+    expect(server.requests.where((request) => request == "GET /sync/manifest"), isEmpty);
+    expect(server.requests.where((request) => request == "GET /files/content"), isEmpty);
+    expect(server.requests.where((request) => request == "POST /sync/downloads"), hasLength(2));
+    expect(watch.elapsed, lessThan(const Duration(seconds: 5)), reason: "300 serial requests would take 6 s");
+  });
+
+  test("a new large remote file is fetched whole, and a later edit still downloads only the difference", () async {
+    final original = randomBytes(6 * 1024 * 1024);
+    server.putFile("/Docs/video.bin", original);
+
+    await engine.run(root);
+
+    expect(server.requests.where((request) => request == "GET /sync/manifest"), isEmpty);
+    expect(await local("video.bin").readAsBytes(), original);
+    final edited = Uint8List.fromList(original)..setRange(100, 110, List.filled(10, 9));
+    server
+      ..putFile("/Docs/video.bin", edited)
+      ..rangeBytesServed = 0;
+    await engine.run(root);
+    expect(await local("video.bin").readAsBytes(), edited);
+    expect(server.rangeBytesServed, lessThan(original.length ~/ 2));
+  });
+
+  test("a remote file that changes while it is being downloaded is deferred, not failed", () async {
+    server.putFile("/Docs/report.txt", "first".codeUnits);
+    final racing = SyncEngine(
+      api: PolderApi(
+        ApiClientFactory.create(
+          "https://cloud.test",
+          httpClient: _ChangesBeforeDownload(server, () => server.putFile("/Docs/report.txt", "second".codeUnits)),
+        ),
+      ),
+      store: store,
+      deviceName: "Laptop",
+    );
+
+    final first = await racing.run(root);
+    final second = await racing.run(root);
+
+    expect(first.hasFailures, isFalse, reason: first.errors.join("\n"));
+    expect(first.deferred, 1);
+    expect(second.downloaded, 1);
+    expect(await local("report.txt").readAsString(), "second");
   });
 
   test("a small remote edit to a large file downloads only the changed ranges", () async {
@@ -327,4 +408,32 @@ void main() {
       expect(await local("a.txt").exists(), isFalse);
     });
   });
+}
+
+class _SlowNetwork extends http.BaseClient {
+  _SlowNetwork(this._server);
+
+  final FakePolderServer _server;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    return _server.send(request);
+  }
+}
+
+class _ChangesBeforeDownload extends http.BaseClient {
+  _ChangesBeforeDownload(this._server, this._change);
+
+  final FakePolderServer _server;
+  void Function()? _change;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    if (request.url.path.endsWith("/files/content") || request.url.path.endsWith("/sync/downloads")) {
+      _change?.call();
+      _change = null;
+    }
+    return _server.send(request);
+  }
 }

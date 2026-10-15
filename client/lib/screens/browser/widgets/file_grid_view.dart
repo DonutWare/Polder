@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 
+import "package:polder/models/activity.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_grid_tile.dart";
@@ -76,14 +77,20 @@ class _FileGridViewState extends State<FileGridView> {
         itemBuilder: (context, index) {
           final item = widget.items[index];
           final entry = item.entry;
-          if (item.pendingFolder case final folder?) return PendingFolderGridTile(key: ValueKey(folder), name: folder);
+          if (item.pendingFolder case final folder?) {
+            return PendingFolderGridTile(
+              key: ValueKey(folder),
+              name: folder,
+              direction: item.syncing ?? TransferDirectionKind.upload,
+            );
+          }
           if (entry == null) return PendingFileGridTile(key: ValueKey(item.name), upload: item.pending!);
           final tile = SelectableEntry(
             key: ValueKey(item.name),
             parentPath: widget.parentPath,
             entry: entry,
             builder: (context, interaction) =>
-                FileGridTile(entry: entry, interaction: interaction, pending: item.pending, busy: item.busy),
+                FileGridTile(entry: entry, interaction: interaction, pending: item.pending, syncing: item.syncing),
           );
           return item.name == widget.select
               ? SelectionHighlight(key: ValueKey("selected-${item.name}"), child: tile)

@@ -17,10 +17,16 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 
 	"polder-server/internal/app"
+	"polder-server/internal/auth"
 	"polder-server/internal/config"
 )
 
 const postgresEnvironmentVariable = "POLDER_TEST_POSTGRES_DSN"
+
+func TestMain(m *testing.M) {
+	auth.HashCost = auth.Argon2Cost{Time: 1, MemoryKiB: 64, Threads: 1}
+	os.Exit(m.Run())
+}
 
 type testServer struct {
 	t      *testing.T

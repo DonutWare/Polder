@@ -8,9 +8,7 @@ import (
 
 	"polder-server/internal/activity"
 	"polder-server/internal/files"
-	"polder-server/internal/storage"
 	"polder-server/internal/syncing"
-	"polder-server/internal/users"
 )
 
 type changesInput struct {
@@ -18,19 +16,34 @@ type changesInput struct {
 	Limit  int   `query:"limit" default:"1000" doc:"Maximum number of changes to return; the server caps it"`
 }
 
-type uploadPath struct {
-	UploadID string `path:"uploadID"`
+type batchPath struct {
+	BatchID string `path:"batchID"`
 }
 
-type chunkInput struct {
-	UploadID  string `path:"uploadID"`
-	ChunkHash string `path:"chunkHash" doc:"Lowercase hex SHA-256 of the chunk"`
-	content   io.Reader
+type batchStreamInput struct {
+	BatchID string `path:"batchID"`
+	content io.Reader
 }
 
-func (i *chunkInput) Resolve(ctx huma.Context) []error {
+func (i *batchStreamInput) Resolve(ctx huma.Context) []error {
 	i.content = ctx.BodyReader()
 	return nil
+}
+
+type downloadBatchOutput struct {
+	ContentType string `header:"Content-Type"`
+	Body        func(huma.Context)
+}
+
+type transferWriter struct {
+	target   io.Writer
+	transfer *activity.Transfer
+}
+
+func (w transferWriter) Write(p []byte) (int, error) {
+	n, err := w.target.Write(p)
+	w.transfer.Add(int64(n))
+	return n, err
 }
 
 func (a *API) changes(ctx context.Context, input *changesInput) (*jsonBody[files.ChangePage], error) {
@@ -49,86 +62,67 @@ func (a *API) manifest(ctx context.Context, input *pathQuery) (*jsonBody[syncing
 	return respond(manifest), nil
 }
 
-func (a *API) createUpload(ctx context.Context, input *jsonBody[syncing.UploadRequest]) (*jsonBody[syncing.UploadStatus], error) {
-	owner := currentUser(ctx)
-	status, err := a.sync.CreateUpload(ctx, owner, input.Body)
+func (a *API) createUploadBatch(ctx context.Context, input *jsonBody[syncing.BatchRequest]) (*jsonBody[syncing.BatchStatus], error) {
+	status, err := a.sync.CreateBatch(ctx, currentUser(ctx), input.Body)
 	if err != nil {
 		return nil, err
 	}
-	if missing := syncing.MissingBytes(input.Body.Chunks, status.Missing); missing > 0 {
-		cleanPath, _ := storage.CleanPath(input.Body.Path)
-		a.activity.Start(ctx, activity.TransferSpec{
-			ID: status.UploadID, Owner: owner, Direction: activity.DirectionUpload, Path: cleanPath, Total: &missing,
+	return respond(status), nil
+}
+
+func (a *API) uploadBatchStatus(ctx context.Context, input *batchPath) (*jsonBody[syncing.BatchStatus], error) {
+	status, err := a.sync.BatchStatus(ctx, currentUser(ctx), input.BatchID)
+	if err != nil {
+		return nil, err
+	}
+	return respond(status), nil
+}
+
+func (a *API) streamUploadBatch(ctx context.Context, input *batchStreamInput) (*jsonBody[syncing.BatchStatus], error) {
+	owner := currentUser(ctx)
+	stream, err := a.sync.OpenStream(ctx, owner, input.BatchID)
+	if err != nil {
+		return nil, err
+	}
+	defer stream.Close()
+
+	body := input.content
+	if total := stream.MissingBytes(); total > 0 {
+		transfer := a.activity.Start(ctx, activity.TransferSpec{
+			Owner: owner, Direction: activity.DirectionUpload, Path: stream.TransferPath(), Total: &total,
 		})
-	}
-	return respond(status), nil
-}
-
-func (a *API) uploadStatus(ctx context.Context, input *uploadPath) (*jsonBody[syncing.UploadStatus], error) {
-	status, err := a.sync.UploadStatus(ctx, currentUser(ctx), input.UploadID)
-	if err != nil {
-		return nil, err
-	}
-	return respond(status), nil
-}
-
-func (a *API) putChunk(ctx context.Context, input *chunkInput) (*struct{}, error) {
-	owner := currentUser(ctx)
-	transfer, err := a.uploadTransfer(ctx, owner, input.UploadID)
-	if err != nil {
-		return nil, err
-	}
-	defer transfer.Hold()()
-	body := transfer.Reader(input.content)
-	if err := a.sync.PutChunk(ctx, owner, input.UploadID, input.ChunkHash, body); err != nil {
-		body.Undo()
-		return nil, err
-	}
-	return nil, nil
-}
-
-func (a *API) uploadTransfer(ctx context.Context, owner users.User, uploadID string) (*activity.Transfer, error) {
-	if transfer := a.ownTransfer(owner, uploadID); transfer != nil {
-		return transfer, nil
-	}
-	path, remaining, err := a.sync.Remaining(ctx, owner, uploadID)
-	if err != nil {
-		return nil, err
-	}
-	return a.activity.Start(ctx, activity.TransferSpec{
-		ID: uploadID, Owner: owner, Direction: activity.DirectionUpload, Path: path, Total: &remaining,
-	}), nil
-}
-
-func (a *API) ownTransfer(owner users.User, id string) *activity.Transfer {
-	transfer := a.activity.Lookup(id)
-	if transfer == nil || transfer.UserID() != owner.ID {
-		return nil
-	}
-	return transfer
-}
-
-func (a *API) commitUpload(ctx context.Context, input *uploadPath) (*jsonBody[files.Entry], error) {
-	transfer := a.ownTransfer(currentUser(ctx), input.UploadID)
-	if transfer != nil {
+		defer a.activity.Discard(transfer)
 		defer transfer.Hold()()
+		body = transfer.Reader(body)
 	}
-	entry, err := a.sync.CommitUpload(activity.WithTransfer(ctx, transfer), currentUser(ctx), input.UploadID)
-	if transfer != nil {
-		a.activity.Finish(ctx, transfer, err)
-	}
+	status, err := stream.Receive(ctx, body)
 	if err != nil {
 		return nil, err
 	}
-	return respond(entry), nil
+	return respond(status), nil
 }
 
-func (a *API) abortUpload(ctx context.Context, input *uploadPath) (*struct{}, error) {
-	if err := a.sync.AbortUpload(ctx, currentUser(ctx), input.UploadID); err != nil {
+func (a *API) abortUploadBatch(ctx context.Context, input *batchPath) (*struct{}, error) {
+	if err := a.sync.AbortBatch(ctx, currentUser(ctx), input.BatchID); err != nil {
 		return nil, err
 	}
-	if transfer := a.ownTransfer(currentUser(ctx), input.UploadID); transfer != nil {
-		a.activity.Finish(ctx, transfer, context.Canceled)
-	}
 	return nil, nil
+}
+
+func (a *API) downloadBatch(ctx context.Context, input *jsonBody[syncing.DownloadRequest]) (*downloadBatchOutput, error) {
+	owner := currentUser(ctx)
+	paths := make([]string, 0, len(input.Body.Files))
+	for _, file := range input.Body.Files {
+		paths = append(paths, file.Path)
+	}
+	return &downloadBatchOutput{
+		ContentType: "application/octet-stream",
+		Body: func(humaCtx huma.Context) {
+			transfer := a.activity.Start(ctx, activity.TransferSpec{
+				Owner: owner, Direction: activity.DirectionDownload, Path: syncing.CommonFolder(paths),
+			})
+			err := a.sync.WriteFiles(ctx, owner, input.Body.Files, transferWriter{target: humaCtx.BodyWriter(), transfer: transfer})
+			a.activity.Finish(ctx, transfer, err)
+		},
+	}, nil
 }

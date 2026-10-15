@@ -4,12 +4,13 @@ import "dart:io";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/sync/local_file_state.dart";
+import "package:polder/models/sync/sync_action.dart";
 import "package:polder/models/sync/sync_entry.dart";
 import "package:polder/models/sync/sync_root.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/sync/delta_downloader.dart";
-import "package:polder/services/sync/delta_uploader.dart";
+import "package:polder/services/sync/batch_uploader.dart";
 import "package:polder/services/sync/sync_activity.dart";
 import "package:polder/services/sync/sync_paths.dart";
 import "package:polder/services/sync/sync_state_store.dart";
@@ -19,15 +20,15 @@ class SyncExecutor {
     required this._api,
     required this._store,
     this._activity,
-    DeltaUploader? uploader,
+    BatchUploader? uploader,
     DeltaDownloader? downloader,
-  }) : _uploader = uploader ?? DeltaUploader(_api),
+  }) : _uploader = uploader ?? BatchUploader(_api),
        _downloader = downloader ?? DeltaDownloader(_api);
 
   final PolderApi _api;
   final SyncStateStore _store;
   final SyncActivity? _activity;
-  final DeltaUploader _uploader;
+  final BatchUploader _uploader;
   final DeltaDownloader _downloader;
 
   Future<void> createRemoteDir(SyncRoot root, String path) async {
@@ -50,25 +51,61 @@ class SyncExecutor {
     required int baseRev,
     Manifest? manifest,
   }) async {
+    final action = UploadAction(path: path, local: local, baseRev: baseRev);
+    final [failure] = await uploadBatch(root, [action], prepared: {path: ?manifest});
+    if (failure != null) throw failure;
+  }
+
+  Future<List<Exception?>> uploadBatch(
+    SyncRoot root,
+    List<UploadAction> actions, {
+    Map<String, Manifest> prepared = const {},
+    CancelToken? run,
+  }) async {
+    final items = [for (final action in actions) _uploadItem(root, action, prepared[action.path])];
+    final outcomes = await _uploader.upload(items, group: root.id, run: run);
+    final failures = <Exception?>[];
+    for (final (index, outcome) in outcomes.indexed) {
+      if (outcome.result case final result?) await _recordUpload(root, actions[index], result);
+      failures.add(outcome.error);
+    }
+    return failures;
+  }
+
+  Future<void> discardPausedUploads(SyncRoot root) => _uploader.abortPausedBatches(root.id);
+
+  UploadItem _uploadItem(SyncRoot root, UploadAction action, Manifest? manifest) {
     final paths = SyncPaths(root);
     final activity = _activity;
-    final result = await _uploader.upload(
-      source: paths.file(path),
-      remotePath: paths.remotePath(path),
-      baseRev: baseRev,
-      mtime: local.mtime,
+    return UploadItem(
+      source: paths.file(action.path),
+      remotePath: paths.remotePath(action.path),
+      local: action.local,
+      baseRev: action.baseRev,
       manifest: manifest,
       tracking: activity == null
           ? null
           : UploadTracking(
-              begin: (phase, total) => activity.begin(root, path, phase, total: total),
-              progress: (bytes) => activity.progress(root.id, path, bytes),
+              begin: (phase, total) => activity.begin(root, action.path, phase, total: total),
+              progress: (bytes) => activity.progress(root.id, action.path, bytes),
             ),
     );
+  }
+
+  Future<void> _recordUpload(SyncRoot root, UploadAction action, UploadResult result) async {
+    final local = action.local;
     await _store.saveEntry(
-      _fileEntry(root, path, result.entry, result.manifest, localSize: local.size, localMtime: local.mtime),
+      _fileEntry(
+        root,
+        action.path,
+        result.entry,
+        localHash: result.manifest.hash,
+        manifest: result.manifest,
+        localSize: local.size,
+        localMtime: local.mtime,
+      ),
     );
-    activity?.done(root.id, path);
+    _activity?.done(root.id, action.path);
   }
 
   Future<void> download(
@@ -81,16 +118,60 @@ class SyncExecutor {
     _activity?.expectWrite(root.id, path);
     final target = SyncPaths(root).file(path);
     await target.parent.create(recursive: true);
-    final manifest = await _downloader.download(
-      remotePath: remote.path,
+    final activity = _activity;
+    activity?.begin(root, path, LocalSyncPhase.downloading, total: remote.size);
+    var received = 0;
+    final downloaded = await _downloader.download(
+      remote: remote,
       target: target,
       localManifest: _decodeManifest(previous?.manifestJson),
-      mtime: remote.mtime,
+      cancel: cancel,
+      onReceived: activity == null
+          ? null
+          : (bytes) {
+              activity
+                ..downloaded(bytes)
+                ..progress(root.id, path, received += bytes);
+            },
+    );
+    await _recordDownload(root, path, remote, downloaded);
+  }
+
+  Future<List<Exception?>> downloadBatch(SyncRoot root, List<DownloadAction> actions, {CancelToken? cancel}) async {
+    final paths = SyncPaths(root);
+    for (final action in actions) {
+      _activity
+        ?..expectWrite(root.id, action.path)
+        ..begin(root, action.path, LocalSyncPhase.downloading, total: action.remote.size);
+    }
+    final outcomes = await _downloader.downloadBatch(
+      [for (final action in actions) (remote: action.remote, target: paths.file(action.path))],
       cancel: cancel,
       onReceived: _activity?.downloaded,
     );
-    final stat = await target.stat();
-    await _store.saveEntry(_fileEntry(root, path, remote, manifest, localSize: stat.size, localMtime: stat.modified));
+    final failures = <Exception?>[];
+    for (final (index, outcome) in outcomes.indexed) {
+      final action = actions[index];
+      if (outcome.result case final result?) await _recordDownload(root, action.path, action.remote, result);
+      failures.add(outcome.error);
+    }
+    return failures;
+  }
+
+  Future<void> _recordDownload(SyncRoot root, String path, FileEntry remote, DownloadResult downloaded) async {
+    final stat = await SyncPaths(root).file(path).stat();
+    await _store.saveEntry(
+      _fileEntry(
+        root,
+        path,
+        remote,
+        localHash: downloaded.hash,
+        manifest: downloaded.manifest,
+        localSize: stat.size,
+        localMtime: stat.modified,
+      ),
+    );
+    _activity?.done(root.id, path);
   }
 
   /// Moves an unchanged local file to where the server moved it, possibly into another sync root, and carries
@@ -183,19 +264,20 @@ class SyncExecutor {
   SyncEntry _fileEntry(
     SyncRoot root,
     String path,
-    FileEntry remote,
-    Manifest manifest, {
+    FileEntry remote, {
+    required String localHash,
+    required Manifest? manifest,
     required int localSize,
     required DateTime localMtime,
   }) => SyncEntry(
     syncRootId: root.id,
     relativePath: path,
-    localHash: manifest.hash,
+    localHash: localHash,
     localSize: localSize,
     localMtime: localMtime.toUtc(),
     syncedRev: remote.rev,
-    syncedHash: remote.hash.isEmpty ? manifest.hash : remote.hash,
-    manifestJson: jsonEncode(manifest.toJson()),
+    syncedHash: remote.hash.isEmpty ? localHash : remote.hash,
+    manifestJson: manifest == null ? null : jsonEncode(manifest.toJson()),
   );
 
   Manifest? _decodeManifest(String? json) =>

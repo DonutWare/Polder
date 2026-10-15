@@ -11,12 +11,17 @@ import (
 )
 
 const (
-	argonTime    = 2
-	argonMemory  = 64 * 1024
-	argonThreads = 2
-	argonKeyLen  = 32
-	saltLength   = 16
+	argonKeyLen = 32
+	saltLength  = 16
 )
+
+type Argon2Cost struct {
+	Time      uint32
+	MemoryKiB uint32
+	Threads   uint8
+}
+
+var HashCost = Argon2Cost{Time: 2, MemoryKiB: 64 * 1024, Threads: 2}
 
 type Argon2Hasher struct{}
 
@@ -25,10 +30,11 @@ func (Argon2Hasher) Hash(password string) (string, error) {
 	if _, err := rand.Read(salt); err != nil {
 		return "", err
 	}
-	key := argon2.IDKey([]byte(password), salt, argonTime, argonMemory, argonThreads, argonKeyLen)
+	cost := HashCost
+	key := argon2.IDKey([]byte(password), salt, cost.Time, cost.MemoryKiB, cost.Threads, argonKeyLen)
 	encoding := base64.RawStdEncoding
 	return fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
-		argon2.Version, argonMemory, argonTime, argonThreads, encoding.EncodeToString(salt), encoding.EncodeToString(key)), nil
+		argon2.Version, cost.MemoryKiB, cost.Time, cost.Threads, encoding.EncodeToString(salt), encoding.EncodeToString(key)), nil
 }
 
 func (Argon2Hasher) Verify(password, encodedHash string) bool {

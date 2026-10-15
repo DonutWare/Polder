@@ -119,22 +119,15 @@ func TestDeltaUploadIsLoggedOnce(t *testing.T) {
 		content := pseudoRandomBytes(3<<20, 7)
 		request, chunkData := planUpload(t, content, "/sync/big.bin", 0)
 
-		var status uploadStatus
-		alice.mustJSON(http.MethodPost, "/sync/uploads", request, http.StatusCreated, &status)
-		var sent int64
-		for _, missing := range status.Missing {
-			sent += int64(len(chunkData[missing]))
-			alice.expect(alice.request(http.MethodPut, "/sync/uploads/"+status.UploadID+"/chunks/"+missing, bytes.NewReader(chunkData[missing]), nil), http.StatusNoContent, nil)
-		}
-		alice.mustJSON(http.MethodPost, "/sync/uploads/"+status.UploadID+"/commit", nil, http.StatusOK, nil)
+		alice.streamBatch(alice.createBatch(request), chunkData)
 
 		page := alice.activity("")
 		if kinds(page) != "upload /sync/big.bin, login " {
 			t.Fatalf("activity = %s", kinds(page))
 		}
 		upload := page.Entries[0]
-		if *upload.Bytes != sent || *upload.Size != int64(len(content)) || upload.Status != "ok" {
-			t.Fatalf("upload entry = %+v, sent %d", upload, sent)
+		if *upload.Size != int64(len(content)) || upload.Status != "ok" {
+			t.Fatalf("upload entry = %+v", upload)
 		}
 	})
 }

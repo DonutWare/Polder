@@ -54,7 +54,7 @@ class TransferCounter extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    if (request.method == "PUT" && request.url.path.contains("/chunks/")) chunkBytesSent += request.contentLength ?? 0;
+    if (request.method == "PUT" && request.url.path.endsWith("/stream")) chunkBytesSent += request.contentLength ?? 0;
     final response = await _inner.send(request);
     if (response.statusCode == 206) rangeBytesReceived += response.contentLength ?? 0;
     return response;

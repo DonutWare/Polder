@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
 
+import "package:polder/models/activity.dart";
+
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
@@ -9,12 +11,12 @@ import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/theme/app_theme.dart";
 
 class FileGridTile extends StatelessWidget {
-  const FileGridTile({required this.entry, required this.interaction, this.pending, this.busy = false, super.key});
+  const FileGridTile({required this.entry, required this.interaction, this.pending, this.syncing, super.key});
 
   final FileEntry entry;
   final EntryInteraction interaction;
   final PendingUpload? pending;
-  final bool busy;
+  final TransferDirectionKind? syncing;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,8 @@ class FileGridTile extends StatelessWidget {
                               FileThumbnail(entry: entry, dimension: constraints.biggest.shortestSide, fill: true),
                         ),
                       ),
-                      if (busy) const PositionedDirectional(top: 8, start: 8, child: FolderUploadingTag()),
+                      if (syncing case final direction?)
+                        PositionedDirectional(top: 8, start: 8, child: FolderSyncTag(direction: direction)),
                       if (onIconTap != null)
                         PositionedDirectional(
                           top: 0,

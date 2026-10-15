@@ -23,38 +23,51 @@ class SectionCard extends StatelessWidget {
   final Widget child;
 
   @override
+  Widget build(BuildContext context) => Card(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionCardHeader(title: title, subtitle: subtitle, icon: icon, iconColor: iconColor, trailing: trailing),
+        Padding(padding: padding, child: child),
+      ],
+    ),
+  );
+}
+
+class SectionCardHeader extends StatelessWidget {
+  const SectionCardHeader({required this.title, this.subtitle, this.icon, this.iconColor, this.trailing, super.key});
+
+  final String title;
+  final String? subtitle;
+  final IconData? icon;
+  final Color? iconColor;
+  final Widget? trailing;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        spacing: 12,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              spacing: 12,
+          if (icon != null) IconBadge(icon: icon, color: iconColor),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (icon != null) IconBadge(icon: icon, color: iconColor),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: theme.textTheme.titleMedium, overflow: TextOverflow.ellipsis),
-                      if (subtitle != null)
-                        Text(
-                          subtitle!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                        ),
-                    ],
+                Text(title, style: theme.textTheme.titleMedium, overflow: TextOverflow.ellipsis),
+                if (subtitle != null)
+                  Text(
+                    subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
-                ),
-                ?trailing,
               ],
             ),
           ),
-          Padding(padding: padding, child: child),
+          ?trailing,
         ],
       ),
     );

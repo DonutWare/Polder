@@ -7,6 +7,7 @@ import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/providers/sync/sync_activity_provider.dart";
 import "package:polder/providers/sync/sync_paused_provider.dart";
 import "package:polder/services/sync/sync_activity.dart";
+import "package:polder/util/remote_path.dart";
 
 class NowGroup {
   const NowGroup({
@@ -35,7 +36,9 @@ class NowGroup {
       local.where((upload) => upload.phase == LocalSyncPhase.uploading).length +
       transfers.where((transfer) => transfer.isUpload).length;
 
-  int get downloading => transfers.where((transfer) => !transfer.isUpload).length;
+  int get downloading =>
+      local.where((upload) => upload.phase == LocalSyncPhase.downloading).length +
+      transfers.where((transfer) => !transfer.isUpload).length;
 
   int get preparing => local.where((upload) => upload.phase == LocalSyncPhase.preparing).length;
 
@@ -68,9 +71,11 @@ final nowGroupsProvider = Provider<List<NowGroup>>((ref) {
     localGroups.putIfAbsent(item.group, () => []).add(item);
   }
   final localPaths = {for (final item in items) item.remotePath};
+  bool coveredLocally(LiveTransfer transfer) =>
+      localPaths.contains(transfer.path) || localPaths.any((path) => RemotePath.isWithin(path, transfer.path));
   final transferGroups = <String, List<LiveTransfer>>{};
   for (final transfer in ref.watch(scopedTransfersProvider)) {
-    if (transfer.userId == selfId && localPaths.contains(transfer.path)) continue;
+    if (transfer.userId == selfId && coveredLocally(transfer)) continue;
     transferGroups.putIfAbsent(LiveTransfersNotifier.folderKey(transfer), () => []).add(transfer);
   }
   final live = ref.read(liveTransfersProvider.notifier);

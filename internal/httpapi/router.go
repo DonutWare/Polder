@@ -230,13 +230,16 @@ func (a *API) routes(api huma.API) {
 
 	register(user, http.MethodGet, "/sync/changes", "listChanges", "Page through changes since a cursor", a.changes)
 	register(user, http.MethodGet, "/sync/manifest", "getManifest", "Get a file's chunk manifest for delta sync", a.manifest)
-	register(user, http.MethodPost, "/sync/uploads", "createUpload", "Start a chunked upload; returns the chunks the server is missing", a.createUpload,
+	register(user, http.MethodPost, "/sync/downloads", "downloadSyncFiles",
+		"Send several files in one response: per file a JSON header line, then exactly size bytes of content", a.downloadBatch,
+		withResponse(http.StatusOK, "The files, back to back", binaryContent("application/octet-stream")))
+	register(user, http.MethodPost, "/sync/batches", "createUploadBatch", "Start uploading a batch of files; returns the chunks the server is missing", a.createUploadBatch,
 		created, maxBody(uploadPlanLimit))
-	register(user, http.MethodGet, "/sync/uploads/{uploadID}", "getUpload", "Get the chunks an upload is still missing", a.uploadStatus)
-	register(user, http.MethodPut, "/sync/uploads/{uploadID}/chunks/{chunkHash}", "putChunk", "Send one chunk as the request body", a.putChunk,
+	register(user, http.MethodGet, "/sync/batches/{batchID}", "getUploadBatch", "Get the chunks a batch is still missing and the files that are done", a.uploadBatchStatus)
+	register(user, http.MethodPut, "/sync/batches/{batchID}/stream", "streamUploadBatch",
+		"Send the missing chunks back to back as one body; each file is stored once it is complete", a.streamUploadBatch,
 		withRequestBody(binaryContent("application/octet-stream")))
-	register(user, http.MethodPost, "/sync/uploads/{uploadID}/commit", "commitUpload", "Assemble the uploaded chunks into the file", a.commitUpload)
-	register(user, http.MethodDelete, "/sync/uploads/{uploadID}", "abortUpload", "Cancel an upload", a.abortUpload)
+	register(user, http.MethodDelete, "/sync/batches/{batchID}", "abortUploadBatch", "Cancel a batch; files already stored stay", a.abortUploadBatch)
 
 	admin := huma.NewGroup(user)
 	admin.UseMiddleware(requireAdmin(api))

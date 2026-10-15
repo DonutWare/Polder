@@ -63,3 +63,66 @@ class AsyncQueue<T> {
     return Future.wait([for (var i = 0; i < workers; i++) worker()]);
   }
 }
+
+class BatchQueue<T> {
+  BatchQueue({required this.maxItems, required this.maxWeight, required this.weigh});
+
+  final int maxItems;
+  final int maxWeight;
+  final int Function(T item) weigh;
+  final _items = Queue<T>();
+  final _waiters = Queue<Completer<void>>();
+  var _closed = false;
+
+  Future<void> add(T item) async {
+    while (_items.length >= maxItems) {
+      await _wait();
+    }
+    _items.add(item);
+    _wakeAll();
+  }
+
+  Future<List<T>?> takeBatch() async {
+    while (_items.isEmpty) {
+      if (_closed) return null;
+      await _wait();
+    }
+    final batch = <T>[];
+    var weight = 0;
+    while (_items.isNotEmpty && batch.length < maxItems) {
+      final next = weigh(_items.first);
+      if (batch.isNotEmpty && weight + next > maxWeight) break;
+      batch.add(_items.removeFirst());
+      weight += next;
+    }
+    _wakeAll();
+    return batch;
+  }
+
+  void close() {
+    _closed = true;
+    _wakeAll();
+  }
+
+  Future<void> drain(int workers, Future<void> Function(List<T> batch) work) {
+    Future<void> worker() async {
+      for (var batch = await takeBatch(); batch != null; batch = await takeBatch()) {
+        await work(batch);
+      }
+    }
+
+    return Future.wait([for (var i = 0; i < workers; i++) worker()]);
+  }
+
+  Future<void> _wait() {
+    final waiter = Completer<void>();
+    _waiters.add(waiter);
+    return waiter.future;
+  }
+
+  void _wakeAll() {
+    while (_waiters.isNotEmpty) {
+      _waiters.removeFirst().complete();
+    }
+  }
+}

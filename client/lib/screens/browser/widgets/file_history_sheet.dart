@@ -16,6 +16,7 @@ import "package:polder/util/action_feedback.dart";
 import "package:polder/util/byte_format.dart";
 import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/icon_menu_item.dart";
@@ -87,33 +88,38 @@ class _VersionList extends ConsumerWidget {
     final localized = context.localized;
     final theme = Theme.of(context);
     final locale = context.localeName;
-    return ListView(
-      shrinkWrap: true,
-      padding: const EdgeInsets.only(bottom: 16),
-      children: [
-        ListTile(
-          leading: FileThumbnail(entry: entry, dimension: 48),
-          title: Text(localized.versionCurrent),
-          subtitle: Text("${entry.mtime.formatted(context)} · ${ByteFormat.format(entry.size, locale: locale)}"),
+    final versions = listing.versions;
+    final header = [
+      ListTile(
+        leading: FileThumbnail(entry: entry, dimension: 48),
+        title: Text(localized.versionCurrent),
+        subtitle: Text("${entry.mtime.formatted(context)} · ${ByteFormat.format(entry.size, locale: locale)}"),
+      ),
+      const Divider(),
+      if (versions.isEmpty)
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            listing.retention.enabled ? localized.versionHistoryEmpty : localized.versionHistoryOff,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
         ),
-        const Divider(),
-        if (listing.versions.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              listing.retention.enabled ? localized.versionHistoryEmpty : localized.versionHistoryOff,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-          ),
-        for (final version in listing.versions)
-          ListTile(
-            leading: FileThumbnail.version(entry: entry, version: version, dimension: 48),
-            title: Text(version.modifiedAt.formatted(context)),
-            subtitle: Text(ByteFormat.format(version.size, locale: locale)),
-            trailing: _VersionMenu(entry: entry, version: version, onView: onView, onRestore: onRestore),
-          ),
-      ],
+    ];
+    return ListView.builder(
+      shrinkWrap: versions.length < sheetShrinkWrapLimit,
+      padding: const EdgeInsets.only(bottom: 16),
+      itemCount: header.length + versions.length,
+      itemBuilder: (context, index) {
+        if (index < header.length) return header[index];
+        final version = versions[index - header.length];
+        return ListTile(
+          leading: FileThumbnail.version(entry: entry, version: version, dimension: 48),
+          title: Text(version.modifiedAt.formatted(context)),
+          subtitle: Text(ByteFormat.format(version.size, locale: locale)),
+          trailing: _VersionMenu(entry: entry, version: version, onView: onView, onRestore: onRestore),
+        );
+      },
     );
   }
 }

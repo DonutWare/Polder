@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 
+import "package:polder/models/activity.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_list_tile.dart";
@@ -55,13 +56,16 @@ class _FileListViewState extends State<FileListView> {
         final item = widget.items[index];
         final entry = item.entry;
         final content = switch (item) {
-          BrowserItem(:final pendingFolder?) => PendingFolderListTile(name: pendingFolder),
+          BrowserItem(:final pendingFolder?, :final syncing) => PendingFolderListTile(
+            name: pendingFolder,
+            direction: syncing ?? TransferDirectionKind.upload,
+          ),
           _ when entry == null => PendingFileListTile(upload: item.pending!),
           _ => SelectableEntry(
             parentPath: widget.parentPath,
             entry: entry,
             builder: (context, interaction) =>
-                FileListTile(entry: entry, interaction: interaction, pending: item.pending, busy: item.busy),
+                FileListTile(entry: entry, interaction: interaction, pending: item.pending, syncing: item.syncing),
           ),
         };
         return GroupedTile(

@@ -22,6 +22,28 @@ Map<String, dynamic> _$AvatarToJson(Avatar instance) => <String, dynamic>{
   'id': instance.id,
 };
 
+BatchRequest _$BatchRequestFromJson(Map<String, dynamic> json) => BatchRequest(
+  files:
+      (json['files'] as List<dynamic>?)?.map((e) => UploadRequest.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$BatchRequestToJson(BatchRequest instance) => <String, dynamic>{
+  'files': ?instance.files?.map((e) => e.toJson()).toList(),
+};
+
+BatchStatus _$BatchStatusFromJson(Map<String, dynamic> json) => BatchStatus(
+  batchId: json['batchId'] as String,
+  missing: (json['missing'] as List<dynamic>?)?.map((e) => ChunkRef.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  results:
+      (json['results'] as List<dynamic>?)?.map((e) => FileResult.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$BatchStatusToJson(BatchStatus instance) => <String, dynamic>{
+  'batchId': instance.batchId,
+  'missing': ?instance.missing?.map((e) => e.toJson()).toList(),
+  'results': ?instance.results?.map((e) => e.toJson()).toList(),
+};
+
 Branding _$BrandingFromJson(Map<String, dynamic> json) => Branding(
   accentColor: json['accentColor'] as String,
   backgrounds:
@@ -140,6 +162,22 @@ Map<String, dynamic> _$CredentialsRequestToJson(CredentialsRequest instance) => 
   'deviceName': ?instance.deviceName,
   'password': instance.password,
   'username': instance.username,
+};
+
+DownloadFile _$DownloadFileFromJson(Map<String, dynamic> json) =>
+    DownloadFile(path: json['path'] as String, rev: (json['rev'] as num?)?.toInt());
+
+Map<String, dynamic> _$DownloadFileToJson(DownloadFile instance) => <String, dynamic>{
+  'path': instance.path,
+  'rev': ?instance.rev,
+};
+
+DownloadRequest _$DownloadRequestFromJson(Map<String, dynamic> json) => DownloadRequest(
+  files: (json['files'] as List<dynamic>?)?.map((e) => DownloadFile.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+);
+
+Map<String, dynamic> _$DownloadRequestToJson(DownloadRequest instance) => <String, dynamic>{
+  'files': ?instance.files?.map((e) => e.toJson()).toList(),
 };
 
 EditorCapabilities _$EditorCapabilitiesFromJson(Map<String, dynamic> json) => EditorCapabilities(
@@ -278,6 +316,30 @@ Facets _$FacetsFromJson(Map<String, dynamic> json) => Facets(
 Map<String, dynamic> _$FacetsToJson(Facets instance) => <String, dynamic>{
   'exts': ?instance.exts?.map((e) => e.toJson()).toList(),
   'types': ?instance.types?.map((e) => e.toJson()).toList(),
+};
+
+FileError _$FileErrorFromJson(Map<String, dynamic> json) => FileError(
+  code: json['code'] as String,
+  current: json['current'] == null ? null : Entry.fromJson(json['current'] as Map<String, dynamic>),
+  message: json['message'] as String,
+);
+
+Map<String, dynamic> _$FileErrorToJson(FileError instance) => <String, dynamic>{
+  'code': instance.code,
+  'current': ?instance.current?.toJson(),
+  'message': instance.message,
+};
+
+FileResult _$FileResultFromJson(Map<String, dynamic> json) => FileResult(
+  entry: json['entry'] == null ? null : Entry.fromJson(json['entry'] as Map<String, dynamic>),
+  error: json['error'] == null ? null : FileError.fromJson(json['error'] as Map<String, dynamic>),
+  path: json['path'] as String,
+);
+
+Map<String, dynamic> _$FileResultToJson(FileResult instance) => <String, dynamic>{
+  'entry': ?instance.entry?.toJson(),
+  'error': ?instance.error?.toJson(),
+  'path': instance.path,
 };
 
 HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) => HealthStatus(status: json['status'] as String);
@@ -904,16 +966,6 @@ Map<String, dynamic> _$UploadRequestToJson(UploadRequest instance) => <String, d
   'mtime': ?instance.mtime?.toIso8601String(),
   'path': instance.path,
   'size': instance.size,
-};
-
-UploadStatus _$UploadStatusFromJson(Map<String, dynamic> json) => UploadStatus(
-  missing: (json['missing'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-  uploadId: json['uploadId'] as String,
-);
-
-Map<String, dynamic> _$UploadStatusToJson(UploadStatus instance) => <String, dynamic>{
-  'missing': ?instance.missing,
-  'uploadId': instance.uploadId,
 };
 
 User _$UserFromJson(Map<String, dynamic> json) => User(

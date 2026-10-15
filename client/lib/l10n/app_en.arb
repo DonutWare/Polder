@@ -628,6 +628,7 @@
 		}
 	},
 	"folderUploading": "Uploading…",
+	"folderDownloading": "Downloading…",
 	"realtimeOffline": "Live updates paused, reconnecting…",
 	"today": "Today",
 	"yesterday": "Yesterday",
@@ -682,14 +683,6 @@
 	},
 	"nowGroupWaiting": "{count} waiting",
 	"@nowGroupWaiting": {
-		"placeholders": {
-			"count": {
-				"type": "int"
-			}
-		}
-	},
-	"andMore": "and {count} more",
-	"@andMore": {
 		"placeholders": {
 			"count": {
 				"type": "int"

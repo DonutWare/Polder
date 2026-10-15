@@ -22,13 +22,19 @@ class AutoUploadScreen extends StatelessWidget {
     actions: const [SyncNowButton()],
     body: ReadableWidth(
       maxWidth: 840,
-      builder: (context, inset) => ListView(
-        padding: inset + const EdgeInsets.only(top: 8, bottom: 96),
-        children: const [
-          AutoUploadSettingsSection(),
-          LiveTransfersCard(),
-          ConflictsBanner(),
-          SyncRootsList(mode: SyncMode.autoUpload),
+      builder: (context, inset) => CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: inset + const EdgeInsets.only(top: 8, bottom: 96),
+            sliver: const SliverMainAxisGroup(
+              slivers: [
+                SliverToBoxAdapter(child: AutoUploadSettingsSection()),
+                LiveTransfersSliver(),
+                SliverToBoxAdapter(child: ConflictsBanner()),
+                SliverToBoxAdapter(child: SyncRootsList(mode: SyncMode.autoUpload)),
+              ],
+            ),
+          ),
         ],
       ),
     ),

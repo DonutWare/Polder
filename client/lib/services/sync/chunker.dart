@@ -129,7 +129,7 @@ abstract final class FastCdc {
 
   static Manifest _manifestOfFileSync(File file, {void Function(int bytesRead)? onProgress}) {
     final chunks = <ChunkRef>[];
-    final fileDigest = _DigestCollector();
+    final fileDigest = DigestCollector();
     final fileHasher = sha256.startChunkedConversion(fileDigest);
     final reader = file.openSync();
     try {
@@ -167,7 +167,7 @@ abstract final class FastCdc {
       ChunkRef(hash: sha256.convert(chunk).toString(), offset: offset, size: chunk.length);
 }
 
-class _DigestCollector implements Sink<Digest> {
+class DigestCollector implements Sink<Digest> {
   Digest? _digest;
 
   String get hex => _digest.toString();

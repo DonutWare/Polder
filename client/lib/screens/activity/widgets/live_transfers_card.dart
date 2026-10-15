@@ -22,17 +22,19 @@ import "package:polder/widgets/shared/notice_tile.dart";
 import "package:polder/widgets/shared/section_card.dart";
 import "package:polder/widgets/shared/tag.dart";
 
-class LiveTransfersCard extends ConsumerWidget {
-  const LiveTransfersCard({super.key});
+class LiveTransfersSliver extends ConsumerWidget {
+  const LiveTransfersSliver({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final groups = ref.watch(nowGroupsProvider);
+    final open = ref.watch(openNowGroupsProvider);
     final status = ref.watch(syncStatusProvider);
     final lastRunAt = status.lastRunAt;
     final showUser = ref.watch(activityScopeProvider) is! ActivityScopeMe;
     final offline = ref.watch(realtimeStatusProvider).value == RealtimeStatus.offline;
     final cs = Theme.of(context).colorScheme;
+    final card = Theme.of(context).cardTheme;
     final localized = context.localized;
     final colors = AppColors.of(context);
 
@@ -49,57 +51,145 @@ class LiveTransfersCard extends ConsumerWidget {
         ? null
         : localized.lastSynced(lastRunAt.formatted(context));
     final error = status.errorMessage;
+    final rows = _nowRows(groups, open);
 
-    return SectionCard(
-      icon: icon,
-      iconColor: color,
-      title: label,
-      subtitle: subtitle,
-      trailing: const PauseSyncButton(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 16,
-        children: [
-          if (error != null) NoticeTile(icon: IconsaxPlusLinear.information, text: error, color: cs.error),
-          if (groups.isEmpty)
-            Text(
-              localized.nothingTransferring,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+    return SliverPadding(
+      padding: card.margin ?? EdgeInsets.zero,
+      sliver: DecoratedSliver(
+        decoration: ShapeDecoration(color: card.color, shape: card.shape ?? const RoundedRectangleBorder()),
+        sliver: SliverMainAxisGroup(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SectionCardHeader(
+                    icon: icon,
+                    iconColor: color,
+                    title: label,
+                    subtitle: subtitle,
+                    trailing: const PauseSyncButton(),
+                  ),
+                  if (error != null || rows.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(20, 0, 20, rows.isEmpty ? 20 : 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 16,
+                        children: [
+                          if (error != null)
+                            NoticeTile(icon: IconsaxPlusLinear.information, text: error, color: cs.error),
+                          if (rows.isEmpty)
+                            Text(
+                              localized.nothingTransferring,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ),
-          for (final group in groups)
-            if (group.isBatch)
-              NowGroupTile(key: ValueKey(group.key), group: group, showUser: showUser)
-            else
-              ..._tiles(group, showUser: showUser),
-        ],
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, rows.isEmpty ? 0 : 20),
+              sliver: SliverList.builder(
+                itemCount: rows.length,
+                itemBuilder: (context, index) => _NowRowView(row: rows[index], first: index == 0, showUser: showUser),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-List<Widget> _tiles(NowGroup group, {required bool showUser, bool relativeTitles = false, int? limit}) {
-  String? title(String path) => relativeTitles ? RemotePath.relativeTo(path, group.folder) : null;
+sealed class _NowRow {
+  const _NowRow();
+}
+
+class _GroupRow extends _NowRow {
+  const _GroupRow(this.group);
+
+  final NowGroup group;
+}
+
+class _LocalRow extends _NowRow {
+  const _LocalRow(this.upload, {required this.title, required this.nested});
+
+  final PendingUpload upload;
+  final String? title;
+  final bool nested;
+}
+
+class _TransferRow extends _NowRow {
+  const _TransferRow(this.transfer, {required this.title, required this.nested});
+
+  final LiveTransfer transfer;
+  final String? title;
+  final bool nested;
+}
+
+List<_NowRow> _nowRows(List<NowGroup> groups, Set<String> open) => [
+  for (final group in groups)
+    if (group.isBatch) ...[
+      _GroupRow(group),
+      if (open.contains(group.key)) ..._fileRows(group, nested: true),
+    ] else
+      ..._fileRows(group, nested: false),
+];
+
+List<_NowRow> _fileRows(NowGroup group, {required bool nested}) {
+  String? title(String path) => nested ? RemotePath.relativeTo(path, group.folder) : null;
   final local = [...group.local]
     ..sort((a, b) {
       final byPhase = b.phase.index.compareTo(a.phase.index);
       return byPhase != 0 ? byPhase : a.path.compareTo(b.path);
     });
   final transfers = [...group.transfers]..sort((a, b) => a.path.compareTo(b.path));
-  final tiles = [
-    for (final upload in local) LocalSyncTile(key: ValueKey(upload.path), upload: upload, title: title(upload.path)),
-    for (final transfer in transfers)
-      LiveTransferTile(key: ValueKey(transfer.id), transfer: transfer, showUser: showUser, title: title(transfer.path)),
+  return [
+    for (final upload in local) _LocalRow(upload, title: title(upload.path), nested: nested),
+    for (final transfer in transfers) _TransferRow(transfer, title: title(transfer.path), nested: nested),
   ];
-  return limit == null || tiles.length <= limit ? tiles : tiles.take(limit).toList();
+}
+
+class _NowRowView extends StatelessWidget {
+  const _NowRowView({required this.row, required this.first, required this.showUser});
+
+  final _NowRow row;
+  final bool first;
+  final bool showUser;
+
+  @override
+  Widget build(BuildContext context) {
+    final nested = switch (row) {
+      _LocalRow(:final nested) || _TransferRow(:final nested) => nested,
+      _GroupRow() => false,
+    };
+    return Padding(
+      padding: EdgeInsetsDirectional.only(top: first ? 0 : (nested ? 12 : 16), start: nested ? 24 : 0),
+      child: switch (row) {
+        _GroupRow(:final group) => NowGroupTile(key: ValueKey(group.key), group: group),
+        _LocalRow(:final upload, :final title) => LocalSyncTile(
+          key: ValueKey(upload.path),
+          upload: upload,
+          title: title,
+        ),
+        _TransferRow(:final transfer, :final title) => LiveTransferTile(
+          key: ValueKey(transfer.id),
+          transfer: transfer,
+          showUser: showUser,
+          title: title,
+        ),
+      },
+    );
+  }
 }
 
 class NowGroupTile extends ConsumerWidget {
-  const NowGroupTile({required this.group, this.showUser = false, super.key});
-
-  static const shownWhenOpen = 50;
+  const NowGroupTile({required this.group, super.key});
 
   final NowGroup group;
-  final bool showUser;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -119,71 +209,49 @@ class NowGroupTile extends ConsumerWidget {
       localized.nowGroupProgress(group.completed, group.totalFiles),
       if (group.rate > 0) ByteFormat.rate(group.rate, locale: context.localeName),
     ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
       spacing: 12,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          spacing: 12,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            UploadRing(
-              progress: group.progress,
-              dimension: 44,
-              child: Icon(IconsaxPlusBold.folder_2, color: color, size: 20),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 4,
-                children: [
-                  Text(
-                    "${name.isEmpty ? localized.activityAllFiles : name} · ${localized.nowGroupFiles(group.totalFiles)}",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: [for (final (text, color) in phases) Tag(text: text, color: color)],
-                  ),
-                  Text(
-                    progress.join(" · "),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  LevelBar(fraction: group.progress, height: 4, color: color),
-                ],
-              ),
-            ),
-            IconButton(
-              tooltip: open ? localized.hideFiles : localized.showFiles,
-              icon: AnimatedRotation(
-                turns: open ? 0.5 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: const Icon(IconsaxPlusLinear.arrow_down_2),
-              ),
-              onPressed: () => ref.read(openNowGroupsProvider.notifier).toggle(group.key),
-            ),
-          ],
+        UploadRing(
+          progress: group.progress,
+          dimension: 44,
+          child: Icon(IconsaxPlusBold.folder_2, color: color, size: 20),
         ),
-        if (open)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 12,
-              children: [
-                ..._tiles(group, showUser: showUser, relativeTitles: true, limit: NowGroupTile.shownWhenOpen),
-                if (group.active > NowGroupTile.shownWhenOpen)
-                  Text(
-                    localized.andMore(group.active - NowGroupTile.shownWhenOpen),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-              ],
-            ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 4,
+            children: [
+              Text(
+                "${name.isEmpty ? localized.activityAllFiles : name} · ${localized.nowGroupFiles(group.totalFiles)}",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [for (final (text, color) in phases) Tag(text: text, color: color)],
+              ),
+              Text(
+                progress.join(" · "),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              LevelBar(fraction: group.progress, height: 4, color: color),
+            ],
           ),
+        ),
+        IconButton(
+          tooltip: open ? localized.hideFiles : localized.showFiles,
+          icon: AnimatedRotation(
+            turns: open ? 0.5 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: const Icon(IconsaxPlusLinear.arrow_down_2),
+          ),
+          onPressed: () => ref.read(openNowGroupsProvider.notifier).toggle(group.key),
+        ),
       ],
     );
   }

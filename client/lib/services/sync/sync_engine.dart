@@ -1,4 +1,5 @@
 import "dart:io";
+import "dart:math";
 
 import "package:polder/models/manifest.dart";
 import "package:polder/models/sync/conflict.dart";
@@ -12,6 +13,7 @@ import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/sync/chunker.dart";
 import "package:polder/services/sync/conflict_resolver.dart";
+import "package:polder/services/sync/delta_downloader.dart";
 import "package:polder/services/sync/local_scanner.dart";
 import "package:polder/services/sync/reconciler.dart";
 import "package:polder/services/sync/sync_activity.dart";
@@ -55,8 +57,13 @@ class SyncEngine implements SyncService {
   final DateTime Function() _clock;
   late final ConflictResolver _resolver;
 
-  static const hashWorkers = 2;
-  static const uploadWorkers = 2;
+  static final hashWorkers = (Platform.numberOfProcessors - 1).clamp(2, 6);
+  static const actionWorkers = 6;
+  static const uploadStreams = 2;
+  static const maxBatchFiles = 1000;
+  static const maxBatchBytes = 64 * 1024 * 1024;
+  static const downloadStreams = 2;
+  static const maxDownloadBatchFiles = 200;
 
   @override
   Future<SyncRunReport> run(SyncRoot root, {Set<String> pausedPaths = const {}}) async {
@@ -79,7 +86,7 @@ class SyncEngine implements SyncService {
     final paths = SyncPaths(root);
     final reconciler = Reconciler(rootId: root.id, mode: root.mode);
     final prepared = <String, Manifest>{};
-    final scanner = _activity == null ? _scanner : LocalScanner(hasher: _preparingHasher(root, prepared));
+    final scanner = LocalScanner(hasher: _preparingHasher(root, prepared));
     final scan = await scanner.quickScan(paths, synced);
     final deferred = {...scan.deferred};
     bool skipped(String path) => pausedPaths.contains(path) || deferred.contains(path);
@@ -93,6 +100,7 @@ class SyncEngine implements SyncService {
       }
       final outcome = await _executeSafely(root, action, synced, prepared, run);
       report += outcome;
+      if (action is! DownloadAction) _activity?.done(root.id, action.path);
     }
 
     final firstPass = reconciler.reconcile(
@@ -101,27 +109,84 @@ class SyncEngine implements SyncService {
       remote: remoteStates,
       pending: {...scan.dirty, ...deferred},
     );
-    for (final action in firstPass.where((action) => !action.isDelete && !skipped(action.path))) {
+    final firstActions = [...firstPass.where((action) => !action.isDelete && !skipped(action.path))];
+    for (final action in firstActions.where((action) => action.isDirectoryCreation)) {
       await execute(action);
+    }
+    if (!run.isCancelled) {
+      _activity?.enqueue(root, [
+        for (final action in firstActions)
+          if (action is DownloadAction) action.path,
+      ], downloads: true);
+    }
+    final smallDownloads = <DownloadAction>[];
+    final others = <SyncAction>[];
+    for (final action in firstActions.where((action) => !action.isDirectoryCreation)) {
+      if (action is DownloadAction && DeltaDownloader.canBatch(action.remote)) {
+        smallDownloads.add(action);
+      } else {
+        others.add(action);
+      }
+    }
+
+    Future<void> downloadBatch(List<DownloadAction> batch) async {
+      if (run.isCancelled) {
+        deferred.addAll([for (final action in batch) action.path]);
+        return;
+      }
+      final failures = await _executor.downloadBatch(root, batch, cancel: run);
+      final outcome = _batchReport(root, batch, failures, const SyncRunReport(downloaded: 1));
+      report += outcome;
+    }
+
+    await Future.wait([
+      runPool(others, actionWorkers, execute),
+      runPool(_slices(smallDownloads, maxDownloadBatchFiles), downloadStreams, downloadBatch),
+    ]);
+
+    Future<void> uploadBatch(List<UploadAction> batch) async {
+      if (run.isCancelled) {
+        deferred.addAll([for (final action in batch) action.path]);
+        return;
+      }
+      final failures = await _executor.uploadBatch(root, batch, prepared: prepared, run: run);
+      final outcome = _batchReport(root, batch, failures, const SyncRunReport(uploaded: 1));
+      report += outcome;
     }
 
     final hashed = <String, LocalFileState>{};
-    final uploads = AsyncQueue<SyncAction>(capacity: uploadWorkers * 2);
-    final hashing = runPool(dirty, hashWorkers, (path) async {
-      if (run.isCancelled) {
-        deferred.add(path);
-        return;
-      }
-      final state = await scanner.settledState(paths, path, synced: synced[path]);
-      if (state == null) {
-        deferred.add(path);
-        return;
-      }
-      hashed[path] = state;
-      final action = reconciler.decide(path, state, synced[path], remoteStates[path]);
-      if (action != null) await uploads.add(action);
-    }).whenComplete(uploads.close);
-    await Future.wait([hashing, uploads.drain(uploadWorkers, execute)]);
+    final actions = AsyncQueue<SyncAction>(capacity: actionWorkers * 2);
+    final uploads = BatchQueue<UploadAction>(
+      maxItems: maxBatchFiles,
+      maxWeight: maxBatchBytes,
+      weigh: (action) => action.local.size,
+    );
+    final hashing =
+        runPool(dirty, hashWorkers, (path) async {
+          if (run.isCancelled) {
+            deferred.add(path);
+            return;
+          }
+          final state = await scanner.settledState(paths, path, synced: synced[path]);
+          if (state == null) {
+            deferred.add(path);
+            return;
+          }
+          hashed[path] = state;
+          switch (reconciler.decide(path, state, synced[path], remoteStates[path])) {
+            case final UploadAction upload:
+              await uploads.add(upload);
+            case final SyncAction action:
+              await actions.add(action);
+            case null:
+              _activity?.done(root.id, path);
+          }
+        }).whenComplete(() {
+          actions.close();
+          uploads.close();
+        });
+    await Future.wait([hashing, actions.drain(actionWorkers, execute), uploads.drain(uploadStreams, uploadBatch)]);
+    if (!run.isCancelled) await _executor.discardPausedUploads(root);
 
     if (!run.isCancelled) {
       final lastPass = reconciler.reconcile(
@@ -174,8 +239,15 @@ class SyncEngine implements SyncService {
   }
 
   FileHasher _preparingHasher(SyncRoot root, Map<String, Manifest> prepared) => (file, relativePath, size) async {
-    final activity = _activity!;
-    if (size <= LocalScanner.backgroundHashThreshold) return LocalScanner.hashFile(file);
+    if (size < FastCdc.minSize) return LocalScanner.hashFile(file);
+    final manifest = await _chunkForUpload(root, file, relativePath, size);
+    prepared[relativePath] = manifest;
+    return manifest.hash;
+  };
+
+  Future<Manifest> _chunkForUpload(SyncRoot root, File file, String relativePath, int size) async {
+    final activity = _activity;
+    if (activity == null) return FastCdc.manifestOfFile(file);
     final cancel = activity.begin(root, relativePath, LocalSyncPhase.preparing, total: size);
     final manifest = await FastCdc.manifestOfFileTracked(
       file,
@@ -183,9 +255,8 @@ class SyncEngine implements SyncService {
       cancel: cancel,
     );
     activity.progress(root.id, relativePath, manifest.size);
-    prepared[relativePath] = manifest;
-    return manifest.hash;
-  };
+    return manifest;
+  }
 
   @override
   Future<void> resolve(SyncRoot root, Conflict conflict, ConflictResolution resolution) =>
@@ -290,20 +361,34 @@ class SyncEngine implements SyncService {
   ) async {
     try {
       return await _execute(root, action, synced, prepared, run);
-    } on SyncCancelledException {
-      return const SyncRunReport(deferred: 1);
-    } on PathNotFoundException {
-      return const SyncRunReport(deferred: 1);
-    } on ConflictException catch (error) {
-      return SyncRunReport.conflict(_conflictFromRejection(root, action, error));
-    } on ApiException catch (error) {
-      return SyncRunReport.failure("${action.path}: $error");
-    } on FileSystemException catch (error) {
-      return SyncRunReport.failure("${action.path}: ${error.message}");
-    } on HashMismatchException catch (error) {
-      return SyncRunReport.failure("${action.path}: $error");
+    } on Exception catch (error) {
+      return _reportFailure(root, action, error) ?? (throw error);
     }
   }
+
+  SyncRunReport _batchReport(SyncRoot root, List<SyncAction> batch, List<Exception?> failures, SyncRunReport success) {
+    var report = const SyncRunReport();
+    for (final (index, failure) in failures.indexed) {
+      report += switch (failure) {
+        null => success,
+        final error =>
+          _reportFailure(root, batch[index], error) ?? SyncRunReport.failure("${batch[index].path}: $error"),
+      };
+    }
+    return report;
+  }
+
+  static List<List<T>> _slices<T>(List<T> items, int size) => [
+    for (var start = 0; start < items.length; start += size) items.sublist(start, min(start + size, items.length)),
+  ];
+
+  SyncRunReport? _reportFailure(SyncRoot root, SyncAction action, Exception error) => switch (error) {
+    SyncCancelledException() || PathNotFoundException() => const SyncRunReport(deferred: 1),
+    ConflictException() => SyncRunReport.conflict(_conflictFromRejection(root, action, error)),
+    ApiException() || HashMismatchException() => SyncRunReport.failure("${action.path}: $error"),
+    FileSystemException(:final message) => SyncRunReport.failure("${action.path}: $message"),
+    _ => null,
+  };
 
   Future<SyncRunReport> _execute(
     SyncRoot root,

@@ -21,7 +21,7 @@ import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
-import "package:polder/models/upload_session.dart";
+import "package:polder/models/upload_batch.dart";
 import "package:polder/models/user.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
@@ -133,6 +133,15 @@ class PolderApi {
       path: path,
       range: range?.header,
       ifMatch: ifMatchRev == null ? null : "\"$ifMatchRev\"",
+    );
+    return response.body!.map(_asBytes);
+  }
+
+  Future<Stream<Uint8List>> downloadBatch(List<({String path, int rev})> files) async {
+    final response = await _service.downloadSyncFiles(
+      body: wire.DownloadRequest(
+        files: [for (final file in files) wire.DownloadFile(path: file.path, rev: file.rev)],
+      ),
     );
     return response.body!.map(_asBytes);
   }
@@ -258,19 +267,15 @@ class PolderApi {
 
   Future<Manifest> manifest(String path) async => (await _service.getManifest(path: path)).body!.toModel();
 
-  Future<UploadSession> createUpload(UploadRequest request) async =>
-      (await _service.createUpload(body: request.toWire())).body!.toModel();
+  Future<UploadBatchStatus> createUploadBatch(List<UploadRequest> files) async =>
+      (await _service.createUploadBatch(body: wire.BatchRequest(files: [for (final file in files) file.toWire()])))
+          .body!
+          .toModel();
 
-  Future<void> putChunk(String uploadId, String hash, Uint8List bytes) =>
-      _service.putChunk(uploadID: uploadId, chunkHash: hash, body: bytes);
+  Future<UploadBatchStatus> streamUploadBatch(String batchId, Stream<List<int>> body, {required int length}) async =>
+      (await _service.streamUploadBatch(batchID: batchId, body: PendingUpload(body, length))).body!.toModel();
 
-  Future<UploadSession> uploadStatus(String uploadId) async =>
-      (await _service.getUpload(uploadID: uploadId)).body!.toModel();
-
-  Future<FileEntry> commitUpload(String uploadId) async =>
-      (await _service.commitUpload(uploadID: uploadId)).body!.toModel();
-
-  Future<void> abortUpload(String uploadId) => _service.abortUpload(uploadID: uploadId);
+  Future<void> abortUploadBatch(String batchId) => _service.abortUploadBatch(batchID: batchId);
 
   Future<ActivityPage> activity({required ActivityScope scope, int? before, int limit = 50}) async =>
       (await _service.listActivity(user: scope.query, before: before, limit: limit)).body!.toModel();

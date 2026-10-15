@@ -1,10 +1,10 @@
 // coverage:ignore-file
 // ignore_for_file: type=lint
 
-import 'dart:convert';
-
-import 'package:collection/collection.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:collection/collection.dart';
+
+import 'dart:convert';
 
 import 'polder.enums.swagger.dart' as enums;
 
@@ -97,6 +97,96 @@ extension $AvatarExtension on Avatar {
     return Avatar(
       contentType: (contentType != null ? contentType.value : this.contentType),
       id: (id != null ? id.value : this.id),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class BatchRequest {
+  const BatchRequest({this.files});
+
+  factory BatchRequest.fromJson(Map<String, dynamic> json) => _$BatchRequestFromJson(json);
+
+  static const toJsonFactory = _$BatchRequestToJson;
+  Map<String, dynamic> toJson() => _$BatchRequestToJson(this);
+
+  @JsonKey(name: 'files', includeIfNull: false, defaultValue: <UploadRequest>[])
+  final List<UploadRequest>? files;
+  static const fromJsonFactory = _$BatchRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is BatchRequest &&
+            (identical(other.files, files) || const DeepCollectionEquality().equals(other.files, files)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(files) ^ runtimeType.hashCode;
+}
+
+extension $BatchRequestExtension on BatchRequest {
+  BatchRequest copyWith({List<UploadRequest>? files}) {
+    return BatchRequest(files: files ?? this.files);
+  }
+
+  BatchRequest copyWithWrapped({Wrapped<List<UploadRequest>?>? files}) {
+    return BatchRequest(files: (files != null ? files.value : this.files));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class BatchStatus {
+  const BatchStatus({required this.batchId, this.missing, this.results});
+
+  factory BatchStatus.fromJson(Map<String, dynamic> json) => _$BatchStatusFromJson(json);
+
+  static const toJsonFactory = _$BatchStatusToJson;
+  Map<String, dynamic> toJson() => _$BatchStatusToJson(this);
+
+  @JsonKey(name: 'batchId', includeIfNull: false)
+  final String batchId;
+  @JsonKey(name: 'missing', includeIfNull: false, defaultValue: <ChunkRef>[])
+  final List<ChunkRef>? missing;
+  @JsonKey(name: 'results', includeIfNull: false, defaultValue: <FileResult>[])
+  final List<FileResult>? results;
+  static const fromJsonFactory = _$BatchStatusFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is BatchStatus &&
+            (identical(other.batchId, batchId) || const DeepCollectionEquality().equals(other.batchId, batchId)) &&
+            (identical(other.missing, missing) || const DeepCollectionEquality().equals(other.missing, missing)) &&
+            (identical(other.results, results) || const DeepCollectionEquality().equals(other.results, results)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(batchId) ^
+      const DeepCollectionEquality().hash(missing) ^
+      const DeepCollectionEquality().hash(results) ^
+      runtimeType.hashCode;
+}
+
+extension $BatchStatusExtension on BatchStatus {
+  BatchStatus copyWith({String? batchId, List<ChunkRef>? missing, List<FileResult>? results}) {
+    return BatchStatus(
+      batchId: batchId ?? this.batchId,
+      missing: missing ?? this.missing,
+      results: results ?? this.results,
+    );
+  }
+
+  BatchStatus copyWithWrapped({
+    Wrapped<String>? batchId,
+    Wrapped<List<ChunkRef>?>? missing,
+    Wrapped<List<FileResult>?>? results,
+  }) {
+    return BatchStatus(
+      batchId: (batchId != null ? batchId.value : this.batchId),
+      missing: (missing != null ? missing.value : this.missing),
+      results: (results != null ? results.value : this.results),
     );
   }
 }
@@ -653,6 +743,78 @@ extension $CredentialsRequestExtension on CredentialsRequest {
       password: (password != null ? password.value : this.password),
       username: (username != null ? username.value : this.username),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class DownloadFile {
+  const DownloadFile({required this.path, this.rev});
+
+  factory DownloadFile.fromJson(Map<String, dynamic> json) => _$DownloadFileFromJson(json);
+
+  static const toJsonFactory = _$DownloadFileToJson;
+  Map<String, dynamic> toJson() => _$DownloadFileToJson(this);
+
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  @JsonKey(name: 'rev', includeIfNull: false)
+  final int? rev;
+  static const fromJsonFactory = _$DownloadFileFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is DownloadFile &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.rev, rev) || const DeepCollectionEquality().equals(other.rev, rev)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(path) ^ const DeepCollectionEquality().hash(rev) ^ runtimeType.hashCode;
+}
+
+extension $DownloadFileExtension on DownloadFile {
+  DownloadFile copyWith({String? path, int? rev}) {
+    return DownloadFile(path: path ?? this.path, rev: rev ?? this.rev);
+  }
+
+  DownloadFile copyWithWrapped({Wrapped<String>? path, Wrapped<int?>? rev}) {
+    return DownloadFile(path: (path != null ? path.value : this.path), rev: (rev != null ? rev.value : this.rev));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class DownloadRequest {
+  const DownloadRequest({this.files});
+
+  factory DownloadRequest.fromJson(Map<String, dynamic> json) => _$DownloadRequestFromJson(json);
+
+  static const toJsonFactory = _$DownloadRequestToJson;
+  Map<String, dynamic> toJson() => _$DownloadRequestToJson(this);
+
+  @JsonKey(name: 'files', includeIfNull: false, defaultValue: <DownloadFile>[])
+  final List<DownloadFile>? files;
+  static const fromJsonFactory = _$DownloadRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is DownloadRequest &&
+            (identical(other.files, files) || const DeepCollectionEquality().equals(other.files, files)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(files) ^ runtimeType.hashCode;
+}
+
+extension $DownloadRequestExtension on DownloadRequest {
+  DownloadRequest copyWith({List<DownloadFile>? files}) {
+    return DownloadRequest(files: files ?? this.files);
+  }
+
+  DownloadRequest copyWithWrapped({Wrapped<List<DownloadFile>?>? files}) {
+    return DownloadRequest(files: (files != null ? files.value : this.files));
   }
 }
 
@@ -1327,6 +1489,102 @@ extension $FacetsExtension on Facets {
 
   Facets copyWithWrapped({Wrapped<List<FacetCount>?>? exts, Wrapped<List<FacetCount>?>? types}) {
     return Facets(exts: (exts != null ? exts.value : this.exts), types: (types != null ? types.value : this.types));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class FileError {
+  const FileError({required this.code, this.current, required this.message});
+
+  factory FileError.fromJson(Map<String, dynamic> json) => _$FileErrorFromJson(json);
+
+  static const toJsonFactory = _$FileErrorToJson;
+  Map<String, dynamic> toJson() => _$FileErrorToJson(this);
+
+  @JsonKey(name: 'code', includeIfNull: false)
+  final String code;
+  @JsonKey(name: 'current', includeIfNull: false)
+  final Entry? current;
+  @JsonKey(name: 'message', includeIfNull: false)
+  final String message;
+  static const fromJsonFactory = _$FileErrorFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is FileError &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.current, current) || const DeepCollectionEquality().equals(other.current, current)) &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(code) ^
+      const DeepCollectionEquality().hash(current) ^
+      const DeepCollectionEquality().hash(message) ^
+      runtimeType.hashCode;
+}
+
+extension $FileErrorExtension on FileError {
+  FileError copyWith({String? code, Entry? current, String? message}) {
+    return FileError(code: code ?? this.code, current: current ?? this.current, message: message ?? this.message);
+  }
+
+  FileError copyWithWrapped({Wrapped<String>? code, Wrapped<Entry?>? current, Wrapped<String>? message}) {
+    return FileError(
+      code: (code != null ? code.value : this.code),
+      current: (current != null ? current.value : this.current),
+      message: (message != null ? message.value : this.message),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class FileResult {
+  const FileResult({this.entry, this.error, required this.path});
+
+  factory FileResult.fromJson(Map<String, dynamic> json) => _$FileResultFromJson(json);
+
+  static const toJsonFactory = _$FileResultToJson;
+  Map<String, dynamic> toJson() => _$FileResultToJson(this);
+
+  @JsonKey(name: 'entry', includeIfNull: false)
+  final Entry? entry;
+  @JsonKey(name: 'error', includeIfNull: false)
+  final FileError? error;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  static const fromJsonFactory = _$FileResultFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is FileResult &&
+            (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.error, error) || const DeepCollectionEquality().equals(other.error, error)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(entry) ^
+      const DeepCollectionEquality().hash(error) ^
+      const DeepCollectionEquality().hash(path) ^
+      runtimeType.hashCode;
+}
+
+extension $FileResultExtension on FileResult {
+  FileResult copyWith({Entry? entry, FileError? error, String? path}) {
+    return FileResult(entry: entry ?? this.entry, error: error ?? this.error, path: path ?? this.path);
+  }
+
+  FileResult copyWithWrapped({Wrapped<Entry?>? entry, Wrapped<FileError?>? error, Wrapped<String>? path}) {
+    return FileResult(
+      entry: (entry != null ? entry.value : this.entry),
+      error: (error != null ? error.value : this.error),
+      path: (path != null ? path.value : this.path),
+    );
   }
 }
 
@@ -4352,49 +4610,6 @@ extension $UploadRequestExtension on UploadRequest {
       mtime: (mtime != null ? mtime.value : this.mtime),
       path: (path != null ? path.value : this.path),
       size: (size != null ? size.value : this.size),
-    );
-  }
-}
-
-@JsonSerializable(explicitToJson: true)
-class UploadStatus {
-  const UploadStatus({this.missing, required this.uploadId});
-
-  factory UploadStatus.fromJson(Map<String, dynamic> json) => _$UploadStatusFromJson(json);
-
-  static const toJsonFactory = _$UploadStatusToJson;
-  Map<String, dynamic> toJson() => _$UploadStatusToJson(this);
-
-  @JsonKey(name: 'missing', includeIfNull: false, defaultValue: <String>[])
-  final List<String>? missing;
-  @JsonKey(name: 'uploadId', includeIfNull: false)
-  final String uploadId;
-  static const fromJsonFactory = _$UploadStatusFromJson;
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other is UploadStatus &&
-            (identical(other.missing, missing) || const DeepCollectionEquality().equals(other.missing, missing)) &&
-            (identical(other.uploadId, uploadId) || const DeepCollectionEquality().equals(other.uploadId, uploadId)));
-  }
-
-  @override
-  int get hashCode =>
-      const DeepCollectionEquality().hash(missing) ^
-      const DeepCollectionEquality().hash(uploadId) ^
-      runtimeType.hashCode;
-}
-
-extension $UploadStatusExtension on UploadStatus {
-  UploadStatus copyWith({List<String>? missing, String? uploadId}) {
-    return UploadStatus(missing: missing ?? this.missing, uploadId: uploadId ?? this.uploadId);
-  }
-
-  UploadStatus copyWithWrapped({Wrapped<List<String>?>? missing, Wrapped<String>? uploadId}) {
-    return UploadStatus(
-      missing: (missing != null ? missing.value : this.missing),
-      uploadId: (uploadId != null ? uploadId.value : this.uploadId),
     );
   }
 }

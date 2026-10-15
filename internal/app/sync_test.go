@@ -3,10 +3,12 @@ package app_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -146,14 +148,36 @@ func pseudoRandomBytes(size int, seed uint64) []byte {
 	return out
 }
 
-type uploadStatus struct {
-	UploadID string   `json:"uploadId"`
-	Missing  []string `json:"missing"`
+type batchStatus struct {
+	BatchID string `json:"batchId"`
+	Missing []struct {
+		Hash string `json:"hash"`
+		Size int64  `json:"size"`
+	} `json:"missing"`
+	Results []batchResult `json:"results"`
+}
+
+type batchResult struct {
+	Path  string     `json:"path"`
+	Entry *fileEntry `json:"entry"`
+	Error *struct {
+		Code    string     `json:"code"`
+		Current *fileEntry `json:"current"`
+	} `json:"error"`
+}
+
+func (s batchStatus) result(path string) batchResult {
+	for _, result := range s.Results {
+		if result.Path == path {
+			return result
+		}
+	}
+	return batchResult{}
 }
 
 func planUpload(t *testing.T, content []byte, path string, baseRev int64) (map[string]any, map[string][]byte) {
 	t.Helper()
-	var chunks []map[string]any
+	chunks := []map[string]any{}
 	data := map[string][]byte{}
 	manifest, err := chunker.BuildManifest(bytes.NewReader(content))
 	if err != nil {
@@ -166,6 +190,24 @@ func planUpload(t *testing.T, content []byte, path string, baseRev int64) (map[s
 	request := map[string]any{"path": path, "baseRev": baseRev, "size": manifest.Size, "hash": manifest.Hash,
 		"mtime": time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC), "chunks": chunks}
 	return request, data
+}
+
+func (c *client) createBatch(plans ...map[string]any) batchStatus {
+	c.server.t.Helper()
+	var status batchStatus
+	c.mustJSON(http.MethodPost, "/sync/batches", map[string]any{"files": plans}, http.StatusCreated, &status)
+	return status
+}
+
+func (c *client) streamBatch(status batchStatus, data map[string][]byte) batchStatus {
+	c.server.t.Helper()
+	var body bytes.Buffer
+	for _, chunk := range status.Missing {
+		body.Write(data[chunk.Hash])
+	}
+	var result batchStatus
+	c.expect(c.request(http.MethodPut, "/sync/batches/"+status.BatchID+"/stream", &body, nil), http.StatusOK, &result)
+	return result
 }
 
 func TestDeltaUploadOnlySendsChangedChunks(t *testing.T) {
@@ -186,56 +228,238 @@ func TestDeltaUploadOnlySendsChangedChunks(t *testing.T) {
 		copy(edited[12<<20:], []byte("a small edit in the middle of a large file"))
 		request, chunkData := planUpload(t, edited, "/big.bin", base.Rev)
 
-		var status uploadStatus
-		alice.mustJSON(http.MethodPost, "/sync/uploads", request, http.StatusCreated, &status)
-		var uploadedBytes int
+		status := alice.createBatch(request)
+		var uploadedBytes int64
 		for _, missing := range status.Missing {
-			uploadedBytes += len(chunkData[missing])
+			uploadedBytes += missing.Size
 		}
 		if uploadedBytes == 0 || uploadedBytes > 2*chunker.MaxSize {
 			t.Fatalf("expected a small delta, would upload %d of %d bytes", uploadedBytes, len(edited))
 		}
 
-		for i, missing := range status.Missing {
-			alice.expect(alice.request(http.MethodPut, "/sync/uploads/"+status.UploadID+"/chunks/"+missing, bytes.NewReader(chunkData[missing]), nil), http.StatusNoContent, nil)
-			if i == 0 {
-				var resumed uploadStatus
-				alice.mustJSON(http.MethodGet, "/sync/uploads/"+status.UploadID, nil, http.StatusOK, &resumed)
-				if len(resumed.Missing) != len(status.Missing)-1 {
-					t.Fatalf("resume status should shrink: %v", resumed.Missing)
-				}
-			}
+		done := alice.streamBatch(status, chunkData)
+		committed := done.result("/big.bin").Entry
+		_, downloaded := alice.download("/big.bin", nil)
+		if committed == nil || !bytes.Equal(downloaded, edited) || committed.Rev <= base.Rev {
+			t.Fatalf("assembled file does not match the edited content: %+v", done)
+		}
+		alice.expect(alice.request(http.MethodGet, "/sync/batches/"+status.BatchID, nil, nil), http.StatusNotFound, nil)
+	})
+}
+
+func TestUploadBatchResumesAfterBrokenStream(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		content := pseudoRandomBytes(6<<20, 3)
+		request, chunkData := planUpload(t, content, "/resume.bin", 0)
+		status := alice.createBatch(request)
+		if len(status.Missing) < 2 {
+			t.Fatalf("expected several chunks, got %d", len(status.Missing))
 		}
 
-		var committed fileEntry
-		alice.mustJSON(http.MethodPost, "/sync/uploads/"+status.UploadID+"/commit", nil, http.StatusOK, &committed)
-		_, downloaded := alice.download("/big.bin", nil)
-		if !bytes.Equal(downloaded, edited) || committed.Rev <= base.Rev {
-			t.Fatal("assembled file does not match the edited content")
+		first := status.Missing[0]
+		alice.expect(alice.request(http.MethodPut, "/sync/batches/"+status.BatchID+"/stream", bytes.NewReader(chunkData[first.Hash]), nil), http.StatusBadRequest, nil)
+
+		var resumed batchStatus
+		alice.mustJSON(http.MethodGet, "/sync/batches/"+status.BatchID, nil, http.StatusOK, &resumed)
+		if len(resumed.Missing) != len(status.Missing)-1 || resumed.Missing[0].Hash != status.Missing[1].Hash {
+			t.Fatalf("resume should skip the chunk that arrived: %+v", resumed.Missing)
+		}
+
+		done := alice.streamBatch(resumed, chunkData)
+		_, downloaded := alice.download("/resume.bin", nil)
+		if done.result("/resume.bin").Entry == nil || !bytes.Equal(downloaded, content) {
+			t.Fatalf("resumed upload = %+v", done)
 		}
 	})
 }
 
-func TestDeltaUploadRejectsWrongChunkAndStaleBase(t *testing.T) {
+func TestNewUploadBatchReusesChunksAnAbandonedBatchReceived(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 0)
-		var base fileEntry
-		alice.put("/doc.bin", 0, pseudoRandomBytes(1<<20, 7), http.StatusOK, &base)
+		content := pseudoRandomBytes(6<<20, 5)
+		request, chunkData := planUpload(t, content, "/paused.bin", 0)
+		abandoned := alice.createBatch(request)
+		first := abandoned.Missing[0]
+		alice.expect(alice.request(http.MethodPut, "/sync/batches/"+abandoned.BatchID+"/stream", bytes.NewReader(chunkData[first.Hash]), nil), http.StatusBadRequest, nil)
 
-		request, chunkData := planUpload(t, pseudoRandomBytes(1<<20, 8), "/doc.bin", base.Rev)
-		var status uploadStatus
-		alice.mustJSON(http.MethodPost, "/sync/uploads", request, http.StatusCreated, &status)
+		retried := alice.createBatch(request)
+		if len(retried.Missing) != len(abandoned.Missing)-1 {
+			t.Fatalf("the new batch should not ask for the chunk the old one received: %d of %d", len(retried.Missing), len(abandoned.Missing))
+		}
+		alice.expect(alice.request(http.MethodDelete, "/sync/batches/"+abandoned.BatchID, nil, nil), http.StatusNoContent, nil)
+		done := alice.streamBatch(retried, chunkData)
+		if _, downloaded := alice.download("/paused.bin", nil); done.result("/paused.bin").Entry == nil || !bytes.Equal(downloaded, content) {
+			t.Fatalf("retried upload = %+v", done)
+		}
+	})
+}
 
-		alice.expect(alice.request(http.MethodPut, "/sync/uploads/"+status.UploadID+"/chunks/"+status.Missing[0], bytes.NewReader([]byte("tampered")), nil), http.StatusBadRequest, nil)
-		for _, missing := range status.Missing {
-			alice.expect(alice.request(http.MethodPut, "/sync/uploads/"+status.UploadID+"/chunks/"+missing, bytes.NewReader(chunkData[missing]), nil), http.StatusNoContent, nil)
+func TestUploadBatchStoresManyFilesInOneStream(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		var plans []map[string]any
+		data := map[string][]byte{}
+		contents := map[string][]byte{}
+		for i := range 40 {
+			path := fmt.Sprintf("/many/file-%02d.txt", i)
+			contents[path] = fmt.Appendf(nil, "file number %d", i%30)
+			plan, chunks := planUpload(t, contents[path], path, 0)
+			plans = append(plans, plan)
+			for hash, chunk := range chunks {
+				data[hash] = chunk
+			}
+		}
+		empty, _ := planUpload(t, nil, "/many/empty.txt", 0)
+		plans = append(plans, empty)
+
+		status := alice.createBatch(plans...)
+		if len(status.Missing) != 30 {
+			t.Fatalf("identical files should be sent once: %d missing", len(status.Missing))
+		}
+		done := alice.streamBatch(status, data)
+		if len(done.Results) != len(plans) || len(done.Missing) != 0 {
+			t.Fatalf("stream result = %+v", done)
+		}
+		for path, content := range contents {
+			if done.result(path).Entry == nil {
+				t.Fatalf("%s was not stored: %+v", path, done.result(path))
+			}
+			if _, downloaded := alice.download(path, nil); !bytes.Equal(downloaded, content) {
+				t.Fatalf("%s = %q", path, downloaded)
+			}
+		}
+		if alice.stat("/many/empty.txt").Size != 0 {
+			t.Fatal("the empty file should be stored")
+		}
+	})
+}
+
+func TestUploadBatchReportsFailuresPerFile(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		var stale, raced fileEntry
+		alice.put("/stale.txt", 0, []byte("old"), http.StatusOK, &stale)
+		alice.put("/stale.txt", stale.Rev, []byte("newer"), http.StatusOK, nil)
+		alice.put("/raced.txt", 0, []byte("old"), http.StatusOK, &raced)
+
+		data := map[string][]byte{}
+		plan := func(path string, content []byte, baseRev int64) map[string]any {
+			request, chunks := planUpload(t, content, path, baseRev)
+			for hash, chunk := range chunks {
+				data[hash] = chunk
+			}
+			return request
+		}
+		status := alice.createBatch(
+			plan("/stale.txt", []byte("mine"), stale.Rev),
+			plan("/raced.txt", []byte("mine too"), raced.Rev),
+			plan("/corrupt.txt", []byte("will be damaged"), 0),
+			plan("/fine.txt", []byte("all good"), 0),
+		)
+		if rejected := status.result("/stale.txt"); rejected.Error == nil || rejected.Error.Code != "conflict" || rejected.Error.Current == nil {
+			t.Fatalf("stale file should be rejected up front: %+v", status.Results)
+		}
+		if len(status.Missing) != 3 {
+			t.Fatalf("rejected files should not be asked for: %d missing", len(status.Missing))
 		}
 
-		alice.put("/doc.bin", base.Rev, []byte("someone else won"), http.StatusOK, nil)
-		var conflict errorResponse
-		alice.mustJSON(http.MethodPost, "/sync/uploads/"+status.UploadID+"/commit", nil, http.StatusConflict, &conflict)
-		if conflict.Current == nil || conflict.Current.Size != int64(len("someone else won")) {
-			t.Fatalf("commit conflict should include the current entry: %+v", conflict)
+		alice.put("/raced.txt", raced.Rev, []byte("someone else won"), http.StatusOK, nil)
+		for hash, chunk := range data {
+			if string(chunk) == "will be damaged" {
+				data[hash] = []byte("will be DAMAGED")
+			}
+		}
+		done := alice.streamBatch(status, data)
+		if result := done.result("/raced.txt"); result.Error == nil || result.Error.Code != "conflict" {
+			t.Fatalf("raced file should conflict: %+v", result)
+		}
+		if result := done.result("/corrupt.txt"); result.Error == nil || result.Error.Code != "precondition_failed" {
+			t.Fatalf("corrupt file should fail: %+v", result)
+		}
+		if done.result("/fine.txt").Entry == nil {
+			t.Fatalf("other files should still be stored: %+v", done.Results)
+		}
+	})
+}
+
+func TestUploadBatchChecksQuotaAcrossFiles(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 100)
+		first, _ := planUpload(t, bytes.Repeat([]byte("a"), 60), "/a.txt", 0)
+		second, _ := planUpload(t, bytes.Repeat([]byte("b"), 60), "/b.txt", 0)
+		status := alice.createBatch(first, second)
+		if result := status.result("/b.txt"); result.Error == nil || result.Error.Code != "quota_exceeded" {
+			t.Fatalf("second file should exceed the quota: %+v", status.Results)
+		}
+		if status.result("/a.txt").Error != nil {
+			t.Fatalf("first file fits: %+v", status.Results)
+		}
+	})
+}
+
+type downloadRecord struct {
+	Path  string `json:"path"`
+	Rev   int64  `json:"rev"`
+	Size  int64  `json:"size"`
+	Hash  string `json:"hash"`
+	Error *struct {
+		Code string `json:"code"`
+	} `json:"error"`
+	content []byte
+}
+
+func readDownloadRecords(t *testing.T, body []byte) []downloadRecord {
+	t.Helper()
+	var records []downloadRecord
+	for len(body) > 0 {
+		newline := bytes.IndexByte(body, '\n')
+		var record downloadRecord
+		if err := json.Unmarshal(body[:newline], &record); err != nil {
+			t.Fatal(err)
+		}
+		body = body[newline+1:]
+		record.content, body = body[:record.Size], body[record.Size:]
+		records = append(records, record)
+	}
+	return records
+}
+
+func TestDownloadBatchStreamsFilesInOrder(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		var first, stale fileEntry
+		alice.put("/a.txt", 0, []byte("first file"), http.StatusOK, &first)
+		alice.put("/empty.txt", 0, nil, http.StatusOK, nil)
+		alice.put("/stale.txt", 0, []byte("old"), http.StatusOK, &stale)
+		alice.put("/stale.txt", stale.Rev, []byte("new"), http.StatusOK, nil)
+
+		request := map[string]any{"files": []map[string]any{
+			{"path": "/a.txt", "rev": first.Rev}, {"path": "/missing.txt"}, {"path": "/empty.txt"}, {"path": "/stale.txt", "rev": stale.Rev},
+		}}
+		encoded, _ := json.Marshal(request)
+		response := alice.request(http.MethodPost, "/sync/downloads", bytes.NewReader(encoded), map[string]string{"Content-Type": "application/json"})
+		defer response.Body.Close()
+		body, _ := io.ReadAll(response.Body)
+		if response.StatusCode != http.StatusOK {
+			t.Fatalf("status %d: %s", response.StatusCode, body)
+		}
+
+		records := readDownloadRecords(t, body)
+		if len(records) != 4 {
+			t.Fatalf("records = %+v", records)
+		}
+		if string(records[0].content) != "first file" || records[0].Hash != first.Hash || records[0].Rev != first.Rev {
+			t.Fatalf("first record = %+v", records[0])
+		}
+		if records[1].Error == nil || records[1].Error.Code != "not_found" {
+			t.Fatalf("missing file should fail on its own: %+v", records[1])
+		}
+		if records[2].Error != nil || records[2].Size != 0 {
+			t.Fatalf("empty file = %+v", records[2])
+		}
+		if records[3].Error == nil || records[3].Error.Code != "precondition_failed" {
+			t.Fatalf("stale revision should fail: %+v", records[3])
 		}
 	})
 }

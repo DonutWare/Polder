@@ -34,7 +34,6 @@ class ActivityScreen extends ConsumerWidget {
     final history = ref.watch(activityHistoryProvider(scope));
     final notifier = ref.read(activityHistoryProvider(scope).notifier);
     final rows = [
-      const LiveTransfersCard(),
       SectionHeader(context.localized.activityHistory),
       ...switch (history) {
         AsyncValue(value: final ActivityHistory loaded?) => _historyRows(
@@ -63,16 +62,29 @@ class ActivityScreen extends ConsumerWidget {
         builder: (context, inset) => RefreshIndicator(
           edgeOffset: inset.top,
           onRefresh: notifier.refresh,
-          child: ListView.builder(
+          child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: inset + const EdgeInsets.only(top: 8, bottom: 96),
-            itemCount: rows.length + (hasMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (hasMore && index >= rows.length - _loadAhead) unawaited(Future.microtask(notifier.loadMore));
-              return index < rows.length
-                  ? rows[index]
-                  : const Padding(padding: EdgeInsets.all(24), child: CenteredProgress());
-            },
+            slivers: [
+              SliverPadding(
+                padding: inset + const EdgeInsets.only(top: 8, bottom: 96),
+                sliver: SliverMainAxisGroup(
+                  slivers: [
+                    const LiveTransfersSliver(),
+                    SliverList.builder(
+                      itemCount: rows.length + (hasMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (hasMore && index >= rows.length - _loadAhead) {
+                          unawaited(Future.microtask(notifier.loadMore));
+                        }
+                        return index < rows.length
+                            ? rows[index]
+                            : const Padding(padding: EdgeInsets.all(24), child: CenteredProgress());
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

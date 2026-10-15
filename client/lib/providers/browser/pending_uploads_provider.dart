@@ -1,5 +1,6 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "package:polder/models/activity.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/transfer.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
@@ -46,7 +47,7 @@ class PendingUpload {
 }
 
 class BrowserItem {
-  const BrowserItem({this.entry, this.pending, this.pendingFolder, this.busy = false})
+  const BrowserItem({this.entry, this.pending, this.pendingFolder, this.syncing})
     : assert(entry != null || pending != null || pendingFolder != null);
 
   final FileEntry? entry;
@@ -54,7 +55,7 @@ class BrowserItem {
 
   final String? pendingFolder;
 
-  final bool busy;
+  final TransferDirectionKind? syncing;
 
   String get name => entry?.name ?? pending?.name ?? pendingFolder!;
 
@@ -86,7 +87,7 @@ final pendingUploadsProvider = Provider.autoDispose.family<List<PendingUpload>, 
 List<BrowserItem> mergePendingUploads(
   List<FileEntry> sortedEntries,
   List<PendingUpload> pending, {
-  Set<String> busyFolders = const {},
+  Map<String, TransferDirectionKind> busyFolders = const {},
 }) {
   final byName = {for (final upload in pending) upload.name: upload};
   final items = [
@@ -94,14 +95,14 @@ List<BrowserItem> mergePendingUploads(
       BrowserItem(
         entry: entry,
         pending: entry.isDir ? null : byName.remove(entry.name),
-        busy: entry.isDir && busyFolders.contains(entry.name),
+        syncing: entry.isDir ? busyFolders[entry.name] : null,
       ),
   ];
   final existing = {for (final entry in sortedEntries) entry.name};
-  for (final folder in busyFolders.difference(existing).toList()..sort()) {
+  for (final folder in busyFolders.keys.toSet().difference(existing).toList()..sort()) {
     final key = folder.toLowerCase();
     final index = items.indexWhere((item) => !item.isDir || item.name.toLowerCase().compareTo(key) > 0);
-    items.insert(index == -1 ? items.length : index, BrowserItem(pendingFolder: folder, busy: true));
+    items.insert(index == -1 ? items.length : index, BrowserItem(pendingFolder: folder, syncing: busyFolders[folder]));
   }
   for (final upload in byName.values) {
     final key = upload.name.toLowerCase();

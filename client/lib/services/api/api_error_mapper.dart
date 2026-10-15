@@ -25,18 +25,22 @@ class ApiErrorInterceptor implements Interceptor {
 }
 
 abstract final class ApiErrorMapper {
-  static ApiException fromResponse(int statusCode, Map<String, dynamic>? body) {
-    final error = _parseError(body);
+  static ApiException fromResponse(int statusCode, Map<String, dynamic>? body) =>
+      _fromParts(statusCode, _parseError(body), _parseCurrent(body));
+
+  static ApiException fromError(ApiError error, {FileEntry? current}) => _fromParts(null, error, current);
+
+  static ApiException _fromParts(int? statusCode, ApiError? error, FileEntry? current) {
     return switch ((statusCode, error?.code)) {
-      (_, "conflict") => ConflictException(current: _parseCurrent(body), error: error, statusCode: statusCode),
+      (_, "conflict") => ConflictException(current: current, error: error, statusCode: statusCode),
       (_, "already_exists") => AlreadyExistsException(error: error, statusCode: statusCode),
       (_, "quota_exceeded") || (507, _) => QuotaExceededException(error: error, statusCode: statusCode),
       (_, "invalid_request") || (400, _) => InvalidRequestException(error: error, statusCode: statusCode),
       (_, "unauthorized") || (401, _) => UnauthorizedException(error: error, statusCode: statusCode),
       (_, "forbidden") || (403, _) => ForbiddenException(error: error, statusCode: statusCode),
       (_, "not_found") || (404, _) => NotFoundException(error: error, statusCode: statusCode),
-      (409, _) => ConflictException(current: _parseCurrent(body), error: error, statusCode: statusCode),
-      (412, _) => PreconditionFailedException(error: error, statusCode: statusCode),
+      (_, "precondition_failed") || (412, _) => PreconditionFailedException(error: error, statusCode: statusCode),
+      (409, _) => ConflictException(current: current, error: error, statusCode: statusCode),
       _ => ServerException(error: error, statusCode: statusCode),
     };
   }

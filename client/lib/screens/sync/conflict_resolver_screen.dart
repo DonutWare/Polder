@@ -29,15 +29,29 @@ class ConflictResolverScreen extends ConsumerWidget {
             )
           : ReadableWidth(
               maxWidth: 840,
-              builder: (context, inset) => ListView(
+              builder: (context, inset) => ListView.builder(
                 padding: inset + const EdgeInsets.only(top: 8, bottom: 24),
-                children: [
-                  NavGroup(
-                    title: context.localized.conflictsWaiting(conflicts.length),
-                    children: [for (final conflict in conflicts) ConflictTile(conflict: conflict)],
-                  ),
-                  const ApplyToAllCheckbox(),
-                ],
+                itemCount: conflicts.length + 2,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: NavGroupHeader(title: context.localized.conflictsWaiting(conflicts.length)),
+                    );
+                  }
+                  if (index > conflicts.length) {
+                    return const Padding(padding: EdgeInsets.only(top: 8), child: ApplyToAllCheckbox());
+                  }
+                  final conflict = conflicts[index - 1];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: GroupedTile(
+                      index: index - 1,
+                      count: conflicts.length,
+                      child: ConflictTile(conflict: conflict),
+                    ),
+                  );
+                },
               ),
             ),
     );

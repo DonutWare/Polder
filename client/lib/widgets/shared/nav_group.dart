@@ -14,25 +14,35 @@ class NavGroup extends StatelessWidget {
   final List<Widget> children;
 
   @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        NavGroupHeader(title: title, trailing: trailing),
+        for (final (i, child) in children.indexed) GroupedTile(index: i, count: children.length, child: child),
+      ],
+    ),
+  );
+}
+
+class NavGroupHeader extends StatelessWidget {
+  const NavGroupHeader({required this.title, this.trailing, super.key});
+
+  final String title;
+  final Widget? trailing;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(title, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
-                ),
-                ?trailing,
-              ],
-            ),
+          Expanded(
+            child: Text(title, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
           ),
-          for (final (i, child) in children.indexed) GroupedTile(index: i, count: children.length, child: child),
+          ?trailing,
         ],
       ),
     );

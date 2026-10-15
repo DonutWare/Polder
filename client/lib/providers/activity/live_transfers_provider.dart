@@ -106,15 +106,28 @@ final uploadsIntoDirectoryProvider = Provider.autoDispose.family<List<LiveTransf
 final incomingPathsProvider = Provider<Set<String>>(
   (ref) => {
     for (final transfer in ref.watch(ownUploadsProvider)) transfer.path,
-    for (final item in ref.watch(localSyncItemsProvider).values) item.remotePath,
+    for (final item in ref.watch(localSyncItemsProvider).values)
+      if (!item.isDownload) item.remotePath,
   },
 );
 
-final busyFoldersProvider = Provider.autoDispose.family<Set<String>, String>((ref, path) {
-  final names = <String>{};
-  for (final incoming in ref.watch(incomingPathsProvider)) {
-    final relative = RemotePath.relativeTo(RemotePath.parent(incoming), path);
-    if (relative != null) names.add(RemotePath.segments(relative).first);
+final outgoingPathsProvider = Provider<Set<String>>(
+  (ref) => {
+    for (final item in ref.watch(localSyncItemsProvider).values)
+      if (item.isDownload) item.remotePath,
+  },
+);
+
+final busyFoldersProvider = Provider.autoDispose.family<Map<String, TransferDirectionKind>, String>((ref, path) {
+  final folders = <String, TransferDirectionKind>{};
+  void mark(Set<String> paths, TransferDirectionKind direction) {
+    for (final busy in paths) {
+      final relative = RemotePath.relativeTo(RemotePath.parent(busy), path);
+      if (relative != null) folders.putIfAbsent(RemotePath.segments(relative).first, () => direction);
+    }
   }
-  return names;
+
+  mark(ref.watch(incomingPathsProvider), TransferDirectionKind.upload);
+  mark(ref.watch(outgoingPathsProvider), TransferDirectionKind.download);
+  return folders;
 });

@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
+import "package:polder/models/activity.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/providers/sync/sync_paused_provider.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
@@ -31,6 +32,7 @@ extension PendingUploadPresentation on PendingUpload {
     LocalSyncPhase.waiting => context.localized.syncWaiting,
     LocalSyncPhase.preparing => context.localized.syncPreparing,
     LocalSyncPhase.uploading => context.localized.transferUploading,
+    LocalSyncPhase.downloading => context.localized.transferDownloading,
   };
 
   IconData get icon => switch (phase) {
@@ -38,12 +40,13 @@ extension PendingUploadPresentation on PendingUpload {
     LocalSyncPhase.waiting => IconsaxPlusLinear.clock,
     LocalSyncPhase.preparing => IconsaxPlusLinear.document_code,
     LocalSyncPhase.uploading => IconsaxPlusLinear.document_upload,
+    LocalSyncPhase.downloading => IconsaxPlusLinear.document_download,
   };
 
   Color color(BuildContext context) => switch (phase) {
     LocalSyncPhase.waiting => Theme.of(context).colorScheme.outline,
     LocalSyncPhase.preparing => Theme.of(context).colorScheme.tertiary,
-    LocalSyncPhase.uploading => Theme.of(context).colorScheme.primary,
+    LocalSyncPhase.uploading || LocalSyncPhase.downloading => Theme.of(context).colorScheme.primary,
   };
 
   String summary(BuildContext context) => switch (phase) {
@@ -214,8 +217,10 @@ class PendingGridStatus extends StatelessWidget {
   }
 }
 
-class FolderUploadingTag extends ConsumerWidget {
-  const FolderUploadingTag({super.key});
+class FolderSyncTag extends ConsumerWidget {
+  const FolderSyncTag({required this.direction, super.key});
+
+  final TransferDirectionKind direction;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => (ref.watch(syncPausedProvider).value ?? false)
@@ -224,17 +229,25 @@ class FolderUploadingTag extends ConsumerWidget {
           text: context.localized.itemPaused,
           color: Theme.of(context).colorScheme.outline,
         )
-      : Tag(
-          icon: IconsaxPlusLinear.document_upload,
-          text: context.localized.folderUploading,
-          color: Theme.of(context).colorScheme.primary,
-        );
+      : switch (direction) {
+          TransferDirectionKind.upload => Tag(
+            icon: IconsaxPlusLinear.document_upload,
+            text: context.localized.folderUploading,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          TransferDirectionKind.download => Tag(
+            icon: IconsaxPlusLinear.document_download,
+            text: context.localized.folderDownloading,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        };
 }
 
 class PendingFolderListTile extends StatelessWidget {
-  const PendingFolderListTile({required this.name, super.key});
+  const PendingFolderListTile({required this.name, required this.direction, super.key});
 
   final String name;
+  final TransferDirectionKind direction;
 
   @override
   Widget build(BuildContext context) => PendingHighlight(
@@ -242,15 +255,19 @@ class PendingFolderListTile extends StatelessWidget {
       contentPadding: const EdgeInsetsDirectional.only(start: 9, end: 16),
       leading: const FileTypeIcon.of(isDir: true, mime: "", size: 40),
       title: Text(name, overflow: TextOverflow.ellipsis),
-      subtitle: const Align(alignment: AlignmentDirectional.centerStart, child: FolderUploadingTag()),
+      subtitle: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: FolderSyncTag(direction: direction),
+      ),
     ),
   );
 }
 
 class PendingFolderGridTile extends StatelessWidget {
-  const PendingFolderGridTile({required this.name, super.key});
+  const PendingFolderGridTile({required this.name, required this.direction, super.key});
 
   final String name;
+  final TransferDirectionKind direction;
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +285,10 @@ class PendingFolderGridTile extends StatelessWidget {
               child: Center(child: FileTypeIcon.of(isDir: true, mime: "", size: 64)),
             ),
             Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-            const Align(alignment: AlignmentDirectional.centerStart, child: FolderUploadingTag()),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: FolderSyncTag(direction: direction),
+            ),
           ],
         ),
       ),

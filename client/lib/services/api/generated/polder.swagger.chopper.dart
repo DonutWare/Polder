@@ -1510,6 +1510,108 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   }
 
   @override
+  Future<Response<BatchStatus>> _createUploadBatch({
+    required BatchRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start uploading a batch of files; returns the chunks the server is missing',
+      operationId: 'createUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/sync/batches');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<BatchStatus, BatchStatus>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _abortUploadBatch({
+    required String? batchID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Cancel a batch; files already stored stay',
+      operationId: 'abortUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/sync/batches/${batchID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<BatchStatus>> _getUploadBatch({
+    required String? batchID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Get the chunks a batch is still missing and the files that are done',
+      operationId: 'getUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/sync/batches/${batchID}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<BatchStatus, BatchStatus>($request);
+  }
+
+  @override
+  Future<Response<BatchStatus>> _streamUploadBatch({
+    required String? batchID,
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Send the missing chunks back to back as one body; each file is stored once it is complete',
+      operationId: 'streamUploadBatch',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/sync/batches/${batchID}/stream');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<BatchStatus, BatchStatus>($request);
+  }
+
+  @override
   Future<Response<ChangePage>> _listChanges({
     int? cursor,
     int? limit,
@@ -1540,6 +1642,32 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   }
 
   @override
+  Future<Response<Stream<List<int>>>> _downloadSyncFiles({
+    required DownloadRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Send several files in one response: per file a JSON header line, then exactly size bytes of content',
+      operationId: 'downloadSyncFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["sync"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/sync/downloads');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
   Future<Response<Manifest>> _getManifest({
     String? path,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -1563,135 +1691,6 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       tag: swaggerMetaData,
     );
     return client.send<Manifest, Manifest>($request);
-  }
-
-  @override
-  Future<Response<UploadStatus>> _createUpload({
-    required UploadRequest? body,
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary:
-          'Start a chunked upload; returns the chunks the server is missing',
-      operationId: 'createUpload',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  }) {
-    final Uri $url = Uri.parse('/api/v1/sync/uploads');
-    final $body = body;
-    final Request $request = Request(
-      'POST',
-      $url,
-      client.baseUrl,
-      body: $body,
-      tag: swaggerMetaData,
-    );
-    return client.send<UploadStatus, UploadStatus>($request);
-  }
-
-  @override
-  Future<Response<dynamic>> _abortUpload({
-    required String? uploadID,
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Cancel an upload',
-      operationId: 'abortUpload',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  }) {
-    final Uri $url = Uri.parse('/api/v1/sync/uploads/${uploadID}');
-    final Request $request = Request(
-      'DELETE',
-      $url,
-      client.baseUrl,
-      tag: swaggerMetaData,
-    );
-    return client.send<dynamic, dynamic>($request);
-  }
-
-  @override
-  Future<Response<UploadStatus>> _getUpload({
-    required String? uploadID,
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Get the chunks an upload is still missing',
-      operationId: 'getUpload',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  }) {
-    final Uri $url = Uri.parse('/api/v1/sync/uploads/${uploadID}');
-    final Request $request = Request(
-      'GET',
-      $url,
-      client.baseUrl,
-      tag: swaggerMetaData,
-    );
-    return client.send<UploadStatus, UploadStatus>($request);
-  }
-
-  @override
-  Future<Response<dynamic>> _putChunk({
-    required String? uploadID,
-    required String? chunkHash,
-    required Object? body,
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Send one chunk as the request body',
-      operationId: 'putChunk',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  }) {
-    final Uri $url = Uri.parse(
-      '/api/v1/sync/uploads/${uploadID}/chunks/${chunkHash}',
-    );
-    final $body = body;
-    final Request $request = Request(
-      'PUT',
-      $url,
-      client.baseUrl,
-      body: $body,
-      tag: swaggerMetaData,
-    );
-    return client.send<dynamic, dynamic>($request);
-  }
-
-  @override
-  Future<Response<Entry>> _commitUpload({
-    required String? uploadID,
-    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '',
-      summary: 'Assemble the uploaded chunks into the file',
-      operationId: 'commitUpload',
-      consumes: [],
-      produces: [],
-      security: ["bearer"],
-      tags: ["sync"],
-      deprecated: false,
-    ),
-  }) {
-    final Uri $url = Uri.parse('/api/v1/sync/uploads/${uploadID}/commit');
-    final Request $request = Request(
-      'POST',
-      $url,
-      client.baseUrl,
-      tag: swaggerMetaData,
-    );
-    return client.send<Entry, Entry>($request);
   }
 
   @override
