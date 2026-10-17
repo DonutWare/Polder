@@ -17,6 +17,7 @@ import (
 	"polder-server/internal/database"
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
+	"polder-server/internal/groups"
 	"polder-server/internal/httpapi"
 	"polder-server/internal/links"
 	"polder-server/internal/logging"
@@ -25,6 +26,7 @@ import (
 	"polder-server/internal/scanner"
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
+	"polder-server/internal/sharing"
 	"polder-server/internal/storage"
 	"polder-server/internal/syncing"
 	"polder-server/internal/users"
@@ -178,6 +180,9 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	fileService.OnMutation(linkGraph.FileMutation)
 	fileService.OnContentRemoved(previews.RequestCleanup)
 	logs := logging.NewFiles(cfg.LogDir())
+	groupService := groups.NewService(groups.NewStore(db), userStore)
+	sharingService := sharing.NewService(db, fileService, userStore, groupService, auth.Argon2Hasher{}, tokens.DerivedKey(sharing.LinkKeyPurpose))
+	fileService.OnMutation(sharingService.FileMutation)
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
 		Sessions:               sessions,
@@ -195,6 +200,8 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Office:                 officeService,
 		Versions:               versionWorker,
 		Links:                  linkGraph,
+		Groups:                 groupService,
+		Sharing:                sharingService,
 		RequestTrashPurge:      func() { requestWork(trashPurgeRequests) },
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		TrustedProxies:         trustedProxies,

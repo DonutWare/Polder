@@ -28,6 +28,9 @@ import "package:polder/screens/settings/account_screen.dart";
 import "package:polder/screens/viewer/document_editor_screen.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
+import "package:polder/screens/public_share/public_share_screen.dart";
+import "package:polder/screens/groups/groups_screen.dart";
+import "package:polder/screens/shared/shared_screen.dart";
 import "package:polder/screens/shell/app_shell.dart";
 import "package:polder/screens/sync/conflict_resolver_screen.dart";
 import "package:polder/screens/sync/sync_folders_screen.dart";
@@ -50,6 +53,14 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (_, state) => AppRedirect.resolve(account.value, state.uri, isAdmin: isAdmin.value),
     routes: [
       GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
+      GoRoute(
+        path: "${AppRoutes.publicShare}/:code",
+        builder: (_, state) => PublicShareScreen(
+          code: state.pathParameters["code"]!,
+          server: state.uri.queryParameters[AppRoutes.serverParameter],
+          path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
+        ),
+      ),
       GoRoute(
         path: AppRoutes.scan,
         redirect: (_, state) => state.extra is ScanRequest ? null : AppRoutes.files,
@@ -103,6 +114,39 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(path: AppRoutes.autoUpload, builder: (_, _) => const AutoUploadScreen()),
           GoRoute(path: AppRoutes.trash, builder: (_, _) => const TrashScreen()),
+          GoRoute(path: AppRoutes.shared, builder: (_, _) => const SharedScreen()),
+          GoRoute(
+            path: "${AppRoutes.shared}/:section",
+            redirect: (_, state) =>
+                SharedSection.fromSegment(state.pathParameters["section"]) == null ? AppRoutes.shared : null,
+            builder: (_, state) => SharedScreen(section: SharedSection.fromSegment(state.pathParameters["section"])),
+          ),
+          GoRoute(
+            path: "${AppRoutes.shared}/:section/:shareId",
+            redirect: (_, state) =>
+                state.pathParameters["section"] != SharedSection.withMe.segment ||
+                    int.tryParse(state.pathParameters["shareId"] ?? "") == null
+                ? AppRoutes.shared
+                : null,
+            builder: (_, state) => SharedScreen(
+              section: SharedSection.withMe,
+              shareId: int.parse(state.pathParameters["shareId"]!),
+              path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.groups,
+            builder: (_, state) => GroupsScreen(scope: AppRoutes.groupScopeOf(state.uri)),
+          ),
+          GoRoute(
+            path: "${AppRoutes.groups}/:groupId",
+            redirect: (_, state) =>
+                int.tryParse(state.pathParameters["groupId"] ?? "") == null ? AppRoutes.groups : null,
+            builder: (_, state) => GroupsScreen(
+              scope: AppRoutes.groupScopeOf(state.uri),
+              groupId: int.parse(state.pathParameters["groupId"]!),
+            ),
+          ),
           GoRoute(
             path: AppRoutes.settings,
             builder: (_, _) => const SettingsScreen(),
@@ -135,10 +179,13 @@ final routerProvider = Provider<GoRouter>((ref) {
 abstract final class AppRedirect {
   static String? resolve(AsyncValue<Account?> account, Uri location, {bool isAdmin = false}) {
     if (account.isLoading && !account.hasValue) return null;
+    if (AppRoutes.isPublic(location.path)) return null;
     final signedIn = account.value != null;
     final atLogin = location.path == AppRoutes.login;
-    if (!signedIn && !atLogin) return AppRoutes.login;
-    if (signedIn && atLogin) return AppRoutes.files;
+    if (!signedIn && !atLogin) return AppRoutes.loginFrom(location);
+    if (signedIn && atLogin) {
+      return AppRoutes.safeReturn(location.queryParameters[AppRoutes.fromParameter]) ?? AppRoutes.files;
+    }
     if (signedIn && !isAdmin && AppRoutes.isAdmin(location.path)) return AppRoutes.files;
     return null;
   }

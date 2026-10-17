@@ -16,6 +16,7 @@ import (
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/chunkstore"
+	"polder-server/internal/database"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
 )
@@ -75,7 +76,7 @@ func (s *Service) shouldCaptureVersion(ctx context.Context, owner users.User) bo
 	return s.versioningEnabled != nil && s.versioningEnabled(ctx, owner)
 }
 
-func scanVersion(row rowScanner, extra ...any) (Version, error) {
+func scanVersion(row database.RowScanner, extra ...any) (Version, error) {
 	var version Version
 	var modifiedNanos, replacedAt int64
 	destinations := append([]any{&version.ID, &version.UserID, &version.HistoryID, &version.FileID, &version.TrashID, &version.TrashPath,

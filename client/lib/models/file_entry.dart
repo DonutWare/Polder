@@ -30,6 +30,13 @@ abstract class FileEntry with _$FileEntry {
 
   factory FileEntry.fromJson(Map<String, dynamic> json) => _$FileEntryFromJson(json);
 
+  factory FileEntry.folder(String path, {required String rootName}) => FileEntry(
+    path: path,
+    name: path == RemotePath.root ? rootName : RemotePath.name(path),
+    isDir: true,
+    mtime: DateTime.now(),
+  );
+
   bool get hasPreview => previewState == PreviewState.ready;
 
   bool get isImage => mime.startsWith("image/");

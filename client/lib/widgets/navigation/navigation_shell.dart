@@ -221,7 +221,7 @@ class _Sidebar extends ConsumerWidget {
           _group(items, 0),
           const Spacer(),
           if (footer != null) Padding(padding: const EdgeInsets.fromLTRB(28, 8, 28, 8), child: footer),
-          if (exit != null) _SidebarItem(icon: exit.icon, label: exit.label, selected: false, onTap: exit.onTap),
+          if (exit != null) SidebarItem(icon: exit.icon, label: exit.label, selected: false, onTap: exit.onTap),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(14, 4, 14, 16),
             child: Align(
@@ -244,7 +244,7 @@ class _Sidebar extends ConsumerWidget {
     indicator: const Padding(padding: EdgeInsets.symmetric(horizontal: 14, vertical: 2), child: _SelectionSurface()),
     children: [
       for (final (i, item) in group.indexed)
-        _SidebarItem(
+        SidebarItem(
           icon: offset + i == selectedIndex ? item.selectedIcon : item.icon,
           label: item.label,
           selected: offset + i == selectedIndex,
@@ -273,19 +273,22 @@ class _AvatarButton extends StatelessWidget {
   );
 }
 
-class _SidebarItem extends StatelessWidget {
-  const _SidebarItem({
+class SidebarItem extends StatelessWidget {
+  const SidebarItem({
     required this.icon,
     required this.label,
     required this.selected,
     required this.onTap,
     this.badge,
+    this.detail,
+    super.key,
   });
 
   final IconData icon;
   final String label;
   final bool selected;
   final String? badge;
+  final String? detail;
   final VoidCallback onTap;
 
   @override
@@ -314,6 +317,8 @@ class _SidebarItem extends StatelessWidget {
                 ),
               ),
               if (badge != null) Badge(label: Text(badge!)),
+              if (detail != null)
+                Text(detail!, style: theme.textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
             ],
           ),
         ),

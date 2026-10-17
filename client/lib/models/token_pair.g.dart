@@ -13,9 +13,10 @@ _TokenPair _$TokenPairFromJson(Map<String, dynamic> json) => _TokenPair(
   user: User.fromJson(json['user'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$TokenPairToJson(_TokenPair instance) => <String, dynamic>{
-  'accessToken': instance.accessToken,
-  'refreshToken': instance.refreshToken,
-  'expiresIn': instance.expiresIn,
-  'user': instance.user.toJson(),
-};
+Map<String, dynamic> _$TokenPairToJson(_TokenPair instance) =>
+    <String, dynamic>{
+      'accessToken': instance.accessToken,
+      'refreshToken': instance.refreshToken,
+      'expiresIn': instance.expiresIn,
+      'user': instance.user.toJson(),
+    };

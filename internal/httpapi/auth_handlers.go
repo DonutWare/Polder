@@ -56,14 +56,13 @@ func (a *API) setup(ctx context.Context, input *jsonBody[credentialsRequest]) (*
 }
 
 func (a *API) login(ctx context.Context, input *loginInput) (*jsonBody[auth.TokenPair], error) {
-	if !a.limiter.allowed(input.address) {
+	done, allowed := a.limiter.attempt(input.address)
+	if !allowed {
 		authLog.Warn("login refused: too many failed attempts", "user", input.Body.Username, "address", input.address)
 		return nil, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
 	}
 	tokens, err := a.auth.Login(ctx, input.Body.Username, input.Body.Password, input.Body.DeviceName)
-	if apperr.Is(err, apperr.KindUnauthorized) {
-		a.limiter.recordFailure(input.address)
-	}
+	done(apperr.Is(err, apperr.KindUnauthorized))
 	if err != nil {
 		authLog.Warn("login failed", "user", input.Body.Username, "address", input.address, "error", err)
 		return nil, err

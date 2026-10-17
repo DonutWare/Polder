@@ -156,6 +156,22 @@ enum ExtractionStatusOcr {
   const ExtractionStatusOcr(this.value);
 }
 
+enum GroupMyRole {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('admin')
+  admin('admin'),
+  @JsonValue('member')
+  member('member'),
+  @JsonValue('viewer')
+  viewer('viewer');
+
+  final String? value;
+
+  const GroupMyRole(this.value);
+}
+
 enum LiveTransferDirection {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -220,6 +236,38 @@ enum LogEntryStatus {
   const LogEntryStatus(this.value);
 }
 
+enum MemberRole {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('admin')
+  admin('admin'),
+  @JsonValue('member')
+  member('member'),
+  @JsonValue('viewer')
+  viewer('viewer');
+
+  final String? value;
+
+  const MemberRole(this.value);
+}
+
+enum NewMemberRole {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('admin')
+  admin('admin'),
+  @JsonValue('member')
+  member('member'),
+  @JsonValue('viewer')
+  viewer('viewer');
+
+  final String? value;
+
+  const NewMemberRole(this.value);
+}
+
 enum NewUserRole {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -278,6 +326,34 @@ enum QueryFilterOp {
   const QueryFilterOp(this.value);
 }
 
+enum RecipientKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('user')
+  user('user'),
+  @JsonValue('group')
+  group('group');
+
+  final String? value;
+
+  const RecipientKind(this.value);
+}
+
+enum RecipientRefKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('user')
+  user('user'),
+  @JsonValue('group')
+  group('group');
+
+  final String? value;
+
+  const RecipientRefKind(this.value);
+}
+
 enum RestoreRequestOnConflict {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -292,6 +368,22 @@ enum RestoreRequestOnConflict {
   final String? value;
 
   const RestoreRequestOnConflict(this.value);
+}
+
+enum RoleChangeRole {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('admin')
+  admin('admin'),
+  @JsonValue('member')
+  member('member'),
+  @JsonValue('viewer')
+  viewer('viewer');
+
+  final String? value;
+
+  const RoleChangeRole(this.value);
 }
 
 enum SuggestionKind {
@@ -416,6 +508,52 @@ enum ApiV1FilesVersionsVersionIDPreviewGetSize {
   final int? value;
 
   const ApiV1FilesVersionsVersionIDPreviewGetSize(this.value);
+}
+
+enum ApiV1GroupsGetScope {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('mine')
+  mine('mine'),
+  @JsonValue('all')
+  all('all');
+
+  final String? value;
+
+  const ApiV1GroupsGetScope(this.value);
+}
+
+enum ApiV1PublicLinksCodePreviewGetSize {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue(128)
+  value_128(128),
+  @JsonValue(256)
+  value_256(256),
+  @JsonValue(512)
+  value_512(512);
+
+  final int? value;
+
+  const ApiV1PublicLinksCodePreviewGetSize(this.value);
+}
+
+enum ApiV1SharesShareIDPreviewGetSize {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue(128)
+  value_128(128),
+  @JsonValue(256)
+  value_256(256),
+  @JsonValue(512)
+  value_512(512);
+
+  final int? value;
+
+  const ApiV1SharesShareIDPreviewGetSize(this.value);
 }
 
 enum ApiV1TrashItemIDPreviewGetSize {

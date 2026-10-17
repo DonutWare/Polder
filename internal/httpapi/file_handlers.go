@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -41,7 +42,6 @@ type copyRequest struct {
 	To   string `json:"to" doc:"Where the copy goes; nothing may exist there yet"`
 }
 
-// Huma reads parameters only from an input's own fields, not from embedded structs.
 type pathQuery struct {
 	Path string `query:"path" doc:"Path inside the user's storage, such as /Photos/cat.jpg; empty means the root"`
 }
@@ -54,7 +54,11 @@ type downloadInput struct {
 }
 
 type uploadInput struct {
-	Path       string `query:"path" doc:"Where to store the file, such as /Photos/cat.jpg"`
+	Path string `query:"path" doc:"Where to store the file, such as /Photos/cat.jpg"`
+	UploadContent
+}
+
+type UploadContent struct {
 	BaseRev    int64  `query:"baseRev" default:"0" doc:"Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there"`
 	Mtime      string `query:"mtime" format:"date-time" doc:"Modification time to record, as RFC 3339; defaults to now"`
 	TransferID string `header:"X-Polder-Transfer-Id" doc:"Any ID the client picks; live transfer events echo it back as clientId"`
@@ -62,20 +66,25 @@ type uploadInput struct {
 	size       *int64
 }
 
-func (i *uploadInput) Resolve(ctx huma.Context) []error {
-	i.content = ctx.BodyReader()
-	if length, err := strconv.ParseInt(ctx.Header("Content-Length"), 10, 64); err == nil && length >= 0 {
-		i.size = &length
-	}
+func (i *UploadContent) Resolve(ctx huma.Context) []error {
+	i.content, i.size = ctx.BodyReader(), contentLength(ctx)
 	return nil
 }
 
-type deleteInput struct {
+func contentLength(ctx huma.Context) *int64 {
+	length, err := strconv.ParseInt(ctx.Header("Content-Length"), 10, 64)
+	if err != nil || length < 0 {
+		return nil
+	}
+	return &length
+}
+
+type DeleteInput struct {
 	Path    string `query:"path"`
 	BaseRev int64  `query:"baseRev" default:"-1" doc:"Revision the client last saw; -1 deletes whatever is there"`
 }
 
-type previewInput struct {
+type PreviewInput struct {
 	Path string      `query:"path"`
 	Size previewSize `query:"size" default:"256" doc:"Thumbnail width and height in pixels"`
 }
@@ -129,34 +138,37 @@ func (a *API) downloadFile(ctx context.Context, input *downloadInput) (*download
 	if err != nil {
 		return nil, err
 	}
-	ranged := input.Range != ""
 	return &downloadOutput{
 		ETag:        revisionETag(entry.Rev),
 		Rev:         fmt.Sprint(entry.Rev),
 		ContentType: entry.Mime,
-		Body: func(humaCtx huma.Context) {
-			defer file.Close()
-			r, w := humachi.Unwrap(humaCtx)
-			release := func() {}
-			metered := &meteredResponse{ResponseWriter: w, start: func() *activity.Transfer {
-				transfer := a.startDownload(ctx, owner, entry, ranged)
-				if !ranged {
-					release = transfer.Hold()
-				}
-				return transfer
-			}}
-			http.ServeContent(metered, r, entry.Name, entry.Mtime, file)
-			release()
-			if metered.transfer == nil || ranged {
-				return
-			}
-			var incomplete error
-			if metered.written < entry.Size {
-				incomplete = io.ErrUnexpectedEOF
-			}
-			a.activity.Finish(ctx, metered.transfer, incomplete)
-		},
+		Body:        a.serveFile(ctx, owner, file, entry, input.Range != ""),
 	}, nil
+}
+
+func (a *API) serveFile(ctx context.Context, owner users.User, file *os.File, entry files.Entry, ranged bool) func(huma.Context) {
+	return func(humaCtx huma.Context) {
+		defer file.Close()
+		r, w := humachi.Unwrap(humaCtx)
+		release := func() {}
+		metered := &meteredResponse{ResponseWriter: w, start: func() *activity.Transfer {
+			transfer := a.startDownload(ctx, owner, entry, ranged)
+			if !ranged {
+				release = transfer.Hold()
+			}
+			return transfer
+		}}
+		http.ServeContent(metered, r, entry.Name, entry.Mtime, file)
+		release()
+		if metered.transfer == nil || ranged {
+			return
+		}
+		var incomplete error
+		if metered.written < entry.Size {
+			incomplete = io.ErrUnexpectedEOF
+		}
+		a.activity.Finish(ctx, metered.transfer, incomplete)
+	}
 }
 
 // startDownload tracks a whole-file download on its own, and gathers the range reads one session
@@ -212,22 +224,27 @@ func (a *API) uploadFile(ctx context.Context, input *uploadInput) (*jsonBody[fil
 	if err != nil {
 		return nil, err
 	}
-	owner := currentUser(ctx)
-	transfer := a.activity.Start(ctx, activity.TransferSpec{
-		Owner: owner, Direction: activity.DirectionUpload, Path: cleanPath, Total: input.size, ClientID: input.TransferID,
-	})
-	defer transfer.Hold()()
-	entry, err := a.files.Write(activity.WithTransfer(ctx, transfer), owner, files.WriteRequest{
+	entry, err := a.trackedWrite(ctx, currentUser(ctx), files.WriteRequest{
 		Path:    cleanPath,
 		BaseRev: input.BaseRev,
 		Mtime:   mtime,
-		Content: transfer.Reader(input.content),
-	})
-	a.activity.Finish(ctx, transfer, err)
+		Content: input.content,
+	}, input.size, input.TransferID)
 	if err != nil {
 		return nil, err
 	}
 	return respond(entry), nil
+}
+
+func (a *API) trackedWrite(ctx context.Context, owner users.User, request files.WriteRequest, size *int64, clientID string) (files.Entry, error) {
+	transfer := a.activity.Start(ctx, activity.TransferSpec{
+		Owner: owner, Direction: activity.DirectionUpload, Path: request.Path, Total: size, ClientID: clientID,
+	})
+	defer transfer.Hold()()
+	request.Content = transfer.Reader(request.Content)
+	entry, err := a.files.Write(activity.WithTransfer(ctx, transfer), owner, request)
+	a.activity.Finish(ctx, transfer, err)
+	return entry, err
 }
 
 func (a *API) makeDirectory(ctx context.Context, input *jsonBody[pathRequest]) (*jsonBody[files.Entry], error) {
@@ -254,11 +271,11 @@ func (a *API) copyFile(ctx context.Context, input *jsonBody[copyRequest]) (*json
 	return respond(entry), nil
 }
 
-func (a *API) deleteFile(ctx context.Context, input *deleteInput) (*struct{}, error) {
+func (a *API) deleteFile(ctx context.Context, input *DeleteInput) (*struct{}, error) {
 	return nil, a.files.Delete(ctx, currentUser(ctx), input.Path, input.BaseRev)
 }
 
-func (a *API) previewFile(ctx context.Context, input *previewInput) (*previewOutput, error) {
+func (a *API) previewFile(ctx context.Context, input *PreviewInput) (*previewOutput, error) {
 	entry, err := a.files.Stat(ctx, currentUser(ctx), input.Path)
 	if err != nil {
 		return nil, err

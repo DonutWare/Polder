@@ -14,8 +14,28 @@ void main() {
   String? resolve(AsyncValue<Account?> account, String location, {bool isAdmin = false}) =>
       AppRedirect.resolve(account, Uri.parse(location), isAdmin: isAdmin);
 
-  test("signed-out users go to login", () {
-    expect(resolve(const AsyncData(null), AppRoutes.admin), AppRoutes.login);
+  test("signed-out users go to login and come back afterwards", () {
+    expect(resolve(const AsyncData(null), AppRoutes.files), AppRoutes.login);
+    final redirect = resolve(const AsyncData(null), AppRoutes.sharedAt(4, path: "/Photos"))!;
+    expect(Uri.parse(redirect).path, AppRoutes.login);
+    final from = Uri.parse(redirect).queryParameters[AppRoutes.fromParameter];
+    expect(from, AppRoutes.sharedAt(4, path: "/Photos"));
+    expect(resolve(signedIn(UserRole.user), redirect), AppRoutes.sharedAt(4, path: "/Photos"));
+  });
+
+  test("public share pages need no account", () {
+    expect(resolve(const AsyncData(null), AppRoutes.publicShareAt("Ab3dE9xQ2k")), isNull);
+    expect(
+      resolve(signedIn(UserRole.user), AppRoutes.publicShareAt("Ab3dE9xQ2k", server: "files.example.com")),
+      isNull,
+    );
+  });
+
+  test("only local paths are returned to after login", () {
+    expect(AppRoutes.safeReturn("//evil.example.com"), isNull);
+    expect(AppRoutes.safeReturn("https://evil.example.com"), isNull);
+    expect(AppRoutes.safeReturn(AppRoutes.login), isNull);
+    expect(AppRoutes.safeReturn(AppRoutes.trash), AppRoutes.trash);
   });
 
   test("signed-in users skip login", () {

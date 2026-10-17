@@ -18,6 +18,7 @@ import "package:polder/screens/notes/widgets/notes_sidebar.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
+import "package:polder/widgets/layout/split_view.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
 
@@ -40,7 +41,6 @@ class NotesScreen extends ConsumerStatefulWidget {
 }
 
 class _NotesScreenState extends ConsumerState<NotesScreen> {
-  static const _sidebarWidth = 280.0;
   static const _linksWidth = 300.0;
 
   var _linksShown = true;
@@ -107,8 +107,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       onRetry: () => ref.invalidate(notesFolderProvider),
       data: (root) {
         if (root == null && widget.notePath == null) _askForFolderOnce();
-        final compact = WindowSize.of(context) == WindowSize.compact;
-        return compact ? _compact(context, root) : _wide(context, root);
+        return WindowSize.isCompact(context) ? _compact(context, root) : _wide(context, root);
       },
     );
   }
@@ -153,51 +152,37 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     final roomForLinks = WindowSize.of(context).index >= WindowSize.expanded.index;
     final entry = notePath == null ? null : ref.watch(noteDocumentProvider(notePath)).value?.entry ?? _lastLinksEntry;
     _lastLinksEntry = entry;
-    final colors = Theme.of(context).colorScheme;
-    return Material(
-      color: colors.surface,
-      child: SafeArea(
-        top: false,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: _sidebarWidth,
-              child: Material(
-                color: colors.surfaceContainerLow,
-                child: SafeArea(child: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder)),
-              ),
-            ),
-            const VerticalDivider(width: 1),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                child: notePath == null
-                    ? SafeArea(child: _NothingOpen(onCreate: () => NotesActions.createInNotesFolder(context, ref)))
-                    : NotePane(
-                        key: ValueKey(notePath),
-                        path: notePath,
-                        sourceMode: _sourceMode,
-                        onToggleSourceMode: _toggleSourceMode,
-                        linksShown: roomForLinks && _linksShown,
-                        onToggleLinks: roomForLinks
-                            ? () => setState(() => _linksShown = !_linksShown)
-                            : () => _showLinksSheet(notePath),
-                      ),
-              ),
-            ),
-            if (roomForLinks && _linksShown && entry != null) ...[
-              const VerticalDivider(width: 1),
-              SizedBox(
-                width: _linksWidth,
-                child: SafeArea(
-                  child: LinksPanel(entry: entry, onOpen: (target) => openEntry(context, target)),
-                ),
-              ),
-            ],
-          ],
-        ),
+    return SplitView(
+      pane: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
+      placeholder: SafeArea(
+        left: false,
+        child: _NothingOpen(onCreate: () => NotesActions.createInNotesFolder(context, ref)),
       ),
+      content: notePath == null
+          ? null
+          : SafeArea(
+              key: ValueKey(notePath),
+              left: false,
+              top: false,
+              child: NotePane(
+                path: notePath,
+                sourceMode: _sourceMode,
+                onToggleSourceMode: _toggleSourceMode,
+                linksShown: roomForLinks && _linksShown,
+                onToggleLinks: roomForLinks
+                    ? () => setState(() => _linksShown = !_linksShown)
+                    : () => _showLinksSheet(notePath),
+              ),
+            ),
+      trailing: roomForLinks && _linksShown && entry != null
+          ? SizedBox(
+              width: _linksWidth,
+              child: SafeArea(
+                left: false,
+                child: LinksPanel(entry: entry, onOpen: (target) => openEntry(context, target)),
+              ),
+            )
+          : null,
     );
   }
 

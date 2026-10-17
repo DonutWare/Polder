@@ -17,6 +17,8 @@ enum WindowSize {
 
   static WindowSize of(BuildContext context) => fromWidth(MediaQuery.sizeOf(context).width);
 
+  static bool isCompact(BuildContext context) => of(context) == compact;
+
   static WindowSize fromWidth(double width) => switch (width) {
     < 600 => compact,
     < 840 => medium,

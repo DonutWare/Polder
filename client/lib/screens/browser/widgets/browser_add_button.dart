@@ -17,6 +17,7 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/unique_name.dart";
 import "package:polder/widgets/shared/fab_menu.dart";
+import "package:polder/widgets/shared/file_dialogs.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
 
 class BrowserAddButton extends ConsumerWidget {
@@ -100,13 +101,7 @@ class BrowserAddButton extends ConsumerWidget {
   }
 
   Future<void> _createFolder(BuildContext context, WidgetRef ref) async {
-    final name = await showTextInputDialog(
-      context,
-      title: context.localized.newFolder,
-      label: context.localized.name,
-      confirmLabel: context.localized.create,
-      isValid: (value) => RemotePath.isValidName(value.trim()),
-    );
+    final name = await promptFolderName(context);
     if (name != null && context.mounted) {
       await context.runWithFeedback(ref.read(directoryProvider(path).notifier).createFolder(name));
     }

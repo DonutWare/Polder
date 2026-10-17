@@ -14,6 +14,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"polder-server/internal/database"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
 
@@ -43,16 +44,12 @@ type querier interface {
 	QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
 }
 
-type rowScanner interface {
-	Scan(dest ...any) error
-}
-
 func pathKey(cleanPath string) string {
 	sum := sha256.Sum256([]byte(cleanPath))
 	return hex.EncodeToString(sum[:])
 }
 
-func scanEntry(row rowScanner) (Entry, error) {
+func scanEntry(row database.RowScanner) (Entry, error) {
 	var entry Entry
 	var mtimeNanos int64
 	var metaJSON string

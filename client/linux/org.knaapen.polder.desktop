@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Polder
+Exec=polder %u
+Icon=polder_icon_desktop
+Terminal=false
+Categories=Utility;
+Comment=Files, sync and auto-upload for a self-hosted Polder server
+MimeType=x-scheme-handler/polder;

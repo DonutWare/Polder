@@ -184,8 +184,7 @@ func (c *client) mustJSON(method, path string, body any, expectedStatus int, tar
 
 func (c *client) expect(response *http.Response, expectedStatus int, target any) {
 	c.server.t.Helper()
-	defer response.Body.Close()
-	content, _ := io.ReadAll(response.Body)
+	content := readBody(c.server.t, response)
 	if response.StatusCode != expectedStatus {
 		c.server.t.Fatalf("%s %s: status %d, want %d: %s", response.Request.Method, response.Request.URL.Path,
 			response.StatusCode, expectedStatus, content)
@@ -213,7 +212,15 @@ func (c *client) stat(path string) fileEntry {
 func (c *client) download(path string, headers map[string]string) (*http.Response, []byte) {
 	c.server.t.Helper()
 	response := c.request(http.MethodGet, "/files/content?path="+url.QueryEscape(path), nil, headers)
+	return response, readBody(c.server.t, response)
+}
+
+func readBody(t *testing.T, response *http.Response) []byte {
+	t.Helper()
 	defer response.Body.Close()
-	content, _ := io.ReadAll(response.Body)
-	return response, content
+	content, err := io.ReadAll(response.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return content
 }

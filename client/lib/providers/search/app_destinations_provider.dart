@@ -42,6 +42,18 @@ final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
       keywords: (l) => l.searchKeywordsFiles,
     ),
     AppDestination(
+      route: AppRoutes.shared,
+      icon: IconsaxPlusLinear.share,
+      label: (l) => l.navShared,
+      keywords: (l) => l.searchKeywordsShared,
+    ),
+    AppDestination(
+      route: AppRoutes.groups,
+      icon: IconsaxPlusLinear.people,
+      label: (l) => l.groups,
+      keywords: (l) => l.searchKeywordsGroups,
+    ),
+    AppDestination(
       route: AppRoutes.notes,
       icon: IconsaxPlusLinear.note_2,
       label: (l) => l.navNotes,

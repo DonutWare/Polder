@@ -15,8 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LoginState {
 
- LoginStep get step; String get serverUrl; String get username; String get password;/// The password typed a second time, only asked when creating the first administrator.
- String get passwordConfirmation; bool get loading; bool get completed;/// The server is the one this web client was served from, so it can't be changed.
+ LoginStep get step; String get serverUrl; String get username; String get password; String get passwordConfirmation; bool get loading; bool get completed;/// The server is the one this web client was served from, so it can't be changed.
  bool get serverLocked;/// Checking whether the page's own origin is a Polder server, before showing any form.
  bool get probingHostedServer; LoginFailure? get failure;
 /// Create a copy of LoginState
@@ -231,7 +230,6 @@ class _LoginState extends LoginState {
 @override@JsonKey() final  String serverUrl;
 @override@JsonKey() final  String username;
 @override@JsonKey() final  String password;
-/// The password typed a second time, only asked when creating the first administrator.
 @override@JsonKey() final  String passwordConfirmation;
 @override@JsonKey() final  bool loading;
 @override@JsonKey() final  bool completed;

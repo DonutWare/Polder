@@ -42,6 +42,12 @@ Source: "{#SourcePath}\build\windows\x64\prod\runner\Release\*"; DestDir: "{app}
 Name: "{autoprograms}\Polder"; Filename: "{app}\polder.exe"
 Name: "{autodesktop}\Polder"; Filename: "{app}\polder.exe"; Tasks: desktopicon
 
+[Registry]
+Root: HKA; Subkey: "Software\Classes\polder"; ValueType: string; ValueName: ""; ValueData: "URL:Polder"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\polder"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\polder\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\polder.exe,0"
+Root: HKA; Subkey: "Software\Classes\polder\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\polder.exe"" ""%1"""
+
 [Run]
 Filename: "{app}\polder.exe"; Description: "{cm:LaunchProgram,Polder}"; Flags: nowait postinstall skipifsilent
 

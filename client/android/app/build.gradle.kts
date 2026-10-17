@@ -41,6 +41,7 @@ android {
         create("prod") {
             dimension = "channel"
             manifestPlaceholders["appLabel"] = "Polder"
+            manifestPlaceholders["deepLinkScheme"] = "polder"
         }
         // Installs next to prod with its own package, data and orange icon (src/dev/res).
         create("dev") {
@@ -48,6 +49,7 @@ android {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
             manifestPlaceholders["appLabel"] = "Polder Dev"
+            manifestPlaceholders["deepLinkScheme"] = "polder-dev"
         }
     }
 

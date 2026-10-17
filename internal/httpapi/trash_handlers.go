@@ -1,22 +1,15 @@
 package httpapi
 
 import (
-	"archive/zip"
 	"context"
-	"errors"
-	"io"
-	"io/fs"
-	"mime"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 
 	"polder-server/internal/files"
 	"polder-server/internal/settings"
-	"polder-server/internal/storage"
 	"polder-server/internal/users"
 )
 
@@ -42,12 +35,6 @@ type restoreRequest struct {
 type restoreInput struct {
 	ItemID int64 `path:"itemID"`
 	Body   restoreRequest
-}
-
-type attachmentOutput struct {
-	ContentType        string `header:"Content-Type"`
-	ContentDisposition string `header:"Content-Disposition"`
-	Body               func(huma.Context)
 }
 
 func (a *API) listTrash(ctx context.Context, _ *struct{}) (*jsonBody[trashListing], error) {
@@ -116,56 +103,6 @@ func (a *API) previewTrashItem(ctx context.Context, input *trashPreviewInput) (*
 		return nil, err
 	}
 	return a.thumbnail(item.Hash, item.PreviewState, int(input.Size))
-}
-
-func attachment(name string) string {
-	return mime.FormatMediaType("attachment", map[string]string{"filename": name})
-}
-
-func writeZip(w io.Writer, root string) error {
-	archive := zip.NewWriter(w)
-	err := filepath.WalkDir(root, func(current string, entry fs.DirEntry, err error) error {
-		if err != nil || current == root {
-			return err
-		}
-		if storage.IsReservedName(entry.Name()) || storage.IsSystemFile(entry.Name()) {
-			return nil
-		}
-		relative, _ := filepath.Rel(root, current)
-		name := filepath.ToSlash(relative)
-		if entry.IsDir() {
-			_, err := archive.Create(name + "/")
-			return err
-		}
-		if !entry.Type().IsRegular() {
-			return nil
-		}
-		return addZipFile(archive, current, name, entry)
-	})
-	return errors.Join(err, archive.Close())
-}
-
-func addZipFile(archive *zip.Writer, absolute, name string, entry fs.DirEntry) error {
-	info, err := entry.Info()
-	if err != nil {
-		return err
-	}
-	header, err := zip.FileInfoHeader(info)
-	if err != nil {
-		return err
-	}
-	header.Name, header.Method = name, zip.Deflate
-	target, err := archive.CreateHeader(header)
-	if err != nil {
-		return err
-	}
-	file, err := os.Open(absolute)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	_, err = io.Copy(target, file)
-	return err
 }
 
 func (a *API) deleteTrashItem(ctx context.Context, input *trashItemPath) (*struct{}, error) {

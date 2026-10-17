@@ -26,7 +26,7 @@ class AdminShell extends ConsumerWidget {
     return SideSheetDrawer(
       title: context.localized.administration,
       sheet: const MoreOptions(inAdministration: true),
-      canEdgeSwipe: () => WindowSize.of(context) == WindowSize.compact && !GoRouter.of(context).canPop(),
+      canEdgeSwipe: () => WindowSize.isCompact(context) && !GoRouter.of(context).canPop(),
       child: NavigationShell(
         items: [for (final destination in AdminDestination.values) destination.item(context)],
         selectedIndex: selected < 0 ? 0 : selected,

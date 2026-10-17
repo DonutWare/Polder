@@ -8,13 +8,14 @@ import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/sync/sync_scheduler_provider.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/util/guarded_refresh.dart";
 import "package:polder/util/remote_path.dart";
 
 final directoryProvider = AsyncNotifierProvider.autoDispose.family<DirectoryNotifier, DirectoryListing, String>(
   DirectoryNotifier.new,
 );
 
-class DirectoryNotifier extends AsyncNotifier<DirectoryListing> {
+class DirectoryNotifier extends AsyncNotifier<DirectoryListing> with GuardedRefresh {
   DirectoryNotifier(this.path);
 
   // The server says when it is still indexing but not when it stops, so the listing is fetched
@@ -29,17 +30,16 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> {
   @override
   Future<DirectoryListing> build() async {
     ref.onDispose(() => _indexingTimer?.cancel());
-    final listing = await ref.watch(polderApiProvider).list(path);
+    final listing = await _fetch(ref.watch(polderApiProvider));
     _followIndexing(listing);
     return listing;
   }
 
   Future<void> refresh() async {
-    final result = await AsyncValue.guard(() => _api.list(path));
-    if (!ref.mounted) return;
-    state = result;
-    if (result.value case final listing?) _followIndexing(listing);
+    if (await refreshWith(() => _fetch(_api)) case final listing?) _followIndexing(listing);
   }
+
+  Future<DirectoryListing> _fetch(PolderApi api) => api.list(path);
 
   void _followIndexing(DirectoryListing listing) {
     _indexingTimer?.cancel();

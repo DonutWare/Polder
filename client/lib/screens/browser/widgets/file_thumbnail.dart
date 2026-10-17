@@ -1,11 +1,16 @@
+import "dart:typed_data";
+
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:flutter_riverpod/misc.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/thumbnail_request.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/providers/browser/thumbnail_provider.dart";
+import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/theme/app_theme.dart";
 
@@ -14,13 +19,24 @@ class FileThumbnail extends StatelessWidget {
     : isDir = entry.isDir,
       mime = entry.mime,
       hasPreview = entry.hasPreview,
-      request = ((size) => ThumbnailRequest.file(path: entry.path, rev: entry.rev, size: size));
+      preview = ((size) => thumbnailProvider(ThumbnailRequest.file(path: entry.path, rev: entry.rev, size: size)));
+
+  FileThumbnail.inSpace({
+    required FileSpace space,
+    required FileEntry entry,
+    required this.dimension,
+    this.fill = false,
+    super.key,
+  }) : isDir = entry.isDir,
+       mime = entry.mime,
+       hasPreview = entry.hasPreview,
+       preview = ((size) => spaceThumbnailProvider((SpaceLocation(space: space, path: entry.path), size)));
 
   FileThumbnail.trashed({required TrashItem item, required this.dimension, this.fill = false, super.key})
     : isDir = item.isDir,
       mime = item.mime,
       hasPreview = item.hasPreview,
-      request = ((size) => ThumbnailRequest.trash(itemId: item.id, size: size));
+      preview = ((size) => thumbnailProvider(ThumbnailRequest.trash(itemId: item.id, size: size)));
 
   FileThumbnail.version({
     required FileEntry entry,
@@ -31,12 +47,12 @@ class FileThumbnail extends StatelessWidget {
   }) : isDir = false,
        mime = entry.mime,
        hasPreview = version.hasPreview,
-       request = ((size) => ThumbnailRequest.version(versionId: version.id, size: size));
+       preview = ((size) => thumbnailProvider(ThumbnailRequest.version(versionId: version.id, size: size)));
 
   final bool isDir;
   final String mime;
   final bool hasPreview;
-  final ThumbnailRequest Function(int size) request;
+  final ProviderListenable<AsyncValue<Uint8List?>> Function(int size) preview;
   final double dimension;
 
   final bool fill;
@@ -63,7 +79,7 @@ class _PreviewImage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bytes = ref.watch(thumbnailProvider(thumbnail.request(_requestSize))).value;
+    final bytes = ref.watch(thumbnail.preview(_requestSize)).value;
     if (bytes == null) {
       return FileTypeIcon.of(
         isDir: thumbnail.isDir,

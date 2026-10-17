@@ -12,3 +12,5 @@ PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 org.knaapen. All rights reserved.
+
+DEEP_LINK_SCHEME = polder

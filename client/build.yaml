@@ -46,3 +46,21 @@ targets:
             - url: "/api/v1/admin/logs/files/{name}"
               method: get
               overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/shares/{shareID}/content"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/shares/{shareID}/preview"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/shares/{shareID}/archive"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/public/links/{code}/content"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/public/links/{code}/preview"
+              method: get
+              overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/public/links/{code}/archive"
+              method: get
+              overridden_value: "Stream<List<int>>"

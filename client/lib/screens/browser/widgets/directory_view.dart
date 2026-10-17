@@ -15,6 +15,7 @@ import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/widgets/shared/notice_tile.dart";
+import "package:polder/widgets/shared/refreshable_empty_view.dart";
 
 class DirectoryView extends ConsumerWidget {
   const DirectoryView({required this.path, this.select, super.key});
@@ -43,19 +44,10 @@ class DirectoryView extends ConsumerWidget {
             edgeOffset: inset.top,
             onRefresh: notifier.refresh,
             child: items.isEmpty
-                ? LayoutBuilder(
-                    builder: (context, constraints) => SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: SizedBox(
-                        height: constraints.maxHeight,
-                        child: listing.indexing
-                            ? MessageView(
-                                icon: IconsaxPlusLinear.refresh_2,
-                                message: context.localized.indexingEmptyFolder,
-                              )
-                            : MessageView(icon: IconsaxPlusLinear.folder_open, message: context.localized.emptyFolder),
-                      ),
-                    ),
+                ? RefreshableEmptyView(
+                    child: listing.indexing
+                        ? MessageView(icon: IconsaxPlusLinear.refresh_2, message: context.localized.indexingEmptyFolder)
+                        : MessageView(icon: IconsaxPlusLinear.folder_open, message: context.localized.emptyFolder),
                   )
                 : _EntriesView(
                     path: path,

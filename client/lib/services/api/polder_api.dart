@@ -12,6 +12,7 @@ import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_links.dart";
 import "package:polder/models/file_version.dart";
+import "package:polder/models/group.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
 import "package:polder/models/search.dart";
@@ -19,6 +20,7 @@ import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
+import "package:polder/models/sharing.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/models/upload_batch.dart";
@@ -26,6 +28,7 @@ import "package:polder/models/user.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 import "package:polder/services/api/pending_uploads.dart";
+import "package:polder/services/api/sharing_mappers.dart";
 import "package:polder/services/api/wire_mappers.dart";
 
 class ByteRange {
@@ -171,18 +174,12 @@ class PolderApi {
     String? transferId,
     void Function(int sent, int total)? onProgress,
   }) async {
-    var sent = 0;
-    final counted = body.map((chunk) {
-      sent += chunk.length;
-      onProgress?.call(sent, length);
-      return chunk;
-    });
     final response = await _service.uploadFile(
       path: path,
       baseRev: baseRev,
       mtime: mtime?.toUtc(),
       xPolderTransferId: transferId,
-      body: PendingUpload(counted, length),
+      body: PendingUpload(_counted(body, length, onProgress), length),
     );
     return response.body!.toModel();
   }
@@ -366,6 +363,233 @@ class PolderApi {
 
   Future<Uint8List> downloadLogFile(String name, {void Function(int received, int total)? onProgress}) async =>
       _collect(await _service.downloadLogFile(name: name), onProgress);
+
+  Future<List<Group>> groups({GroupScope scope = GroupScope.mine}) async => [
+    for (final group in (await _service.listGroups(
+      scope: wire.ApiV1GroupsGetScope.values.firstWhere((option) => option.value == scope.name),
+    )).body!)
+      group.toModel(),
+  ];
+
+  Future<GroupDetails> group(int id) async => (await _service.getGroup(groupID: id)).body!.toModel();
+
+  Future<Group> createGroup(String name) async =>
+      (await _service.createGroup(body: wire.GroupNameRequest(name: name))).body!.toModel();
+
+  Future<Group> renameGroup(int id, String name) async => (await _service.renameGroup(
+    groupID: id,
+    body: wire.GroupNameRequest(name: name),
+  )).body!.toModel();
+
+  Future<void> deleteGroup(int id) => _service.deleteGroup(groupID: id);
+
+  Future<GroupDetails> addGroupMember(int groupId, int userId, GroupRole role) async => (await _service.addGroupMember(
+    groupID: groupId,
+    body: wire.NewMember(userId: userId, role: wire.NewMemberRole.values.byName(role.name)),
+  )).body!.toModel();
+
+  Future<GroupDetails> setGroupMemberRole(int groupId, int userId, GroupRole role) async =>
+      (await _service.setGroupMemberRole(
+        groupID: groupId,
+        userID: userId,
+        body: wire.RoleChange(role: wire.RoleChangeRole.values.byName(role.name)),
+      )).body!.toModel();
+
+  Future<void> removeGroupMember(int groupId, int userId) =>
+      _service.removeGroupMember(groupID: groupId, userID: userId);
+
+  Future<List<OutgoingShare>> groupShares(int groupId) async => [
+    for (final share in (await _service.listGroupShares(groupID: groupId)).body!) share.toModel(),
+  ];
+
+  Future<ShareTargets> searchShareTargets(String query) async =>
+      (await _service.searchDirectory(q: query)).body!.toModel();
+
+  Future<List<OutgoingShare>> outgoingShares({int? fileId}) async => [
+    for (final share in (await _service.listOutgoingShares(fileId: fileId)).body!) share.toModel(),
+  ];
+
+  Future<List<IncomingShare>> incomingShares() async => [
+    for (final share in (await _service.listIncomingShares()).body!) share.toModel(),
+  ];
+
+  Future<OutgoingShare> share({
+    required int fileId,
+    required ShareTarget recipient,
+    required SharePermissions permissions,
+    DateTime? expiresAt,
+    String note = "",
+  }) async => (await _service.createShare(
+    body: wire.NewShare(
+      fileId: fileId,
+      recipient: wire.RecipientRef(id: recipient.id, kind: wire.RecipientRefKind.values.byName(recipient.kind.name)),
+      permissions: permissions.toWire(),
+      expiresAt: expiresAt?.toUtc(),
+      note: note.isEmpty ? null : note,
+    ),
+  )).body!.toModel();
+
+  Future<OutgoingShare> updateShare(
+    int id, {
+    SharePermissions? permissions,
+    DateTime? expiresAt,
+    bool removeExpiry = false,
+    String? note,
+  }) async => (await _service.updateShare(
+    shareID: id,
+    body: wire.ShareChanges(
+      permissions: permissions?.toWire(),
+      expiresAt: expiresAt?.toUtc(),
+      removeExpiry: removeExpiry ? true : null,
+      note: note,
+    ),
+  )).body!.toModel();
+
+  Future<void> removeShare(int id) => _service.deleteShare(shareID: id);
+
+  Future<DirectoryListing> listShare(int shareId, String path) async =>
+      (await _service.listShareFiles(shareID: shareId, path: path)).body!.toModel();
+
+  Future<Uint8List> downloadFromShare(
+    int shareId,
+    String path, {
+    void Function(int received, int total)? onProgress,
+  }) async => _collect(await _service.downloadShareFile(shareID: shareId, path: path), onProgress);
+
+  Future<Uint8List> downloadShareArchive(
+    int shareId,
+    String path, {
+    void Function(int received, int total)? onProgress,
+  }) async => _collect(await _service.downloadShareArchive(shareID: shareId, path: path), onProgress);
+
+  Future<Uint8List?> sharePreview(int shareId, String path, {int size = 256}) => _thumbnail(
+    () => _service.previewShareFile(
+      shareID: shareId,
+      path: path,
+      size: _thumbnailSize(wire.ApiV1SharesShareIDPreviewGetSize.values, (option) => option.value, size),
+    ),
+  );
+
+  Future<FileEntry> putShareContent(
+    int shareId,
+    String path,
+    Stream<List<int>> body, {
+    required int length,
+    String? transferId,
+    void Function(int sent, int total)? onProgress,
+  }) async => (await _service.uploadShareFile(
+    shareID: shareId,
+    path: path,
+    baseRev: 0,
+    xPolderTransferId: transferId,
+    body: PendingUpload(_counted(body, length, onProgress), length),
+  )).body!.toModel();
+
+  Future<FileEntry> mkdirInShare(int shareId, String path) async => (await _service.makeShareDirectory(
+    shareID: shareId,
+    body: wire.PathRequest(path: path),
+  )).body!.toModel();
+
+  Future<FileEntry> moveInShare(int shareId, {required String from, required String to, int baseRev = -1}) async =>
+      (await _service.moveShareFile(
+        shareID: shareId,
+        body: wire.MoveRequest(from: from, to: to, baseRev: baseRev),
+      )).body!.toModel();
+
+  Future<void> deleteInShare(int shareId, String path, {int baseRev = -1}) =>
+      _service.deleteShareFile(shareID: shareId, path: path, baseRev: baseRev);
+
+  Future<List<ShareLink>> shareLinks({int? fileId}) async => [
+    for (final link in (await _service.listShareLinks(fileId: fileId)).body!) link.toModel(),
+  ];
+
+  Future<ShareLink> createShareLink(int fileId, LinkOptions options) async => (await _service.createShareLink(
+    body: wire.NewShareLink(
+      fileId: fileId,
+      permissions: options.permissions.toWire(),
+      password: options.password,
+      expiresAt: options.expiresAt?.toUtc(),
+    ),
+  )).body!.toModel();
+
+  Future<ShareLink> updateShareLink(int id, LinkOptions options) async => (await _service.updateShareLink(
+    linkID: id,
+    body: wire.LinkChanges(
+      permissions: options.permissions.toWireChanges(),
+      password: options.password,
+      removePassword: options.removePassword ? true : null,
+      expiresAt: options.expiresAt?.toUtc(),
+      removeExpiry: options.removeExpiry ? true : null,
+    ),
+  )).body!.toModel();
+
+  Future<void> deleteShareLink(int id) => _service.deleteShareLink(linkID: id);
+
+  Future<LinkMatch> matchShareLink(String code) async => (await _service.matchShareLink(code: code)).body!.toModel();
+
+  Future<PublicLinkInfo> publicLink(String code) async => (await _service.getPublicLink(code: code)).body!.toModel();
+
+  Future<PublicLinkUnlock> unlockPublicLink(String code, {String? password}) async => (await _service.unlockPublicLink(
+    code: code,
+    body: wire.UnlockRequest(password: password),
+  )).body!.toModel();
+
+  Future<DirectoryListing> listPublicLink(String code, String token, String path) async =>
+      (await _service.listPublicLinkFiles(code: code, path: path, xPolderShareToken: token)).body!.toModel();
+
+  Future<Uint8List> downloadFromPublicLink(
+    String code,
+    String token,
+    String path, {
+    void Function(int received, int total)? onProgress,
+  }) async =>
+      _collect(await _service.downloadPublicLinkFile(code: code, path: path, xPolderShareToken: token), onProgress);
+
+  Future<Uint8List> downloadPublicLinkArchive(
+    String code,
+    String token,
+    String path, {
+    void Function(int received, int total)? onProgress,
+  }) async =>
+      _collect(await _service.downloadPublicLinkArchive(code: code, path: path, xPolderShareToken: token), onProgress);
+
+  Future<Uint8List?> publicLinkPreview(String code, String token, String path, {int size = 256}) => _thumbnail(
+    () => _service.previewPublicLinkFile(
+      code: code,
+      path: path,
+      xPolderShareToken: token,
+      size: _thumbnailSize(wire.ApiV1PublicLinksCodePreviewGetSize.values, (option) => option.value, size),
+    ),
+  );
+
+  Future<FileEntry> putPublicLinkContent(
+    String code,
+    String token,
+    String path,
+    Stream<List<int>> body, {
+    required int length,
+    String? transferId,
+    void Function(int sent, int total)? onProgress,
+  }) async => (await _service.uploadPublicLinkFile(
+    code: code,
+    path: path,
+    xPolderShareToken: token,
+    xPolderTransferId: transferId,
+    body: PendingUpload(_counted(body, length, onProgress), length),
+  )).body!.toModel();
+
+  static Stream<List<int>> _counted(
+    Stream<List<int>> body,
+    int length,
+    void Function(int sent, int total)? onProgress,
+  ) {
+    var sent = 0;
+    return body.map((chunk) {
+      sent += chunk.length;
+      onProgress?.call(sent, length);
+      return chunk;
+    });
+  }
 
   static Uint8List _asBytes(List<int> chunk) => chunk is Uint8List ? chunk : Uint8List.fromList(chunk);
 

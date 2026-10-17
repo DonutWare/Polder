@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/database"
 	"polder-server/internal/logging"
 	"polder-server/internal/storage"
 	"polder-server/internal/users"
@@ -52,7 +53,7 @@ func (RestoreMode) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema
 	return s
 }
 
-func scanTrashItem(row rowScanner) (TrashItem, error) {
+func scanTrashItem(row database.RowScanner) (TrashItem, error) {
 	var item TrashItem
 	var deletedAt int64
 	err := row.Scan(&item.ID, &item.OriginalPath, &item.Name, &item.IsDir, &item.Size, &item.Mime, &item.Hash, &item.PreviewState,
@@ -263,7 +264,7 @@ func (s *Service) restoreTarget(ctx context.Context, q querier, owner users.User
 		_, undo, err := s.moveToTrash(ctx, q, owner, existing)
 		return item.OriginalPath, undo, err
 	case RestoreKeepBoth:
-		target, err := s.freeRestorePath(ctx, q, owner, item.OriginalPath)
+		target, err := s.freeName(ctx, q, owner, item.OriginalPath, restoredSuffix)
 		return target, noUndo, err
 	default:
 		alreadyExists := apperr.AlreadyExists("%s already exists", item.OriginalPath)
@@ -272,19 +273,37 @@ func (s *Service) restoreTarget(ctx context.Context, q querier, owner users.User
 	}
 }
 
-func (s *Service) freeRestorePath(ctx context.Context, q querier, owner users.User, originalPath string) (string, error) {
-	directory, name := storage.ParentPath(originalPath), path.Base(originalPath)
+func restoredSuffix(attempt int) string {
+	if attempt == 0 {
+		return " (restored)"
+	}
+	return fmt.Sprintf(" (restored %d)", attempt+1)
+}
+
+func numberedSuffix(attempt int) string {
+	if attempt == 0 {
+		return ""
+	}
+	return fmt.Sprintf(" (%d)", attempt+1)
+}
+
+func (s *Service) FreeName(ctx context.Context, owner users.User, rawPath string) (string, error) {
+	cleanPath, err := nonRootPath(rawPath)
+	if err != nil {
+		return "", err
+	}
+	return s.freeName(ctx, s.db, owner, cleanPath, numberedSuffix)
+}
+
+func (s *Service) freeName(ctx context.Context, q querier, owner users.User, wanted string, suffix func(attempt int) string) (string, error) {
+	directory, name := storage.ParentPath(wanted), path.Base(wanted)
 	extension := path.Ext(name)
 	if extension == name {
 		extension = ""
 	}
 	stem := strings.TrimSuffix(name, extension)
-	for attempt := 1; attempt < 1000; attempt++ {
-		suffix := " (restored)"
-		if attempt > 1 {
-			suffix = fmt.Sprintf(" (restored %d)", attempt)
-		}
-		candidate := path.Join(directory, stem+suffix+extension)
+	for attempt := range 1000 {
+		candidate := path.Join(directory, stem+suffix(attempt)+extension)
 		_, found, err := findEntry(ctx, q, owner.ID, candidate)
 		if err != nil {
 			return "", err
@@ -293,7 +312,7 @@ func (s *Service) freeRestorePath(ctx context.Context, q querier, owner users.Us
 			return candidate, nil
 		}
 	}
-	return "", apperr.AlreadyExists("no free name to restore %s under", originalPath)
+	return "", apperr.AlreadyExists("no free name for %s", wanted)
 }
 
 func (s *Service) indexRestoredTree(ctx context.Context, q querier, owner users.User, target, absolute string, fileIDs map[string]int64) (Entry, []string, error) {
@@ -365,20 +384,21 @@ func (s *Service) DeleteFromTrash(ctx context.Context, owner users.User, id int6
 	if err != nil {
 		return err
 	}
-	if err := s.purge(ctx, owner, []TrashItem{item}); err != nil {
+	removed, err := s.purge(ctx, owner, []TrashItem{item})
+	if err != nil {
 		return err
 	}
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashDelete, Path: item.OriginalPath, IsDir: item.IsDir, Size: item.Size, Count: 1})
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashDelete, Path: item.OriginalPath, IsDir: item.IsDir, Size: item.Size, Count: 1, RemovedFileIDs: removed})
 	return nil
 }
 
-func (s *Service) purgeTrashItem(ctx context.Context, owner users.User, id int64) error {
+func (s *Service) purgeTrashItem(ctx context.Context, owner users.User, id int64) ([]int64, error) {
 	item, err := findTrashItem(ctx, s.db, owner.ID, id)
 	if apperr.Is(err, apperr.KindNotFound) {
-		return nil
+		return nil, nil
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 	return s.purge(ctx, owner, []TrashItem{item})
 }
@@ -388,10 +408,11 @@ func (s *Service) EmptyTrash(ctx context.Context, owner users.User) error {
 	if err != nil {
 		return err
 	}
-	if err := s.purge(ctx, owner, items); err != nil || len(items) == 0 {
+	removed, err := s.purge(ctx, owner, items)
+	if err != nil || len(items) == 0 {
 		return err
 	}
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashEmpty, Path: "/", IsDir: true, Size: totalSize(items), Count: len(items)})
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashEmpty, Path: "/", IsDir: true, Size: totalSize(items), Count: len(items), RemovedFileIDs: removed})
 	return nil
 }
 
@@ -400,10 +421,11 @@ func (s *Service) PurgeTrash(ctx context.Context, owner users.User, deletedBefor
 	if err != nil {
 		return 0, err
 	}
-	if err := s.purge(ctx, owner, items); err != nil || len(items) == 0 {
+	removed, err := s.purge(ctx, owner, items)
+	if err != nil || len(items) == 0 {
 		return len(items), err
 	}
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashExpire, Path: "/", IsDir: true, Size: totalSize(items), Count: len(items)})
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationTrashExpire, Path: "/", IsDir: true, Size: totalSize(items), Count: len(items), RemovedFileIDs: removed})
 	return len(items), nil
 }
 
@@ -415,9 +437,9 @@ func totalSize(items []TrashItem) int64 {
 	return total
 }
 
-func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem) error {
+func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem) ([]int64, error) {
 	if len(items) == 0 {
-		return nil
+		return nil, nil
 	}
 	defer s.onContentRemoved()
 	var failures []error
@@ -427,18 +449,34 @@ func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem
 	})
 	unlock()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer s.onVersionsChanged()
+	var removed []int64
 	for _, item := range items {
+		removed = append(removed, s.trashedFileIDs(owner.Username, item)...)
 		if _, err := s.db.ExecContext(ctx, `DELETE FROM trash WHERE id = $1`, item.ID); err != nil {
-			return err
+			return removed, err
 		}
 		if err := s.disk.RemoveTrashItem(owner.Username, item.storageID); err != nil {
 			failures = append(failures, fmt.Errorf("remove %s from trash: %w", item.Name, err))
 		}
 	}
-	return errors.Join(failures...)
+	return removed, errors.Join(failures...)
+}
+
+func (s *Service) trashedFileIDs(username string, item TrashItem) []int64 {
+	sidecar, err := s.readTrashSidecar(username, item.storageID)
+	if err != nil {
+		return nil
+	}
+	ids := make([]int64, 0, len(sidecar.FileIDs))
+	for _, id := range sidecar.FileIDs {
+		if id != 0 {
+			ids = append(ids, id)
+		}
+	}
+	return ids
 }
 
 type trashSidecar struct {

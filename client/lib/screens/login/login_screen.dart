@@ -19,7 +19,10 @@ class LoginScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(loginProvider);
     ref.listen(loginProvider.select((state) => state.completed), (_, completed) {
-      if (completed) context.go(AppRoutes.files);
+      if (completed) {
+        final from = GoRouterState.of(context).uri.queryParameters[AppRoutes.fromParameter];
+        context.go(AppRoutes.safeReturn(from) ?? AppRoutes.files);
+      }
     });
     // A hosted web client connects to its own server first; don't flash the server form meanwhile.
     final probing = state.probingHostedServer;

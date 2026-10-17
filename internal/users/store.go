@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/database"
 )
 
 const selectUserColumns = `SELECT u.id, u.username, u.role, u.quota_bytes, u.disabled, u.created_at,
@@ -28,11 +29,7 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
-type rowScanner interface {
-	Scan(dest ...any) error
-}
-
-func scanUser(row rowScanner) (User, error) {
+func scanUser(row database.RowScanner) (User, error) {
 	var user User
 	var createdAt int64
 	var retention, versionsKeepAll, versionsMaxAge, versionsMaxPerFile sql.NullInt64
@@ -86,27 +83,6 @@ func optionalBool(value sql.NullBool) *bool {
 	return &value.Bool
 }
 
-func nullableBool(value *bool) any {
-	if value == nil {
-		return nil
-	}
-	return *value
-}
-
-func nullableInt(value *int) any {
-	if value == nil {
-		return nil
-	}
-	return *value
-}
-
-func nullableString(value *string) any {
-	if value == nil {
-		return nil
-	}
-	return *value
-}
-
 func (s *Store) Count(ctx context.Context) (int, error) {
 	var count int
 	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users`).Scan(&count)
@@ -118,7 +94,7 @@ func (s *Store) Insert(ctx context.Context, newUser NewUser, passwordHash string
 	err := s.db.QueryRowContext(ctx,
 		`INSERT INTO users (username, password_hash, role, quota_bytes, disabled, created_at) VALUES ($1, $2, $3, $4, FALSE, $5) RETURNING id`,
 		newUser.Username, passwordHash, newUser.Role, newUser.QuotaBytes, time.Now().Unix()).Scan(&id)
-	if isUniqueViolation(err) {
+	if database.IsUniqueViolation(err) {
 		return User{}, apperr.AlreadyExists("user %q already exists", newUser.Username)
 	}
 	if err != nil {
@@ -205,19 +181,19 @@ func (s *Store) Update(ctx context.Context, id int64, changes Changes, passwordH
 
 func (s *Store) SetTrashPreferences(ctx context.Context, id int64, preferences TrashPreferences) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE users SET trash_enabled = $1, trash_retention_days = $2 WHERE id = $3`,
-		nullableBool(preferences.Enabled), nullableInt(preferences.Days), id)
+		database.NullIfNil(preferences.Enabled), database.NullIfNil(preferences.Days), id)
 	return err
 }
 
 func (s *Store) SetVersionPreferences(ctx context.Context, id int64, preferences VersionPreferences) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE users SET versions_enabled = $1, versions_keep_all_hours = $2, versions_max_age_days = $3, versions_max_per_file = $4 WHERE id = $5`,
-		nullableBool(preferences.Enabled), nullableInt(preferences.KeepAllHours), nullableInt(preferences.MaxAgeDays), nullableInt(preferences.MaxPerFile), id)
+		database.NullIfNil(preferences.Enabled), database.NullIfNil(preferences.KeepAllHours), database.NullIfNil(preferences.MaxAgeDays), database.NullIfNil(preferences.MaxPerFile), id)
 	return err
 }
 
 func (s *Store) SetProfile(ctx context.Context, id int64, profile Profile) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE users SET first_name = $1, last_name = $2, display_name = $3, email = $4, age = $5, address = $6 WHERE id = $7`,
-		profile.FirstName, profile.LastName, profile.DisplayName, profile.Email, nullableInt(profile.Age), profile.Address, id)
+		profile.FirstName, profile.LastName, profile.DisplayName, profile.Email, database.NullIfNil(profile.Age), profile.Address, id)
 	return err
 }
 
@@ -236,7 +212,7 @@ func (s *Store) SetAppearance(ctx context.Context, id int64, appearance Appearan
 		theme = string(*appearance.Theme)
 	}
 	_, err := s.db.ExecContext(ctx, `UPDATE users SET theme = $1, accent_color = $2 WHERE id = $3`,
-		theme, nullableString(appearance.AccentColor), id)
+		theme, database.NullIfNil(appearance.AccentColor), id)
 	return err
 }
 
@@ -252,19 +228,11 @@ func (s *Store) NotesPath(ctx context.Context, id int64) (*string, error) {
 }
 
 func (s *Store) SetNotesPath(ctx context.Context, id int64, notesPath *string) error {
-	_, err := s.db.ExecContext(ctx, `UPDATE users SET notes_path = $1 WHERE id = $2`, nullableString(notesPath), id)
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET notes_path = $1 WHERE id = $2`, database.NullIfNil(notesPath), id)
 	return err
 }
 
 func (s *Store) Delete(ctx context.Context, id int64) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM users WHERE id = $1`, id)
 	return err
-}
-
-func isUniqueViolation(err error) bool {
-	if err == nil {
-		return false
-	}
-	message := strings.ToLower(err.Error())
-	return strings.Contains(message, "unique") || strings.Contains(message, "duplicate")
 }

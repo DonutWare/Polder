@@ -130,7 +130,7 @@ extension UserToModel on wire.User {
     disabled: disabled,
     createdAt: createdAt,
     profile: profile.toModel(),
-    avatar: avatar == null ? null : ServerImage(id: avatar!.id, contentType: avatar!.contentType),
+    avatar: avatar?.toModel(),
     theme: switch (appearance.theme) {
       wire.AppearanceTheme.system => ThemeMode.system,
       wire.AppearanceTheme.light => ThemeMode.light,
@@ -277,6 +277,10 @@ extension BrandingToModel on wire.Branding {
 }
 
 extension ImageInfoToModel on wire.ImageInfo {
+  ServerImage toModel() => ServerImage(id: id, contentType: contentType);
+}
+
+extension AvatarToModel on wire.Avatar {
   ServerImage toModel() => ServerImage(id: id, contentType: contentType);
 }
 

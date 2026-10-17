@@ -24,4 +24,7 @@ Map<String, dynamic> _$SyncRootToJson(_SyncRoot instance) => <String, dynamic>{
   'enabled': instance.enabled,
 };
 
-const _$SyncModeEnumMap = {SyncMode.sync: 'sync', SyncMode.autoUpload: 'autoUpload'};
+const _$SyncModeEnumMap = {
+  SyncMode.sync: 'sync',
+  SyncMode.autoUpload: 'autoUpload',
+};

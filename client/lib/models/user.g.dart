@@ -15,30 +15,44 @@ _UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
   address: json['address'] as String? ?? "",
 );
 
-Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) => <String, dynamic>{
-  'firstName': instance.firstName,
-  'lastName': instance.lastName,
-  'displayName': instance.displayName,
-  'email': instance.email,
-  'age': ?instance.age,
-  'address': instance.address,
-};
+Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
+    <String, dynamic>{
+      'firstName': instance.firstName,
+      'lastName': instance.lastName,
+      'displayName': instance.displayName,
+      'email': instance.email,
+      'age': ?instance.age,
+      'address': instance.address,
+    };
 
 _User _$UserFromJson(Map<String, dynamic> json) => _User(
   id: (json['id'] as num).toInt(),
   username: json['username'] as String,
-  role: $enumDecodeNullable(_$UserRoleEnumMap, json['role'], unknownValue: UserRole.user) ?? UserRole.user,
+  role:
+      $enumDecodeNullable(
+        _$UserRoleEnumMap,
+        json['role'],
+        unknownValue: UserRole.user,
+      ) ??
+      UserRole.user,
   quotaBytes: (json['quotaBytes'] as num?)?.toInt() ?? 0,
   usedBytes: (json['usedBytes'] as num?)?.toInt() ?? 0,
   historyBytes: (json['historyBytes'] as num?)?.toInt() ?? 0,
   disabled: json['disabled'] as bool? ?? false,
-  createdAt: json['createdAt'] == null ? null : DateTime.parse(json['createdAt'] as String),
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
   profile: json['profile'] == null
       ? const UserProfile()
       : UserProfile.fromJson(json['profile'] as Map<String, dynamic>),
-  avatar: json['avatar'] == null ? null : ServerImage.fromJson(json['avatar'] as Map<String, dynamic>),
+  avatar: json['avatar'] == null
+      ? null
+      : ServerImage.fromJson(json['avatar'] as Map<String, dynamic>),
   theme: $enumDecodeNullable(_$ThemeModeEnumMap, json['theme']),
-  accent: _$JsonConverterFromJson<int, Color>(json['accent'], const ColorConverter().fromJson),
+  accent: _$JsonConverterFromJson<int, Color>(
+    json['accent'],
+    const ColorConverter().fromJson,
+  ),
 );
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
@@ -53,15 +67,26 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'profile': instance.profile.toJson(),
   'avatar': ?instance.avatar?.toJson(),
   'theme': ?_$ThemeModeEnumMap[instance.theme],
-  'accent': ?_$JsonConverterToJson<int, Color>(instance.accent, const ColorConverter().toJson),
+  'accent': ?_$JsonConverterToJson<int, Color>(
+    instance.accent,
+    const ColorConverter().toJson,
+  ),
 };
 
 const _$UserRoleEnumMap = {UserRole.admin: 'admin', UserRole.user: 'user'};
 
-const _$ThemeModeEnumMap = {ThemeMode.system: 'system', ThemeMode.light: 'light', ThemeMode.dark: 'dark'};
+const _$ThemeModeEnumMap = {
+  ThemeMode.system: 'system',
+  ThemeMode.light: 'light',
+  ThemeMode.dark: 'dark',
+};
 
-Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
-    json == null ? null : fromJson(json as Json);
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
 
-Json? _$JsonConverterToJson<Json, Value>(Value? value, Json? Function(Value value) toJson) =>
-    value == null ? null : toJson(value);
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

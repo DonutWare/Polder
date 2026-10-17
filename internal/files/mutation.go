@@ -45,6 +45,8 @@ type Mutation struct {
 	Count    int
 	Changes  []ScanChange
 
+	RemovedFileIDs []int64
+
 	Housekeeping bool
 }
 

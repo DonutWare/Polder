@@ -19,12 +19,14 @@ import (
 	"polder-server/internal/auth"
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
+	"polder-server/internal/groups"
 	"polder-server/internal/links"
 	"polder-server/internal/logging"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
+	"polder-server/internal/sharing"
 	"polder-server/internal/syncing"
 	"polder-server/internal/users"
 	"polder-server/internal/versions"
@@ -47,7 +49,12 @@ type API struct {
 	office   *office.Service
 	versions *versions.Worker
 	links    *links.Graph
+	groups   *groups.Service
+	sharing  *sharing.Service
 	limiter  *failedAttemptLimiter
+
+	linkLimiter  *failedAttemptLimiter
+	archiveSlots chan struct{}
 
 	requestTrashPurge func()
 }
@@ -69,6 +76,8 @@ type Dependencies struct {
 	Office                 *office.Service
 	Versions               *versions.Worker
 	Links                  *links.Graph
+	Groups                 *groups.Service
+	Sharing                *sharing.Service
 	RequestTrashPurge      func()
 	LoginAttemptsPerMinute int
 	TrustedProxies         []netip.Prefix
@@ -94,7 +103,12 @@ func NewRouter(deps Dependencies) http.Handler {
 		office:   deps.Office,
 		versions: deps.Versions,
 		links:    deps.Links,
+		groups:   deps.Groups,
+		sharing:  deps.Sharing,
 		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+
+		linkLimiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+		archiveSlots: make(chan struct{}, maxConcurrentArchives),
 
 		requestTrashPurge: deps.RequestTrashPurge,
 	}
@@ -167,6 +181,18 @@ func (a *API) routes(api huma.API) {
 
 	register(v1, http.MethodGet, "/server/info", "getServerInfo", "Version, commit and build of the server binary", a.getServerInfo)
 
+	register(v1, http.MethodGet, "/public/links/{code}", "getPublicLink", "What a share link points to; hidden while it needs a password", a.getPublicLink)
+	register(v1, http.MethodPost, "/public/links/{code}/unlock", "unlockPublicLink", "Enter a share link's password, or open a link without one, to get a token for its contents", a.unlockPublicLink)
+	register(v1, http.MethodGet, "/public/links/{code}/list", "listPublicLinkFiles", "List a folder inside a share link", a.listPublicLinkFiles)
+	register(v1, http.MethodGet, "/public/links/{code}/content", "downloadPublicLinkFile", "Download a file inside a share link; supports Range", a.downloadPublicLinkFile,
+		withResponse(http.StatusOK, "File content", binaryContent("application/octet-stream")))
+	register(v1, http.MethodGet, "/public/links/{code}/preview", "previewPublicLinkFile", "Get a JPEG thumbnail of a file inside a share link", a.previewPublicLinkFile,
+		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(v1, http.MethodGet, "/public/links/{code}/archive", "downloadPublicLinkArchive", "Download a folder inside a share link as a zip", a.downloadPublicLinkArchive,
+		withResponse(http.StatusOK, "Zip archive", binaryContent("application/zip")))
+	register(v1, http.MethodPut, "/public/links/{code}/content", "uploadPublicLinkFile", "Upload a file into a share link that accepts uploads; it never replaces an existing file", a.uploadPublicLinkFile,
+		withRequestBody(binaryContent("application/octet-stream")))
+
 	user := huma.NewGroup(v1)
 	user.UseMiddleware(a.requireUser(api))
 	user.UseSimpleModifier(requiresAuth(api, http.StatusUnauthorized))
@@ -227,6 +253,44 @@ func (a *API) routes(api huma.API) {
 
 	register(user, http.MethodGet, "/activity", "listActivity", "Page through what happened to files and sessions, newest first", a.listActivity)
 	register(user, http.MethodGet, "/activity/live", "listLiveTransfers", "Uploads and downloads in progress", a.listLiveTransfers)
+
+	register(user, http.MethodGet, "/directory", "searchDirectory", "Find users and groups to share with", a.searchDirectory)
+
+	register(user, http.MethodGet, "/groups", "listGroups", "Groups the logged-in user is in or created, or every group for administrators", a.listGroups)
+	register(user, http.MethodPost, "/groups", "createGroup", "Create a group; the creator becomes its admin", a.createGroup, created)
+	register(user, http.MethodGet, "/groups/{groupID}", "getGroup", "A group and its members", a.getGroup)
+	register(user, http.MethodPatch, "/groups/{groupID}", "renameGroup", "Rename a group; group admins only", a.renameGroup)
+	register(user, http.MethodDelete, "/groups/{groupID}", "deleteGroup", "Delete a group; what was shared with it is no longer shared", a.deleteGroup)
+	register(user, http.MethodPost, "/groups/{groupID}/members", "addGroupMember", "Add someone to a group; group admins only", a.addGroupMember, created)
+	register(user, http.MethodPatch, "/groups/{groupID}/members/{userID}", "setGroupMemberRole", "Change a member's role; group admins only", a.setGroupMemberRole)
+	register(user, http.MethodDelete, "/groups/{groupID}/members/{userID}", "removeGroupMember", "Remove someone from a group, or leave it yourself", a.removeGroupMember)
+	register(user, http.MethodGet, "/groups/{groupID}/shares", "listGroupShares", "What is shared with a group", a.listGroupShares)
+
+	register(user, http.MethodGet, "/shares/outgoing", "listOutgoingShares", "What the logged-in user shares with others", a.listOutgoingShares)
+	register(user, http.MethodGet, "/shares/incoming", "listIncomingShares", "What others share with the logged-in user, directly or through a group", a.listIncomingShares)
+	register(user, http.MethodPost, "/shares", "createShare", "Share a file or folder with a user or group", a.createShare, created)
+	register(user, http.MethodPatch, "/shares/{shareID}", "updateShare", "Change what a share's recipients may do", a.updateShare)
+	register(user, http.MethodDelete, "/shares/{shareID}", "deleteShare", "Stop sharing; recipients of a direct share may also remove it", a.deleteShare)
+	register(user, http.MethodGet, "/shares/{shareID}/list", "listShareFiles", "List a folder inside a share", a.listShareFiles)
+	register(user, http.MethodGet, "/shares/{shareID}/stat", "statShareFile", "Get one file or folder inside a share", a.statShareFile)
+	register(user, http.MethodGet, "/shares/{shareID}/content", "downloadShareFile", "Download a file inside a share; supports Range", a.downloadShareFile,
+		withResponse(http.StatusOK, "File content", binaryContent("application/octet-stream")))
+	register(user, http.MethodGet, "/shares/{shareID}/preview", "previewShareFile", "Get a JPEG thumbnail of a file inside a share", a.previewShareFile,
+		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(user, http.MethodGet, "/shares/{shareID}/archive", "downloadShareArchive", "Download a folder inside a share as a zip", a.downloadShareArchive,
+		withResponse(http.StatusOK, "Zip archive", binaryContent("application/zip")))
+	register(user, http.MethodPut, "/shares/{shareID}/content", "uploadShareFile", "Upload a file into a share that allows changes", a.uploadShareFile,
+		withRequestBody(binaryContent("application/octet-stream")))
+	register(user, http.MethodPost, "/shares/{shareID}/mkdir", "makeShareDirectory", "Create a folder inside a share that allows changes", a.makeShareDirectory, created)
+	register(user, http.MethodPost, "/shares/{shareID}/move", "moveShareFile", "Move or rename inside a share that allows changes", a.moveShareFile)
+	register(user, http.MethodPost, "/shares/{shareID}/copy", "copyShareFile", "Copy inside a share that allows changes", a.copyShareFile)
+	register(user, http.MethodDelete, "/shares/{shareID}/files", "deleteShareFile", "Delete inside a share that allows changes; it goes to the owner's trash", a.deleteShareFile)
+
+	register(user, http.MethodGet, "/links", "listShareLinks", "The logged-in user's share links", a.listShareLinks)
+	register(user, http.MethodPost, "/links", "createShareLink", "Create a share link to a file or folder", a.createShareLink, created)
+	register(user, http.MethodPatch, "/links/{linkID}", "updateShareLink", "Change a share link's access, password or expiry", a.updateShareLink)
+	register(user, http.MethodDelete, "/links/{linkID}", "deleteShareLink", "Delete a share link; it stops working at once", a.deleteShareLink)
+	register(user, http.MethodGet, "/links/match/{code}", "matchShareLink", "Find where a share link's item is for the logged-in user: their own file or inside a share", a.matchShareLink)
 
 	register(user, http.MethodGet, "/sync/changes", "listChanges", "Page through changes since a cursor", a.changes)
 	register(user, http.MethodGet, "/sync/manifest", "getManifest", "Get a file's chunk manifest for delta sync", a.manifest)

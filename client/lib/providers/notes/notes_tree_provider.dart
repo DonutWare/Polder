@@ -6,6 +6,8 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/models/note_item.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/realtime/files_changed_provider.dart";
+import "package:polder/services/api/polder_api.dart";
+import "package:polder/util/guarded_refresh.dart";
 import "package:polder/util/remote_path.dart";
 
 class NoteTreeNode {
@@ -38,7 +40,7 @@ final notesTreeProvider = AsyncNotifierProvider.autoDispose.family<NotesTreeNoti
   NotesTreeNotifier.new,
 );
 
-class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> {
+class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> with GuardedRefresh {
   NotesTreeNotifier(this.path);
 
   static const refreshDelays = [Duration(milliseconds: 400), Duration(seconds: 2)];
@@ -60,13 +62,12 @@ class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> {
         timers.add(Timer(delay, refresh));
       }
     });
-    return arrange(await ref.watch(polderApiProvider).listNotes(path));
+    return _fetch(ref.watch(polderApiProvider));
   }
 
-  Future<void> refresh() async {
-    final result = await AsyncValue.guard(() async => arrange(await ref.read(polderApiProvider).listNotes(path)));
-    if (ref.mounted && result.hasValue) state = result;
-  }
+  Future<void> refresh() => refreshWith(() => _fetch(ref.read(polderApiProvider)), keepOnError: true);
+
+  Future<NotesFolderContents> _fetch(PolderApi api) async => arrange(await api.listNotes(path));
 
   static NotesFolderContents arrange(List<NoteItem> items) {
     final pages = <String, NoteItem>{};

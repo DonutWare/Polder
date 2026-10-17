@@ -6,13 +6,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"polder-server/internal/database"
 )
 
 const (
 	Retention        = 30 * 24 * time.Hour
 	DefaultPageSize  = 50
 	MaxPageSize      = 200
-	selectEntryQuery = `SELECT a.id, a.user_id, u.username, a.device, a.kind, a.path, a.from_path, a.is_dir,
+	selectEntryQuery = `SELECT a.id, a.user_id, u.username, a.device, a.via, a.kind, a.path, a.from_path, a.is_dir,
 	a.size, a.bytes, a.duration_ms, a.item_count, a.status, a.detail, a.created_at
 	FROM activity a JOIN users u ON u.id = a.user_id`
 )
@@ -22,6 +24,7 @@ type LogEntry struct {
 	UserID     int64     `json:"userId"`
 	Username   string    `json:"username"`
 	Device     string    `json:"device" doc:"Device that did it, or server for the server's own work"`
+	Via        string    `json:"via,omitempty" required:"false" doc:"Who acted through a share: another user's username, or link:<code> for a public link"`
 	Kind       Kind      `json:"kind"`
 	Path       string    `json:"path"`
 	FromPath   string    `json:"fromPath,omitempty" required:"false" doc:"Where a moved or restored item came from"`
@@ -60,11 +63,11 @@ func (s *Store) Insert(ctx context.Context, entry LogEntry) (LogEntry, error) {
 		entry.CreatedAt = time.Now().UTC().Truncate(time.Second)
 	}
 	err := s.db.QueryRowContext(ctx,
-		`INSERT INTO activity (user_id, session_id, device, kind, path, from_path, is_dir, size, bytes, duration_ms, item_count, status, detail, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		`INSERT INTO activity (user_id, session_id, device, via, kind, path, from_path, is_dir, size, bytes, duration_ms, item_count, status, detail, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 		RETURNING id`,
-		entry.UserID, nullable(entry.sessionID), entry.Device, entry.Kind, entry.Path, entry.FromPath, entry.IsDir,
-		nullablePointer(entry.Size), nullablePointer(entry.Bytes), nullablePointer(entry.DurationMs), nullablePointer(entry.Count),
+		entry.UserID, database.NullIfZero(entry.sessionID), entry.Device, entry.Via, entry.Kind, entry.Path, entry.FromPath, entry.IsDir,
+		database.NullIfNil(entry.Size), database.NullIfNil(entry.Bytes), database.NullIfNil(entry.DurationMs), database.NullIfNil(entry.Count),
 		entry.Status, entry.Detail, entry.CreatedAt.Unix()).Scan(&entry.ID)
 	if err != nil || entry.Username != "" {
 		return entry, err
@@ -132,7 +135,7 @@ func scanEntry(rows *sql.Rows) (LogEntry, error) {
 	var entry LogEntry
 	var size, bytes, duration, count sql.NullInt64
 	var createdAt int64
-	err := rows.Scan(&entry.ID, &entry.UserID, &entry.Username, &entry.Device, &entry.Kind, &entry.Path, &entry.FromPath,
+	err := rows.Scan(&entry.ID, &entry.UserID, &entry.Username, &entry.Device, &entry.Via, &entry.Kind, &entry.Path, &entry.FromPath,
 		&entry.IsDir, &size, &bytes, &duration, &count, &entry.Status, &entry.Detail, &createdAt)
 	entry.Size = pointerOf(size)
 	entry.Bytes = pointerOf(bytes)
@@ -140,20 +143,6 @@ func scanEntry(rows *sql.Rows) (LogEntry, error) {
 	entry.Count = pointerOf(count)
 	entry.CreatedAt = time.Unix(createdAt, 0).UTC()
 	return entry, err
-}
-
-func nullable(value int64) any {
-	if value == 0 {
-		return nil
-	}
-	return value
-}
-
-func nullablePointer(value *int64) any {
-	if value == nil {
-		return nil
-	}
-	return *value
 }
 
 func pointerOf(value sql.NullInt64) *int64 {

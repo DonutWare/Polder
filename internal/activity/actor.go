@@ -7,6 +7,7 @@ const ServerDevice = "server"
 type Actor struct {
 	SessionID int64
 	Device    string
+	Via       string
 }
 
 type actorKey struct{}

@@ -15,6 +15,7 @@ import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/widgets/shared/nav_group.dart";
+import "package:polder/widgets/shared/refreshable_empty_view.dart";
 
 class TrashScreen extends ConsumerWidget {
   const TrashScreen({super.key});
@@ -80,16 +81,10 @@ class _EmptyTrash extends StatelessWidget {
   final TrashRetention retention;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) => SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: SizedBox(
-        height: constraints.maxHeight,
-        child: MessageView(
-          icon: IconsaxPlusLinear.trash,
-          message: "${context.localized.trashEmpty}\n${retentionHint(context, retention)}",
-        ),
-      ),
+  Widget build(BuildContext context) => RefreshableEmptyView(
+    child: MessageView(
+      icon: IconsaxPlusLinear.trash,
+      message: "${context.localized.trashEmpty}\n${retentionHint(context, retention)}",
     ),
   );
 }

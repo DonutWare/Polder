@@ -1107,5 +1107,203 @@
 				"type": "int"
 			}
 		}
+	},
+	"navShared": "Shared",
+	"searchKeywordsShared": "shared share links people groups",
+	"sharedWithMe": "Shared with me",
+	"sharedByMe": "Shared by me",
+	"shareLinks": "Links",
+	"noIncomingShares": "Nothing has been shared with you yet",
+	"noOutgoingShares": "You haven't shared anything yet",
+	"noShareLinks": "You haven't created any links yet",
+	"share": "Share",
+	"shareTitle": "Share {name}",
+	"@shareTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"shareRecipients": "Shared with",
+	"shareSearchHint": "Add people or groups",
+	"shareNoMatches": "No people or groups found",
+	"sharePermissionRead": "Can view",
+	"sharePermissionWrite": "Can edit",
+	"shareNotSharedYet": "Not shared with anyone yet",
+	"sharedBy": "Shared by {name}",
+	"@sharedBy": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"shareUnavailable": "In the trash",
+	"shareLeave": "Remove from my shared items",
+	"shareDetailsOwner": "Shared by",
+	"shareDetailsGroups": "{count, plural, =1{Group} other{Groups}}",
+	"@shareDetailsGroups": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"shareDetailsAccess": "Access",
+	"shareDetailsNote": "Note",
+	"shareStop": "Stop sharing",
+	"shareGroupMembers": "{count, plural, =1{1 member} other{{count} members}}",
+	"@shareGroupMembers": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"createLink": "Create link",
+	"editLink": "Edit link",
+	"linkAccess": "Anyone with the link can",
+	"linkCanView": "View",
+	"linkCanViewHint": "Browse the files and see previews",
+	"linkCanDownload": "Download",
+	"linkCanDownloadHint": "Save files and folders to their device",
+	"linkCanUpload": "Upload",
+	"linkCanUploadHint": "Add files to this folder; existing files are never replaced",
+	"linkPassword": "Password",
+	"linkPasswordHint": "Leave empty for no password",
+	"linkPasswordKeep": "Leave empty to keep the current password",
+	"linkPasswordSet": "Password protected",
+	"linkRemovePassword": "Remove password",
+	"linkExpiry": "Expiry date",
+	"linkNoExpiry": "Never expires",
+	"linkExpiresOn": "Expires {date}",
+	"@linkExpiresOn": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"linkExpired": "Expired",
+	"linkCopy": "Copy link",
+	"linkCopied": "Link copied",
+	"deleteLinkTitle": "Delete link?",
+	"deleteLinkMessage": "The link stops working right away for everyone who has it.",
+	"publicShareLocked": "This link is password protected",
+	"publicShareUnlock": "Open",
+	"publicShareWrongPassword": "Wrong password",
+	"publicShareRateLimited": "Too many attempts. Try again in a minute.",
+	"publicShareNotFound": "This link doesn't exist or has expired",
+	"publicShareUploadOnly": "Files you upload here go to {name}. You can't see what's already there.",
+	"@publicShareUploadOnly": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"downloadAll": "Download all",
+	"openInApp": "Open in app",
+	"openInPolder": "Open in Polder",
+	"groups": "Groups",
+	"groupName": "Group name",
+	"renameGroup": "Rename group",
+	"deleteGroupTitle": "Delete group?",
+	"deleteGroupMessage": "{name} is deleted and anything shared with it is no longer shared.",
+	"@deleteGroupMessage": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"groupMembers": "Members",
+	"noGroups": "No groups yet",
+	"filterUsers": "Filter users",
+	"newGroup": "New group",
+	"myGroups": "My groups",
+	"allGroups": "All groups",
+	"groupRoleAdmin": "Admin",
+	"groupRoleMember": "Member",
+	"groupRoleViewer": "Viewer",
+	"groupRoleAdminHint": "Manages members and can remove anything shared with the group",
+	"groupRoleMemberHint": "Can share with the group",
+	"groupRoleViewerHint": "Can only view what is shared with the group",
+	"addMember": "Add member",
+	"leaveGroup": "Leave group",
+	"leaveGroupTitle": "Leave {name}?",
+	"@leaveGroupTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"leaveGroupMessage": "You will no longer see what is shared with this group, and what you shared with it is no longer shared.",
+	"leaveGroupAloneMessage": "You are the only member of {name}. Leaving deletes the group, and anything shared with it is no longer shared.",
+	"@leaveGroupAloneMessage": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"leaveAndDeleteGroup": "Leave and delete",
+	"leaveGroupLastAdminMessage": "You are the last admin of {name}. Make someone else an admin before you leave, or delete the group.",
+	"@leaveGroupLastAdminMessage": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"removeMember": "Remove from group",
+	"groupShared": "Shared with this group",
+	"noGroupShares": "Nothing is shared with this group yet",
+	"selectGroup": "Select a group or create one",
+	"searchKeywordsGroups": "groups teams members roles",
+	"groupCreatedBy": "Created by {name}",
+	"@groupCreatedBy": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"sharePermissionCustom": "Custom permissions",
+	"sharePermView": "View",
+	"sharePermCreate": "Create",
+	"sharePermEdit": "Edit",
+	"sharePermDelete": "Delete",
+	"shareNote": "Note to recipient",
+	"shareNoteHint": "Shown to them together with the share",
+	"nothingSelected": "Choose something on the left",
+	"sharedByWithPermission": "Shared by {name} · {permission}",
+	"@sharedByWithPermission": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"permission": {
+				"type": "String"
+			}
+		}
+	},
+	"shareWithName": "Share with {name}",
+	"@shareWithName": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"sharedWithName": "Shared with {name}",
+	"@sharedWithName": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
 	}
 }

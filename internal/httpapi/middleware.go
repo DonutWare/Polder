@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"net/netip"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -66,20 +67,38 @@ func newFailedAttemptLimiter(limitPerMinute int) *failedAttemptLimiter {
 	return &failedAttemptLimiter{limit: limitPerMinute, window: time.Minute, failures: map[string][]time.Time{}}
 }
 
-func (l *failedAttemptLimiter) allowed(key string) bool {
+func (l *failedAttemptLimiter) attempt(keys ...string) (func(failed bool), bool) {
 	if l.limit <= 0 {
-		return true
+		return func(bool) {}, true
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.failures[key] = recentOnly(l.failures[key], time.Now().Add(-l.window))
-	return len(l.failures[key]) < l.limit
+	now := time.Now()
+	for _, key := range keys {
+		l.failures[key] = recentOnly(l.failures[key], now.Add(-l.window))
+		if len(l.failures[key]) >= l.limit {
+			return nil, false
+		}
+	}
+	for _, key := range keys {
+		l.failures[key] = append(l.failures[key], now)
+	}
+	return func(failed bool) {
+		if !failed {
+			l.forget(keys, now)
+		}
+	}, true
 }
 
-func (l *failedAttemptLimiter) recordFailure(key string) {
+func (l *failedAttemptLimiter) forget(keys []string, reserved time.Time) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.failures[key] = append(l.failures[key], time.Now())
+	for _, key := range keys {
+		moments := l.failures[key]
+		if index := slices.Index(moments, reserved); index >= 0 {
+			l.failures[key] = slices.Delete(moments, index, index+1)
+		}
+	}
 }
 
 func recentOnly(moments []time.Time, cutoff time.Time) []time.Time {

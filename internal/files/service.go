@@ -267,13 +267,14 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 		return err
 	}
 	unlock()
+	var removed []int64
 	if trashID != 0 && !s.keepsTrash(ctx, owner) {
-		if err := s.purgeTrashItem(ctx, owner, trashID); err != nil {
+		if removed, err = s.purgeTrashItem(ctx, owner, trashID); err != nil {
 			return err
 		}
 	}
 	s.onContentRemoved()
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationDelete, Path: current.Path, IsDir: current.IsDir, Size: current.Size})
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationDelete, Path: current.Path, IsDir: current.IsDir, Size: current.Size, RemovedFileIDs: removed})
 	return nil
 }
 

@@ -776,6 +776,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<DirectoryResponse>> _searchDirectory({
+    String? q,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Find users and groups to share with',
+      operationId: 'searchDirectory',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["directory"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/directory');
+    final Map<String, dynamic> $params = <String, dynamic>{'q': q};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<DirectoryResponse, DirectoryResponse>($request);
+  }
+
+  @override
   Future<Response<dynamic>> _events({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: 'Open a WebSocket here and send an `auth` message within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can `subscribe` to other users; every subscribe is answered with a new snapshot, and your own events always arrive. Messages are described by the ClientMessage and EventMessage schemas. The connection closes with code 4401 when authentication fails or the token expires without renewal.',
@@ -1244,6 +1270,364 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<List<Group>>> _listGroups({
+    String? scope,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Groups the logged-in user is in or created, or every group for administrators',
+      operationId: 'listGroups',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups');
+    final Map<String, dynamic> $params = <String, dynamic>{'scope': scope};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Group>, Group>($request);
+  }
+
+  @override
+  Future<Response<Group>> _createGroup({
+    required GroupNameRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a group; the creator becomes its admin',
+      operationId: 'createGroup',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Group, Group>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteGroup({
+    required int? groupID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete a group; what was shared with it is no longer shared',
+      operationId: 'deleteGroup',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups/${groupID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<GroupDetails>> _getGroup({
+    required int? groupID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'A group and its members',
+      operationId: 'getGroup',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups/${groupID}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<GroupDetails, GroupDetails>($request);
+  }
+
+  @override
+  Future<Response<Group>> _renameGroup({
+    required int? groupID,
+    required GroupNameRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Rename a group; group admins only',
+      operationId: 'renameGroup',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups/${groupID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Group, Group>($request);
+  }
+
+  @override
+  Future<Response<GroupDetails>> _addGroupMember({
+    required int? groupID,
+    required NewMember? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Add someone to a group; group admins only',
+      operationId: 'addGroupMember',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups/${groupID}/members');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<GroupDetails, GroupDetails>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _removeGroupMember({
+    required int? groupID,
+    required int? userID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove someone from a group, or leave it yourself',
+      operationId: 'removeGroupMember',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups/${groupID}/members/${userID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<GroupDetails>> _setGroupMemberRole({
+    required int? groupID,
+    required int? userID,
+    required RoleChange? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change a member\'s role; group admins only',
+      operationId: 'setGroupMemberRole',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups/${groupID}/members/${userID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<GroupDetails, GroupDetails>($request);
+  }
+
+  @override
+  Future<Response<List<Share>>> _listGroupShares({
+    required int? groupID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What is shared with a group',
+      operationId: 'listGroupShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["groups"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/groups/${groupID}/shares');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Share>, Share>($request);
+  }
+
+  @override
+  Future<Response<List<ShareLink>>> _listShareLinks({
+    int? fileId,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The logged-in user\'s share links',
+      operationId: 'listShareLinks',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["links"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/links');
+    final Map<String, dynamic> $params = <String, dynamic>{'fileId': fileId};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<ShareLink>, ShareLink>($request);
+  }
+
+  @override
+  Future<Response<ShareLink>> _createShareLink({
+    required NewShareLink? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a share link to a file or folder',
+      operationId: 'createShareLink',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["links"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/links');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<ShareLink, ShareLink>($request);
+  }
+
+  @override
+  Future<Response<LinkMatch>> _matchShareLink({
+    required String? code,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Find where a share link\'s item is for the logged-in user: their own file or inside a share',
+      operationId: 'matchShareLink',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["links"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/links/match/${code}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<LinkMatch, LinkMatch>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteShareLink({
+    required int? linkID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete a share link; it stops working at once',
+      operationId: 'deleteShareLink',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["links"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/links/${linkID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<ShareLink>> _updateShareLink({
+    required int? linkID,
+    required LinkChanges? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change a share link\'s access, password or expiry',
+      operationId: 'updateShareLink',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["links"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/links/${linkID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<ShareLink, ShareLink>($request);
+  }
+
+  @override
   Future<Response<NotesListing>> _listNotes({
     String? path,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -1365,6 +1749,248 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<EditorSession, EditorSession>($request);
+  }
+
+  @override
+  Future<Response<LinkInfo>> _getPublicLink({
+    required String? code,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What a share link points to; hidden while it needs a password',
+      operationId: 'getPublicLink',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<LinkInfo, LinkInfo>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadPublicLinkArchive({
+    required String? code,
+    String? path,
+    String? token,
+    String? xPolderShareToken,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a folder inside a share link as a zip',
+      operationId: 'downloadPublicLinkArchive',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}/archive');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'token': token,
+    };
+    final Map<String, String> $headers = {
+      if (xPolderShareToken != null) 'X-Polder-Share-Token': xPolderShareToken,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadPublicLinkFile({
+    required String? code,
+    String? path,
+    String? token,
+    String? xPolderShareToken,
+    String? range,
+    bool? download,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a file inside a share link; supports Range',
+      operationId: 'downloadPublicLinkFile',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}/content');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'token': token,
+      'download': download,
+    };
+    final Map<String, String> $headers = {
+      if (xPolderShareToken != null) 'X-Polder-Share-Token': xPolderShareToken,
+      if (range != null) 'Range': range,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _uploadPublicLinkFile({
+    required String? code,
+    String? path,
+    DateTime? mtime,
+    String? xPolderShareToken,
+    String? xPolderTransferId,
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Upload a file into a share link that accepts uploads; it never replaces an existing file',
+      operationId: 'uploadPublicLinkFile',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}/content');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'mtime': mtime,
+    };
+    final Map<String, String> $headers = {
+      if (xPolderShareToken != null) 'X-Polder-Share-Token': xPolderShareToken,
+      if (xPolderTransferId != null) 'X-Polder-Transfer-Id': xPolderTransferId,
+    };
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<ListResponse>> _listPublicLinkFiles({
+    required String? code,
+    String? path,
+    String? token,
+    String? xPolderShareToken,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List a folder inside a share link',
+      operationId: 'listPublicLinkFiles',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}/list');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'token': token,
+    };
+    final Map<String, String> $headers = {
+      if (xPolderShareToken != null) 'X-Polder-Share-Token': xPolderShareToken,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<ListResponse, ListResponse>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _previewPublicLinkFile({
+    required String? code,
+    String? path,
+    String? token,
+    String? xPolderShareToken,
+    String? size,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a JPEG thumbnail of a file inside a share link',
+      operationId: 'previewPublicLinkFile',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}/preview');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'token': token,
+      'size': size,
+    };
+    final Map<String, String> $headers = {
+      if (xPolderShareToken != null) 'X-Polder-Share-Token': xPolderShareToken,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<LinkUnlock>> _unlockPublicLink({
+    required String? code,
+    required UnlockRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Enter a share link\'s password, or open a link without one, to get a token for its contents',
+      operationId: 'unlockPublicLink',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}/unlock');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<LinkUnlock, LinkUnlock>($request);
   }
 
   @override
@@ -1507,6 +2133,431 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       tag: swaggerMetaData,
     );
     return client.send<TokenPair, TokenPair>($request);
+  }
+
+  @override
+  Future<Response<Share>> _createShare({
+    required NewShare? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Share a file or folder with a user or group',
+      operationId: 'createShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Share, Share>($request);
+  }
+
+  @override
+  Future<Response<List<IncomingShare>>> _listIncomingShares({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What others share with the logged-in user, directly or through a group',
+      operationId: 'listIncomingShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/incoming');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<IncomingShare>, IncomingShare>($request);
+  }
+
+  @override
+  Future<Response<List<Share>>> _listOutgoingShares({
+    int? fileId,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What the logged-in user shares with others',
+      operationId: 'listOutgoingShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/outgoing');
+    final Map<String, dynamic> $params = <String, dynamic>{'fileId': fileId};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Share>, Share>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteShare({
+    required int? shareID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop sharing; recipients of a direct share may also remove it',
+      operationId: 'deleteShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<Share>> _updateShare({
+    required int? shareID,
+    required ShareChanges? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change what a share\'s recipients may do',
+      operationId: 'updateShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Share, Share>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadShareArchive({
+    required int? shareID,
+    String? path,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a folder inside a share as a zip',
+      operationId: 'downloadShareArchive',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/archive');
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadShareFile({
+    required int? shareID,
+    String? path,
+    String? range,
+    bool? download,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a file inside a share; supports Range',
+      operationId: 'downloadShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/content');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'download': download,
+    };
+    final Map<String, String> $headers = {if (range != null) 'Range': range};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _uploadShareFile({
+    required int? shareID,
+    String? path,
+    int? baseRev,
+    DateTime? mtime,
+    String? xPolderTransferId,
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Upload a file into a share that allows changes',
+      operationId: 'uploadShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/content');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'baseRev': baseRev,
+      'mtime': mtime,
+    };
+    final Map<String, String> $headers = {
+      if (xPolderTransferId != null) 'X-Polder-Transfer-Id': xPolderTransferId,
+    };
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _copyShareFile({
+    required int? shareID,
+    required CopyRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Copy inside a share that allows changes',
+      operationId: 'copyShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/copy');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteShareFile({
+    required int? shareID,
+    String? path,
+    int? baseRev,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete inside a share that allows changes; it goes to the owner\'s trash',
+      operationId: 'deleteShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/files');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'baseRev': baseRev,
+    };
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<ListResponse>> _listShareFiles({
+    required int? shareID,
+    String? path,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List a folder inside a share',
+      operationId: 'listShareFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/list');
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<ListResponse, ListResponse>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _makeShareDirectory({
+    required int? shareID,
+    required PathRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a folder inside a share that allows changes',
+      operationId: 'makeShareDirectory',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/mkdir');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _moveShareFile({
+    required int? shareID,
+    required MoveRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Move or rename inside a share that allows changes',
+      operationId: 'moveShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/move');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _previewShareFile({
+    required int? shareID,
+    String? path,
+    String? size,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a JPEG thumbnail of a file inside a share',
+      operationId: 'previewShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/preview');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'size': size,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<Entry>> _statShareFile({
+    required int? shareID,
+    String? path,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get one file or folder inside a share',
+      operationId: 'statShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/${shareID}/stat');
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
   }
 
   @override

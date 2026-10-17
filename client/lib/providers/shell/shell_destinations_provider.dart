@@ -4,10 +4,12 @@ import "package:polder/routes/app_routes.dart";
 
 enum ShellDestination {
   files(AppRoutes.files),
+  shared(AppRoutes.shared),
   notes(AppRoutes.notes),
   activity(AppRoutes.activity),
   sync(AppRoutes.sync),
   autoUpload(AppRoutes.autoUpload),
+  groups(AppRoutes.groups),
   trash(AppRoutes.trash),
   settings(AppRoutes.settings);
 
@@ -31,6 +33,7 @@ final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
   final platform = ref.watch(syncPlatformProvider);
   return [
     ShellDestination.files,
+    ShellDestination.shared,
     ShellDestination.notes,
     ShellDestination.activity,
     if (platform.supportsFolderSync) ShellDestination.sync,
@@ -39,5 +42,5 @@ final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
 });
 
 final secondaryShellDestinationsProvider = Provider<List<ShellDestination>>(
-  (ref) => const [ShellDestination.trash, ShellDestination.settings],
+  (ref) => const [ShellDestination.groups, ShellDestination.trash, ShellDestination.settings],
 );

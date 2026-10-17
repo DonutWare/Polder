@@ -28,10 +28,7 @@ class AppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRoot = !(ModalRoute.of(context)?.impliesAppBarDismissal ?? false);
     final showMenu =
-        leading == null &&
-        isRoot &&
-        WindowSize.of(context) == WindowSize.compact &&
-        SideSheetDrawer.maybeOf(context) != null;
+        leading == null && isRoot && WindowSize.isCompact(context) && SideSheetDrawer.maybeOf(context) != null;
     final navigationBarOverlap = MediaQuery.paddingOf(context).bottom - MediaQuery.viewPaddingOf(context).bottom;
     final fab = floatingActionButton;
     return Scaffold(

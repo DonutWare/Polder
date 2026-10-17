@@ -21,7 +21,7 @@ bool _paletteOpen = false;
 // Compact windows get a full page, so the keyboard and the results have the whole screen; larger
 // windows get a palette over whatever is open.
 Future<void> openSearch(BuildContext context, {String initialQuery = ""}) async {
-  if (WindowSize.of(context) == WindowSize.compact) {
+  if (WindowSize.isCompact(context)) {
     if (GoRouter.of(context).routerDelegate.currentConfiguration.uri.path == AppRoutes.search) return;
     await context.push(AppRoutes.searchFor(initialQuery));
     return;

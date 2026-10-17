@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/transfer.dart";
@@ -12,6 +13,7 @@ import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/service_providers.dart";
+import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/providers/sync/sync_scheduler_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
@@ -62,6 +64,40 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     size: entry.size,
     mime: entry.mime,
     fetch: (onProgress) => ref.read(polderApiProvider).downloadBytes(entry.path, onProgress: onProgress),
+  );
+
+  Future<void> pickAndUploadToSpace(SpaceLocation location) async {
+    final files = await ref.read(filePickerServiceProvider).pickFiles();
+    await Future.wait(files.map((file) => uploadToSpace(location, file)));
+  }
+
+  Future<void> uploadToSpace(SpaceLocation location, PickedFile file) async {
+    final length = await file.length() ?? 0;
+    final transfer = _start(file.name, TransferDirection.upload, length);
+    await _track(transfer, () async {
+      await ref
+          .read(fileSpaceApiProvider(location.space))
+          .upload(
+            RemotePath.join(location.path, file.name),
+            file.openRead(),
+            length: length,
+            transferId: transfer.clientId,
+            onProgress: (sent, total) => _progress(transfer.id, sent, total),
+          );
+      ref.invalidate(spaceDirectoryProvider(location));
+    });
+  }
+
+  Future<void> downloadFromSpace(FileSpace space, FileEntry entry) => _downloadAndSave(
+    name: entry.isDir ? "${entry.name}.zip" : entry.name,
+    size: entry.isDir ? 0 : entry.size,
+    mime: entry.isDir ? "application/zip" : entry.mime,
+    fetch: (onProgress) {
+      final api = ref.read(fileSpaceApiProvider(space));
+      return entry.isDir
+          ? api.downloadArchive(entry.path, onProgress: onProgress)
+          : api.download(entry.path, onProgress: onProgress);
+    },
   );
 
   Future<void> downloadVersion(FileEntry entry, FileVersion version) => _downloadAndSave(

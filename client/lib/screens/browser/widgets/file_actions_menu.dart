@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/sharing.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
@@ -13,13 +14,12 @@ import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
-import "package:polder/util/remote_path.dart";
-import "package:polder/widgets/shared/confirm_dialog.dart";
+import "package:polder/widgets/shared/file_dialogs.dart";
 import "package:polder/widgets/shared/icon_menu_item.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
-import "package:polder/widgets/shared/text_input_dialog.dart";
+import "package:polder/widgets/sharing/share_panel.dart";
 
-enum _FileAction { open, edit, download, history, rename, copy, move, delete }
+enum _FileAction { open, edit, download, share, history, rename, copy, move, delete }
 
 abstract final class FileActions {
   static RelativeRect menuPositionAt(BuildContext context, Offset globalPosition) {
@@ -59,6 +59,7 @@ abstract final class FileActions {
         if (editable) iconMenuItem(_FileAction.edit, IconsaxPlusLinear.edit, context.localized.editorOpen),
         if (hasFiles)
           iconMenuItem(_FileAction.download, IconsaxPlusLinear.document_download, context.localized.download),
+        if (single != null) iconMenuItem(_FileAction.share, IconsaxPlusLinear.share, context.localized.share),
         if (single != null && !single.isDir)
           iconMenuItem(_FileAction.history, IconsaxPlusLinear.clock, context.localized.versionHistory),
         if (single != null) iconMenuItem(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
@@ -78,6 +79,8 @@ abstract final class FileActions {
         for (final entry in entries.where((entry) => !entry.isDir)) {
           await transfers.download(entry);
         }
+      case _FileAction.share:
+        await showSharePanel(context, SharedFile.of(single!));
       case _FileAction.history:
         await showFileHistory(context, single!);
       case _FileAction.rename:
@@ -98,14 +101,7 @@ abstract final class FileActions {
     required FileEntry entry,
   }) async {
     final directory = ref.read(directoryProvider(parentPath).notifier);
-    final name = await showTextInputDialog(
-      context,
-      title: context.localized.rename,
-      label: context.localized.name,
-      confirmLabel: context.localized.rename,
-      initialValue: entry.name,
-      isValid: (value) => RemotePath.isValidName(value.trim()) && value.trim() != entry.name,
-    );
+    final name = await promptRename(context, entry);
     if (name != null && context.mounted) await context.runWithFeedback(directory.rename(entry, name));
   }
 
@@ -169,19 +165,7 @@ abstract final class FileActions {
         .read(trashRetentionProvider.future)
         .then((retention) => retention.enabled, onError: (Object _) => true);
     if (!context.mounted) return;
-    final single = entries.length == 1 ? entries.single : null;
-    final confirmed = await showConfirmDialog(
-      context,
-      title: switch ((keepsTrash, single)) {
-        (true, final FileEntry entry) => context.localized.deleteTitle(entry.name),
-        (false, final FileEntry entry) => context.localized.deletePermanentlyTitle(entry.name),
-        (true, null) => context.localized.deleteItemsTitle(entries.length),
-        (false, null) => context.localized.deletePermanentlyItemsTitle(entries.length),
-      },
-      message: keepsTrash ? context.localized.deleteMessage : context.localized.deletePermanentlyMessage,
-      confirmLabel: context.localized.delete,
-      destructive: true,
-    );
+    final confirmed = await confirmDelete(context, entries, keepsTrash: keepsTrash);
     if (confirmed && context.mounted) await context.runWithFeedback(directory.deleteAll(entries));
   }
 }

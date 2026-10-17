@@ -7,13 +7,14 @@ import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/sync/sync_scheduler_provider.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/util/guarded_refresh.dart";
 import "package:polder/util/remote_path.dart";
 
 final fileVersionsProvider = AsyncNotifierProvider.autoDispose.family<FileVersionsNotifier, VersionListing, String>(
   FileVersionsNotifier.new,
 );
 
-class FileVersionsNotifier extends AsyncNotifier<VersionListing> {
+class FileVersionsNotifier extends AsyncNotifier<VersionListing> with GuardedRefresh {
   FileVersionsNotifier(this.path);
 
   final String path;
@@ -21,12 +22,11 @@ class FileVersionsNotifier extends AsyncNotifier<VersionListing> {
   PolderApi get _api => ref.read(polderApiProvider);
 
   @override
-  Future<VersionListing> build() => ref.watch(polderApiProvider).fileVersions(path);
+  Future<VersionListing> build() => _fetch(ref.watch(polderApiProvider));
 
-  Future<void> refresh() async {
-    final result = await AsyncValue.guard(() => _api.fileVersions(path));
-    if (ref.mounted) state = result;
-  }
+  Future<void> refresh() => refreshWith(() => _fetch(_api));
+
+  Future<VersionListing> _fetch(PolderApi api) => api.fileVersions(path);
 
   Future<FileEntry> restore(FileVersion version) async {
     final restored = await _api.restoreVersion(version.id);

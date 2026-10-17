@@ -36,7 +36,7 @@ class AppShell extends ConsumerWidget {
       child: SideSheetDrawer(
         title: name,
         sheet: const MoreOptions(),
-        canEdgeSwipe: () => WindowSize.of(context) == WindowSize.compact && !GoRouter.of(context).canPop(),
+        canEdgeSwipe: () => WindowSize.isCompact(context) && !GoRouter.of(context).canPop(),
         child: NavigationShell(
           items: [
             for (final destination in destinations)

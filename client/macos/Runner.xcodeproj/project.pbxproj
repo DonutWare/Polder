@@ -394,6 +394,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				DEEP_LINK_SCHEME = "polder-dev";
 				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.dev;
 				PRODUCT_NAME = "Polder Dev";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -415,6 +416,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				DEEP_LINK_SCHEME = polder;
 				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder;
 				PRODUCT_NAME = Polder;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -959,6 +961,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				DEEP_LINK_SCHEME = polder;
 				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder;
 				PRODUCT_NAME = Polder;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1051,6 +1054,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				DEEP_LINK_SCHEME = polder;
 				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder;
 				PRODUCT_NAME = Polder;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1159,6 +1163,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				DEEP_LINK_SCHEME = "polder-dev";
 				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.dev;
 				PRODUCT_NAME = "Polder Dev";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1205,6 +1210,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				DEEP_LINK_SCHEME = "polder-dev";
 				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.dev;
 				PRODUCT_NAME = "Polder Dev";
 				PROVISIONING_PROFILE_SPECIFIER = "";

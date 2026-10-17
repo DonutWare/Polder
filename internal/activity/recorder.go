@@ -24,7 +24,7 @@ func (h *Hub) FileMutation(ctx context.Context, mutation files.Mutation) {
 
 	actor := ActorFrom(ctx)
 	entry := LogEntry{
-		UserID: mutation.Owner.ID, Username: mutation.Owner.Username, Device: actor.Device, sessionID: actor.SessionID,
+		UserID: mutation.Owner.ID, Username: mutation.Owner.Username, Device: actor.Device, Via: actor.Via, sessionID: actor.SessionID,
 		Path: mutation.Path, FromPath: mutation.FromPath, IsDir: mutation.IsDir,
 	}
 	if entry.FromPath == entry.Path {

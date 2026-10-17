@@ -35,14 +35,13 @@ func (i *changePasswordInput) Resolve(ctx huma.Context) []error {
 
 func (a *API) changePassword(ctx context.Context, input *changePasswordInput) (*struct{}, error) {
 	user := currentUser(ctx)
-	if !a.limiter.allowed(input.address) {
+	done, allowed := a.limiter.attempt(input.address)
+	if !allowed {
 		authLog.Warn("password change refused: too many failed attempts", "user", user.Username, "address", input.address)
 		return nil, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
 	}
 	err := a.auth.ChangePassword(ctx, user, activity.ActorFrom(ctx).SessionID, input.Body.CurrentPassword, input.Body.NewPassword)
-	if apperr.Is(err, apperr.KindForbidden) {
-		a.limiter.recordFailure(input.address)
-	}
+	done(apperr.Is(err, apperr.KindForbidden))
 	if err != nil {
 		return nil, err
 	}

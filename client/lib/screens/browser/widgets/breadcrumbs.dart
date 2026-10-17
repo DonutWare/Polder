@@ -8,9 +8,11 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 
 class Breadcrumbs extends StatelessWidget {
-  const Breadcrumbs({required this.path, super.key});
+  const Breadcrumbs({required this.path, this.rootLabel, this.onNavigate, super.key});
 
   final String path;
+  final String? rootLabel;
+  final ValueChanged<String>? onNavigate;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class Breadcrumbs extends StatelessWidget {
           ),
           itemBuilder: (context, index) {
             final crumb = crumbs[crumbs.length - 1 - index];
-            return _Crumb(path: crumb, isCurrent: crumb == path);
+            return _Crumb(path: crumb, isCurrent: crumb == path, rootLabel: rootLabel, onNavigate: onNavigate);
           },
         ),
       ),
@@ -42,16 +44,18 @@ class Breadcrumbs extends StatelessWidget {
 }
 
 class _Crumb extends StatelessWidget {
-  const _Crumb({required this.path, required this.isCurrent});
+  const _Crumb({required this.path, required this.isCurrent, this.rootLabel, this.onNavigate});
 
   final String path;
   final bool isCurrent;
+  final String? rootLabel;
+  final ValueChanged<String>? onNavigate;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isRoot = path == RemotePath.root;
-    final label = isRoot ? context.localized.rootFolder : RemotePath.name(path);
+    final label = isRoot ? rootLabel ?? context.localized.rootFolder : RemotePath.name(path);
     return Center(
       child: TextButton.icon(
         style: TextButton.styleFrom(
@@ -61,7 +65,7 @@ class _Crumb extends StatelessWidget {
           disabledForegroundColor: cs.onSurface,
           backgroundColor: isCurrent ? AppColors.of(context).panel : null,
         ),
-        onPressed: isCurrent ? null : () => context.go(AppRoutes.filesAt(path)),
+        onPressed: isCurrent ? null : () => (onNavigate ?? (path) => context.go(AppRoutes.filesAt(path)))(path),
         icon: isRoot ? const Icon(IconsaxPlusLinear.home_2, size: 16) : null,
         label: Text(label),
       ),

@@ -5,6 +5,8 @@ script:
   - cp -r build/linux/x64/prod/release/bundle AppDir
   - mkdir -p AppDir/usr/share/icons/
   - cp web/icons/Icon-512.png AppDir/usr/share/icons/polder_icon_desktop.png
+  - mkdir -p AppDir/usr/share/applications/
+  - cp linux/org.knaapen.polder.desktop AppDir/usr/share/applications/
 AppDir:
   path: ./AppDir
   app_info:

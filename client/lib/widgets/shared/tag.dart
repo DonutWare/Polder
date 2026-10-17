@@ -11,22 +11,22 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
     decoration: ShapeDecoration(
       color: color.withValues(alpha: 0.16),
       shape: squircle(AppRadius.tag, side: tintedSide(color)),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
-      spacing: 4,
+      spacing: 6,
       children: [
-        if (icon != null) Icon(icon, size: 13, color: color),
+        if (icon != null) Icon(icon, size: 18, color: color),
         Flexible(
           child: Text(
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: color),
           ),
         ),
       ],

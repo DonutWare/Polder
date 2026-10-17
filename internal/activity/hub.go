@@ -56,6 +56,7 @@ type LiveTransfer struct {
 	Direction Direction `json:"direction"`
 	Path      string    `json:"path"`
 	Device    string    `json:"device"`
+	Via       string    `json:"via,omitempty" required:"false" doc:"Who is transferring through a share: another user's username, or link:<code> for a public link"`
 	ClientID  string    `json:"clientId,omitempty" required:"false" doc:"The X-Polder-Transfer-Id the uploader sent"`
 	Bytes     int64     `json:"bytes" doc:"Bytes transferred so far"`
 	Total     *int64    `json:"total,omitempty" required:"false" doc:"Bytes expected in all; absent when unknown"`
@@ -214,7 +215,7 @@ func (h *Hub) startLocked(actor Actor, spec TransferSpec, aggregate string) *Tra
 	transfer := &Transfer{
 		info: LiveTransfer{
 			ID: spec.ID, UserID: spec.Owner.ID, Username: spec.Owner.Username, Direction: spec.Direction,
-			Path: spec.Path, Device: actor.Device, ClientID: spec.ClientID, Total: spec.Total, StartedAt: now.UTC(),
+			Path: spec.Path, Device: actor.Device, Via: actor.Via, ClientID: spec.ClientID, Total: spec.Total, StartedAt: now.UTC(),
 		},
 		sessionID:  actor.SessionID,
 		aggregate:  aggregate,
@@ -240,7 +241,7 @@ func (h *Hub) Finish(ctx context.Context, transfer *Transfer, err error) {
 		return
 	}
 	entry := LogEntry{
-		UserID: snapshot.UserID, Username: snapshot.Username, Device: snapshot.Device, sessionID: transfer.sessionID,
+		UserID: snapshot.UserID, Username: snapshot.Username, Device: snapshot.Device, Via: snapshot.Via, sessionID: transfer.sessionID,
 		Kind: Kind(snapshot.Direction), Path: snapshot.Path, Size: snapshot.Total, Bytes: ptr(snapshot.Bytes),
 		DurationMs: ptr(h.now().Sub(snapshot.StartedAt).Milliseconds()), Status: status, Detail: detail,
 	}

@@ -340,6 +340,31 @@
         ],
         "type": "object"
       },
+      "DirectoryResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "groups": {
+            "description": "Only groups the logged-in user may share with",
+            "items": {
+              "$ref": "#/components/schemas/Group"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/UserSummary"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "users",
+          "groups"
+        ],
+        "type": "object"
+      },
       "DownloadFile": {
         "additionalProperties": false,
         "properties": {
@@ -734,6 +759,127 @@
         ],
         "type": "object"
       },
+      "FileSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isDir": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "description": "Where the item is in the owner's storage; empty while it is in the trash or for other people's items",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "name",
+          "isDir"
+        ],
+        "type": "object"
+      },
+      "Group": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "memberCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "myRole": {
+            "description": "The logged-in user's role; absent when they are not a member",
+            "enum": [
+              "admin",
+              "member",
+              "viewer"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "memberCount",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "GroupDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "canManage": {
+            "description": "Whether the logged-in user may rename the group, delete it and change its members",
+            "type": "boolean"
+          },
+          "group": {
+            "$ref": "#/components/schemas/Group"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/Member"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "group",
+          "members",
+          "canManage"
+        ],
+        "type": "object"
+      },
+      "GroupNameRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "GroupRef": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
       "HealthStatus": {
         "additionalProperties": false,
         "properties": {
@@ -783,6 +929,200 @@
           "kind",
           "title",
           "source"
+        ],
+        "type": "object"
+      },
+      "IncomingShare": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "direct": {
+            "description": "Whether the item was shared with the user personally; only then can they remove it from their list",
+            "type": "boolean"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/Entry",
+            "description": "The shared item; its path is / because paths inside a share start at the shared item"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "groups": {
+            "description": "The groups the item reached the user through",
+            "items": {
+              "$ref": "#/components/schemas/GroupRef"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "description": "Opens the item; when several shares reach the same item they are combined under one ID, the personal share's when there is one",
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions",
+            "description": "What the logged-in user may actually do, combined over every share that reaches them and after group roles"
+          }
+        },
+        "required": [
+          "id",
+          "owner",
+          "direct",
+          "groups",
+          "permissions",
+          "note",
+          "entry",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "LinkChanges": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "password": {
+            "description": "A new password; visitors who unlocked the link must enter it again",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/LinkPermissionChanges"
+          },
+          "removeExpiry": {
+            "type": "boolean"
+          },
+          "removePassword": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "LinkInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "isDir": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "needsPassword": {
+            "description": "The name, owner and contents stay hidden until the link is unlocked with its password",
+            "type": "boolean"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/LinkPermissions"
+          }
+        },
+        "required": [
+          "needsPassword",
+          "permissions"
+        ],
+        "type": "object"
+      },
+      "LinkMatch": {
+        "additionalProperties": false,
+        "properties": {
+          "ownPath": {
+            "description": "Set when the link is the user's own: where the item is in their storage",
+            "type": "string"
+          },
+          "path": {
+            "description": "With shareId: where the item is inside that share",
+            "type": "string"
+          },
+          "shareId": {
+            "description": "Set when the item is in something shared with the user",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "LinkPermissionChanges": {
+        "additionalProperties": false,
+        "properties": {
+          "download": {
+            "type": "boolean"
+          },
+          "upload": {
+            "type": "boolean"
+          },
+          "view": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "LinkPermissions": {
+        "additionalProperties": false,
+        "properties": {
+          "download": {
+            "description": "Visitors can download files and folders; needs view",
+            "type": "boolean"
+          },
+          "upload": {
+            "description": "Visitors can add files to a folder; they never replace existing files",
+            "type": "boolean"
+          },
+          "view": {
+            "description": "Visitors can browse the folder and see previews",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "view",
+          "download",
+          "upload"
+        ],
+        "type": "object"
+      },
+      "LinkUnlock": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "Unlock again after this",
+            "format": "date-time",
+            "type": "string"
+          },
+          "info": {
+            "$ref": "#/components/schemas/LinkInfo"
+          },
+          "root": {
+            "$ref": "#/components/schemas/Entry",
+            "description": "The linked item; its path is /"
+          },
+          "token": {
+            "description": "Send as the X-Polder-Share-Token header, or as the token query parameter for downloads in a browser",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "expiresAt",
+          "info",
+          "root"
         ],
         "type": "object"
       },
@@ -884,6 +1224,10 @@
             "type": "integer"
           },
           "username": {
+            "type": "string"
+          },
+          "via": {
+            "description": "Who is transferring through a share: another user's username, or link:\u003ccode\u003e for a public link",
             "type": "string"
           }
         },
@@ -1011,6 +1355,10 @@
             "type": "integer"
           },
           "username": {
+            "type": "string"
+          },
+          "via": {
+            "description": "Who acted through a share: another user's username, or link:\u003ccode\u003e for a public link",
             "type": "string"
           }
         },
@@ -1140,6 +1488,27 @@
         ],
         "type": "object"
       },
+      "Member": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "enum": [
+              "admin",
+              "member",
+              "viewer"
+            ],
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          }
+        },
+        "required": [
+          "user",
+          "role"
+        ],
+        "type": "object"
+      },
       "MoveRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1158,6 +1527,85 @@
         "required": [
           "from",
           "to"
+        ],
+        "type": "object"
+      },
+      "NewMember": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "default": "member",
+            "enum": [
+              "admin",
+              "member",
+              "viewer"
+            ],
+            "type": "string"
+          },
+          "userId": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "userId"
+        ],
+        "type": "object"
+      },
+      "NewShare": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileId": {
+            "description": "One of the logged-in user's own files",
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/RecipientRef"
+          }
+        },
+        "required": [
+          "fileId",
+          "recipient",
+          "permissions"
+        ],
+        "type": "object"
+      },
+      "NewShareLink": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "description": "When the link stops working; absent for never",
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "password": {
+            "description": "Visitors must enter it before they see anything; absent or empty for no password",
+            "maxLength": 256,
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/LinkPermissions",
+            "description": "What visitors may do; absent lets them view and download"
+          }
+        },
+        "required": [
+          "fileId"
         ],
         "type": "object"
       },
@@ -1425,6 +1873,60 @@
         ],
         "type": "object"
       },
+      "Recipient": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "$ref": "#/components/schemas/Avatar"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "user",
+              "group"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "The user's shown name or the group's name",
+            "type": "string"
+          },
+          "username": {
+            "description": "Only for users",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "RecipientRef": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "user",
+              "group"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "type": "object"
+      },
       "RefreshRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1538,6 +2040,23 @@
           "filters",
           "facets",
           "warnings"
+        ],
+        "type": "object"
+      },
+      "RoleChange": {
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "enum": [
+              "admin",
+              "member",
+              "viewer"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "role"
         ],
         "type": "object"
       },
@@ -1847,6 +2366,146 @@
         ],
         "type": "object"
       },
+      "Share": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "description": "False while the shared item is in the trash",
+            "type": "boolean"
+          },
+          "canChange": {
+            "description": "Whether the logged-in user may change this share",
+            "type": "boolean"
+          },
+          "canRemove": {
+            "description": "Whether the logged-in user may remove this share",
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/FileSummary"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/Recipient"
+          }
+        },
+        "required": [
+          "id",
+          "file",
+          "owner",
+          "recipient",
+          "permissions",
+          "note",
+          "available",
+          "canChange",
+          "canRemove",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "ShareChanges": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions"
+          },
+          "removeExpiry": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ShareLink": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "description": "False while the linked item is in the trash",
+            "type": "boolean"
+          },
+          "code": {
+            "description": "Short code the link URL ends in, as in /share/\u003ccode\u003e",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": "After this the link stops working; absent when it never expires",
+            "format": "date-time",
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/FileSummary"
+          },
+          "hasPassword": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/LinkPermissions"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "file",
+          "permissions",
+          "hasPassword",
+          "available",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "SharePermissions": {
+        "additionalProperties": false,
+        "properties": {
+          "create": {
+            "description": "Add files and folders; only for folders",
+            "type": "boolean"
+          },
+          "delete": {
+            "description": "Delete files and folders; only for folders",
+            "type": "boolean"
+          },
+          "edit": {
+            "description": "Change and rename existing files",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "Suggestion": {
         "additionalProperties": false,
         "properties": {
@@ -2092,6 +2751,16 @@
         ],
         "type": "object"
       },
+      "UnlockRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "password": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UploadRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2193,6 +2862,31 @@
           "createdAt",
           "profile",
           "appearance"
+        ],
+        "type": "object"
+      },
+      "UserSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "avatar": {
+            "$ref": "#/components/schemas/Avatar"
+          },
+          "displayName": {
+            "description": "The name the apps show, falling back to the first name and then the username",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "displayName"
         ],
         "type": "object"
       },
@@ -4148,6 +4842,65 @@
         ]
       }
     },
+    "/api/v1/directory": {
+      "get": {
+        "operationId": "searchDirectory",
+        "parameters": [
+          {
+            "description": "Part of a username, name or group name; empty lists the first matches",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Part of a username, name or group name; empty lists the first matches",
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DirectoryResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find users and groups to share with",
+        "tags": [
+          "directory"
+        ]
+      }
+    },
     "/api/v1/events": {
       "get": {
         "description": "Open a WebSocket here and send an `auth` message within 10 seconds, and again whenever the token is renewed. The server answers `ready` and a `snapshot` of the transfers in progress. Administrators can `subscribe` to other users; every subscribe is answered with a new snapshot, and your own events always arrive. Messages are described by the ClientMessage and EventMessage schemas. The connection closes with code 4401 when authentication fails or the token expires without renewal.",
@@ -5276,6 +6029,847 @@
         ]
       }
     },
+    "/api/v1/groups": {
+      "get": {
+        "operationId": "listGroups",
+        "parameters": [
+          {
+            "description": "mine: groups the logged-in user is in or created; all: every group, for administrators",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "default": "mine",
+              "description": "mine: groups the logged-in user is in or created; all: every group, for administrators",
+              "enum": [
+                "mine",
+                "all"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Group"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Groups the logged-in user is in or created, or every group for administrators",
+        "tags": [
+          "groups"
+        ]
+      },
+      "post": {
+        "operationId": "createGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupNameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a group; the creator becomes its admin",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/api/v1/groups/{groupID}": {
+      "delete": {
+        "operationId": "deleteGroup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a group; what was shared with it is no longer shared",
+        "tags": [
+          "groups"
+        ]
+      },
+      "get": {
+        "operationId": "getGroup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDetails"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A group and its members",
+        "tags": [
+          "groups"
+        ]
+      },
+      "patch": {
+        "operationId": "renameGroup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupNameRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Group"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rename a group; group admins only",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/api/v1/groups/{groupID}/members": {
+      "post": {
+        "operationId": "addGroupMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewMember"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDetails"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add someone to a group; group admins only",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/api/v1/groups/{groupID}/members/{userID}": {
+      "delete": {
+        "operationId": "removeGroupMember",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove someone from a group, or leave it yourself",
+        "tags": [
+          "groups"
+        ]
+      },
+      "patch": {
+        "operationId": "setGroupMemberRole",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupDetails"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a member's role; group admins only",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/api/v1/groups/{groupID}/shares": {
+      "get": {
+        "operationId": "listGroupShares",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "groupID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Share"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What is shared with a group",
+        "tags": [
+          "groups"
+        ]
+      }
+    },
+    "/api/v1/links": {
+      "get": {
+        "operationId": "listShareLinks",
+        "parameters": [
+          {
+            "description": "Only links to this file; 0 or absent for all",
+            "explode": false,
+            "in": "query",
+            "name": "fileId",
+            "schema": {
+              "description": "Only links to this file; 0 or absent for all",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ShareLink"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The logged-in user's share links",
+        "tags": [
+          "links"
+        ]
+      },
+      "post": {
+        "operationId": "createShareLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewShareLink"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareLink"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a share link to a file or folder",
+        "tags": [
+          "links"
+        ]
+      }
+    },
+    "/api/v1/links/match/{code}": {
+      "get": {
+        "operationId": "matchShareLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkMatch"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find where a share link's item is for the logged-in user: their own file or inside a share",
+        "tags": [
+          "links"
+        ]
+      }
+    },
+    "/api/v1/links/{linkID}": {
+      "delete": {
+        "operationId": "deleteShareLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "linkID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a share link; it stops working at once",
+        "tags": [
+          "links"
+        ]
+      },
+      "patch": {
+        "operationId": "updateShareLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "linkID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkChanges"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareLink"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a share link's access, password or expiry",
+        "tags": [
+          "links"
+        ]
+      }
+    },
     "/api/v1/notes/list": {
       "get": {
         "operationId": "listNotes",
@@ -5536,6 +7130,571 @@
         ]
       }
     },
+    "/api/v1/public/links/{code}": {
+      "get": {
+        "operationId": "getPublicLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkInfo"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "What a share link points to; hidden while it needs a password",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/v1/public/links/{code}/archive": {
+      "get": {
+        "operationId": "downloadPublicLinkArchive",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path inside the link; / or empty is the linked item itself",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the link; / or empty is the linked item itself",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking, for requests that cannot send headers",
+            "explode": false,
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "description": "The token from unlocking, for requests that cannot send headers",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking",
+            "in": "header",
+            "name": "X-Polder-Share-Token",
+            "schema": {
+              "description": "The token from unlocking",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Zip archive",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Download a folder inside a share link as a zip",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/v1/public/links/{code}/content": {
+      "get": {
+        "operationId": "downloadPublicLinkFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking, for requests that cannot send headers",
+            "explode": false,
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "description": "The token from unlocking, for requests that cannot send headers",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking",
+            "in": "header",
+            "name": "X-Polder-Share-Token",
+            "schema": {
+              "description": "The token from unlocking",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Byte range to send, such as bytes=0-1023",
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "description": "Byte range to send, such as bytes=0-1023",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Ask the browser to save the file instead of showing it",
+            "explode": false,
+            "in": "query",
+            "name": "download",
+            "schema": {
+              "description": "Ask the browser to save the file instead of showing it",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "File content",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Polder-Rev": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Download a file inside a share link; supports Range",
+        "tags": [
+          "public"
+        ]
+      },
+      "put": {
+        "operationId": "uploadPublicLinkFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Where to put the file inside the linked folder; a number is added to the name when it is taken",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Where to put the file inside the linked folder; a number is added to the name when it is taken",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Modification time to record, as RFC 3339; defaults to now",
+            "explode": false,
+            "in": "query",
+            "name": "mtime",
+            "schema": {
+              "description": "Modification time to record, as RFC 3339; defaults to now",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking",
+            "in": "header",
+            "name": "X-Polder-Share-Token",
+            "schema": {
+              "description": "The token from unlocking",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Polder-Transfer-Id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Upload a file into a share link that accepts uploads; it never replaces an existing file",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/v1/public/links/{code}/list": {
+      "get": {
+        "operationId": "listPublicLinkFiles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Path inside the link; / or empty is the linked item itself",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the link; / or empty is the linked item itself",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking, for requests that cannot send headers",
+            "explode": false,
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "description": "The token from unlocking, for requests that cannot send headers",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking",
+            "in": "header",
+            "name": "X-Polder-Share-Token",
+            "schema": {
+              "description": "The token from unlocking",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "List a folder inside a share link",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/v1/public/links/{code}/preview": {
+      "get": {
+        "operationId": "previewPublicLinkFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking, for requests that cannot send headers",
+            "explode": false,
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "description": "The token from unlocking, for requests that cannot send headers",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking",
+            "in": "header",
+            "name": "X-Polder-Share-Token",
+            "schema": {
+              "description": "The token from unlocking",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Thumbnail width and height in pixels",
+            "explode": false,
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "default": 256,
+              "description": "Thumbnail width and height in pixels",
+              "enum": [
+                128,
+                256,
+                512
+              ],
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Thumbnail",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get a JPEG thumbnail of a file inside a share link",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/v1/public/links/{code}/unlock": {
+      "post": {
+        "operationId": "unlockPublicLink",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UnlockRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkUnlock"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Enter a share link's password, or open a link without one, to get a token for its contents",
+        "tags": [
+          "public"
+        ]
+      }
+    },
     "/api/v1/search": {
       "get": {
         "description": "Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Tags narrow the results; they have the form `key\u003cop\u003evalues`:\n\n- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`\n- `ext`: extensions only\n- `in`: a folder and everything below it, such as `in=\"/My Docs\"`\n- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`\n- `size`: such as `10mb`, `500kb`, `1.5gb`\n\nOperators are `=` or `:` (is), `!=` or a leading `-` (is not), and `\u003e`, `\u003e=`, `\u003c`, `\u003c=` for modified and size. Commas separate alternatives, separate tags must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified\u003e7d` is newer than a week ago.",
@@ -5784,6 +7943,1105 @@
         "summary": "Create the first administrator account",
         "tags": [
           "setup"
+        ]
+      }
+    },
+    "/api/v1/shares": {
+      "post": {
+        "operationId": "createShare",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewShare"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Share"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Share a file or folder with a user or group",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/incoming": {
+      "get": {
+        "operationId": "listIncomingShares",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IncomingShare"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What others share with the logged-in user, directly or through a group",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/outgoing": {
+      "get": {
+        "operationId": "listOutgoingShares",
+        "parameters": [
+          {
+            "description": "Only shares of this file; 0 or absent for all",
+            "explode": false,
+            "in": "query",
+            "name": "fileId",
+            "schema": {
+              "description": "Only shares of this file; 0 or absent for all",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Share"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What the logged-in user shares with others",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}": {
+      "delete": {
+        "operationId": "deleteShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stop sharing; recipients of a direct share may also remove it",
+        "tags": [
+          "shares"
+        ]
+      },
+      "patch": {
+        "operationId": "updateShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareChanges"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Share"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change what a share's recipients may do",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/archive": {
+      "get": {
+        "operationId": "downloadShareArchive",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Path inside the share; / or empty is the shared item itself",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the share; / or empty is the shared item itself",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Zip archive",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a folder inside a share as a zip",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/content": {
+      "get": {
+        "operationId": "downloadShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Path inside the share",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the share",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Byte range to send, such as bytes=0-1023",
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "description": "Byte range to send, such as bytes=0-1023",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Ask the browser to save the file instead of showing it",
+            "explode": false,
+            "in": "query",
+            "name": "download",
+            "schema": {
+              "description": "Ask the browser to save the file instead of showing it",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "File content",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Polder-Rev": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a file inside a share; supports Range",
+        "tags": [
+          "shares"
+        ]
+      },
+      "put": {
+        "operationId": "uploadShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Where to store the file inside the share",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Where to store the file inside the share",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+            "explode": false,
+            "in": "query",
+            "name": "baseRev",
+            "schema": {
+              "default": 0,
+              "description": "Revision this content replaces: 0 when the file must not exist yet, -1 to overwrite whatever is there",
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Modification time to record, as RFC 3339; defaults to now",
+            "explode": false,
+            "in": "query",
+            "name": "mtime",
+            "schema": {
+              "description": "Modification time to record, as RFC 3339; defaults to now",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Any ID the client picks; live transfer events echo it back as clientId",
+            "in": "header",
+            "name": "X-Polder-Transfer-Id",
+            "schema": {
+              "description": "Any ID the client picks; live transfer events echo it back as clientId",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a file into a share that allows changes",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/copy": {
+      "post": {
+        "operationId": "copyShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Copy inside a share that allows changes",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/files": {
+      "delete": {
+        "operationId": "deleteShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Revision the client last saw; -1 deletes whatever is there",
+            "explode": false,
+            "in": "query",
+            "name": "baseRev",
+            "schema": {
+              "default": -1,
+              "description": "Revision the client last saw; -1 deletes whatever is there",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete inside a share that allows changes; it goes to the owner's trash",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/list": {
+      "get": {
+        "operationId": "listShareFiles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Path inside the share; / or empty is the shared item itself",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the share; / or empty is the shared item itself",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a folder inside a share",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/mkdir": {
+      "post": {
+        "operationId": "makeShareDirectory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a folder inside a share that allows changes",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/move": {
+      "post": {
+        "operationId": "moveShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move or rename inside a share that allows changes",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/preview": {
+      "get": {
+        "operationId": "previewShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Thumbnail width and height in pixels",
+            "explode": false,
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "default": 256,
+              "description": "Thumbnail width and height in pixels",
+              "enum": [
+                128,
+                256,
+                512
+              ],
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Thumbnail",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a JPEG thumbnail of a file inside a share",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/{shareID}/stat": {
+      "get": {
+        "operationId": "statShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Path inside the share; / or empty is the shared item itself",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the share; / or empty is the shared item itself",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get one file or folder inside a share",
+        "tags": [
+          "shares"
         ]
       }
     },

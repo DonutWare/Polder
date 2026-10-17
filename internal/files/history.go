@@ -2,14 +2,17 @@ package files
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -317,15 +320,24 @@ func (s *Service) reconcileHistory(ctx context.Context, tx *sql.Tx, owner users.
 		}
 	}
 	target := versionTarget{FileID: versions[0].FileID, TrashID: versions[0].TrashID, TrashPath: versions[0].TrashPath}
-	for name, manifest := range manifests {
+	for _, name := range oldestFirst(manifests) {
 		if known[name] {
 			continue
 		}
-		if err := s.importVersion(ctx, tx, owner, historyID, target, manifest); err != nil {
+		if err := s.importVersion(ctx, tx, owner, historyID, target, manifests[name]); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func oldestFirst(manifests map[string]versionManifest) []string {
+	names := slices.Collect(maps.Keys(manifests))
+	slices.SortFunc(names, func(a, b string) int {
+		left, right := manifests[a], manifests[b]
+		return cmp.Or(cmp.Compare(left.ReplacedAt, right.ReplacedAt), cmp.Compare(left.ModifiedNs, right.ModifiedNs), strings.Compare(a, b))
+	})
+	return names
 }
 
 type versionTarget struct {
@@ -347,8 +359,8 @@ func (s *Service) adoptHistory(ctx context.Context, tx *sql.Tx, owner users.User
 	if err != nil || !found {
 		return err
 	}
-	for _, manifest := range manifests {
-		if err := s.importVersion(ctx, tx, owner, historyID, target, manifest); err != nil {
+	for _, name := range oldestFirst(manifests) {
+		if err := s.importVersion(ctx, tx, owner, historyID, target, manifests[name]); err != nil {
 			return err
 		}
 	}
