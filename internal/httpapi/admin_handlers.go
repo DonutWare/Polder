@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 
+	"polder-server/internal/apperr"
 	"polder-server/internal/logging"
 	"polder-server/internal/settings"
 	"polder-server/internal/users"
@@ -49,7 +50,7 @@ func (a *API) updateUser(ctx context.Context, input *updateUserInput) (*jsonBody
 	}
 	usersLog.Info("user changed", "user", updated.Username, "fields", changedFields(changes), "by", currentUser(ctx).Username)
 	if changes.Password != nil || updated.Disabled {
-		if err := a.sessions.RevokeAllForUser(ctx, input.UserID); err != nil {
+		if err := a.auth.LogOutEverywhere(ctx, input.UserID); err != nil {
 			return nil, err
 		}
 		usersLog.Info("user logged out everywhere", "user", updated.Username)
@@ -81,6 +82,9 @@ func (a *API) getServerSettings(ctx context.Context, _ *struct{}) (*jsonBody[set
 }
 
 func (a *API) updateServerSettings(ctx context.Context, input *jsonBody[settings.ServerSettingsChanges]) (*jsonBody[settings.ServerSettings], error) {
+	if enable := input.Body.FederationEnabled; enable != nil && *enable && !a.federation.Configured() {
+		return nil, apperr.Invalid("federation needs publicUrl in the server config")
+	}
 	updated, err := a.settings.Update(ctx, input.Body)
 	if err != nil {
 		return nil, err

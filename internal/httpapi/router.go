@@ -18,6 +18,7 @@ import (
 	"polder-server/internal/apperr"
 	"polder-server/internal/auth"
 	"polder-server/internal/extract"
+	"polder-server/internal/federation"
 	"polder-server/internal/files"
 	"polder-server/internal/groups"
 	"polder-server/internal/links"
@@ -30,28 +31,35 @@ import (
 	"polder-server/internal/syncing"
 	"polder-server/internal/users"
 	"polder-server/internal/versions"
+	"polder-server/internal/webdav"
 )
 
 type API struct {
-	auth     *auth.Service
-	sessions *auth.Sessions
-	users    *users.Service
-	files    *files.Service
-	settings *settings.Store
-	images   *settings.Images
-	avatars  *settings.Avatars
-	sync     *syncing.Service
-	previews *preview.Worker
-	activity *activity.Hub
-	search   *search.Service
-	extract  *extract.Worker
-	logs     *logging.Files
-	office   *office.Service
-	versions *versions.Worker
-	links    *links.Graph
-	groups   *groups.Service
-	sharing  *sharing.Service
-	limiter  *failedAttemptLimiter
+	auth       *auth.Service
+	sessions   *auth.Sessions
+	users      *users.Service
+	files      *files.Service
+	settings   *settings.Store
+	images     *settings.Images
+	avatars    *settings.Avatars
+	sync       *syncing.Service
+	previews   *preview.Worker
+	activity   *activity.Hub
+	search     *search.Service
+	extract    *extract.Worker
+	logs       *logging.Files
+	office     *office.Service
+	versions   *versions.Worker
+	links      *links.Graph
+	groups     *groups.Service
+	sharing    *sharing.Service
+	webdav     *webdav.Handler
+	federation *federation.Service
+	limiter    *failedAttemptLimiter
+
+	federationLimiter *failedAttemptLimiter
+
+	webdavAllowInsecure bool
 
 	linkLimiter  *failedAttemptLimiter
 	archiveSlots chan struct{}
@@ -78,6 +86,9 @@ type Dependencies struct {
 	Links                  *links.Graph
 	Groups                 *groups.Service
 	Sharing                *sharing.Service
+	WebDAV                 *webdav.Handler
+	Federation             *federation.Service
+	WebDAVAllowInsecure    bool
 	RequestTrashPurge      func()
 	LoginAttemptsPerMinute int
 	TrustedProxies         []netip.Prefix
@@ -87,25 +98,31 @@ type Dependencies struct {
 
 func NewRouter(deps Dependencies) http.Handler {
 	api := &API{
-		auth:     deps.Auth,
-		sessions: deps.Sessions,
-		users:    deps.Users,
-		files:    deps.Files,
-		settings: deps.Settings,
-		images:   deps.Images,
-		avatars:  deps.Avatars,
-		sync:     deps.Sync,
-		previews: deps.Previews,
-		activity: deps.Activity,
-		search:   deps.Search,
-		extract:  deps.Extractor,
-		logs:     deps.Logs,
-		office:   deps.Office,
-		versions: deps.Versions,
-		links:    deps.Links,
-		groups:   deps.Groups,
-		sharing:  deps.Sharing,
-		limiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+		auth:       deps.Auth,
+		sessions:   deps.Sessions,
+		users:      deps.Users,
+		files:      deps.Files,
+		settings:   deps.Settings,
+		images:     deps.Images,
+		avatars:    deps.Avatars,
+		sync:       deps.Sync,
+		previews:   deps.Previews,
+		activity:   deps.Activity,
+		search:     deps.Search,
+		extract:    deps.Extractor,
+		logs:       deps.Logs,
+		office:     deps.Office,
+		versions:   deps.Versions,
+		links:      deps.Links,
+		groups:     deps.Groups,
+		sharing:    deps.Sharing,
+		webdav:     deps.WebDAV,
+		federation: deps.Federation,
+		limiter:    newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+
+		federationLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute * federationLimitFactor),
+
+		webdavAllowInsecure: deps.WebDAVAllowInsecure,
 
 		linkLimiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 		archiveSlots: make(chan struct{}, maxConcurrentArchives),
@@ -121,6 +138,10 @@ func NewRouter(deps Dependencies) http.Handler {
 	// Unknown API paths answer like the API, never with the web client's index.html.
 	router.Handle("/api/*", http.HandlerFunc(endpointNotFound))
 	deps.Office.Routes(router)
+	api.webDAVRoutes(router)
+	if deps.Federation != nil {
+		deps.Federation.Routes(router, federationGuard{api: api}, deps.WebDAV)
+	}
 	if deps.Web != nil {
 		router.Handle("/*", middleware.Compress(5)(deps.Web))
 	}
@@ -139,8 +160,9 @@ func (a *API) register(humaAPI huma.API) {
 }
 
 const (
-	apiPrefix  = "/api/v1"
-	bearerAuth = "bearer"
+	apiPrefix             = "/api/v1"
+	bearerAuth            = "bearer"
+	federationLimitFactor = 6
 )
 
 // apiConfig serves the OpenAPI document built from the registered operations at
@@ -204,6 +226,9 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPut, "/account/avatar", "setAvatar", "Replace the logged-in user's icon with the image in the request body", a.setAvatar,
 		withRequestBody(binaryContent("application/octet-stream")))
 	register(user, http.MethodDelete, "/account/avatar", "removeAvatar", "Go back to showing the logged-in user's initials", a.removeAvatar)
+	register(user, http.MethodGet, "/account/app-passwords", "listAppPasswords", "The logged-in user's app passwords, for WebDAV and other apps", a.listAppPasswords)
+	register(user, http.MethodPost, "/account/app-passwords", "createAppPassword", "Create an app password; needs the account password and returns the new password once", a.createAppPassword, created)
+	register(user, http.MethodDelete, "/account/app-passwords/{appPasswordID}", "deleteAppPassword", "Revoke an app password; it stops working at once", a.deleteAppPassword)
 
 	register(user, http.MethodGet, "/files/list", "listFiles", "List a directory", a.listFiles)
 	register(user, http.MethodGet, "/files/stat", "statFile", "Get one file or directory", a.statFile)
@@ -293,6 +318,30 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodDelete, "/links/{linkID}", "deleteShareLink", "Delete a share link; it stops working at once", a.deleteShareLink)
 	register(user, http.MethodGet, "/links/match/{code}", "matchShareLink", "Find where a share link's item is for the logged-in user: their own file or inside a share", a.matchShareLink)
 
+	register(user, http.MethodGet, "/federation/status", "getFederationStatus", "Whether federated sharing is available, and the logged-in user's cloud ID", a.federationStatus)
+	register(user, http.MethodGet, "/federation/invites", "listFederationInvites", "The logged-in user's open invites for people on other servers", a.listInvites)
+	register(user, http.MethodPost, "/federation/invites", "createFederationInvite", "Create an invite token that someone on another server can accept", a.createInvite, created)
+	register(user, http.MethodDelete, "/federation/invites/{id}", "revokeFederationInvite", "Revoke an open invite", a.revokeInvite)
+	register(user, http.MethodPost, "/federation/invites/accept", "acceptFederationInvite", "Accept an invite from someone on a trusted server; they become a contact", a.acceptInvite, created)
+	register(user, http.MethodGet, "/federation/contacts", "listFederationContacts", "People on other servers who exchanged an invite with the logged-in user", a.listContacts)
+	register(user, http.MethodDelete, "/federation/contacts/{id}", "removeFederationContact", "Remove a contact", a.removeContact)
+	register(user, http.MethodGet, "/federation/shares/outgoing", "listOutgoingFederatedShares", "What the logged-in user shares with people on other servers", a.listOutgoingFederatedShares)
+	register(user, http.MethodPost, "/federation/shares/outgoing", "createFederatedShare", "Share a file or folder with someone on a trusted server", a.createFederatedShare, created)
+	register(user, http.MethodPatch, "/federation/shares/outgoing/{shareID}", "updateFederatedShare", "Change what a federated recipient may do", a.updateFederatedShare)
+	register(user, http.MethodDelete, "/federation/shares/outgoing/{shareID}", "deleteFederatedShare", "Stop sharing with a federated recipient; their access ends at once", a.deleteFederatedShare)
+	register(user, http.MethodGet, "/federation/shares/incoming", "listIncomingFederatedShares", "What people on other servers share with the logged-in user", a.listIncomingFederatedShares)
+	register(user, http.MethodPost, "/federation/shares/incoming/{shareID}/accept", "acceptFederatedShare", "Accept a share from another server", a.acceptFederatedShare)
+	register(user, http.MethodDelete, "/federation/shares/incoming/{shareID}", "removeIncomingFederatedShare", "Decline or remove a share from another server", a.removeIncomingFederatedShare)
+	register(user, http.MethodGet, "/federation/shares/incoming/{shareID}/list", "listFederatedShareFiles", "List a folder inside a share from another server", a.listFederatedShareFiles)
+	register(user, http.MethodGet, "/federation/shares/incoming/{shareID}/content", "downloadFederatedShareFile", "Download a file inside a share from another server; supports Range", a.downloadFederatedShareFile,
+		withResponse(http.StatusOK, "File content", binaryContent("application/octet-stream")))
+	register(user, http.MethodPut, "/federation/shares/incoming/{shareID}/content", "uploadFederatedShareFile", "Upload a file into a share from another server that allows changes", a.uploadFederatedShareFile,
+		withRequestBody(binaryContent("application/octet-stream")))
+	register(user, http.MethodPost, "/federation/shares/incoming/{shareID}/mkdir", "makeFederatedShareDirectory", "Create a folder inside a share from another server", a.makeFederatedShareDirectory)
+	register(user, http.MethodPost, "/federation/shares/incoming/{shareID}/move", "moveFederatedShareFile", "Move or rename inside a share from another server", a.moveFederatedShareFile)
+	register(user, http.MethodPost, "/federation/shares/incoming/{shareID}/copy", "copyFederatedShareFile", "Copy inside a share from another server", a.copyFederatedShareFile)
+	register(user, http.MethodDelete, "/federation/shares/incoming/{shareID}/files", "deleteFederatedShareFile", "Delete inside a share from another server", a.deleteFederatedShareFile)
+
 	register(user, http.MethodGet, "/sync/changes", "listChanges", "Page through changes since a cursor", a.changes)
 	register(user, http.MethodGet, "/sync/manifest", "getManifest", "Get a file's chunk manifest for delta sync", a.manifest)
 	register(user, http.MethodPost, "/sync/downloads", "downloadSyncFiles",
@@ -323,6 +372,11 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodGet, "/admin/search", "getSearchStatus", "State of the search index and of reading text from files", a.searchStatus)
 	register(admin, http.MethodPost, "/admin/search/rebuild", "rebuildSearchIndex", "Rebuild the search index from scratch in the background", a.rebuildSearchIndex, accepted)
 	register(admin, http.MethodDelete, "/admin/users/{userID}", "deleteUser", "Delete a user; their files are archived on the server", a.deleteUser)
+	register(admin, http.MethodGet, "/admin/federation/servers", "listTrustedServers", "Servers this server federates with", a.listTrustedServers)
+	register(admin, http.MethodPost, "/admin/federation/servers", "addTrustedServer", "Trust a server for federated sharing; its signing key is pinned", a.addTrustedServer, created)
+	register(admin, http.MethodPatch, "/admin/federation/servers/{serverID}", "updateTrustedServer", "Change how a trusted server is reached and checked", a.updateTrustedServer)
+	register(admin, http.MethodPost, "/admin/federation/servers/{serverID}/refresh", "refreshTrustedServer", "Discover a trusted server again and pin its current signing key", a.refreshTrustedServer)
+	register(admin, http.MethodDelete, "/admin/federation/servers/{serverID}", "removeTrustedServer", "Stop trusting a server; every share with it ends", a.removeTrustedServer)
 	register(admin, http.MethodGet, "/admin/logs", "listLogs", "Page through the server log, newest first", a.listLogs)
 	register(admin, http.MethodGet, "/admin/logs/components", "listLogComponents", "Parts of the server that appear in the log", a.listLogComponents)
 	register(admin, http.MethodGet, "/admin/logs/files", "listLogFiles", "The log files, one per day, newest first", a.listLogFiles)

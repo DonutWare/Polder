@@ -91,6 +91,10 @@ func init() {
 	}
 }
 
+func MimeFor(filePath string) string {
+	return mimeFor(filePath)
+}
+
 func mimeFor(filePath string) string {
 	detected := mime.TypeByExtension(strings.ToLower(path.Ext(filePath)))
 	if detected == "" {

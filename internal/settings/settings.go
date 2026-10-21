@@ -27,6 +27,7 @@ const (
 	versionsKeepAllHoursKey = "versions_keep_all_hours"
 	versionsMaxAgeDaysKey   = "versions_max_age_days"
 	versionsMaxPerFileKey   = "versions_max_per_file"
+	federationEnabledKey    = "federation_enabled"
 
 	MaxOCRPages = 10000
 
@@ -53,6 +54,7 @@ type ServerSettings struct {
 	VersionsKeepAllHours int      `json:"versionsKeepAllHours" doc:"Hours during which every saved version is kept; older versions thin out gradually. Users can only choose less"`
 	VersionsMaxAgeDays   int      `json:"versionsMaxAgeDays" doc:"Days earlier versions are kept; 0 for no age limit. Users can only choose less"`
 	VersionsMaxPerFile   int      `json:"versionsMaxPerFile" doc:"Most earlier versions kept per file; 0 for no count limit. Users can only choose fewer"`
+	FederationEnabled    bool     `json:"federationEnabled" doc:"Share with people on trusted servers that support Open Cloud Mesh; needs publicUrl in the server config"`
 }
 
 type ServerSettingsChanges struct {
@@ -69,6 +71,7 @@ type ServerSettingsChanges struct {
 	VersionsKeepAllHours *int      `json:"versionsKeepAllHours" required:"false" minimum:"0" maximum:"720" doc:"Hours during which every saved version is kept. Users can only choose less"`
 	VersionsMaxAgeDays   *int      `json:"versionsMaxAgeDays" required:"false" minimum:"0" maximum:"3650" doc:"Days earlier versions are kept; 0 for no age limit"`
 	VersionsMaxPerFile   *int      `json:"versionsMaxPerFile" required:"false" minimum:"0" maximum:"10000" doc:"Most earlier versions kept per file; 0 for no count limit"`
+	FederationEnabled    *bool     `json:"federationEnabled" required:"false" doc:"Share with people on trusted servers that support Open Cloud Mesh; needs publicUrl in the server config"`
 }
 
 func (c ServerSettingsChanges) validate() error {
@@ -169,6 +172,10 @@ func (s *Store) Get(ctx context.Context) (ServerSettings, error) {
 			if count, err := strconv.Atoi(value); err == nil {
 				current.VersionsMaxPerFile = count
 			}
+		case federationEnabledKey:
+			if enabled, err := strconv.ParseBool(value); err == nil {
+				current.FederationEnabled = enabled
+			}
 		}
 	}
 	return current, rows.Err()
@@ -218,6 +225,9 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	}
 	if changes.VersionsMaxPerFile != nil {
 		values[versionsMaxPerFileKey] = strconv.Itoa(*changes.VersionsMaxPerFile)
+	}
+	if changes.FederationEnabled != nil {
+		values[federationEnabledKey] = strconv.FormatBool(*changes.FederationEnabled)
 	}
 	if err := s.save(ctx, values); err != nil {
 		return ServerSettings{}, err

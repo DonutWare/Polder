@@ -172,6 +172,20 @@ enum GroupMyRole {
   const GroupMyRole(this.value);
 }
 
+enum IncomingFederatedShareState {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('pending')
+  pending('pending'),
+  @JsonValue('accepted')
+  accepted('accepted');
+
+  final String? value;
+
+  const IncomingFederatedShareState(this.value);
+}
+
 enum LiveTransferDirection {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -280,6 +294,20 @@ enum NewUserRole {
   final String? value;
 
   const NewUserRole(this.value);
+}
+
+enum OutgoingShareState {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('pending')
+  pending('pending'),
+  @JsonValue('accepted')
+  accepted('accepted');
+
+  final String? value;
+
+  const OutgoingShareState(this.value);
 }
 
 enum QueryFilterKey {

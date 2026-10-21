@@ -220,6 +220,7 @@ extension ServerSettingsToModel on wire.ServerSettings {
     versionsKeepAllHours: versionsKeepAllHours,
     versionsMaxAgeDays: versionsMaxAgeDays,
     versionsMaxPerFile: versionsMaxPerFile,
+    federationEnabled: federationEnabled,
   );
 }
 

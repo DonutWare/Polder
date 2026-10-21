@@ -56,6 +56,77 @@ abstract class Polder extends ChopperService {
     return _$Polder(newClient);
   }
 
+  ///The logged-in user's app passwords, for WebDAV and other apps
+  Future<chopper.Response<List<AppPassword>>> listAppPasswords() {
+    generatedMapping.putIfAbsent(AppPassword, () => AppPassword.fromJsonFactory);
+
+    return _listAppPasswords();
+  }
+
+  ///The logged-in user's app passwords, for WebDAV and other apps
+  @GET(path: '/api/v1/account/app-passwords')
+  Future<chopper.Response<List<AppPassword>>> _listAppPasswords({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The logged-in user\'s app passwords, for WebDAV and other apps',
+      operationId: 'listAppPasswords',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Create an app password; needs the account password and returns the new password once
+  Future<chopper.Response<NewAppPassword>> createAppPassword({required AppPasswordRequest? body}) {
+    generatedMapping.putIfAbsent(NewAppPassword, () => NewAppPassword.fromJsonFactory);
+
+    return _createAppPassword(body: body);
+  }
+
+  ///Create an app password; needs the account password and returns the new password once
+  @POST(path: '/api/v1/account/app-passwords', optionalBody: true)
+  Future<chopper.Response<NewAppPassword>> _createAppPassword({
+    @Body() required AppPasswordRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create an app password; needs the account password and returns the new password once',
+      operationId: 'createAppPassword',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Revoke an app password; it stops working at once
+  ///@param appPasswordID
+  Future<chopper.Response> deleteAppPassword({required int? appPasswordID}) {
+    return _deleteAppPassword(appPasswordID: appPasswordID);
+  }
+
+  ///Revoke an app password; it stops working at once
+  ///@param appPasswordID
+  @DELETE(path: '/api/v1/account/app-passwords/{appPasswordID}')
+  Future<chopper.Response> _deleteAppPassword({
+    @Path('appPasswordID') required int? appPasswordID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Revoke an app password; it stops working at once',
+      operationId: 'deleteAppPassword',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
   ///Choose the theme and accent color the apps use for the logged-in user
   Future<chopper.Response<User>> setAppearance({required Appearance? body}) {
     generatedMapping.putIfAbsent(User, () => User.fromJsonFactory);
@@ -177,11 +248,7 @@ abstract class Polder extends ChopperService {
   ///@param user me, all, or a user id; anything but your own activity needs the administrator role
   ///@param before Cursor from the previous page; 0 starts at the newest
   ///@param limit Maximum number of entries to return; the server caps it
-  Future<chopper.Response<LogPage>> listActivity({
-    String? user,
-    int? before,
-    int? limit,
-  }) {
+  Future<chopper.Response<LogPage>> listActivity({String? user, int? before, int? limit}) {
     generatedMapping.putIfAbsent(LogPage, () => LogPage.fromJsonFactory);
 
     return _listActivity(user: user, before: before, limit: limit);
@@ -212,10 +279,7 @@ abstract class Polder extends ChopperService {
   ///Uploads and downloads in progress
   ///@param user me, all, or a user id; anything but your own transfers needs the administrator role
   Future<chopper.Response<LiveTransfers>> listLiveTransfers({String? user}) {
-    generatedMapping.putIfAbsent(
-      LiveTransfers,
-      () => LiveTransfers.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(LiveTransfers, () => LiveTransfers.fromJsonFactory);
 
     return _listLiveTransfers(user: user);
   }
@@ -239,9 +303,7 @@ abstract class Polder extends ChopperService {
   });
 
   ///Add the image in the request body to the login screen's backgrounds
-  Future<chopper.Response<Branding>> addBrandingBackground({
-    required Object? body,
-  }) {
+  Future<chopper.Response<Branding>> addBrandingBackground({required Object? body}) {
     generatedMapping.putIfAbsent(Branding, () => Branding.fromJsonFactory);
 
     return _addBrandingBackground(body: body);
@@ -266,9 +328,7 @@ abstract class Polder extends ChopperService {
 
   ///Remove one of the login screen's backgrounds
   ///@param imageID
-  Future<chopper.Response> removeBrandingBackground({
-    required String? imageID,
-  }) {
+  Future<chopper.Response> removeBrandingBackground({required String? imageID}) {
     return _removeBrandingBackground(imageID: imageID);
   }
 
@@ -335,6 +395,130 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Servers this server federates with
+  Future<chopper.Response<List<Server>>> listTrustedServers() {
+    generatedMapping.putIfAbsent(Server, () => Server.fromJsonFactory);
+
+    return _listTrustedServers();
+  }
+
+  ///Servers this server federates with
+  @GET(path: '/api/v1/admin/federation/servers')
+  Future<chopper.Response<List<Server>>> _listTrustedServers({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Servers this server federates with',
+      operationId: 'listTrustedServers',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Trust a server for federated sharing; its signing key is pinned
+  Future<chopper.Response<Server>> addTrustedServer({required TrustedServerRequest? body}) {
+    generatedMapping.putIfAbsent(Server, () => Server.fromJsonFactory);
+
+    return _addTrustedServer(body: body);
+  }
+
+  ///Trust a server for federated sharing; its signing key is pinned
+  @POST(path: '/api/v1/admin/federation/servers', optionalBody: true)
+  Future<chopper.Response<Server>> _addTrustedServer({
+    @Body() required TrustedServerRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Trust a server for federated sharing; its signing key is pinned',
+      operationId: 'addTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Stop trusting a server; every share with it ends
+  ///@param serverID
+  Future<chopper.Response> removeTrustedServer({required int? serverID}) {
+    return _removeTrustedServer(serverID: serverID);
+  }
+
+  ///Stop trusting a server; every share with it ends
+  ///@param serverID
+  @DELETE(path: '/api/v1/admin/federation/servers/{serverID}')
+  Future<chopper.Response> _removeTrustedServer({
+    @Path('serverID') required int? serverID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop trusting a server; every share with it ends',
+      operationId: 'removeTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change how a trusted server is reached and checked
+  ///@param serverID
+  Future<chopper.Response<Server>> updateTrustedServer({required int? serverID, required ServerOptions? body}) {
+    generatedMapping.putIfAbsent(Server, () => Server.fromJsonFactory);
+
+    return _updateTrustedServer(serverID: serverID, body: body);
+  }
+
+  ///Change how a trusted server is reached and checked
+  ///@param serverID
+  @PATCH(path: '/api/v1/admin/federation/servers/{serverID}', optionalBody: true)
+  Future<chopper.Response<Server>> _updateTrustedServer({
+    @Path('serverID') required int? serverID,
+    @Body() required ServerOptions? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change how a trusted server is reached and checked',
+      operationId: 'updateTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Discover a trusted server again and pin its current signing key
+  ///@param serverID
+  Future<chopper.Response<Server>> refreshTrustedServer({required int? serverID}) {
+    generatedMapping.putIfAbsent(Server, () => Server.fromJsonFactory);
+
+    return _refreshTrustedServer(serverID: serverID);
+  }
+
+  ///Discover a trusted server again and pin its current signing key
+  ///@param serverID
+  @POST(path: '/api/v1/admin/federation/servers/{serverID}/refresh', optionalBody: true)
+  Future<chopper.Response<Server>> _refreshTrustedServer({
+    @Path('serverID') required int? serverID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Discover a trusted server again and pin its current signing key',
+      operationId: 'refreshTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
   ///Page through the server log, newest first
   ///@param level Leave out entries below this level
   ///@param component Only entries from this part of the server
@@ -348,18 +532,9 @@ abstract class Polder extends ChopperService {
     String? before,
     int? limit,
   }) {
-    generatedMapping.putIfAbsent(
-      ServerLogPage,
-      () => ServerLogPage.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(ServerLogPage, () => ServerLogPage.fromJsonFactory);
 
-    return _listLogs(
-      level: level?.value?.toString(),
-      component: component,
-      q: q,
-      before: before,
-      limit: limit,
-    );
+    return _listLogs(level: level?.value?.toString(), component: component, q: q, before: before, limit: limit);
   }
 
   ///Page through the server log, newest first
@@ -390,10 +565,7 @@ abstract class Polder extends ChopperService {
 
   ///Parts of the server that appear in the log
   Future<chopper.Response<LogComponents>> listLogComponents() {
-    generatedMapping.putIfAbsent(
-      LogComponents,
-      () => LogComponents.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(LogComponents, () => LogComponents.fromJsonFactory);
 
     return _listLogComponents();
   }
@@ -439,9 +611,7 @@ abstract class Polder extends ChopperService {
 
   ///Download one day's log file as JSON lines
   ///@param name
-  Future<chopper.Response<Stream<List<int>>>> downloadLogFile({
-    required String? name,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadLogFile({required String? name}) {
     return _downloadLogFile(name: name);
   }
 
@@ -465,10 +635,7 @@ abstract class Polder extends ChopperService {
 
   ///State of the search index and of reading text from files
   Future<chopper.Response<SearchStatus>> getSearchStatus() {
-    generatedMapping.putIfAbsent(
-      SearchStatus,
-      () => SearchStatus.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(SearchStatus, () => SearchStatus.fromJsonFactory);
 
     return _getSearchStatus();
   }
@@ -512,10 +679,7 @@ abstract class Polder extends ChopperService {
 
   ///Server-wide settings
   Future<chopper.Response<ServerSettings>> getServerSettings() {
-    generatedMapping.putIfAbsent(
-      ServerSettings,
-      () => ServerSettings.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
 
     return _getServerSettings();
   }
@@ -537,13 +701,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Change server-wide settings
-  Future<chopper.Response<ServerSettings>> updateServerSettings({
-    required ServerSettingsChanges? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      ServerSettings,
-      () => ServerSettings.fromJsonFactory,
-    );
+  Future<chopper.Response<ServerSettings>> updateServerSettings({required ServerSettingsChanges? body}) {
+    generatedMapping.putIfAbsent(ServerSettings, () => ServerSettings.fromJsonFactory);
 
     return _updateServerSettings(body: body);
   }
@@ -638,10 +797,7 @@ abstract class Polder extends ChopperService {
 
   ///Change a user; password changes and disabling log the user out
   ///@param userID
-  Future<chopper.Response<User>> updateUser({
-    required int? userID,
-    required Changes? body,
-  }) {
+  Future<chopper.Response<User>> updateUser({required int? userID, required Changes? body}) {
     generatedMapping.putIfAbsent(User, () => User.fromJsonFactory);
 
     return _updateUser(userID: userID, body: body);
@@ -667,9 +823,7 @@ abstract class Polder extends ChopperService {
   });
 
   ///Log in and get a token pair
-  Future<chopper.Response<TokenPair>> login({
-    required CredentialsRequest? body,
-  }) {
+  Future<chopper.Response<TokenPair>> login({required CredentialsRequest? body}) {
     generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
 
     return _login(body: body);
@@ -762,9 +916,7 @@ abstract class Polder extends ChopperService {
   });
 
   ///Start another session for the logged-in user, such as for a file provider on this device
-  Future<chopper.Response<TokenPair>> startSession({
-    required SessionRequest? body,
-  }) {
+  Future<chopper.Response<TokenPair>> startSession({required SessionRequest? body}) {
     generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
 
     return _startSession(body: body);
@@ -812,9 +964,7 @@ abstract class Polder extends ChopperService {
 
   ///One of the login screen's backgrounds
   ///@param imageID
-  Future<chopper.Response<String>> getBrandingBackground({
-    required String? imageID,
-  }) {
+  Future<chopper.Response<String>> getBrandingBackground({required String? imageID}) {
     return _getBrandingBackground(imageID: imageID);
   }
 
@@ -863,10 +1013,7 @@ abstract class Polder extends ChopperService {
   ///Find users and groups to share with
   ///@param q Part of a username, name or group name; empty lists the first matches
   Future<chopper.Response<DirectoryResponse>> searchDirectory({String? q}) {
-    generatedMapping.putIfAbsent(
-      DirectoryResponse,
-      () => DirectoryResponse.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(DirectoryResponse, () => DirectoryResponse.fromJsonFactory);
 
     return _searchDirectory(q: q);
   }
@@ -906,6 +1053,557 @@ abstract class Polder extends ChopperService {
       produces: [],
       security: [],
       tags: ["events"],
+      deprecated: false,
+    ),
+  });
+
+  ///People on other servers who exchanged an invite with the logged-in user
+  Future<chopper.Response<List<Contact>>> listFederationContacts() {
+    generatedMapping.putIfAbsent(Contact, () => Contact.fromJsonFactory);
+
+    return _listFederationContacts();
+  }
+
+  ///People on other servers who exchanged an invite with the logged-in user
+  @GET(path: '/api/v1/federation/contacts')
+  Future<chopper.Response<List<Contact>>> _listFederationContacts({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'People on other servers who exchanged an invite with the logged-in user',
+      operationId: 'listFederationContacts',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Remove a contact
+  ///@param id
+  Future<chopper.Response> removeFederationContact({required int? id}) {
+    return _removeFederationContact(id: id);
+  }
+
+  ///Remove a contact
+  ///@param id
+  @DELETE(path: '/api/v1/federation/contacts/{id}')
+  Future<chopper.Response> _removeFederationContact({
+    @Path('id') required int? id,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove a contact',
+      operationId: 'removeFederationContact',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///The logged-in user's open invites for people on other servers
+  Future<chopper.Response<List<Invite>>> listFederationInvites() {
+    generatedMapping.putIfAbsent(Invite, () => Invite.fromJsonFactory);
+
+    return _listFederationInvites();
+  }
+
+  ///The logged-in user's open invites for people on other servers
+  @GET(path: '/api/v1/federation/invites')
+  Future<chopper.Response<List<Invite>>> _listFederationInvites({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The logged-in user\'s open invites for people on other servers',
+      operationId: 'listFederationInvites',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Create an invite token that someone on another server can accept
+  Future<chopper.Response<Invite>> createFederationInvite() {
+    generatedMapping.putIfAbsent(Invite, () => Invite.fromJsonFactory);
+
+    return _createFederationInvite();
+  }
+
+  ///Create an invite token that someone on another server can accept
+  @POST(path: '/api/v1/federation/invites', optionalBody: true)
+  Future<chopper.Response<Invite>> _createFederationInvite({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create an invite token that someone on another server can accept',
+      operationId: 'createFederationInvite',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Accept an invite from someone on a trusted server; they become a contact
+  Future<chopper.Response<Contact>> acceptFederationInvite({required AcceptInviteRequest? body}) {
+    generatedMapping.putIfAbsent(Contact, () => Contact.fromJsonFactory);
+
+    return _acceptFederationInvite(body: body);
+  }
+
+  ///Accept an invite from someone on a trusted server; they become a contact
+  @POST(path: '/api/v1/federation/invites/accept', optionalBody: true)
+  Future<chopper.Response<Contact>> _acceptFederationInvite({
+    @Body() required AcceptInviteRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Accept an invite from someone on a trusted server; they become a contact',
+      operationId: 'acceptFederationInvite',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Revoke an open invite
+  ///@param id
+  Future<chopper.Response> revokeFederationInvite({required int? id}) {
+    return _revokeFederationInvite(id: id);
+  }
+
+  ///Revoke an open invite
+  ///@param id
+  @DELETE(path: '/api/v1/federation/invites/{id}')
+  Future<chopper.Response> _revokeFederationInvite({
+    @Path('id') required int? id,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Revoke an open invite',
+      operationId: 'revokeFederationInvite',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///What people on other servers share with the logged-in user
+  Future<chopper.Response<List<IncomingFederatedShare>>> listIncomingFederatedShares() {
+    generatedMapping.putIfAbsent(IncomingFederatedShare, () => IncomingFederatedShare.fromJsonFactory);
+
+    return _listIncomingFederatedShares();
+  }
+
+  ///What people on other servers share with the logged-in user
+  @GET(path: '/api/v1/federation/shares/incoming')
+  Future<chopper.Response<List<IncomingFederatedShare>>> _listIncomingFederatedShares({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What people on other servers share with the logged-in user',
+      operationId: 'listIncomingFederatedShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Decline or remove a share from another server
+  ///@param shareID
+  Future<chopper.Response> removeIncomingFederatedShare({required int? shareID}) {
+    return _removeIncomingFederatedShare(shareID: shareID);
+  }
+
+  ///Decline or remove a share from another server
+  ///@param shareID
+  @DELETE(path: '/api/v1/federation/shares/incoming/{shareID}')
+  Future<chopper.Response> _removeIncomingFederatedShare({
+    @Path('shareID') required int? shareID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Decline or remove a share from another server',
+      operationId: 'removeIncomingFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Accept a share from another server
+  ///@param shareID
+  Future<chopper.Response<IncomingFederatedShare>> acceptFederatedShare({required int? shareID}) {
+    generatedMapping.putIfAbsent(IncomingFederatedShare, () => IncomingFederatedShare.fromJsonFactory);
+
+    return _acceptFederatedShare(shareID: shareID);
+  }
+
+  ///Accept a share from another server
+  ///@param shareID
+  @POST(path: '/api/v1/federation/shares/incoming/{shareID}/accept', optionalBody: true)
+  Future<chopper.Response<IncomingFederatedShare>> _acceptFederatedShare({
+    @Path('shareID') required int? shareID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Accept a share from another server',
+      operationId: 'acceptFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Download a file inside a share from another server; supports Range
+  ///@param shareID
+  ///@param path Path inside the share
+  ///@param Range Byte range to send, such as bytes=0-1023
+  ///@param If-None-Match
+  Future<chopper.Response<Stream<List<int>>>> downloadFederatedShareFile({
+    required int? shareID,
+    String? path,
+    String? range,
+    String? ifNoneMatch,
+  }) {
+    return _downloadFederatedShareFile(
+      shareID: shareID,
+      path: path,
+      range: range?.toString(),
+      ifNoneMatch: ifNoneMatch?.toString(),
+    );
+  }
+
+  ///Download a file inside a share from another server; supports Range
+  ///@param shareID
+  ///@param path Path inside the share
+  ///@param Range Byte range to send, such as bytes=0-1023
+  ///@param If-None-Match
+  @GET(path: '/api/v1/federation/shares/incoming/{shareID}/content')
+  Future<chopper.Response<Stream<List<int>>>> _downloadFederatedShareFile({
+    @Path('shareID') required int? shareID,
+    @Query('path') String? path,
+    @Header('Range') String? range,
+    @Header('If-None-Match') String? ifNoneMatch,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a file inside a share from another server; supports Range',
+      operationId: 'downloadFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Upload a file into a share from another server that allows changes
+  ///@param shareID
+  ///@param path Where to store the file inside the share
+  ///@param mustNotExist Fail instead of replacing an existing file
+  Future<chopper.Response> uploadFederatedShareFile({
+    required int? shareID,
+    String? path,
+    bool? mustNotExist,
+    required Object? body,
+  }) {
+    return _uploadFederatedShareFile(shareID: shareID, path: path, mustNotExist: mustNotExist, body: body);
+  }
+
+  ///Upload a file into a share from another server that allows changes
+  ///@param shareID
+  ///@param path Where to store the file inside the share
+  ///@param mustNotExist Fail instead of replacing an existing file
+  @PUT(path: '/api/v1/federation/shares/incoming/{shareID}/content', optionalBody: true)
+  Future<chopper.Response> _uploadFederatedShareFile({
+    @Path('shareID') required int? shareID,
+    @Query('path') String? path,
+    @Query('mustNotExist') bool? mustNotExist,
+    @Body() required Object? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Upload a file into a share from another server that allows changes',
+      operationId: 'uploadFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Copy inside a share from another server
+  ///@param shareID
+  Future<chopper.Response> copyFederatedShareFile({required int? shareID, required CopyRequest? body}) {
+    return _copyFederatedShareFile(shareID: shareID, body: body);
+  }
+
+  ///Copy inside a share from another server
+  ///@param shareID
+  @POST(path: '/api/v1/federation/shares/incoming/{shareID}/copy', optionalBody: true)
+  Future<chopper.Response> _copyFederatedShareFile({
+    @Path('shareID') required int? shareID,
+    @Body() required CopyRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Copy inside a share from another server',
+      operationId: 'copyFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Delete inside a share from another server
+  ///@param shareID
+  ///@param path
+  Future<chopper.Response> deleteFederatedShareFile({required int? shareID, String? path}) {
+    return _deleteFederatedShareFile(shareID: shareID, path: path);
+  }
+
+  ///Delete inside a share from another server
+  ///@param shareID
+  ///@param path
+  @DELETE(path: '/api/v1/federation/shares/incoming/{shareID}/files')
+  Future<chopper.Response> _deleteFederatedShareFile({
+    @Path('shareID') required int? shareID,
+    @Query('path') String? path,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete inside a share from another server',
+      operationId: 'deleteFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///List a folder inside a share from another server
+  ///@param shareID
+  ///@param path Path inside the share; / or empty is the shared item itself
+  Future<chopper.Response<RemoteListResponse>> listFederatedShareFiles({required int? shareID, String? path}) {
+    generatedMapping.putIfAbsent(RemoteListResponse, () => RemoteListResponse.fromJsonFactory);
+
+    return _listFederatedShareFiles(shareID: shareID, path: path);
+  }
+
+  ///List a folder inside a share from another server
+  ///@param shareID
+  ///@param path Path inside the share; / or empty is the shared item itself
+  @GET(path: '/api/v1/federation/shares/incoming/{shareID}/list')
+  Future<chopper.Response<RemoteListResponse>> _listFederatedShareFiles({
+    @Path('shareID') required int? shareID,
+    @Query('path') String? path,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List a folder inside a share from another server',
+      operationId: 'listFederatedShareFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Create a folder inside a share from another server
+  ///@param shareID
+  Future<chopper.Response> makeFederatedShareDirectory({required int? shareID, required PathRequest? body}) {
+    return _makeFederatedShareDirectory(shareID: shareID, body: body);
+  }
+
+  ///Create a folder inside a share from another server
+  ///@param shareID
+  @POST(path: '/api/v1/federation/shares/incoming/{shareID}/mkdir', optionalBody: true)
+  Future<chopper.Response> _makeFederatedShareDirectory({
+    @Path('shareID') required int? shareID,
+    @Body() required PathRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a folder inside a share from another server',
+      operationId: 'makeFederatedShareDirectory',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Move or rename inside a share from another server
+  ///@param shareID
+  Future<chopper.Response> moveFederatedShareFile({required int? shareID, required CopyRequest? body}) {
+    return _moveFederatedShareFile(shareID: shareID, body: body);
+  }
+
+  ///Move or rename inside a share from another server
+  ///@param shareID
+  @POST(path: '/api/v1/federation/shares/incoming/{shareID}/move', optionalBody: true)
+  Future<chopper.Response> _moveFederatedShareFile({
+    @Path('shareID') required int? shareID,
+    @Body() required CopyRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Move or rename inside a share from another server',
+      operationId: 'moveFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///What the logged-in user shares with people on other servers
+  ///@param fileId Only shares of this file or folder; 0 for all
+  Future<chopper.Response<List<OutgoingShare>>> listOutgoingFederatedShares({int? fileId}) {
+    generatedMapping.putIfAbsent(OutgoingShare, () => OutgoingShare.fromJsonFactory);
+
+    return _listOutgoingFederatedShares(fileId: fileId);
+  }
+
+  ///What the logged-in user shares with people on other servers
+  ///@param fileId Only shares of this file or folder; 0 for all
+  @GET(path: '/api/v1/federation/shares/outgoing')
+  Future<chopper.Response<List<OutgoingShare>>> _listOutgoingFederatedShares({
+    @Query('fileId') int? fileId,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What the logged-in user shares with people on other servers',
+      operationId: 'listOutgoingFederatedShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Share a file or folder with someone on a trusted server
+  Future<chopper.Response<OutgoingShare>> createFederatedShare({required NewOutgoingShare? body}) {
+    generatedMapping.putIfAbsent(OutgoingShare, () => OutgoingShare.fromJsonFactory);
+
+    return _createFederatedShare(body: body);
+  }
+
+  ///Share a file or folder with someone on a trusted server
+  @POST(path: '/api/v1/federation/shares/outgoing', optionalBody: true)
+  Future<chopper.Response<OutgoingShare>> _createFederatedShare({
+    @Body() required NewOutgoingShare? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Share a file or folder with someone on a trusted server',
+      operationId: 'createFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Stop sharing with a federated recipient; their access ends at once
+  ///@param shareID
+  Future<chopper.Response> deleteFederatedShare({required int? shareID}) {
+    return _deleteFederatedShare(shareID: shareID);
+  }
+
+  ///Stop sharing with a federated recipient; their access ends at once
+  ///@param shareID
+  @DELETE(path: '/api/v1/federation/shares/outgoing/{shareID}')
+  Future<chopper.Response> _deleteFederatedShare({
+    @Path('shareID') required int? shareID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop sharing with a federated recipient; their access ends at once',
+      operationId: 'deleteFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change what a federated recipient may do
+  ///@param shareID
+  Future<chopper.Response<OutgoingShare>> updateFederatedShare({
+    required int? shareID,
+    required OutgoingShareChanges? body,
+  }) {
+    generatedMapping.putIfAbsent(OutgoingShare, () => OutgoingShare.fromJsonFactory);
+
+    return _updateFederatedShare(shareID: shareID, body: body);
+  }
+
+  ///Change what a federated recipient may do
+  ///@param shareID
+  @PATCH(path: '/api/v1/federation/shares/outgoing/{shareID}', optionalBody: true)
+  Future<chopper.Response<OutgoingShare>> _updateFederatedShare({
+    @Path('shareID') required int? shareID,
+    @Body() required OutgoingShareChanges? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change what a federated recipient may do',
+      operationId: 'updateFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  });
+
+  ///Whether federated sharing is available, and the logged-in user's cloud ID
+  Future<chopper.Response<FederationStatus>> getFederationStatus() {
+    generatedMapping.putIfAbsent(FederationStatus, () => FederationStatus.fromJsonFactory);
+
+    return _getFederationStatus();
+  }
+
+  ///Whether federated sharing is available, and the logged-in user's cloud ID
+  @GET(path: '/api/v1/federation/status')
+  Future<chopper.Response<FederationStatus>> _getFederationStatus({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether federated sharing is available, and the logged-in user\'s cloud ID',
+      operationId: 'getFederationStatus',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
       deprecated: false,
     ),
   });
@@ -1055,10 +1753,7 @@ abstract class Polder extends ChopperService {
   ///What a file links to and which files link to it
   ///@param id The file's id
   Future<chopper.Response<LinksResponse>> listFileLinks({int? id}) {
-    generatedMapping.putIfAbsent(
-      LinksResponse,
-      () => LinksResponse.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(LinksResponse, () => LinksResponse.fromJsonFactory);
 
     return _listFileLinks(id: id);
   }
@@ -1084,10 +1779,7 @@ abstract class Polder extends ChopperService {
   ///List a directory
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<ListResponse>> listFiles({String? path}) {
-    generatedMapping.putIfAbsent(
-      ListResponse,
-      () => ListResponse.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(ListResponse, () => ListResponse.fromJsonFactory);
 
     return _listFiles(path: path);
   }
@@ -1161,10 +1853,7 @@ abstract class Polder extends ChopperService {
   ///Get a JPEG thumbnail of an image, video or document
   ///@param path
   ///@param size Thumbnail width and height in pixels
-  Future<chopper.Response<Stream<List<int>>>> previewFile({
-    String? path,
-    enums.ApiV1FilesPreviewGetSize? size,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> previewFile({String? path, enums.ApiV1FilesPreviewGetSize? size}) {
     return _previewFile(path: path, size: size?.value?.toString());
   }
 
@@ -1189,13 +1878,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Look files up by id, wherever they are now
-  Future<chopper.Response<ResolveResponse>> resolveFiles({
-    required ResolveRequest? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      ResolveResponse,
-      () => ResolveResponse.fromJsonFactory,
-    );
+  Future<chopper.Response<ResolveResponse>> resolveFiles({required ResolveRequest? body}) {
+    generatedMapping.putIfAbsent(ResolveResponse, () => ResolveResponse.fromJsonFactory);
 
     return _resolveFiles(body: body);
   }
@@ -1246,10 +1930,7 @@ abstract class Polder extends ChopperService {
   ///List a file's earlier versions, newest first
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<VersionListing>> listFileVersions({String? path}) {
-    generatedMapping.putIfAbsent(
-      VersionListing,
-      () => VersionListing.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(VersionListing, () => VersionListing.fromJsonFactory);
 
     return _listFileVersions(path: path);
   }
@@ -1298,9 +1979,7 @@ abstract class Polder extends ChopperService {
 
   ///Download an earlier version of a file
   ///@param versionID
-  Future<chopper.Response<Stream<List<int>>>> downloadFileVersion({
-    required int? versionID,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadFileVersion({required int? versionID}) {
     return _downloadFileVersion(versionID: versionID);
   }
 
@@ -1329,10 +2008,7 @@ abstract class Polder extends ChopperService {
     required int? versionID,
     enums.ApiV1FilesVersionsVersionIDPreviewGetSize? size,
   }) {
-    return _previewFileVersion(
-      versionID: versionID,
-      size: size?.value?.toString(),
-    );
+    return _previewFileVersion(versionID: versionID, size: size?.value?.toString());
   }
 
   ///Get a JPEG thumbnail of an earlier version
@@ -1357,10 +2033,7 @@ abstract class Polder extends ChopperService {
 
   ///Make an earlier version the current file; the current content is kept as a version
   ///@param versionID
-  Future<chopper.Response<Entry>> restoreFileVersion({
-    required int? versionID,
-    required VersionRestoreRequest? body,
-  }) {
+  Future<chopper.Response<Entry>> restoreFileVersion({required int? versionID, required VersionRestoreRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _restoreFileVersion(versionID: versionID, body: body);
@@ -1387,9 +2060,7 @@ abstract class Polder extends ChopperService {
 
   ///Groups the logged-in user is in or created, or every group for administrators
   ///@param scope mine: groups the logged-in user is in or created; all: every group, for administrators
-  Future<chopper.Response<List<Group>>> listGroups({
-    enums.ApiV1GroupsGetScope? scope,
-  }) {
+  Future<chopper.Response<List<Group>>> listGroups({enums.ApiV1GroupsGetScope? scope}) {
     generatedMapping.putIfAbsent(Group, () => Group.fromJsonFactory);
 
     return _listGroups(scope: scope?.value?.toString());
@@ -1414,9 +2085,7 @@ abstract class Polder extends ChopperService {
   });
 
   ///Create a group; the creator becomes its admin
-  Future<chopper.Response<Group>> createGroup({
-    required GroupNameRequest? body,
-  }) {
+  Future<chopper.Response<Group>> createGroup({required GroupNameRequest? body}) {
     generatedMapping.putIfAbsent(Group, () => Group.fromJsonFactory);
 
     return _createGroup(body: body);
@@ -1466,10 +2135,7 @@ abstract class Polder extends ChopperService {
   ///A group and its members
   ///@param groupID
   Future<chopper.Response<GroupDetails>> getGroup({required int? groupID}) {
-    generatedMapping.putIfAbsent(
-      GroupDetails,
-      () => GroupDetails.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(GroupDetails, () => GroupDetails.fromJsonFactory);
 
     return _getGroup(groupID: groupID);
   }
@@ -1494,10 +2160,7 @@ abstract class Polder extends ChopperService {
 
   ///Rename a group; group admins only
   ///@param groupID
-  Future<chopper.Response<Group>> renameGroup({
-    required int? groupID,
-    required GroupNameRequest? body,
-  }) {
+  Future<chopper.Response<Group>> renameGroup({required int? groupID, required GroupNameRequest? body}) {
     generatedMapping.putIfAbsent(Group, () => Group.fromJsonFactory);
 
     return _renameGroup(groupID: groupID, body: body);
@@ -1524,14 +2187,8 @@ abstract class Polder extends ChopperService {
 
   ///Add someone to a group; group admins only
   ///@param groupID
-  Future<chopper.Response<GroupDetails>> addGroupMember({
-    required int? groupID,
-    required NewMember? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      GroupDetails,
-      () => GroupDetails.fromJsonFactory,
-    );
+  Future<chopper.Response<GroupDetails>> addGroupMember({required int? groupID, required NewMember? body}) {
+    generatedMapping.putIfAbsent(GroupDetails, () => GroupDetails.fromJsonFactory);
 
     return _addGroupMember(groupID: groupID, body: body);
   }
@@ -1558,10 +2215,7 @@ abstract class Polder extends ChopperService {
   ///Remove someone from a group, or leave it yourself
   ///@param groupID
   ///@param userID
-  Future<chopper.Response> removeGroupMember({
-    required int? groupID,
-    required int? userID,
-  }) {
+  Future<chopper.Response> removeGroupMember({required int? groupID, required int? userID}) {
     return _removeGroupMember(groupID: groupID, userID: userID);
   }
 
@@ -1593,10 +2247,7 @@ abstract class Polder extends ChopperService {
     required int? userID,
     required RoleChange? body,
   }) {
-    generatedMapping.putIfAbsent(
-      GroupDetails,
-      () => GroupDetails.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(GroupDetails, () => GroupDetails.fromJsonFactory);
 
     return _setGroupMemberRole(groupID: groupID, userID: userID, body: body);
   }
@@ -1624,9 +2275,7 @@ abstract class Polder extends ChopperService {
 
   ///What is shared with a group
   ///@param groupID
-  Future<chopper.Response<List<Share>>> listGroupShares({
-    required int? groupID,
-  }) {
+  Future<chopper.Response<List<Share>>> listGroupShares({required int? groupID}) {
     generatedMapping.putIfAbsent(Share, () => Share.fromJsonFactory);
 
     return _listGroupShares(groupID: groupID);
@@ -1677,9 +2326,7 @@ abstract class Polder extends ChopperService {
   });
 
   ///Create a share link to a file or folder
-  Future<chopper.Response<ShareLink>> createShareLink({
-    required NewShareLink? body,
-  }) {
+  Future<chopper.Response<ShareLink>> createShareLink({required NewShareLink? body}) {
     generatedMapping.putIfAbsent(ShareLink, () => ShareLink.fromJsonFactory);
 
     return _createShareLink(body: body);
@@ -1754,10 +2401,7 @@ abstract class Polder extends ChopperService {
 
   ///Change a share link's access, password or expiry
   ///@param linkID
-  Future<chopper.Response<ShareLink>> updateShareLink({
-    required int? linkID,
-    required LinkChanges? body,
-  }) {
+  Future<chopper.Response<ShareLink>> updateShareLink({required int? linkID, required LinkChanges? body}) {
     generatedMapping.putIfAbsent(ShareLink, () => ShareLink.fromJsonFactory);
 
     return _updateShareLink(linkID: linkID, body: body);
@@ -1785,10 +2429,7 @@ abstract class Polder extends ChopperService {
   ///List the folders and notes in a folder
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<NotesListing>> listNotes({String? path}) {
-    generatedMapping.putIfAbsent(
-      NotesListing,
-      () => NotesListing.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(NotesListing, () => NotesListing.fromJsonFactory);
 
     return _listNotes(path: path);
   }
@@ -1813,10 +2454,7 @@ abstract class Polder extends ChopperService {
 
   ///Which folder holds the user's notes
   Future<chopper.Response<NotesSettings>> getNotesSettings() {
-    generatedMapping.putIfAbsent(
-      NotesSettings,
-      () => NotesSettings.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(NotesSettings, () => NotesSettings.fromJsonFactory);
 
     return _getNotesSettings();
   }
@@ -1838,13 +2476,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Choose the folder that holds the user's notes; it must already exist
-  Future<chopper.Response<NotesSettings>> setNotesSettings({
-    required NotesSettings? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      NotesSettings,
-      () => NotesSettings.fromJsonFactory,
-    );
+  Future<chopper.Response<NotesSettings>> setNotesSettings({required NotesSettings? body}) {
+    generatedMapping.putIfAbsent(NotesSettings, () => NotesSettings.fromJsonFactory);
 
     return _setNotesSettings(body: body);
   }
@@ -1868,10 +2501,7 @@ abstract class Polder extends ChopperService {
 
   ///Which files the document editor can open
   Future<chopper.Response<EditorCapabilities>> getOfficeCapabilities() {
-    generatedMapping.putIfAbsent(
-      EditorCapabilities,
-      () => EditorCapabilities.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(EditorCapabilities, () => EditorCapabilities.fromJsonFactory);
 
     return _getOfficeCapabilities();
   }
@@ -1893,13 +2523,8 @@ abstract class Polder extends ChopperService {
   });
 
   ///Let the document editor open a file
-  Future<chopper.Response<EditorSession>> startOfficeSession({
-    required OfficeSessionRequest? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      EditorSession,
-      () => EditorSession.fromJsonFactory,
-    );
+  Future<chopper.Response<EditorSession>> startOfficeSession({required OfficeSessionRequest? body}) {
+    generatedMapping.putIfAbsent(EditorSession, () => EditorSession.fromJsonFactory);
 
     return _startOfficeSession(body: body);
   }
@@ -2107,17 +2732,9 @@ abstract class Polder extends ChopperService {
     String? token,
     String? xPolderShareToken,
   }) {
-    generatedMapping.putIfAbsent(
-      ListResponse,
-      () => ListResponse.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(ListResponse, () => ListResponse.fromJsonFactory);
 
-    return _listPublicLinkFiles(
-      code: code,
-      path: path,
-      token: token,
-      xPolderShareToken: xPolderShareToken?.toString(),
-    );
+    return _listPublicLinkFiles(code: code, path: path, token: token, xPolderShareToken: xPolderShareToken?.toString());
   }
 
   ///List a folder inside a share link
@@ -2194,10 +2811,7 @@ abstract class Polder extends ChopperService {
 
   ///Enter a share link's password, or open a link without one, to get a token for its contents
   ///@param code
-  Future<chopper.Response<LinkUnlock>> unlockPublicLink({
-    required String? code,
-    required UnlockRequest? body,
-  }) {
+  Future<chopper.Response<LinkUnlock>> unlockPublicLink({required String? code, required UnlockRequest? body}) {
     generatedMapping.putIfAbsent(LinkUnlock, () => LinkUnlock.fromJsonFactory);
 
     return _unlockPublicLink(code: code, body: body);
@@ -2226,11 +2840,7 @@ abstract class Polder extends ChopperService {
   ///@param q What to look for; see the operation description for tags
   ///@param limit
   ///@param offset
-  Future<chopper.Response<Results>> searchFiles({
-    String? q,
-    int? limit,
-    int? offset,
-  }) {
+  Future<chopper.Response<Results>> searchFiles({String? q, int? limit, int? offset}) {
     generatedMapping.putIfAbsent(Results, () => Results.fromJsonFactory);
 
     return _searchFiles(q: q, limit: limit, offset: offset);
@@ -2269,14 +2879,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///Complete the search tag under the cursor
   ///@param q
   ///@param cursor Caret position in the query, in UTF-16 code units
-  Future<chopper.Response<Suggestions>> suggestSearch({
-    String? q,
-    int? cursor,
-  }) {
-    generatedMapping.putIfAbsent(
-      Suggestions,
-      () => Suggestions.fromJsonFactory,
-    );
+  Future<chopper.Response<Suggestions>> suggestSearch({String? q, int? cursor}) {
+    generatedMapping.putIfAbsent(Suggestions, () => Suggestions.fromJsonFactory);
 
     return _suggestSearch(q: q, cursor: cursor);
   }
@@ -2326,10 +2930,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Whether the server still needs its first account
   Future<chopper.Response<SetupStatus>> getSetupStatus() {
-    generatedMapping.putIfAbsent(
-      SetupStatus,
-      () => SetupStatus.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(SetupStatus, () => SetupStatus.fromJsonFactory);
 
     return _getSetupStatus();
   }
@@ -2351,9 +2952,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Create the first administrator account
-  Future<chopper.Response<TokenPair>> setup({
-    required CredentialsRequest? body,
-  }) {
+  Future<chopper.Response<TokenPair>> setup({required CredentialsRequest? body}) {
     generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
 
     return _setup(body: body);
@@ -2402,10 +3001,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///What others share with the logged-in user, directly or through a group
   Future<chopper.Response<List<IncomingShare>>> listIncomingShares() {
-    generatedMapping.putIfAbsent(
-      IncomingShare,
-      () => IncomingShare.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(IncomingShare, () => IncomingShare.fromJsonFactory);
 
     return _listIncomingShares();
   }
@@ -2478,10 +3074,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Change what a share's recipients may do
   ///@param shareID
-  Future<chopper.Response<Share>> updateShare({
-    required int? shareID,
-    required ShareChanges? body,
-  }) {
+  Future<chopper.Response<Share>> updateShare({required int? shareID, required ShareChanges? body}) {
     generatedMapping.putIfAbsent(Share, () => Share.fromJsonFactory);
 
     return _updateShare(shareID: shareID, body: body);
@@ -2509,10 +3102,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///Download a folder inside a share as a zip
   ///@param shareID
   ///@param path Path inside the share; / or empty is the shared item itself
-  Future<chopper.Response<Stream<List<int>>>> downloadShareArchive({
-    required int? shareID,
-    String? path,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadShareArchive({required int? shareID, String? path}) {
     return _downloadShareArchive(shareID: shareID, path: path);
   }
 
@@ -2547,12 +3137,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     String? range,
     bool? download,
   }) {
-    return _downloadShareFile(
-      shareID: shareID,
-      path: path,
-      range: range?.toString(),
-      download: download,
-    );
+    return _downloadShareFile(shareID: shareID, path: path, range: range?.toString(), download: download);
   }
 
   ///Download a file inside a share; supports Range
@@ -2634,10 +3219,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Copy inside a share that allows changes
   ///@param shareID
-  Future<chopper.Response<Entry>> copyShareFile({
-    required int? shareID,
-    required CopyRequest? body,
-  }) {
+  Future<chopper.Response<Entry>> copyShareFile({required int? shareID, required CopyRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _copyShareFile(shareID: shareID, body: body);
@@ -2666,11 +3248,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///@param shareID
   ///@param path
   ///@param baseRev Revision the client last saw; -1 deletes whatever is there
-  Future<chopper.Response> deleteShareFile({
-    required int? shareID,
-    String? path,
-    int? baseRev,
-  }) {
+  Future<chopper.Response> deleteShareFile({required int? shareID, String? path, int? baseRev}) {
     return _deleteShareFile(shareID: shareID, path: path, baseRev: baseRev);
   }
 
@@ -2699,14 +3277,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///List a folder inside a share
   ///@param shareID
   ///@param path Path inside the share; / or empty is the shared item itself
-  Future<chopper.Response<ListResponse>> listShareFiles({
-    required int? shareID,
-    String? path,
-  }) {
-    generatedMapping.putIfAbsent(
-      ListResponse,
-      () => ListResponse.fromJsonFactory,
-    );
+  Future<chopper.Response<ListResponse>> listShareFiles({required int? shareID, String? path}) {
+    generatedMapping.putIfAbsent(ListResponse, () => ListResponse.fromJsonFactory);
 
     return _listShareFiles(shareID: shareID, path: path);
   }
@@ -2733,10 +3305,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Create a folder inside a share that allows changes
   ///@param shareID
-  Future<chopper.Response<Entry>> makeShareDirectory({
-    required int? shareID,
-    required PathRequest? body,
-  }) {
+  Future<chopper.Response<Entry>> makeShareDirectory({required int? shareID, required PathRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _makeShareDirectory(shareID: shareID, body: body);
@@ -2763,10 +3332,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Move or rename inside a share that allows changes
   ///@param shareID
-  Future<chopper.Response<Entry>> moveShareFile({
-    required int? shareID,
-    required MoveRequest? body,
-  }) {
+  Future<chopper.Response<Entry>> moveShareFile({required int? shareID, required MoveRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _moveShareFile(shareID: shareID, body: body);
@@ -2800,11 +3366,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     String? path,
     enums.ApiV1SharesShareIDPreviewGetSize? size,
   }) {
-    return _previewShareFile(
-      shareID: shareID,
-      path: path,
-      size: size?.value?.toString(),
-    );
+    return _previewShareFile(shareID: shareID, path: path, size: size?.value?.toString());
   }
 
   ///Get a JPEG thumbnail of a file inside a share
@@ -2832,10 +3394,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///Get one file or folder inside a share
   ///@param shareID
   ///@param path Path inside the share; / or empty is the shared item itself
-  Future<chopper.Response<Entry>> statShareFile({
-    required int? shareID,
-    String? path,
-  }) {
+  Future<chopper.Response<Entry>> statShareFile({required int? shareID, String? path}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _statShareFile(shareID: shareID, path: path);
@@ -2862,13 +3421,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Start uploading a batch of files; returns the chunks the server is missing
-  Future<chopper.Response<BatchStatus>> createUploadBatch({
-    required BatchRequest? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      BatchStatus,
-      () => BatchStatus.fromJsonFactory,
-    );
+  Future<chopper.Response<BatchStatus>> createUploadBatch({required BatchRequest? body}) {
+    generatedMapping.putIfAbsent(BatchStatus, () => BatchStatus.fromJsonFactory);
 
     return _createUploadBatch(body: body);
   }
@@ -2916,13 +3470,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Get the chunks a batch is still missing and the files that are done
   ///@param batchID
-  Future<chopper.Response<BatchStatus>> getUploadBatch({
-    required String? batchID,
-  }) {
-    generatedMapping.putIfAbsent(
-      BatchStatus,
-      () => BatchStatus.fromJsonFactory,
-    );
+  Future<chopper.Response<BatchStatus>> getUploadBatch({required String? batchID}) {
+    generatedMapping.putIfAbsent(BatchStatus, () => BatchStatus.fromJsonFactory);
 
     return _getUploadBatch(batchID: batchID);
   }
@@ -2935,8 +3484,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary:
-          'Get the chunks a batch is still missing and the files that are done',
+      summary: 'Get the chunks a batch is still missing and the files that are done',
       operationId: 'getUploadBatch',
       consumes: [],
       produces: [],
@@ -2948,14 +3496,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Send the missing chunks back to back as one body; each file is stored once it is complete
   ///@param batchID
-  Future<chopper.Response<BatchStatus>> streamUploadBatch({
-    required String? batchID,
-    required Object? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      BatchStatus,
-      () => BatchStatus.fromJsonFactory,
-    );
+  Future<chopper.Response<BatchStatus>> streamUploadBatch({required String? batchID, required Object? body}) {
+    generatedMapping.putIfAbsent(BatchStatus, () => BatchStatus.fromJsonFactory);
 
     return _streamUploadBatch(batchID: batchID, body: body);
   }
@@ -3009,9 +3551,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Send several files in one response: per file a JSON header line, then exactly size bytes of content
-  Future<chopper.Response<Stream<List<int>>>> downloadSyncFiles({
-    required DownloadRequest? body,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadSyncFiles({required DownloadRequest? body}) {
     return _downloadSyncFiles(body: body);
   }
 
@@ -3081,10 +3621,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///List deleted items, most recent first
   Future<chopper.Response<TrashListing>> listTrash() {
-    generatedMapping.putIfAbsent(
-      TrashListing,
-      () => TrashListing.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(TrashListing, () => TrashListing.fromJsonFactory);
 
     return _listTrash();
   }
@@ -3107,10 +3644,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///How long deleted items stay in the trash
   Future<chopper.Response<TrashRetention>> getTrashRetention() {
-    generatedMapping.putIfAbsent(
-      TrashRetention,
-      () => TrashRetention.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(TrashRetention, () => TrashRetention.fromJsonFactory);
 
     return _getTrashRetention();
   }
@@ -3132,13 +3666,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Choose how long deleted items stay in the trash
-  Future<chopper.Response<TrashRetention>> setTrashRetention({
-    required TrashPreferences? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      TrashRetention,
-      () => TrashRetention.fromJsonFactory,
-    );
+  Future<chopper.Response<TrashRetention>> setTrashRetention({required TrashPreferences? body}) {
+    generatedMapping.putIfAbsent(TrashRetention, () => TrashRetention.fromJsonFactory);
 
     return _setTrashRetention(body: body);
   }
@@ -3186,9 +3715,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Download a deleted item without restoring it; a directory comes as a zip
   ///@param itemID
-  Future<chopper.Response<Stream<List<int>>>> downloadTrashItem({
-    required int? itemID,
-  }) {
+  Future<chopper.Response<Stream<List<int>>>> downloadTrashItem({required int? itemID}) {
     return _downloadTrashItem(itemID: itemID);
   }
 
@@ -3242,10 +3769,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Put a deleted item back where it was
   ///@param itemID
-  Future<chopper.Response<Entry>> restoreTrashItem({
-    required int? itemID,
-    required RestoreRequest? body,
-  }) {
+  Future<chopper.Response<Entry>> restoreTrashItem({required int? itemID, required RestoreRequest? body}) {
     generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
 
     return _restoreTrashItem(itemID: itemID, body: body);
@@ -3273,10 +3797,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   ///A user's icon
   ///@param userID
   ///@param imageID
-  Future<chopper.Response<String>> getUserAvatar({
-    required int? userID,
-    required String? imageID,
-  }) {
+  Future<chopper.Response<String>> getUserAvatar({required int? userID, required String? imageID}) {
     return _getUserAvatar(userID: userID, imageID: imageID);
   }
 
@@ -3302,10 +3823,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///How long earlier versions of files are kept
   Future<chopper.Response<VersionRetention>> getVersionSettings() {
-    generatedMapping.putIfAbsent(
-      VersionRetention,
-      () => VersionRetention.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(VersionRetention, () => VersionRetention.fromJsonFactory);
 
     return _getVersionSettings();
   }
@@ -3327,13 +3845,8 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   });
 
   ///Choose how long earlier versions of files are kept, within the server's limits
-  Future<chopper.Response<VersionRetention>> setVersionSettings({
-    required VersionPreferences? body,
-  }) {
-    generatedMapping.putIfAbsent(
-      VersionRetention,
-      () => VersionRetention.fromJsonFactory,
-    );
+  Future<chopper.Response<VersionRetention>> setVersionSettings({required VersionPreferences? body}) {
+    generatedMapping.putIfAbsent(VersionRetention, () => VersionRetention.fromJsonFactory);
 
     return _setVersionSettings(body: body);
   }
@@ -3357,10 +3870,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
 
   ///Health check
   Future<chopper.Response<HealthStatus>> health() {
-    generatedMapping.putIfAbsent(
-      HealthStatus,
-      () => HealthStatus.fromJsonFactory,
-    );
+    generatedMapping.putIfAbsent(HealthStatus, () => HealthStatus.fromJsonFactory);
 
     return _health();
   }
@@ -3422,15 +3932,12 @@ class $CustomJsonDecoder {
     return jsonFactory(values);
   }
 
-  List<T> _decodeList<T>(Iterable values) =>
-      values.where((v) => v != null).map<T>((v) => decode<T>(v) as T).toList();
+  List<T> _decodeList<T>(Iterable values) => values.where((v) => v != null).map<T>((v) => decode<T>(v) as T).toList();
 }
 
 class $JsonSerializableConverter extends chopper.JsonConverter {
   @override
-  FutureOr<chopper.Response<ResultType>> convertResponse<ResultType, Item>(
-    chopper.Response response,
-  ) async {
+  FutureOr<chopper.Response<ResultType>> convertResponse<ResultType, Item>(chopper.Response response) async {
     if (response.bodyString.isEmpty) {
       // In rare cases, when let's say 204 (no content) is returned -
       // we cannot decode the missing json with the result type specified
@@ -3442,17 +3949,11 @@ class $JsonSerializableConverter extends chopper.JsonConverter {
     }
 
     if (ResultType == DateTime) {
-      return response.copyWith(
-        body: DateTime.parse(
-          (response.body as String).replaceAll('"', ''),
-        ) as ResultType,
-      );
+      return response.copyWith(body: DateTime.parse((response.body as String).replaceAll('"', '')) as ResultType);
     }
 
     final jsonRes = await super.convertResponse(response);
-    return jsonRes.copyWith<ResultType>(
-      body: $jsonDecoder.decode<Item>(jsonRes.body) as ResultType,
-    );
+    return jsonRes.copyWith<ResultType>(body: $jsonDecoder.decode<Item>(jsonRes.body) as ResultType);
   }
 }
 

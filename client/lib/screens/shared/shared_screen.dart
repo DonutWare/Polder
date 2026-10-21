@@ -4,12 +4,17 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
+import "package:polder/models/federation.dart";
 import "package:polder/models/sharing.dart";
+import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/screens/shared/shared_browser_screen.dart";
+import "package:polder/screens/shared/widgets/federation_invite_dialogs.dart";
 import "package:polder/screens/shared/widgets/incoming_share_details_sheet.dart";
+import "package:polder/util/action_feedback.dart";
+import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/layout/adaptive.dart";
@@ -17,6 +22,7 @@ import "package:polder/widgets/layout/app_page.dart";
 import "package:polder/widgets/layout/split_view.dart";
 import "package:polder/widgets/navigation/navigation_shell.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/widgets/shared/refreshable_empty_view.dart";
 import "package:polder/widgets/sharing/share_labels.dart";
@@ -45,6 +51,12 @@ class SharedScreen extends ConsumerWidget {
         pane: _SectionList(selected: shown),
         placeholder: MessageView(icon: IconsaxPlusLinear.share, message: localized.nothingSelected),
         content: switch ((shown, shareId)) {
+          (SharedSection.federated, final int shareId) => FederatedBrowserScreen(
+            key: ValueKey("federated-$shareId"),
+            shareId: shareId,
+            path: path,
+            parentRoute: parent!,
+          ),
           (_, final int shareId) => SharedBrowserScreen(
             key: ValueKey("share-$shareId"),
             shareId: shareId,
@@ -54,6 +66,7 @@ class SharedScreen extends ConsumerWidget {
           (SharedSection.withMe, _) => const _IncomingPage(key: ValueKey(SharedSection.withMe)),
           (SharedSection.byMe, _) => const _OutgoingPage(key: ValueKey(SharedSection.byMe)),
           (SharedSection.links, _) => const _LinksPage(key: ValueKey(SharedSection.links)),
+          (SharedSection.federated, _) => const _FederatedPage(key: ValueKey(SharedSection.federated)),
           (null, _) => null,
         },
       ),
@@ -62,9 +75,14 @@ class SharedScreen extends ConsumerWidget {
 
   String? _parentRoute(BuildContext context) {
     if (shareId case final shareId?) {
-      return path == RemotePath.root
-          ? AppRoutes.sharedSection(SharedSection.withMe.segment)
-          : AppRoutes.sharedAt(shareId, path: RemotePath.parent(path));
+      final federated = section == SharedSection.federated;
+      if (path == RemotePath.root) {
+        return AppRoutes.sharedSection((federated ? SharedSection.federated : SharedSection.withMe).segment);
+      }
+      final parentPath = RemotePath.parent(path);
+      return federated
+          ? AppRoutes.federatedAt(shareId, path: parentPath)
+          : AppRoutes.sharedAt(shareId, path: parentPath);
     }
     if (section != null && WindowSize.isCompact(context)) return AppRoutes.shared;
     return null;
@@ -82,6 +100,8 @@ class _SectionList extends ConsumerWidget {
     final incoming = ref.watch(incomingSharesProvider).value?.length;
     final outgoing = ref.watch(outgoingSharesProvider(null)).value?.map((share) => share.file.id).toSet().length;
     final links = ref.watch(shareLinksProvider(null)).value?.length;
+    final federation = ref.watch(federationStatusProvider).value?.enabled ?? false;
+    final federated = federation ? ref.watch(incomingFederatedSharesProvider).value : null;
     Widget item(SharedSection section, IconData icon, String label, int? count) => SidebarItem(
       icon: icon,
       label: label,
@@ -95,23 +115,38 @@ class _SectionList extends ConsumerWidget {
         item(SharedSection.withMe, IconsaxPlusLinear.import_1, localized.sharedWithMe, incoming),
         item(SharedSection.byMe, IconsaxPlusLinear.export_1, localized.sharedByMe, outgoing),
         item(SharedSection.links, IconsaxPlusLinear.link_21, localized.shareLinks, links),
+        if (federation)
+          item(
+            SharedSection.federated,
+            IconsaxPlusLinear.global,
+            localized.sharedFromOtherServers,
+            federated?.where((share) => share.isPending).length,
+          ),
       ],
     );
   }
 }
 
 class _SectionPage extends StatelessWidget {
-  const _SectionPage({required this.title, required this.onRefresh, required this.empty, required this.children});
+  const _SectionPage({
+    required this.title,
+    required this.onRefresh,
+    required this.empty,
+    required this.children,
+    this.actions = const [],
+  });
 
   final String title;
   final Future<void> Function() onRefresh;
   final Widget empty;
   final List<Widget> children;
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) => AppPage(
     leading: SplitView.backTo(context, AppRoutes.shared),
     title: Text(title),
+    actions: actions,
     body: ReadableWidth(
       maxWidth: 840,
       builder: (context, inset) => RefreshIndicator(
@@ -231,4 +266,176 @@ class _LinksPage extends ConsumerWidget {
       children: [for (final link in links) ShareLinkTile(link: link, showFileName: true)],
     ),
   );
+}
+
+class _FederatedPage extends ConsumerWidget {
+  const _FederatedPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    final contacts = ref.watch(federationContactsProvider).value ?? const <FederationContact>[];
+    final invites = ref.watch(federationInvitesProvider).value ?? const <FederationInvite>[];
+    return AsyncValueView<List<IncomingFederatedShare>>(
+      value: ref.watch(incomingFederatedSharesProvider),
+      onRetry: () => ref.invalidate(incomingFederatedSharesProvider),
+      data: (shares) => _SectionPage(
+        title: localized.sharedFromOtherServers,
+        onRefresh: () async {
+          ref.invalidate(federationContactsProvider);
+          ref.invalidate(federationInvitesProvider);
+          await ref.read(incomingFederatedSharesProvider.notifier).refresh();
+        },
+        actions: [
+          IconButton(
+            tooltip: localized.acceptInvite,
+            icon: const Icon(IconsaxPlusLinear.ticket),
+            onPressed: () => showAcceptInvite(context),
+          ),
+          IconButton(
+            tooltip: localized.inviteSomeone,
+            icon: const Icon(IconsaxPlusLinear.user_add),
+            onPressed: () => createAndShowInvite(context, ref),
+          ),
+        ],
+        empty: MessageView(icon: IconsaxPlusLinear.global, message: localized.noFederatedShares),
+        children: [
+          for (final share in shares) _FederatedShareTile(share: share),
+          if (contacts.isNotEmpty) ...[
+            _ListHeader(title: localized.federationContacts),
+            for (final contact in contacts) _ContactTile(contact: contact),
+          ],
+          if (invites.isNotEmpty) ...[
+            _ListHeader(title: localized.openInvites),
+            for (final invite in invites) _InviteTile(invite: invite),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ListHeader extends StatelessWidget {
+  const _ListHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(12, 24, 12, 4),
+    child: Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+  );
+}
+
+class _ContactTile extends ConsumerWidget {
+  const _ContactTile({required this.contact});
+
+  final FederationContact contact;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    return ListTile(
+      contentPadding: const EdgeInsetsDirectional.only(start: 12, end: 4),
+      leading: const CircleAvatar(child: Icon(IconsaxPlusLinear.global)),
+      title: Text(contact.shownName, overflow: TextOverflow.ellipsis),
+      subtitle: Text(contact.cloudId, overflow: TextOverflow.ellipsis),
+      trailing: IconButton(
+        tooltip: localized.remove,
+        icon: const Icon(IconsaxPlusLinear.trash),
+        onPressed: () async {
+          final confirmed = await showConfirmDialog(
+            context,
+            title: localized.removeContactTitle(contact.shownName),
+            message: localized.removeContactMessage,
+            confirmLabel: localized.remove,
+            destructive: true,
+          );
+          if (confirmed && context.mounted) {
+            await context.runWithFeedback(ref.read(federationContactsProvider.notifier).remove(contact));
+          }
+        },
+      ),
+    );
+  }
+}
+
+class _InviteTile extends ConsumerWidget {
+  const _InviteTile({required this.invite});
+
+  final FederationInvite invite;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    return ListTile(
+      contentPadding: const EdgeInsetsDirectional.only(start: 12, end: 4),
+      leading: const CircleAvatar(child: Icon(IconsaxPlusLinear.ticket)),
+      title: Text(localized.openInvite),
+      subtitle: Text(localized.linkExpiresOn(invite.expiresAt.formattedDate(context))),
+      trailing: IconButton(
+        tooltip: localized.revokeAppPassword,
+        icon: const Icon(IconsaxPlusLinear.trash),
+        onPressed: () => context.runWithFeedback(ref.read(federationInvitesProvider.notifier).revoke(invite)),
+      ),
+    );
+  }
+}
+
+class _FederatedShareTile extends ConsumerWidget {
+  const _FederatedShareTile({required this.share});
+
+  final IncomingFederatedShare share;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    final notifier = ref.read(incomingFederatedSharesProvider.notifier);
+    return ListTile(
+      contentPadding: const EdgeInsetsDirectional.only(start: 12, end: 4),
+      leading: FileTypeIcon.of(isDir: share.isDir, mime: "", size: 40),
+      title: Text(share.name, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+        [share.shownOwner, if (share.provider.isNotEmpty) share.provider].join(" · "),
+        overflow: TextOverflow.ellipsis,
+      ),
+      onTap: share.isPending ? null : () => context.go(AppRoutes.federatedAt(share.id)),
+      trailing: share.isPending
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () => _remove(context, notifier, declining: true),
+                  child: Text(localized.decline),
+                ),
+                FilledButton.tonal(
+                  onPressed: () => context.runWithFeedback(notifier.accept(share)),
+                  child: Text(localized.accept),
+                ),
+              ],
+            )
+          : IconButton(
+              tooltip: localized.remove,
+              icon: const Icon(IconsaxPlusLinear.logout),
+              onPressed: () => _remove(context, notifier, declining: false),
+            ),
+    );
+  }
+
+  Future<void> _remove(
+    BuildContext context,
+    IncomingFederatedSharesNotifier notifier, {
+    required bool declining,
+  }) async {
+    final localized = context.localized;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: declining ? localized.declineFederatedTitle(share.name) : localized.removeFederatedTitle(share.name),
+      message: localized.removeFederatedMessage(share.owner),
+      confirmLabel: declining ? localized.decline : localized.remove,
+      destructive: true,
+    );
+    if (!confirmed || !context.mounted) return;
+    await context.runWithFeedback(notifier.remove(share));
+  }
 }

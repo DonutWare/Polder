@@ -56,12 +56,13 @@ extension FileSpacePatterns on FileSpace {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ShareSpace value)?  share,TResult Function( LinkSpace value)?  link,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ShareSpace value)?  share,TResult Function( LinkSpace value)?  link,TResult Function( FederatedSpace value)?  federated,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ShareSpace() when share != null:
 return share(_that);case LinkSpace() when link != null:
-return link(_that);case _:
+return link(_that);case FederatedSpace() when federated != null:
+return federated(_that);case _:
   return orElse();
 
 }
@@ -79,12 +80,13 @@ return link(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ShareSpace value)  share,required TResult Function( LinkSpace value)  link,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ShareSpace value)  share,required TResult Function( LinkSpace value)  link,required TResult Function( FederatedSpace value)  federated,}){
 final _that = this;
 switch (_that) {
 case ShareSpace():
 return share(_that);case LinkSpace():
-return link(_that);}
+return link(_that);case FederatedSpace():
+return federated(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -98,12 +100,13 @@ return link(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ShareSpace value)?  share,TResult? Function( LinkSpace value)?  link,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ShareSpace value)?  share,TResult? Function( LinkSpace value)?  link,TResult? Function( FederatedSpace value)?  federated,}){
 final _that = this;
 switch (_that) {
 case ShareSpace() when share != null:
 return share(_that);case LinkSpace() when link != null:
-return link(_that);case _:
+return link(_that);case FederatedSpace() when federated != null:
+return federated(_that);case _:
   return null;
 
 }
@@ -120,11 +123,12 @@ return link(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int shareId)?  share,TResult Function( String serverUrl,  String code)?  link,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int shareId)?  share,TResult Function( String serverUrl,  String code)?  link,TResult Function( int shareId)?  federated,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ShareSpace() when share != null:
 return share(_that.shareId);case LinkSpace() when link != null:
-return link(_that.serverUrl,_that.code);case _:
+return link(_that.serverUrl,_that.code);case FederatedSpace() when federated != null:
+return federated(_that.shareId);case _:
   return orElse();
 
 }
@@ -142,11 +146,12 @@ return link(_that.serverUrl,_that.code);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int shareId)  share,required TResult Function( String serverUrl,  String code)  link,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int shareId)  share,required TResult Function( String serverUrl,  String code)  link,required TResult Function( int shareId)  federated,}) {final _that = this;
 switch (_that) {
 case ShareSpace():
 return share(_that.shareId);case LinkSpace():
-return link(_that.serverUrl,_that.code);}
+return link(_that.serverUrl,_that.code);case FederatedSpace():
+return federated(_that.shareId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -160,11 +165,12 @@ return link(_that.serverUrl,_that.code);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int shareId)?  share,TResult? Function( String serverUrl,  String code)?  link,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int shareId)?  share,TResult? Function( String serverUrl,  String code)?  link,TResult? Function( int shareId)?  federated,}) {final _that = this;
 switch (_that) {
 case ShareSpace() when share != null:
 return share(_that.shareId);case LinkSpace() when link != null:
-return link(_that.serverUrl,_that.code);case _:
+return link(_that.serverUrl,_that.code);case FederatedSpace() when federated != null:
+return federated(_that.shareId);case _:
   return null;
 
 }
@@ -304,6 +310,74 @@ class _$LinkSpaceCopyWithImpl<$Res>
 serverUrl: null == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class FederatedSpace extends FileSpace {
+  const FederatedSpace({required this.shareId}): super._();
+  
+
+ final  int shareId;
+
+/// Create a copy of FileSpace
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FederatedSpaceCopyWith<FederatedSpace> get copyWith => _$FederatedSpaceCopyWithImpl<FederatedSpace>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is FederatedSpace&&(identical(other.shareId, shareId) || other.shareId == shareId));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,shareId);
+}
+
+@override
+String toString() {
+    return 'FileSpace.federated(shareId: $shareId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FederatedSpaceCopyWith<$Res> implements $FileSpaceCopyWith<$Res> {
+  factory $FederatedSpaceCopyWith(FederatedSpace value, $Res Function(FederatedSpace) _then) = _$FederatedSpaceCopyWithImpl;
+@useResult
+$Res call({
+ int shareId
+});
+
+
+
+
+}
+/// @nodoc
+class _$FederatedSpaceCopyWithImpl<$Res>
+    implements $FederatedSpaceCopyWith<$Res> {
+  _$FederatedSpaceCopyWithImpl(this._self, this._then);
+
+  final FederatedSpace _self;
+  final $Res Function(FederatedSpace) _then;
+
+/// Create a copy of FileSpace
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? shareId = null,}) {
+  return _then(FederatedSpace(
+shareId: null == shareId ? _self.shareId : shareId // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -598,7 +672,7 @@ $FileSpaceCopyWith<$Res> get space {
 /// @nodoc
 mixin _$SpaceCapabilities {
 
- bool get canDownload; bool get canCreate; bool get canEdit; bool get canDelete; bool get canUpload;
+ bool get canDownload; bool get canCreate; bool get canEdit; bool get canDelete; bool get canUpload; bool get canDownloadArchive;
 /// Create a copy of SpaceCapabilities
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -610,20 +684,20 @@ $SpaceCapabilitiesCopyWith<SpaceCapabilities> get copyWith => _$SpaceCapabilitie
 @override
 bool operator ==(Object other) {
   final _this = this as SpaceCapabilities;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SpaceCapabilities&&(identical(other.canDownload, _this.canDownload) || other.canDownload == _this.canDownload)&&(identical(other.canCreate, _this.canCreate) || other.canCreate == _this.canCreate)&&(identical(other.canEdit, _this.canEdit) || other.canEdit == _this.canEdit)&&(identical(other.canDelete, _this.canDelete) || other.canDelete == _this.canDelete)&&(identical(other.canUpload, _this.canUpload) || other.canUpload == _this.canUpload));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SpaceCapabilities&&(identical(other.canDownload, _this.canDownload) || other.canDownload == _this.canDownload)&&(identical(other.canCreate, _this.canCreate) || other.canCreate == _this.canCreate)&&(identical(other.canEdit, _this.canEdit) || other.canEdit == _this.canEdit)&&(identical(other.canDelete, _this.canDelete) || other.canDelete == _this.canDelete)&&(identical(other.canUpload, _this.canUpload) || other.canUpload == _this.canUpload)&&(identical(other.canDownloadArchive, _this.canDownloadArchive) || other.canDownloadArchive == _this.canDownloadArchive));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SpaceCapabilities;
-  return Object.hash(runtimeType,_this.canDownload,_this.canCreate,_this.canEdit,_this.canDelete,_this.canUpload);
+  return Object.hash(runtimeType,_this.canDownload,_this.canCreate,_this.canEdit,_this.canDelete,_this.canUpload,_this.canDownloadArchive);
 }
 
 @override
 String toString() {
   final _this = this as SpaceCapabilities;
-  return 'SpaceCapabilities(canDownload: ${_this.canDownload}, canCreate: ${_this.canCreate}, canEdit: ${_this.canEdit}, canDelete: ${_this.canDelete}, canUpload: ${_this.canUpload})';
+  return 'SpaceCapabilities(canDownload: ${_this.canDownload}, canCreate: ${_this.canCreate}, canEdit: ${_this.canEdit}, canDelete: ${_this.canDelete}, canUpload: ${_this.canUpload}, canDownloadArchive: ${_this.canDownloadArchive})';
 }
 
 
@@ -634,7 +708,7 @@ abstract mixin class $SpaceCapabilitiesCopyWith<$Res>  {
   factory $SpaceCapabilitiesCopyWith(SpaceCapabilities value, $Res Function(SpaceCapabilities) _then) = _$SpaceCapabilitiesCopyWithImpl;
 @useResult
 $Res call({
- bool canDownload, bool canCreate, bool canEdit, bool canDelete, bool canUpload
+ bool canDownload, bool canCreate, bool canEdit, bool canDelete, bool canUpload, bool canDownloadArchive
 });
 
 
@@ -651,13 +725,14 @@ class _$SpaceCapabilitiesCopyWithImpl<$Res>
 
 /// Create a copy of SpaceCapabilities
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? canDownload = null,Object? canCreate = null,Object? canEdit = null,Object? canDelete = null,Object? canUpload = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? canDownload = null,Object? canCreate = null,Object? canEdit = null,Object? canDelete = null,Object? canUpload = null,Object? canDownloadArchive = null,}) {
   return _then(SpaceCapabilities(
 canDownload: null == canDownload ? _self.canDownload : canDownload // ignore: cast_nullable_to_non_nullable
 as bool,canCreate: null == canCreate ? _self.canCreate : canCreate // ignore: cast_nullable_to_non_nullable
 as bool,canEdit: null == canEdit ? _self.canEdit : canEdit // ignore: cast_nullable_to_non_nullable
 as bool,canDelete: null == canDelete ? _self.canDelete : canDelete // ignore: cast_nullable_to_non_nullable
 as bool,canUpload: null == canUpload ? _self.canUpload : canUpload // ignore: cast_nullable_to_non_nullable
+as bool,canDownloadArchive: null == canDownloadArchive ? _self.canDownloadArchive : canDownloadArchive // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -743,10 +818,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool canDownload,  bool canCreate,  bool canEdit,  bool canDelete,  bool canUpload)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool canDownload,  bool canCreate,  bool canEdit,  bool canDelete,  bool canUpload,  bool canDownloadArchive)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SpaceCapabilities() when $default != null:
-return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,_that.canUpload);case _:
+return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,_that.canUpload,_that.canDownloadArchive);case _:
   return orElse();
 
 }
@@ -764,10 +839,10 @@ return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool canDownload,  bool canCreate,  bool canEdit,  bool canDelete,  bool canUpload)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool canDownload,  bool canCreate,  bool canEdit,  bool canDelete,  bool canUpload,  bool canDownloadArchive)  $default,) {final _that = this;
 switch (_that) {
 case _SpaceCapabilities():
-return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,_that.canUpload);case _:
+return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,_that.canUpload,_that.canDownloadArchive);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -784,10 +859,10 @@ return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool canDownload,  bool canCreate,  bool canEdit,  bool canDelete,  bool canUpload)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool canDownload,  bool canCreate,  bool canEdit,  bool canDelete,  bool canUpload,  bool canDownloadArchive)?  $default,) {final _that = this;
 switch (_that) {
 case _SpaceCapabilities() when $default != null:
-return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,_that.canUpload);case _:
+return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,_that.canUpload,_that.canDownloadArchive);case _:
   return null;
 
 }
@@ -799,7 +874,7 @@ return $default(_that.canDownload,_that.canCreate,_that.canEdit,_that.canDelete,
 
 
 class _SpaceCapabilities implements SpaceCapabilities {
-  const _SpaceCapabilities({this.canDownload = true, this.canCreate = false, this.canEdit = false, this.canDelete = false, this.canUpload = false});
+  const _SpaceCapabilities({this.canDownload = true, this.canCreate = false, this.canEdit = false, this.canDelete = false, this.canUpload = false, this.canDownloadArchive = true});
   
 
 @override@JsonKey() final  bool canDownload;
@@ -807,6 +882,7 @@ class _SpaceCapabilities implements SpaceCapabilities {
 @override@JsonKey() final  bool canEdit;
 @override@JsonKey() final  bool canDelete;
 @override@JsonKey() final  bool canUpload;
+@override@JsonKey() final  bool canDownloadArchive;
 
 /// Create a copy of SpaceCapabilities
 /// with the given fields replaced by the non-null parameter values.
@@ -818,18 +894,18 @@ _$SpaceCapabilitiesCopyWith<_SpaceCapabilities> get copyWith => __$SpaceCapabili
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SpaceCapabilities&&(identical(other.canDownload, canDownload) || other.canDownload == canDownload)&&(identical(other.canCreate, canCreate) || other.canCreate == canCreate)&&(identical(other.canEdit, canEdit) || other.canEdit == canEdit)&&(identical(other.canDelete, canDelete) || other.canDelete == canDelete)&&(identical(other.canUpload, canUpload) || other.canUpload == canUpload));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SpaceCapabilities&&(identical(other.canDownload, canDownload) || other.canDownload == canDownload)&&(identical(other.canCreate, canCreate) || other.canCreate == canCreate)&&(identical(other.canEdit, canEdit) || other.canEdit == canEdit)&&(identical(other.canDelete, canDelete) || other.canDelete == canDelete)&&(identical(other.canUpload, canUpload) || other.canUpload == canUpload)&&(identical(other.canDownloadArchive, canDownloadArchive) || other.canDownloadArchive == canDownloadArchive));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,canDownload,canCreate,canEdit,canDelete,canUpload);
+    return Object.hash(runtimeType,canDownload,canCreate,canEdit,canDelete,canUpload,canDownloadArchive);
 }
 
 @override
 String toString() {
-    return 'SpaceCapabilities(canDownload: $canDownload, canCreate: $canCreate, canEdit: $canEdit, canDelete: $canDelete, canUpload: $canUpload)';
+    return 'SpaceCapabilities(canDownload: $canDownload, canCreate: $canCreate, canEdit: $canEdit, canDelete: $canDelete, canUpload: $canUpload, canDownloadArchive: $canDownloadArchive)';
 }
 
 
@@ -840,7 +916,7 @@ abstract mixin class _$SpaceCapabilitiesCopyWith<$Res> implements $SpaceCapabili
   factory _$SpaceCapabilitiesCopyWith(_SpaceCapabilities value, $Res Function(_SpaceCapabilities) _then) = __$SpaceCapabilitiesCopyWithImpl;
 @override @useResult
 $Res call({
- bool canDownload, bool canCreate, bool canEdit, bool canDelete, bool canUpload
+ bool canDownload, bool canCreate, bool canEdit, bool canDelete, bool canUpload, bool canDownloadArchive
 });
 
 
@@ -857,13 +933,14 @@ class __$SpaceCapabilitiesCopyWithImpl<$Res>
 
 /// Create a copy of SpaceCapabilities
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? canDownload = null,Object? canCreate = null,Object? canEdit = null,Object? canDelete = null,Object? canUpload = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? canDownload = null,Object? canCreate = null,Object? canEdit = null,Object? canDelete = null,Object? canUpload = null,Object? canDownloadArchive = null,}) {
   return _then(_SpaceCapabilities(
 canDownload: null == canDownload ? _self.canDownload : canDownload // ignore: cast_nullable_to_non_nullable
 as bool,canCreate: null == canCreate ? _self.canCreate : canCreate // ignore: cast_nullable_to_non_nullable
 as bool,canEdit: null == canEdit ? _self.canEdit : canEdit // ignore: cast_nullable_to_non_nullable
 as bool,canDelete: null == canDelete ? _self.canDelete : canDelete // ignore: cast_nullable_to_non_nullable
 as bool,canUpload: null == canUpload ? _self.canUpload : canUpload // ignore: cast_nullable_to_non_nullable
+as bool,canDownloadArchive: null == canDownloadArchive ? _self.canDownloadArchive : canDownloadArchive // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

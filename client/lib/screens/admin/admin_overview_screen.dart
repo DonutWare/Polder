@@ -7,6 +7,7 @@ import "package:polder/models/user.dart";
 import "package:polder/providers/admin/admin_users_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/admin/widgets/admin_stats_grid.dart";
+import "package:polder/screens/admin/widgets/federation_settings_group.dart";
 import "package:polder/screens/admin/widgets/search_settings_group.dart";
 import "package:polder/screens/admin/widgets/storage_by_user_card.dart";
 import "package:polder/screens/admin/widgets/trash_settings_group.dart";
@@ -82,6 +83,7 @@ class AdminOverviewScreen extends ConsumerWidget {
                 const ServerTrashSettingsGroup(),
                 const ServerVersionSettingsGroup(),
                 const SearchSettingsGroup(),
+                const ServerFederationSettingsGroup(),
                 const SizedBox(height: 8),
                 StorageByUserCard(users: users),
               ],

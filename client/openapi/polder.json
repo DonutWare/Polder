@@ -1,6 +1,86 @@
 {
   "components": {
     "schemas": {
+      "AcceptInviteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "provider": {
+            "description": "The address of the other person's server",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "token": {
+            "description": "The invite token the other person gave you",
+            "maxLength": 255,
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "provider"
+        ],
+        "type": "object"
+      },
+      "AppPassword": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastUsedAddress": {
+            "description": "Address the password was last used from",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "Absent until the password is first used",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "readOnly": {
+            "description": "Only allows reading files",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "readOnly",
+          "createdAt",
+          "lastUsedAddress"
+        ],
+        "type": "object"
+      },
+      "AppPasswordRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "currentPassword": {
+            "description": "The account password, to confirm it is really the user",
+            "type": "string"
+          },
+          "name": {
+            "description": "What the password is for, such as the device or app using it",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "readOnly": {
+            "description": "Only allow reading files",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "currentPassword"
+        ],
+        "type": "object"
+      },
       "Appearance": {
         "additionalProperties": false,
         "properties": {
@@ -283,6 +363,41 @@
         },
         "required": [
           "type"
+        ],
+        "type": "object"
+      },
+      "Contact": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudId": {
+            "description": "The contact's federated cloud ID, to share with",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "server": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "cloudId",
+          "name",
+          "email",
+          "server",
+          "createdAt"
         ],
         "type": "object"
       },
@@ -723,6 +838,29 @@
         ],
         "type": "object"
       },
+      "FederationStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudId": {
+            "description": "The logged-in user's federated cloud ID; empty when federation is not configured",
+            "type": "string"
+          },
+          "configured": {
+            "description": "Whether the server has the public address federation needs",
+            "type": "boolean"
+          },
+          "enabled": {
+            "description": "Whether people on trusted servers can be shared with",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled",
+          "configured",
+          "cloudId"
+        ],
+        "type": "object"
+      },
       "FileError": {
         "additionalProperties": false,
         "properties": {
@@ -937,6 +1075,69 @@
         ],
         "type": "object"
       },
+      "IncomingFederatedShare": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isDir": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "description": "The owner's federated cloud ID",
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions",
+            "description": "What the remote server allows, as last seen"
+          },
+          "provider": {
+            "description": "The software the remote server says it runs",
+            "type": "string"
+          },
+          "server": {
+            "type": "string"
+          },
+          "sharedBy": {
+            "description": "Cloud ID of whoever shared it; usually the owner",
+            "type": "string"
+          },
+          "state": {
+            "description": "Pending until accepted; pending shares cannot be opened",
+            "enum": [
+              "pending",
+              "accepted"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "owner",
+          "ownerName",
+          "sharedBy",
+          "server",
+          "provider",
+          "isDir",
+          "permissions",
+          "state",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "IncomingShare": {
         "additionalProperties": false,
         "properties": {
@@ -988,6 +1189,38 @@
           "permissions",
           "note",
           "entry",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "Invite": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "provider": {
+            "description": "This server's address, which the other person enters together with the token",
+            "type": "string"
+          },
+          "token": {
+            "description": "The invite token; only returned when the invite is created",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "provider",
+          "expiresAt",
           "createdAt"
         ],
         "type": "object"
@@ -1535,6 +1768,48 @@
         ],
         "type": "object"
       },
+      "NewAppPassword": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastUsedAddress": {
+            "description": "Address the password was last used from",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "description": "Absent until the password is first used",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "readOnly": {
+            "description": "Only allows reading files",
+            "type": "boolean"
+          },
+          "token": {
+            "description": "The password itself; shown only this once",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "id",
+          "name",
+          "readOnly",
+          "createdAt",
+          "lastUsedAddress"
+        ],
+        "type": "object"
+      },
       "NewMember": {
         "additionalProperties": false,
         "properties": {
@@ -1554,6 +1829,33 @@
         },
         "required": [
           "userId"
+        ],
+        "type": "object"
+      },
+      "NewOutgoingShare": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "fileId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions"
+          },
+          "recipient": {
+            "description": "Federated cloud ID, such as alice@cloud.example.com",
+            "maxLength": 512,
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileId",
+          "recipient",
+          "permissions"
         ],
         "type": "object"
       },
@@ -1742,6 +2044,77 @@
           "title",
           "targetPath"
         ],
+        "type": "object"
+      },
+      "OutgoingShare": {
+        "additionalProperties": false,
+        "properties": {
+          "available": {
+            "description": "False while the shared item is in the trash",
+            "type": "boolean"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "file": {
+            "$ref": "#/components/schemas/FileSummary"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions"
+          },
+          "recipient": {
+            "description": "The recipient's federated cloud ID",
+            "type": "string"
+          },
+          "recipientName": {
+            "description": "The name the recipient's server reported; may be empty",
+            "type": "string"
+          },
+          "state": {
+            "description": "Pending until the recipient accepts",
+            "enum": [
+              "pending",
+              "accepted"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "file",
+          "recipient",
+          "recipientName",
+          "permissions",
+          "state",
+          "available",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "OutgoingShareChanges": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "noExpiry": {
+            "description": "Remove the expiry date",
+            "type": "boolean"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions"
+          }
+        },
         "type": "object"
       },
       "PasswordChange": {
@@ -1948,6 +2321,70 @@
         ],
         "type": "object"
       },
+      "RemoteEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "etag": {
+            "type": "string"
+          },
+          "isDir": {
+            "type": "boolean"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "mtime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "description": "Path inside the share",
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/SharePermissions"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "name",
+          "isDir",
+          "size",
+          "mtime",
+          "etag",
+          "mime",
+          "permissions"
+        ],
+        "type": "object"
+      },
+      "RemoteListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/RemoteEntry"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "item": {
+            "$ref": "#/components/schemas/RemoteEntry",
+            "description": "The listed folder itself"
+          }
+        },
+        "required": [
+          "item",
+          "entries"
+        ],
+        "type": "object"
+      },
       "ResolveRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2089,6 +2526,63 @@
         ],
         "type": "object"
       },
+      "Server": {
+        "additionalProperties": false,
+        "properties": {
+          "allowPrivateNetwork": {
+            "description": "Whether the server may be reached on a private or local network address",
+            "type": "boolean"
+          },
+          "apiVersion": {
+            "description": "The OCM version the server reports",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "discoveredAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "keyFingerprint": {
+            "description": "SHA-256 of the server's signing key; empty when it publishes none",
+            "type": "string"
+          },
+          "provider": {
+            "description": "The software the server says it runs",
+            "type": "string"
+          },
+          "remote": {
+            "description": "The server's address, such as cloud.example.com",
+            "type": "string"
+          },
+          "signsRequests": {
+            "description": "Whether the server signs its requests; then unsigned requests from it are refused",
+            "type": "boolean"
+          },
+          "verifySenderAddress": {
+            "description": "Whether unsigned requests must come from an address the server's name resolves to",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "remote",
+          "provider",
+          "keyFingerprint",
+          "allowPrivateNetwork",
+          "verifySenderAddress",
+          "signsRequests",
+          "apiVersion",
+          "createdAt"
+        ],
+        "type": "object"
+      },
       "ServerInfo": {
         "additionalProperties": false,
         "properties": {
@@ -2187,12 +2681,30 @@
         ],
         "type": "object"
       },
+      "ServerOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "allowPrivateNetwork": {
+            "description": "Allow reaching the server on a private or local network address",
+            "type": "boolean"
+          },
+          "skipAddressCheck": {
+            "description": "Accept unsigned requests from any address, not only from addresses the server's name resolves to",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "ServerSettings": {
         "additionalProperties": false,
         "properties": {
           "accentColor": {
             "description": "Default accent color as #RRGGBB; empty uses the apps' own default",
             "type": "string"
+          },
+          "federationEnabled": {
+            "description": "Share with people on trusted servers that support Open Cloud Mesh; needs publicUrl in the server config",
+            "type": "boolean"
           },
           "instanceName": {
             "description": "Name the apps show for this server; empty shows the default",
@@ -2265,7 +2777,8 @@
           "versionsEnabled",
           "versionsKeepAllHours",
           "versionsMaxAgeDays",
-          "versionsMaxPerFile"
+          "versionsMaxPerFile",
+          "federationEnabled"
         ],
         "type": "object"
       },
@@ -2276,6 +2789,11 @@
             "description": "Default accent color as #RRGGBB; empty uses the apps' own default",
             "nullable": true,
             "type": "string"
+          },
+          "federationEnabled": {
+            "description": "Share with people on trusted servers that support Open Cloud Mesh; needs publicUrl in the server config",
+            "nullable": true,
+            "type": "boolean"
           },
           "instanceName": {
             "description": "Name the apps show for this server; empty shows the default",
@@ -2766,6 +3284,28 @@
         ],
         "type": "object"
       },
+      "TrustedServerRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allowPrivateNetwork": {
+            "description": "Allow reaching the server on a private or local network address",
+            "type": "boolean"
+          },
+          "remote": {
+            "description": "The server's address, such as cloud.example.com",
+            "maxLength": 512,
+            "type": "string"
+          },
+          "skipAddressCheck": {
+            "description": "Accept unsigned requests from any address, not only from addresses the server's name resolves to",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "remote"
+        ],
+        "type": "object"
+      },
       "UnlockRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3095,6 +3635,160 @@
   },
   "openapi": "3.0.3",
   "paths": {
+    "/api/v1/account/app-passwords": {
+      "get": {
+        "operationId": "listAppPasswords",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AppPassword"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The logged-in user's app passwords, for WebDAV and other apps",
+        "tags": [
+          "account"
+        ]
+      },
+      "post": {
+        "operationId": "createAppPassword",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAppPassword"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an app password; needs the account password and returns the new password once",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/app-passwords/{appPasswordID}": {
+      "delete": {
+        "operationId": "deleteAppPassword",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "appPasswordID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke an app password; it stops working at once",
+        "tags": [
+          "account"
+        ]
+      }
+    },
     "/api/v1/account/appearance": {
       "put": {
         "operationId": "setAppearance",
@@ -3736,6 +4430,332 @@
           }
         ],
         "summary": "Replace the server's icon with the image in the request body",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/federation/servers": {
+      "get": {
+        "operationId": "listTrustedServers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Server"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Servers this server federates with",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "addTrustedServer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrustedServerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Server"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Trust a server for federated sharing; its signing key is pinned",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/federation/servers/{serverID}": {
+      "delete": {
+        "operationId": "removeTrustedServer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serverID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stop trusting a server; every share with it ends",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "updateTrustedServer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serverID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServerOptions"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Server"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change how a trusted server is reached and checked",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/federation/servers/{serverID}/refresh": {
+      "post": {
+        "operationId": "refreshTrustedServer",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "serverID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Server"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Discover a trusted server again and pin its current signing key",
         "tags": [
           "admin"
         ]
@@ -4998,6 +6018,1253 @@
         "x-client-message": {
           "$ref": "#/components/schemas/ClientMessage"
         }
+      }
+    },
+    "/api/v1/federation/contacts": {
+      "get": {
+        "operationId": "listFederationContacts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Contact"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "People on other servers who exchanged an invite with the logged-in user",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/contacts/{id}": {
+      "delete": {
+        "operationId": "removeFederationContact",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a contact",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/invites": {
+      "get": {
+        "operationId": "listFederationInvites",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Invite"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The logged-in user's open invites for people on other servers",
+        "tags": [
+          "federation"
+        ]
+      },
+      "post": {
+        "operationId": "createFederationInvite",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invite"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an invite token that someone on another server can accept",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/invites/accept": {
+      "post": {
+        "operationId": "acceptFederationInvite",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept an invite from someone on a trusted server; they become a contact",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/invites/{id}": {
+      "delete": {
+        "operationId": "revokeFederationInvite",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke an open invite",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming": {
+      "get": {
+        "operationId": "listIncomingFederatedShares",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IncomingFederatedShare"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What people on other servers share with the logged-in user",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}": {
+      "delete": {
+        "operationId": "removeIncomingFederatedShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Decline or remove a share from another server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}/accept": {
+      "post": {
+        "operationId": "acceptFederatedShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomingFederatedShare"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Accept a share from another server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}/content": {
+      "get": {
+        "operationId": "downloadFederatedShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Path inside the share",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the share",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Byte range to send, such as bytes=0-1023",
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "description": "Byte range to send, such as bytes=0-1023",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "File content",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Length": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Range": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a file inside a share from another server; supports Range",
+        "tags": [
+          "federation"
+        ]
+      },
+      "put": {
+        "operationId": "uploadFederatedShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Where to store the file inside the share",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Where to store the file inside the share",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Fail instead of replacing an existing file",
+            "explode": false,
+            "in": "query",
+            "name": "mustNotExist",
+            "schema": {
+              "description": "Fail instead of replacing an existing file",
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload a file into a share from another server that allows changes",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}/copy": {
+      "post": {
+        "operationId": "copyFederatedShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Copy inside a share from another server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}/files": {
+      "delete": {
+        "operationId": "deleteFederatedShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete inside a share from another server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}/list": {
+      "get": {
+        "operationId": "listFederatedShareFiles",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Path inside the share; / or empty is the shared item itself",
+            "explode": false,
+            "in": "query",
+            "name": "path",
+            "schema": {
+              "description": "Path inside the share; / or empty is the shared item itself",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoteListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List a folder inside a share from another server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}/mkdir": {
+      "post": {
+        "operationId": "makeFederatedShareDirectory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a folder inside a share from another server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/incoming/{shareID}/move": {
+      "post": {
+        "operationId": "moveFederatedShareFile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move or rename inside a share from another server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/outgoing": {
+      "get": {
+        "operationId": "listOutgoingFederatedShares",
+        "parameters": [
+          {
+            "description": "Only shares of this file or folder; 0 for all",
+            "explode": false,
+            "in": "query",
+            "name": "fileId",
+            "schema": {
+              "description": "Only shares of this file or folder; 0 for all",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OutgoingShare"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What the logged-in user shares with people on other servers",
+        "tags": [
+          "federation"
+        ]
+      },
+      "post": {
+        "operationId": "createFederatedShare",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewOutgoingShare"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutgoingShare"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Share a file or folder with someone on a trusted server",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/shares/outgoing/{shareID}": {
+      "delete": {
+        "operationId": "deleteFederatedShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stop sharing with a federated recipient; their access ends at once",
+        "tags": [
+          "federation"
+        ]
+      },
+      "patch": {
+        "operationId": "updateFederatedShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutgoingShareChanges"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutgoingShare"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change what a federated recipient may do",
+        "tags": [
+          "federation"
+        ]
+      }
+    },
+    "/api/v1/federation/status": {
+      "get": {
+        "operationId": "getFederationStatus",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FederationStatus"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Whether federated sharing is available, and the logged-in user's cloud ID",
+        "tags": [
+          "federation"
+        ]
       }
     },
     "/api/v1/files": {

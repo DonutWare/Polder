@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -33,16 +34,22 @@ const (
 type SessionFunc func(ctx context.Context, user users.User, session Session, event SessionEvent)
 
 type Service struct {
-	users     *users.Service
-	sessions  *Sessions
-	tokens    *AccessTokens
-	hasher    Argon2Hasher
-	setupMu   sync.Mutex
-	onSession SessionFunc
+	users        *users.Service
+	sessions     *Sessions
+	appPasswords *AppPasswords
+	tokens       *AccessTokens
+	hasher       Argon2Hasher
+	setupMu      sync.Mutex
+	onSession    SessionFunc
 }
 
-func NewService(userService *users.Service, sessions *Sessions, tokens *AccessTokens) *Service {
-	return &Service{users: userService, sessions: sessions, tokens: tokens, onSession: func(context.Context, users.User, Session, SessionEvent) {}}
+func NewService(userService *users.Service, sessions *Sessions, appPasswords *AppPasswords, tokens *AccessTokens) *Service {
+	return &Service{users: userService, sessions: sessions, appPasswords: appPasswords, tokens: tokens,
+		onSession: func(context.Context, users.User, Session, SessionEvent) {}}
+}
+
+func (s *Service) AppPasswords() *AppPasswords {
+	return s.appPasswords
 }
 
 func (s *Service) OnSession(callback SessionFunc) {
@@ -91,17 +98,54 @@ func (s *Service) Login(ctx context.Context, username, password, deviceName stri
 }
 
 func (s *Service) ChangePassword(ctx context.Context, user users.User, sessionID int64, currentPassword, newPassword string) error {
-	passwordHash, err := s.users.Store().PasswordHash(ctx, user.ID)
-	if err != nil {
+	if err := s.ConfirmPassword(ctx, user, currentPassword); err != nil {
 		return err
-	}
-	if !s.hasher.Verify(currentPassword, passwordHash) {
-		return apperr.Forbidden("current password is incorrect")
 	}
 	if _, err := s.users.Update(ctx, user, user.ID, users.Changes{Password: &newPassword}); err != nil {
 		return err
 	}
+	if err := s.appPasswords.RevokeAllForUser(ctx, user.ID); err != nil {
+		return err
+	}
 	return s.sessions.RevokeOthersForUser(ctx, user.ID, sessionID)
+}
+
+func (s *Service) ConfirmPassword(ctx context.Context, user users.User, password string) error {
+	passwordHash, err := s.users.Store().PasswordHash(ctx, user.ID)
+	if err != nil {
+		return err
+	}
+	if !s.hasher.Verify(password, passwordHash) {
+		return apperr.Forbidden("current password is incorrect")
+	}
+	return nil
+}
+
+func (s *Service) LogOutEverywhere(ctx context.Context, userID int64) error {
+	return errors.Join(s.sessions.RevokeAllForUser(ctx, userID), s.appPasswords.RevokeAllForUser(ctx, userID))
+}
+
+func (s *Service) CreateAppPassword(ctx context.Context, user users.User, accountPassword, name string, readOnly bool) (NewAppPassword, error) {
+	if err := s.ConfirmPassword(ctx, user, accountPassword); err != nil {
+		return NewAppPassword{}, err
+	}
+	return s.appPasswords.Create(ctx, user.ID, name, readOnly)
+}
+
+func (s *Service) AuthenticateAppPassword(ctx context.Context, username, token, address string) (users.User, AppPassword, error) {
+	invalid := apperr.Unauthorized("invalid username or password")
+	identity, err := s.appPasswords.Verify(ctx, token, address)
+	if err != nil {
+		return users.User{}, AppPassword{}, err
+	}
+	user, err := s.ActiveUser(ctx, identity.UserID)
+	if err != nil {
+		return users.User{}, AppPassword{}, err
+	}
+	if user.Username != username {
+		return users.User{}, AppPassword{}, invalid
+	}
+	return user, identity.Password, nil
 }
 
 var dummyHash, _ = Argon2Hasher{}.Hash("timing-equalizer")

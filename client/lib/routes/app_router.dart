@@ -124,12 +124,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: "${AppRoutes.shared}/:section/:shareId",
             redirect: (_, state) =>
-                state.pathParameters["section"] != SharedSection.withMe.segment ||
+                !_browsableSections.contains(SharedSection.fromSegment(state.pathParameters["section"])) ||
                     int.tryParse(state.pathParameters["shareId"] ?? "") == null
                 ? AppRoutes.shared
                 : null,
             builder: (_, state) => SharedScreen(
-              section: SharedSection.withMe,
+              section: SharedSection.fromSegment(state.pathParameters["section"]),
               shareId: int.parse(state.pathParameters["shareId"]!),
               path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
             ),
@@ -190,3 +190,5 @@ abstract final class AppRedirect {
     return null;
   }
 }
+
+const _browsableSections = {SharedSection.withMe, SharedSection.federated};

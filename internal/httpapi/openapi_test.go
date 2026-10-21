@@ -34,7 +34,7 @@ func TestOpenAPIDocumentsEveryRoute(t *testing.T) {
 		served[apiPrefix+"/openapi"+extension] = true
 	}
 	walk := func(method, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
-		if served[route] || route == "/api/*" || route == "/*" {
+		if served[route] || route == "/api/*" || !isAPIRoute(route) {
 			return nil
 		}
 		if _, documented := spec.Paths[route][strings.ToLower(method)]; !documented {
@@ -45,6 +45,10 @@ func TestOpenAPIDocumentsEveryRoute(t *testing.T) {
 	if err := chi.Walk(router.(chi.Routes), walk); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func isAPIRoute(route string) bool {
+	return route == "/healthz" || strings.HasPrefix(route, apiPrefix+"/")
 }
 
 func TestOpenAPIMatchesServedDocument(t *testing.T) {

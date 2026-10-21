@@ -52,10 +52,12 @@ type Config struct {
 	// takes the place of Collabora, so only one of the two is set.
 	EuroOfficeURL string `yaml:"euroOfficeUrl"`
 	// WOPIURL is where the document editor reaches this server; it defaults to the listen address on localhost.
-	WOPIURL            string `yaml:"wopiUrl"`
-	FFmpegPath         string `yaml:"ffmpegPath"`
-	VideoHWAccel       string `yaml:"videoHwaccel"`
-	VideoHWAccelDevice string `yaml:"videoHwaccelDevice"`
+	WOPIURL             string `yaml:"wopiUrl"`
+	FFmpegPath          string `yaml:"ffmpegPath"`
+	VideoHWAccel        string `yaml:"videoHwaccel"`
+	VideoHWAccelDevice  string `yaml:"videoHwaccelDevice"`
+	PublicURL           string `yaml:"publicUrl"`
+	WebDAVAllowInsecure bool   `yaml:"webdavAllowInsecure"`
 }
 
 func Default() Config {
@@ -119,6 +121,7 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.FFmpegPath = envOr("POLDER_FFMPEG", cfg.FFmpegPath)
 	cfg.VideoHWAccel = envOr("POLDER_VIDEO_HWACCEL", cfg.VideoHWAccel)
 	cfg.VideoHWAccelDevice = envOr("POLDER_VIDEO_HWACCEL_DEVICE", cfg.VideoHWAccelDevice)
+	cfg.PublicURL = envOr("POLDER_PUBLIC_URL", cfg.PublicURL)
 	if value, ok := os.LookupEnv("POLDER_TRUSTED_PROXIES"); ok {
 		cfg.TrustedProxies = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || unicode.IsSpace(r) })
 	}
@@ -151,6 +154,13 @@ func (cfg *Config) mergeEnvironment() error {
 		}
 		cfg.ServeWeb = serve
 	}
+	if value, ok := os.LookupEnv("POLDER_WEBDAV_ALLOW_INSECURE"); ok {
+		allow, err := strconv.ParseBool(value)
+		if err != nil {
+			return fmt.Errorf("POLDER_WEBDAV_ALLOW_INSECURE: %w", err)
+		}
+		cfg.WebDAVAllowInsecure = allow
+	}
 	if value, ok := os.LookupEnv("POLDER_WATCH_FILES"); ok {
 		watch, err := strconv.ParseBool(value)
 		if err != nil {
@@ -173,6 +183,12 @@ func (cfg Config) validate() error {
 	}
 	if cfg.CollaboraURL != "" && cfg.EuroOfficeURL != "" {
 		return errors.New("collaboraUrl and euroOfficeUrl are both set; choose one document editor")
+	}
+	if cfg.PublicURL != "" {
+		if parsed, err := url.Parse(cfg.PublicURL); err != nil || parsed.Scheme != "https" || parsed.Host == "" || parsed.User != nil ||
+			parsed.RawQuery != "" || parsed.Fragment != "" || strings.Trim(parsed.Path, "/") != "" {
+			return fmt.Errorf("publicUrl: %q must be an https address without a path, such as https://files.example.com", cfg.PublicURL)
+		}
 	}
 	for name, value := range map[string]string{"collaboraUrl": cfg.CollaboraURL, "euroOfficeUrl": cfg.EuroOfficeURL, "wopiUrl": cfg.WOPIURL} {
 		if value == "" {
@@ -220,6 +236,14 @@ func (cfg Config) WOPIBaseURL() string {
 		host = "localhost"
 	}
 	return "http://" + net.JoinHostPort(host, port)
+}
+
+func (cfg Config) PublicBaseURL() string {
+	return strings.TrimSuffix(cfg.PublicURL, "/")
+}
+
+func (cfg Config) FederationKeyPath() string {
+	return filepath.Join(cfg.ConfigDir, "federation.key")
 }
 
 func (cfg Config) SQLitePath() string {

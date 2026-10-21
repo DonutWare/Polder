@@ -11,7 +11,7 @@ class Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
     decoration: ShapeDecoration(
       color: color.withValues(alpha: 0.16),
       shape: squircle(AppRadius.tag, side: tintedSide(color)),

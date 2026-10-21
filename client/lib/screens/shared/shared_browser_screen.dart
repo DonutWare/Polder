@@ -6,8 +6,8 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_space.dart";
-import "package:polder/models/sharing.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
@@ -29,13 +29,70 @@ class SharedBrowserScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final space = FileSpace.share(shareId: shareId);
-    final location = SpaceLocation(space: space, path: path);
     final share = ref.watch(incomingShareProvider(shareId));
+    return SpaceBrowserPage(
+      space: FileSpace.share(shareId: shareId),
+      name: share?.entry.name ?? context.localized.navShared,
+      isDir: share?.entry.isDir ?? true,
+      path: path,
+      parentRoute: parentRoute,
+      routeFor: (target) => AppRoutes.sharedAt(shareId, path: target),
+      ready: ref.watch(incomingSharesProvider),
+      onRetry: () => ref.invalidate(incomingSharesProvider),
+    );
+  }
+}
+
+class FederatedBrowserScreen extends ConsumerWidget {
+  const FederatedBrowserScreen({required this.shareId, required this.path, required this.parentRoute, super.key});
+
+  final int shareId;
+  final String path;
+  final String parentRoute;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final share = ref.watch(incomingFederatedShareProvider(shareId));
+    return SpaceBrowserPage(
+      space: FileSpace.federated(shareId: shareId),
+      name: share?.name ?? context.localized.navShared,
+      isDir: share?.isDir ?? true,
+      path: path,
+      parentRoute: parentRoute,
+      routeFor: (target) => AppRoutes.federatedAt(shareId, path: target),
+      ready: ref.watch(incomingFederatedSharesProvider),
+      onRetry: () => ref.invalidate(incomingFederatedSharesProvider),
+    );
+  }
+}
+
+class SpaceBrowserPage extends ConsumerWidget {
+  const SpaceBrowserPage({
+    required this.space,
+    required this.name,
+    required this.isDir,
+    required this.path,
+    required this.parentRoute,
+    required this.routeFor,
+    required this.ready,
+    required this.onRetry,
+    super.key,
+  });
+
+  final FileSpace space;
+  final String name;
+  final bool isDir;
+  final String path;
+  final String parentRoute;
+  final String Function(String path) routeFor;
+  final AsyncValue<Object?> ready;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final location = SpaceLocation(space: space, path: path);
     final capabilities = ref.watch(spaceCapabilitiesProvider(space));
     final localized = context.localized;
-    final name = share?.entry.name ?? localized.navShared;
-    final isDir = share?.entry.isDir ?? true;
     final folder = FileEntry.folder(path, rootName: name);
     return AppPage(
       leading: BackButton(onPressed: () => context.go(parentRoute)),
@@ -48,7 +105,7 @@ class SharedBrowserScreen extends ConsumerWidget {
             icon: const Icon(IconsaxPlusLinear.folder_add),
             onPressed: () => _createFolder(context, ref, location),
           ),
-        if (isDir)
+        if (isDir && capabilities.canDownloadArchive)
           IconButton(
             tooltip: localized.downloadAll,
             icon: const Icon(IconsaxPlusLinear.document_download),
@@ -58,11 +115,7 @@ class SharedBrowserScreen extends ConsumerWidget {
       bottom: isDir
           ? PreferredSize(
               preferredSize: const Size.fromHeight(44),
-              child: Breadcrumbs(
-                path: path,
-                rootLabel: name,
-                onNavigate: (target) => context.go(AppRoutes.sharedAt(shareId, path: target)),
-              ),
+              child: Breadcrumbs(path: path, rootLabel: name, onNavigate: (target) => context.go(routeFor(target))),
             )
           : null,
       floatingActionButton: capabilities.canUpload && isDir
@@ -72,13 +125,10 @@ class SharedBrowserScreen extends ConsumerWidget {
               onPressed: () => ref.read(transfersProvider.notifier).pickAndUploadToSpace(location),
             )
           : null,
-      body: AsyncValueView<List<IncomingShare>>(
-        value: ref.watch(incomingSharesProvider),
-        onRetry: () => ref.invalidate(incomingSharesProvider),
-        data: (_) => SpaceDirectoryView(
-          location: location,
-          onOpenFolder: (folder) => context.go(AppRoutes.sharedAt(shareId, path: folder)),
-        ),
+      body: AsyncValueView<Object?>(
+        value: ready,
+        onRetry: onRetry,
+        data: (_) => SpaceDirectoryView(location: location, onOpenFolder: (folder) => context.go(routeFor(folder))),
       ),
     );
   }

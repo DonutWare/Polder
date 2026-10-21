@@ -9,6 +9,7 @@ import "package:polder/models/branding.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
+import "package:polder/models/federation.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_links.dart";
 import "package:polder/models/file_version.dart";
@@ -26,6 +27,7 @@ import "package:polder/models/trash.dart";
 import "package:polder/models/upload_batch.dart";
 import "package:polder/models/user.dart";
 import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/federation_mappers.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 import "package:polder/services/api/pending_uploads.dart";
 import "package:polder/services/api/sharing_mappers.dart";
@@ -325,8 +327,10 @@ class PolderApi {
     int? versionsKeepAllHours,
     int? versionsMaxAgeDays,
     int? versionsMaxPerFile,
+    bool? federationEnabled,
   }) async => (await _service.updateServerSettings(
     body: wire.ServerSettingsChanges(
+      federationEnabled: federationEnabled,
       versionsEnabled: versionsEnabled,
       versionsKeepAllHours: versionsKeepAllHours,
       versionsMaxAgeDays: versionsMaxAgeDays,
@@ -501,6 +505,150 @@ class PolderApi {
 
   Future<void> deleteInShare(int shareId, String path, {int baseRev = -1}) =>
       _service.deleteShareFile(shareID: shareId, path: path, baseRev: baseRev);
+
+  Future<List<AppPassword>> appPasswords() async => [
+    for (final password in (await _service.listAppPasswords()).body!) password.toModel(),
+  ];
+
+  Future<CreatedAppPassword> createAppPassword({
+    required String name,
+    required String currentPassword,
+    bool readOnly = false,
+  }) async => (await _service.createAppPassword(
+    body: wire.AppPasswordRequest(name: name, currentPassword: currentPassword, readOnly: readOnly),
+  )).body!.toModel();
+
+  Future<void> deleteAppPassword(int id) => _service.deleteAppPassword(appPasswordID: id);
+
+  Future<FederationStatus> federationStatus() async => (await _service.getFederationStatus()).body!.toModel();
+
+  Future<List<TrustedServer>> trustedServers() async => [
+    for (final server in (await _service.listTrustedServers()).body!) server.toModel(),
+  ];
+
+  Future<TrustedServer> addTrustedServer(
+    String remote, {
+    bool allowPrivateNetwork = false,
+    bool skipAddressCheck = false,
+  }) async => (await _service.addTrustedServer(
+    body: wire.TrustedServerRequest(
+      remote: remote,
+      allowPrivateNetwork: allowPrivateNetwork,
+      skipAddressCheck: skipAddressCheck,
+    ),
+  )).body!.toModel();
+
+  Future<TrustedServer> updateTrustedServer(
+    int id, {
+    required bool allowPrivateNetwork,
+    required bool skipAddressCheck,
+  }) async => (await _service.updateTrustedServer(
+    serverID: id,
+    body: wire.ServerOptions(allowPrivateNetwork: allowPrivateNetwork, skipAddressCheck: skipAddressCheck),
+  )).body!.toModel();
+
+  Future<List<FederationInvite>> federationInvites() async => [
+    for (final invite in (await _service.listFederationInvites()).body!) invite.toModel(),
+  ];
+
+  Future<FederationInvite> createFederationInvite() async => (await _service.createFederationInvite()).body!.toModel();
+
+  Future<void> revokeFederationInvite(int id) => _service.revokeFederationInvite(id: id);
+
+  Future<FederationContact> acceptFederationInvite({required String token, required String provider}) async =>
+      (await _service.acceptFederationInvite(
+        body: wire.AcceptInviteRequest(token: token.trim(), provider: provider.trim()),
+      )).body!.toModel();
+
+  Future<List<FederationContact>> federationContacts() async => [
+    for (final contact in (await _service.listFederationContacts()).body!) contact.toModel(),
+  ];
+
+  Future<void> removeFederationContact(int id) => _service.removeFederationContact(id: id);
+
+  Future<TrustedServer> refreshTrustedServer(int id) async =>
+      (await _service.refreshTrustedServer(serverID: id)).body!.toModel();
+
+  Future<void> removeTrustedServer(int id) => _service.removeTrustedServer(serverID: id);
+
+  Future<List<FederatedShare>> federatedShares({int? fileId}) async => [
+    for (final share in (await _service.listOutgoingFederatedShares(fileId: fileId)).body!) share.toModel(),
+  ];
+
+  Future<FederatedShare> shareFederated({
+    required int fileId,
+    required String recipient,
+    required SharePermissions permissions,
+    DateTime? expiresAt,
+  }) async => (await _service.createFederatedShare(
+    body: wire.NewOutgoingShare(
+      fileId: fileId,
+      recipient: recipient.trim(),
+      permissions: permissions.toWire(),
+      expiresAt: expiresAt?.toUtc(),
+    ),
+  )).body!.toModel();
+
+  Future<FederatedShare> updateFederatedShare(
+    int id, {
+    SharePermissions? permissions,
+    DateTime? expiresAt,
+    bool removeExpiry = false,
+  }) async => (await _service.updateFederatedShare(
+    shareID: id,
+    body: wire.OutgoingShareChanges(
+      permissions: permissions?.toWire(),
+      expiresAt: expiresAt?.toUtc(),
+      noExpiry: removeExpiry ? true : null,
+    ),
+  )).body!.toModel();
+
+  Future<void> removeFederatedShare(int id) => _service.deleteFederatedShare(shareID: id);
+
+  Future<List<IncomingFederatedShare>> incomingFederatedShares() async => [
+    for (final share in (await _service.listIncomingFederatedShares()).body!) share.toModel(),
+  ];
+
+  Future<IncomingFederatedShare> acceptFederatedShare(int id) async =>
+      (await _service.acceptFederatedShare(shareID: id)).body!.toModel();
+
+  Future<void> removeIncomingFederatedShare(int id) => _service.removeIncomingFederatedShare(shareID: id);
+
+  Future<DirectoryListing> listFederatedShare(int shareId, String path) async =>
+      (await _service.listFederatedShareFiles(shareID: shareId, path: path)).body!.toModel();
+
+  Future<Uint8List> downloadFromFederatedShare(
+    int shareId,
+    String path, {
+    void Function(int received, int total)? onProgress,
+  }) async => _collect(await _service.downloadFederatedShareFile(shareID: shareId, path: path), onProgress);
+
+  Future<void> putFederatedShareContent(
+    int shareId,
+    String path,
+    Stream<List<int>> body, {
+    required int length,
+    void Function(int sent, int total)? onProgress,
+  }) => _service.uploadFederatedShareFile(
+    shareID: shareId,
+    path: path,
+    mustNotExist: true,
+    body: PendingUpload(_counted(body, length, onProgress), length),
+  );
+
+  Future<void> mkdirInFederatedShare(int shareId, String path) => _service.makeFederatedShareDirectory(
+    shareID: shareId,
+    body: wire.PathRequest(path: path),
+  );
+
+  Future<void> moveInFederatedShare(int shareId, {required String from, required String to}) =>
+      _service.moveFederatedShareFile(
+        shareID: shareId,
+        body: wire.CopyRequest(from: from, to: to),
+      );
+
+  Future<void> deleteInFederatedShare(int shareId, String path) =>
+      _service.deleteFederatedShareFile(shareID: shareId, path: path);
 
   Future<List<ShareLink>> shareLinks({int? fileId}) async => [
     for (final link in (await _service.listShareLinks(fileId: fileId)).body!) link.toModel(),

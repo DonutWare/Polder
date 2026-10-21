@@ -19,6 +19,81 @@ final class _$Polder extends Polder {
   final Type definitionType = Polder;
 
   @override
+  Future<Response<List<AppPassword>>> _listAppPasswords({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The logged-in user\'s app passwords, for WebDAV and other apps',
+      operationId: 'listAppPasswords',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/app-passwords');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<AppPassword>, AppPassword>($request);
+  }
+
+  @override
+  Future<Response<NewAppPassword>> _createAppPassword({
+    required AppPasswordRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create an app password; needs the account password and returns the new password once',
+      operationId: 'createAppPassword',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/app-passwords');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<NewAppPassword, NewAppPassword>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteAppPassword({
+    required int? appPasswordID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Revoke an app password; it stops working at once',
+      operationId: 'deleteAppPassword',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/account/app-passwords/${appPasswordID}',
+    );
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<User>> _setAppearance({
     required Appearance? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -300,6 +375,134 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<Branding, Branding>($request);
+  }
+
+  @override
+  Future<Response<List<Server>>> _listTrustedServers({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Servers this server federates with',
+      operationId: 'listTrustedServers',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/federation/servers');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Server>, Server>($request);
+  }
+
+  @override
+  Future<Response<Server>> _addTrustedServer({
+    required TrustedServerRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Trust a server for federated sharing; its signing key is pinned',
+      operationId: 'addTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/federation/servers');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Server, Server>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _removeTrustedServer({
+    required int? serverID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop trusting a server; every share with it ends',
+      operationId: 'removeTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/federation/servers/${serverID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<Server>> _updateTrustedServer({
+    required int? serverID,
+    required ServerOptions? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change how a trusted server is reached and checked',
+      operationId: 'updateTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/federation/servers/${serverID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Server, Server>($request);
+  }
+
+  @override
+  Future<Response<Server>> _refreshTrustedServer({
+    required int? serverID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Discover a trusted server again and pin its current signing key',
+      operationId: 'refreshTrustedServer',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/admin/federation/servers/${serverID}/refresh',
+    );
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Server, Server>($request);
   }
 
   @override
@@ -848,6 +1051,573 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<List<Contact>>> _listFederationContacts({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'People on other servers who exchanged an invite with the logged-in user',
+      operationId: 'listFederationContacts',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/contacts');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Contact>, Contact>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _removeFederationContact({
+    required int? id,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove a contact',
+      operationId: 'removeFederationContact',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/contacts/${id}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<List<Invite>>> _listFederationInvites({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The logged-in user\'s open invites for people on other servers',
+      operationId: 'listFederationInvites',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/invites');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Invite>, Invite>($request);
+  }
+
+  @override
+  Future<Response<Invite>> _createFederationInvite({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Create an invite token that someone on another server can accept',
+      operationId: 'createFederationInvite',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/invites');
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Invite, Invite>($request);
+  }
+
+  @override
+  Future<Response<Contact>> _acceptFederationInvite({
+    required AcceptInviteRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Accept an invite from someone on a trusted server; they become a contact',
+      operationId: 'acceptFederationInvite',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/invites/accept');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Contact, Contact>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _revokeFederationInvite({
+    required int? id,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Revoke an open invite',
+      operationId: 'revokeFederationInvite',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/invites/${id}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<List<IncomingFederatedShare>>> _listIncomingFederatedShares({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What people on other servers share with the logged-in user',
+      operationId: 'listIncomingFederatedShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/shares/incoming');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<IncomingFederatedShare>, IncomingFederatedShare>(
+      $request,
+    );
+  }
+
+  @override
+  Future<Response<dynamic>> _removeIncomingFederatedShare({
+    required int? shareID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Decline or remove a share from another server',
+      operationId: 'removeIncomingFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/shares/incoming/${shareID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<IncomingFederatedShare>> _acceptFederatedShare({
+    required int? shareID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Accept a share from another server',
+      operationId: 'acceptFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/accept',
+    );
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<IncomingFederatedShare, IncomingFederatedShare>(
+      $request,
+    );
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _downloadFederatedShareFile({
+    required int? shareID,
+    String? path,
+    String? range,
+    String? ifNoneMatch,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Download a file inside a share from another server; supports Range',
+      operationId: 'downloadFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/content',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Map<String, String> $headers = {
+      if (range != null) 'Range': range,
+      if (ifNoneMatch != null) 'If-None-Match': ifNoneMatch,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _uploadFederatedShareFile({
+    required int? shareID,
+    String? path,
+    bool? mustNotExist,
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Upload a file into a share from another server that allows changes',
+      operationId: 'uploadFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/content',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'mustNotExist': mustNotExist,
+    };
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _copyFederatedShareFile({
+    required int? shareID,
+    required CopyRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Copy inside a share from another server',
+      operationId: 'copyFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/copy',
+    );
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteFederatedShareFile({
+    required int? shareID,
+    String? path,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete inside a share from another server',
+      operationId: 'deleteFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/files',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<RemoteListResponse>> _listFederatedShareFiles({
+    required int? shareID,
+    String? path,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'List a folder inside a share from another server',
+      operationId: 'listFederatedShareFiles',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/list',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<RemoteListResponse, RemoteListResponse>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _makeFederatedShareDirectory({
+    required int? shareID,
+    required PathRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a folder inside a share from another server',
+      operationId: 'makeFederatedShareDirectory',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/mkdir',
+    );
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _moveFederatedShareFile({
+    required int? shareID,
+    required CopyRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Move or rename inside a share from another server',
+      operationId: 'moveFederatedShareFile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/federation/shares/incoming/${shareID}/move',
+    );
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<List<OutgoingShare>>> _listOutgoingFederatedShares({
+    int? fileId,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'What the logged-in user shares with people on other servers',
+      operationId: 'listOutgoingFederatedShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/shares/outgoing');
+    final Map<String, dynamic> $params = <String, dynamic>{'fileId': fileId};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<OutgoingShare>, OutgoingShare>($request);
+  }
+
+  @override
+  Future<Response<OutgoingShare>> _createFederatedShare({
+    required NewOutgoingShare? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Share a file or folder with someone on a trusted server',
+      operationId: 'createFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/shares/outgoing');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<OutgoingShare, OutgoingShare>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteFederatedShare({
+    required int? shareID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Stop sharing with a federated recipient; their access ends at once',
+      operationId: 'deleteFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/shares/outgoing/${shareID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<OutgoingShare>> _updateFederatedShare({
+    required int? shareID,
+    required OutgoingShareChanges? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change what a federated recipient may do',
+      operationId: 'updateFederatedShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/shares/outgoing/${shareID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<OutgoingShare, OutgoingShare>($request);
+  }
+
+  @override
+  Future<Response<FederationStatus>> _getFederationStatus({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether federated sharing is available, and the logged-in user\'s cloud ID',
+      operationId: 'getFederationStatus',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["federation"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/federation/status');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<FederationStatus, FederationStatus>($request);
   }
 
   @override

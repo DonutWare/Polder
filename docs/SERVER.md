@@ -72,6 +72,33 @@ Euro-Office has two other limits. It doesn't read Polder's colour palette,
 so it only follows light or dark mode. A version restore made while a document
 is open discards that session's unsaved edits.
 
+## WebDAV
+
+Files are available over WebDAV at `https://<server>/dav/files/<username>/`.
+Log in with an app password, created under account settings. The account
+password does not work for WebDAV. WebDAV requires HTTPS, either from
+Polder itself or from a reverse proxy listed in `trustedProxies`.
+
+| Setting | Environment variable | Meaning |
+| --- | --- | --- |
+| `webdavAllowInsecure` | `POLDER_WEBDAV_ALLOW_INSECURE` | Accept app passwords over plain HTTP, for testing only |
+
+## Federation
+
+Polder shares with other servers using
+[Open Cloud Mesh](https://github.com/cs3org/OCM-API). To turn it on:
+
+1. Set `publicUrl` to the server's https address.
+2. Turn on federation in the admin settings.
+3. Add the servers to trust.
+
+Keep `<config>/federation.key`. It is the key Polder signs its requests
+with.
+
+| Setting | Environment variable | Meaning |
+| --- | --- | --- |
+| `publicUrl` | `POLDER_PUBLIC_URL` | The https address of this server, such as `https://files.example.com` |
+
 ## Development
 
 Use the launch configurations in `.vscode/launch.json` for the server, the

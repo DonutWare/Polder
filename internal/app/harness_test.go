@@ -165,7 +165,7 @@ func (c *client) request(method, path string, body io.Reader, headers map[string
 	for name, value := range headers {
 		request.Header.Set(name, value)
 	}
-	response, err := http.DefaultClient.Do(request)
+	response, err := c.server.server.Client().Do(request)
 	if err != nil {
 		c.server.t.Fatal(err)
 	}

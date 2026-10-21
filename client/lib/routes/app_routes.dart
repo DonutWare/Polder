@@ -52,6 +52,11 @@ abstract final class AppRoutes {
     queryParameters: path == "/" ? null : {pathParameter: path},
   ).toString();
 
+  static String federatedAt(int shareId, {String path = "/"}) => Uri(
+    path: "$shared/${SharedSection.federated.segment}/$shareId",
+    queryParameters: path == "/" ? null : {pathParameter: path},
+  ).toString();
+
   static String groupAt(int groupId, {GroupScope scope = GroupScope.mine}) =>
       Uri(path: "$groups/$groupId", queryParameters: _scopeQuery(scope)).toString();
 
@@ -86,7 +91,8 @@ abstract final class AppRoutes {
 enum SharedSection {
   withMe("with-me"),
   byMe("by-me"),
-  links("links");
+  links("links"),
+  federated("other-servers");
 
   const SharedSection(this.segment);
 

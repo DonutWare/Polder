@@ -111,6 +111,14 @@ func (s *Store) ByID(ctx context.Context, id int64) (User, error) {
 	return user, err
 }
 
+func (s *Store) ByUsername(ctx context.Context, username string) (User, error) {
+	user, err := scanUser(s.db.QueryRowContext(ctx, selectUserColumns+` WHERE u.username = $1`, username))
+	if errors.Is(err, sql.ErrNoRows) {
+		return User{}, apperr.NotFound("user not found")
+	}
+	return user, err
+}
+
 func (s *Store) CredentialsByUsername(ctx context.Context, username string) (User, string, error) {
 	var passwordHash string
 	err := s.db.QueryRowContext(ctx, `SELECT password_hash FROM users WHERE username = $1`, username).Scan(&passwordHash)

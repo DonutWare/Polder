@@ -9,6 +9,8 @@ sealed class FileSpace with _$FileSpace {
   const factory FileSpace.share({required int shareId}) = ShareSpace;
 
   const factory FileSpace.link({required String serverUrl, required String code}) = LinkSpace;
+
+  const factory FileSpace.federated({required int shareId}) = FederatedSpace;
 }
 
 @freezed
@@ -24,5 +26,6 @@ abstract class SpaceCapabilities with _$SpaceCapabilities {
     @Default(false) bool canEdit,
     @Default(false) bool canDelete,
     @Default(false) bool canUpload,
+    @Default(true) bool canDownloadArchive,
   }) = _SpaceCapabilities;
 }

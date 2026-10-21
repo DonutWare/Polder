@@ -49,6 +49,9 @@ targets:
             - url: "/api/v1/shares/{shareID}/content"
               method: get
               overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/federation/shares/incoming/{shareID}/content"
+              method: get
+              overridden_value: "Stream<List<int>>"
             - url: "/api/v1/shares/{shareID}/preview"
               method: get
               overridden_value: "Stream<List<int>>"

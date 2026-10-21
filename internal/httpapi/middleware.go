@@ -19,7 +19,11 @@ import (
 
 type contextKey string
 
-const currentUserKey contextKey = "currentUser"
+const (
+	currentUserKey  contextKey = "currentUser"
+	trustedProxyKey contextKey = "trustedProxy"
+	forwardedHTTPS             = "https"
+)
 
 // requireUser lets only requests with a valid access token through, and makes their user available
 // to handlers through currentUser.
@@ -90,6 +94,34 @@ func (l *failedAttemptLimiter) attempt(keys ...string) (func(failed bool), bool)
 	}, true
 }
 
+func (l *failedAttemptLimiter) blocked(keys ...string) bool {
+	if l.limit <= 0 {
+		return false
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	cutoff := time.Now().Add(-l.window)
+	for _, key := range keys {
+		l.failures[key] = recentOnly(l.failures[key], cutoff)
+		if len(l.failures[key]) >= l.limit {
+			return true
+		}
+	}
+	return false
+}
+
+func (l *failedAttemptLimiter) fail(keys ...string) {
+	if l.limit <= 0 {
+		return
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	now := time.Now()
+	for _, key := range keys {
+		l.failures[key] = append(l.failures[key], now)
+	}
+}
+
 func (l *failedAttemptLimiter) forget(keys []string, reserved time.Time) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -128,7 +160,7 @@ func forwardedClient(trusted []netip.Prefix) func(http.Handler) http.Handler {
 		}
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if client, ok := clientBehind(r, trusted); ok {
-				r = r.WithContext(r.Context())
+				r = r.WithContext(context.WithValue(r.Context(), trustedProxyKey, r.Header.Get("X-Forwarded-Proto")))
 				r.RemoteAddr = client
 			}
 			next.ServeHTTP(w, r)
@@ -165,6 +197,11 @@ func clientBehind(r *http.Request, trusted []netip.Prefix) (string, bool) {
 		return address.String(), true
 	}
 	return "", false
+}
+
+func forwardedProto(r *http.Request) (string, bool) {
+	proto, ok := r.Context().Value(trustedProxyKey).(string)
+	return proto, ok
 }
 
 func parseHop(hop string) (netip.Addr, error) {

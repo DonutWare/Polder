@@ -37,6 +37,8 @@
 * Trash - Files are never removed entirely use trash to recover files remove by accident
 * Notes - Create a knowledgedatabase link notes inside of another note
 * Collabora Online or Euro-Office support - Edit documents directly on all platforms.
+* WebDAV - Mount your files in Finder, Explorer or any WebDAV app using app passwords
+* Federation - Share with people on other servers that support Open Cloud Mesh (OCM)
 * Platforms
   - Android
   - Web + Docker
@@ -52,7 +54,6 @@
 * Virtual file system
 * Sharing urls
 * Groups/Collaborations
-* WebDAV
 * 
 
 ## Download

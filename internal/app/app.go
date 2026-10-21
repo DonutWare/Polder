@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"crypto/x509"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -16,6 +17,7 @@ import (
 	"polder-server/internal/config"
 	"polder-server/internal/database"
 	"polder-server/internal/extract"
+	"polder-server/internal/federation"
 	"polder-server/internal/files"
 	"polder-server/internal/groups"
 	"polder-server/internal/httpapi"
@@ -31,6 +33,7 @@ import (
 	"polder-server/internal/syncing"
 	"polder-server/internal/users"
 	"polder-server/internal/versions"
+	"polder-server/internal/webdav"
 	"polder-server/internal/webui"
 )
 
@@ -62,9 +65,12 @@ type App struct {
 	versions  *versions.Worker
 	links     *links.Graph
 
+	federation         *federation.Service
 	trashPurgeRequests chan struct{}
 	background         sync.WaitGroup
 }
+
+var federationRootCAs *x509.CertPool
 
 func New(cfg config.Config) (*App, error) {
 	db, err := database.Open(cfg)
@@ -145,7 +151,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	extractor.OnExtracted(searchService.IndexText)
 	fileScanner := scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles)
 	userService.OnCreated(func(user users.User) { fileScanner.Request(user.Username) })
-	authService := auth.NewService(userService, sessions, tokens)
+	authService := auth.NewService(userService, sessions, auth.NewAppPasswords(db), tokens)
 	authService.OnSession(func(ctx context.Context, user users.User, session auth.Session, event auth.SessionEvent) {
 		activityHub.Session(ctx, user, session.ID, session.DeviceName, event == auth.SessionStarted)
 	})
@@ -183,6 +189,17 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	groupService := groups.NewService(groups.NewStore(db), userStore)
 	sharingService := sharing.NewService(db, fileService, userStore, groupService, auth.Argon2Hasher{}, tokens.DerivedKey(sharing.LinkKeyPurpose))
 	fileService.OnMutation(sharingService.FileMutation)
+	federationService, err := federation.New(db, fileService, userStore, serverSettings, federation.Options{
+		PublicURL: cfg.PublicBaseURL(),
+		KeyPath:   cfg.FederationKeyPath(),
+		SecretKey: tokens.DerivedKey(federation.SecretKeyPurpose),
+		RootCAs:   federationRootCAs,
+	})
+	if err != nil {
+		searchService.Close()
+		return nil, err
+	}
+	fileService.OnMutation(federationService.FileMutation)
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
 		Sessions:               sessions,
@@ -202,6 +219,9 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Links:                  linkGraph,
 		Groups:                 groupService,
 		Sharing:                sharingService,
+		WebDAV:                 webdav.NewHandler(fileService),
+		Federation:             federationService,
+		WebDAVAllowInsecure:    cfg.WebDAVAllowInsecure,
 		RequestTrashPurge:      func() { requestWork(trashPurgeRequests) },
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
 		TrustedProxies:         trustedProxies,
@@ -224,6 +244,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		versions:  versionWorker,
 		links:     linkGraph,
 
+		federation:         federationService,
 		trashPurgeRequests: trashPurgeRequests,
 	}, nil
 }
@@ -264,6 +285,7 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	a.background.Go(func() { a.Search.Run(ctx) })
 	a.background.Go(func() { a.versions.Run(ctx) })
 	a.background.Go(func() { a.links.Run(ctx) })
+	a.background.Go(func() { a.federation.Run(ctx) })
 	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
 	a.background.Go(func() {
 		repeatOnRequest(ctx, trashPurgeInterval, a.trashPurgeRequests, "purge expired trash", func(ctx context.Context) error {

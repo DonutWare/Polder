@@ -56,6 +56,9 @@ class ServerSettingsNotifier extends AsyncNotifier<ServerSettings> {
     () => ref.read(polderApiProvider).updateServerSettings(accentColor: color == null ? "" : hexColor(color)),
   );
 
+  Future<void> setFederationEnabled(bool enabled) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(federationEnabled: enabled));
+
   Future<void> _update(Future<ServerSettings> Function() change) async {
     state = AsyncData(await change());
     ref.invalidate(textExtractionStatusProvider);

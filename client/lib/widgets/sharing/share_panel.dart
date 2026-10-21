@@ -3,13 +3,16 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
+import "package:polder/models/federation.dart";
 import "package:polder/models/sharing.dart";
+import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/sharing/federated_share_dialog.dart";
 import "package:polder/widgets/sharing/link_form_dialog.dart";
 import "package:polder/widgets/sharing/share_labels.dart";
 import "package:polder/widgets/sharing/share_link_tile.dart";
@@ -83,6 +86,10 @@ class _SharePanelState extends ConsumerState<SharePanel> {
   Widget build(BuildContext context) {
     final localized = context.localized;
     final theme = Theme.of(context);
+    final federation = ref.watch(federationStatusProvider).value?.enabled ?? false;
+    final contacts = federation
+        ? ref.watch(federationContactsProvider).value ?? const <FederationContact>[]
+        : const <FederationContact>[];
     return ListView(
       controller: widget.scrollController,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -108,13 +115,18 @@ class _SharePanelState extends ConsumerState<SharePanel> {
           controller: _search,
           decoration: InputDecoration(
             prefixIcon: const Icon(IconsaxPlusLinear.search_normal_1),
-            hintText: localized.shareSearchHint,
+            hintText: federation ? localized.shareSearchFederatedHint : localized.shareSearchHint,
           ),
           onChanged: (value) => setState(() => _query = value.trim()),
         ),
-        if (_query.isNotEmpty)
-          _Matches(query: _query, fileId: file.id, onPick: _add)
-        else ...[
+        if (_query.isNotEmpty) ...[
+          if (federation)
+            for (final contact in contacts.where((contact) => contact.matches(_query)))
+              _FederatedMatch(cloudId: contact.cloudId, name: contact.name, onPick: _addFederated),
+          if (federation && looksLikeCloudId(_query) && !contacts.any((contact) => contact.cloudId == _query))
+            _FederatedMatch(cloudId: _query, onPick: _addFederated),
+          _Matches(query: _query, fileId: file.id, onPick: _add),
+        ] else ...[
           _SectionTitle(
             title: localized.shareLinks,
             action: IconButton(
@@ -126,9 +138,18 @@ class _SharePanelState extends ConsumerState<SharePanel> {
           _Links(fileId: file.id),
           _SectionTitle(title: localized.shareRecipients),
           _People(fileId: file.id),
+          if (federation) ...[_SectionTitle(title: localized.federatedRecipients), _FederatedPeople(file: file)],
         ],
       ],
     );
+  }
+
+  Future<void> _addFederated(String cloudId) async {
+    final added = await showNewFederatedShare(context, file: file, recipient: cloudId);
+    if (added && mounted) {
+      _search.clear();
+      setState(() => _query = "");
+    }
   }
 
   Future<void> _add(ShareTarget recipient) async {
@@ -301,4 +322,57 @@ class _ShareRowState extends ConsumerState<_ShareRow> {
       ],
     );
   }
+}
+
+class _FederatedMatch extends StatelessWidget {
+  const _FederatedMatch({required this.cloudId, required this.onPick, this.name = ""});
+
+  final String cloudId;
+  final String name;
+  final ValueChanged<String> onPick;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    contentPadding: EdgeInsets.zero,
+    leading: const CircleAvatar(child: Icon(IconsaxPlusLinear.global)),
+    title: Text(name.isEmpty ? cloudId : name, overflow: TextOverflow.ellipsis),
+    subtitle: Text(name.isEmpty ? context.localized.shareWithFederated : cloudId, overflow: TextOverflow.ellipsis),
+    trailing: const Icon(IconsaxPlusLinear.add),
+    onTap: () => onPick(cloudId),
+  );
+}
+
+class _FederatedPeople extends ConsumerWidget {
+  const _FederatedPeople({required this.file});
+
+  final SharedFile file;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => AsyncValueView<List<FederatedShare>>(
+    value: ref.watch(federatedSharesProvider(file.id)),
+    onRetry: () => ref.invalidate(federatedSharesProvider(file.id)),
+    data: (shares) => shares.isEmpty
+        ? _Quiet(text: context.localized.federatedNotSharedYet)
+        : Column(
+            children: [
+              for (final share in shares)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const CircleAvatar(child: Icon(IconsaxPlusLinear.global)),
+                  title: Text(
+                    share.recipientName.isEmpty ? share.recipient : "${share.recipientName} (${share.recipient})",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    [
+                      share.permissions.summary(context.localized),
+                      if (share.isPending) context.localized.federatedSharePendingShort,
+                    ].join(" · "),
+                  ),
+                  trailing: const Icon(IconsaxPlusLinear.setting_4),
+                  onTap: () => showFederatedShareSettings(context, file: file, share: share),
+                ),
+            ],
+          ),
+  );
 }

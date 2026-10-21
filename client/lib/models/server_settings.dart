@@ -20,5 +20,6 @@ abstract class ServerSettings with _$ServerSettings {
     @Default(0) int versionsKeepAllHours,
     @Default(0) int versionsMaxAgeDays,
     @Default(0) int versionsMaxPerFile,
+    @Default(false) bool federationEnabled,
   }) = _ServerSettings;
 }
