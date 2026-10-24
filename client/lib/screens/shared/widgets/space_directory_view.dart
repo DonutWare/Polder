@@ -128,14 +128,15 @@ Future<void> showSpaceFileSheet(BuildContext context, FileSpace space, FileEntry
   context: context,
   showDragHandle: true,
   isScrollControlled: true,
-  builder: (_) => SpaceFileSheet(space: space, entry: entry),
+  builder: (_) => SpaceFileSheet(space: space, entry: entry, dismissOnDownload: true),
 );
 
 class SpaceFileSheet extends ConsumerWidget {
-  const SpaceFileSheet({required this.space, required this.entry, super.key});
+  const SpaceFileSheet({required this.space, required this.entry, this.dismissOnDownload = false, super.key});
 
   final FileSpace space;
   final FileEntry entry;
+  final bool dismissOnDownload;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => SafeArea(
@@ -153,7 +154,7 @@ class SpaceFileSheet extends ConsumerWidget {
               icon: const Icon(IconsaxPlusLinear.document_download),
               label: Text(context.localized.download),
               onPressed: () {
-                Navigator.pop(context);
+                if (dismissOnDownload) Navigator.pop(context);
                 ref.read(transfersProvider.notifier).downloadFromSpace(space, entry);
               },
             ),

@@ -15,30 +15,67 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FileSpace {
 
-
+ String get serverUrl; String get code;
+/// Create a copy of FileSpace
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FileSpaceCopyWith<FileSpace> get copyWith => _$FileSpaceCopyWithImpl<FileSpace>(this as FileSpace, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is FileSpace);
+  final _this = this as FileSpace;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileSpace&&(identical(other.serverUrl, _this.serverUrl) || other.serverUrl == _this.serverUrl)&&(identical(other.code, _this.code) || other.code == _this.code));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode {
+  final _this = this as FileSpace;
+  return Object.hash(runtimeType,_this.serverUrl,_this.code);
+}
 
 @override
 String toString() {
-    return 'FileSpace()';
+  final _this = this as FileSpace;
+  return 'FileSpace(serverUrl: ${_this.serverUrl}, code: ${_this.code})';
 }
 
 
 }
 
 /// @nodoc
-class $FileSpaceCopyWith<$Res>  {
-$FileSpaceCopyWith(FileSpace _, $Res Function(FileSpace) __);
+abstract mixin class $FileSpaceCopyWith<$Res>  {
+  factory $FileSpaceCopyWith(FileSpace value, $Res Function(FileSpace) _then) = _$FileSpaceCopyWithImpl;
+@useResult
+$Res call({
+ String serverUrl, String code
+});
+
+
+
+
+}
+/// @nodoc
+class _$FileSpaceCopyWithImpl<$Res>
+    implements $FileSpaceCopyWith<$Res> {
+  _$FileSpaceCopyWithImpl(this._self, this._then);
+
+  final FileSpace _self;
+  final $Res Function(FileSpace) _then;
+
+/// Create a copy of FileSpace
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? serverUrl = null,Object? code = null,}) {
+  return _then(FileSpace.link(
+serverUrl: null == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
+as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
 }
 
 
@@ -56,13 +93,11 @@ extension FileSpacePatterns on FileSpace {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ShareSpace value)?  share,TResult Function( LinkSpace value)?  link,TResult Function( FederatedSpace value)?  federated,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LinkSpace value)?  link,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case ShareSpace() when share != null:
-return share(_that);case LinkSpace() when link != null:
-return link(_that);case FederatedSpace() when federated != null:
-return federated(_that);case _:
+case LinkSpace() when link != null:
+return link(_that);case _:
   return orElse();
 
 }
@@ -80,13 +115,11 @@ return federated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ShareSpace value)  share,required TResult Function( LinkSpace value)  link,required TResult Function( FederatedSpace value)  federated,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LinkSpace value)  link,}){
 final _that = this;
 switch (_that) {
-case ShareSpace():
-return share(_that);case LinkSpace():
-return link(_that);case FederatedSpace():
-return federated(_that);}
+case LinkSpace():
+return link(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -100,13 +133,11 @@ return federated(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ShareSpace value)?  share,TResult? Function( LinkSpace value)?  link,TResult? Function( FederatedSpace value)?  federated,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LinkSpace value)?  link,}){
 final _that = this;
 switch (_that) {
-case ShareSpace() when share != null:
-return share(_that);case LinkSpace() when link != null:
-return link(_that);case FederatedSpace() when federated != null:
-return federated(_that);case _:
+case LinkSpace() when link != null:
+return link(_that);case _:
   return null;
 
 }
@@ -123,12 +154,10 @@ return federated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int shareId)?  share,TResult Function( String serverUrl,  String code)?  link,TResult Function( int shareId)?  federated,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String serverUrl,  String code)?  link,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case ShareSpace() when share != null:
-return share(_that.shareId);case LinkSpace() when link != null:
-return link(_that.serverUrl,_that.code);case FederatedSpace() when federated != null:
-return federated(_that.shareId);case _:
+case LinkSpace() when link != null:
+return link(_that.serverUrl,_that.code);case _:
   return orElse();
 
 }
@@ -146,12 +175,10 @@ return federated(_that.shareId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int shareId)  share,required TResult Function( String serverUrl,  String code)  link,required TResult Function( int shareId)  federated,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String serverUrl,  String code)  link,}) {final _that = this;
 switch (_that) {
-case ShareSpace():
-return share(_that.shareId);case LinkSpace():
-return link(_that.serverUrl,_that.code);case FederatedSpace():
-return federated(_that.shareId);}
+case LinkSpace():
+return link(_that.serverUrl,_that.code);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -165,12 +192,10 @@ return federated(_that.shareId);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int shareId)?  share,TResult? Function( String serverUrl,  String code)?  link,TResult? Function( int shareId)?  federated,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String serverUrl,  String code)?  link,}) {final _that = this;
 switch (_that) {
-case ShareSpace() when share != null:
-return share(_that.shareId);case LinkSpace() when link != null:
-return link(_that.serverUrl,_that.code);case FederatedSpace() when federated != null:
-return federated(_that.shareId);case _:
+case LinkSpace() when link != null:
+return link(_that.serverUrl,_that.code);case _:
   return null;
 
 }
@@ -181,84 +206,16 @@ return federated(_that.shareId);case _:
 /// @nodoc
 
 
-class ShareSpace extends FileSpace {
-  const ShareSpace({required this.shareId}): super._();
+class LinkSpace implements FileSpace {
+  const LinkSpace({required this.serverUrl, required this.code});
   
 
- final  int shareId;
+@override final  String serverUrl;
+@override final  String code;
 
 /// Create a copy of FileSpace
 /// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ShareSpaceCopyWith<ShareSpace> get copyWith => _$ShareSpaceCopyWithImpl<ShareSpace>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is ShareSpace&&(identical(other.shareId, shareId) || other.shareId == shareId));
-}
-
-
-@override
-int get hashCode {
-    return Object.hash(runtimeType,shareId);
-}
-
-@override
-String toString() {
-    return 'FileSpace.share(shareId: $shareId)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $ShareSpaceCopyWith<$Res> implements $FileSpaceCopyWith<$Res> {
-  factory $ShareSpaceCopyWith(ShareSpace value, $Res Function(ShareSpace) _then) = _$ShareSpaceCopyWithImpl;
-@useResult
-$Res call({
- int shareId
-});
-
-
-
-
-}
-/// @nodoc
-class _$ShareSpaceCopyWithImpl<$Res>
-    implements $ShareSpaceCopyWith<$Res> {
-  _$ShareSpaceCopyWithImpl(this._self, this._then);
-
-  final ShareSpace _self;
-  final $Res Function(ShareSpace) _then;
-
-/// Create a copy of FileSpace
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? shareId = null,}) {
-  return _then(ShareSpace(
-shareId: null == shareId ? _self.shareId : shareId // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class LinkSpace extends FileSpace {
-  const LinkSpace({required this.serverUrl, required this.code}): super._();
-  
-
- final  String serverUrl;
- final  String code;
-
-/// Create a copy of FileSpace
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
+@override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $LinkSpaceCopyWith<LinkSpace> get copyWith => _$LinkSpaceCopyWithImpl<LinkSpace>(this, _$identity);
 
@@ -286,7 +243,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $LinkSpaceCopyWith<$Res> implements $FileSpaceCopyWith<$Res> {
   factory $LinkSpaceCopyWith(LinkSpace value, $Res Function(LinkSpace) _then) = _$LinkSpaceCopyWithImpl;
-@useResult
+@override @useResult
 $Res call({
  String serverUrl, String code
 });
@@ -305,79 +262,11 @@ class _$LinkSpaceCopyWithImpl<$Res>
 
 /// Create a copy of FileSpace
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? serverUrl = null,Object? code = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? serverUrl = null,Object? code = null,}) {
   return _then(LinkSpace(
 serverUrl: null == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
 as String,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class FederatedSpace extends FileSpace {
-  const FederatedSpace({required this.shareId}): super._();
-  
-
- final  int shareId;
-
-/// Create a copy of FileSpace
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$FederatedSpaceCopyWith<FederatedSpace> get copyWith => _$FederatedSpaceCopyWithImpl<FederatedSpace>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is FederatedSpace&&(identical(other.shareId, shareId) || other.shareId == shareId));
-}
-
-
-@override
-int get hashCode {
-    return Object.hash(runtimeType,shareId);
-}
-
-@override
-String toString() {
-    return 'FileSpace.federated(shareId: $shareId)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $FederatedSpaceCopyWith<$Res> implements $FileSpaceCopyWith<$Res> {
-  factory $FederatedSpaceCopyWith(FederatedSpace value, $Res Function(FederatedSpace) _then) = _$FederatedSpaceCopyWithImpl;
-@useResult
-$Res call({
- int shareId
-});
-
-
-
-
-}
-/// @nodoc
-class _$FederatedSpaceCopyWithImpl<$Res>
-    implements $FederatedSpaceCopyWith<$Res> {
-  _$FederatedSpaceCopyWithImpl(this._self, this._then);
-
-  final FederatedSpace _self;
-  final $Res Function(FederatedSpace) _then;
-
-/// Create a copy of FileSpace
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? shareId = null,}) {
-  return _then(FederatedSpace(
-shareId: null == shareId ? _self.shareId : shareId // ignore: cast_nullable_to_non_nullable
-as int,
   ));
 }
 

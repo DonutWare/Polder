@@ -3007,6 +3007,55 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   }
 
   @override
+  Future<Response<ShareDisplaySettings>> _getShareDisplaySettings({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether shares appear in the logged-in user\'s files',
+      operationId: 'getShareDisplaySettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/settings');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<ShareDisplaySettings, ShareDisplaySettings>($request);
+  }
+
+  @override
+  Future<Response<ShareDisplaySettings>> _setShareDisplaySettings({
+    required ShareDisplaySettings? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Show or hide shares at the root of the logged-in user\'s files',
+      operationId: 'setShareDisplaySettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/settings');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<ShareDisplaySettings, ShareDisplaySettings>($request);
+  }
+
+  @override
   Future<Response<dynamic>> _deleteShare({
     required int? shareID,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(

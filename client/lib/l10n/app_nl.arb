@@ -721,5 +721,13 @@
 	"checkSenderAddress": "Afzenderadres controleren",
 	"checkSenderAddressHint": "Voor servers die verzoeken niet ondertekenen: accepteer ze alleen vanaf adressen waar de servernaam naar verwijst",
 	"serverUnsignedChecked": "Ondertekent geen verzoeken; afzenderadres wordt gecontroleerd",
-	"serverUnsignedAnyAddress": "Ondertekent geen verzoeken; elk afzenderadres wordt geaccepteerd"
+	"serverUnsignedAnyAddress": "Ondertekent geen verzoeken; elk afzenderadres wordt geaccepteerd",
+	"shareDetailsTitle": "Deelgegevens",
+	"shareDetailsSoftware": "Software",
+	"shareDetailsSharedOn": "Gedeeld op",
+	"sharedWithYou": "Met jou gedeeld",
+	"leaveShareMessage": "Het verdwijnt uit je bestanden. {owner} kan het opnieuw met je delen.",
+	"showSharesInFiles": "Tonen in Bestanden",
+	"showSharesInFilesHint": "Gedeelde items staan tussen je eigen bestanden. Uitgeschakeld open je ze alleen hier.",
+	"sharedByYou": "Door jou gedeeld"
 }

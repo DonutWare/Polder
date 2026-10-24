@@ -40,6 +40,13 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Start nextcloud docker",
+			"detail": "Start Nextcloud and Caddy in Docker, for the Server (Nextcloud) launch configuration",
+			"type": "shell",
+			"command": "sh dev/nextcloud/start.sh",
+			"problemMatcher": []
+		},
+		{
 			"label": "Generate client code",
 			"detail": "build_runner for freezed / json / drift",
 			"type": "shell",

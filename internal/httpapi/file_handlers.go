@@ -25,6 +25,7 @@ type listResponse struct {
 	Path     string        `json:"path"`
 	Entries  []files.Entry `json:"entries"`
 	Indexing bool          `json:"indexing" doc:"Files found on disk are still being added, so the listing may be incomplete"`
+	Mount    *files.Mount  `json:"mount,omitempty" required:"false" doc:"The share the listed folder is in, when it is inside one"`
 }
 
 type pathRequest struct {
@@ -117,23 +118,59 @@ type previewOutput struct {
 
 func (a *API) listFiles(ctx context.Context, input *pathQuery) (*jsonBody[listResponse], error) {
 	owner := currentUser(ctx)
+	at, err := a.mountAt(ctx, owner, input.Path)
+	if err != nil {
+		return nil, err
+	}
+	if at != nil {
+		return a.listMounted(ctx, *at)
+	}
 	listedPath, entries, err := a.files.List(ctx, owner, input.Path)
 	if err != nil {
 		return nil, err
+	}
+	if err := a.markShared(ctx, owner, entries); err != nil {
+		return nil, err
+	}
+	if listedPath == storage.RootPath {
+		mounts, err := a.visibleMounts(ctx, owner)
+		if err != nil {
+			return nil, err
+		}
+		entries = append(entries, a.mountRootEntries(ctx, mounts)...)
+		files.SortForListing(entries)
 	}
 	return respond(listResponse{Path: listedPath, Entries: entries, Indexing: a.files.IsIndexing(owner.ID)}), nil
 }
 
 func (a *API) statFile(ctx context.Context, input *pathQuery) (*jsonBody[files.Entry], error) {
+	at, err := a.mountAt(ctx, currentUser(ctx), input.Path)
+	if err != nil {
+		return nil, err
+	}
+	if at != nil {
+		return a.respondMounted(ctx, *at)
+	}
 	entry, err := a.files.Stat(ctx, currentUser(ctx), input.Path)
 	if err != nil {
 		return nil, err
 	}
-	return respond(entry), nil
+	marked := []files.Entry{entry}
+	if err := a.markShared(ctx, currentUser(ctx), marked); err != nil {
+		return nil, err
+	}
+	return respond(marked[0]), nil
 }
 
 func (a *API) downloadFile(ctx context.Context, input *downloadInput) (*downloadOutput, error) {
 	owner := currentUser(ctx)
+	at, err := a.mountAt(ctx, owner, input.Path)
+	if err != nil {
+		return nil, err
+	}
+	if at != nil {
+		return a.downloadMounted(ctx, *at, input)
+	}
 	file, entry, err := a.files.Open(ctx, owner, input.Path)
 	if err != nil {
 		return nil, err
@@ -224,6 +261,13 @@ func (a *API) uploadFile(ctx context.Context, input *uploadInput) (*jsonBody[fil
 	if err != nil {
 		return nil, err
 	}
+	at, err := a.mountAt(ctx, currentUser(ctx), cleanPath)
+	if err != nil {
+		return nil, err
+	}
+	if at != nil {
+		return a.uploadMounted(ctx, *at, input)
+	}
 	entry, err := a.trackedWrite(ctx, currentUser(ctx), files.WriteRequest{
 		Path:    cleanPath,
 		BaseRev: input.BaseRev,
@@ -248,6 +292,13 @@ func (a *API) trackedWrite(ctx context.Context, owner users.User, request files.
 }
 
 func (a *API) makeDirectory(ctx context.Context, input *jsonBody[pathRequest]) (*jsonBody[files.Entry], error) {
+	at, err := a.mountAt(ctx, currentUser(ctx), input.Body.Path)
+	if err != nil {
+		return nil, err
+	}
+	if at != nil {
+		return a.mkdirMounted(ctx, *at)
+	}
 	entry, err := a.files.Mkdir(ctx, currentUser(ctx), input.Body.Path)
 	if err != nil {
 		return nil, err
@@ -256,6 +307,13 @@ func (a *API) makeDirectory(ctx context.Context, input *jsonBody[pathRequest]) (
 }
 
 func (a *API) moveFile(ctx context.Context, input *jsonBody[moveRequest]) (*jsonBody[files.Entry], error) {
+	source, err := a.transferMount(ctx, currentUser(ctx), input.Body.From, input.Body.To)
+	if err != nil {
+		return nil, err
+	}
+	if source != nil {
+		return a.moveMounted(ctx, *source, input.Body.To, input.Body.BaseRev, false)
+	}
 	entry, err := a.files.Move(ctx, currentUser(ctx), input.Body.From, input.Body.To, input.Body.BaseRev)
 	if err != nil {
 		return nil, err
@@ -264,6 +322,13 @@ func (a *API) moveFile(ctx context.Context, input *jsonBody[moveRequest]) (*json
 }
 
 func (a *API) copyFile(ctx context.Context, input *jsonBody[copyRequest]) (*jsonBody[files.Entry], error) {
+	source, err := a.transferMount(ctx, currentUser(ctx), input.Body.From, input.Body.To)
+	if err != nil {
+		return nil, err
+	}
+	if source != nil {
+		return a.moveMounted(ctx, *source, input.Body.To, 0, true)
+	}
 	entry, err := a.files.Copy(ctx, currentUser(ctx), input.Body.From, input.Body.To)
 	if err != nil {
 		return nil, err
@@ -272,10 +337,24 @@ func (a *API) copyFile(ctx context.Context, input *jsonBody[copyRequest]) (*json
 }
 
 func (a *API) deleteFile(ctx context.Context, input *DeleteInput) (*struct{}, error) {
+	at, err := a.mountAt(ctx, currentUser(ctx), input.Path)
+	if err != nil {
+		return nil, err
+	}
+	if at != nil {
+		return nil, a.deleteMounted(ctx, *at, input.BaseRev)
+	}
 	return nil, a.files.Delete(ctx, currentUser(ctx), input.Path, input.BaseRev)
 }
 
 func (a *API) previewFile(ctx context.Context, input *PreviewInput) (*previewOutput, error) {
+	at, err := a.mountAt(ctx, currentUser(ctx), input.Path)
+	if err != nil {
+		return nil, err
+	}
+	if at != nil {
+		return a.previewMounted(ctx, *at, input.Size)
+	}
 	entry, err := a.files.Stat(ctx, currentUser(ctx), input.Path)
 	if err != nil {
 		return nil, err

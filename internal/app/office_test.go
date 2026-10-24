@@ -124,7 +124,7 @@ func (s *testServer) wopi(session officeSession, method, suffix string, body []b
 	for name, value := range headers {
 		request.Header.Set(name, value)
 	}
-	response, err := http.DefaultClient.Do(request)
+	response, err := s.server.Client().Do(request)
 	if err != nil {
 		s.t.Fatal(err)
 	}
@@ -415,4 +415,77 @@ func between(text, start, end string) string {
 	_, after, _ := strings.Cut(text, start)
 	value, _, _ := strings.Cut(after, end)
 	return value
+}
+
+func TestOfficeEditsFilesInsideShares(t *testing.T) {
+	server := startOfficeServer(t)
+	admin := server.setupAdmin()
+	alice := server.createUser(admin, "alice", 0)
+	bob := server.createUser(admin, "bob", 0)
+	carol := server.createUser(admin, "carol", 0)
+	alice.put("/Docs/report.docx", 0, []byte("draft"), http.StatusOK, nil)
+	docs := alice.stat("/Docs").ID
+	bobShare := alice.share(docs, "user", bob.me(), "write")
+	alice.share(docs, "user", carol.me(), "read")
+
+	session := bob.startOfficeSession("/Docs/report.docx", http.StatusCreated)
+	response, info := server.wopi(session, http.MethodGet, "", nil, nil)
+	if response.StatusCode != http.StatusOK || session.ReadOnly || !strings.Contains(info, `"UserFriendlyName":"bob"`) ||
+		!strings.Contains(info, `"UserCanWrite":true`) {
+		t.Fatalf("CheckFileInfo for a shared file: %d %s", response.StatusCode, info)
+	}
+	if response, content := server.wopi(session, http.MethodGet, "/contents", nil, nil); response.StatusCode != http.StatusOK || content != "draft" {
+		t.Fatalf("GetFile: %d %q", response.StatusCode, content)
+	}
+	if response, _ := server.wopi(session, http.MethodPost, "/contents", []byte("bob's edit"), nil); response.StatusCode != http.StatusOK {
+		t.Fatalf("PutFile: %d", response.StatusCode)
+	}
+	if _, onServer := alice.download("/Docs/report.docx", nil); string(onServer) != "bob's edit" {
+		t.Fatalf("the edit reached alice's file: %q", onServer)
+	}
+
+	if viewer := carol.startOfficeSession("/Docs/report.docx", http.StatusCreated); !viewer.ReadOnly {
+		t.Fatal("a view-only share opens read-only")
+	}
+
+	alice.mustJSON(http.MethodDelete, fmt.Sprintf("/shares/%d", bobShare.ID), nil, http.StatusNoContent, nil)
+	if response, _ := server.wopi(session, http.MethodGet, "/contents", nil, nil); response.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("an editor keeps no access after the share ends: %d", response.StatusCode)
+	}
+}
+
+func TestOfficeEditsFilesFromOtherServers(t *testing.T) {
+	collabora, _ := startFakeCollabora(t, http.StatusOK)
+	a := startFederatedServer(t, func(cfg *config.Config) { cfg.CollaboraURL = collabora })
+	fake := startFakeOCMServer(t)
+	fake.addFile("report.docx", "remote draft")
+	a.admin.mustJSON(http.MethodPost, "/admin/federation/servers", map[string]any{"remote": fake.remote, "allowPrivateNetwork": true}, http.StatusCreated, nil)
+	alice := a.createUser(a.admin, "alice", 0)
+	share := map[string]any{
+		"shareWith": "alice@" + a.remote, "name": "Project", "providerId": "p1", "owner": "carol@" + fake.remote,
+		"sender": "carol@" + fake.remote, "shareType": "user", "resourceType": "folder",
+		"protocol": map[string]any{"name": "multi", "webdav": map[string]any{
+			"sharedSecret": "secret-one", "permissions": []string{"read", "write"}, "uri": fake.server.URL + "/dav/ocm/share-1/",
+		}},
+	}
+	if status := fake.post(t, a.server.URL, "/ocm/shares", share); status != http.StatusCreated {
+		t.Fatalf("share: %d", status)
+	}
+	var incoming []incomingFederated
+	alice.mustJSON(http.MethodGet, "/federation/shares/incoming", nil, http.StatusOK, &incoming)
+	alice.mustJSON(http.MethodPost, fmt.Sprintf("/federation/shares/incoming/%d/accept", incoming[0].ID), nil, http.StatusOK, nil)
+
+	session := alice.startOfficeSession("/Project/report.docx", http.StatusCreated)
+	response, info := a.wopi(session, http.MethodGet, "", nil, nil)
+	if response.StatusCode != http.StatusOK || session.ReadOnly || !strings.Contains(info, `"BaseFileName":"report.docx"`) {
+		t.Fatalf("CheckFileInfo for a remote file: %d %s", response.StatusCode, info)
+	}
+	lastModified := between(info, `"LastModifiedTime":"`, `"`)
+	if response, content := a.wopi(session, http.MethodGet, "/contents", nil, nil); response.StatusCode != http.StatusOK || content != "remote draft" {
+		t.Fatalf("GetFile: %d %q", response.StatusCode, content)
+	}
+	response, saved := a.wopi(session, http.MethodPost, "/contents", []byte("edited here"), map[string]string{"X-COOL-WOPI-Timestamp": lastModified})
+	if response.StatusCode != http.StatusOK || fake.content("report.docx") != "edited here" {
+		t.Fatalf("PutFile: %d %s, remote has %q", response.StatusCode, saved, fake.content("report.docx"))
+	}
 }

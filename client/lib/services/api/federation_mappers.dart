@@ -1,6 +1,4 @@
-import "package:polder/models/directory_listing.dart";
 import "package:polder/models/federation.dart";
-import "package:polder/models/file_entry.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 import "package:polder/services/api/sharing_mappers.dart";
 
@@ -75,18 +73,7 @@ extension IncomingFederatedShareToModel on wire.IncomingFederatedShare {
     isDir: isDir,
     permissions: permissions.toModel(),
     state: _state(state.value),
-  );
-}
-
-extension RemoteEntryToModel on wire.RemoteEntry {
-  FileEntry toModel() =>
-      FileEntry(path: path, name: name, isDir: isDir, size: size, mtime: mtime.toLocal(), hash: etag, mime: mime);
-}
-
-extension RemoteListResponseToModel on wire.RemoteListResponse {
-  DirectoryListing toModel() => DirectoryListing(
-    path: item.path,
-    entries: [for (final entry in entries ?? <wire.RemoteEntry>[]) entry.toModel()],
+    mountPath: mountPath,
   );
 }
 

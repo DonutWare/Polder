@@ -9,6 +9,7 @@ import (
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/federation"
+	"polder-server/internal/files"
 	"polder-server/internal/logging"
 )
 
@@ -150,6 +151,13 @@ func (a *API) listIncomingFederatedShares(ctx context.Context, _ *struct{}) (*js
 	if err != nil {
 		return nil, err
 	}
+	paths, err := a.mountPaths(ctx, currentUser(ctx), files.MountFederated)
+	if err != nil {
+		return nil, err
+	}
+	for i := range list {
+		list[i].MountPath = paths[list[i].ID]
+	}
 	return respond(list), nil
 }
 
@@ -204,7 +212,11 @@ func (a *API) uploadFederatedShareFile(ctx context.Context, input *federatedUplo
 	if input.size == nil {
 		return nil, apperr.Invalid("uploads into a federated share need a Content-Length")
 	}
-	return nil, a.federation.RemoteWrite(ctx, currentUser(ctx), input.ShareID, input.Path, input.content, *input.size, input.MustNotExist)
+	baseRev := federation.RemoteOverwrite
+	if input.MustNotExist {
+		baseRev = federation.RemoteMustNotExist
+	}
+	return nil, a.federation.RemoteWrite(ctx, currentUser(ctx), input.ShareID, input.Path, input.content, *input.size, baseRev)
 }
 
 func (a *API) makeFederatedShareDirectory(ctx context.Context, input *federatedMkdirInput) (*struct{}, error) {

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
+	"hash/fnv"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/database"
 	"polder-server/internal/files"
 	"polder-server/internal/sharing"
 	"polder-server/internal/storage"
@@ -25,7 +27,7 @@ const (
 	maxRemoteEntries = 10000
 	remotePropfind   = `<?xml version="1.0" encoding="UTF-8"?>
 <d:propfind xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:ocm="http://open-cloud-mesh.org/ns">
-<d:prop><d:getlastmodified/><d:getcontentlength/><d:resourcetype/><d:getetag/><oc:permissions/><ocm:share-permissions/></d:prop>
+<d:prop><d:getlastmodified/><d:getcontentlength/><d:resourcetype/><d:getetag/><oc:permissions/><oc:size/><ocm:share-permissions/></d:prop>
 </d:propfind>`
 )
 
@@ -36,6 +38,7 @@ type RemoteEntry struct {
 	Size        int64                    `json:"size"`
 	Mtime       time.Time                `json:"mtime"`
 	ETag        string                   `json:"etag"`
+	Rev         int64                    `json:"rev" doc:"Changes whenever the item does; send it back as baseRev to write only over this version"`
 	Mime        string                   `json:"mime"`
 	Permissions sharing.SharePermissions `json:"permissions"`
 }
@@ -209,6 +212,7 @@ type davMultistatus struct {
 				ContentLength string `xml:"getcontentlength"`
 				ETag          string `xml:"getetag"`
 				Permissions   string `xml:"http://owncloud.org/ns permissions"`
+				FolderSize    string `xml:"http://owncloud.org/ns size"`
 				OCMPerms      string `xml:"http://open-cloud-mesh.org/ns share-permissions"`
 				ResourceType  struct {
 					Collection *struct{} `xml:"collection"`
@@ -255,8 +259,12 @@ func (r *remoteShare) propfind(ctx context.Context, relative, depth string) ([]R
 			prop := propstat.Prop
 			entry.IsDir = prop.ResourceType.Collection != nil
 			entry.Size, _ = strconv.ParseInt(strings.TrimSpace(prop.ContentLength), 10, 64)
+			if folderSize, err := strconv.ParseInt(strings.TrimSpace(prop.FolderSize), 10, 64); err == nil && entry.IsDir {
+				entry.Size = folderSize
+			}
 			entry.Mtime, _ = http.ParseTime(strings.TrimSpace(prop.LastModified))
 			entry.ETag = truncate(strings.Trim(strings.TrimSpace(prop.ETag), `"`), 128)
+			entry.Rev = revisionOf(entry.ETag)
 			entry.Permissions = remotePermissions(prop.Permissions, prop.OCMPerms)
 		}
 		if !entry.IsDir {
@@ -320,11 +328,72 @@ func (s *Service) RemoteList(ctx context.Context, user users.User, id int64, rel
 		return RemoteEntry{}, nil, err
 	}
 	self, children := entries[0], entries[1:]
-	if self.Path == storage.RootPath && (self.IsDir != row.isDir || maskFromPermissions(self.Permissions) != row.permissions) {
-		_, _ = s.db.ExecContext(ctx, `UPDATE federated_shares_in SET is_dir = $1, permissions = $2 WHERE id = $3`,
-			self.IsDir, maskFromPermissions(self.Permissions), row.id)
+	if self.Path != storage.RootPath {
+		return self, children, nil
 	}
-	return self, children, nil
+	s.rememberRoot(ctx, &row, self)
+	if self.IsDir {
+		return row.withShareName(self), children, nil
+	}
+	self = row.withShareName(self)
+	return self, []RemoteEntry{self}, nil
+}
+
+func (s *Service) RemoteStat(ctx context.Context, user users.User, id int64, relative string) (RemoteEntry, error) {
+	remote, row, err := s.openRemote(ctx, user, id)
+	if err != nil {
+		return RemoteEntry{}, err
+	}
+	entry, err := remote.stat(ctx, relative)
+	if err != nil {
+		return RemoteEntry{}, err
+	}
+	if entry.Path != storage.RootPath {
+		return entry, nil
+	}
+	s.rememberRoot(ctx, &row, entry)
+	return row.withShareName(entry), nil
+}
+
+func (s *Service) rememberRoot(ctx context.Context, row *incomingRow, root RemoteEntry) {
+	permissions := maskFromPermissions(root.Permissions)
+	mtime := unixOrZero(root.Mtime)
+	stored := int64(0)
+	if row.remoteMtime != nil {
+		stored = row.remoteMtime.Unix()
+	}
+	if root.IsDir == row.isDir && permissions == row.permissions && root.Size == row.remoteSize && mtime == stored {
+		return
+	}
+	row.isDir, row.permissions, row.remoteSize, row.remoteMtime = root.IsDir, permissions, root.Size, nil
+	if mtime != 0 {
+		changed := time.Unix(mtime, 0)
+		row.remoteMtime = &changed
+	}
+	_, _ = s.db.ExecContext(ctx, `UPDATE federated_shares_in SET is_dir = $1, permissions = $2, remote_size = $3, remote_mtime = $4 WHERE id = $5`,
+		root.IsDir, permissions, root.Size, database.NullIfZero(mtime), row.id)
+}
+
+func unixOrZero(moment time.Time) int64 {
+	if moment.IsZero() {
+		return 0
+	}
+	return moment.Unix()
+}
+
+func (r incomingRow) withShareName(root RemoteEntry) RemoteEntry {
+	root.Name = r.name
+	if !root.IsDir {
+		root.Mime = files.MimeFor(r.name)
+	}
+	return root
+}
+
+func (r incomingRow) nameAt(relative string) string {
+	if clean, err := storage.CleanPath(relative); err == nil && clean == storage.RootPath {
+		return r.name
+	}
+	return storage.BaseName(relative)
 }
 
 type RemoteContent struct {
@@ -339,7 +408,7 @@ type RemoteContent struct {
 }
 
 func (s *Service) RemoteOpen(ctx context.Context, user users.User, id int64, relative, rangeHeader, ifNoneMatch string) (RemoteContent, error) {
-	remote, _, err := s.openRemote(ctx, user, id)
+	remote, row, err := s.openRemote(ctx, user, id)
 	if err != nil {
 		return RemoteContent{}, err
 	}
@@ -360,7 +429,7 @@ func (s *Service) RemoteOpen(ctx context.Context, user users.User, id int64, rel
 		response.Body.Close()
 		return RemoteContent{}, remoteFailure(response)
 	}
-	name := storage.BaseName(relative)
+	name := row.nameAt(relative)
 	return RemoteContent{
 		Status: response.StatusCode, Body: response.Body, ContentLength: response.Header.Get("Content-Length"),
 		ContentRange: response.Header.Get("Content-Range"), ETag: response.Header.Get("ETag"),
@@ -368,8 +437,24 @@ func (s *Service) RemoteOpen(ctx context.Context, user users.User, id int64, rel
 	}, nil
 }
 
-func (s *Service) RemoteWrite(ctx context.Context, user users.User, id int64, relative string, content io.Reader, size int64, mustNotExist bool) error {
-	remote, _, err := s.openRemote(ctx, user, id)
+func revisionOf(etag string) int64 {
+	if etag == "" {
+		return 0
+	}
+	hash := fnv.New64a()
+	_, _ = hash.Write([]byte(etag))
+	return int64(hash.Sum64()>>(64-maxSafeRevisionBits)) | 1
+}
+
+const maxSafeRevisionBits = 53
+
+const (
+	RemoteMustNotExist int64 = 0
+	RemoteOverwrite    int64 = -1
+)
+
+func (s *Service) RemoteWrite(ctx context.Context, user users.User, id int64, relative string, content io.Reader, size, baseRev int64) error {
+	remote, row, err := s.openRemote(ctx, user, id)
 	if err != nil {
 		return err
 	}
@@ -377,8 +462,21 @@ func (s *Service) RemoteWrite(ctx context.Context, user users.User, id int64, re
 		return apperr.Invalid("uploads into a federated share need a Content-Length")
 	}
 	headers := map[string]string{}
-	if mustNotExist {
+	switch {
+	case baseRev == RemoteMustNotExist:
 		headers["If-None-Match"] = "*"
+	case baseRev > 0:
+		current, err := remote.stat(ctx, relative)
+		if err != nil {
+			return err
+		}
+		if current.Path == storage.RootPath {
+			current = row.withShareName(current)
+		}
+		if current.Rev != baseRev {
+			return apperr.Conflict(current, "%s changed on the remote server", row.nameAt(relative))
+		}
+		headers["If-Match"] = `"` + current.ETag + `"`
 	}
 	target, err := remote.url(relative)
 	if err != nil {
@@ -398,6 +496,9 @@ func (s *Service) RemoteWrite(ctx context.Context, user users.User, id int64, re
 		return apperr.Unavailable("the remote server cannot be reached")
 	}
 	defer response.Body.Close()
+	if response.StatusCode == http.StatusPreconditionFailed && baseRev > 0 {
+		return apperr.Conflict(nil, "%s changed on the remote server", row.nameAt(relative))
+	}
 	if response.StatusCode != http.StatusCreated && response.StatusCode != http.StatusNoContent && response.StatusCode != http.StatusOK {
 		return remoteFailure(response)
 	}

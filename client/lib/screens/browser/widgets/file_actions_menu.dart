@@ -12,14 +12,16 @@ import "package:polder/providers/trash/trash_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
+import "package:polder/screens/browser/widgets/mount_details_sheet.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/file_dialogs.dart";
 import "package:polder/widgets/shared/icon_menu_item.dart";
+import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/sharing/share_panel.dart";
 
-enum _FileAction { open, edit, download, share, history, rename, copy, move, delete }
+enum _FileAction { open, edit, download, share, shareDetails, history, rename, copy, move, delete }
 
 abstract final class FileActions {
   static RelativeRect menuPositionAt(BuildContext context, Offset globalPosition) {
@@ -48,6 +50,10 @@ abstract final class FileActions {
   }) async {
     if (entries.isEmpty) return;
     final single = entries.length == 1 ? entries.single : null;
+    final inShare = entries.any((entry) => entry.mount != null);
+    final includesShareRoot = entries.any((entry) => entry.isMountRoot);
+    bool allowed(bool Function(SharePermissions permissions) test) =>
+        !includesShareRoot && entries.every((entry) => entry.mount == null || test(entry.mount!.permissions));
     final editable = single != null && (ref.read(editorCapabilitiesProvider).value?.canOpen(single) ?? false);
     final hasFiles = entries.any((entry) => !entry.isDir);
     final error = Theme.of(context).colorScheme.error;
@@ -59,13 +65,20 @@ abstract final class FileActions {
         if (editable) iconMenuItem(_FileAction.edit, IconsaxPlusLinear.edit, context.localized.editorOpen),
         if (hasFiles)
           iconMenuItem(_FileAction.download, IconsaxPlusLinear.document_download, context.localized.download),
-        if (single != null) iconMenuItem(_FileAction.share, IconsaxPlusLinear.share, context.localized.share),
-        if (single != null && !single.isDir)
+        if (single != null && !inShare)
+          iconMenuItem(_FileAction.share, IconsaxPlusLinear.share, context.localized.share),
+        if (single?.mount != null)
+          iconMenuItem(_FileAction.shareDetails, IconsaxPlusLinear.people, context.localized.shareDetailsTitle),
+        if (single != null && !single.isDir && !inShare)
           iconMenuItem(_FileAction.history, IconsaxPlusLinear.clock, context.localized.versionHistory),
-        if (single != null) iconMenuItem(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
-        iconMenuItem(_FileAction.copy, IconsaxPlusLinear.copy, context.localized.copy),
-        iconMenuItem(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
-        iconMenuItem(_FileAction.delete, IconsaxPlusLinear.trash, context.localized.delete, color: error),
+        if (single != null && allowed((permissions) => permissions.edit))
+          iconMenuItem(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
+        if (allowed((permissions) => permissions.create))
+          iconMenuItem(_FileAction.copy, IconsaxPlusLinear.copy, context.localized.copy),
+        if (allowed((permissions) => permissions.create && permissions.delete))
+          iconMenuItem(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
+        if (allowed((permissions) => permissions.delete))
+          iconMenuItem(_FileAction.delete, IconsaxPlusLinear.trash, context.localized.delete, color: error),
       ],
     );
     if (action == null || !context.mounted) return;
@@ -81,6 +94,8 @@ abstract final class FileActions {
         }
       case _FileAction.share:
         await showSharePanel(context, SharedFile.of(single!));
+      case _FileAction.shareDetails:
+        await showMountDetails(context, single!);
       case _FileAction.history:
         await showFileHistory(context, single!);
       case _FileAction.rename:
@@ -120,7 +135,7 @@ abstract final class FileActions {
           : context.localized.moveItemsTitle(entries.length),
       confirmLabel: context.localized.moveHere,
       excluded: _folders(entries),
-      canChoose: (path) => path != parentPath,
+      canChoose: (path) => path != parentPath && _withinSameShare(ref, entries, path),
     );
     if (destination == null || !context.mounted) return;
     await context.runWithFeedback(directory.moveAllTo(entries, destination));
@@ -142,9 +157,16 @@ abstract final class FileActions {
           : context.localized.copyItemsTitle(entries.length),
       confirmLabel: context.localized.copyHere,
       excluded: _folders(entries),
+      canChoose: (path) => _withinSameShare(ref, entries, path),
     );
     if (destination == null || !context.mounted) return;
     await context.runWithFeedback(directory.copyAllTo(entries, destination, copySuffix: context.localized.copySuffix));
+  }
+
+  static bool _withinSameShare(WidgetRef ref, List<FileEntry> entries, String destination) {
+    if (entries.first.mount case final mount?) return mount.contains(destination);
+    final mounts = ref.read(directoryProvider(RemotePath.root)).value?.entries.where((entry) => entry.isMountRoot);
+    return !(mounts ?? const <FileEntry>[]).any((entry) => entry.mount!.contains(destination));
   }
 
   // Folders can't go into themselves, so the picker greys them out.

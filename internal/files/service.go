@@ -123,6 +123,18 @@ func (s *Service) existingEntry(ctx context.Context, q querier, userID int64, cl
 	return entry, nil
 }
 
+func (s *Service) StatWithSize(ctx context.Context, owner users.User, rawPath string) (Entry, error) {
+	entry, err := s.Stat(ctx, owner, rawPath)
+	if err != nil || !entry.IsDir {
+		return entry, err
+	}
+	prefix := descendantPrefix(entry.Path)
+	err = s.db.QueryRowContext(ctx,
+		`SELECT COALESCE(SUM(size), 0) FROM files WHERE user_id = $1 AND is_dir = FALSE AND SUBSTR(path, 1, $2) = $3`,
+		owner.ID, utf8.RuneCountInString(prefix), prefix).Scan(&entry.Size)
+	return entry, err
+}
+
 func (s *Service) List(ctx context.Context, owner users.User, rawPath string) (string, []Entry, error) {
 	directory, err := s.Stat(ctx, owner, rawPath)
 	if err != nil {

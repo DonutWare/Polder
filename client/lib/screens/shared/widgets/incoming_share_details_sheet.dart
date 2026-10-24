@@ -1,13 +1,12 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
-import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder/screens/shared/mounted_share_screen.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
@@ -65,7 +64,14 @@ class _IncomingShareDetailsSheet extends ConsumerWidget {
               onPressed: () {
                 final navigator = Navigator.of(context);
                 navigator.pop();
-                navigator.context.go(AppRoutes.sharedAt(share.id));
+                openMountedShare(
+                  navigator.context,
+                  ref,
+                  origin: ShareOrigin.local,
+                  shareId: share.id,
+                  isDir: share.entry.isDir,
+                  mountPath: share.mountPath,
+                );
               },
             ),
             if (share.direct) ...[

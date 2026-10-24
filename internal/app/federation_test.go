@@ -29,7 +29,7 @@ type federatedServer struct {
 	admin  *client
 }
 
-func startFederatedServer(t *testing.T) *federatedServer {
+func startFederatedServer(t *testing.T, configure ...func(*config.Config)) *federatedServer {
 	t.Helper()
 	handler := http.NotFoundHandler()
 	var mu sync.RWMutex
@@ -51,6 +51,9 @@ func startFederatedServer(t *testing.T) *federatedServer {
 	cfg.RescanInterval = 0
 	cfg.TesseractPath = ""
 	cfg.PublicURL = tlsServer.URL
+	for _, change := range configure {
+		change(&cfg)
+	}
 	application, err := app.New(cfg)
 	if err != nil {
 		t.Fatal(err)

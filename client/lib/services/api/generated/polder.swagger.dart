@@ -3048,6 +3048,53 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     ),
   });
 
+  ///Whether shares appear in the logged-in user's files
+  Future<chopper.Response<ShareDisplaySettings>> getShareDisplaySettings() {
+    generatedMapping.putIfAbsent(ShareDisplaySettings, () => ShareDisplaySettings.fromJsonFactory);
+
+    return _getShareDisplaySettings();
+  }
+
+  ///Whether shares appear in the logged-in user's files
+  @GET(path: '/api/v1/shares/settings')
+  Future<chopper.Response<ShareDisplaySettings>> _getShareDisplaySettings({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether shares appear in the logged-in user\'s files',
+      operationId: 'getShareDisplaySettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  });
+
+  ///Show or hide shares at the root of the logged-in user's files
+  Future<chopper.Response<ShareDisplaySettings>> setShareDisplaySettings({required ShareDisplaySettings? body}) {
+    generatedMapping.putIfAbsent(ShareDisplaySettings, () => ShareDisplaySettings.fromJsonFactory);
+
+    return _setShareDisplaySettings(body: body);
+  }
+
+  ///Show or hide shares at the root of the logged-in user's files
+  @PUT(path: '/api/v1/shares/settings', optionalBody: true)
+  Future<chopper.Response<ShareDisplaySettings>> _setShareDisplaySettings({
+    @Body() required ShareDisplaySettings? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Show or hide shares at the root of the logged-in user\'s files',
+      operationId: 'setShareDisplaySettings',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  });
+
   ///Stop sharing; recipients of a direct share may also remove it
   ///@param shareID
   Future<chopper.Response> deleteShare({required int? shareID}) {

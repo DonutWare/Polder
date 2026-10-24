@@ -1,11 +1,9 @@
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder/models/federation.dart";
-import "package:polder/models/file_space.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/federation/federation_providers.dart";
-import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/settings/widgets/app_passwords_group.dart";
 
 import "../support/provider_harness.dart";
@@ -31,6 +29,8 @@ Map<String, Object?> incomingJson(int id, String state, {bool create = false}) =
   "permissions": {"create": create, "edit": create, "delete": false},
   "state": state,
   "createdAt": "2026-10-01T10:00:00Z",
+  "mountPath": state == "accepted" ? "/Docs" : "",
+  "size": 0,
 };
 
 Map<String, Object?> outgoingJson(int id, Map<String, bool> permissions) => {
@@ -118,19 +118,18 @@ void main() {
     expect(harness.container.read(appPasswordsProvider).value!.map((p) => p.name), ["phone"]);
   });
 
-  test("accepting an incoming federated share unlocks its space", () async {
+  test("accepting an incoming federated share places it in the user's files", () async {
     await harness.container.read(accountProvider.future);
     final shares = await harness.container.read(incomingFederatedSharesProvider.future);
     expect(shares.single.isPending, isTrue);
+    expect(shares.single.mountPath, isEmpty);
     expect(shares.single.shownOwner, "Bob (bob@cloud.example.com)");
-    const space = FileSpace.federated(shareId: 3);
-    expect(harness.container.read(spaceCapabilitiesProvider(space)).canCreate, isFalse);
 
     await harness.container.read(incomingFederatedSharesProvider.notifier).accept(shares.single);
-    expect(harness.container.read(incomingFederatedShareProvider(3))!.state, FederatedShareState.accepted);
-    final capabilities = harness.container.read(spaceCapabilitiesProvider(space));
-    expect(capabilities.canCreate, isTrue);
-    expect(capabilities.canDownloadArchive, isFalse);
+    final accepted = harness.container.read(incomingFederatedShareProvider(3))!;
+    expect(accepted.state, FederatedShareState.accepted);
+    expect(accepted.mountPath, "/Docs");
+    expect(accepted.permissions.create, isTrue);
   });
 
   test("sharing with a cloud ID sends trimmed recipient and permissions for the entry", () async {
@@ -157,7 +156,10 @@ void main() {
     expect(contact.matches("erin"), isTrue);
     expect(contact.matches("uuid-1"), isTrue);
     expect(contact.matches("bob"), isFalse);
-    expect(harness.container.read(federationContactsProvider).value!.single.cloudId, "uuid-1@idp.example@cloud.example.com");
+    expect(
+      harness.container.read(federationContactsProvider).value!.single.cloudId,
+      "uuid-1@idp.example@cloud.example.com",
+    );
   });
 
   test("cloud IDs and WebDAV addresses", () {

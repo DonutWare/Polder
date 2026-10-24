@@ -116,6 +116,8 @@ scripts/dev-office.sh             # server + Collabora Online in Docker
 scripts/dev-office.sh eurooffice  # server + Euro-Office in Docker
 ```
 
+To test federation against Nextcloud, see [dev/nextcloud](../dev/nextcloud/README.md).
+
 The launch configurations `Server (Collabora)` and `Server (Euro-Office)` start
 the editor in Docker and then debug the server against it.
 

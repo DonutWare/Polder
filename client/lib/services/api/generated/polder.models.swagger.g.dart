@@ -290,11 +290,13 @@ Entry _$EntryFromJson(Map<String, dynamic> json) => Entry(
   isDir: json['isDir'] as bool,
   meta: json['meta'] as Map<String, dynamic>,
   mime: json['mime'] as String,
+  mount: json['mount'] == null ? null : Mount.fromJson(json['mount'] as Map<String, dynamic>),
   mtime: DateTime.parse(json['mtime'] as String),
   name: json['name'] as String,
   path: json['path'] as String,
   previewState: entryPreviewStateFromJson(json['previewState']),
   rev: (json['rev'] as num).toInt(),
+  shared: json['shared'] as bool?,
   size: (json['size'] as num).toInt(),
 );
 
@@ -304,11 +306,13 @@ Map<String, dynamic> _$EntryToJson(Entry instance) => <String, dynamic>{
   'isDir': instance.isDir,
   'meta': instance.meta,
   'mime': instance.mime,
+  'mount': ?instance.mount?.toJson(),
   'mtime': instance.mtime.toIso8601String(),
   'name': instance.name,
   'path': instance.path,
   'previewState': ?entryPreviewStateToJson(instance.previewState),
   'rev': instance.rev,
+  'shared': ?instance.shared,
   'size': instance.size,
 };
 
@@ -504,6 +508,8 @@ IncomingFederatedShare _$IncomingFederatedShareFromJson(Map<String, dynamic> jso
   createdAt: DateTime.parse(json['createdAt'] as String),
   id: (json['id'] as num).toInt(),
   isDir: json['isDir'] as bool,
+  mountPath: json['mountPath'] as String,
+  mtime: json['mtime'] == null ? null : DateTime.parse(json['mtime'] as String),
   name: json['name'] as String,
   owner: json['owner'] as String,
   ownerName: json['ownerName'] as String,
@@ -511,6 +517,7 @@ IncomingFederatedShare _$IncomingFederatedShareFromJson(Map<String, dynamic> jso
   provider: json['provider'] as String,
   server: json['server'] as String,
   sharedBy: json['sharedBy'] as String,
+  size: (json['size'] as num).toInt(),
   state: incomingFederatedShareStateFromJson(json['state']),
 );
 
@@ -518,6 +525,8 @@ Map<String, dynamic> _$IncomingFederatedShareToJson(IncomingFederatedShare insta
   'createdAt': instance.createdAt.toIso8601String(),
   'id': instance.id,
   'isDir': instance.isDir,
+  'mountPath': instance.mountPath,
+  'mtime': ?instance.mtime?.toIso8601String(),
   'name': instance.name,
   'owner': instance.owner,
   'ownerName': instance.ownerName,
@@ -525,6 +534,7 @@ Map<String, dynamic> _$IncomingFederatedShareToJson(IncomingFederatedShare insta
   'provider': instance.provider,
   'server': instance.server,
   'sharedBy': instance.sharedBy,
+  'size': instance.size,
   'state': ?incomingFederatedShareStateToJson(instance.state),
 };
 
@@ -535,6 +545,7 @@ IncomingShare _$IncomingShareFromJson(Map<String, dynamic> json) => IncomingShar
   expiresAt: json['expiresAt'] == null ? null : DateTime.parse(json['expiresAt'] as String),
   groups: (json['groups'] as List<dynamic>?)?.map((e) => GroupRef.fromJson(e as Map<String, dynamic>)).toList() ?? [],
   id: (json['id'] as num).toInt(),
+  mountPath: json['mountPath'] as String,
   note: json['note'] as String,
   owner: UserSummary.fromJson(json['owner'] as Map<String, dynamic>),
   permissions: SharePermissions.fromJson(json['permissions'] as Map<String, dynamic>),
@@ -547,6 +558,7 @@ Map<String, dynamic> _$IncomingShareToJson(IncomingShare instance) => <String, d
   'expiresAt': ?instance.expiresAt?.toIso8601String(),
   'groups': ?instance.groups?.map((e) => e.toJson()).toList(),
   'id': instance.id,
+  'mountPath': instance.mountPath,
   'note': instance.note,
   'owner': instance.owner.toJson(),
   'permissions': instance.permissions.toJson(),
@@ -666,12 +678,14 @@ Map<String, dynamic> _$LinksResponseToJson(LinksResponse instance) => <String, d
 ListResponse _$ListResponseFromJson(Map<String, dynamic> json) => ListResponse(
   entries: (json['entries'] as List<dynamic>?)?.map((e) => Entry.fromJson(e as Map<String, dynamic>)).toList() ?? [],
   indexing: json['indexing'] as bool,
+  mount: json['mount'] == null ? null : Mount.fromJson(json['mount'] as Map<String, dynamic>),
   path: json['path'] as String,
 );
 
 Map<String, dynamic> _$ListResponseToJson(ListResponse instance) => <String, dynamic>{
   'entries': ?instance.entries?.map((e) => e.toJson()).toList(),
   'indexing': instance.indexing,
+  'mount': ?instance.mount?.toJson(),
   'path': instance.path,
 };
 
@@ -820,6 +834,49 @@ Member _$MemberFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
   'role': ?memberRoleToJson(instance.role),
   'user': instance.user.toJson(),
+};
+
+Mount _$MountFromJson(Map<String, dynamic> json) => Mount(
+  canLeave: json['canLeave'] as bool,
+  expiresAt: json['expiresAt'] == null ? null : DateTime.parse(json['expiresAt'] as String),
+  groups: (json['groups'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  isDir: json['isDir'] as bool,
+  kind: mountKindFromJson(json['kind']),
+  note: json['note'] as String?,
+  owner: json['owner'] as String,
+  ownerName: json['ownerName'] as String,
+  path: json['path'] as String,
+  permissions: MountPermissions.fromJson(json['permissions'] as Map<String, dynamic>),
+  provider: json['provider'] as String?,
+  server: json['server'] as String?,
+  shareId: (json['shareId'] as num).toInt(),
+  sharedAt: DateTime.parse(json['sharedAt'] as String),
+);
+
+Map<String, dynamic> _$MountToJson(Mount instance) => <String, dynamic>{
+  'canLeave': instance.canLeave,
+  'expiresAt': ?instance.expiresAt?.toIso8601String(),
+  'groups': ?instance.groups,
+  'isDir': instance.isDir,
+  'kind': ?mountKindToJson(instance.kind),
+  'note': ?instance.note,
+  'owner': instance.owner,
+  'ownerName': instance.ownerName,
+  'path': instance.path,
+  'permissions': instance.permissions.toJson(),
+  'provider': ?instance.provider,
+  'server': ?instance.server,
+  'shareId': instance.shareId,
+  'sharedAt': instance.sharedAt.toIso8601String(),
+};
+
+MountPermissions _$MountPermissionsFromJson(Map<String, dynamic> json) =>
+    MountPermissions(create: json['create'] as bool, delete: json['delete'] as bool, edit: json['edit'] as bool);
+
+Map<String, dynamic> _$MountPermissionsToJson(MountPermissions instance) => <String, dynamic>{
+  'create': instance.create,
+  'delete': instance.delete,
+  'edit': instance.edit,
 };
 
 MoveRequest _$MoveRequestFromJson(Map<String, dynamic> json) =>
@@ -1107,6 +1164,7 @@ RemoteEntry _$RemoteEntryFromJson(Map<String, dynamic> json) => RemoteEntry(
   name: json['name'] as String,
   path: json['path'] as String,
   permissions: SharePermissions.fromJson(json['permissions'] as Map<String, dynamic>),
+  rev: (json['rev'] as num).toInt(),
   size: (json['size'] as num).toInt(),
 );
 
@@ -1118,6 +1176,7 @@ Map<String, dynamic> _$RemoteEntryToJson(RemoteEntry instance) => <String, dynam
   'name': instance.name,
   'path': instance.path,
   'permissions': instance.permissions.toJson(),
+  'rev': instance.rev,
   'size': instance.size,
 };
 
@@ -1397,6 +1456,13 @@ Map<String, dynamic> _$ShareChangesToJson(ShareChanges instance) => <String, dyn
   'note': ?instance.note,
   'permissions': ?instance.permissions?.toJson(),
   'removeExpiry': ?instance.removeExpiry,
+};
+
+ShareDisplaySettings _$ShareDisplaySettingsFromJson(Map<String, dynamic> json) =>
+    ShareDisplaySettings(showInFiles: json['showInFiles'] as bool);
+
+Map<String, dynamic> _$ShareDisplaySettingsToJson(ShareDisplaySettings instance) => <String, dynamic>{
+  'showInFiles': instance.showInFiles,
 };
 
 ShareLink _$ShareLinkFromJson(Map<String, dynamic> json) => ShareLink(

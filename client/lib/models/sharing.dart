@@ -4,6 +4,7 @@ import "package:polder/models/branding.dart";
 import "package:polder/models/file_entry.dart";
 
 part "sharing.freezed.dart";
+part "sharing.g.dart";
 
 @freezed
 abstract class SharePermissions with _$SharePermissions {
@@ -14,6 +15,8 @@ abstract class SharePermissions with _$SharePermissions {
     @Default(false) bool edit,
     @Default(false) bool delete,
   }) = _SharePermissions;
+
+  factory SharePermissions.fromJson(Map<String, dynamic> json) => _$SharePermissionsFromJson(json);
 
   static const viewOnly = SharePermissions();
 
@@ -94,6 +97,7 @@ abstract class IncomingShare with _$IncomingShare {
     DateTime? expiresAt,
     @Default("") String note,
     required FileEntry entry,
+    @Default("") String mountPath,
   }) = _IncomingShare;
 }
 

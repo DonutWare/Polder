@@ -8,6 +8,8 @@ import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_mount.dart";
+import "package:polder/models/sharing.dart";
 import "package:polder/models/file_links.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
@@ -38,6 +40,27 @@ extension EntryToModel on wire.Entry {
     mime: mime,
     meta: meta,
     previewState: _previewState(previewState.value),
+    mount: mount?.toModel(),
+    sharedByYou: shared ?? false,
+  );
+}
+
+extension MountToModel on wire.Mount {
+  FileMount toModel() => FileMount(
+    kind: kind == wire.MountKind.federated ? FileMountKind.federated : FileMountKind.share,
+    shareId: shareId,
+    path: path,
+    isDir: isDir,
+    owner: owner,
+    ownerName: ownerName,
+    server: server ?? "",
+    provider: provider ?? "",
+    groups: groups ?? const [],
+    permissions: SharePermissions(create: permissions.create, edit: permissions.edit, delete: permissions.delete),
+    canLeave: canLeave,
+    note: note ?? "",
+    expiresAt: expiresAt?.toLocal(),
+    sharedAt: sharedAt.toLocal(),
   );
 }
 
@@ -48,6 +71,7 @@ extension ListResponseToModel on wire.ListResponse {
     path: path,
     entries: [for (final entry in entries ?? <wire.Entry>[]) entry.toModel()],
     indexing: indexing,
+    mount: mount?.toModel(),
   );
 }
 

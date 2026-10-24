@@ -18,28 +18,27 @@ _FileEntry _$FileEntryFromJson(Map<String, dynamic> json) => _FileEntry(
   mime: json['mime'] as String? ?? "",
   meta: json['meta'] as Map<String, dynamic>? ?? const <String, dynamic>{},
   previewState:
-      $enumDecodeNullable(
-        _$PreviewStateEnumMap,
-        json['previewState'],
-        unknownValue: PreviewState.none,
-      ) ??
+      $enumDecodeNullable(_$PreviewStateEnumMap, json['previewState'], unknownValue: PreviewState.none) ??
       PreviewState.none,
+  mount: json['mount'] == null ? null : FileMount.fromJson(json['mount'] as Map<String, dynamic>),
+  sharedByYou: json['sharedByYou'] as bool? ?? false,
 );
 
-Map<String, dynamic> _$FileEntryToJson(_FileEntry instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'path': instance.path,
-      'name': instance.name,
-      'isDir': instance.isDir,
-      'size': instance.size,
-      'mtime': instance.mtime.toIso8601String(),
-      'rev': instance.rev,
-      'hash': instance.hash,
-      'mime': instance.mime,
-      'meta': instance.meta,
-      'previewState': _$PreviewStateEnumMap[instance.previewState]!,
-    };
+Map<String, dynamic> _$FileEntryToJson(_FileEntry instance) => <String, dynamic>{
+  'id': instance.id,
+  'path': instance.path,
+  'name': instance.name,
+  'isDir': instance.isDir,
+  'size': instance.size,
+  'mtime': instance.mtime.toIso8601String(),
+  'rev': instance.rev,
+  'hash': instance.hash,
+  'mime': instance.mime,
+  'meta': instance.meta,
+  'previewState': _$PreviewStateEnumMap[instance.previewState]!,
+  'mount': ?instance.mount?.toJson(),
+  'sharedByYou': instance.sharedByYou,
+};
 
 const _$PreviewStateEnumMap = {
   PreviewState.none: 'none',

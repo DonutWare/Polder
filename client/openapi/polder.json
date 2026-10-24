@@ -630,6 +630,10 @@
           "mime": {
             "type": "string"
           },
+          "mount": {
+            "$ref": "#/components/schemas/Mount",
+            "description": "Set on a share that sits in the user's files, and on everything inside it"
+          },
           "mtime": {
             "format": "date-time",
             "type": "string"
@@ -652,6 +656,10 @@
           "rev": {
             "format": "int64",
             "type": "integer"
+          },
+          "shared": {
+            "description": "Whether the user shares this item with someone: a user, a group, another server or a link",
+            "type": "boolean"
           },
           "size": {
             "format": "int64",
@@ -1089,6 +1097,15 @@
           "isDir": {
             "type": "boolean"
           },
+          "mountPath": {
+            "description": "Where the item sits in the user's files once accepted; empty while pending",
+            "type": "string"
+          },
+          "mtime": {
+            "description": "When the shared item last changed, as last seen",
+            "format": "date-time",
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
@@ -1114,6 +1131,11 @@
             "description": "Cloud ID of whoever shared it; usually the owner",
             "type": "string"
           },
+          "size": {
+            "description": "The shared item's size, as last seen",
+            "format": "int64",
+            "type": "integer"
+          },
           "state": {
             "description": "Pending until accepted; pending shares cannot be opened",
             "enum": [
@@ -1134,7 +1156,9 @@
           "isDir",
           "permissions",
           "state",
-          "createdAt"
+          "createdAt",
+          "mountPath",
+          "size"
         ],
         "type": "object"
       },
@@ -1170,6 +1194,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "mountPath": {
+            "description": "Where the item sits in the user's files; it opens there even while shares are hidden from the files root",
+            "type": "string"
+          },
           "note": {
             "type": "string"
           },
@@ -1189,7 +1217,8 @@
           "permissions",
           "note",
           "entry",
-          "createdAt"
+          "createdAt",
+          "mountPath"
         ],
         "type": "object"
       },
@@ -1403,6 +1432,10 @@
           "indexing": {
             "description": "Files found on disk are still being added, so the listing may be incomplete",
             "type": "boolean"
+          },
+          "mount": {
+            "$ref": "#/components/schemas/Mount",
+            "description": "The share the listed folder is in, when it is inside one"
           },
           "path": {
             "type": "string"
@@ -1744,6 +1777,109 @@
         "required": [
           "user",
           "role"
+        ],
+        "type": "object"
+      },
+      "Mount": {
+        "additionalProperties": false,
+        "properties": {
+          "canLeave": {
+            "description": "Whether the user can remove the share; not when it reaches them only through a group",
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "groups": {
+            "description": "Groups the share reached the user through",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "isDir": {
+            "description": "Whether the shared item is a folder",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "share for another user on this server, federated for someone on another server",
+            "enum": [
+              "share",
+              "federated"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "owner": {
+            "description": "The owner's username, or their cloud ID on another server",
+            "type": "string"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "path": {
+            "description": "Where the share sits in the user's files",
+            "type": "string"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/MountPermissions",
+            "description": "What the user may do inside the share"
+          },
+          "provider": {
+            "description": "The software the other server runs",
+            "type": "string"
+          },
+          "server": {
+            "description": "The other server, for federated shares",
+            "type": "string"
+          },
+          "shareId": {
+            "description": "The incoming share's ID, under /shares or /federation/shares/incoming",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sharedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "shareId",
+          "path",
+          "isDir",
+          "owner",
+          "ownerName",
+          "permissions",
+          "canLeave",
+          "sharedAt"
+        ],
+        "type": "object"
+      },
+      "MountPermissions": {
+        "additionalProperties": false,
+        "properties": {
+          "create": {
+            "description": "Add files and folders",
+            "type": "boolean"
+          },
+          "delete": {
+            "description": "Delete files and folders",
+            "type": "boolean"
+          },
+          "edit": {
+            "description": "Change and rename existing files",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "create",
+          "edit",
+          "delete"
         ],
         "type": "object"
       },
@@ -2347,6 +2483,11 @@
           "permissions": {
             "$ref": "#/components/schemas/SharePermissions"
           },
+          "rev": {
+            "description": "Changes whenever the item does; send it back as baseRev to write only over this version",
+            "format": "int64",
+            "type": "integer"
+          },
           "size": {
             "format": "int64",
             "type": "integer"
@@ -2359,6 +2500,7 @@
           "size",
           "mtime",
           "etag",
+          "rev",
           "mime",
           "permissions"
         ],
@@ -2974,6 +3116,19 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "ShareDisplaySettings": {
+        "additionalProperties": false,
+        "properties": {
+          "showInFiles": {
+            "description": "Whether shares appear at the root of the user's files; when off they open only from the shares list",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "showInFiles"
+        ],
         "type": "object"
       },
       "ShareLink": {
@@ -10448,6 +10603,106 @@
           }
         ],
         "summary": "What the logged-in user shares with others",
+        "tags": [
+          "shares"
+        ]
+      }
+    },
+    "/api/v1/shares/settings": {
+      "get": {
+        "operationId": "getShareDisplaySettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareDisplaySettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Whether shares appear in the logged-in user's files",
+        "tags": [
+          "shares"
+        ]
+      },
+      "put": {
+        "operationId": "setShareDisplaySettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShareDisplaySettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShareDisplaySettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Show or hide shares at the root of the logged-in user's files",
         "tags": [
           "shares"
         ]

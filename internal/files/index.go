@@ -99,15 +99,19 @@ func listChildren(ctx context.Context, q querier, userID int64, cleanPath string
 	if err := fillFolderSizes(ctx, q, userID, cleanPath, entries); err != nil {
 		return nil, err
 	}
-	sortForListing(entries)
+	SortForListing(entries)
 	return entries, nil
 }
 
-func fillFolderSizes(ctx context.Context, q querier, userID int64, cleanPath string, entries []Entry) error {
-	prefix := cleanPath + "/"
+func descendantPrefix(cleanPath string) string {
 	if cleanPath == storage.RootPath {
-		prefix = storage.RootPath
+		return storage.RootPath
 	}
+	return cleanPath + "/"
+}
+
+func fillFolderSizes(ctx context.Context, q querier, userID int64, cleanPath string, entries []Entry) error {
+	prefix := descendantPrefix(cleanPath)
 	rows, err := q.QueryContext(ctx,
 		`SELECT path, size FROM files WHERE user_id = $1 AND is_dir = FALSE AND SUBSTR(path, 1, $2) = $3`,
 		userID, utf8.RuneCountInString(prefix), prefix)
@@ -187,7 +191,7 @@ func entriesByID(ctx context.Context, q querier, userID int64, ids []int64) (map
 	return found, nil
 }
 
-func sortForListing(entries []Entry) {
+func SortForListing(entries []Entry) {
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].IsDir != entries[j].IsDir {
 			return entries[i].IsDir

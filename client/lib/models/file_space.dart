@@ -4,13 +4,7 @@ part "file_space.freezed.dart";
 
 @freezed
 sealed class FileSpace with _$FileSpace {
-  const FileSpace._();
-
-  const factory FileSpace.share({required int shareId}) = ShareSpace;
-
   const factory FileSpace.link({required String serverUrl, required String code}) = LinkSpace;
-
-  const factory FileSpace.federated({required int shareId}) = FederatedSpace;
 }
 
 @freezed

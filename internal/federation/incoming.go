@@ -38,6 +38,9 @@ type IncomingFederatedShare struct {
 	Permissions sharing.SharePermissions `json:"permissions" doc:"What the remote server allows, as last seen"`
 	State       ShareState               `json:"state" doc:"Pending until accepted; pending shares cannot be opened"`
 	CreatedAt   time.Time                `json:"createdAt"`
+	MountPath   string                   `json:"mountPath" doc:"Where the item sits in the user's files once accepted; empty while pending"`
+	Size        int64                    `json:"size" doc:"The shared item's size, as last seen"`
+	Mtime       *time.Time               `json:"mtime,omitempty" required:"false" doc:"When the shared item last changed, as last seen"`
 }
 
 type incomingRow struct {
@@ -58,11 +61,14 @@ type incomingRow struct {
 	permissions       int
 	state             ShareState
 	createdAt         time.Time
+	remoteSize        int64
+	remoteMtime       *time.Time
 	server            Server
 }
 
 const incomingColumns = `i.id, i.user_id, i.server_id, i.provider_id, i.owner_cloud_id, i.owner_display_name, i.sender_cloud_id, i.sender_display_name,
-	i.name, i.is_dir, i.webdav_uri, i.auth_scheme, i.secret_sealed, i.secret_hash, i.permissions, i.state, i.created_at, ` + serverColumnsPrefixed
+	i.name, i.is_dir, i.webdav_uri, i.auth_scheme, i.secret_sealed, i.secret_hash, i.permissions, i.state, i.created_at,
+	i.remote_size, i.remote_mtime, ` + serverColumnsPrefixed
 
 const serverColumnsPrefixed = `s.id, s.remote, s.provider, s.ocm_endpoint, s.webdav_path, s.key_id, s.public_key_pem, s.api_version, s.resource_types,
 	s.capabilities, s.allow_private_network, s.verify_sender_address, s.created_at, s.discovered_at`
@@ -76,14 +82,20 @@ type joinedScanner struct {
 
 func (j joinedScanner) Scan(dest ...any) error {
 	var createdAt int64
+	var remoteMtime sql.NullInt64
 	incomingDest := []any{&j.incoming.id, &j.incoming.userID, &j.incoming.serverID, &j.incoming.providerID, &j.incoming.ownerCloudID,
 		&j.incoming.ownerName, &j.incoming.senderCloudID, &j.incoming.senderDisplayName, &j.incoming.name, &j.incoming.isDir,
 		&j.incoming.webdavURI, &j.incoming.authScheme,
-		&j.incoming.secretSealed, &j.incoming.secretHash, &j.incoming.permissions, &j.incoming.state, &createdAt}
+		&j.incoming.secretSealed, &j.incoming.secretHash, &j.incoming.permissions, &j.incoming.state, &createdAt,
+		&j.incoming.remoteSize, &remoteMtime}
 	if err := j.row.Scan(append(incomingDest, dest...)...); err != nil {
 		return err
 	}
 	j.incoming.createdAt = time.Unix(createdAt, 0)
+	if remoteMtime.Valid {
+		mtime := time.Unix(remoteMtime.Int64, 0)
+		j.incoming.remoteMtime = &mtime
+	}
 	return nil
 }
 
@@ -105,6 +117,7 @@ func (r incomingRow) describe() IncomingFederatedShare {
 	return IncomingFederatedShare{
 		ID: r.id, Name: r.name, Owner: r.ownerCloudID, OwnerName: r.ownerName, SharedBy: r.senderCloudID, Server: r.server.Remote,
 		Provider: r.server.Provider, IsDir: r.isDir, Permissions: permissionsFromMask(r.permissions), State: r.state, CreatedAt: r.createdAt,
+		Size: r.remoteSize, Mtime: r.remoteMtime,
 	}
 }
 
@@ -379,9 +392,7 @@ func (s *Service) refreshIncomingRoot(ctx context.Context, row *incomingRow, rem
 	if err != nil {
 		return
 	}
-	row.isDir = root.IsDir
-	row.permissions = maskFromPermissions(root.Permissions)
-	_, _ = s.db.ExecContext(ctx, `UPDATE federated_shares_in SET is_dir = $1, permissions = $2 WHERE id = $3`, row.isDir, row.permissions, row.id)
+	s.rememberRoot(ctx, row, root)
 }
 
 func maskFromPermissions(permissions sharing.SharePermissions) int {

@@ -266,6 +266,20 @@ enum MemberRole {
   const MemberRole(this.value);
 }
 
+enum MountKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('share')
+  share('share'),
+  @JsonValue('federated')
+  federated('federated');
+
+  final String? value;
+
+  const MountKind(this.value);
+}
+
 enum NewMemberRole {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

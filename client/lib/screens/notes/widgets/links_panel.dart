@@ -25,6 +25,7 @@ class _LinksPanelState extends ConsumerState<LinksPanel> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.entry.mount != null) return _list(context, const FileLinks());
     final links = ref.watch(fileLinksProvider(widget.entry.id));
     if (links.value case final loaded?) _lastShown = loaded;
     final previous = _lastShown;

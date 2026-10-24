@@ -112,6 +112,7 @@ abstract class IncomingFederatedShare with _$IncomingFederatedShare {
     @Default(true) bool isDir,
     required SharePermissions permissions,
     required FederatedShareState state,
+    @Default("") String mountPath,
   }) = _IncomingFederatedShare;
 
   bool get isPending => state == FederatedShareState.pending;

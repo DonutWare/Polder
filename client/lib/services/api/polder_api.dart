@@ -130,6 +130,11 @@ class PolderApi {
   Future<String?> setNotesFolder(String? path) async =>
       (await _service.setNotesSettings(body: wire.NotesSettings(path: path))).body!.path;
 
+  Future<bool> showsSharesInFiles() async => (await _service.getShareDisplaySettings()).body!.showInFiles;
+
+  Future<bool> setShowsSharesInFiles(bool shown) async =>
+      (await _service.setShareDisplaySettings(body: wire.ShareDisplaySettings(showInFiles: shown))).body!.showInFiles;
+
   Future<SearchResults> search(String query, {int limit = 50, int offset = 0}) async =>
       (await _service.searchFiles(q: query, limit: limit, offset: offset)).body!.toModel();
 
@@ -454,58 +459,6 @@ class PolderApi {
 
   Future<void> removeShare(int id) => _service.deleteShare(shareID: id);
 
-  Future<DirectoryListing> listShare(int shareId, String path) async =>
-      (await _service.listShareFiles(shareID: shareId, path: path)).body!.toModel();
-
-  Future<Uint8List> downloadFromShare(
-    int shareId,
-    String path, {
-    void Function(int received, int total)? onProgress,
-  }) async => _collect(await _service.downloadShareFile(shareID: shareId, path: path), onProgress);
-
-  Future<Uint8List> downloadShareArchive(
-    int shareId,
-    String path, {
-    void Function(int received, int total)? onProgress,
-  }) async => _collect(await _service.downloadShareArchive(shareID: shareId, path: path), onProgress);
-
-  Future<Uint8List?> sharePreview(int shareId, String path, {int size = 256}) => _thumbnail(
-    () => _service.previewShareFile(
-      shareID: shareId,
-      path: path,
-      size: _thumbnailSize(wire.ApiV1SharesShareIDPreviewGetSize.values, (option) => option.value, size),
-    ),
-  );
-
-  Future<FileEntry> putShareContent(
-    int shareId,
-    String path,
-    Stream<List<int>> body, {
-    required int length,
-    String? transferId,
-    void Function(int sent, int total)? onProgress,
-  }) async => (await _service.uploadShareFile(
-    shareID: shareId,
-    path: path,
-    baseRev: 0,
-    xPolderTransferId: transferId,
-    body: PendingUpload(_counted(body, length, onProgress), length),
-  )).body!.toModel();
-
-  Future<FileEntry> mkdirInShare(int shareId, String path) async => (await _service.makeShareDirectory(
-    shareID: shareId,
-    body: wire.PathRequest(path: path),
-  )).body!.toModel();
-
-  Future<FileEntry> moveInShare(int shareId, {required String from, required String to, int baseRev = -1}) async =>
-      (await _service.moveShareFile(
-        shareID: shareId,
-        body: wire.MoveRequest(from: from, to: to, baseRev: baseRev),
-      )).body!.toModel();
-
-  Future<void> deleteInShare(int shareId, String path, {int baseRev = -1}) =>
-      _service.deleteShareFile(shareID: shareId, path: path, baseRev: baseRev);
-
   Future<List<AppPassword>> appPasswords() async => [
     for (final password in (await _service.listAppPasswords()).body!) password.toModel(),
   ];
@@ -613,42 +566,6 @@ class PolderApi {
       (await _service.acceptFederatedShare(shareID: id)).body!.toModel();
 
   Future<void> removeIncomingFederatedShare(int id) => _service.removeIncomingFederatedShare(shareID: id);
-
-  Future<DirectoryListing> listFederatedShare(int shareId, String path) async =>
-      (await _service.listFederatedShareFiles(shareID: shareId, path: path)).body!.toModel();
-
-  Future<Uint8List> downloadFromFederatedShare(
-    int shareId,
-    String path, {
-    void Function(int received, int total)? onProgress,
-  }) async => _collect(await _service.downloadFederatedShareFile(shareID: shareId, path: path), onProgress);
-
-  Future<void> putFederatedShareContent(
-    int shareId,
-    String path,
-    Stream<List<int>> body, {
-    required int length,
-    void Function(int sent, int total)? onProgress,
-  }) => _service.uploadFederatedShareFile(
-    shareID: shareId,
-    path: path,
-    mustNotExist: true,
-    body: PendingUpload(_counted(body, length, onProgress), length),
-  );
-
-  Future<void> mkdirInFederatedShare(int shareId, String path) => _service.makeFederatedShareDirectory(
-    shareID: shareId,
-    body: wire.PathRequest(path: path),
-  );
-
-  Future<void> moveInFederatedShare(int shareId, {required String from, required String to}) =>
-      _service.moveFederatedShareFile(
-        shareID: shareId,
-        body: wire.CopyRequest(from: from, to: to),
-      );
-
-  Future<void> deleteInFederatedShare(int shareId, String path) =>
-      _service.deleteFederatedShareFile(shareID: shareId, path: path);
 
   Future<List<ShareLink>> shareLinks({int? fileId}) async => [
     for (final link in (await _service.listShareLinks(fileId: fileId)).body!) link.toModel(),

@@ -99,6 +99,7 @@ extension IncomingShareToModel on wire.IncomingShare {
     expiresAt: expiresAt,
     note: note,
     entry: entry.toModel(),
+    mountPath: mountPath,
   );
 }
 

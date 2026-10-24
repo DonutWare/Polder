@@ -240,6 +240,17 @@ func (s *Store) SetNotesPath(ctx context.Context, id int64, notesPath *string) e
 	return err
 }
 
+func (s *Store) HidesSharesInFiles(ctx context.Context, id int64) (bool, error) {
+	var hidden bool
+	err := s.db.QueryRowContext(ctx, `SELECT hide_shares_in_files FROM users WHERE id = $1`, id).Scan(&hidden)
+	return hidden, err
+}
+
+func (s *Store) SetHidesSharesInFiles(ctx context.Context, id int64, hidden bool) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET hide_shares_in_files = $1 WHERE id = $2`, hidden, id)
+	return err
+}
+
 func (s *Store) Delete(ctx context.Context, id int64) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM users WHERE id = $1`, id)
 	return err

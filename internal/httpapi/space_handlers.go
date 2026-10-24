@@ -77,7 +77,11 @@ func (a *API) statIn(ctx context.Context, access sharing.Access, relative string
 
 func (a *API) spaceStat(ctx context.Context, access sharing.Access, relative string) (_ *jsonBody[files.Entry], err error) {
 	defer access.Scrub(&err)
-	_, entry, err := a.statIn(ctx, access, relative, access.RequireRead)
+	absolute, _, err := a.statIn(ctx, access, relative, access.RequireRead)
+	if err != nil {
+		return nil, err
+	}
+	entry, err := a.files.StatWithSize(ctx, access.Owner, absolute)
 	if err != nil {
 		return nil, err
 	}

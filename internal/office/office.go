@@ -3,6 +3,7 @@ package office
 import (
 	"context"
 	"fmt"
+	"io"
 	"maps"
 	"net/http"
 	"net/url"
@@ -13,8 +14,10 @@ import (
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/auth"
+	"polder-server/internal/federation"
 	"polder-server/internal/files"
 	"polder-server/internal/logging"
+	"polder-server/internal/storage"
 	"polder-server/internal/users"
 )
 
@@ -62,6 +65,22 @@ type Service struct {
 	locks     *locks
 	files     *files.Service
 	auth      *auth.Service
+	shares    SharedFiles
+	remote    RemoteFiles
+}
+
+type SharedFiles interface {
+	CanEditSharedFile(ctx context.Context, recipient users.User, shareID, ownerID int64, ownerPath string) (bool, error)
+}
+
+type RemoteFiles interface {
+	RemoteStat(ctx context.Context, user users.User, id int64, relative string) (federation.RemoteEntry, error)
+	RemoteOpen(ctx context.Context, user users.User, id int64, relative, rangeHeader, ifNoneMatch string) (federation.RemoteContent, error)
+	RemoteWrite(ctx context.Context, user users.User, id int64, relative string, content io.Reader, size, baseRev int64) error
+}
+
+func (s *Service) UseShares(shares SharedFiles, remote RemoteFiles) {
+	s.shares, s.remote = shares, remote
 }
 
 func New(options Options, fileService *files.Service, authService *auth.Service, signing *auth.AccessTokens) (*Service, error) {
@@ -156,25 +175,9 @@ func (s *Service) StartSession(ctx context.Context, owner users.User, rawPath, o
 	if !s.Enabled() {
 		return EditorSession{}, apperr.NotFound("no document editor is set up on this server")
 	}
-	cleanOrigin, err := parseOrigin(origin)
-	if err != nil {
-		return EditorSession{}, err
-	}
 	entry, err := s.files.Stat(ctx, owner, rawPath)
 	if err != nil {
 		return EditorSession{}, err
-	}
-	if entry.IsDir {
-		return EditorSession{}, apperr.Invalid("%s is a directory", entry.Path)
-	}
-	found, err := s.discovery.get(ctx)
-	if err != nil {
-		logger.Warn("document editor unavailable", "error", err)
-		return EditorSession{}, apperr.Unavailable("the document editor cannot be reached")
-	}
-	editor, ok := found.find(entry.Mime, entry.Name)
-	if !ok {
-		return EditorSession{}, apperr.Invalid("the document editor cannot open %s", entry.Name)
 	}
 	if versionID != 0 {
 		if _, versionEntry, err := s.files.FindVersion(ctx, owner, versionID); err != nil {
@@ -185,25 +188,85 @@ func (s *Service) StartSession(ctx context.Context, owner users.User, rawPath, o
 	}
 	var generation int64
 	if versionID == 0 {
-		if generation, err = s.files.RestoreCount(ctx, entry.ID); err != nil {
+		if generation, err = s.generationOf(ctx, entry); err != nil {
 			return EditorSession{}, err
 		}
 	}
-	actor := activity.ActorFrom(ctx)
-	token, issued, err := s.tokens.issue(grant{
-		UserID:     owner.ID,
-		FileID:     entry.ID,
-		VersionID:  versionID,
-		Generation: generation,
-		SessionID:  actor.SessionID,
-		Device:     actor.Device,
-		ReadOnly:   !editor.editable || versionID != 0,
-		Origin:     cleanOrigin,
+	return s.open(ctx, entry, origin, grant{
+		UserID: owner.ID, FileID: entry.ID, VersionID: versionID, Generation: generation, ReadOnly: versionID != 0,
 	})
+}
+
+func (s *Service) StartSharedSession(ctx context.Context, owner, recipient users.User, shareID int64, ownerPath, origin string, readOnly bool) (EditorSession, error) {
+	if !s.Enabled() || s.shares == nil {
+		return EditorSession{}, apperr.NotFound("no document editor is set up on this server")
+	}
+	entry, err := s.files.Stat(ctx, owner, ownerPath)
 	if err != nil {
 		return EditorSession{}, err
 	}
-	query := url.Values{"WOPISrc": {fmt.Sprintf("%s/wopi/files/%s", s.wopiBase, wopiFileID(entry.ID, generation, versionID))}}
+	generation, err := s.generationOf(ctx, entry)
+	if err != nil {
+		return EditorSession{}, err
+	}
+	return s.open(ctx, entry, origin, grant{
+		UserID: owner.ID, ActorID: recipient.ID, ShareID: shareID, FileID: entry.ID, Generation: generation, ReadOnly: readOnly,
+	})
+}
+
+func (s *Service) StartRemoteSession(ctx context.Context, user users.User, shareID int64, relative, origin string) (EditorSession, error) {
+	if !s.Enabled() || s.remote == nil {
+		return EditorSession{}, apperr.NotFound("no document editor is set up on this server")
+	}
+	clean, err := storage.CleanPath(relative)
+	if err != nil {
+		return EditorSession{}, err
+	}
+	remote, err := s.remote.RemoteStat(ctx, user, shareID, clean)
+	if err != nil {
+		return EditorSession{}, err
+	}
+	return s.open(ctx, remoteEntry(remote), origin, grant{
+		UserID: user.ID, RemoteShareID: shareID, RemotePath: clean, ReadOnly: !remote.Permissions.Edit,
+	})
+}
+
+func (s *Service) generationOf(ctx context.Context, entry files.Entry) (int64, error) {
+	if entry.IsDir {
+		return 0, nil
+	}
+	return s.files.RestoreCount(ctx, entry.ID)
+}
+
+func remoteEntry(remote federation.RemoteEntry) files.Entry {
+	return files.Entry{Name: remote.Name, IsDir: remote.IsDir, Size: remote.Size, Mtime: remote.Mtime, Rev: remote.Rev, Mime: remote.Mime}
+}
+
+func (s *Service) open(ctx context.Context, entry files.Entry, origin string, g grant) (EditorSession, error) {
+	cleanOrigin, err := parseOrigin(origin)
+	if err != nil {
+		return EditorSession{}, err
+	}
+	if entry.IsDir {
+		return EditorSession{}, apperr.Invalid("%s is a directory", entry.Name)
+	}
+	found, err := s.discovery.get(ctx)
+	if err != nil {
+		logger.Warn("document editor unavailable", "error", err)
+		return EditorSession{}, apperr.Unavailable("the document editor cannot be reached")
+	}
+	editor, ok := found.find(entry.Mime, entry.Name)
+	if !ok {
+		return EditorSession{}, apperr.Invalid("the document editor cannot open %s", entry.Name)
+	}
+	actor := activity.ActorFrom(ctx)
+	g.SessionID, g.Device, g.Origin = actor.SessionID, actor.Device, cleanOrigin
+	g.ReadOnly = g.ReadOnly || !editor.editable
+	token, issued, err := s.tokens.issue(g)
+	if err != nil {
+		return EditorSession{}, err
+	}
+	query := url.Values{"WOPISrc": {fmt.Sprintf("%s/wopi/files/%s", s.wopiBase, g.wopiID())}}
 	return EditorSession{
 		EditorURL:      s.prefix + editor.path + "?" + query.Encode(),
 		HostPage:       editorPagePath,

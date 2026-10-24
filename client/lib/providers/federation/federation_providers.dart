@@ -2,6 +2,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/federation.dart";
 import "package:polder/models/sharing.dart";
+import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/util/guarded_refresh.dart";
@@ -94,12 +95,14 @@ class FederatedSharesNotifier extends AsyncNotifier<List<FederatedShare>> with G
 
   Future<void> add({required int fileId, required String recipient, required SharePermissions permissions}) async {
     final created = await _api.shareFederated(fileId: fileId, recipient: recipient, permissions: permissions);
+    if (!ref.mounted) return;
     state = AsyncData([created, ...?state.value]);
     _invalidateOthers();
   }
 
   Future<void> change(FederatedShare share, SharePermissions permissions) async {
     final updated = await _api.updateFederatedShare(share.id, permissions: permissions);
+    if (!ref.mounted) return;
     state = AsyncData([
       for (final existing in state.value ?? <FederatedShare>[]) existing.id == share.id ? updated : existing,
     ]);
@@ -108,11 +111,13 @@ class FederatedSharesNotifier extends AsyncNotifier<List<FederatedShare>> with G
 
   Future<void> remove(FederatedShare share) async {
     await _api.removeFederatedShare(share.id);
+    if (!ref.mounted) return;
     state = AsyncData([...?state.value?.where((existing) => existing.id != share.id)]);
     _invalidateOthers();
   }
 
   void _invalidateOthers() {
+    ref.invalidate(directoryProvider);
     if (fileId != null) ref.invalidate(federatedSharesProvider(null));
   }
 }
@@ -131,15 +136,15 @@ class IncomingFederatedSharesNotifier extends AsyncNotifier<List<IncomingFederat
   Future<void> refresh() => refreshWith(() => _api.incomingFederatedShares());
 
   Future<void> accept(IncomingFederatedShare share) async {
-    final accepted = await _api.acceptFederatedShare(share.id);
-    state = AsyncData([
-      for (final existing in state.value ?? <IncomingFederatedShare>[]) existing.id == share.id ? accepted : existing,
-    ]);
+    await _api.acceptFederatedShare(share.id);
+    ref.invalidate(directoryProvider);
+    await refresh();
   }
 
   Future<void> remove(IncomingFederatedShare share) async {
     await _api.removeIncomingFederatedShare(share.id);
     state = AsyncData([...?state.value?.where((existing) => existing.id != share.id)]);
+    ref.invalidate(directoryProvider);
   }
 }
 

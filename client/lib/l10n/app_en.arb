@@ -1389,5 +1389,14 @@
 	"checkSenderAddress": "Check sender address",
 	"checkSenderAddressHint": "For servers that do not sign requests: only accept them from addresses the server's name points to",
 	"serverUnsignedChecked": "Does not sign requests; sender address checked",
-	"serverUnsignedAnyAddress": "Does not sign requests; any sender address accepted"
+	"serverUnsignedAnyAddress": "Does not sign requests; any sender address accepted",
+	"shareDetailsTitle": "Share details",
+	"shareDetailsSoftware": "Software",
+	"shareDetailsSharedOn": "Shared on",
+	"sharedWithYou": "Shared with you",
+	"leaveShareMessage": "It disappears from your files. {owner} can share it with you again.",
+	"@leaveShareMessage": {"placeholders": {"owner": {"type": "String"}}},
+	"showSharesInFiles": "Show in Files",
+	"showSharesInFilesHint": "Shares appear among your own files. When off, open them from here.",
+	"sharedByYou": "Shared by you"
 }

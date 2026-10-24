@@ -4,9 +4,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/browser/browser_selection_provider.dart";
-import "package:polder/routes/app_routes.dart";
+import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/screens/browser/widgets/breadcrumbs.dart";
 import "package:polder/screens/browser/widgets/browser_add_button.dart";
+import "package:polder/screens/browser/widgets/browser_scope.dart";
 import "package:polder/screens/browser/widgets/directory_view.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/sort_button.dart";
@@ -24,16 +25,20 @@ class BrowserScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final routes = BrowserRoutes.of(context);
+    final parentRoute = routes.parentRoute(path);
+    final mount = ref.watch(directoryProvider(path)).value?.mount;
+    final canAdd = mount == null || mount.permissions.create;
     final selection = ref.watch(browserSelectionProvider(path));
     final notifier = ref.read(browserSelectionProvider(path).notifier);
     final selecting = !usesPointerSelection && selection.isNotEmpty;
     final material = MaterialLocalizations.of(context);
     return PopScope(
-      canPop: path == RemotePath.root && !selecting,
+      canPop: routes.isRoot(path) && !selecting,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (selecting) return notifier.clear();
-        context.go(AppRoutes.filesAt(RemotePath.parent(path)));
+        if (parentRoute != null) context.go(parentRoute);
       },
       child: AppPage(
         leading: selecting
@@ -42,10 +47,12 @@ class BrowserScreen extends ConsumerWidget {
                 icon: const Icon(IconsaxPlusLinear.close_circle),
                 onPressed: notifier.clear,
               )
-            : null,
+            : routes.exitRoute == null
+            ? null
+            : BackButton(onPressed: () => context.go(parentRoute!)),
         title: selecting
             ? Text(material.selectedRowCountTitle(selection.length))
-            : Text(path == RemotePath.root ? context.localized.navFiles : RemotePath.name(path)),
+            : Text(routes.isRoot(path) ? routes.rootLabel ?? context.localized.navFiles : RemotePath.name(path)),
         actions: selecting
             ? [
                 IconButton(
@@ -64,14 +71,14 @@ class BrowserScreen extends ConsumerWidget {
                 ),
               ]
             : const [TransfersButton(), SortButton(), ViewModeButton()],
-        bottom: path == RemotePath.root
+        bottom: routes.isRoot(path)
             ? null
             : PreferredSize(
                 preferredSize: const Size.fromHeight(44),
                 child: Breadcrumbs(path: path),
               ),
         body: DirectoryView(path: path, select: select),
-        floatingActionButton: selecting ? null : BrowserAddButton(path: path),
+        floatingActionButton: selecting || !canAdd ? null : BrowserAddButton(path: path),
       ),
     );
   }

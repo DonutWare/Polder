@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FileEntry {
 
- int get id; String get path; String get name; bool get isDir; int get size; DateTime get mtime; int get rev; String get hash; String get mime; Map<String, dynamic> get meta;@JsonKey(unknownEnumValue: PreviewState.none) PreviewState get previewState;
+ int get id; String get path; String get name; bool get isDir; int get size; DateTime get mtime; int get rev; String get hash; String get mime; Map<String, dynamic> get meta;@JsonKey(unknownEnumValue: PreviewState.none) PreviewState get previewState; FileMount? get mount; bool get sharedByYou;
 /// Create a copy of FileEntry
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $FileEntryCopyWith<FileEntry> get copyWith => _$FileEntryCopyWithImpl<FileEntry>
 @override
 bool operator ==(Object other) {
   final _this = this as FileEntry;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileEntry&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.path, _this.path) || other.path == _this.path)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.isDir, _this.isDir) || other.isDir == _this.isDir)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.mtime, _this.mtime) || other.mtime == _this.mtime)&&(identical(other.rev, _this.rev) || other.rev == _this.rev)&&(identical(other.hash, _this.hash) || other.hash == _this.hash)&&(identical(other.mime, _this.mime) || other.mime == _this.mime)&&const DeepCollectionEquality().equals(other.meta, _this.meta)&&(identical(other.previewState, _this.previewState) || other.previewState == _this.previewState));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FileEntry&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.path, _this.path) || other.path == _this.path)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.isDir, _this.isDir) || other.isDir == _this.isDir)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.mtime, _this.mtime) || other.mtime == _this.mtime)&&(identical(other.rev, _this.rev) || other.rev == _this.rev)&&(identical(other.hash, _this.hash) || other.hash == _this.hash)&&(identical(other.mime, _this.mime) || other.mime == _this.mime)&&const DeepCollectionEquality().equals(other.meta, _this.meta)&&(identical(other.previewState, _this.previewState) || other.previewState == _this.previewState)&&(identical(other.mount, _this.mount) || other.mount == _this.mount)&&(identical(other.sharedByYou, _this.sharedByYou) || other.sharedByYou == _this.sharedByYou));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FileEntry;
-  return Object.hash(runtimeType,_this.id,_this.path,_this.name,_this.isDir,_this.size,_this.mtime,_this.rev,_this.hash,_this.mime,const DeepCollectionEquality().hash(_this.meta),_this.previewState);
+  return Object.hash(runtimeType,_this.id,_this.path,_this.name,_this.isDir,_this.size,_this.mtime,_this.rev,_this.hash,_this.mime,const DeepCollectionEquality().hash(_this.meta),_this.previewState,_this.mount,_this.sharedByYou);
 }
 
 @override
 String toString() {
   final _this = this as FileEntry;
-  return 'FileEntry(id: ${_this.id}, path: ${_this.path}, name: ${_this.name}, isDir: ${_this.isDir}, size: ${_this.size}, mtime: ${_this.mtime}, rev: ${_this.rev}, hash: ${_this.hash}, mime: ${_this.mime}, meta: ${_this.meta}, previewState: ${_this.previewState})';
+  return 'FileEntry(id: ${_this.id}, path: ${_this.path}, name: ${_this.name}, isDir: ${_this.isDir}, size: ${_this.size}, mtime: ${_this.mtime}, rev: ${_this.rev}, hash: ${_this.hash}, mime: ${_this.mime}, meta: ${_this.meta}, previewState: ${_this.previewState}, mount: ${_this.mount}, sharedByYou: ${_this.sharedByYou})';
 }
 
 
@@ -54,11 +54,11 @@ abstract mixin class $FileEntryCopyWith<$Res>  {
   factory $FileEntryCopyWith(FileEntry value, $Res Function(FileEntry) _then) = _$FileEntryCopyWithImpl;
 @useResult
 $Res call({
- int id, String path, String name, bool isDir, int size, DateTime mtime, int rev, String hash, String mime, Map<String, dynamic> meta,@JsonKey(unknownEnumValue: PreviewState.none) PreviewState previewState
+ int id, String path, String name, bool isDir, int size, DateTime mtime, int rev, String hash, String mime, Map<String, dynamic> meta,@JsonKey(unknownEnumValue: PreviewState.none) PreviewState previewState, FileMount? mount, bool sharedByYou
 });
 
 
-
+$FileMountCopyWith<$Res>? get mount;
 
 }
 /// @nodoc
@@ -71,7 +71,7 @@ class _$FileEntryCopyWithImpl<$Res>
 
 /// Create a copy of FileEntry
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? path = null,Object? name = null,Object? isDir = null,Object? size = null,Object? mtime = null,Object? rev = null,Object? hash = null,Object? mime = null,Object? meta = null,Object? previewState = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? path = null,Object? name = null,Object? isDir = null,Object? size = null,Object? mtime = null,Object? rev = null,Object? hash = null,Object? mime = null,Object? meta = null,Object? previewState = null,Object? mount = freezed,Object? sharedByYou = null,}) {
   return _then(FileEntry(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
@@ -84,10 +84,24 @@ as int,hash: null == hash ? _self.hash : hash // ignore: cast_nullable_to_non_nu
 as String,mime: null == mime ? _self.mime : mime // ignore: cast_nullable_to_non_nullable
 as String,meta: null == meta ? _self.meta : meta // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,previewState: null == previewState ? _self.previewState : previewState // ignore: cast_nullable_to_non_nullable
-as PreviewState,
+as PreviewState,mount: freezed == mount ? _self.mount : mount // ignore: cast_nullable_to_non_nullable
+as FileMount?,sharedByYou: null == sharedByYou ? _self.sharedByYou : sharedByYou // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
+/// Create a copy of FileEntry
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FileMountCopyWith<$Res>? get mount {
+    if (_self.mount == null) {
+    return null;
+  }
 
+  return $FileMountCopyWith<$Res>(_self.mount!, (value) {
+    return _then(_self.copyWith(mount: value));
+  });
+}
 }
 
 
@@ -169,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String path,  String name,  bool isDir,  int size,  DateTime mtime,  int rev,  String hash,  String mime,  Map<String, dynamic> meta, @JsonKey(unknownEnumValue: PreviewState.none)  PreviewState previewState)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String path,  String name,  bool isDir,  int size,  DateTime mtime,  int rev,  String hash,  String mime,  Map<String, dynamic> meta, @JsonKey(unknownEnumValue: PreviewState.none)  PreviewState previewState,  FileMount? mount,  bool sharedByYou)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FileEntry() when $default != null:
-return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtime,_that.rev,_that.hash,_that.mime,_that.meta,_that.previewState);case _:
+return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtime,_that.rev,_that.hash,_that.mime,_that.meta,_that.previewState,_that.mount,_that.sharedByYou);case _:
   return orElse();
 
 }
@@ -190,10 +204,10 @@ return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtim
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String path,  String name,  bool isDir,  int size,  DateTime mtime,  int rev,  String hash,  String mime,  Map<String, dynamic> meta, @JsonKey(unknownEnumValue: PreviewState.none)  PreviewState previewState)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String path,  String name,  bool isDir,  int size,  DateTime mtime,  int rev,  String hash,  String mime,  Map<String, dynamic> meta, @JsonKey(unknownEnumValue: PreviewState.none)  PreviewState previewState,  FileMount? mount,  bool sharedByYou)  $default,) {final _that = this;
 switch (_that) {
 case _FileEntry():
-return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtime,_that.rev,_that.hash,_that.mime,_that.meta,_that.previewState);case _:
+return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtime,_that.rev,_that.hash,_that.mime,_that.meta,_that.previewState,_that.mount,_that.sharedByYou);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +224,10 @@ return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtim
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String path,  String name,  bool isDir,  int size,  DateTime mtime,  int rev,  String hash,  String mime,  Map<String, dynamic> meta, @JsonKey(unknownEnumValue: PreviewState.none)  PreviewState previewState)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String path,  String name,  bool isDir,  int size,  DateTime mtime,  int rev,  String hash,  String mime,  Map<String, dynamic> meta, @JsonKey(unknownEnumValue: PreviewState.none)  PreviewState previewState,  FileMount? mount,  bool sharedByYou)?  $default,) {final _that = this;
 switch (_that) {
 case _FileEntry() when $default != null:
-return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtime,_that.rev,_that.hash,_that.mime,_that.meta,_that.previewState);case _:
+return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtime,_that.rev,_that.hash,_that.mime,_that.meta,_that.previewState,_that.mount,_that.sharedByYou);case _:
   return null;
 
 }
@@ -225,7 +239,7 @@ return $default(_that.id,_that.path,_that.name,_that.isDir,_that.size,_that.mtim
 @JsonSerializable()
 
 class _FileEntry extends FileEntry {
-  const _FileEntry({this.id = 0, required this.path, required this.name, this.isDir = false, this.size = 0, required this.mtime, this.rev = 0, this.hash = "", this.mime = "",  Map<String, dynamic> meta = const <String, dynamic>{}, @JsonKey(unknownEnumValue: PreviewState.none) this.previewState = PreviewState.none}): _meta = meta,super._();
+  const _FileEntry({this.id = 0, required this.path, required this.name, this.isDir = false, this.size = 0, required this.mtime, this.rev = 0, this.hash = "", this.mime = "",  Map<String, dynamic> meta = const <String, dynamic>{}, @JsonKey(unknownEnumValue: PreviewState.none) this.previewState = PreviewState.none, this.mount, this.sharedByYou = false}): _meta = meta,super._();
   factory _FileEntry.fromJson(Map<String, dynamic> json) => _$FileEntryFromJson(json);
 
 @override@JsonKey() final  int id;
@@ -245,6 +259,8 @@ class _FileEntry extends FileEntry {
 }
 
 @override@JsonKey(unknownEnumValue: PreviewState.none) final  PreviewState previewState;
+@override final  FileMount? mount;
+@override@JsonKey() final  bool sharedByYou;
 
 /// Create a copy of FileEntry
 /// with the given fields replaced by the non-null parameter values.
@@ -259,18 +275,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FileEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.path, path) || other.path == path)&&(identical(other.name, name) || other.name == name)&&(identical(other.isDir, isDir) || other.isDir == isDir)&&(identical(other.size, size) || other.size == size)&&(identical(other.mtime, mtime) || other.mtime == mtime)&&(identical(other.rev, rev) || other.rev == rev)&&(identical(other.hash, hash) || other.hash == hash)&&(identical(other.mime, mime) || other.mime == mime)&&const DeepCollectionEquality().equals(other.meta, _meta)&&(identical(other.previewState, previewState) || other.previewState == previewState));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FileEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.path, path) || other.path == path)&&(identical(other.name, name) || other.name == name)&&(identical(other.isDir, isDir) || other.isDir == isDir)&&(identical(other.size, size) || other.size == size)&&(identical(other.mtime, mtime) || other.mtime == mtime)&&(identical(other.rev, rev) || other.rev == rev)&&(identical(other.hash, hash) || other.hash == hash)&&(identical(other.mime, mime) || other.mime == mime)&&const DeepCollectionEquality().equals(other.meta, _meta)&&(identical(other.previewState, previewState) || other.previewState == previewState)&&(identical(other.mount, mount) || other.mount == mount)&&(identical(other.sharedByYou, sharedByYou) || other.sharedByYou == sharedByYou));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,path,name,isDir,size,mtime,rev,hash,mime,const DeepCollectionEquality().hash(_meta),previewState);
+    return Object.hash(runtimeType,id,path,name,isDir,size,mtime,rev,hash,mime,const DeepCollectionEquality().hash(_meta),previewState,mount,sharedByYou);
 }
 
 @override
 String toString() {
-    return 'FileEntry(id: $id, path: $path, name: $name, isDir: $isDir, size: $size, mtime: $mtime, rev: $rev, hash: $hash, mime: $mime, meta: $meta, previewState: $previewState)';
+    return 'FileEntry(id: $id, path: $path, name: $name, isDir: $isDir, size: $size, mtime: $mtime, rev: $rev, hash: $hash, mime: $mime, meta: $meta, previewState: $previewState, mount: $mount, sharedByYou: $sharedByYou)';
 }
 
 
@@ -281,11 +297,11 @@ abstract mixin class _$FileEntryCopyWith<$Res> implements $FileEntryCopyWith<$Re
   factory _$FileEntryCopyWith(_FileEntry value, $Res Function(_FileEntry) _then) = __$FileEntryCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String path, String name, bool isDir, int size, DateTime mtime, int rev, String hash, String mime, Map<String, dynamic> meta,@JsonKey(unknownEnumValue: PreviewState.none) PreviewState previewState
+ int id, String path, String name, bool isDir, int size, DateTime mtime, int rev, String hash, String mime, Map<String, dynamic> meta,@JsonKey(unknownEnumValue: PreviewState.none) PreviewState previewState, FileMount? mount, bool sharedByYou
 });
 
 
-
+@override $FileMountCopyWith<$Res>? get mount;
 
 }
 /// @nodoc
@@ -298,7 +314,7 @@ class __$FileEntryCopyWithImpl<$Res>
 
 /// Create a copy of FileEntry
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? path = null,Object? name = null,Object? isDir = null,Object? size = null,Object? mtime = null,Object? rev = null,Object? hash = null,Object? mime = null,Object? meta = null,Object? previewState = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? path = null,Object? name = null,Object? isDir = null,Object? size = null,Object? mtime = null,Object? rev = null,Object? hash = null,Object? mime = null,Object? meta = null,Object? previewState = null,Object? mount = freezed,Object? sharedByYou = null,}) {
   return _then(_FileEntry(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
@@ -311,11 +327,25 @@ as int,hash: null == hash ? _self.hash : hash // ignore: cast_nullable_to_non_nu
 as String,mime: null == mime ? _self.mime : mime // ignore: cast_nullable_to_non_nullable
 as String,meta: null == meta ? _self._meta : meta // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,previewState: null == previewState ? _self.previewState : previewState // ignore: cast_nullable_to_non_nullable
-as PreviewState,
+as PreviewState,mount: freezed == mount ? _self.mount : mount // ignore: cast_nullable_to_non_nullable
+as FileMount?,sharedByYou: null == sharedByYou ? _self.sharedByYou : sharedByYou // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
+/// Create a copy of FileEntry
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FileMountCopyWith<$Res>? get mount {
+    if (_self.mount == null) {
+    return null;
+  }
 
+  return $FileMountCopyWith<$Res>(_self.mount!, (value) {
+    return _then(_self.copyWith(mount: value));
+  });
+}
 }
 
 // dart format on

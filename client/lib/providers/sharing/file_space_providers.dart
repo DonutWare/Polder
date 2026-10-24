@@ -6,10 +6,8 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_space.dart";
-import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/sharing/public_link_session_provider.dart";
-import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/services/sharing/file_space_api.dart";
 import "package:polder/util/guarded_refresh.dart";
 import "package:polder/util/ref_cache.dart";
@@ -17,40 +15,19 @@ import "package:polder/util/remote_path.dart";
 
 final fileSpaceApiProvider = Provider.autoDispose.family<FileSpaceApi, FileSpace>(
   (ref, space) => switch (space) {
-    ShareSpace(:final shareId) => ShareSpaceApi(ref.watch(polderApiProvider), shareId),
     final LinkSpace link => LinkSpaceApi(
       ref.watch(serverPolderApiProvider(link.serverUrl)),
       link.code,
       ref.watch(publicLinkSessionProvider(link).notifier).token,
     ),
-    FederatedSpace(:final shareId) => FederatedSpaceApi(ref.watch(polderApiProvider), shareId),
   },
 );
 
 final spaceCapabilitiesProvider = Provider.autoDispose.family<SpaceCapabilities, FileSpace>(
   (ref, space) => switch (space) {
-    ShareSpace(:final shareId) => switch (ref.watch(incomingShareProvider(shareId))?.permissions) {
-      final permissions? => SpaceCapabilities(
-        canCreate: permissions.create,
-        canEdit: permissions.edit,
-        canDelete: permissions.delete,
-        canUpload: permissions.create,
-      ),
-      null => const SpaceCapabilities(),
-    },
     final LinkSpace link => switch (ref.watch(publicLinkSessionProvider(link)).value?.shownInfo.permissions) {
       final permissions? => SpaceCapabilities(canDownload: permissions.download, canUpload: permissions.upload),
       null => const SpaceCapabilities(canDownload: false),
-    },
-    FederatedSpace(:final shareId) => switch (ref.watch(incomingFederatedShareProvider(shareId))?.permissions) {
-      final permissions? => SpaceCapabilities(
-        canCreate: permissions.create,
-        canEdit: permissions.edit,
-        canDelete: permissions.delete,
-        canUpload: permissions.create,
-        canDownloadArchive: false,
-      ),
-      null => const SpaceCapabilities(canDownloadArchive: false),
     },
   },
 );

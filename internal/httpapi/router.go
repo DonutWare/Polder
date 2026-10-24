@@ -293,6 +293,8 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/groups/{groupID}/shares", "listGroupShares", "What is shared with a group", a.listGroupShares)
 
 	register(user, http.MethodGet, "/shares/outgoing", "listOutgoingShares", "What the logged-in user shares with others", a.listOutgoingShares)
+	register(user, http.MethodGet, "/shares/settings", "getShareDisplaySettings", "Whether shares appear in the logged-in user's files", a.getShareDisplaySettings)
+	register(user, http.MethodPut, "/shares/settings", "setShareDisplaySettings", "Show or hide shares at the root of the logged-in user's files", a.setShareDisplaySettings)
 	register(user, http.MethodGet, "/shares/incoming", "listIncomingShares", "What others share with the logged-in user, directly or through a group", a.listIncomingShares)
 	register(user, http.MethodPost, "/shares", "createShare", "Share a file or folder with a user or group", a.createShare, created)
 	register(user, http.MethodPatch, "/shares/{shareID}", "updateShare", "Change what a share's recipients may do", a.updateShare)

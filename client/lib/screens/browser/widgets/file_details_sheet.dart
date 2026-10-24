@@ -8,6 +8,7 @@ import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
 import "package:polder/providers/versions/file_versions_provider.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
+import "package:polder/screens/browser/widgets/mount_details_sheet.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
@@ -45,7 +46,8 @@ class FileDetailsSheet extends ConsumerWidget {
               DetailRow(label: localized.dimensionsLabel, value: localized.dimensions(entry.width!, entry.height!)),
             if (entry.pageCount != null) DetailRow(label: localized.pages, value: "${entry.pageCount}"),
             if (entry.takenAt != null) DetailRow(label: localized.takenAt, value: entry.takenAt!.formatted(context)),
-            if (!entry.isDir)
+            if (entry.mount case final mount?) MountDetailRows(mount: mount),
+            if (!entry.isDir && entry.mount == null)
               InkWell(
                 borderRadius: BorderRadius.circular(8),
                 onTap: () {
@@ -66,7 +68,7 @@ class FileDetailsSheet extends ConsumerWidget {
                   valueColor: Theme.of(context).colorScheme.primary,
                 ),
               ),
-            if (!entry.isDir && entry.id > 0) _LinkedFrom(entry: entry),
+            if (!entry.isDir && entry.id > 0 && entry.mount == null) _LinkedFrom(entry: entry),
             const SizedBox(height: 16),
             FilledButton.icon(
               icon: const Icon(IconsaxPlusLinear.document_download),

@@ -47,6 +47,7 @@ class _FederatedShareDialogState extends ConsumerState<_FederatedShareDialog> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(federatedSharesProvider(widget.file.id));
     final localized = context.localized;
     final existing = widget.existing;
     return AlertDialog(

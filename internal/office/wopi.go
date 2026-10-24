@@ -1,7 +1,10 @@
 package office
 
 import (
+	"bytes"
+	"cmp"
 	"encoding/json"
+	"hash/fnv"
 	"io"
 	"net/http"
 	"path"
@@ -27,11 +30,36 @@ const documentChanged = `{"COOLStatusCode":1010}`
 type access struct {
 	grant   grant
 	user    users.User
+	actor   users.User
 	entry   files.Entry
 	version *files.Version
 }
 
-const versionFileIDPrefix = "version-"
+func (a access) isRemote() bool {
+	return a.grant.RemoteShareID != 0
+}
+
+func (a access) activityActor() activity.Actor {
+	actor := activity.Actor{SessionID: a.grant.SessionID, Device: a.grant.Device}
+	if a.actor.ID != a.user.ID {
+		actor.Via = a.actor.Username
+	}
+	return actor
+}
+
+const (
+	versionFileIDPrefix = "version-"
+	remoteFileIDPrefix  = "remote-"
+)
+
+func (g grant) wopiID() string {
+	if g.RemoteShareID != 0 {
+		hash := fnv.New64a()
+		_, _ = hash.Write([]byte(g.RemotePath))
+		return remoteFileIDPrefix + strconv.FormatInt(g.RemoteShareID, 10) + "-" + strconv.FormatUint(hash.Sum64(), 36)
+	}
+	return wopiFileID(g.FileID, g.Generation, g.VersionID)
+}
 
 func wopiFileID(fileID, generation, versionID int64) string {
 	switch {
@@ -46,16 +74,26 @@ func wopiFileID(fileID, generation, versionID int64) string {
 
 func (s *Service) authorize(w http.ResponseWriter, r *http.Request) (access, bool) {
 	granted, err := s.tokens.parse(r.URL.Query().Get("access_token"))
-	if err != nil || wopiFileID(granted.FileID, granted.Generation, granted.VersionID) != chi.URLParam(r, "fileID") {
+	if err != nil || granted.wopiID() != chi.URLParam(r, "fileID") {
 		http.Error(w, "access token is invalid or expired", http.StatusUnauthorized)
 		return access{}, false
 	}
-	fileID := granted.FileID
-	user, err := s.auth.ActiveUser(r.Context(), granted.UserID)
+	actor, err := s.auth.ActiveUser(r.Context(), cmp.Or(granted.ActorID, granted.UserID))
 	if err != nil {
 		http.Error(w, "account is not active", http.StatusUnauthorized)
 		return access{}, false
 	}
+	if granted.RemoteShareID != 0 {
+		return s.authorizeRemote(w, r, granted, actor)
+	}
+	user := actor
+	if granted.ActorID != 0 {
+		if user, err = s.auth.ActiveUser(r.Context(), granted.UserID); err != nil {
+			http.Error(w, "the shared file is no longer available", http.StatusUnauthorized)
+			return access{}, false
+		}
+	}
+	fileID := granted.FileID
 	entries, err := s.files.EntriesByID(r.Context(), user.ID, []int64{fileID})
 	if err != nil {
 		s.fail(w, r, err)
@@ -66,15 +104,37 @@ func (s *Service) authorize(w http.ResponseWriter, r *http.Request) (access, boo
 		http.Error(w, "unknown file", http.StatusNotFound)
 		return access{}, false
 	}
+	if granted.ShareID != 0 {
+		editable, err := s.shares.CanEditSharedFile(r.Context(), actor, granted.ShareID, user.ID, entry.Path)
+		if err != nil {
+			http.Error(w, "the shared file is no longer available", http.StatusUnauthorized)
+			return access{}, false
+		}
+		granted.ReadOnly = granted.ReadOnly || !editable
+	}
 	if granted.VersionID == 0 {
-		return access{grant: granted, user: user, entry: entry}, true
+		return access{grant: granted, user: user, actor: actor, entry: entry}, true
 	}
 	version, versionEntry, err := s.files.FindVersion(r.Context(), user, granted.VersionID)
 	if err != nil || versionEntry.ID != entry.ID {
 		http.Error(w, "unknown file", http.StatusNotFound)
 		return access{}, false
 	}
-	return access{grant: granted, user: user, entry: entry, version: &version}, true
+	return access{grant: granted, user: user, actor: actor, entry: entry, version: &version}, true
+}
+
+func (s *Service) authorizeRemote(w http.ResponseWriter, r *http.Request, granted grant, user users.User) (access, bool) {
+	remote, err := s.remote.RemoteStat(r.Context(), user, granted.RemoteShareID, granted.RemotePath)
+	if err != nil {
+		s.fail(w, r, err)
+		return access{}, false
+	}
+	if remote.IsDir {
+		http.Error(w, "unknown file", http.StatusNotFound)
+		return access{}, false
+	}
+	granted.ReadOnly = granted.ReadOnly || !remote.Permissions.Edit
+	return access{grant: granted, user: user, actor: user, entry: remoteEntry(remote)}, true
 }
 
 func versionFileName(name string, version files.Version) string {
@@ -112,8 +172,8 @@ func (s *Service) checkFileInfo(w http.ResponseWriter, r *http.Request) {
 	info := fileInfo{
 		BaseFileName:            granted.entry.Name,
 		OwnerID:                 strconv.FormatInt(granted.user.ID, 10),
-		UserID:                  strconv.FormatInt(granted.user.ID, 10),
-		UserFriendlyName:        granted.user.Username,
+		UserID:                  strconv.FormatInt(granted.actor.ID, 10),
+		UserFriendlyName:        granted.actor.Username,
 		Size:                    granted.entry.Size,
 		Version:                 strconv.FormatInt(granted.entry.Rev, 10),
 		LastModifiedTime:        granted.entry.Mtime.UTC().Format(wopiTime),
@@ -145,6 +205,10 @@ func (s *Service) getFile(w http.ResponseWriter, r *http.Request) {
 		s.getVersion(w, r, granted)
 		return
 	}
+	if granted.isRemote() {
+		s.getRemote(w, r, granted)
+		return
+	}
 	file, entry, err := s.files.Open(r.Context(), granted.user, granted.entry.Path)
 	if err != nil {
 		s.fail(w, r, err)
@@ -155,6 +219,21 @@ func (s *Service) getFile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Length", strconv.FormatInt(entry.Size, 10))
 	w.Header().Set("X-WOPI-ItemVersion", strconv.FormatInt(entry.Rev, 10))
 	_, _ = io.Copy(w, file)
+}
+
+func (s *Service) getRemote(w http.ResponseWriter, r *http.Request, granted access) {
+	content, err := s.remote.RemoteOpen(r.Context(), granted.user, granted.grant.RemoteShareID, granted.grant.RemotePath, "", "")
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	defer content.Body.Close()
+	w.Header().Set("Content-Type", "application/octet-stream")
+	if content.ContentLength != "" {
+		w.Header().Set("Content-Length", content.ContentLength)
+	}
+	w.Header().Set("X-WOPI-ItemVersion", strconv.FormatInt(granted.entry.Rev, 10))
+	_, _ = io.Copy(w, content.Body)
 }
 
 func (s *Service) getVersion(w http.ResponseWriter, r *http.Request, granted access) {
@@ -180,13 +259,17 @@ func (s *Service) putFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// A lock that expired while the editor sat idle is not held against it.
-	if held := s.locks.current(granted.entry.ID); held != "" && held != r.Header.Get("X-WOPI-Lock") {
+	if held := s.locks.current(granted.grant.wopiID()); held != "" && held != r.Header.Get("X-WOPI-Lock") {
 		w.Header().Set("X-WOPI-Lock", held)
 		w.WriteHeader(http.StatusConflict)
 		return
 	}
 	if !savedOverCurrent(r, granted.entry.Mtime) {
 		writeRaw(w, http.StatusConflict, documentChanged)
+		return
+	}
+	if granted.isRemote() {
+		s.putRemote(w, r, granted)
 		return
 	}
 	// An editor that opened the file before an older version was restored would save over it,
@@ -198,7 +281,7 @@ func (s *Service) putFile(w http.ResponseWriter, r *http.Request) {
 		writeRaw(w, http.StatusConflict, documentChanged)
 		return
 	}
-	ctx := activity.WithActor(r.Context(), activity.Actor{SessionID: granted.grant.SessionID, Device: granted.grant.Device})
+	ctx := activity.WithActor(r.Context(), granted.activityActor())
 	saved, err := s.files.Write(ctx, granted.user, files.WriteRequest{
 		Path:    granted.entry.Path,
 		BaseRev: granted.entry.Rev,
@@ -219,6 +302,41 @@ func (s *Service) putFile(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"LastModifiedTime": saved.Mtime.UTC().Format(wopiTime)})
 }
 
+func (s *Service) putRemote(w http.ResponseWriter, r *http.Request, granted access) {
+	var body io.Reader = r.Body
+	size := r.ContentLength
+	if size < 0 {
+		content, err := io.ReadAll(io.LimitReader(r.Body, maxRemoteDocument+1))
+		if err != nil || len(content) > maxRemoteDocument {
+			http.Error(w, "the document is too large", http.StatusRequestEntityTooLarge)
+			return
+		}
+		body, size = bytes.NewReader(content), int64(len(content))
+	}
+	ctx := activity.WithActor(r.Context(), granted.activityActor())
+	err := s.remote.RemoteWrite(ctx, granted.user, granted.grant.RemoteShareID, granted.grant.RemotePath, body, size, granted.entry.Rev)
+	switch {
+	case apperr.Is(err, apperr.KindConflict):
+		writeRaw(w, http.StatusConflict, documentChanged)
+		return
+	case apperr.Is(err, apperr.KindQuotaExceeded):
+		http.Error(w, "storage quota exceeded", http.StatusRequestEntityTooLarge)
+		return
+	case err != nil:
+		s.fail(w, r, err)
+		return
+	}
+	saved, err := s.remote.RemoteStat(ctx, granted.user, granted.grant.RemoteShareID, granted.grant.RemotePath)
+	if err != nil {
+		s.fail(w, r, err)
+		return
+	}
+	w.Header().Set("X-WOPI-ItemVersion", strconv.FormatInt(saved.Rev, 10))
+	writeJSON(w, http.StatusOK, map[string]string{"LastModifiedTime": saved.Mtime.UTC().Format(wopiTime)})
+}
+
+const maxRemoteDocument = 512 << 20
+
 // savedOverCurrent tells whether the editor started from the file as it is now. Without the
 // timestamp header the editor asks to overwrite whatever is there.
 func savedOverCurrent(r *http.Request, mtime time.Time) bool {
@@ -238,7 +356,7 @@ func (s *Service) fileOperation(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	fileID := granted.entry.ID
+	fileID := granted.grant.wopiID()
 	lockID := r.Header.Get("X-WOPI-Lock")
 	var held string
 	var done bool

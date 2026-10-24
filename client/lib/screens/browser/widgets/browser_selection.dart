@@ -9,10 +9,9 @@ import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/browser_selection_provider.dart";
-import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/browser/widgets/browser_scope.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
-import "package:polder/util/remote_path.dart";
 
 bool get _apple => const {TargetPlatform.macOS, TargetPlatform.iOS}.contains(defaultTargetPlatform);
 
@@ -221,8 +220,9 @@ class _BrowserSelectionAreaState extends ConsumerState<BrowserSelectionArea> {
     final up = _apple
         ? pressed(LogicalKeyboardKey.arrowUp, withCommand: true)
         : pressed(LogicalKeyboardKey.arrowUp, withAlt: true);
-    if (up && widget.parentPath != RemotePath.root) {
-      context.go(AppRoutes.filesAt(RemotePath.parent(widget.parentPath)));
+    final parentRoute = BrowserRoutes.of(context).parentRoute(widget.parentPath);
+    if (up && parentRoute != null) {
+      context.go(parentRoute);
       return KeyEventResult.handled;
     }
     if (command || keyboard.isAltPressed) return KeyEventResult.ignored;

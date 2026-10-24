@@ -1,0 +1,12 @@
+{
+	local_certs
+	skip_install_trust
+}
+
+polder.test {
+	reverse_proxy {$POLDER_UPSTREAM:host.docker.internal:6060}
+}
+
+nextcloud.test {
+	reverse_proxy nextcloud:80
+}

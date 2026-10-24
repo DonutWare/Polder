@@ -2,11 +2,13 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_riverpod/misc.dart";
 
 import "package:polder/models/sharing.dart";
+import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/util/guarded_refresh.dart";
 
 void invalidateShares(void Function(ProviderOrFamily provider) invalidate) {
+  invalidate(directoryProvider);
   invalidate(incomingSharesProvider);
   invalidate(outgoingSharesProvider);
   invalidate(groupSharesProvider);
@@ -65,6 +67,7 @@ class OutgoingSharesNotifier extends AsyncNotifier<List<OutgoingShare>> with Gua
       expiresAt: expiresAt,
       note: note,
     );
+    if (!ref.mounted) return;
     state = AsyncData([created, ...?state.value]);
     _refreshAllFiles(outgoingSharesProvider(null));
   }
@@ -89,6 +92,7 @@ class ShareLinksNotifier extends AsyncNotifier<List<ShareLink>> with GuardedRefr
 
   Future<ShareLink> create(int fileId, LinkOptions options) async {
     final created = await _api.createShareLink(fileId, options);
+    if (!ref.mounted) return created;
     state = AsyncData([created, ...?state.value]);
     _refreshAllFiles(shareLinksProvider(null));
     return created;
@@ -96,6 +100,7 @@ class ShareLinksNotifier extends AsyncNotifier<List<ShareLink>> with GuardedRefr
 
   Future<ShareLink> edit(ShareLink link, LinkOptions options) async {
     final updated = await _api.updateShareLink(link.id, options);
+    if (!ref.mounted) return updated;
     state = AsyncData([
       for (final existing in state.value ?? <ShareLink>[]) existing.id == link.id ? updated : existing,
     ]);
@@ -105,6 +110,7 @@ class ShareLinksNotifier extends AsyncNotifier<List<ShareLink>> with GuardedRefr
 
   Future<void> remove(ShareLink link) async {
     await _api.deleteShareLink(link.id);
+    if (!ref.mounted) return;
     state = AsyncData([...?state.value?.where((existing) => existing.id != link.id)]);
     _refreshAllFiles(shareLinksProvider(null));
   }
@@ -117,6 +123,7 @@ mixin _FileScoped<T> on AsyncNotifier<T> {
 
   void _refreshAllFiles(ProviderOrFamily allFiles) {
     if (fileId != null) ref.invalidate(allFiles);
+    ref.invalidate(directoryProvider);
   }
 }
 

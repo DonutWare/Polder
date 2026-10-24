@@ -1,6 +1,7 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_mount.dart";
 
 part "directory_listing.freezed.dart";
 part "directory_listing.g.dart";
@@ -13,6 +14,7 @@ abstract class DirectoryListing with _$DirectoryListing {
     required String path,
     @Default(<FileEntry>[]) List<FileEntry> entries,
     @Default(false) bool indexing,
+    FileMount? mount,
   }) = _DirectoryListing;
 
   factory DirectoryListing.fromJson(Map<String, dynamic> json) => _$DirectoryListingFromJson(json);

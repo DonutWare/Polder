@@ -8,6 +8,7 @@ import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_metadata_text.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 
 class FileListTile extends StatelessWidget {
@@ -65,7 +66,15 @@ class FileListTile extends StatelessWidget {
         ),
         _ => FileMetadataText(entry: entry),
       },
-      trailing: onMenu == null ? null : FileActionsButton(onPressed: onMenu),
+      trailing: !entry.sharedByYou && onMenu == null
+          ? null
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (entry.sharedByYou) const SharedByYouMark(),
+                if (onMenu != null) FileActionsButton(onPressed: onMenu),
+              ],
+            ),
       onTap: interaction.onTap,
     );
     return upload == null ? tile : PendingHighlight(child: tile);

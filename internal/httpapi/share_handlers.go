@@ -100,6 +100,13 @@ func (a *API) listIncomingShares(ctx context.Context, _ *struct{}) (*jsonBody[[]
 	if err != nil {
 		return nil, err
 	}
+	paths, err := a.mountPaths(ctx, currentUser(ctx), files.MountShare)
+	if err != nil {
+		return nil, err
+	}
+	for i := range list {
+		list[i].MountPath = paths[list[i].ID]
+	}
 	return respond(list), nil
 }
 

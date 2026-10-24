@@ -24,9 +24,7 @@ _Manifest _$ManifestFromJson(Map<String, dynamic> json) => _Manifest(
   size: (json['size'] as num).toInt(),
   hash: json['hash'] as String,
   chunks:
-      (json['chunks'] as List<dynamic>?)
-          ?.map((e) => ChunkRef.fromJson(e as Map<String, dynamic>))
-          .toList() ??
+      (json['chunks'] as List<dynamic>?)?.map((e) => ChunkRef.fromJson(e as Map<String, dynamic>)).toList() ??
       const <ChunkRef>[],
 );
 

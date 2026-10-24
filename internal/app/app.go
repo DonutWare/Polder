@@ -200,6 +200,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		return nil, err
 	}
 	fileService.OnMutation(federationService.FileMutation)
+	officeService.UseShares(sharingService, federationService)
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
 		Sessions:               sessions,

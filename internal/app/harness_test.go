@@ -140,6 +140,19 @@ type fileEntry struct {
 	Mime         string         `json:"mime"`
 	Meta         map[string]any `json:"meta"`
 	PreviewState string         `json:"previewState"`
+	Mount        *mountInfo     `json:"mount"`
+	Shared       bool           `json:"shared"`
+}
+
+type mountInfo struct {
+	Kind        string          `json:"kind"`
+	ShareID     int64           `json:"shareId"`
+	Path        string          `json:"path"`
+	IsDir       bool            `json:"isDir"`
+	Owner       string          `json:"owner"`
+	Server      string          `json:"server"`
+	CanLeave    bool            `json:"canLeave"`
+	Permissions map[string]bool `json:"permissions"`
 }
 
 type errorResponse struct {

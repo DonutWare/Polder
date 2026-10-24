@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DirectoryListing {
 
- String get path; List<FileEntry> get entries; bool get indexing;
+ String get path; List<FileEntry> get entries; bool get indexing; FileMount? get mount;
 /// Create a copy of DirectoryListing
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $DirectoryListingCopyWith<DirectoryListing> get copyWith => _$DirectoryListingCo
 @override
 bool operator ==(Object other) {
   final _this = this as DirectoryListing;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DirectoryListing&&(identical(other.path, _this.path) || other.path == _this.path)&&const DeepCollectionEquality().equals(other.entries, _this.entries)&&(identical(other.indexing, _this.indexing) || other.indexing == _this.indexing));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DirectoryListing&&(identical(other.path, _this.path) || other.path == _this.path)&&const DeepCollectionEquality().equals(other.entries, _this.entries)&&(identical(other.indexing, _this.indexing) || other.indexing == _this.indexing)&&(identical(other.mount, _this.mount) || other.mount == _this.mount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DirectoryListing;
-  return Object.hash(runtimeType,_this.path,const DeepCollectionEquality().hash(_this.entries),_this.indexing);
+  return Object.hash(runtimeType,_this.path,const DeepCollectionEquality().hash(_this.entries),_this.indexing,_this.mount);
 }
 
 @override
 String toString() {
   final _this = this as DirectoryListing;
-  return 'DirectoryListing(path: ${_this.path}, entries: ${_this.entries}, indexing: ${_this.indexing})';
+  return 'DirectoryListing(path: ${_this.path}, entries: ${_this.entries}, indexing: ${_this.indexing}, mount: ${_this.mount})';
 }
 
 
@@ -54,11 +54,11 @@ abstract mixin class $DirectoryListingCopyWith<$Res>  {
   factory $DirectoryListingCopyWith(DirectoryListing value, $Res Function(DirectoryListing) _then) = _$DirectoryListingCopyWithImpl;
 @useResult
 $Res call({
- String path, List<FileEntry> entries, bool indexing
+ String path, List<FileEntry> entries, bool indexing, FileMount? mount
 });
 
 
-
+$FileMountCopyWith<$Res>? get mount;
 
 }
 /// @nodoc
@@ -71,15 +71,28 @@ class _$DirectoryListingCopyWithImpl<$Res>
 
 /// Create a copy of DirectoryListing
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? path = null,Object? entries = null,Object? indexing = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? path = null,Object? entries = null,Object? indexing = null,Object? mount = freezed,}) {
   return _then(DirectoryListing(
 path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String,entries: null == entries ? _self.entries : entries // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,indexing: null == indexing ? _self.indexing : indexing // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,mount: freezed == mount ? _self.mount : mount // ignore: cast_nullable_to_non_nullable
+as FileMount?,
   ));
 }
+/// Create a copy of DirectoryListing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FileMountCopyWith<$Res>? get mount {
+    if (_self.mount == null) {
+    return null;
+  }
 
+  return $FileMountCopyWith<$Res>(_self.mount!, (value) {
+    return _then(_self.copyWith(mount: value));
+  });
+}
 }
 
 
@@ -161,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String path,  List<FileEntry> entries,  bool indexing)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String path,  List<FileEntry> entries,  bool indexing,  FileMount? mount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DirectoryListing() when $default != null:
-return $default(_that.path,_that.entries,_that.indexing);case _:
+return $default(_that.path,_that.entries,_that.indexing,_that.mount);case _:
   return orElse();
 
 }
@@ -182,10 +195,10 @@ return $default(_that.path,_that.entries,_that.indexing);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String path,  List<FileEntry> entries,  bool indexing)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String path,  List<FileEntry> entries,  bool indexing,  FileMount? mount)  $default,) {final _that = this;
 switch (_that) {
 case _DirectoryListing():
-return $default(_that.path,_that.entries,_that.indexing);case _:
+return $default(_that.path,_that.entries,_that.indexing,_that.mount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +215,10 @@ return $default(_that.path,_that.entries,_that.indexing);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String path,  List<FileEntry> entries,  bool indexing)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String path,  List<FileEntry> entries,  bool indexing,  FileMount? mount)?  $default,) {final _that = this;
 switch (_that) {
 case _DirectoryListing() when $default != null:
-return $default(_that.path,_that.entries,_that.indexing);case _:
+return $default(_that.path,_that.entries,_that.indexing,_that.mount);case _:
   return null;
 
 }
@@ -217,7 +230,7 @@ return $default(_that.path,_that.entries,_that.indexing);case _:
 @JsonSerializable()
 
 class _DirectoryListing extends DirectoryListing {
-  const _DirectoryListing({required this.path,  List<FileEntry> entries = const <FileEntry>[], this.indexing = false}): _entries = entries,super._();
+  const _DirectoryListing({required this.path,  List<FileEntry> entries = const <FileEntry>[], this.indexing = false, this.mount}): _entries = entries,super._();
   factory _DirectoryListing.fromJson(Map<String, dynamic> json) => _$DirectoryListingFromJson(json);
 
 @override final  String path;
@@ -229,6 +242,7 @@ class _DirectoryListing extends DirectoryListing {
 }
 
 @override@JsonKey() final  bool indexing;
+@override final  FileMount? mount;
 
 /// Create a copy of DirectoryListing
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +257,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DirectoryListing&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.entries, _entries)&&(identical(other.indexing, indexing) || other.indexing == indexing));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DirectoryListing&&(identical(other.path, path) || other.path == path)&&const DeepCollectionEquality().equals(other.entries, _entries)&&(identical(other.indexing, indexing) || other.indexing == indexing)&&(identical(other.mount, mount) || other.mount == mount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,path,const DeepCollectionEquality().hash(_entries),indexing);
+    return Object.hash(runtimeType,path,const DeepCollectionEquality().hash(_entries),indexing,mount);
 }
 
 @override
 String toString() {
-    return 'DirectoryListing(path: $path, entries: $entries, indexing: $indexing)';
+    return 'DirectoryListing(path: $path, entries: $entries, indexing: $indexing, mount: $mount)';
 }
 
 
@@ -265,11 +279,11 @@ abstract mixin class _$DirectoryListingCopyWith<$Res> implements $DirectoryListi
   factory _$DirectoryListingCopyWith(_DirectoryListing value, $Res Function(_DirectoryListing) _then) = __$DirectoryListingCopyWithImpl;
 @override @useResult
 $Res call({
- String path, List<FileEntry> entries, bool indexing
+ String path, List<FileEntry> entries, bool indexing, FileMount? mount
 });
 
 
-
+@override $FileMountCopyWith<$Res>? get mount;
 
 }
 /// @nodoc
@@ -282,16 +296,29 @@ class __$DirectoryListingCopyWithImpl<$Res>
 
 /// Create a copy of DirectoryListing
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? path = null,Object? entries = null,Object? indexing = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? path = null,Object? entries = null,Object? indexing = null,Object? mount = freezed,}) {
   return _then(_DirectoryListing(
 path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as String,entries: null == entries ? _self._entries : entries // ignore: cast_nullable_to_non_nullable
 as List<FileEntry>,indexing: null == indexing ? _self.indexing : indexing // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,mount: freezed == mount ? _self.mount : mount // ignore: cast_nullable_to_non_nullable
+as FileMount?,
   ));
 }
 
+/// Create a copy of DirectoryListing
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FileMountCopyWith<$Res>? get mount {
+    if (_self.mount == null) {
+    return null;
+  }
 
+  return $FileMountCopyWith<$Res>(_self.mount!, (value) {
+    return _then(_self.copyWith(mount: value));
+  });
+}
 }
 
 // dart format on

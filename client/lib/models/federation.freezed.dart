@@ -2010,7 +2010,7 @@ $SharePermissionsCopyWith<$Res> get permissions {
 /// @nodoc
 mixin _$IncomingFederatedShare {
 
- int get id; String get name; String get owner; String get ownerName; String get server; String get provider; bool get isDir; SharePermissions get permissions; FederatedShareState get state;
+ int get id; String get name; String get owner; String get ownerName; String get server; String get provider; bool get isDir; SharePermissions get permissions; FederatedShareState get state; String get mountPath;
 /// Create a copy of IncomingFederatedShare
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2022,20 +2022,20 @@ $IncomingFederatedShareCopyWith<IncomingFederatedShare> get copyWith => _$Incomi
 @override
 bool operator ==(Object other) {
   final _this = this as IncomingFederatedShare;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IncomingFederatedShare&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.owner, _this.owner) || other.owner == _this.owner)&&(identical(other.ownerName, _this.ownerName) || other.ownerName == _this.ownerName)&&(identical(other.server, _this.server) || other.server == _this.server)&&(identical(other.provider, _this.provider) || other.provider == _this.provider)&&(identical(other.isDir, _this.isDir) || other.isDir == _this.isDir)&&(identical(other.permissions, _this.permissions) || other.permissions == _this.permissions)&&(identical(other.state, _this.state) || other.state == _this.state));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IncomingFederatedShare&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.owner, _this.owner) || other.owner == _this.owner)&&(identical(other.ownerName, _this.ownerName) || other.ownerName == _this.ownerName)&&(identical(other.server, _this.server) || other.server == _this.server)&&(identical(other.provider, _this.provider) || other.provider == _this.provider)&&(identical(other.isDir, _this.isDir) || other.isDir == _this.isDir)&&(identical(other.permissions, _this.permissions) || other.permissions == _this.permissions)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.mountPath, _this.mountPath) || other.mountPath == _this.mountPath));
 }
 
 
 @override
 int get hashCode {
   final _this = this as IncomingFederatedShare;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.owner,_this.ownerName,_this.server,_this.provider,_this.isDir,_this.permissions,_this.state);
+  return Object.hash(runtimeType,_this.id,_this.name,_this.owner,_this.ownerName,_this.server,_this.provider,_this.isDir,_this.permissions,_this.state,_this.mountPath);
 }
 
 @override
 String toString() {
   final _this = this as IncomingFederatedShare;
-  return 'IncomingFederatedShare(id: ${_this.id}, name: ${_this.name}, owner: ${_this.owner}, ownerName: ${_this.ownerName}, server: ${_this.server}, provider: ${_this.provider}, isDir: ${_this.isDir}, permissions: ${_this.permissions}, state: ${_this.state})';
+  return 'IncomingFederatedShare(id: ${_this.id}, name: ${_this.name}, owner: ${_this.owner}, ownerName: ${_this.ownerName}, server: ${_this.server}, provider: ${_this.provider}, isDir: ${_this.isDir}, permissions: ${_this.permissions}, state: ${_this.state}, mountPath: ${_this.mountPath})';
 }
 
 
@@ -2046,7 +2046,7 @@ abstract mixin class $IncomingFederatedShareCopyWith<$Res>  {
   factory $IncomingFederatedShareCopyWith(IncomingFederatedShare value, $Res Function(IncomingFederatedShare) _then) = _$IncomingFederatedShareCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, String owner, String ownerName, String server, String provider, bool isDir, SharePermissions permissions, FederatedShareState state
+ int id, String name, String owner, String ownerName, String server, String provider, bool isDir, SharePermissions permissions, FederatedShareState state, String mountPath
 });
 
 
@@ -2063,7 +2063,7 @@ class _$IncomingFederatedShareCopyWithImpl<$Res>
 
 /// Create a copy of IncomingFederatedShare
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? owner = null,Object? ownerName = null,Object? server = null,Object? provider = null,Object? isDir = null,Object? permissions = null,Object? state = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? owner = null,Object? ownerName = null,Object? server = null,Object? provider = null,Object? isDir = null,Object? permissions = null,Object? state = null,Object? mountPath = null,}) {
   return _then(IncomingFederatedShare(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -2074,7 +2074,8 @@ as String,provider: null == provider ? _self.provider : provider // ignore: cast
 as String,isDir: null == isDir ? _self.isDir : isDir // ignore: cast_nullable_to_non_nullable
 as bool,permissions: null == permissions ? _self.permissions : permissions // ignore: cast_nullable_to_non_nullable
 as SharePermissions,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as FederatedShareState,
+as FederatedShareState,mountPath: null == mountPath ? _self.mountPath : mountPath // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 /// Create a copy of IncomingFederatedShare
@@ -2168,10 +2169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String owner,  String ownerName,  String server,  String provider,  bool isDir,  SharePermissions permissions,  FederatedShareState state)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  String owner,  String ownerName,  String server,  String provider,  bool isDir,  SharePermissions permissions,  FederatedShareState state,  String mountPath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IncomingFederatedShare() when $default != null:
-return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_that.provider,_that.isDir,_that.permissions,_that.state);case _:
+return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_that.provider,_that.isDir,_that.permissions,_that.state,_that.mountPath);case _:
   return orElse();
 
 }
@@ -2189,10 +2190,10 @@ return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String owner,  String ownerName,  String server,  String provider,  bool isDir,  SharePermissions permissions,  FederatedShareState state)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  String owner,  String ownerName,  String server,  String provider,  bool isDir,  SharePermissions permissions,  FederatedShareState state,  String mountPath)  $default,) {final _that = this;
 switch (_that) {
 case _IncomingFederatedShare():
-return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_that.provider,_that.isDir,_that.permissions,_that.state);case _:
+return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_that.provider,_that.isDir,_that.permissions,_that.state,_that.mountPath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2209,10 +2210,10 @@ return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String owner,  String ownerName,  String server,  String provider,  bool isDir,  SharePermissions permissions,  FederatedShareState state)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  String owner,  String ownerName,  String server,  String provider,  bool isDir,  SharePermissions permissions,  FederatedShareState state,  String mountPath)?  $default,) {final _that = this;
 switch (_that) {
 case _IncomingFederatedShare() when $default != null:
-return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_that.provider,_that.isDir,_that.permissions,_that.state);case _:
+return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_that.provider,_that.isDir,_that.permissions,_that.state,_that.mountPath);case _:
   return null;
 
 }
@@ -2224,7 +2225,7 @@ return $default(_that.id,_that.name,_that.owner,_that.ownerName,_that.server,_th
 
 
 class _IncomingFederatedShare extends IncomingFederatedShare {
-  const _IncomingFederatedShare({required this.id, required this.name, required this.owner, this.ownerName = "", this.server = "", this.provider = "", this.isDir = true, required this.permissions, required this.state}): super._();
+  const _IncomingFederatedShare({required this.id, required this.name, required this.owner, this.ownerName = "", this.server = "", this.provider = "", this.isDir = true, required this.permissions, required this.state, this.mountPath = ""}): super._();
   
 
 @override final  int id;
@@ -2236,6 +2237,7 @@ class _IncomingFederatedShare extends IncomingFederatedShare {
 @override@JsonKey() final  bool isDir;
 @override final  SharePermissions permissions;
 @override final  FederatedShareState state;
+@override@JsonKey() final  String mountPath;
 
 /// Create a copy of IncomingFederatedShare
 /// with the given fields replaced by the non-null parameter values.
@@ -2247,18 +2249,18 @@ _$IncomingFederatedShareCopyWith<_IncomingFederatedShare> get copyWith => __$Inc
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IncomingFederatedShare&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.ownerName, ownerName) || other.ownerName == ownerName)&&(identical(other.server, server) || other.server == server)&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.isDir, isDir) || other.isDir == isDir)&&(identical(other.permissions, permissions) || other.permissions == permissions)&&(identical(other.state, state) || other.state == state));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IncomingFederatedShare&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.ownerName, ownerName) || other.ownerName == ownerName)&&(identical(other.server, server) || other.server == server)&&(identical(other.provider, provider) || other.provider == provider)&&(identical(other.isDir, isDir) || other.isDir == isDir)&&(identical(other.permissions, permissions) || other.permissions == permissions)&&(identical(other.state, state) || other.state == state)&&(identical(other.mountPath, mountPath) || other.mountPath == mountPath));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,owner,ownerName,server,provider,isDir,permissions,state);
+    return Object.hash(runtimeType,id,name,owner,ownerName,server,provider,isDir,permissions,state,mountPath);
 }
 
 @override
 String toString() {
-    return 'IncomingFederatedShare(id: $id, name: $name, owner: $owner, ownerName: $ownerName, server: $server, provider: $provider, isDir: $isDir, permissions: $permissions, state: $state)';
+    return 'IncomingFederatedShare(id: $id, name: $name, owner: $owner, ownerName: $ownerName, server: $server, provider: $provider, isDir: $isDir, permissions: $permissions, state: $state, mountPath: $mountPath)';
 }
 
 
@@ -2269,7 +2271,7 @@ abstract mixin class _$IncomingFederatedShareCopyWith<$Res> implements $Incoming
   factory _$IncomingFederatedShareCopyWith(_IncomingFederatedShare value, $Res Function(_IncomingFederatedShare) _then) = __$IncomingFederatedShareCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, String owner, String ownerName, String server, String provider, bool isDir, SharePermissions permissions, FederatedShareState state
+ int id, String name, String owner, String ownerName, String server, String provider, bool isDir, SharePermissions permissions, FederatedShareState state, String mountPath
 });
 
 
@@ -2286,7 +2288,7 @@ class __$IncomingFederatedShareCopyWithImpl<$Res>
 
 /// Create a copy of IncomingFederatedShare
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? owner = null,Object? ownerName = null,Object? server = null,Object? provider = null,Object? isDir = null,Object? permissions = null,Object? state = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? owner = null,Object? ownerName = null,Object? server = null,Object? provider = null,Object? isDir = null,Object? permissions = null,Object? state = null,Object? mountPath = null,}) {
   return _then(_IncomingFederatedShare(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -2297,7 +2299,8 @@ as String,provider: null == provider ? _self.provider : provider // ignore: cast
 as String,isDir: null == isDir ? _self.isDir : isDir // ignore: cast_nullable_to_non_nullable
 as bool,permissions: null == permissions ? _self.permissions : permissions // ignore: cast_nullable_to_non_nullable
 as SharePermissions,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as FederatedShareState,
+as FederatedShareState,mountPath: null == mountPath ? _self.mountPath : mountPath // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

@@ -51,6 +51,12 @@ func QueryAll[T any](ctx context.Context, db *sql.DB, scan func(RowScanner) (T, 
 	return list, rows.Err()
 }
 
+func ScanInt64(row RowScanner) (int64, error) {
+	var value int64
+	err := row.Scan(&value)
+	return value, err
+}
+
 func NullIfZero(value int64) any {
 	if value == 0 {
 		return nil

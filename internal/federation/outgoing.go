@@ -411,3 +411,8 @@ func firstNonEmpty(values ...string) string {
 	}
 	return ""
 }
+
+func (s *Service) SharedFileIDs(ctx context.Context, owner users.User) ([]int64, error) {
+	return database.QueryAll(ctx, s.db, database.ScanInt64,
+		`SELECT DISTINCT file_id FROM federated_shares_out WHERE owner_id = $1`, owner.ID)
+}

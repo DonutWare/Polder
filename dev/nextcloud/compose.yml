@@ -1,0 +1,99 @@
+name: polder-nextcloud
+
+x-ca: &ca ca:/ca:ro
+
+services:
+  caddy:
+    image: caddy:2
+    command:
+      - sh
+      - -c
+      - |
+        caddy run --config /etc/caddy/Caddyfile --adapter caddyfile &
+        until [ -f /data/caddy/pki/authorities/local/root.crt ]; do sleep 1; done
+        install -m 0644 /data/caddy/pki/authorities/local/root.crt /ca/root.crt
+        wait
+    ports:
+      - "127.0.0.1:443:443"
+    environment:
+      POLDER_UPSTREAM: ${POLDER_UPSTREAM:-host.docker.internal:6060}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - ca:/ca
+    networks:
+      mesh:
+        ipv4_address: 172.31.240.10
+        aliases:
+          - polder.test
+          - nextcloud.test
+
+  polder:
+    image: golang:1.27
+    profiles:
+      - container
+    working_dir: /src
+    command: go run -buildvcs=false ./cmd/polder
+    depends_on:
+      - caddy
+    volumes:
+      - ../..:/src:ro
+      - polder-config:/config
+      - polder-data:/data
+      - go-mod:/go/pkg/mod
+      - go-build:/root/.cache/go-build
+      - *ca
+    environment:
+      POLDER_CONFIG_DIR: /config
+      POLDER_DATA_DIR: /data
+      POLDER_LISTEN: ":6060"
+      POLDER_PUBLIC_URL: https://polder.test
+      POLDER_TRUSTED_PROXIES: 172.31.240.10
+      SSL_CERT_DIR: /etc/ssl/certs:/ca
+    networks:
+      - mesh
+
+  nextcloud:
+    image: nextcloud:${NEXTCLOUD_VERSION:-latest}
+    command:
+      - sh
+      - -c
+      - |
+        until [ -f /ca/root.crt ]; do sleep 1; done
+        cp /ca/root.crt /usr/local/share/ca-certificates/caddy-local.crt
+        update-ca-certificates
+        exec /entrypoint.sh apache2-foreground
+    depends_on:
+      - caddy
+    volumes:
+      - nextcloud:/var/www/html
+      - ./post-installation.sh:/docker-entrypoint-hooks.d/post-installation/polder.sh:ro
+      - *ca
+    environment:
+      SQLITE_DATABASE: nextcloud
+      NEXTCLOUD_ADMIN_USER: admin
+      NEXTCLOUD_ADMIN_PASSWORD: admin
+      NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.test
+      OVERWRITEHOST: nextcloud.test
+      OVERWRITEPROTOCOL: https
+      OVERWRITECLIURL: https://nextcloud.test
+      TRUSTED_PROXIES: 172.31.240.10
+    networks:
+      - mesh
+
+networks:
+  mesh:
+    ipam:
+      config:
+        - subnet: 172.31.240.0/24
+
+volumes:
+  caddy-data:
+  ca:
+  polder-config:
+  polder-data:
+  go-mod:
+  go-build:
+  nextcloud:

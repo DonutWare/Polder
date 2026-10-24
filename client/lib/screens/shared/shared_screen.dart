@@ -7,10 +7,11 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/federation.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/federation/federation_providers.dart";
+import "package:polder/providers/sharing/shares_in_files_provider.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
-import "package:polder/screens/shared/shared_browser_screen.dart";
+import "package:polder/screens/shared/mounted_share_screen.dart";
 import "package:polder/screens/shared/widgets/federation_invite_dialogs.dart";
 import "package:polder/screens/shared/widgets/incoming_share_details_sheet.dart";
 import "package:polder/util/action_feedback.dart";
@@ -51,17 +52,19 @@ class SharedScreen extends ConsumerWidget {
         pane: _SectionList(selected: shown),
         placeholder: MessageView(icon: IconsaxPlusLinear.share, message: localized.nothingSelected),
         content: switch ((shown, shareId)) {
-          (SharedSection.federated, final int shareId) => FederatedBrowserScreen(
+          (SharedSection.federated, final int shareId) => MountedShareScreen(
             key: ValueKey("federated-$shareId"),
+            origin: ShareOrigin.federated,
             shareId: shareId,
             path: path,
-            parentRoute: parent!,
+            exitRoute: AppRoutes.sharedSection(SharedSection.federated.segment),
           ),
-          (_, final int shareId) => SharedBrowserScreen(
+          (_, final int shareId) => MountedShareScreen(
             key: ValueKey("share-$shareId"),
+            origin: ShareOrigin.local,
             shareId: shareId,
             path: path,
-            parentRoute: parent!,
+            exitRoute: AppRoutes.sharedSection(SharedSection.withMe.segment),
           ),
           (SharedSection.withMe, _) => const _IncomingPage(key: ValueKey(SharedSection.withMe)),
           (SharedSection.byMe, _) => const _OutgoingPage(key: ValueKey(SharedSection.byMe)),
@@ -122,7 +125,27 @@ class _SectionList extends ConsumerWidget {
             localized.sharedFromOtherServers,
             federated?.where((share) => share.isPending).length,
           ),
+        const Divider(height: 24),
+        const _SharesInFilesSwitch(),
       ],
+    );
+  }
+}
+
+class _SharesInFilesSwitch extends ConsumerWidget {
+  const _SharesInFilesSwitch();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shown = ref.watch(sharesInFilesProvider).value;
+    return SwitchListTile(
+      secondary: const Icon(IconsaxPlusLinear.folder_2),
+      title: Text(context.localized.showSharesInFiles),
+      subtitle: Text(context.localized.showSharesInFilesHint),
+      value: shown ?? true,
+      onChanged: shown == null
+          ? null
+          : (value) => context.runWithFeedback(ref.read(sharesInFilesProvider.notifier).setShown(value)),
     );
   }
 }
@@ -196,7 +219,14 @@ class _IncomingShareTile extends ConsumerWidget {
         share.direct || share.groups.isEmpty ? share.owner.name : share.groups.map((group) => group.name).join(", "),
         overflow: TextOverflow.ellipsis,
       ),
-      onTap: () => context.go(AppRoutes.sharedAt(share.id)),
+      onTap: () => openMountedShare(
+        context,
+        ref,
+        origin: ShareOrigin.local,
+        shareId: share.id,
+        isDir: share.entry.isDir,
+        mountPath: share.mountPath,
+      ),
       onLongPress: () => showIncomingShareDetails(context, share),
       trailing: IconButton(
         tooltip: localized.details,
@@ -399,7 +429,16 @@ class _FederatedShareTile extends ConsumerWidget {
         [share.shownOwner, if (share.provider.isNotEmpty) share.provider].join(" · "),
         overflow: TextOverflow.ellipsis,
       ),
-      onTap: share.isPending ? null : () => context.go(AppRoutes.federatedAt(share.id)),
+      onTap: share.isPending
+          ? null
+          : () => openMountedShare(
+              context,
+              ref,
+              origin: ShareOrigin.federated,
+              shareId: share.id,
+              isDir: share.isDir,
+              mountPath: share.mountPath,
+            ),
       trailing: share.isPending
           ? Row(
               mainAxisSize: MainAxisSize.min,

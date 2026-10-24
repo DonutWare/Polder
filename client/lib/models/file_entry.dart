@@ -1,5 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
+import "package:polder/models/file_mount.dart";
 import "package:polder/util/remote_path.dart";
 
 part "file_entry.freezed.dart";
@@ -26,6 +27,8 @@ abstract class FileEntry with _$FileEntry {
     @Default("") String mime,
     @Default(<String, dynamic>{}) Map<String, dynamic> meta,
     @JsonKey(unknownEnumValue: PreviewState.none) @Default(PreviewState.none) PreviewState previewState,
+    FileMount? mount,
+    @Default(false) bool sharedByYou,
   }) = _FileEntry;
 
   factory FileEntry.fromJson(Map<String, dynamic> json) => _$FileEntryFromJson(json);
@@ -38,6 +41,8 @@ abstract class FileEntry with _$FileEntry {
   );
 
   bool get hasPreview => previewState == PreviewState.ready;
+
+  bool get isMountRoot => mount?.path == path;
 
   bool get isImage => mime.startsWith("image/");
 

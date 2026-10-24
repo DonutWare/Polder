@@ -32,11 +32,13 @@ type incomingShare struct {
 	Permissions map[string]bool `json:"permissions"`
 	Note        string          `json:"note"`
 	Entry       fileEntry       `json:"entry"`
+	MountPath   string          `json:"mountPath"`
 }
 
 type listing struct {
 	Path    string      `json:"path"`
 	Entries []fileEntry `json:"entries"`
+	Mount   *mountInfo  `json:"mount"`
 }
 
 var (

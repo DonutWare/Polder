@@ -12,6 +12,7 @@ import "package:polder/models/trash.dart";
 import "package:polder/providers/browser/thumbnail_provider.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder/theme/app_theme.dart";
 
 class FileThumbnail extends StatelessWidget {
@@ -19,6 +20,7 @@ class FileThumbnail extends StatelessWidget {
     : isDir = entry.isDir,
       mime = entry.mime,
       hasPreview = entry.hasPreview,
+      showsSharedBadge = entry.isMountRoot,
       preview = ((size) => thumbnailProvider(ThumbnailRequest.file(path: entry.path, rev: entry.rev, size: size)));
 
   FileThumbnail.inSpace({
@@ -30,12 +32,14 @@ class FileThumbnail extends StatelessWidget {
   }) : isDir = entry.isDir,
        mime = entry.mime,
        hasPreview = entry.hasPreview,
+       showsSharedBadge = false,
        preview = ((size) => spaceThumbnailProvider((SpaceLocation(space: space, path: entry.path), size)));
 
   FileThumbnail.trashed({required TrashItem item, required this.dimension, this.fill = false, super.key})
     : isDir = item.isDir,
       mime = item.mime,
       hasPreview = item.hasPreview,
+      showsSharedBadge = false,
       preview = ((size) => thumbnailProvider(ThumbnailRequest.trash(itemId: item.id, size: size)));
 
   FileThumbnail.version({
@@ -47,25 +51,42 @@ class FileThumbnail extends StatelessWidget {
   }) : isDir = false,
        mime = entry.mime,
        hasPreview = version.hasPreview,
+       showsSharedBadge = false,
        preview = ((size) => thumbnailProvider(ThumbnailRequest.version(versionId: version.id, size: size)));
 
   final bool isDir;
   final String mime;
   final bool hasPreview;
+  final bool showsSharedBadge;
   final ProviderListenable<AsyncValue<Uint8List?>> Function(int size) preview;
   final double dimension;
 
   final bool fill;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: dimension,
-    child: Center(
-      child: hasPreview
-          ? _PreviewImage(thumbnail: this)
-          : FileTypeIcon.of(isDir: isDir, mime: mime, size: fill ? dimension * 0.45 : dimension),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final image = SizedBox.square(
+      dimension: dimension,
+      child: Center(
+        child: hasPreview
+            ? _PreviewImage(thumbnail: this)
+            : FileTypeIcon.of(isDir: isDir, mime: mime, size: fill ? dimension * 0.45 : dimension),
+      ),
+    );
+    if (!showsSharedBadge) return image;
+    final badge = (dimension * 0.42).clamp(16.0, 28.0);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        image,
+        PositionedDirectional(
+          end: fill ? dimension * 0.2 : -2,
+          bottom: fill ? dimension * 0.2 : -2,
+          child: SharedWithYouBadge(size: badge),
+        ),
+      ],
+    );
+  }
 }
 
 class _PreviewImage extends ConsumerWidget {

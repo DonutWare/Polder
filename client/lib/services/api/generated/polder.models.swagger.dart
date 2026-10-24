@@ -1332,11 +1332,13 @@ class Entry {
     required this.isDir,
     required this.meta,
     required this.mime,
+    this.mount,
     required this.mtime,
     required this.name,
     required this.path,
     required this.previewState,
     required this.rev,
+    this.shared,
     required this.size,
   });
 
@@ -1355,6 +1357,8 @@ class Entry {
   final Map<String, dynamic> meta;
   @JsonKey(name: 'mime', includeIfNull: false)
   final String mime;
+  @JsonKey(name: 'mount', includeIfNull: false)
+  final Mount? mount;
   @JsonKey(name: 'mtime', includeIfNull: false)
   final DateTime mtime;
   @JsonKey(name: 'name', includeIfNull: false)
@@ -1370,6 +1374,8 @@ class Entry {
   final enums.EntryPreviewState previewState;
   @JsonKey(name: 'rev', includeIfNull: false)
   final int rev;
+  @JsonKey(name: 'shared', includeIfNull: false)
+  final bool? shared;
   @JsonKey(name: 'size', includeIfNull: false)
   final int size;
   static const fromJsonFactory = _$EntryFromJson;
@@ -1383,12 +1389,14 @@ class Entry {
             (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
             (identical(other.meta, meta) || const DeepCollectionEquality().equals(other.meta, meta)) &&
             (identical(other.mime, mime) || const DeepCollectionEquality().equals(other.mime, mime)) &&
+            (identical(other.mount, mount) || const DeepCollectionEquality().equals(other.mount, mount)) &&
             (identical(other.mtime, mtime) || const DeepCollectionEquality().equals(other.mtime, mtime)) &&
             (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
             (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
             (identical(other.previewState, previewState) ||
                 const DeepCollectionEquality().equals(other.previewState, previewState)) &&
             (identical(other.rev, rev) || const DeepCollectionEquality().equals(other.rev, rev)) &&
+            (identical(other.shared, shared) || const DeepCollectionEquality().equals(other.shared, shared)) &&
             (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
@@ -1399,11 +1407,13 @@ class Entry {
       const DeepCollectionEquality().hash(isDir) ^
       const DeepCollectionEquality().hash(meta) ^
       const DeepCollectionEquality().hash(mime) ^
+      const DeepCollectionEquality().hash(mount) ^
       const DeepCollectionEquality().hash(mtime) ^
       const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(path) ^
       const DeepCollectionEquality().hash(previewState) ^
       const DeepCollectionEquality().hash(rev) ^
+      const DeepCollectionEquality().hash(shared) ^
       const DeepCollectionEquality().hash(size) ^
       runtimeType.hashCode;
 }
@@ -1415,11 +1425,13 @@ extension $EntryExtension on Entry {
     bool? isDir,
     Map<String, dynamic>? meta,
     String? mime,
+    Mount? mount,
     DateTime? mtime,
     String? name,
     String? path,
     enums.EntryPreviewState? previewState,
     int? rev,
+    bool? shared,
     int? size,
   }) {
     return Entry(
@@ -1428,11 +1440,13 @@ extension $EntryExtension on Entry {
       isDir: isDir ?? this.isDir,
       meta: meta ?? this.meta,
       mime: mime ?? this.mime,
+      mount: mount ?? this.mount,
       mtime: mtime ?? this.mtime,
       name: name ?? this.name,
       path: path ?? this.path,
       previewState: previewState ?? this.previewState,
       rev: rev ?? this.rev,
+      shared: shared ?? this.shared,
       size: size ?? this.size,
     );
   }
@@ -1443,11 +1457,13 @@ extension $EntryExtension on Entry {
     Wrapped<bool>? isDir,
     Wrapped<Map<String, dynamic>>? meta,
     Wrapped<String>? mime,
+    Wrapped<Mount?>? mount,
     Wrapped<DateTime>? mtime,
     Wrapped<String>? name,
     Wrapped<String>? path,
     Wrapped<enums.EntryPreviewState>? previewState,
     Wrapped<int>? rev,
+    Wrapped<bool?>? shared,
     Wrapped<int>? size,
   }) {
     return Entry(
@@ -1456,11 +1472,13 @@ extension $EntryExtension on Entry {
       isDir: (isDir != null ? isDir.value : this.isDir),
       meta: (meta != null ? meta.value : this.meta),
       mime: (mime != null ? mime.value : this.mime),
+      mount: (mount != null ? mount.value : this.mount),
       mtime: (mtime != null ? mtime.value : this.mtime),
       name: (name != null ? name.value : this.name),
       path: (path != null ? path.value : this.path),
       previewState: (previewState != null ? previewState.value : this.previewState),
       rev: (rev != null ? rev.value : this.rev),
+      shared: (shared != null ? shared.value : this.shared),
       size: (size != null ? size.value : this.size),
     );
   }
@@ -2373,6 +2391,8 @@ class IncomingFederatedShare {
     required this.createdAt,
     required this.id,
     required this.isDir,
+    required this.mountPath,
+    this.mtime,
     required this.name,
     required this.owner,
     required this.ownerName,
@@ -2380,6 +2400,7 @@ class IncomingFederatedShare {
     required this.provider,
     required this.server,
     required this.sharedBy,
+    required this.size,
     required this.state,
   });
 
@@ -2394,6 +2415,10 @@ class IncomingFederatedShare {
   final int id;
   @JsonKey(name: 'isDir', includeIfNull: false)
   final bool isDir;
+  @JsonKey(name: 'mountPath', includeIfNull: false)
+  final String mountPath;
+  @JsonKey(name: 'mtime', includeIfNull: false)
+  final DateTime? mtime;
   @JsonKey(name: 'name', includeIfNull: false)
   final String name;
   @JsonKey(name: 'owner', includeIfNull: false)
@@ -2408,6 +2433,8 @@ class IncomingFederatedShare {
   final String server;
   @JsonKey(name: 'sharedBy', includeIfNull: false)
   final String sharedBy;
+  @JsonKey(name: 'size', includeIfNull: false)
+  final int size;
   @JsonKey(
     name: 'state',
     includeIfNull: false,
@@ -2425,6 +2452,9 @@ class IncomingFederatedShare {
                 const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
             (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
             (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.mountPath, mountPath) ||
+                const DeepCollectionEquality().equals(other.mountPath, mountPath)) &&
+            (identical(other.mtime, mtime) || const DeepCollectionEquality().equals(other.mtime, mtime)) &&
             (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
             (identical(other.owner, owner) || const DeepCollectionEquality().equals(other.owner, owner)) &&
             (identical(other.ownerName, ownerName) ||
@@ -2434,6 +2464,7 @@ class IncomingFederatedShare {
             (identical(other.provider, provider) || const DeepCollectionEquality().equals(other.provider, provider)) &&
             (identical(other.server, server) || const DeepCollectionEquality().equals(other.server, server)) &&
             (identical(other.sharedBy, sharedBy) || const DeepCollectionEquality().equals(other.sharedBy, sharedBy)) &&
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)) &&
             (identical(other.state, state) || const DeepCollectionEquality().equals(other.state, state)));
   }
 
@@ -2442,6 +2473,8 @@ class IncomingFederatedShare {
       const DeepCollectionEquality().hash(createdAt) ^
       const DeepCollectionEquality().hash(id) ^
       const DeepCollectionEquality().hash(isDir) ^
+      const DeepCollectionEquality().hash(mountPath) ^
+      const DeepCollectionEquality().hash(mtime) ^
       const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(owner) ^
       const DeepCollectionEquality().hash(ownerName) ^
@@ -2449,6 +2482,7 @@ class IncomingFederatedShare {
       const DeepCollectionEquality().hash(provider) ^
       const DeepCollectionEquality().hash(server) ^
       const DeepCollectionEquality().hash(sharedBy) ^
+      const DeepCollectionEquality().hash(size) ^
       const DeepCollectionEquality().hash(state) ^
       runtimeType.hashCode;
 }
@@ -2458,6 +2492,8 @@ extension $IncomingFederatedShareExtension on IncomingFederatedShare {
     DateTime? createdAt,
     int? id,
     bool? isDir,
+    String? mountPath,
+    DateTime? mtime,
     String? name,
     String? owner,
     String? ownerName,
@@ -2465,12 +2501,15 @@ extension $IncomingFederatedShareExtension on IncomingFederatedShare {
     String? provider,
     String? server,
     String? sharedBy,
+    int? size,
     enums.IncomingFederatedShareState? state,
   }) {
     return IncomingFederatedShare(
       createdAt: createdAt ?? this.createdAt,
       id: id ?? this.id,
       isDir: isDir ?? this.isDir,
+      mountPath: mountPath ?? this.mountPath,
+      mtime: mtime ?? this.mtime,
       name: name ?? this.name,
       owner: owner ?? this.owner,
       ownerName: ownerName ?? this.ownerName,
@@ -2478,6 +2517,7 @@ extension $IncomingFederatedShareExtension on IncomingFederatedShare {
       provider: provider ?? this.provider,
       server: server ?? this.server,
       sharedBy: sharedBy ?? this.sharedBy,
+      size: size ?? this.size,
       state: state ?? this.state,
     );
   }
@@ -2486,6 +2526,8 @@ extension $IncomingFederatedShareExtension on IncomingFederatedShare {
     Wrapped<DateTime>? createdAt,
     Wrapped<int>? id,
     Wrapped<bool>? isDir,
+    Wrapped<String>? mountPath,
+    Wrapped<DateTime?>? mtime,
     Wrapped<String>? name,
     Wrapped<String>? owner,
     Wrapped<String>? ownerName,
@@ -2493,12 +2535,15 @@ extension $IncomingFederatedShareExtension on IncomingFederatedShare {
     Wrapped<String>? provider,
     Wrapped<String>? server,
     Wrapped<String>? sharedBy,
+    Wrapped<int>? size,
     Wrapped<enums.IncomingFederatedShareState>? state,
   }) {
     return IncomingFederatedShare(
       createdAt: (createdAt != null ? createdAt.value : this.createdAt),
       id: (id != null ? id.value : this.id),
       isDir: (isDir != null ? isDir.value : this.isDir),
+      mountPath: (mountPath != null ? mountPath.value : this.mountPath),
+      mtime: (mtime != null ? mtime.value : this.mtime),
       name: (name != null ? name.value : this.name),
       owner: (owner != null ? owner.value : this.owner),
       ownerName: (ownerName != null ? ownerName.value : this.ownerName),
@@ -2506,6 +2551,7 @@ extension $IncomingFederatedShareExtension on IncomingFederatedShare {
       provider: (provider != null ? provider.value : this.provider),
       server: (server != null ? server.value : this.server),
       sharedBy: (sharedBy != null ? sharedBy.value : this.sharedBy),
+      size: (size != null ? size.value : this.size),
       state: (state != null ? state.value : this.state),
     );
   }
@@ -2520,6 +2566,7 @@ class IncomingShare {
     this.expiresAt,
     this.groups,
     required this.id,
+    required this.mountPath,
     required this.note,
     required this.owner,
     required this.permissions,
@@ -2542,6 +2589,8 @@ class IncomingShare {
   final List<GroupRef>? groups;
   @JsonKey(name: 'id', includeIfNull: false)
   final int id;
+  @JsonKey(name: 'mountPath', includeIfNull: false)
+  final String mountPath;
   @JsonKey(name: 'note', includeIfNull: false)
   final String note;
   @JsonKey(name: 'owner', includeIfNull: false)
@@ -2562,6 +2611,8 @@ class IncomingShare {
                 const DeepCollectionEquality().equals(other.expiresAt, expiresAt)) &&
             (identical(other.groups, groups) || const DeepCollectionEquality().equals(other.groups, groups)) &&
             (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.mountPath, mountPath) ||
+                const DeepCollectionEquality().equals(other.mountPath, mountPath)) &&
             (identical(other.note, note) || const DeepCollectionEquality().equals(other.note, note)) &&
             (identical(other.owner, owner) || const DeepCollectionEquality().equals(other.owner, owner)) &&
             (identical(other.permissions, permissions) ||
@@ -2576,6 +2627,7 @@ class IncomingShare {
       const DeepCollectionEquality().hash(expiresAt) ^
       const DeepCollectionEquality().hash(groups) ^
       const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(mountPath) ^
       const DeepCollectionEquality().hash(note) ^
       const DeepCollectionEquality().hash(owner) ^
       const DeepCollectionEquality().hash(permissions) ^
@@ -2590,6 +2642,7 @@ extension $IncomingShareExtension on IncomingShare {
     DateTime? expiresAt,
     List<GroupRef>? groups,
     int? id,
+    String? mountPath,
     String? note,
     UserSummary? owner,
     SharePermissions? permissions,
@@ -2601,6 +2654,7 @@ extension $IncomingShareExtension on IncomingShare {
       expiresAt: expiresAt ?? this.expiresAt,
       groups: groups ?? this.groups,
       id: id ?? this.id,
+      mountPath: mountPath ?? this.mountPath,
       note: note ?? this.note,
       owner: owner ?? this.owner,
       permissions: permissions ?? this.permissions,
@@ -2614,6 +2668,7 @@ extension $IncomingShareExtension on IncomingShare {
     Wrapped<DateTime?>? expiresAt,
     Wrapped<List<GroupRef>?>? groups,
     Wrapped<int>? id,
+    Wrapped<String>? mountPath,
     Wrapped<String>? note,
     Wrapped<UserSummary>? owner,
     Wrapped<SharePermissions>? permissions,
@@ -2625,6 +2680,7 @@ extension $IncomingShareExtension on IncomingShare {
       expiresAt: (expiresAt != null ? expiresAt.value : this.expiresAt),
       groups: (groups != null ? groups.value : this.groups),
       id: (id != null ? id.value : this.id),
+      mountPath: (mountPath != null ? mountPath.value : this.mountPath),
       note: (note != null ? note.value : this.note),
       owner: (owner != null ? owner.value : this.owner),
       permissions: (permissions != null ? permissions.value : this.permissions),
@@ -3141,7 +3197,7 @@ extension $LinksResponseExtension on LinksResponse {
 
 @JsonSerializable(explicitToJson: true)
 class ListResponse {
-  const ListResponse({this.entries, required this.indexing, required this.path});
+  const ListResponse({this.entries, required this.indexing, this.mount, required this.path});
 
   factory ListResponse.fromJson(Map<String, dynamic> json) => _$ListResponseFromJson(json);
 
@@ -3152,6 +3208,8 @@ class ListResponse {
   final List<Entry>? entries;
   @JsonKey(name: 'indexing', includeIfNull: false)
   final bool indexing;
+  @JsonKey(name: 'mount', includeIfNull: false)
+  final Mount? mount;
   @JsonKey(name: 'path', includeIfNull: false)
   final String path;
   static const fromJsonFactory = _$ListResponseFromJson;
@@ -3162,6 +3220,7 @@ class ListResponse {
         (other is ListResponse &&
             (identical(other.entries, entries) || const DeepCollectionEquality().equals(other.entries, entries)) &&
             (identical(other.indexing, indexing) || const DeepCollectionEquality().equals(other.indexing, indexing)) &&
+            (identical(other.mount, mount) || const DeepCollectionEquality().equals(other.mount, mount)) &&
             (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
   }
 
@@ -3169,19 +3228,31 @@ class ListResponse {
   int get hashCode =>
       const DeepCollectionEquality().hash(entries) ^
       const DeepCollectionEquality().hash(indexing) ^
+      const DeepCollectionEquality().hash(mount) ^
       const DeepCollectionEquality().hash(path) ^
       runtimeType.hashCode;
 }
 
 extension $ListResponseExtension on ListResponse {
-  ListResponse copyWith({List<Entry>? entries, bool? indexing, String? path}) {
-    return ListResponse(entries: entries ?? this.entries, indexing: indexing ?? this.indexing, path: path ?? this.path);
+  ListResponse copyWith({List<Entry>? entries, bool? indexing, Mount? mount, String? path}) {
+    return ListResponse(
+      entries: entries ?? this.entries,
+      indexing: indexing ?? this.indexing,
+      mount: mount ?? this.mount,
+      path: path ?? this.path,
+    );
   }
 
-  ListResponse copyWithWrapped({Wrapped<List<Entry>?>? entries, Wrapped<bool>? indexing, Wrapped<String>? path}) {
+  ListResponse copyWithWrapped({
+    Wrapped<List<Entry>?>? entries,
+    Wrapped<bool>? indexing,
+    Wrapped<Mount?>? mount,
+    Wrapped<String>? path,
+  }) {
     return ListResponse(
       entries: (entries != null ? entries.value : this.entries),
       indexing: (indexing != null ? indexing.value : this.indexing),
+      mount: (mount != null ? mount.value : this.mount),
       path: (path != null ? path.value : this.path),
     );
   }
@@ -3853,6 +3924,220 @@ extension $MemberExtension on Member {
 
   Member copyWithWrapped({Wrapped<enums.MemberRole>? role, Wrapped<UserSummary>? user}) {
     return Member(role: (role != null ? role.value : this.role), user: (user != null ? user.value : this.user));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Mount {
+  const Mount({
+    required this.canLeave,
+    this.expiresAt,
+    this.groups,
+    required this.isDir,
+    required this.kind,
+    this.note,
+    required this.owner,
+    required this.ownerName,
+    required this.path,
+    required this.permissions,
+    this.provider,
+    this.server,
+    required this.shareId,
+    required this.sharedAt,
+  });
+
+  factory Mount.fromJson(Map<String, dynamic> json) => _$MountFromJson(json);
+
+  static const toJsonFactory = _$MountToJson;
+  Map<String, dynamic> toJson() => _$MountToJson(this);
+
+  @JsonKey(name: 'canLeave', includeIfNull: false)
+  final bool canLeave;
+  @JsonKey(name: 'expiresAt', includeIfNull: false)
+  final DateTime? expiresAt;
+  @JsonKey(name: 'groups', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? groups;
+  @JsonKey(name: 'isDir', includeIfNull: false)
+  final bool isDir;
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: mountKindToJson, fromJson: mountKindFromJson)
+  final enums.MountKind kind;
+  @JsonKey(name: 'note', includeIfNull: false)
+  final String? note;
+  @JsonKey(name: 'owner', includeIfNull: false)
+  final String owner;
+  @JsonKey(name: 'ownerName', includeIfNull: false)
+  final String ownerName;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  @JsonKey(name: 'permissions', includeIfNull: false)
+  final MountPermissions permissions;
+  @JsonKey(name: 'provider', includeIfNull: false)
+  final String? provider;
+  @JsonKey(name: 'server', includeIfNull: false)
+  final String? server;
+  @JsonKey(name: 'shareId', includeIfNull: false)
+  final int shareId;
+  @JsonKey(name: 'sharedAt', includeIfNull: false)
+  final DateTime sharedAt;
+  static const fromJsonFactory = _$MountFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Mount &&
+            (identical(other.canLeave, canLeave) || const DeepCollectionEquality().equals(other.canLeave, canLeave)) &&
+            (identical(other.expiresAt, expiresAt) ||
+                const DeepCollectionEquality().equals(other.expiresAt, expiresAt)) &&
+            (identical(other.groups, groups) || const DeepCollectionEquality().equals(other.groups, groups)) &&
+            (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.note, note) || const DeepCollectionEquality().equals(other.note, note)) &&
+            (identical(other.owner, owner) || const DeepCollectionEquality().equals(other.owner, owner)) &&
+            (identical(other.ownerName, ownerName) ||
+                const DeepCollectionEquality().equals(other.ownerName, ownerName)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
+            (identical(other.permissions, permissions) ||
+                const DeepCollectionEquality().equals(other.permissions, permissions)) &&
+            (identical(other.provider, provider) || const DeepCollectionEquality().equals(other.provider, provider)) &&
+            (identical(other.server, server) || const DeepCollectionEquality().equals(other.server, server)) &&
+            (identical(other.shareId, shareId) || const DeepCollectionEquality().equals(other.shareId, shareId)) &&
+            (identical(other.sharedAt, sharedAt) || const DeepCollectionEquality().equals(other.sharedAt, sharedAt)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(canLeave) ^
+      const DeepCollectionEquality().hash(expiresAt) ^
+      const DeepCollectionEquality().hash(groups) ^
+      const DeepCollectionEquality().hash(isDir) ^
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(note) ^
+      const DeepCollectionEquality().hash(owner) ^
+      const DeepCollectionEquality().hash(ownerName) ^
+      const DeepCollectionEquality().hash(path) ^
+      const DeepCollectionEquality().hash(permissions) ^
+      const DeepCollectionEquality().hash(provider) ^
+      const DeepCollectionEquality().hash(server) ^
+      const DeepCollectionEquality().hash(shareId) ^
+      const DeepCollectionEquality().hash(sharedAt) ^
+      runtimeType.hashCode;
+}
+
+extension $MountExtension on Mount {
+  Mount copyWith({
+    bool? canLeave,
+    DateTime? expiresAt,
+    List<String>? groups,
+    bool? isDir,
+    enums.MountKind? kind,
+    String? note,
+    String? owner,
+    String? ownerName,
+    String? path,
+    MountPermissions? permissions,
+    String? provider,
+    String? server,
+    int? shareId,
+    DateTime? sharedAt,
+  }) {
+    return Mount(
+      canLeave: canLeave ?? this.canLeave,
+      expiresAt: expiresAt ?? this.expiresAt,
+      groups: groups ?? this.groups,
+      isDir: isDir ?? this.isDir,
+      kind: kind ?? this.kind,
+      note: note ?? this.note,
+      owner: owner ?? this.owner,
+      ownerName: ownerName ?? this.ownerName,
+      path: path ?? this.path,
+      permissions: permissions ?? this.permissions,
+      provider: provider ?? this.provider,
+      server: server ?? this.server,
+      shareId: shareId ?? this.shareId,
+      sharedAt: sharedAt ?? this.sharedAt,
+    );
+  }
+
+  Mount copyWithWrapped({
+    Wrapped<bool>? canLeave,
+    Wrapped<DateTime?>? expiresAt,
+    Wrapped<List<String>?>? groups,
+    Wrapped<bool>? isDir,
+    Wrapped<enums.MountKind>? kind,
+    Wrapped<String?>? note,
+    Wrapped<String>? owner,
+    Wrapped<String>? ownerName,
+    Wrapped<String>? path,
+    Wrapped<MountPermissions>? permissions,
+    Wrapped<String?>? provider,
+    Wrapped<String?>? server,
+    Wrapped<int>? shareId,
+    Wrapped<DateTime>? sharedAt,
+  }) {
+    return Mount(
+      canLeave: (canLeave != null ? canLeave.value : this.canLeave),
+      expiresAt: (expiresAt != null ? expiresAt.value : this.expiresAt),
+      groups: (groups != null ? groups.value : this.groups),
+      isDir: (isDir != null ? isDir.value : this.isDir),
+      kind: (kind != null ? kind.value : this.kind),
+      note: (note != null ? note.value : this.note),
+      owner: (owner != null ? owner.value : this.owner),
+      ownerName: (ownerName != null ? ownerName.value : this.ownerName),
+      path: (path != null ? path.value : this.path),
+      permissions: (permissions != null ? permissions.value : this.permissions),
+      provider: (provider != null ? provider.value : this.provider),
+      server: (server != null ? server.value : this.server),
+      shareId: (shareId != null ? shareId.value : this.shareId),
+      sharedAt: (sharedAt != null ? sharedAt.value : this.sharedAt),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class MountPermissions {
+  const MountPermissions({required this.create, required this.delete, required this.edit});
+
+  factory MountPermissions.fromJson(Map<String, dynamic> json) => _$MountPermissionsFromJson(json);
+
+  static const toJsonFactory = _$MountPermissionsToJson;
+  Map<String, dynamic> toJson() => _$MountPermissionsToJson(this);
+
+  @JsonKey(name: 'create', includeIfNull: false)
+  final bool create;
+  @JsonKey(name: 'delete', includeIfNull: false)
+  final bool delete;
+  @JsonKey(name: 'edit', includeIfNull: false)
+  final bool edit;
+  static const fromJsonFactory = _$MountPermissionsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is MountPermissions &&
+            (identical(other.create, create) || const DeepCollectionEquality().equals(other.create, create)) &&
+            (identical(other.delete, delete) || const DeepCollectionEquality().equals(other.delete, delete)) &&
+            (identical(other.edit, edit) || const DeepCollectionEquality().equals(other.edit, edit)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(create) ^
+      const DeepCollectionEquality().hash(delete) ^
+      const DeepCollectionEquality().hash(edit) ^
+      runtimeType.hashCode;
+}
+
+extension $MountPermissionsExtension on MountPermissions {
+  MountPermissions copyWith({bool? create, bool? delete, bool? edit}) {
+    return MountPermissions(create: create ?? this.create, delete: delete ?? this.delete, edit: edit ?? this.edit);
+  }
+
+  MountPermissions copyWithWrapped({Wrapped<bool>? create, Wrapped<bool>? delete, Wrapped<bool>? edit}) {
+    return MountPermissions(
+      create: (create != null ? create.value : this.create),
+      delete: (delete != null ? delete.value : this.delete),
+      edit: (edit != null ? edit.value : this.edit),
+    );
   }
 }
 
@@ -5219,6 +5504,7 @@ class RemoteEntry {
     required this.name,
     required this.path,
     required this.permissions,
+    required this.rev,
     required this.size,
   });
 
@@ -5241,6 +5527,8 @@ class RemoteEntry {
   final String path;
   @JsonKey(name: 'permissions', includeIfNull: false)
   final SharePermissions permissions;
+  @JsonKey(name: 'rev', includeIfNull: false)
+  final int rev;
   @JsonKey(name: 'size', includeIfNull: false)
   final int size;
   static const fromJsonFactory = _$RemoteEntryFromJson;
@@ -5257,6 +5545,7 @@ class RemoteEntry {
             (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
             (identical(other.permissions, permissions) ||
                 const DeepCollectionEquality().equals(other.permissions, permissions)) &&
+            (identical(other.rev, rev) || const DeepCollectionEquality().equals(other.rev, rev)) &&
             (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
   }
 
@@ -5269,6 +5558,7 @@ class RemoteEntry {
       const DeepCollectionEquality().hash(name) ^
       const DeepCollectionEquality().hash(path) ^
       const DeepCollectionEquality().hash(permissions) ^
+      const DeepCollectionEquality().hash(rev) ^
       const DeepCollectionEquality().hash(size) ^
       runtimeType.hashCode;
 }
@@ -5282,6 +5572,7 @@ extension $RemoteEntryExtension on RemoteEntry {
     String? name,
     String? path,
     SharePermissions? permissions,
+    int? rev,
     int? size,
   }) {
     return RemoteEntry(
@@ -5292,6 +5583,7 @@ extension $RemoteEntryExtension on RemoteEntry {
       name: name ?? this.name,
       path: path ?? this.path,
       permissions: permissions ?? this.permissions,
+      rev: rev ?? this.rev,
       size: size ?? this.size,
     );
   }
@@ -5304,6 +5596,7 @@ extension $RemoteEntryExtension on RemoteEntry {
     Wrapped<String>? name,
     Wrapped<String>? path,
     Wrapped<SharePermissions>? permissions,
+    Wrapped<int>? rev,
     Wrapped<int>? size,
   }) {
     return RemoteEntry(
@@ -5314,6 +5607,7 @@ extension $RemoteEntryExtension on RemoteEntry {
       name: (name != null ? name.value : this.name),
       path: (path != null ? path.value : this.path),
       permissions: (permissions != null ? permissions.value : this.permissions),
+      rev: (rev != null ? rev.value : this.rev),
       size: (size != null ? size.value : this.size),
     );
   }
@@ -6694,6 +6988,41 @@ extension $ShareChangesExtension on ShareChanges {
       permissions: (permissions != null ? permissions.value : this.permissions),
       removeExpiry: (removeExpiry != null ? removeExpiry.value : this.removeExpiry),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ShareDisplaySettings {
+  const ShareDisplaySettings({required this.showInFiles});
+
+  factory ShareDisplaySettings.fromJson(Map<String, dynamic> json) => _$ShareDisplaySettingsFromJson(json);
+
+  static const toJsonFactory = _$ShareDisplaySettingsToJson;
+  Map<String, dynamic> toJson() => _$ShareDisplaySettingsToJson(this);
+
+  @JsonKey(name: 'showInFiles', includeIfNull: false)
+  final bool showInFiles;
+  static const fromJsonFactory = _$ShareDisplaySettingsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ShareDisplaySettings &&
+            (identical(other.showInFiles, showInFiles) ||
+                const DeepCollectionEquality().equals(other.showInFiles, showInFiles)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(showInFiles) ^ runtimeType.hashCode;
+}
+
+extension $ShareDisplaySettingsExtension on ShareDisplaySettings {
+  ShareDisplaySettings copyWith({bool? showInFiles}) {
+    return ShareDisplaySettings(showInFiles: showInFiles ?? this.showInFiles);
+  }
+
+  ShareDisplaySettings copyWithWrapped({Wrapped<bool>? showInFiles}) {
+    return ShareDisplaySettings(showInFiles: (showInFiles != null ? showInFiles.value : this.showInFiles));
   }
 }
 
@@ -9033,6 +9362,55 @@ List<enums.MemberRole>? memberRoleNullableListFromJson(List? memberRole, [List<e
   }
 
   return memberRole.map((e) => memberRoleFromJson(e.toString())).toList();
+}
+
+String? mountKindNullableToJson(enums.MountKind? mountKind) {
+  return mountKind?.value;
+}
+
+String? mountKindToJson(enums.MountKind mountKind) {
+  return mountKind.value;
+}
+
+enums.MountKind mountKindFromJson(Object? mountKind, [enums.MountKind? defaultValue]) {
+  return enums.MountKind.values.firstWhereOrNull((e) => e.value == mountKind) ??
+      defaultValue ??
+      enums.MountKind.swaggerGeneratedUnknown;
+}
+
+enums.MountKind? mountKindNullableFromJson(Object? mountKind, [enums.MountKind? defaultValue]) {
+  if (mountKind == null) {
+    return null;
+  }
+  return enums.MountKind.values.firstWhereOrNull((e) => e.value == mountKind) ?? defaultValue;
+}
+
+String mountKindExplodedListToJson(List<enums.MountKind>? mountKind) {
+  return mountKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> mountKindListToJson(List<enums.MountKind>? mountKind) {
+  if (mountKind == null) {
+    return [];
+  }
+
+  return mountKind.map((e) => e.value!).toList();
+}
+
+List<enums.MountKind> mountKindListFromJson(List? mountKind, [List<enums.MountKind>? defaultValue]) {
+  if (mountKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return mountKind.map((e) => mountKindFromJson(e.toString())).toList();
+}
+
+List<enums.MountKind>? mountKindNullableListFromJson(List? mountKind, [List<enums.MountKind>? defaultValue]) {
+  if (mountKind == null) {
+    return defaultValue;
+  }
+
+  return mountKind.map((e) => mountKindFromJson(e.toString())).toList();
 }
 
 String? newMemberRoleNullableToJson(enums.NewMemberRole? newMemberRole) {

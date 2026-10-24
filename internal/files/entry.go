@@ -34,7 +34,7 @@ const (
 )
 
 const (
-	directoryMime = "inode/directory"
+	DirectoryMime = "inode/directory"
 	fallbackMime  = "application/octet-stream"
 	MarkdownMime  = "text/markdown"
 )
@@ -53,6 +53,8 @@ type Entry struct {
 	Meta         map[string]any `json:"meta"`
 	PreviewState PreviewState   `json:"previewState"`
 	TextState    TextState      `json:"-"`
+	Mount        *Mount         `json:"mount,omitempty" required:"false" doc:"Set on a share that sits in the user's files, and on everything inside it"`
+	Shared       bool           `json:"shared,omitempty" required:"false" doc:"Whether the user shares this item with someone: a user, a group, another server or a link"`
 }
 
 func newDirectoryEntry(userID int64, cleanPath string, mtime time.Time) Entry {
@@ -62,7 +64,7 @@ func newDirectoryEntry(userID int64, cleanPath string, mtime time.Time) Entry {
 		Name:         path.Base(cleanPath),
 		IsDir:        true,
 		Mtime:        mtime,
-		Mime:         directoryMime,
+		Mime:         DirectoryMime,
 		Meta:         map[string]any{},
 		PreviewState: PreviewNone,
 		TextState:    TextNone,

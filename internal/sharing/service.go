@@ -11,6 +11,7 @@ import (
 	"polder-server/internal/database"
 	"polder-server/internal/files"
 	"polder-server/internal/groups"
+	"polder-server/internal/storage"
 	"polder-server/internal/users"
 )
 
@@ -397,4 +398,20 @@ func (n *recipientNames) group(id int64) *groups.Group {
 	}
 	n.groups[id] = found
 	return found
+}
+
+func (s *Service) SharedFileIDs(ctx context.Context, owner users.User) ([]int64, error) {
+	return database.QueryAll(ctx, s.db, database.ScanInt64,
+		`SELECT file_id FROM shares WHERE owner_id = $1 UNION SELECT file_id FROM share_links WHERE owner_id = $1`, owner.ID)
+}
+
+func (s *Service) CanEditSharedFile(ctx context.Context, recipient users.User, shareID, ownerID int64, ownerPath string) (bool, error) {
+	access, err := s.ForRecipient(ctx, recipient, shareID)
+	if err != nil {
+		return false, err
+	}
+	if access.Owner.ID != ownerID || !storage.IsSameOrDescendant(ownerPath, access.Root.Path) {
+		return false, notAvailable()
+	}
+	return access.CanEdit, nil
 }
