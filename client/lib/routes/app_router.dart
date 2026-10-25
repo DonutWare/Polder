@@ -1,4 +1,4 @@
-import "package:flutter/foundation.dart";
+import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
@@ -11,20 +11,15 @@ import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/routes/route_extra_codec.dart";
+import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/activity/activity_screen.dart";
-import "package:polder/screens/admin/admin_branding_screen.dart";
-import "package:polder/screens/admin/admin_logs_screen.dart";
-import "package:polder/screens/admin/admin_overview_screen.dart";
-import "package:polder/screens/admin/admin_shell.dart";
-import "package:polder/screens/admin/admin_users_screen.dart";
+import "package:polder/screens/admin/admin_screen.dart";
 import "package:polder/screens/auto_upload/auto_upload_screen.dart";
-import "package:polder/screens/browser/browser_screen.dart";
+import "package:polder/screens/browser/browser_stack.dart";
 import "package:polder/screens/login/login_screen.dart";
 import "package:polder/screens/notes/notes_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
-import "package:polder/screens/settings/about_screen.dart";
-import "package:polder/screens/settings/account_screen.dart";
 import "package:polder/screens/viewer/document_editor_screen.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
@@ -32,6 +27,7 @@ import "package:polder/screens/public_share/public_share_screen.dart";
 import "package:polder/screens/groups/groups_screen.dart";
 import "package:polder/screens/shared/shared_screen.dart";
 import "package:polder/screens/shell/app_shell.dart";
+import "package:polder/screens/shell/sync_background_activator.dart";
 import "package:polder/screens/sync/conflict_resolver_screen.dart";
 import "package:polder/screens/sync/sync_folders_screen.dart";
 import "package:polder/screens/trash/trash_screen.dart";
@@ -52,29 +48,29 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: Listenable.merge([account, isAdmin]),
     redirect: (_, state) => AppRedirect.resolve(account.value, state.uri, isAdmin: isAdmin.value),
     routes: [
-      GoRoute(path: AppRoutes.login, builder: (_, _) => const LoginScreen()),
-      GoRoute(
+      _route(path: AppRoutes.login, page: (_) => const LoginScreen()),
+      _route(
         path: "${AppRoutes.publicShare}/:code",
-        builder: (_, state) => PublicShareScreen(
+        page: (state) => PublicShareScreen(
           code: state.pathParameters["code"]!,
           server: state.uri.queryParameters[AppRoutes.serverParameter],
           path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
         ),
       ),
-      GoRoute(
+      _route(
         path: AppRoutes.scan,
         redirect: (_, state) => state.extra is ScanRequest ? null : AppRoutes.files,
-        builder: (_, state) => ScanReviewScreen(request: state.extra! as ScanRequest),
+        page: (state) => ScanReviewScreen(request: state.extra! as ScanRequest),
       ),
-      GoRoute(
+      _route(
         path: AppRoutes.pdf,
         redirect: (_, state) => state.extra is FileEntry ? null : AppRoutes.files,
-        builder: (_, state) => PdfViewerScreen(entry: state.extra! as FileEntry),
+        page: (state) => PdfViewerScreen(entry: state.extra! as FileEntry),
       ),
-      GoRoute(
+      _route(
         path: AppRoutes.editor,
         redirect: (_, state) => state.extra is FileEntry || state.extra is EditorTarget ? null : AppRoutes.files,
-        builder: (_, state) => DocumentEditorScreen(
+        page: (state) => DocumentEditorScreen(
           target: switch (state.extra) {
             final EditorTarget target => target,
             final extra => EditorTarget(extra! as FileEntry),
@@ -82,9 +78,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       ShellRoute(
-        builder: (_, state, child) => AppShell(location: state.uri.path, child: child),
+        builder: (_, _, child) => AppShell(child: child),
         routes: [
-          GoRoute(
+          _tab(
             path: AppRoutes.files,
             redirect: (_, state) {
               final path = state.uri.queryParameters[AppRoutes.pathParameter];
@@ -92,79 +88,113 @@ final routerProvider = Provider<GoRouter>((ref) {
               lastBrowsedPath = path;
               return null;
             },
-            builder: (_, state) => BrowserScreen(
-              path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
-              select: state.uri.queryParameters[AppRoutes.selectParameter],
+            page: (state) => UpScope(
+              child: BrowserStack(
+                path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
+                select: state.uri.queryParameters[AppRoutes.selectParameter],
+              ),
             ),
           ),
-          GoRoute(
+          _tab(
             path: AppRoutes.notes,
-            builder: (_, state) => NotesScreen(notePath: state.uri.queryParameters[AppRoutes.pathParameter]),
+            page: (state) => UpScope(child: NotesScreen(notePath: state.uri.queryParameters[AppRoutes.pathParameter])),
           ),
-          GoRoute(
-            path: AppRoutes.search,
-            builder: (_, state) =>
-                SearchScreen(initialQuery: state.uri.queryParameters[AppRoutes.queryParameter] ?? ""),
-          ),
-          GoRoute(path: AppRoutes.activity, builder: (_, _) => const ActivityScreen()),
-          GoRoute(
+          _tab(
             path: AppRoutes.sync,
-            builder: (_, _) => const SyncFoldersScreen(),
-            routes: [GoRoute(path: "conflicts", builder: (_, _) => const ConflictResolverScreen())],
+            page: (_) => const UpScope(child: SyncFoldersScreen()),
+            routes: [
+              _route(
+                path: "conflicts",
+                page: (_) => const UpScope(child: ConflictResolverScreen()),
+              ),
+            ],
           ),
-          GoRoute(path: AppRoutes.autoUpload, builder: (_, _) => const AutoUploadScreen()),
-          GoRoute(path: AppRoutes.trash, builder: (_, _) => const TrashScreen()),
-          GoRoute(path: AppRoutes.shared, builder: (_, _) => const SharedScreen()),
-          GoRoute(
+          _tab(
+            path: AppRoutes.shared,
+            page: (_) => const UpScope(child: SharedScreen()),
+          ),
+          _tab(
             path: "${AppRoutes.shared}/:section",
             redirect: (_, state) =>
                 SharedSection.fromSegment(state.pathParameters["section"]) == null ? AppRoutes.shared : null,
-            builder: (_, state) => SharedScreen(section: SharedSection.fromSegment(state.pathParameters["section"])),
+            page: (state) =>
+                UpScope(child: SharedScreen(section: SharedSection.fromSegment(state.pathParameters["section"]))),
           ),
-          GoRoute(
+          _tab(
             path: "${AppRoutes.shared}/:section/:shareId",
             redirect: (_, state) =>
                 !_browsableSections.contains(SharedSection.fromSegment(state.pathParameters["section"])) ||
                     int.tryParse(state.pathParameters["shareId"] ?? "") == null
                 ? AppRoutes.shared
                 : null,
-            builder: (_, state) => SharedScreen(
-              section: SharedSection.fromSegment(state.pathParameters["section"]),
-              shareId: int.parse(state.pathParameters["shareId"]!),
-              path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
+            page: (state) => UpScope(
+              child: SharedScreen(
+                section: SharedSection.fromSegment(state.pathParameters["section"]),
+                shareId: int.parse(state.pathParameters["shareId"]!),
+                path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
+              ),
             ),
           ),
-          GoRoute(
-            path: AppRoutes.groups,
-            builder: (_, state) => GroupsScreen(scope: AppRoutes.groupScopeOf(state.uri)),
+          _route(
+            path: AppRoutes.activity,
+            page: (_) => const UpScope(child: ActivityScreen()),
           ),
-          GoRoute(
+          _route(
+            path: AppRoutes.autoUpload,
+            page: (_) => const UpScope(child: AutoUploadScreen()),
+          ),
+          _route(
+            path: AppRoutes.trash,
+            page: (_) => const UpScope(child: TrashScreen()),
+          ),
+          _route(
+            path: AppRoutes.groups,
+            family: "groups",
+            page: (state) => UpScope(child: GroupsScreen(scope: AppRoutes.groupScopeOf(state.uri))),
+          ),
+          _route(
             path: "${AppRoutes.groups}/:groupId",
+            family: "groups",
             redirect: (_, state) =>
                 int.tryParse(state.pathParameters["groupId"] ?? "") == null ? AppRoutes.groups : null,
-            builder: (_, state) => GroupsScreen(
-              scope: AppRoutes.groupScopeOf(state.uri),
-              groupId: int.parse(state.pathParameters["groupId"]!),
+            page: (state) => UpScope(
+              child: GroupsScreen(
+                scope: AppRoutes.groupScopeOf(state.uri),
+                groupId: int.parse(state.pathParameters["groupId"]!),
+              ),
             ),
           ),
-          GoRoute(
+          _route(
             path: AppRoutes.settings,
-            builder: (_, _) => const SettingsScreen(),
-            routes: [
-              GoRoute(path: "about", builder: (_, _) => const AboutScreen()),
-              GoRoute(path: "account", builder: (_, _) => const AccountScreen()),
-            ],
+            family: "settings",
+            page: (_) => const UpScope(child: SettingsScreen()),
+          ),
+          _route(
+            path: "${AppRoutes.settings}/:page",
+            family: "settings",
+            redirect: (_, state) =>
+                SettingsPage.fromSegment(state.pathParameters["page"]) == null ? AppRoutes.settings : null,
+            page: (state) =>
+                UpScope(child: SettingsScreen(page: SettingsPage.fromSegment(state.pathParameters["page"]))),
+          ),
+          _route(
+            path: AppRoutes.admin,
+            family: "admin",
+            page: (_) => const UpScope(child: AdminScreen()),
+          ),
+          _route(
+            path: "${AppRoutes.admin}/:page",
+            family: "admin",
+            redirect: (_, state) =>
+                AdminPage.fromSegment(state.pathParameters["page"]) == null ? AppRoutes.admin : null,
+            page: (state) => UpScope(child: AdminScreen(page: AdminPage.fromSegment(state.pathParameters["page"]))),
           ),
         ],
       ),
-      ShellRoute(
-        builder: (_, state, child) => AdminShell(location: state.uri.path, child: child),
-        routes: [
-          GoRoute(path: AppRoutes.admin, builder: (_, _) => const AdminOverviewScreen()),
-          GoRoute(path: AppRoutes.adminUsers, builder: (_, _) => const AdminUsersScreen()),
-          GoRoute(path: AppRoutes.adminLogs, builder: (_, _) => const AdminLogsScreen()),
-          GoRoute(path: AppRoutes.adminBranding, builder: (_, _) => const AdminBrandingScreen()),
-        ],
+      _route(
+        path: AppRoutes.search,
+        page: (state) =>
+            _standalone(SearchScreen(initialQuery: state.uri.queryParameters[AppRoutes.queryParameter] ?? "")),
       ),
     ],
   );
@@ -190,5 +220,40 @@ abstract final class AppRedirect {
     return null;
   }
 }
+
+GoRoute _route({
+  required String path,
+  required Widget Function(GoRouterState state) page,
+  String? family,
+  GoRouterRedirect? redirect,
+  List<RouteBase> routes = const [],
+}) => GoRoute(
+  path: path,
+  redirect: redirect,
+  routes: routes,
+  pageBuilder: (_, state) => MaterialPage<void>(key: _pageKey(state, family), name: state.path, child: page(state)),
+);
+
+LocalKey _pageKey(GoRouterState state, String? family) =>
+    family != null && _isDeclarative(state) ? ValueKey("family:$family") : state.pageKey;
+
+bool _isDeclarative(GoRouterState state) => state.pageKey.value.startsWith("/");
+
+GoRoute _tab({
+  required String path,
+  required Widget Function(GoRouterState state) page,
+  GoRouterRedirect? redirect,
+  List<RouteBase> routes = const [],
+}) => GoRoute(
+  path: path,
+  redirect: redirect,
+  routes: routes,
+  pageBuilder: (_, state) =>
+      NoTransitionPage<void>(key: ValueKey("tab:${state.uri.pathSegments.firstOrNull}"), child: page(state)),
+);
+
+Widget _standalone(Widget page) => SyncBackgroundActivator(
+  child: SearchShortcut(child: UpScope(child: page)),
+);
 
 const _browsableSections = {SharedSection.withMe, SharedSection.federated};

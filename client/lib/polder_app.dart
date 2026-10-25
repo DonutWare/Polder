@@ -12,6 +12,7 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";
 import "package:polder/widgets/layout/window_titlebar.dart";
+import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
 class PolderApp extends ConsumerStatefulWidget {
   const PolderApp({super.key});
@@ -49,8 +50,10 @@ class _PolderAppState extends ConsumerState<PolderApp> {
       themeMode: appearance.mode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: (_, child) => DesktopTray(
-        child: WindowTitlebar(child: MouseNavigation(child: child!)),
+      builder: (_, child) => AdaptiveLayoutBuilder(
+        child: (_) => DesktopTray(
+          child: WindowTitlebar(child: MouseNavigation(child: child!)),
+        ),
       ),
       routerConfig: ref.watch(routerProvider),
     );

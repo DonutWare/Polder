@@ -46,35 +46,3 @@ extension ShellDestinationPresentation on ShellDestination {
   NavItem item(BuildContext context, {String? badge}) =>
       NavItem(icon: icon, selectedIcon: selectedIcon, label: label(context), badge: badge);
 }
-
-extension AdminDestinationPresentation on AdminDestination {
-  String label(BuildContext context) => switch (this) {
-    AdminDestination.overview => context.localized.adminOverview,
-    AdminDestination.users => context.localized.users,
-    AdminDestination.logs => context.localized.serverLogs,
-    AdminDestination.branding => context.localized.brandingGroup,
-  };
-
-  NavItem item(BuildContext context) => switch (this) {
-    AdminDestination.overview => NavItem(
-      icon: IconsaxPlusLinear.category,
-      selectedIcon: IconsaxPlusBold.category,
-      label: label(context),
-    ),
-    AdminDestination.users => NavItem(
-      icon: IconsaxPlusLinear.profile_2user,
-      selectedIcon: IconsaxPlusBold.profile_2user,
-      label: label(context),
-    ),
-    AdminDestination.logs => NavItem(
-      icon: IconsaxPlusLinear.document_text,
-      selectedIcon: IconsaxPlusBold.document_text,
-      label: label(context),
-    ),
-    AdminDestination.branding => NavItem(
-      icon: IconsaxPlusLinear.brush_2,
-      selectedIcon: IconsaxPlusBold.brush_2,
-      label: label(context),
-    ),
-  };
-}

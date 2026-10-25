@@ -12,6 +12,7 @@ import "package:polder/providers/browser/browser_selection_provider.dart";
 import "package:polder/screens/browser/widgets/browser_scope.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
+import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
 bool get _apple => const {TargetPlatform.macOS, TargetPlatform.iOS}.contains(defaultTargetPlatform);
 
@@ -118,7 +119,7 @@ class _SelectableEntryState extends ConsumerState<SelectableEntry> {
   Widget build(BuildContext context) {
     final provider = browserSelectionProvider(widget.parentPath);
     final selected = ref.watch(provider.select((selection) => selection.contains(_name)));
-    if (!usesPointerSelection) {
+    if (!AdaptiveLayout.usesPointer(context)) {
       return GestureDetector(
         onLongPressStart: _onLongPress,
         onSecondaryTapUp: (details) => _showMenu(FileActions.menuPositionAt(context, details.globalPosition)),
@@ -253,12 +254,12 @@ class _BrowserSelectionAreaState extends ConsumerState<BrowserSelectionArea> {
   @override
   Widget build(BuildContext context) => Focus(
     focusNode: _focus,
-    autofocus: usesPointerSelection,
+    autofocus: AdaptiveLayout.usesPointer(context),
     onKeyEvent: _onKey,
     child: Listener(
       behavior: HitTestBehavior.translucent,
       onPointerDown: (_) => _focus.requestFocus(),
-      child: usesPointerSelection
+      child: AdaptiveLayout.usesPointer(context)
           ? GestureDetector(behavior: HitTestBehavior.translucent, onTap: _notifier.clear, child: widget.child)
           : widget.child,
     ),

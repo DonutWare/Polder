@@ -1,6 +1,8 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/sync/sync_platform_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/util/extensions/num_extensions.dart";
 
 enum ShellDestination {
   files(AppRoutes.files),
@@ -18,29 +20,28 @@ enum ShellDestination {
   final String route;
 }
 
-enum AdminDestination {
-  overview(AppRoutes.admin),
-  users(AppRoutes.adminUsers),
-  logs(AppRoutes.adminLogs),
-  branding(AppRoutes.adminBranding);
-
-  const AdminDestination(this.route);
-
-  final String route;
-}
-
 final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
   final platform = ref.watch(syncPlatformProvider);
   return [
     ShellDestination.files,
     ShellDestination.shared,
     ShellDestination.notes,
-    ShellDestination.activity,
     if (platform.supportsFolderSync) ShellDestination.sync,
-    if (platform.supportsAutoUpload) ShellDestination.autoUpload,
   ];
 });
 
-final secondaryShellDestinationsProvider = Provider<List<ShellDestination>>(
-  (ref) => const [ShellDestination.groups, ShellDestination.trash, ShellDestination.settings],
-);
+final stackedDestinationsProvider = Provider<List<ShellDestination>>((ref) {
+  final platform = ref.watch(syncPlatformProvider);
+  return [
+    ShellDestination.activity,
+    if (platform.supportsAutoUpload) ShellDestination.autoUpload,
+    ShellDestination.groups,
+    ShellDestination.trash,
+    ShellDestination.settings,
+  ];
+});
+
+final activityBadgeProvider = Provider<String?>((ref) {
+  final uploading = ref.watch(incomingPathsProvider.select((paths) => paths.length));
+  return uploading > 0 ? uploading.shortenToNearestNumber() : null;
+});

@@ -10,7 +10,6 @@ import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
-import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/sharing/federated_share_dialog.dart";
 import "package:polder/widgets/sharing/link_form_dialog.dart";
@@ -18,9 +17,10 @@ import "package:polder/widgets/sharing/share_labels.dart";
 import "package:polder/widgets/sharing/share_link_tile.dart";
 import "package:polder/widgets/sharing/share_settings.dart";
 import "package:polder/widgets/sharing/share_target_avatar.dart";
+import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
 Future<void> showSharePanel(BuildContext context, SharedFile file) {
-  if (WindowSize.isCompact(context)) {
+  if (AdaptiveLayout.isPhone(context)) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

@@ -6,10 +6,6 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/browser_view_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 
-/// Desktops select on click and open on double click, like Finder and Explorer; touch devices open on tap.
-bool get usesPointerSelection =>
-    const {TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux}.contains(defaultTargetPlatform);
-
 @immutable
 class BrowserSelection {
   const BrowserSelection({this.names = const {}, this.anchor, this.lead});

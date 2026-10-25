@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/group.dart";
@@ -10,6 +9,7 @@ import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/groups/groups_provider.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/screens/groups/widgets/add_member_dialog.dart";
 import "package:polder/util/action_feedback.dart";
@@ -17,7 +17,6 @@ import "package:polder/util/api_error_localization.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
-import "package:polder/widgets/layout/split_view.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/nav_group.dart";
@@ -41,7 +40,6 @@ class GroupPage extends ConsumerWidget {
     final me = ref.watch(currentUserProvider).value?.id;
     final group = details.value?.group;
     return AppPage(
-      leading: SplitView.backTo(context, AppRoutes.groupsScope(scope: scope)),
       title: Text(group?.name ?? localized.groups),
       actions: [
         if (details.value case final loaded?)
@@ -149,7 +147,7 @@ class GroupPage extends ConsumerWidget {
     );
     if (!confirmed || !context.mounted) return;
     final left = await context.runWithFeedback(ref.read(groupProvider(groupId).notifier).leave(me));
-    if (left && context.mounted) context.go(AppRoutes.groupsScope(scope: scope));
+    if (left && context.mounted) goWithin(context, AppRoutes.groupsScope(scope: scope));
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref, Group group) async {
@@ -162,7 +160,7 @@ class GroupPage extends ConsumerWidget {
     );
     if (!confirmed || !context.mounted) return;
     final deleted = await context.runWithFeedback(ref.read(groupProvider(groupId).notifier).delete());
-    if (deleted && context.mounted) context.go(AppRoutes.groupsScope(scope: scope));
+    if (deleted && context.mounted) goWithin(context, AppRoutes.groupsScope(scope: scope));
   }
 }
 

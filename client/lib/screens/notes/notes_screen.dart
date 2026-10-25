@@ -16,11 +16,10 @@ import "package:polder/screens/notes/widgets/note_pane.dart";
 import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
 import "package:polder/screens/notes/widgets/notes_sidebar.dart";
 import "package:polder/util/localization_helper.dart";
-import "package:polder/widgets/layout/adaptive.dart";
-import "package:polder/widgets/layout/app_page.dart";
-import "package:polder/widgets/layout/split_view.dart";
+import "package:polder/widgets/layout/dual_pane.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
+import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
 final lastNoteProvider = NotifierProvider<LastNote, String?>(LastNote.new);
 
@@ -107,7 +106,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       onRetry: () => ref.invalidate(notesFolderProvider),
       data: (root) {
         if (root == null && widget.notePath == null) _askForFolderOnce();
-        return WindowSize.isCompact(context) ? _compact(context, root) : _wide(context, root);
+        return _notes(context, root);
       },
     );
   }
@@ -116,65 +115,61 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       ? null
       : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open, onChangeFolder: _changeFolder);
 
-  Widget _compact(BuildContext context, String? root) {
+  void _closeNote(String location) {
+    ref.read(lastNoteProvider.notifier).set(null);
+    context.go(location);
+  }
+
+  Widget _notes(BuildContext context, String? root) {
     final notePath = widget.notePath;
-    if (notePath != null) {
-      return NotePane(
-        key: ValueKey(notePath),
-        path: notePath,
-        sourceMode: _sourceMode,
-        onToggleSourceMode: _toggleSourceMode,
-        leading: IconButton(
-          tooltip: context.localized.navNotes,
-          icon: const Icon(IconsaxPlusLinear.arrow_left),
-          onPressed: () {
-            ref.read(lastNoteProvider.notifier).set(null);
-            context.go(AppRoutes.notes);
-          },
-        ),
-        onToggleLinks: () => _showLinksSheet(notePath),
-      );
-    }
-    return AppPage(
+    final single = AdaptiveLayout.isSingle(context);
+    if (!single && notePath == null && root != null) _openStartPage(root);
+    final entry = single || notePath == null
+        ? null
+        : ref.watch(noteDocumentProvider(notePath)).value?.entry ?? _lastLinksEntry;
+    _lastLinksEntry = entry;
+    return DualPane(
       title: Text(context.localized.navNotes),
-      floatingActionButton: FloatingActionButton(
+      listLocation: AppRoutes.notes,
+      list: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
+      listFloatingActionButton: FloatingActionButton(
         tooltip: context.localized.noteNewPage,
         onPressed: () => NotesActions.createInNotesFolder(context, ref),
         child: const Icon(IconsaxPlusLinear.note_add),
       ),
-      body: SafeArea(child: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder)),
-    );
-  }
-
-  Widget _wide(BuildContext context, String? root) {
-    final notePath = widget.notePath;
-    if (notePath == null && root != null) _openStartPage(root);
-    final roomForLinks = WindowSize.of(context).index >= WindowSize.expanded.index;
-    final entry = notePath == null ? null : ref.watch(noteDocumentProvider(notePath)).value?.entry ?? _lastLinksEntry;
-    _lastLinksEntry = entry;
-    return SplitView(
-      pane: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
+      onPop: _closeNote,
       placeholder: SafeArea(
         left: false,
         child: _NothingOpen(onCreate: () => NotesActions.createInNotesFolder(context, ref)),
       ),
-      content: notePath == null
-          ? null
-          : SafeArea(
-              key: ValueKey(notePath),
-              left: false,
-              top: false,
-              child: NotePane(
-                path: notePath,
-                sourceMode: _sourceMode,
-                onToggleSourceMode: _toggleSourceMode,
-                linksShown: roomForLinks && _linksShown,
-                onToggleLinks: roomForLinks
-                    ? () => setState(() => _linksShown = !_linksShown)
-                    : () => _showLinksSheet(notePath),
-              ),
-            ),
-      trailing: roomForLinks && _linksShown && entry != null
+      detail: switch (notePath) {
+        null => null,
+        final notePath when single => NotePane(
+          key: ValueKey(notePath),
+          path: notePath,
+          sourceMode: _sourceMode,
+          onToggleSourceMode: _toggleSourceMode,
+          leading: IconButton(
+            tooltip: context.localized.navNotes,
+            icon: const Icon(IconsaxPlusLinear.arrow_left),
+            onPressed: () => _closeNote(AppRoutes.notes),
+          ),
+          onToggleLinks: () => _showLinksSheet(notePath),
+        ),
+        final notePath => SafeArea(
+          key: ValueKey(notePath),
+          left: false,
+          top: false,
+          child: NotePane(
+            path: notePath,
+            sourceMode: _sourceMode,
+            onToggleSourceMode: _toggleSourceMode,
+            linksShown: _linksShown,
+            onToggleLinks: () => setState(() => _linksShown = !_linksShown),
+          ),
+        ),
+      },
+      trailing: !single && _linksShown && entry != null
           ? SizedBox(
               width: _linksWidth,
               child: SafeArea(

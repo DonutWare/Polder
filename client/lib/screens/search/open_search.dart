@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -14,14 +16,14 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/search_syntax.dart";
-import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
 bool _paletteOpen = false;
 
 // Compact windows get a full page, so the keyboard and the results have the whole screen; larger
 // windows get a palette over whatever is open.
 Future<void> openSearch(BuildContext context, {String initialQuery = ""}) async {
-  if (WindowSize.isCompact(context)) {
+  if (AdaptiveLayout.isPhone(context)) {
     if (GoRouter.of(context).routerDelegate.currentConfiguration.uri.path == AppRoutes.search) return;
     await context.push(AppRoutes.searchFor(initialQuery));
     return;
@@ -67,7 +69,7 @@ class _SearchPalette extends StatelessWidget {
           initialQuery: initialQuery,
           onOpenEntry: (entry) => closeThen((host) => openEntry(host, entry)),
           onShowInFolder: (entry) => closeThen((host) => showInFolder(host, entry)),
-          onGo: (route) => closeThen((host) => host.go(route)),
+          onGo: (route) => closeThen((host) => AppRoutes.isTab(route) ? host.go(route) : unawaited(host.push(route))),
           onClose: () => Navigator.of(context).pop(),
         ),
       ),
@@ -91,7 +93,7 @@ class SearchScreen extends StatelessWidget {
           leading: BackButton(onPressed: close),
           onOpenEntry: (entry) => openEntry(context, entry),
           onShowInFolder: (entry) => showInFolder(context, entry),
-          onGo: context.go,
+          onGo: (route) => AppRoutes.isTab(route) ? context.go(route) : context.pushReplacement(route),
           onClose: close,
         ),
       ),

@@ -17,10 +17,9 @@ import "package:polder/screens/shared/widgets/incoming_share_details_sheet.dart"
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
-import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
-import "package:polder/widgets/layout/split_view.dart";
+import "package:polder/widgets/layout/dual_pane.dart";
 import "package:polder/widgets/navigation/navigation_shell.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
@@ -40,55 +39,34 @@ class SharedScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localized = context.localized;
-    final shown = section ?? (WindowSize.isCompact(context) ? null : SharedSection.withMe);
-    final parent = _parentRoute(context);
-    return PopScope(
-      canPop: parent == null,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && parent != null) context.go(parent);
+    return DualPane(
+      title: Text(localized.navShared),
+      listLocation: AppRoutes.shared,
+      list: _SectionList(selected: DualPane.highlights(context) ? section ?? SharedSection.withMe : null),
+      placeholder: MessageView(icon: IconsaxPlusLinear.share, message: localized.nothingSelected),
+      defaultDetail: const _IncomingPage(key: ValueKey(SharedSection.withMe)),
+      detail: switch ((section, shareId)) {
+        (SharedSection.federated, final int shareId) => MountedShareScreen(
+          key: ValueKey("federated-$shareId"),
+          origin: ShareOrigin.federated,
+          shareId: shareId,
+          path: path,
+          exitRoute: AppRoutes.sharedSection(SharedSection.federated.segment),
+        ),
+        (_, final int shareId) => MountedShareScreen(
+          key: ValueKey("share-$shareId"),
+          origin: ShareOrigin.local,
+          shareId: shareId,
+          path: path,
+          exitRoute: AppRoutes.sharedSection(SharedSection.withMe.segment),
+        ),
+        (SharedSection.withMe, _) => const _IncomingPage(key: ValueKey(SharedSection.withMe)),
+        (SharedSection.byMe, _) => const _OutgoingPage(key: ValueKey(SharedSection.byMe)),
+        (SharedSection.links, _) => const _LinksPage(key: ValueKey(SharedSection.links)),
+        (SharedSection.federated, _) => const _FederatedPage(key: ValueKey(SharedSection.federated)),
+        (null, _) => null,
       },
-      child: SplitView(
-        title: Text(localized.navShared),
-        pane: _SectionList(selected: shown),
-        placeholder: MessageView(icon: IconsaxPlusLinear.share, message: localized.nothingSelected),
-        content: switch ((shown, shareId)) {
-          (SharedSection.federated, final int shareId) => MountedShareScreen(
-            key: ValueKey("federated-$shareId"),
-            origin: ShareOrigin.federated,
-            shareId: shareId,
-            path: path,
-            exitRoute: AppRoutes.sharedSection(SharedSection.federated.segment),
-          ),
-          (_, final int shareId) => MountedShareScreen(
-            key: ValueKey("share-$shareId"),
-            origin: ShareOrigin.local,
-            shareId: shareId,
-            path: path,
-            exitRoute: AppRoutes.sharedSection(SharedSection.withMe.segment),
-          ),
-          (SharedSection.withMe, _) => const _IncomingPage(key: ValueKey(SharedSection.withMe)),
-          (SharedSection.byMe, _) => const _OutgoingPage(key: ValueKey(SharedSection.byMe)),
-          (SharedSection.links, _) => const _LinksPage(key: ValueKey(SharedSection.links)),
-          (SharedSection.federated, _) => const _FederatedPage(key: ValueKey(SharedSection.federated)),
-          (null, _) => null,
-        },
-      ),
     );
-  }
-
-  String? _parentRoute(BuildContext context) {
-    if (shareId case final shareId?) {
-      final federated = section == SharedSection.federated;
-      if (path == RemotePath.root) {
-        return AppRoutes.sharedSection((federated ? SharedSection.federated : SharedSection.withMe).segment);
-      }
-      final parentPath = RemotePath.parent(path);
-      return federated
-          ? AppRoutes.federatedAt(shareId, path: parentPath)
-          : AppRoutes.sharedAt(shareId, path: parentPath);
-    }
-    if (section != null && WindowSize.isCompact(context)) return AppRoutes.shared;
-    return null;
   }
 }
 
@@ -167,7 +145,6 @@ class _SectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AppPage(
-    leading: SplitView.backTo(context, AppRoutes.shared),
     title: Text(title),
     actions: actions,
     body: ReadableWidth(

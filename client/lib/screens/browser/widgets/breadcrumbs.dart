@@ -8,11 +8,18 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 
 class Breadcrumbs extends StatelessWidget {
-  const Breadcrumbs({required this.path, this.rootLabel, this.onNavigate, super.key});
+  const Breadcrumbs({
+    required this.path,
+    this.rootLabel,
+    this.onNavigate,
+    this.padding = const EdgeInsets.symmetric(horizontal: 12),
+    super.key,
+  });
 
   final String path;
   final String? rootLabel;
   final ValueChanged<String>? onNavigate;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +34,7 @@ class Breadcrumbs extends StatelessWidget {
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           reverse: true,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: padding,
           itemCount: crumbs.length,
           separatorBuilder: (context, _) => Icon(
             rtl ? IconsaxPlusLinear.arrow_left_2 : IconsaxPlusLinear.arrow_right_3,

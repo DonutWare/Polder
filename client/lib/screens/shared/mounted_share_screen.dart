@@ -8,7 +8,7 @@ import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/browser/browser_screen.dart";
+import "package:polder/screens/browser/browser_stack.dart";
 import "package:polder/screens/browser/widgets/browser_scope.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/util/action_feedback.dart";
@@ -65,7 +65,7 @@ class MountedShareScreen extends ConsumerWidget {
         exitRoute: exitRoute,
         routeFor: (target, {select}) => shareRoute(origin, shareId, path: target.substring(mountPath.length)),
       ),
-      child: BrowserScreen(key: ValueKey(browsed), path: browsed),
+      child: BrowserStack(path: browsed),
     );
   }
 }

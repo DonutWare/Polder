@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/l10n/generated/app_localizations.dart";
@@ -9,10 +8,11 @@ import "package:polder/models/group.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/groups/groups_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/groups/group_page.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
-import "package:polder/widgets/layout/split_view.dart";
+import "package:polder/widgets/layout/dual_pane.dart";
 import "package:polder/widgets/navigation/navigation_shell.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
@@ -30,18 +30,19 @@ class GroupsScreen extends ConsumerWidget {
     final selected = groupId;
     final isAdmin = ref.watch(isAdminProvider);
     final shownScope = isAdmin ? scope : GroupScope.mine;
-    return SplitView(
+    return DualPane(
       title: isAdmin ? _ScopeMenu(scope: shownScope) : Text(localized.groups),
-      paneActions: [
+      listLocation: AppRoutes.groupsScope(scope: shownScope),
+      listActions: [
         IconButton(
           tooltip: localized.newGroup,
           icon: const Icon(IconsaxPlusLinear.add_square),
           onPressed: () => _create(context, ref),
         ),
       ],
-      pane: _GroupList(scope: shownScope, selected: selected),
+      list: _GroupList(scope: shownScope, selected: DualPane.highlights(context) ? selected : null),
       placeholder: MessageView(icon: IconsaxPlusLinear.people, message: localized.selectGroup),
-      content: selected == null ? null : GroupPage(key: ValueKey(selected), groupId: selected, scope: shownScope),
+      detail: selected == null ? null : GroupPage(key: ValueKey(selected), groupId: selected, scope: shownScope),
     );
   }
 
@@ -57,7 +58,7 @@ class GroupsScreen extends ConsumerWidget {
     final ok = await context.runWithFeedback(() async {
       created = await ref.read(groupsProvider(GroupScope.mine).notifier).create(name.trim());
     }());
-    if (ok && created != null && context.mounted) context.go(AppRoutes.groupAt(created!.id));
+    if (ok && created != null && context.mounted) goWithin(context, AppRoutes.groupAt(created!.id));
   }
 }
 
@@ -89,7 +90,7 @@ class _GroupList extends ConsumerWidget {
                         label: group.name,
                         selected: group.id == selected,
                         detail: localized.shareGroupMembers(group.memberCount),
-                        onTap: () => context.go(AppRoutes.groupAt(group.id, scope: scope)),
+                        onTap: () => goWithin(context, AppRoutes.groupAt(group.id, scope: scope)),
                       ),
                   ],
                 ),
@@ -113,7 +114,7 @@ class _ScopeMenu extends StatelessWidget {
         initialValue: scope,
         tooltip: localized.groups,
         position: PopupMenuPosition.under,
-        onSelected: (chosen) => context.go(AppRoutes.groupsScope(scope: chosen)),
+        onSelected: (chosen) => goWithin(context, AppRoutes.groupsScope(scope: chosen)),
         itemBuilder: (context) => [
           for (final option in GroupScope.values)
             CheckedPopupMenuItem(value: option, checked: option == scope, child: Text(_label(localized, option))),

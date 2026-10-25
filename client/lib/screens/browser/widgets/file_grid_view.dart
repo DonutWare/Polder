@@ -66,6 +66,7 @@ class _FileGridViewState extends State<FileGridView> {
       columns: _columnsFor(constraints.maxWidth - widget.padding.horizontal),
       child: GridView.builder(
         controller: _scroll,
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: widget.padding,
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _maxTileExtent,

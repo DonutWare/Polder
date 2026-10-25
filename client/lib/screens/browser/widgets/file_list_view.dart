@@ -50,6 +50,7 @@ class _FileListViewState extends State<FileListView> {
     slots: [for (final item in widget.items) item.entry?.name],
     child: ListView.builder(
       controller: _scroll,
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: widget.padding,
       itemCount: widget.items.length,
       itemBuilder: (context, index) {

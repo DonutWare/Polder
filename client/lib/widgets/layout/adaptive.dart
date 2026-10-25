@@ -8,24 +8,7 @@ import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/theme/app_theme.dart";
-
-enum WindowSize {
-  compact,
-  medium,
-  expanded,
-  large;
-
-  static WindowSize of(BuildContext context) => fromWidth(MediaQuery.sizeOf(context).width);
-
-  static bool isCompact(BuildContext context) => of(context) == compact;
-
-  static WindowSize fromWidth(double width) => switch (width) {
-    < 600 => compact,
-    < 840 => medium,
-    < 1200 => expanded,
-    _ => large,
-  };
-}
+import "package:polder/widgets/navigation/intercept_back.dart";
 
 final sidebarExpandedProvider = NotifierProvider<SidebarExpanded, bool>(SidebarExpanded.new);
 
@@ -93,6 +76,11 @@ class SideSheetDrawerState extends State<SideSheetDrawer> with SingleTickerProvi
   void close() {
     _peeking = false;
     _controller.fling(velocity: -1);
+  }
+
+  void dismiss() {
+    _peeking = false;
+    _controller.value = 0;
   }
 
   @override
@@ -168,7 +156,7 @@ class SideSheetDrawerState extends State<SideSheetDrawer> with SingleTickerProvi
         final open = visible && !_peeking;
         return Stack(
           children: [
-            widget.child,
+            InterceptBack(active: open, child: widget.child),
             if (visible)
               BlockSemantics(
                 child: Stack(

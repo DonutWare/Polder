@@ -6,6 +6,7 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/shared/user_avatar.dart";
+import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
 @immutable
 class NavItem {
@@ -17,109 +18,107 @@ class NavItem {
   final String? badge;
 }
 
-@immutable
-class NavAction {
-  const NavAction({required this.icon, required this.label, required this.onTap});
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-}
-
 class NavigationShell extends ConsumerWidget {
   const NavigationShell({
     required this.items,
     required this.selectedIndex,
     required this.onSelected,
     required this.child,
-    this.secondaryItems = const [],
+    this.showNavigation = true,
+    this.launchers = const [],
+    this.selectedLauncher = -1,
+    this.onLaunch,
     this.sidebarFooter,
-    this.exitAction,
     super.key,
   });
 
+  final bool showNavigation;
   final List<NavItem> items;
 
-  final List<NavItem> secondaryItems;
+  final List<NavItem> launchers;
+  final int selectedLauncher;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final ValueChanged<int>? onLaunch;
 
   final Widget? sidebarFooter;
-
-  final NavAction? exitAction;
 
   final Widget child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final size = WindowSize.of(context);
     final colors = AppColors.of(context);
     final border = BorderSide(color: colors.border);
-    if (size == WindowSize.compact) {
+    if (AdaptiveLayout.isPhone(context)) {
       return Scaffold(
         extendBody: true,
         body: child,
-        bottomNavigationBar: SafeArea(
-          top: false,
-          minimum: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: DecoratedBox(
-              decoration: ShapeDecoration(
-                shape: squircle(AppRadius.panel),
-                shadows: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.14), blurRadius: 24, offset: const Offset(0, 8)),
-                ],
-              ),
-              child: Material(
-                color: colors.panel,
-                shape: squircle(AppRadius.panel, side: border),
-                clipBehavior: Clip.antiAlias,
-                child: SizedBox(
-                  height: 64,
-                  child: _SlidingSelection(
-                    axis: Axis.horizontal,
-                    selected: _groupSelection(selectedIndex, 0, items.length),
-                    indicator: const Center(child: SizedBox(width: 56, height: 44, child: _SelectionSurface())),
-                    children: [
-                      for (final (i, item) in items.indexed)
-                        Expanded(
-                          child: Center(
-                            child: _NavTile(item: item, selected: i == selectedIndex, onTap: () => onSelected(i)),
-                          ),
+        bottomNavigationBar: !showNavigation
+            ? null
+            : SafeArea(
+                top: false,
+                minimum: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      shape: squircle(AppRadius.panel),
+                      shadows: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.14),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
                         ),
-                    ],
+                      ],
+                    ),
+                    child: Material(
+                      color: colors.panel,
+                      shape: squircle(AppRadius.panel, side: border),
+                      clipBehavior: Clip.antiAlias,
+                      child: SizedBox(
+                        height: 64,
+                        child: _SlidingSelection(
+                          axis: Axis.horizontal,
+                          selected: _validSelection(selectedIndex, items.length),
+                          indicator: const Center(child: SizedBox(width: 56, height: 44, child: _SelectionSurface())),
+                          children: [
+                            for (final (i, item) in items.indexed)
+                              Expanded(
+                                child: Center(
+                                  child: _NavTile(item: item, selected: i == selectedIndex, onTap: () => onSelected(i)),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        ),
       );
     }
 
-    final canExpand = size == WindowSize.large;
+    final canExpand = !AdaptiveLayout.isSingle(context);
     final extended = canExpand && ref.watch(sidebarExpandedProvider);
     final rtl = Directionality.of(context) == TextDirection.rtl;
-    final exit = exitAction;
     final Widget navigation = extended
         ? _Sidebar(
             items: items,
-            secondaryItems: secondaryItems,
+            launchers: launchers,
+            selectedLauncher: selectedLauncher,
             selectedIndex: selectedIndex,
             onSelected: onSelected,
+            onLaunch: onLaunch,
             footer: sidebarFooter,
-            exitAction: exit,
           )
         : SizedBox(
             width: 80,
-            child: Column(
+            child: _FillOrScroll(
               children: [
                 const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: _AvatarButton()),
-                _railGroup(items, 0),
+                _railGroup(items, selectedIndex, onSelected),
                 const Spacer(),
-                if (secondaryItems.isNotEmpty) _railGroup(secondaryItems, items.length),
-                if (exit != null) IconButton(tooltip: exit.label, icon: Icon(exit.icon), onPressed: exit.onTap),
+                if (launchers.isNotEmpty && onLaunch != null) _railGroup(launchers, selectedLauncher, onLaunch!),
                 if (canExpand)
                   IconButton(
                     tooltip: context.localized.expandSidebar,
@@ -133,56 +132,82 @@ class NavigationShell extends ConsumerWidget {
     return Scaffold(
       body: Row(
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.panel,
-              border: BorderDirectional(end: border),
+          if (showNavigation)
+            DecoratedBox(
+              key: const ValueKey("navigation"),
+              decoration: BoxDecoration(
+                color: colors.panel,
+                border: BorderDirectional(end: border),
+              ),
+              child: SafeArea(left: !rtl, right: rtl, child: navigation),
             ),
-            child: SafeArea(left: !rtl, right: rtl, child: navigation),
-          ),
           Expanded(
-            child: MediaQuery.removePadding(context: context, removeLeft: !rtl, removeRight: rtl, child: child),
+            key: const ValueKey("content"),
+            child: MediaQuery.removePadding(
+              context: context,
+              removeLeft: showNavigation && !rtl,
+              removeRight: showNavigation && rtl,
+              child: child,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _railGroup(List<NavItem> group, int offset) => _SlidingSelection(
+  Widget _railGroup(List<NavItem> group, int selected, ValueChanged<int> onTap) => _SlidingSelection(
     axis: Axis.vertical,
-    selected: _groupSelection(selectedIndex, offset, group.length),
+    selected: _validSelection(selected, group.length),
     indicator: const Padding(padding: EdgeInsets.symmetric(vertical: 4), child: _SelectionSurface()),
     children: [
       for (final (i, item) in group.indexed)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
-          child: _NavTile(item: item, selected: offset + i == selectedIndex, onTap: () => onSelected(offset + i)),
+          child: _NavTile(item: item, selected: i == selected, onTap: () => onTap(i)),
         ),
     ],
   );
 }
 
-int _groupSelection(int selectedIndex, int offset, int length) {
-  final local = selectedIndex - offset;
-  return local >= 0 && local < length ? local : -1;
+class _FillOrScroll extends StatelessWidget {
+  const _FillOrScroll({required this.children, this.crossAxisAlignment = CrossAxisAlignment.center});
+
+  final List<Widget> children;
+  final CrossAxisAlignment crossAxisAlignment;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+        child: IntrinsicHeight(
+          child: Column(crossAxisAlignment: crossAxisAlignment, children: children),
+        ),
+      ),
+    ),
+  );
 }
+
+int _validSelection(int selected, int length) => selected >= 0 && selected < length ? selected : -1;
 
 class _Sidebar extends ConsumerWidget {
   const _Sidebar({
     required this.items,
     required this.selectedIndex,
     required this.onSelected,
-    this.secondaryItems = const [],
+    this.launchers = const [],
+    this.selectedLauncher = -1,
+    this.onLaunch,
     this.footer,
-    this.exitAction,
   });
 
   final List<NavItem> items;
-  final List<NavItem> secondaryItems;
+  final List<NavItem> launchers;
+  final int selectedLauncher;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+  final ValueChanged<int>? onLaunch;
   final Widget? footer;
-  final NavAction? exitAction;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -190,10 +215,10 @@ class _Sidebar extends ConsumerWidget {
     final cs = theme.colorScheme;
     final colors = AppColors.of(context);
     final rtl = Directionality.of(context) == TextDirection.rtl;
-    final exit = exitAction;
+    final launch = onLaunch;
     return SizedBox(
       width: 264,
-      child: Column(
+      child: _FillOrScroll(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
@@ -218,10 +243,10 @@ class _Sidebar extends ConsumerWidget {
           ),
           Divider(color: colors.border),
           const SizedBox(height: 12),
-          _group(items, 0),
+          _group(items, selectedIndex, onSelected),
           const Spacer(),
+          if (launchers.isNotEmpty && launch != null) _group(launchers, selectedLauncher, launch),
           if (footer != null) Padding(padding: const EdgeInsets.fromLTRB(28, 8, 28, 8), child: footer),
-          if (exit != null) SidebarItem(icon: exit.icon, label: exit.label, selected: false, onTap: exit.onTap),
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(14, 4, 14, 16),
             child: Align(
@@ -238,18 +263,18 @@ class _Sidebar extends ConsumerWidget {
     );
   }
 
-  Widget _group(List<NavItem> group, int offset) => _SlidingSelection(
+  Widget _group(List<NavItem> group, int selected, ValueChanged<int> onTap) => _SlidingSelection(
     axis: Axis.vertical,
-    selected: _groupSelection(selectedIndex, offset, group.length),
+    selected: _validSelection(selected, group.length),
     indicator: const Padding(padding: EdgeInsets.symmetric(horizontal: 14, vertical: 2), child: _SelectionSurface()),
     children: [
       for (final (i, item) in group.indexed)
         SidebarItem(
-          icon: offset + i == selectedIndex ? item.selectedIcon : item.icon,
+          icon: i == selected ? item.selectedIcon : item.icon,
           label: item.label,
-          selected: offset + i == selectedIndex,
+          selected: i == selected,
           badge: item.badge,
-          onTap: () => onSelected(offset + i),
+          onTap: () => onTap(i),
         ),
     ],
   );

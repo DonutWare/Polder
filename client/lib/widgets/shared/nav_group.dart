@@ -89,6 +89,7 @@ class NavEntry extends StatelessWidget {
     this.iconColor,
     this.badge,
     this.trailing,
+    this.selected = false,
     super.key,
   });
 
@@ -99,9 +100,13 @@ class NavEntry extends StatelessWidget {
   final String? badge;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final bool selected;
 
   @override
   Widget build(BuildContext context) => ListTile(
+    selected: selected,
+    selectedTileColor: Theme.of(context).colorScheme.secondaryContainer.withAlpha(175),
+    selectedColor: Theme.of(context).colorScheme.onSecondaryContainer,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     leading: IconBadge(icon: icon, color: iconColor),
     title: Text(title),
