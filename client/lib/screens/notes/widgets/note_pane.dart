@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:convert";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
@@ -25,11 +26,14 @@ import "package:polder/screens/notes/editor/note_embeds.dart";
 import "package:polder/screens/notes/editor/note_toolbar.dart";
 import "package:polder/screens/notes/editor/source_editor.dart";
 import "package:polder/screens/notes/notes_actions.dart";
+import "package:polder/screens/notes/widgets/link_preview_card.dart";
 import "package:polder/services/notes/format_actions.dart";
 import "package:polder/services/notes/note_link.dart";
+import "package:polder/services/notes/note_preview.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/api_error_localization.dart";
 import "package:polder/util/date_format_extension.dart";
+import "package:polder/util/external_link.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/unique_name.dart";
@@ -37,7 +41,6 @@ import "package:polder/widgets/layout/window_centered.dart";
 import "package:polder/widgets/shared/centered_progress.dart";
 import "package:polder/widgets/shared/error_view.dart";
 import "package:polder/widgets/shared/file_link_picker_dialog.dart";
-import "package:url_launcher/url_launcher.dart";
 
 const attachmentsFolder = "attachments";
 
@@ -125,8 +128,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
   Future<void> _openLink(String destination, NoteTargets targets) async {
     final link = targets.parse(destination);
     if (link == null) {
-      final uri = Uri.tryParse(destination);
-      if (uri != null && uri.hasScheme) await launchUrl(uri, mode: LaunchMode.externalApplication);
+      await openExternalLink(destination);
       return;
     }
     final api = ref.read(polderApiProvider);
@@ -419,6 +421,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
               ),
             ),
           ),
+          _NoteLinkPreviews(path: widget.path, contentWidth: _readableWidth),
         ],
       ),
     );
@@ -619,4 +622,56 @@ class _VersionDialogState extends ConsumerState<_VersionDialog> {
       ),
     ],
   );
+}
+
+class _NoteLinkPreviews extends ConsumerStatefulWidget {
+  const _NoteLinkPreviews({required this.path, required this.contentWidth});
+
+  final String path;
+  final double contentWidth;
+
+  @override
+  ConsumerState<_NoteLinkPreviews> createState() => _NoteLinkPreviewsState();
+}
+
+class _NoteLinkPreviewsState extends ConsumerState<_NoteLinkPreviews> {
+  static const _settleDelay = Duration(milliseconds: 600);
+
+  Timer? _settle;
+  var _links = const <String>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _links = _linksIn(ref.read(noteDocumentProvider(widget.path)).value?.text);
+  }
+
+  @override
+  void dispose() {
+    _settle?.cancel();
+    super.dispose();
+  }
+
+  static List<String> _linksIn(String? text) => text == null ? const [] : NotePreview.webLinksIn(text);
+
+  void _textChanged(String? text) {
+    _settle?.cancel();
+    _settle = Timer(_settleDelay, () {
+      final links = _linksIn(text);
+      if (mounted && !listEquals(links, _links)) setState(() => _links = links);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(
+      noteDocumentProvider(widget.path).select((document) => document.value?.text),
+      (_, text) => _textChanged(text),
+    );
+    if (_links.isEmpty || MediaQuery.viewInsetsOf(context).bottom > 0) return const SizedBox.shrink();
+    return WindowCentered(
+      contentWidth: widget.contentWidth,
+      builder: (context, gutters) => LinkPreviewStrip(urls: _links, gutters: gutters),
+    );
+  }
 }

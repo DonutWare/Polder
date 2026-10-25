@@ -2299,6 +2299,62 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Describe a web link with its title, summary and site, as the server sees it
+  ///@param url The http or https link to describe
+  Future<chopper.Response<LinkPreview>> getLinkPreview({required String? url}) {
+    generatedMapping.putIfAbsent(LinkPreview, () => LinkPreview.fromJsonFactory);
+
+    return _getLinkPreview(url: url);
+  }
+
+  ///Describe a web link with its title, summary and site, as the server sees it
+  ///@param url The http or https link to describe
+  @GET(path: '/api/v1/link-previews')
+  Future<chopper.Response<LinkPreview>> _getLinkPreview({
+    @Query('url') required String? url,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Describe a web link with its title, summary and site, as the server sees it',
+      operationId: 'getLinkPreview',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["link-previews"],
+      deprecated: false,
+    ),
+  });
+
+  ///Get a web link's preview image or site icon, fetched by the server
+  ///@param url The link whose preview image or icon to get
+  ///@param kind The page's preview image, or the site's icon
+  Future<chopper.Response<Stream<List<int>>>> getLinkPreviewImage({
+    required String? url,
+    enums.ApiV1LinkPreviewsImageGetKind? kind,
+  }) {
+    return _getLinkPreviewImage(url: url, kind: kind?.value?.toString());
+  }
+
+  ///Get a web link's preview image or site icon, fetched by the server
+  ///@param url The link whose preview image or icon to get
+  ///@param kind The page's preview image, or the site's icon
+  @GET(path: '/api/v1/link-previews/image')
+  Future<chopper.Response<Stream<List<int>>>> _getLinkPreviewImage({
+    @Query('url') required String? url,
+    @Query('kind') String? kind,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a web link\'s preview image or site icon, fetched by the server',
+      operationId: 'getLinkPreviewImage',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["link-previews"],
+      deprecated: false,
+    ),
+  });
+
   ///The logged-in user's share links
   ///@param fileId Only links to this file; 0 or absent for all
   Future<chopper.Response<List<ShareLink>>> listShareLinks({int? fileId}) {

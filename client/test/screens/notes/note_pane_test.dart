@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 
 import "package:flutter/material.dart";
@@ -5,6 +6,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/notes/note_document_provider.dart";
+import "package:polder/screens/notes/widgets/link_preview_card.dart";
 import "package:polder/screens/notes/widgets/note_pane.dart";
 import "package:polder/widgets/shared/file_link_picker_dialog.dart";
 
@@ -83,6 +85,24 @@ void main() {
     expect(noteText(), "# Plan\n");
 
     await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+    await closeNote(tester);
+  });
+
+  testWidgets("web links in the note show as preview cards once typing settles", (tester) async {
+    await openNote(tester);
+    expect(find.byType(LinkPreviewCard), findsNothing);
+
+    await tester.enterText(find.byKey(liveField), "# Plan\n\nRead https://example.com/guide first.\n");
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(LinkPreviewCard), findsNothing);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LinkPreviewCard), findsOneWidget);
+    expect(find.text("Page on example.com"), findsOneWidget);
+
+    unawaited(harness.container.read(noteDocumentProvider(notePath).notifier).save());
     await tester.pumpAndSettle();
     await closeNote(tester);
   });

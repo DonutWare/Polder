@@ -1365,6 +1365,42 @@
         ],
         "type": "object"
       },
+      "LinkPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "A short summary the page gives of itself",
+            "type": "string"
+          },
+          "hasIcon": {
+            "description": "Whether there is a site icon to try, served by getLinkPreviewImage",
+            "type": "boolean"
+          },
+          "hasImage": {
+            "description": "Whether the page names a preview image, served by getLinkPreviewImage",
+            "type": "boolean"
+          },
+          "siteName": {
+            "description": "The site's name, or its host when it names none",
+            "type": "string"
+          },
+          "title": {
+            "description": "The page's title",
+            "type": "string"
+          },
+          "url": {
+            "description": "The link that was asked about, without its fragment",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "siteName",
+          "hasImage",
+          "hasIcon"
+        ],
+        "type": "object"
+      },
       "LinkUnlock": {
         "additionalProperties": false,
         "properties": {
@@ -9071,6 +9107,163 @@
         "summary": "What is shared with a group",
         "tags": [
           "groups"
+        ]
+      }
+    },
+    "/api/v1/link-previews": {
+      "get": {
+        "operationId": "getLinkPreview",
+        "parameters": [
+          {
+            "description": "The http or https link to describe",
+            "explode": false,
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "description": "The http or https link to describe",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkPreview"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Describe a web link with its title, summary and site, as the server sees it",
+        "tags": [
+          "link-previews"
+        ]
+      }
+    },
+    "/api/v1/link-previews/image": {
+      "get": {
+        "operationId": "getLinkPreviewImage",
+        "parameters": [
+          {
+            "description": "The link whose preview image or icon to get",
+            "explode": false,
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "description": "The link whose preview image or icon to get",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The page's preview image, or the site's icon",
+            "explode": false,
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "default": "image",
+              "description": "The page's preview image, or the site's icon",
+              "enum": [
+                "image",
+                "icon"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Preview image",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Security-Policy": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a web link's preview image or site icon, fetched by the server",
+        "tags": [
+          "link-previews"
         ]
       }
     },

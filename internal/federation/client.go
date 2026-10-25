@@ -9,11 +9,11 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/netip"
 	"net/url"
 	"strings"
-	"syscall"
 	"time"
+
+	"polder-server/internal/netguard"
 )
 
 const (
@@ -25,57 +25,9 @@ const (
 )
 
 var (
-	errForbiddenAddress = errors.New("the server resolves to an address federation may not reach")
 	errNotHTTPS         = errors.New("federation only talks to https addresses")
 	errResponseTooLarge = errors.New("the remote server's response is too large")
 )
-
-var alwaysForbidden = []netip.Prefix{
-	netip.MustParsePrefix("0.0.0.0/8"),
-	netip.MustParsePrefix("169.254.0.0/16"),
-	netip.MustParsePrefix("192.0.0.0/24"),
-	netip.MustParsePrefix("192.0.2.0/24"),
-	netip.MustParsePrefix("198.18.0.0/15"),
-	netip.MustParsePrefix("198.51.100.0/24"),
-	netip.MustParsePrefix("203.0.113.0/24"),
-	netip.MustParsePrefix("224.0.0.0/4"),
-	netip.MustParsePrefix("240.0.0.0/4"),
-	netip.MustParsePrefix("100::/64"),
-	netip.MustParsePrefix("2001:db8::/32"),
-	netip.MustParsePrefix("fe80::/10"),
-	netip.MustParsePrefix("ff00::/8"),
-}
-
-var privateUnlessAllowed = []netip.Prefix{
-	netip.MustParsePrefix("10.0.0.0/8"),
-	netip.MustParsePrefix("100.64.0.0/10"),
-	netip.MustParsePrefix("127.0.0.0/8"),
-	netip.MustParsePrefix("172.16.0.0/12"),
-	netip.MustParsePrefix("192.168.0.0/16"),
-	netip.MustParsePrefix("::1/128"),
-	netip.MustParsePrefix("fc00::/7"),
-}
-
-func addressAllowed(address netip.Addr, allowPrivate bool) bool {
-	address = address.Unmap()
-	if !address.IsValid() || address.IsUnspecified() {
-		return false
-	}
-	for _, prefix := range alwaysForbidden {
-		if prefix.Contains(address) {
-			return false
-		}
-	}
-	if allowPrivate {
-		return true
-	}
-	for _, prefix := range privateUnlessAllowed {
-		if prefix.Contains(address) {
-			return false
-		}
-	}
-	return true
-}
 
 type Clients struct {
 	public  *http.Client
@@ -96,17 +48,7 @@ func (c *Clients) For(allowPrivate bool) *http.Client {
 func newClient(rootCAs *x509.CertPool, allowPrivate bool) *http.Client {
 	dialer := &net.Dialer{
 		Timeout: dialTimeout,
-		Control: func(_, address string, _ syscall.RawConn) error {
-			host, _, err := net.SplitHostPort(address)
-			if err != nil {
-				return err
-			}
-			ip, err := netip.ParseAddr(host)
-			if err != nil || !addressAllowed(ip, allowPrivate) {
-				return errForbiddenAddress
-			}
-			return nil
-		},
+		Control: netguard.Control(allowPrivate),
 	}
 	transport := &http.Transport{
 		DialContext:           dialer.DialContext,

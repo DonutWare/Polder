@@ -5,11 +5,11 @@ import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/app/package_info_provider.dart";
 import "package:polder/providers/polder_system_info_provider.dart";
+import "package:polder/util/external_link.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
 import "package:polder/widgets/shared/polder_logo.dart";
-import "package:url_launcher/url_launcher.dart";
 
 typedef _Link = ({String name, String platform, String url, IconData icon, Color? color});
 
@@ -39,8 +39,6 @@ const _sponsors = <_Link>[
     color: Color.fromARGB(255, 255, 220, 19),
   ),
 ];
-
-Future<void> _open(String url) => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -125,7 +123,7 @@ class _LinkSection extends StatelessWidget {
               Tooltip(
                 message: link.platform,
                 child: IconButton.filledTonal(
-                  onPressed: () => _open(link.url),
+                  onPressed: () => openExternalLink(link.url),
                   style: IconButton.styleFrom(
                     padding: const EdgeInsets.all(12),
                     minimumSize: const Size(64, 64),

@@ -21,6 +21,7 @@ import (
 	"polder-server/internal/federation"
 	"polder-server/internal/files"
 	"polder-server/internal/groups"
+	"polder-server/internal/linkpreview"
 	"polder-server/internal/links"
 	"polder-server/internal/logging"
 	"polder-server/internal/office"
@@ -35,27 +36,28 @@ import (
 )
 
 type API struct {
-	auth       *auth.Service
-	sessions   *auth.Sessions
-	users      *users.Service
-	files      *files.Service
-	settings   *settings.Store
-	images     *settings.Images
-	avatars    *settings.Avatars
-	sync       *syncing.Service
-	previews   *preview.Worker
-	activity   *activity.Hub
-	search     *search.Service
-	extract    *extract.Worker
-	logs       *logging.Files
-	office     *office.Service
-	versions   *versions.Worker
-	links      *links.Graph
-	groups     *groups.Service
-	sharing    *sharing.Service
-	webdav     *webdav.Handler
-	federation *federation.Service
-	limiter    *failedAttemptLimiter
+	auth         *auth.Service
+	sessions     *auth.Sessions
+	users        *users.Service
+	files        *files.Service
+	settings     *settings.Store
+	images       *settings.Images
+	avatars      *settings.Avatars
+	sync         *syncing.Service
+	previews     *preview.Worker
+	activity     *activity.Hub
+	search       *search.Service
+	extract      *extract.Worker
+	logs         *logging.Files
+	office       *office.Service
+	versions     *versions.Worker
+	links        *links.Graph
+	linkPreviews *linkpreview.Service
+	groups       *groups.Service
+	sharing      *sharing.Service
+	webdav       *webdav.Handler
+	federation   *federation.Service
+	limiter      *failedAttemptLimiter
 
 	federationLimiter *failedAttemptLimiter
 
@@ -84,6 +86,7 @@ type Dependencies struct {
 	Office                 *office.Service
 	Versions               *versions.Worker
 	Links                  *links.Graph
+	LinkPreviews           *linkpreview.Service
 	Groups                 *groups.Service
 	Sharing                *sharing.Service
 	WebDAV                 *webdav.Handler
@@ -98,27 +101,28 @@ type Dependencies struct {
 
 func NewRouter(deps Dependencies) http.Handler {
 	api := &API{
-		auth:       deps.Auth,
-		sessions:   deps.Sessions,
-		users:      deps.Users,
-		files:      deps.Files,
-		settings:   deps.Settings,
-		images:     deps.Images,
-		avatars:    deps.Avatars,
-		sync:       deps.Sync,
-		previews:   deps.Previews,
-		activity:   deps.Activity,
-		search:     deps.Search,
-		extract:    deps.Extractor,
-		logs:       deps.Logs,
-		office:     deps.Office,
-		versions:   deps.Versions,
-		links:      deps.Links,
-		groups:     deps.Groups,
-		sharing:    deps.Sharing,
-		webdav:     deps.WebDAV,
-		federation: deps.Federation,
-		limiter:    newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+		auth:         deps.Auth,
+		sessions:     deps.Sessions,
+		users:        deps.Users,
+		files:        deps.Files,
+		settings:     deps.Settings,
+		images:       deps.Images,
+		avatars:      deps.Avatars,
+		sync:         deps.Sync,
+		previews:     deps.Previews,
+		activity:     deps.Activity,
+		search:       deps.Search,
+		extract:      deps.Extractor,
+		logs:         deps.Logs,
+		office:       deps.Office,
+		versions:     deps.Versions,
+		links:        deps.Links,
+		linkPreviews: deps.LinkPreviews,
+		groups:       deps.Groups,
+		sharing:      deps.Sharing,
+		webdav:       deps.WebDAV,
+		federation:   deps.Federation,
+		limiter:      newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 
 		federationLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute * federationLimitFactor),
 
@@ -314,6 +318,9 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPost, "/shares/{shareID}/copy", "copyShareFile", "Copy inside a share that allows changes", a.copyShareFile)
 	register(user, http.MethodDelete, "/shares/{shareID}/files", "deleteShareFile", "Delete inside a share that allows changes; it goes to the owner's trash", a.deleteShareFile)
 
+	register(user, http.MethodGet, "/link-previews", "getLinkPreview", "Describe a web link with its title, summary and site, as the server sees it", a.linkPreview)
+	register(user, http.MethodGet, "/link-previews/image", "getLinkPreviewImage", "Get a web link's preview image or site icon, fetched by the server", a.linkPreviewImage,
+		withResponse(http.StatusOK, "Preview image", binaryContent("image/*")))
 	register(user, http.MethodGet, "/links", "listShareLinks", "The logged-in user's share links", a.listShareLinks)
 	register(user, http.MethodPost, "/links", "createShareLink", "Create a share link to a file or folder", a.createShareLink, created)
 	register(user, http.MethodPatch, "/links/{linkID}", "updateShareLink", "Change a share link's access, password or expiry", a.updateShareLink)

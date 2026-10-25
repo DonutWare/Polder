@@ -21,6 +21,7 @@ import (
 	"polder-server/internal/files"
 	"polder-server/internal/groups"
 	"polder-server/internal/httpapi"
+	"polder-server/internal/linkpreview"
 	"polder-server/internal/links"
 	"polder-server/internal/logging"
 	"polder-server/internal/office"
@@ -218,6 +219,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Office:                 officeService,
 		Versions:               versionWorker,
 		Links:                  linkGraph,
+		LinkPreviews:           linkpreview.New(linkpreview.Options{}),
 		Groups:                 groupService,
 		Sharing:                sharingService,
 		WebDAV:                 webdav.NewHandler(fileService),

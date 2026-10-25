@@ -11,6 +11,7 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_mount.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/models/file_links.dart";
+import "package:polder/models/link_preview.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
@@ -585,6 +586,17 @@ extension SuggestionsToModel on wire.Suggestions {
 
 extension NotesItemToModel on wire.NotesItem {
   NoteItem toModel() => NoteItem(entry: entry.toModel(), hasNotes: hasNotes ?? false, hasReadme: hasReadme ?? false);
+}
+
+extension LinkPreviewToModel on wire.LinkPreview {
+  LinkPreview toModel() => LinkPreview(
+    url: url,
+    siteName: siteName,
+    title: title,
+    description: description,
+    hasImage: hasImage,
+    hasIcon: hasIcon,
+  );
 }
 
 extension LinksResponseToModel on wire.LinksResponse {

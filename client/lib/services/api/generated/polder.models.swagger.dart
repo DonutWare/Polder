@@ -3089,6 +3089,98 @@ extension $LinkPermissionsExtension on LinkPermissions {
 }
 
 @JsonSerializable(explicitToJson: true)
+class LinkPreview {
+  const LinkPreview({
+    this.description,
+    required this.hasIcon,
+    required this.hasImage,
+    required this.siteName,
+    this.title,
+    required this.url,
+  });
+
+  factory LinkPreview.fromJson(Map<String, dynamic> json) => _$LinkPreviewFromJson(json);
+
+  static const toJsonFactory = _$LinkPreviewToJson;
+  Map<String, dynamic> toJson() => _$LinkPreviewToJson(this);
+
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String? description;
+  @JsonKey(name: 'hasIcon', includeIfNull: false)
+  final bool hasIcon;
+  @JsonKey(name: 'hasImage', includeIfNull: false)
+  final bool hasImage;
+  @JsonKey(name: 'siteName', includeIfNull: false)
+  final String siteName;
+  @JsonKey(name: 'title', includeIfNull: false)
+  final String? title;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String url;
+  static const fromJsonFactory = _$LinkPreviewFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LinkPreview &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.hasIcon, hasIcon) || const DeepCollectionEquality().equals(other.hasIcon, hasIcon)) &&
+            (identical(other.hasImage, hasImage) || const DeepCollectionEquality().equals(other.hasImage, hasImage)) &&
+            (identical(other.siteName, siteName) || const DeepCollectionEquality().equals(other.siteName, siteName)) &&
+            (identical(other.title, title) || const DeepCollectionEquality().equals(other.title, title)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(hasIcon) ^
+      const DeepCollectionEquality().hash(hasImage) ^
+      const DeepCollectionEquality().hash(siteName) ^
+      const DeepCollectionEquality().hash(title) ^
+      const DeepCollectionEquality().hash(url) ^
+      runtimeType.hashCode;
+}
+
+extension $LinkPreviewExtension on LinkPreview {
+  LinkPreview copyWith({
+    String? description,
+    bool? hasIcon,
+    bool? hasImage,
+    String? siteName,
+    String? title,
+    String? url,
+  }) {
+    return LinkPreview(
+      description: description ?? this.description,
+      hasIcon: hasIcon ?? this.hasIcon,
+      hasImage: hasImage ?? this.hasImage,
+      siteName: siteName ?? this.siteName,
+      title: title ?? this.title,
+      url: url ?? this.url,
+    );
+  }
+
+  LinkPreview copyWithWrapped({
+    Wrapped<String?>? description,
+    Wrapped<bool>? hasIcon,
+    Wrapped<bool>? hasImage,
+    Wrapped<String>? siteName,
+    Wrapped<String?>? title,
+    Wrapped<String>? url,
+  }) {
+    return LinkPreview(
+      description: (description != null ? description.value : this.description),
+      hasIcon: (hasIcon != null ? hasIcon.value : this.hasIcon),
+      hasImage: (hasImage != null ? hasImage.value : this.hasImage),
+      siteName: (siteName != null ? siteName.value : this.siteName),
+      title: (title != null ? title.value : this.title),
+      url: (url != null ? url.value : this.url),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class LinkUnlock {
   const LinkUnlock({required this.expiresAt, required this.info, required this.root, required this.token});
 
@@ -10456,6 +10548,74 @@ List<enums.ApiV1GroupsGetScope>? apiV1GroupsGetScopeNullableListFromJson(
   }
 
   return apiV1GroupsGetScope.map((e) => apiV1GroupsGetScopeFromJson(e.toString())).toList();
+}
+
+String? apiV1LinkPreviewsImageGetKindNullableToJson(
+  enums.ApiV1LinkPreviewsImageGetKind? apiV1LinkPreviewsImageGetKind,
+) {
+  return apiV1LinkPreviewsImageGetKind?.value;
+}
+
+String? apiV1LinkPreviewsImageGetKindToJson(enums.ApiV1LinkPreviewsImageGetKind apiV1LinkPreviewsImageGetKind) {
+  return apiV1LinkPreviewsImageGetKind.value;
+}
+
+enums.ApiV1LinkPreviewsImageGetKind apiV1LinkPreviewsImageGetKindFromJson(
+  Object? apiV1LinkPreviewsImageGetKind, [
+  enums.ApiV1LinkPreviewsImageGetKind? defaultValue,
+]) {
+  return enums.ApiV1LinkPreviewsImageGetKind.values.firstWhereOrNull((e) => e.value == apiV1LinkPreviewsImageGetKind) ??
+      defaultValue ??
+      enums.ApiV1LinkPreviewsImageGetKind.swaggerGeneratedUnknown;
+}
+
+enums.ApiV1LinkPreviewsImageGetKind? apiV1LinkPreviewsImageGetKindNullableFromJson(
+  Object? apiV1LinkPreviewsImageGetKind, [
+  enums.ApiV1LinkPreviewsImageGetKind? defaultValue,
+]) {
+  if (apiV1LinkPreviewsImageGetKind == null) {
+    return null;
+  }
+  return enums.ApiV1LinkPreviewsImageGetKind.values.firstWhereOrNull((e) => e.value == apiV1LinkPreviewsImageGetKind) ??
+      defaultValue;
+}
+
+String apiV1LinkPreviewsImageGetKindExplodedListToJson(
+  List<enums.ApiV1LinkPreviewsImageGetKind>? apiV1LinkPreviewsImageGetKind,
+) {
+  return apiV1LinkPreviewsImageGetKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> apiV1LinkPreviewsImageGetKindListToJson(
+  List<enums.ApiV1LinkPreviewsImageGetKind>? apiV1LinkPreviewsImageGetKind,
+) {
+  if (apiV1LinkPreviewsImageGetKind == null) {
+    return [];
+  }
+
+  return apiV1LinkPreviewsImageGetKind.map((e) => e.value!).toList();
+}
+
+List<enums.ApiV1LinkPreviewsImageGetKind> apiV1LinkPreviewsImageGetKindListFromJson(
+  List? apiV1LinkPreviewsImageGetKind, [
+  List<enums.ApiV1LinkPreviewsImageGetKind>? defaultValue,
+]) {
+  if (apiV1LinkPreviewsImageGetKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return apiV1LinkPreviewsImageGetKind.map((e) => apiV1LinkPreviewsImageGetKindFromJson(e.toString())).toList();
+}
+
+List<enums.ApiV1LinkPreviewsImageGetKind>? apiV1LinkPreviewsImageGetKindNullableListFromJson(
+  List? apiV1LinkPreviewsImageGetKind, [
+  List<enums.ApiV1LinkPreviewsImageGetKind>? defaultValue,
+]) {
+  if (apiV1LinkPreviewsImageGetKind == null) {
+    return defaultValue;
+  }
+
+  return apiV1LinkPreviewsImageGetKind.map((e) => apiV1LinkPreviewsImageGetKindFromJson(e.toString())).toList();
 }
 
 int? apiV1PublicLinksCodePreviewGetSizeNullableToJson(

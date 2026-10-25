@@ -2297,6 +2297,63 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<LinkPreview>> _getLinkPreview({
+    required String? url,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Describe a web link with its title, summary and site, as the server sees it',
+      operationId: 'getLinkPreview',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["link-previews"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/link-previews');
+    final Map<String, dynamic> $params = <String, dynamic>{'url': url};
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<LinkPreview, LinkPreview>($request);
+  }
+
+  @override
+  Future<Response<Stream<List<int>>>> _getLinkPreviewImage({
+    required String? url,
+    String? kind,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Get a web link\'s preview image or site icon, fetched by the server',
+      operationId: 'getLinkPreviewImage',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["link-previews"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/link-previews/image');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'url': url,
+      'kind': kind,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<Stream<List<int>>, int>($request);
+  }
+
+  @override
   Future<Response<List<ShareLink>>> _listShareLinks({
     int? fileId,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(

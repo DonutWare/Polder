@@ -566,6 +566,20 @@ enum ApiV1GroupsGetScope {
   const ApiV1GroupsGetScope(this.value);
 }
 
+enum ApiV1LinkPreviewsImageGetKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('image')
+  image('image'),
+  @JsonValue('icon')
+  icon('icon');
+
+  final String? value;
+
+  const ApiV1LinkPreviewsImageGetKind(this.value);
+}
+
 enum ApiV1PublicLinksCodePreviewGetSize {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

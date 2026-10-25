@@ -11,6 +11,7 @@ import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
+import "package:polder/screens/notes/widgets/link_preview_card.dart";
 import "package:polder/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
@@ -106,6 +107,7 @@ class _NoteCard extends ConsumerWidget {
   const _NoteCard({required this.node, required this.selectedPath, required this.onOpen, super.key});
 
   static const _maxImageHeight = 220.0;
+  static const _maxLinkRows = 2;
 
   final NoteTreeNode node;
   final String? selectedPath;
@@ -138,6 +140,7 @@ class _NoteCard extends ConsumerWidget {
     final preview = page == null ? null : ref.watch(notePreviewProvider(page)).value;
     final image = preview?.image;
     final excerpt = preview?.excerpt;
+    final links = preview?.links.take(_maxLinkRows) ?? const <String>[];
     final foreground = selected ? colors.onSecondaryContainer : colors.onSurface;
     return Card(
       margin: EdgeInsets.zero,
@@ -194,6 +197,11 @@ class _NoteCard extends ConsumerWidget {
                       color: selected ? colors.onSecondaryContainer : colors.onSurfaceVariant,
                     ),
                   ),
+                ),
+              for (final link in links)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
+                  child: LinkPreviewRow(key: ValueKey(link), url: link),
                 ),
               _footer(context, ref),
             ],

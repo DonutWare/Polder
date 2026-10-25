@@ -67,3 +67,6 @@ targets:
             - url: "/api/v1/public/links/{code}/archive"
               method: get
               overridden_value: "Stream<List<int>>"
+            - url: "/api/v1/link-previews/image"
+              method: get
+              overridden_value: "Stream<List<int>>"

@@ -41,4 +41,13 @@ Second paragraph.
     expect(preview.excerpt!.length, NotePreview.maxExcerptLength + 1);
     expect(preview.excerpt, endsWith("…"));
   });
+
+  test("web links are collected once each, in order, without images or file links", () {
+    final preview = NotePreview.of("""
+See [the docs](https://example.com/docs) and https://keep.google.com.
+
+![photo](https://example.com/photo.jpg) [local](notes/other.md) [again](https://example.com/docs)
+""");
+    expect(preview.links, ["https://example.com/docs", "https://keep.google.com"]);
+  });
 }

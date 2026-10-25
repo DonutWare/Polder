@@ -132,6 +132,7 @@ class FakePolderServer extends http.BaseClient {
       ("POST", "/files/copy") => _copy(_decode(body)),
       ("POST", "/files/resolve") => _resolve(_decode(body)),
       ("DELETE", "/files") => _delete(query),
+      ("GET", "/link-previews") => _linkPreview(query["url"]!),
       ("GET", "/sync/changes") => _changes(int.parse(query["cursor"] ?? "0")),
       ("GET", "/sync/manifest") => _manifest(query["path"]!),
       ("POST", "/sync/batches") => _createBatch(_decode(body)),
@@ -140,6 +141,11 @@ class FakePolderServer extends http.BaseClient {
       ("DELETE", _) when segments.length == 3 && segments[1] == "batches" => _abortBatch(segments[2]),
       _ => throw const _HttpError(404, "not_found"),
     };
+  }
+
+  http.StreamedResponse _linkPreview(String url) {
+    final host = Uri.parse(url).host;
+    return _json(200, {"url": url, "siteName": host, "title": "Page on $host", "hasImage": false, "hasIcon": false});
   }
 
   http.StreamedResponse _resolve(Map<String, dynamic> body) {

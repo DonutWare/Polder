@@ -12,6 +12,7 @@ import "package:polder/models/document_editor.dart";
 import "package:polder/models/federation.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_links.dart";
+import "package:polder/models/link_preview.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/group.dart";
 import "package:polder/models/manifest.dart";
@@ -213,6 +214,12 @@ class PolderApi {
       path: path,
       size: _thumbnailSize(wire.ApiV1FilesPreviewGetSize.values, (option) => option.value, size),
     ),
+  );
+
+  Future<LinkPreview> linkPreview(String url) async => (await _service.getLinkPreview(url: url)).body!.toModel();
+
+  Future<Uint8List?> linkPreviewImage(String url, LinkPreviewImageKind kind) => _thumbnail(
+    () => _service.getLinkPreviewImage(url: url, kind: wire.ApiV1LinkPreviewsImageGetKind.values.byName(kind.name)),
   );
 
   Future<Uint8List?> trashPreview(int id, {int size = 256}) => _thumbnail(

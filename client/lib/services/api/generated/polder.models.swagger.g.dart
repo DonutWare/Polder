@@ -649,6 +649,24 @@ Map<String, dynamic> _$LinkPermissionsToJson(LinkPermissions instance) => <Strin
   'view': instance.view,
 };
 
+LinkPreview _$LinkPreviewFromJson(Map<String, dynamic> json) => LinkPreview(
+  description: json['description'] as String?,
+  hasIcon: json['hasIcon'] as bool,
+  hasImage: json['hasImage'] as bool,
+  siteName: json['siteName'] as String,
+  title: json['title'] as String?,
+  url: json['url'] as String,
+);
+
+Map<String, dynamic> _$LinkPreviewToJson(LinkPreview instance) => <String, dynamic>{
+  'description': ?instance.description,
+  'hasIcon': instance.hasIcon,
+  'hasImage': instance.hasImage,
+  'siteName': instance.siteName,
+  'title': ?instance.title,
+  'url': instance.url,
+};
+
 LinkUnlock _$LinkUnlockFromJson(Map<String, dynamic> json) => LinkUnlock(
   expiresAt: DateTime.parse(json['expiresAt'] as String),
   info: LinkInfo.fromJson(json['info'] as Map<String, dynamic>),
