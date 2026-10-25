@@ -33,6 +33,7 @@ import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/unique_name.dart";
+import "package:polder/widgets/layout/window_centered.dart";
 import "package:polder/widgets/shared/centered_progress.dart";
 import "package:polder/widgets/shared/error_view.dart";
 import "package:polder/widgets/shared/file_link_picker_dialog.dart";
@@ -397,10 +398,10 @@ class _NotePaneState extends ConsumerState<NotePane> {
                   RedoNoteIntent: CallbackAction<RedoNoteIntent>(onInvoke: (_) => controller.redo()),
                   _SaveIntent: CallbackAction<_SaveIntent>(onInvoke: (_) => _notifier.save()),
                 },
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final side = ((constraints.maxWidth - _readableWidth) / 2).clamp(16.0, double.infinity);
-                    final padding = EdgeInsets.fromLTRB(side, 16, side, 24);
+                child: WindowCentered(
+                  contentWidth: _readableWidth,
+                  builder: (context, gutters) {
+                    final padding = gutters.copyWith(top: 16, bottom: 24);
                     void openLink(String destination) => _openLink(destination, targets);
                     if (readOnly && !sourceMode) {
                       return ReadOnlyNote(text: document.text, targets: targets, padding: padding, onLink: openLink);
@@ -423,7 +424,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     );
   }
 
-  static const _readableWidth = 820.0;
+  static const _readableWidth = 700.0;
   static const _fadeDuration = Duration(milliseconds: 180);
 
   NoteTargets _targets(NoteDocument document) {

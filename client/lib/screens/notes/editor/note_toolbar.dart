@@ -5,6 +5,7 @@ import "package:livemd_flutter/livemd_flutter.dart";
 
 import "package:polder/services/notes/format_actions.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/layout/window_centered.dart";
 
 class NoteToolbar extends StatelessWidget implements PreferredSizeWidget {
   const NoteToolbar({
@@ -36,15 +37,15 @@ class NoteToolbar extends StatelessWidget implements PreferredSizeWidget {
       visualDensity: VisualDensity.compact,
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) => SizedBox(
+    return WindowCentered(
+      contentWidth: contentWidth,
+      minGutter: 8,
+      builder: (context, gutters) => SizedBox(
         width: double.infinity,
         height: preferredSize.height,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(
-            horizontal: ((constraints.maxWidth - contentWidth) / 2).clamp(8.0, double.infinity) - 8,
-          ),
+          padding: EdgeInsets.only(left: gutters.left - 8, right: gutters.right - 8),
           child: Row(
             children: [
               ListenableBuilder(

@@ -5,6 +5,7 @@ import "package:go_router/go_router.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/notes/last_note_provider.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
@@ -98,6 +99,17 @@ abstract final class NotesActions {
     return _moveWithFeedback(context, ref, node, destination, node.name);
   }
 
+  static bool canMoveInto(NoteTreeNode node, String destination) =>
+      destination != RemotePath.parent(node.path) &&
+      destination != node.childrenPath &&
+      destination != node.path &&
+      !RemotePath.isWithin(destination, node.childrenPath);
+
+  static Future<String?> moveInto(BuildContext context, WidgetRef ref, NoteTreeNode node, String destination) {
+    if (!canMoveInto(node, destination)) return Future.value();
+    return _moveWithFeedback(context, ref, node, destination, node.name);
+  }
+
   static Future<String?> _moveWithFeedback(
     BuildContext context,
     WidgetRef ref,
@@ -148,9 +160,15 @@ abstract final class NotesActions {
       Future(() async {
         if (node.page case final page?) await api.delete(page.path, baseRev: page.rev);
         if (node.folder case final folder?) await api.delete(folder.path);
+        _forgetLastNoteIn(ref, node);
         _refresh(ref, RemotePath.parent(node.path));
       }),
     );
+  }
+
+  static void _forgetLastNoteIn(WidgetRef ref, NoteTreeNode node) {
+    final last = ref.read(lastNoteProvider);
+    if (last != null && node.holds(last)) ref.read(lastNoteProvider.notifier).set(null);
   }
 
   static void _refresh(WidgetRef ref, String folder) {

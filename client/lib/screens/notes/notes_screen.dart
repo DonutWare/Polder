@@ -5,13 +5,16 @@ import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/app/navigation_history_provider.dart";
+import "package:polder/providers/notes/last_note_provider.dart";
 import "package:polder/providers/notes/note_document_provider.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder/providers/notes/notes_view_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/screens/notes/notes_actions.dart";
 import "package:polder/screens/notes/widgets/links_panel.dart";
+import "package:polder/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder/screens/notes/widgets/note_pane.dart";
 import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
 import "package:polder/screens/notes/widgets/notes_sidebar.dart";
@@ -20,15 +23,6 @@ import "package:polder/widgets/layout/dual_pane.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
-
-final lastNoteProvider = NotifierProvider<LastNote, String?>(LastNote.new);
-
-class LastNote extends Notifier<String?> {
-  @override
-  String? build() => null;
-
-  void set(String? path) => state = path;
-}
 
 class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({this.notePath, super.key});
@@ -41,6 +35,7 @@ class NotesScreen extends ConsumerStatefulWidget {
 
 class _NotesScreenState extends ConsumerState<NotesScreen> {
   static const _linksWidth = 300.0;
+  static const _listWidth = 320.0;
 
   var _linksShown = true;
   var _sourceMode = false;
@@ -111,9 +106,16 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     );
   }
 
-  Widget? _sidebar(String? root) => root == null
-      ? null
-      : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open, onChangeFolder: _changeFolder);
+  Widget? _sidebar(String? root) =>
+      root == null ? null : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open);
+
+  void _createPage(String? root) {
+    if (root == null) {
+      NotesActions.createInNotesFolder(context, ref);
+    } else {
+      NotesActions.createPage(context, ref, folder: notesLevel(ref, root));
+    }
+  }
 
   void _closeNote(String location) {
     ref.read(lastNoteProvider.notifier).set(null);
@@ -122,19 +124,25 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   Widget _notes(BuildContext context, String? root) {
     final notePath = widget.notePath;
-    final single = AdaptiveLayout.isSingle(context);
+    final grid = ref.watch(notesViewModeProvider) == NotesViewMode.grid;
+    final single = grid || AdaptiveLayout.isSingle(context);
     if (!single && notePath == null && root != null) _openStartPage(root);
     final entry = single || notePath == null
         ? null
         : ref.watch(noteDocumentProvider(notePath)).value?.entry ?? _lastLinksEntry;
     _lastLinksEntry = entry;
     return DualPane(
-      title: Text(context.localized.navNotes),
+      title: NotesTitle(root: root, selectedPath: notePath),
+      listActions: [
+        if (root != null) NotesHeaderActions(root: root, showNewPage: !single, onChangeFolder: _changeFolder),
+      ],
       listLocation: AppRoutes.notes,
+      maxListWidth: _listWidth,
+      forceSingle: grid,
       list: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
       listFloatingActionButton: FloatingActionButton(
         tooltip: context.localized.noteNewPage,
-        onPressed: () => NotesActions.createInNotesFolder(context, ref),
+        onPressed: () => _createPage(root),
         child: const Icon(IconsaxPlusLinear.note_add),
       ),
       onPop: _closeNote,

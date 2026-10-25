@@ -21,10 +21,12 @@ class DualPane extends StatelessWidget {
     this.defaultDetail,
     this.trailing,
     this.onPop,
+    this.maxListWidth = defaultMaxListWidth,
+    this.forceSingle = false,
     super.key,
   });
 
-  static const maxListWidth = 480.0;
+  static const defaultMaxListWidth = 480.0;
 
   final Widget list;
   final String listLocation;
@@ -36,13 +38,16 @@ class DualPane extends StatelessWidget {
   final Widget placeholder;
   final Widget? trailing;
   final ValueChanged<String>? onPop;
+  final double maxListWidth;
+  final bool forceSingle;
 
   static bool isDetail(BuildContext context) => context.getInheritedWidgetOfExactType<_DualDetail>() != null;
 
   static bool highlights(BuildContext context) => !AdaptiveLayout.isSingle(context);
 
   @override
-  Widget build(BuildContext context) => AdaptiveLayout.isSingle(context) ? _single(context) : _dual(context);
+  Widget build(BuildContext context) =>
+      forceSingle || AdaptiveLayout.isSingle(context) ? _single(context) : _dual(context);
 
   Widget _single(BuildContext context) {
     final shown = detail;

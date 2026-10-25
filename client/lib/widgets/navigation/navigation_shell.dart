@@ -217,7 +217,7 @@ class _Sidebar extends ConsumerWidget {
     final rtl = Directionality.of(context) == TextDirection.rtl;
     final launch = onLaunch;
     return SizedBox(
-      width: 264,
+      width: 224,
       child: _FillOrScroll(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
