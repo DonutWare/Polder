@@ -88,9 +88,9 @@ func CheckWritePreconditions(current Entry, exists bool, baseRev int64) error {
 	case baseRev == BaseRevMustNotExist && exists:
 		return apperr.Conflict(current, "%s already exists", current.Path)
 	case baseRev > 0 && !exists:
-		return apperr.Conflict(nil, "file was deleted on the server")
+		return apperr.Conflict(nil, "the file was deleted on the server")
 	case baseRev > 0 && current.Rev != baseRev:
-		return apperr.Conflict(current, "%s changed since revision %d", current.Path, baseRev)
+		return apperr.Conflict(current, "%s was changed after you last loaded it", current.Path)
 	}
 	return nil
 }

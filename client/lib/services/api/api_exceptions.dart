@@ -47,6 +47,14 @@ class QuotaExceededException extends ApiException {
   const QuotaExceededException({super.error, super.statusCode});
 }
 
+class RateLimitedException extends ApiException {
+  const RateLimitedException({super.error, super.statusCode});
+}
+
+class UnavailableException extends ApiException {
+  const UnavailableException({super.error, super.statusCode});
+}
+
 class NetworkException extends ApiException {
   const NetworkException({super.error});
 }

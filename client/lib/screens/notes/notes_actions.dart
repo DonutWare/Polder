@@ -158,7 +158,7 @@ abstract final class NotesActions {
     final api = ref.read(polderApiProvider);
     return context.runWithFeedback(
       Future(() async {
-        if (node.page case final page?) await api.delete(page.path, baseRev: page.rev);
+        if (node.page case final page?) await api.delete(page.path);
         if (node.folder case final folder?) await api.delete(folder.path);
         _forgetLastNoteIn(ref, node);
         _refresh(ref, RemotePath.parent(node.path));

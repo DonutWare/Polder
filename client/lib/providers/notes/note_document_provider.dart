@@ -6,6 +6,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
+import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/realtime/files_changed_provider.dart";
 import "package:polder/providers/service_providers.dart";
@@ -229,6 +230,7 @@ class NoteDocumentNotifier extends AsyncNotifier<NoteDocument> {
     ref.invalidate(fileLinksProvider);
     final parent = RemotePath.parent(saved.path);
     if (ref.exists(directoryProvider(parent))) unawaited(ref.read(directoryProvider(parent).notifier).refresh());
+    if (ref.exists(notesTreeProvider(parent))) unawaited(ref.read(notesTreeProvider(parent).notifier).refresh());
   }
 
   Future<void> checkRemote() async {

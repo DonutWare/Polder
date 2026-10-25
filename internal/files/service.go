@@ -269,7 +269,7 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 			return err
 		}
 		if baseRev > 0 && current.Rev != baseRev {
-			return apperr.Conflict(current, "%s changed since revision %d", cleanPath, baseRev)
+			return apperr.Conflict(current, "%s was changed after you last loaded it", cleanPath)
 		}
 		trashID, undo, err = s.moveToTrash(ctx, tx, owner, current)
 		return err
@@ -312,7 +312,7 @@ func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo str
 			return err
 		}
 		if baseRev > 0 && source.Rev != baseRev {
-			return apperr.Conflict(source, "%s changed since revision %d", from, baseRev)
+			return apperr.Conflict(source, "%s was changed after you last loaded it", from)
 		}
 		if err := s.requireAbsent(ctx, tx, owner.ID, to); err != nil {
 			return err

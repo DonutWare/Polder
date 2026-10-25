@@ -8,11 +8,16 @@ extension ActionFeedback on BuildContext {
   Future<bool> runWithFeedback(Future<void> action) async {
     final messenger = ScaffoldMessenger.maybeOf(this);
     final localizations = localized;
+    void show(Object error) => messenger?.showSnackBar(SnackBar(content: Text(localizations.describeError(error))));
     try {
       await action;
       return true;
     } on ApiException catch (error) {
-      messenger?.showSnackBar(SnackBar(content: Text(localizations.describeError(error))));
+      show(error);
+      return false;
+    } on Object catch (error, stack) {
+      FlutterError.reportError(FlutterErrorDetails(exception: error, stack: stack, library: "polder"));
+      show(error);
       return false;
     }
   }

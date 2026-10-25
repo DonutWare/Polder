@@ -40,6 +40,8 @@ abstract final class ApiErrorMapper {
       (_, "forbidden") || (403, _) => ForbiddenException(error: error, statusCode: statusCode),
       (_, "not_found") || (404, _) => NotFoundException(error: error, statusCode: statusCode),
       (_, "precondition_failed") || (412, _) => PreconditionFailedException(error: error, statusCode: statusCode),
+      (_, "rate_limited") || (429, _) => RateLimitedException(error: error, statusCode: statusCode),
+      (_, "unavailable") || (503, _) => UnavailableException(error: error, statusCode: statusCode),
       (409, _) => ConflictException(current: current, error: error, statusCode: statusCode),
       _ => ServerException(error: error, statusCode: statusCode),
     };

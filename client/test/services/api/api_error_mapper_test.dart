@@ -34,6 +34,8 @@ void main() {
     expect(ApiErrorMapper.fromResponse(403, error("forbidden")), isA<ForbiddenException>());
     expect(ApiErrorMapper.fromResponse(404, error("not_found")), isA<NotFoundException>());
     expect(ApiErrorMapper.fromResponse(412, null), isA<PreconditionFailedException>());
+    expect(ApiErrorMapper.fromResponse(429, error("rate_limited")), isA<RateLimitedException>());
+    expect(ApiErrorMapper.fromResponse(503, error("unavailable")), isA<UnavailableException>());
     expect(ApiErrorMapper.fromResponse(500, null), isA<ServerException>());
   });
 
