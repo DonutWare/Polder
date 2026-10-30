@@ -54,9 +54,10 @@ dependencies:
   cached_network_image: ^4.0.4
   markdown: ^7.3.1
   re_highlight: ^0.0.3
-  livemd_flutter: 0.6.0
   font_awesome_flutter: ^11.0.0
   app_links: ^7.2.2
+  desktop_drop: ^0.8.4
+  cross_file: ^0.3.5+5
 
 dev_dependencies:
   flutter_test:

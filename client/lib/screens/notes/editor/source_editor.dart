@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-import "package:livemd_flutter/livemd_flutter.dart";
+import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
 
 import "package:polder/screens/notes/editor/markdown_syntax_controller.dart";
 import "package:polder/screens/notes/editor/note_editor.dart";
@@ -8,7 +8,7 @@ import "package:polder/screens/notes/editor/note_editor.dart";
 class SourceEditor extends StatefulWidget {
   const SourceEditor({required this.controller, this.readOnly = false, this.padding = EdgeInsets.zero, super.key});
 
-  final LiveMarkdownController controller;
+  final MarkdownEditingController controller;
   final bool readOnly;
   final EdgeInsets padding;
 

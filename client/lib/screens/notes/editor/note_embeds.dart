@@ -11,6 +11,7 @@ import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/screens/notes/editor/note_image_provider.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/notes/note_link.dart";
+import "package:polder/services/notes/note_markdown.dart";
 
 class NoteTargets {
   const NoteTargets({required this.notePath, required this.byId});
@@ -24,6 +25,8 @@ class NoteTargets {
 }
 
 const notePreviewSize = 512;
+
+const notePreviewRadius = BorderRadius.all(Radius.circular(6));
 
 ImageProvider noteImage(PolderApi api, NoteTargets targets, String destination) {
   final uri = Uri.tryParse(destination);
@@ -43,6 +46,7 @@ Future<Uint8List> _imageBytes(PolderApi api, NoteLink? link, FileEntry? known) a
     final preview = await api.preview(entry.path, size: notePreviewSize);
     if (preview != null) return preview;
   }
+  if (!entry.isImage) throw StateError("the linked file has no preview");
   return api.downloadBytes(entry.path);
 }
 
@@ -92,30 +96,60 @@ class NoteImage extends ConsumerWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: maxHeight),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image(
-              image: noteImage(ref.watch(polderApiProvider), targets, destination),
-              gaplessPlayback: true,
-              frameBuilder: (context, child, frame, loadedSynchronously) => frame == null && !loadedSynchronously
-                  ? Container(height: 160, width: 240, color: colors.surfaceContainerHighest)
-                  : child,
-              errorBuilder: (context, _, _) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.broken_image_outlined, size: 18, color: colors.onSurfaceVariant),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(alt.isEmpty ? destination : alt, style: TextStyle(color: colors.onSurfaceVariant)),
-                    ),
-                  ],
+            borderRadius: notePreviewRadius,
+            child: NotePlayOverlay(
+              visible: isVideoDestination(destination),
+              child: Image(
+                image: noteImage(ref.watch(polderApiProvider), targets, destination),
+                gaplessPlayback: true,
+                frameBuilder: (context, child, frame, loadedSynchronously) => frame == null && !loadedSynchronously
+                    ? Container(height: 160, width: 240, color: colors.surfaceContainerHighest)
+                    : child,
+                errorBuilder: (context, _, _) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.broken_image_outlined, size: 18, color: colors.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(alt.isEmpty ? destination : alt, style: TextStyle(color: colors.onSurfaceVariant)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class NotePlayOverlay extends StatelessWidget {
+  const NotePlayOverlay({required this.visible, required this.child, super.key});
+
+  final bool visible;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!visible) return child;
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        child,
+        IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.45), shape: BoxShape.circle),
+            child: const Padding(
+              padding: EdgeInsets.all(6),
+              child: Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -109,11 +109,11 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   Widget? _sidebar(String? root) =>
       root == null ? null : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open);
 
-  void _createPage(String? root) {
+  void _createPage(String? root, {bool checklist = false}) {
     if (root == null) {
-      NotesActions.createInNotesFolder(context, ref);
+      NotesActions.createInNotesFolder(context, ref, checklist: checklist);
     } else {
-      NotesActions.createPage(context, ref, folder: notesLevel(ref, root));
+      NotesActions.createPage(context, ref, folder: notesLevel(ref, root), checklist: checklist);
     }
   }
 
@@ -140,10 +140,24 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       maxListWidth: _listWidth,
       forceSingle: grid,
       list: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
-      listFloatingActionButton: FloatingActionButton(
-        tooltip: context.localized.noteNewPage,
-        onPressed: () => _createPage(root),
-        child: const Icon(IconsaxPlusLinear.note_add),
+      listFloatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.small(
+            heroTag: #newChecklist,
+            tooltip: context.localized.noteNewChecklist,
+            onPressed: () => _createPage(root, checklist: true),
+            child: const Icon(IconsaxPlusLinear.task_square),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton(
+            heroTag: #newPage,
+            tooltip: context.localized.noteNewPage,
+            onPressed: () => _createPage(root),
+            child: const Icon(IconsaxPlusLinear.note_add),
+          ),
+        ],
       ),
       onPop: _closeNote,
       placeholder: SafeArea(

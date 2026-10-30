@@ -8,7 +8,6 @@ import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:livemd_flutter/livemd_flutter.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/providers/app/navigation_history_provider.dart";
@@ -20,6 +19,8 @@ import "package:polder/providers/versions/file_versions_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
+import "package:polder/screens/notes/editor/checklist_editor.dart";
+import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
 import "package:polder/screens/notes/editor/markdown_view.dart";
 import "package:polder/screens/notes/editor/note_editor.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
@@ -28,8 +29,10 @@ import "package:polder/screens/notes/editor/source_editor.dart";
 import "package:polder/screens/notes/notes_actions.dart";
 import "package:polder/screens/notes/widgets/link_preview_card.dart";
 import "package:polder/services/notes/format_actions.dart";
+import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/services/notes/note_link.dart";
 import "package:polder/services/notes/note_preview.dart";
+import "package:polder/services/transfer/file_picker_service.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/api_error_localization.dart";
 import "package:polder/util/date_format_extension.dart";
@@ -73,7 +76,7 @@ class _SaveIntent extends Intent {
 class _NotePaneState extends ConsumerState<NotePane> {
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(onHide: _save, onPause: _save);
   Map<int, FileEntry> _resolved = const {};
-  LiveMarkdownController? _controller;
+  MarkdownEditingController? _controller;
   String _reported = "";
   bool _pickingLink = false;
 
@@ -92,11 +95,11 @@ class _NotePaneState extends ConsumerState<NotePane> {
     super.dispose();
   }
 
-  LiveMarkdownController _controllerFor(NoteDocument document) {
+  MarkdownEditingController _controllerFor(NoteDocument document) {
     final existing = _controller;
     if (existing != null) return existing;
     _reported = document.text;
-    return _controller = LiveMarkdownController(text: document.text)..addListener(_onEdited);
+    return _controller = MarkdownEditingController(text: document.text)..addListener(_onEdited);
   }
 
   void _onEdited() {
@@ -161,7 +164,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     final selected = value.selection.isValid ? value.selection.textInside(value.text) : "";
     final label = escapeLinkLabel(selected.trim().isNotEmpty ? selected : fallback);
     controller.setValue(
-      target.isImage
+      target.isImage || target.isVideo
           ? FormatActions.insertBlock(value, "![$label]($destination)")
           : FormatActions.insert(value, "[$label]($destination)"),
     );
@@ -169,13 +172,18 @@ class _NotePaneState extends ConsumerState<NotePane> {
 
   Future<void> _attachFiles(NoteDocument document) async {
     final picked = await ref.read(filePickerServiceProvider).pickFiles();
-    if (picked.isEmpty || !mounted) return;
+    if (!mounted) return;
+    await _upload(document, picked);
+  }
+
+  Future<void> _upload(NoteDocument document, List<PickedFile> files) async {
+    if (files.isEmpty) return;
     final api = ref.read(polderApiProvider);
     final folder = RemotePath.join(RemotePath.parent(document.entry.path), attachmentsFolder);
     await context.runWithFeedback(
       Future(() async {
         final taken = await NotesActions.namesIn(api, folder);
-        for (final file in picked) {
+        for (final file in files) {
           final name = uniqueFileName(file.name, taken);
           taken.add(name);
           final uploaded = await api.putContent(
@@ -186,6 +194,18 @@ class _NotePaneState extends ConsumerState<NotePane> {
           if (mounted) _insertLinkTo(uploaded, document.entry.path);
         }
       }),
+    );
+  }
+
+  void _toggleCheckboxes(MarkdownEditingController controller) {
+    final items = NoteChecklist.parse(controller.text);
+    final text = items == null ? NoteChecklist.fromText(controller.text) : NoteChecklist.toText(items);
+    controller.setValue(
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
+      origin: Object(),
     );
   }
 
@@ -277,6 +297,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     final targets = _targets(document);
     final readOnly = !document.editable || document.state == NoteSaveState.conflict;
     final controller = _controllerFor(document);
+    final checklist = !sourceMode && NoteChecklist.isChecklist(controller.text);
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
@@ -335,8 +356,18 @@ class _NotePaneState extends ConsumerState<NotePane> {
               ),
               _NoteMenu.rename => _rename(document),
               _NoteMenu.delete => _delete(document),
+              _NoteMenu.checkboxes => _toggleCheckboxes(controller),
             },
             itemBuilder: (context) => [
+              if (!readOnly)
+                PopupMenuItem(
+                  value: _NoteMenu.checkboxes,
+                  child: Text(
+                    NoteChecklist.isChecklist(controller.text)
+                        ? localized.noteHideCheckboxes
+                        : localized.noteShowCheckboxes,
+                  ),
+                ),
               PopupMenuItem(value: _NoteMenu.history, child: Text(localized.versionHistory)),
               PopupMenuItem(value: _NoteMenu.showInFiles, child: Text(localized.noteShowInFiles)),
               PopupMenuItem(value: _NoteMenu.rename, child: Text(localized.rename)),
@@ -345,7 +376,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
           ),
           const SizedBox(width: 8),
         ],
-        bottom: readOnly
+        bottom: readOnly || checklist
             ? null
             : NoteToolbar(
                 controller: controller,
@@ -354,75 +385,79 @@ class _NotePaneState extends ConsumerState<NotePane> {
                 onAttachFiles: () => _attachFiles(document),
               ),
       ),
-      body: Column(
-        children: [
-          if (!document.editable) _Banner(icon: Icons.lock_outline, message: localized.noteNotText),
-          if (document.draft case final draft?)
-            _Banner(
-              icon: Icons.restore,
-              message: draft.baseHash == document.entry.hash
-                  ? localized.noteDraftFound(draft.updatedAt.formatted(context))
-                  : localized.noteDraftFoundChanged(draft.updatedAt.formatted(context)),
-              actions: [
-                TextButton(onPressed: _notifier.discardDraft, child: Text(localized.noteDiscardDraft)),
-                FilledButton.tonal(onPressed: _notifier.recoverDraft, child: Text(localized.noteRecoverDraft)),
-              ],
-            ),
-          if (document.state == NoteSaveState.conflict)
-            _Banner(
-              icon: Icons.sync_problem,
-              message: localized.noteConflict,
-              actions: [
-                TextButton(
-                  onPressed: () => _resolveConflict(document, _ConflictChoice.theirs),
-                  child: Text(localized.noteConflictTheirs),
-                ),
-                TextButton(
-                  onPressed: () => _resolveConflict(document, _ConflictChoice.copy),
-                  child: Text(localized.noteConflictCopy),
-                ),
-                FilledButton.tonal(
-                  onPressed: () => _resolveConflict(document, _ConflictChoice.mine),
-                  child: Text(localized.noteConflictMine),
-                ),
-              ],
-            ),
-          Expanded(
-            child: Shortcuts(
-              shortcuts: {
-                ...noteHistoryShortcuts,
-                const SingleActivator(LogicalKeyboardKey.keyS, control: true): const _SaveIntent(),
-                const SingleActivator(LogicalKeyboardKey.keyS, meta: true): const _SaveIntent(),
-              },
-              child: Actions(
-                actions: {
-                  UndoNoteIntent: CallbackAction<UndoNoteIntent>(onInvoke: (_) => controller.undo()),
-                  RedoNoteIntent: CallbackAction<RedoNoteIntent>(onInvoke: (_) => controller.redo()),
-                  _SaveIntent: CallbackAction<_SaveIntent>(onInvoke: (_) => _notifier.save()),
+      body: _AboveNavigation(
+        child: Column(
+          children: [
+            if (!document.editable) _Banner(icon: Icons.lock_outline, message: localized.noteNotText),
+            if (document.draft case final draft?)
+              _Banner(
+                icon: Icons.restore,
+                message: draft.baseHash == document.entry.hash
+                    ? localized.noteDraftFound(draft.updatedAt.formatted(context))
+                    : localized.noteDraftFoundChanged(draft.updatedAt.formatted(context)),
+                actions: [
+                  TextButton(onPressed: _notifier.discardDraft, child: Text(localized.noteDiscardDraft)),
+                  FilledButton.tonal(onPressed: _notifier.recoverDraft, child: Text(localized.noteRecoverDraft)),
+                ],
+              ),
+            if (document.state == NoteSaveState.conflict)
+              _Banner(
+                icon: Icons.sync_problem,
+                message: localized.noteConflict,
+                actions: [
+                  TextButton(
+                    onPressed: () => _resolveConflict(document, _ConflictChoice.theirs),
+                    child: Text(localized.noteConflictTheirs),
+                  ),
+                  TextButton(
+                    onPressed: () => _resolveConflict(document, _ConflictChoice.copy),
+                    child: Text(localized.noteConflictCopy),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: () => _resolveConflict(document, _ConflictChoice.mine),
+                    child: Text(localized.noteConflictMine),
+                  ),
+                ],
+              ),
+            Expanded(
+              child: Shortcuts(
+                shortcuts: {
+                  ...noteHistoryShortcuts,
+                  const SingleActivator(LogicalKeyboardKey.keyS, control: true): const _SaveIntent(),
+                  const SingleActivator(LogicalKeyboardKey.keyS, meta: true): const _SaveIntent(),
                 },
-                child: WindowCentered(
-                  contentWidth: _readableWidth,
-                  builder: (context, gutters) {
-                    final padding = gutters.copyWith(top: 16, bottom: 24);
-                    void openLink(String destination) => _openLink(destination, targets);
-                    if (readOnly && !sourceMode) {
-                      return ReadOnlyNote(text: document.text, targets: targets, padding: padding, onLink: openLink);
-                    }
-                    return sourceMode
-                        ? SourceEditor(controller: controller, readOnly: readOnly, padding: padding)
-                        : LiveNoteEditor(
-                            controller: controller,
-                            padding: padding,
-                            onLink: openLink,
-                            imageFor: (destination) => noteImage(ref.read(polderApiProvider), targets, destination),
-                          );
+                child: Actions(
+                  actions: {
+                    UndoNoteIntent: CallbackAction<UndoNoteIntent>(onInvoke: (_) => controller.undo()),
+                    RedoNoteIntent: CallbackAction<RedoNoteIntent>(onInvoke: (_) => controller.redo()),
+                    _SaveIntent: CallbackAction<_SaveIntent>(onInvoke: (_) => _notifier.save()),
                   },
+                  child: WindowCentered(
+                    contentWidth: _readableWidth,
+                    builder: (context, gutters) {
+                      final padding = gutters.copyWith(top: 16, bottom: 24);
+                      void openLink(String destination) => _openLink(destination, targets);
+                      if (readOnly && !sourceMode) {
+                        return ReadOnlyNote(text: document.text, targets: targets, padding: padding, onLink: openLink);
+                      }
+                      if (sourceMode) return SourceEditor(controller: controller, readOnly: readOnly, padding: padding);
+                      if (checklist) return ChecklistEditor(controller: controller, padding: padding);
+                      return LiveNoteEditor(
+                        controller: controller,
+                        targets: targets,
+                        padding: padding,
+                        onLink: openLink,
+                        onDropFiles: (files) => _upload(document, files.map(XFilePickedFile.new).toList()),
+                        imageFor: (destination) => noteImage(ref.read(polderApiProvider), targets, destination),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-          _NoteLinkPreviews(path: widget.path, contentWidth: _readableWidth),
-        ],
+            _NoteLinkPreviews(path: widget.path, contentWidth: _readableWidth),
+          ],
+        ),
       ),
     );
   }
@@ -440,6 +475,22 @@ class _NotePaneState extends ConsumerState<NotePane> {
       if (resolved != null) _resolved = {..._resolved, ...resolved};
     }
     return NoteTargets(notePath: document.entry.path, byId: _resolved);
+  }
+}
+
+class _AboveNavigation extends StatelessWidget {
+  const _AboveNavigation({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final inset = keyboardOpen ? 0.0 : MediaQuery.paddingOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.only(bottom: inset),
+      child: MediaQuery.removePadding(context: context, removeBottom: true, child: child),
+    );
   }
 }
 
@@ -507,7 +558,7 @@ class _OpeningNoteState extends State<_OpeningNote> {
   );
 }
 
-enum _NoteMenu { history, showInFiles, rename, delete }
+enum _NoteMenu { checkboxes, history, showInFiles, rename, delete }
 
 enum _ConflictChoice { theirs, mine, copy }
 

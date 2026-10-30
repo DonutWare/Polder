@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:livemd_flutter/livemd_flutter.dart";
+import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
 
 import "package:polder/services/notes/format_actions.dart";
 import "package:polder/util/localization_helper.dart";
@@ -16,7 +16,7 @@ class NoteToolbar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
   });
 
-  final LiveMarkdownController controller;
+  final MarkdownEditingController controller;
   final double contentWidth;
 
   @override

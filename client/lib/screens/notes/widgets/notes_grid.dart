@@ -13,6 +13,7 @@ import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
 import "package:polder/screens/notes/widgets/link_preview_card.dart";
 import "package:polder/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
@@ -139,7 +140,8 @@ class _NoteCard extends ConsumerWidget {
     final selected = page != null && page.path == selectedPath;
     final preview = page == null ? null : ref.watch(notePreviewProvider(page)).value;
     final image = preview?.image;
-    final excerpt = preview?.excerpt;
+    final checklist = preview?.checklist;
+    final excerpt = checklist == null ? preview?.excerpt : null;
     final links = preview?.links.take(_maxLinkRows) ?? const <String>[];
     final foreground = selected ? colors.onSecondaryContainer : colors.onSurface;
     return Card(
@@ -198,6 +200,11 @@ class _NoteCard extends ConsumerWidget {
                     ),
                   ),
                 ),
+              if (checklist != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 4, 14, 0),
+                  child: _ChecklistPreview(items: checklist, selected: selected),
+                ),
               for (final link in links)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
@@ -250,6 +257,55 @@ class _NoteCard extends ConsumerWidget {
 
   void _showMenu(BuildContext context, WidgetRef ref, Rect anchor) =>
       NoteNodeActions.showMenuFor(context, ref, node: node, anchor: anchor, selectedPath: selectedPath);
+}
+
+class _ChecklistPreview extends StatelessWidget {
+  const _ChecklistPreview({required this.items, required this.selected});
+
+  static const _maxRows = 8;
+
+  final List<ChecklistItem> items;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final color = selected ? colors.onSecondaryContainer : colors.onSurfaceVariant;
+    final style = theme.textTheme.bodySmall?.copyWith(color: color);
+    final open = items.where((item) => !item.checked && item.text.trim().isNotEmpty).toList();
+    final checked = items.where((item) => item.checked).length;
+    final hidden = open.length - _maxRows;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final item in open.take(_maxRows))
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.check_box_outline_blank_rounded, size: 16, color: color),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(item.text, maxLines: 2, overflow: TextOverflow.ellipsis, style: style),
+                ),
+              ],
+            ),
+          ),
+        if (hidden > 0)
+          Padding(
+            padding: const EdgeInsets.only(left: 22, top: 2),
+            child: Text("+$hidden", style: style),
+          ),
+        if (checked > 0)
+          Padding(
+            padding: const EdgeInsets.only(left: 22, top: 4),
+            child: Text("+ ${context.localized.noteCheckedItems(checked)}", style: style),
+          ),
+      ],
+    );
+  }
 }
 
 class _CardImage extends ConsumerWidget {

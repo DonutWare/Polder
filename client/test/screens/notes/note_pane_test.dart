@@ -6,6 +6,8 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/notes/note_document_provider.dart";
+import "package:polder/screens/notes/editor/checklist_editor.dart";
+import "package:polder/screens/notes/editor/markdown_editor/markdown_editor.dart";
 import "package:polder/screens/notes/widgets/link_preview_card.dart";
 import "package:polder/screens/notes/widgets/note_pane.dart";
 import "package:polder/widgets/shared/file_link_picker_dialog.dart";
@@ -15,12 +17,12 @@ import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";
 
 const notePath = "/Notes/plan.md";
-const liveField = ValueKey("livemd-document-field");
+final liveField = find.descendant(of: find.byType(MarkdownEditor), matching: find.byType(TextField));
 
 void main() {
   late ProviderHarness harness;
 
-  Future<void> openNote(WidgetTester tester) async {
+  Future<void> openNote(WidgetTester tester, {double bottomInset = 0}) async {
     final server = FakePolderServer()..putFile(notePath, utf8.encode("# Plan\n"));
     harness = ProviderHarness(httpClient: SignedInServer(server), account: testAccount());
     await harness.container.read(accountProvider.future);
@@ -28,11 +30,16 @@ void main() {
     await tester.pumpWidget(
       localizedApp(
         harness.container,
-        StatefulBuilder(
-          builder: (context, setState) => NotePane(
-            path: notePath,
-            sourceMode: sourceMode,
-            onToggleSourceMode: () => setState(() => sourceMode = !sourceMode),
+        Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(padding: EdgeInsets.only(bottom: bottomInset)),
+            child: StatefulBuilder(
+              builder: (context, setState) => NotePane(
+                path: notePath,
+                sourceMode: sourceMode,
+                onToggleSourceMode: () => setState(() => sourceMode = !sourceMode),
+              ),
+            ),
           ),
         ),
       ),
@@ -48,10 +55,39 @@ void main() {
 
   String noteText() => harness.container.read(noteDocumentProvider(notePath)).requireValue.text;
 
+  testWidgets("show and hide checkboxes switch between text and checklist", (tester) async {
+    await openNote(tester);
+    await tester.enterText(liveField, "Milk\nEggs");
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text("Show checkboxes"));
+    await tester.pumpAndSettle();
+    expect(noteText(), "- [ ] Milk\n- [ ] Eggs");
+    expect(find.byType(ChecklistEditor), findsOneWidget);
+    expect(find.byType(MarkdownEditor), findsNothing);
+
+    await tester.tap(find.byType(Checkbox).first);
+    await tester.pump(const Duration(seconds: 1));
+    expect(noteText(), "- [x] Milk\n- [ ] Eggs");
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text("Hide checkboxes"));
+    await tester.pumpAndSettle();
+    expect(noteText(), "Milk\nEggs");
+    expect(find.byType(MarkdownEditor), findsOneWidget);
+
+    unawaited(harness.container.read(noteDocumentProvider(notePath).notifier).save());
+    await tester.pumpAndSettle();
+    await closeNote(tester);
+  });
+
   testWidgets("one undo history covers live and source editing", (tester) async {
     await openNote(tester);
 
-    await tester.enterText(find.byKey(liveField), "# Plan\n\nLive\n");
+    await tester.enterText(liveField, "# Plan\n\nLive\n");
     await tester.pump(const Duration(seconds: 1));
     expect(noteText(), "# Plan\n\nLive\n");
 
@@ -77,8 +113,8 @@ void main() {
   testWidgets("typing [[ opens the link picker without leaving the brackets", (tester) async {
     await openNote(tester);
 
-    await tester.enterText(find.byKey(liveField), "# Plan\n[");
-    await tester.enterText(find.byKey(liveField), "# Plan\n[[");
+    await tester.enterText(liveField, "# Plan\n[");
+    await tester.enterText(liveField, "# Plan\n[[");
     await tester.pumpAndSettle();
 
     expect(find.byType(FileLinkPickerDialog), findsOneWidget);
@@ -90,10 +126,10 @@ void main() {
   });
 
   testWidgets("web links in the note show as preview cards once typing settles", (tester) async {
-    await openNote(tester);
+    await openNote(tester, bottomInset: 80);
     expect(find.byType(LinkPreviewCard), findsNothing);
 
-    await tester.enterText(find.byKey(liveField), "# Plan\n\nRead https://example.com/guide first.\n");
+    await tester.enterText(liveField, "# Plan\n\nRead https://example.com/guide first.\n");
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.byType(LinkPreviewCard), findsNothing);
     await tester.pump(const Duration(seconds: 1));
@@ -101,6 +137,8 @@ void main() {
 
     expect(find.byType(LinkPreviewCard), findsOneWidget);
     expect(find.text("Page on example.com"), findsOneWidget);
+    final screenBottom = tester.view.physicalSize.height / tester.view.devicePixelRatio;
+    expect(tester.getBottomLeft(find.byType(LinkPreviewCard)).dy, lessThanOrEqualTo(screenBottom - 80));
 
     unawaited(harness.container.read(noteDocumentProvider(notePath).notifier).save());
     await tester.pumpAndSettle();

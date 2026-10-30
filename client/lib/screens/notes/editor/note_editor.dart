@@ -1,8 +1,13 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
-import "package:livemd_flutter/livemd_flutter.dart";
+import "package:cross_file/cross_file.dart";
 
+import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder/screens/notes/editor/markdown_editor/markdown_editor.dart";
+import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
+import "package:polder/screens/notes/editor/markdown_view.dart";
+import "package:polder/screens/notes/editor/note_embeds.dart";
 import "package:polder/services/notes/note_markdown.dart";
 
 const noteFieldDecoration = InputDecoration(
@@ -34,15 +39,19 @@ const noteHistoryShortcuts = <ShortcutActivator, Intent>{
 class LiveNoteEditor extends StatelessWidget {
   const LiveNoteEditor({
     required this.controller,
+    required this.targets,
     required this.onLink,
     required this.imageFor,
+    required this.onDropFiles,
     this.padding = EdgeInsets.zero,
     super.key,
   });
 
-  final LiveMarkdownController controller;
+  final MarkdownEditingController controller;
+  final NoteTargets targets;
   final void Function(String destination) onLink;
   final ImageProvider Function(String destination) imageFor;
+  final void Function(List<XFile> files) onDropFiles;
   final EdgeInsets padding;
 
   @override
@@ -50,30 +59,27 @@ class LiveNoteEditor extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final body = theme.textTheme.bodyLarge!.copyWith(color: colors.onSurface, height: 1.5);
-    return LiveMarkdownEditor(
+    return MarkdownEditor(
       controller: controller,
       padding: padding,
-      editorDecoration: noteFieldDecoration,
-      onLinkTap: (destination, _) => onLink(destination),
-      onImageTap: (destination, _) => onLink(destination),
-      imageResolver: imageFor,
-      theme: LiveMarkdownThemeData(
-        bodyStyle: body,
-        linkStyle: TextStyle(color: colors.primary, decoration: TextDecoration.none),
-        codeStyle: monospaced(TextStyle(color: colors.onSurface, fontSize: body.fontSize! * 0.92)),
-        codeBlockDecoration: BoxDecoration(
-          color: colors.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        appearance: LiveMarkdownAppearance(
-          syntaxColor: colors.onSurfaceVariant.withValues(alpha: 0.6),
-          quoteColor: colors.outline,
-          taskColor: colors.primary,
-          highlightColor: colors.tertiaryContainer,
-          calloutAccentColor: colors.primary,
-          calloutBackgroundColor: colors.primaryContainer.withValues(alpha: 0.35),
-          tableActiveCellColor: colors.secondaryContainer,
-        ),
+      decoration: noteFieldDecoration,
+      onLinkTap: onLink,
+      onImageTap: onLink,
+      onDropFiles: onDropFiles,
+      imageFor: imageFor,
+      blockBuilder: (context, block, source) {
+        final markdown = NoteMarkdownContext.of(source);
+        return MarkdownView(nodes: markdown.parse(source), context: markdown, targets: targets, onLink: onLink);
+      },
+      style: MarkdownEditorStyle(
+        body: body,
+        code: monospaced(TextStyle(color: colors.onSurface, fontSize: body.fontSize! * 0.92)),
+        link: TextStyle(color: colors.primary, decoration: TextDecoration.none),
+        syntaxColor: colors.onSurfaceVariant.withValues(alpha: 0.6),
+        accentColor: colors.primary,
+        quoteColor: colors.outline,
+        highlightColor: colors.tertiaryContainer,
+        codeBackground: colors.surfaceContainerHighest,
       ),
     );
   }

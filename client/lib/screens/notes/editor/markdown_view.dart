@@ -156,8 +156,20 @@ class _MarkdownBuilder {
     child: _paragraph(element.children ?? const [], (style ?? base).copyWith(fontWeight: FontWeight.w600)),
   );
 
-  Widget _paragraph(List<md.Node> nodes, TextStyle style) =>
-      Text.rich(TextSpan(style: style, children: inlines(nodes, style)));
+  Widget _paragraph(List<md.Node> nodes, TextStyle style) {
+    if (nodes case [md.Element(tag: "a", :final attributes)] when isVideoDestination(attributes["href"] ?? "")) {
+      return Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: NoteImage(
+          destination: attributes["href"]!,
+          alt: nodes.single.textContent,
+          targets: view.targets,
+          onOpen: view.onLink,
+        ),
+      );
+    }
+    return Text.rich(TextSpan(style: style, children: inlines(nodes, style)));
+  }
 
   Widget _quote(md.Element element) => Container(
     padding: const EdgeInsets.only(left: 12),
@@ -182,7 +194,7 @@ class _MarkdownBuilder {
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: notePreviewRadius,
         border: Border(left: BorderSide(color: color, width: 3)),
       ),
       child: Column(
@@ -226,7 +238,7 @@ class _MarkdownBuilder {
     if (text.endsWith("\n")) text = text.substring(0, text.length - 1);
     final style = _monospace.copyWith(fontSize: (base.fontSize ?? 16) * 0.875, height: 1.4);
     return Container(
-      decoration: BoxDecoration(color: colors.surfaceContainerHighest, borderRadius: BorderRadius.circular(8)),
+      decoration: BoxDecoration(color: colors.surfaceContainerHighest, borderRadius: notePreviewRadius),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

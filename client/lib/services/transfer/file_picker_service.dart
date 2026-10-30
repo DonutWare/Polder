@@ -1,6 +1,7 @@
 import "dart:io";
 import "dart:typed_data";
 
+import "package:cross_file/cross_file.dart";
 import "package:file_picker/file_picker.dart";
 import "package:path/path.dart" as p;
 
@@ -72,6 +73,21 @@ class BytesPickedFile implements PickedFile {
 
   @override
   Stream<List<int>> openRead() => Stream.value(_bytes);
+}
+
+class XFilePickedFile implements PickedFile {
+  const XFilePickedFile(this._file);
+
+  final XFile _file;
+
+  @override
+  String get name => _file.name;
+
+  @override
+  Future<int?> length() => _file.length();
+
+  @override
+  Stream<List<int>> openRead() => _file.openRead();
 }
 
 class _PlatformPickedFile implements PickedFile {

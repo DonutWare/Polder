@@ -2317,6 +2317,20 @@
         ],
         "type": "object"
       },
+      "PreviewRegeneration": {
+        "additionalProperties": false,
+        "properties": {
+          "files": {
+            "description": "Files queued for a new preview",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "files"
+        ],
+        "type": "object"
+      },
       "Profile": {
         "additionalProperties": false,
         "properties": {
@@ -5261,6 +5275,62 @@
         ]
       }
     },
+    "/api/v1/admin/previews/regenerate": {
+      "post": {
+        "operationId": "regeneratePreviews",
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviewRegeneration"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Make every file's preview again in the background",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/admin/search": {
       "get": {
         "operationId": "getSearchStatus",
@@ -8048,6 +8118,13 @@
                   "type": "string",
                   "x-contentMediaType": "application/octet-stream"
                 }
+              },
+              "image/png": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
               }
             },
             "description": "Thumbnail",
@@ -8095,7 +8172,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a JPEG thumbnail of an image, video or document",
+        "summary": "Get a thumbnail (JPEG, or PNG when it has transparency) of an image, video or document",
         "tags": [
           "files"
         ]
@@ -8438,6 +8515,13 @@
                   "type": "string",
                   "x-contentMediaType": "application/octet-stream"
                 }
+              },
+              "image/png": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
               }
             },
             "description": "Thumbnail",
@@ -8485,7 +8569,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a JPEG thumbnail of an earlier version",
+        "summary": "Get a thumbnail (JPEG, or PNG when it has transparency) of an earlier version",
         "tags": [
           "files"
         ]
@@ -10291,6 +10375,13 @@
                   "type": "string",
                   "x-contentMediaType": "application/octet-stream"
                 }
+              },
+              "image/png": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
               }
             },
             "description": "Thumbnail",
@@ -10323,7 +10414,7 @@
             "description": "Error"
           }
         },
-        "summary": "Get a JPEG thumbnail of a file inside a share link",
+        "summary": "Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share link",
         "tags": [
           "public"
         ]
@@ -11711,6 +11802,13 @@
                   "type": "string",
                   "x-contentMediaType": "application/octet-stream"
                 }
+              },
+              "image/png": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
               }
             },
             "description": "Thumbnail",
@@ -11758,7 +11856,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a JPEG thumbnail of a file inside a share",
+        "summary": "Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share",
         "tags": [
           "shares"
         ]
@@ -12596,6 +12694,13 @@
                   "type": "string",
                   "x-contentMediaType": "application/octet-stream"
                 }
+              },
+              "image/png": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
               }
             },
             "description": "Thumbnail",
@@ -12643,7 +12748,7 @@
             "bearer": []
           }
         ],
-        "summary": "Get a JPEG thumbnail of a deleted image, video or document",
+        "summary": "Get a thumbnail (JPEG, or PNG when it has transparency) of a deleted image, video or document",
         "tags": [
           "trash"
         ]

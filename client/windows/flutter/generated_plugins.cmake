@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   battery_plus
   connectivity_plus
+  desktop_drop
   dynamic_color
   flutter_inappwebview_windows
   flutter_secure_storage_windows

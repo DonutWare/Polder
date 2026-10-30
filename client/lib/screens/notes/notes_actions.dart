@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -13,6 +15,7 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
@@ -22,11 +25,16 @@ import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
 
 abstract final class NotesActions {
-  static Future<void> createPage(BuildContext context, WidgetRef ref, {required String folder}) async {
+  static Future<void> createPage(
+    BuildContext context,
+    WidgetRef ref, {
+    required String folder,
+    bool checklist = false,
+  }) async {
     final localized = context.localized;
     final name = await showTextInputDialog(
       context,
-      title: localized.noteNewPage,
+      title: checklist ? localized.noteNewChecklist : localized.noteNewPage,
       label: localized.name,
       confirmLabel: localized.create,
       isValid: (value) => RemotePath.isValidName(value.trim()),
@@ -34,7 +42,14 @@ abstract final class NotesActions {
     if (name == null || !context.mounted) return;
     FileEntry? created;
     final succeeded = await context.runWithFeedback(
-      Future(() async => created = await _createNote(ref, folder: folder, name: name.trim())),
+      Future(
+        () async => created = await _createNote(
+          ref,
+          folder: folder,
+          name: name.trim(),
+          content: checklist ? NoteChecklist.empty : "",
+        ),
+      ),
     );
     if (succeeded && created != null && context.mounted) context.go(AppRoutes.noteAt(created!.path));
   }
@@ -42,17 +57,23 @@ abstract final class NotesActions {
   static Future<void> createSubpage(BuildContext context, WidgetRef ref, NoteTreeNode parent) =>
       createPage(context, ref, folder: parent.childrenPath);
 
-  static Future<void> createInNotesFolder(BuildContext context, WidgetRef ref) async {
+  static Future<void> createInNotesFolder(BuildContext context, WidgetRef ref, {bool checklist = false}) async {
     var folder = await ref.read(notesFolderProvider.future);
     if (!context.mounted) return;
     folder ??= await showNotesSetupDialog(context);
-    if (folder != null && context.mounted) await createPage(context, ref, folder: folder);
+    if (folder != null && context.mounted) await createPage(context, ref, folder: folder, checklist: checklist);
   }
 
-  static Future<FileEntry> _createNote(WidgetRef ref, {required String folder, required String name}) async {
+  static Future<FileEntry> _createNote(
+    WidgetRef ref, {
+    required String folder,
+    required String name,
+    required String content,
+  }) async {
     final api = ref.read(polderApiProvider);
     final fileName = uniqueName(name, noteExtension, await namesIn(api, folder));
-    final created = await api.putContent(RemotePath.join(folder, fileName), const Stream.empty(), length: 0);
+    final bytes = utf8.encode(content);
+    final created = await api.putContent(RemotePath.join(folder, fileName), Stream.value(bytes), length: bytes.length);
     _refresh(ref, folder);
     return created;
   }

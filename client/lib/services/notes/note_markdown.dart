@@ -5,6 +5,14 @@ import "package:markdown/markdown.dart" as md;
 TextStyle monospaced(TextStyle base) =>
     base.copyWith(fontFamily: "monospace", fontFamilyFallback: const ["Menlo", "Consolas", "Courier"]);
 
+const _videoExtensions = {"mp4", "m4v", "mov", "webm", "mkv", "avi", "mpeg", "mpg", "wmv", "ogv", "3gp"};
+
+bool isVideoDestination(String destination) {
+  final path = destination.split(RegExp(r"[?#]")).first.toLowerCase();
+  final dot = path.lastIndexOf(".");
+  return dot >= 0 && _videoExtensions.contains(path.substring(dot + 1));
+}
+
 final noteExtensions = md.ExtensionSet(
   const [
     md.FencedCodeBlockSyntax(),

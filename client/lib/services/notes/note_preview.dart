@@ -1,9 +1,10 @@
 import "package:markdown/markdown.dart" as md;
 
+import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/services/notes/note_markdown.dart";
 
 class NotePreview {
-  const NotePreview({this.image, this.excerpt, this.links = const []});
+  const NotePreview({this.image, this.excerpt, this.links = const [], this.checklist});
 
   static const maxExcerptLength = 400;
   static const maxLinks = 10;
@@ -14,6 +15,7 @@ class NotePreview {
       image: _firstImage(nodes),
       excerpt: _firstParagraph(nodes) ?? _firstText(nodes),
       links: _webLinks(nodes),
+      checklist: NoteChecklist.parse(source),
     );
   }
 
@@ -22,6 +24,7 @@ class NotePreview {
   final String? image;
   final String? excerpt;
   final List<String> links;
+  final List<ChecklistItem>? checklist;
 
   static const _skipped = {"h1", "h2", "h3", "h4", "h5", "h6", "hr", "pre", "table"};
 
