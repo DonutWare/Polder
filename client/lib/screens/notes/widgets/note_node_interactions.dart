@@ -71,24 +71,24 @@ abstract final class NoteNodeActions {
       ],
     );
     if (action == null || !context.mounted) return;
+    final navigation = ref.read(navigationHistoryProvider.notifier);
     switch (action) {
       case _NodeAction.newSubpage:
         await createSubpage(context, ref, node);
       case _NodeAction.rename:
-        _follow(ref, selectedPath, node, await NotesActions.rename(context, ref, node));
+        _follow(navigation, selectedPath, node, await NotesActions.rename(context, node));
       case _NodeAction.move:
-        _follow(ref, selectedPath, node, await NotesActions.move(context, ref, node));
+        _follow(navigation, selectedPath, node, await NotesActions.move(context, node));
       case _NodeAction.delete:
-        final deleted = await NotesActions.delete(context, ref, node);
-        if (deleted && context.mounted && selectedPath != null && node.holds(selectedPath)) {
-          ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.notes);
-        }
+        final deleted = await NotesActions.delete(context, node);
+        if (deleted && selectedPath != null && node.holds(selectedPath)) navigation.replace(AppRoutes.notes);
     }
   }
 
   static Future<void> createSubpage(BuildContext context, WidgetRef ref, NoteTreeNode node) async {
-    await NotesActions.createSubpage(context, ref, node);
-    if (context.mounted) ref.read(expandedNotesProvider.notifier).expand(node.childrenPath);
+    final expanded = ref.read(expandedNotesProvider.notifier);
+    await NotesActions.createSubpage(context, node);
+    expanded.expand(node.childrenPath);
   }
 
   static Future<void> drop(
@@ -98,15 +98,17 @@ abstract final class NoteNodeActions {
     required String destination,
     required String? selectedPath,
   }) async {
-    final movedTo = await NotesActions.moveInto(context, ref, node, destination);
-    if (movedTo == null || !context.mounted) return;
-    ref.read(expandedNotesProvider.notifier).expand(destination);
-    _follow(ref, selectedPath, node, movedTo);
+    final expanded = ref.read(expandedNotesProvider.notifier);
+    final navigation = ref.read(navigationHistoryProvider.notifier);
+    final movedTo = await NotesActions.moveInto(context, node, destination);
+    if (movedTo == null) return;
+    expanded.expand(destination);
+    _follow(navigation, selectedPath, node, movedTo);
   }
 
-  static void _follow(WidgetRef ref, String? selectedPath, NoteTreeNode node, String? movedTo) {
+  static void _follow(NavigationHistoryNotifier navigation, String? selectedPath, NoteTreeNode node, String? movedTo) {
     final selected = movedTo == null ? null : NotesActions.pathAfterMove(selectedPath, node, movedTo);
-    if (selected != null) ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.noteAt(selected));
+    if (selected != null) navigation.replace(AppRoutes.noteAt(selected));
   }
 }
 

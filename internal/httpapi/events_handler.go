@@ -225,7 +225,7 @@ func (s *eventStream) sendSnapshot(ctx context.Context, transfers []activity.Liv
 func (s *eventStream) sendError(ctx context.Context, err error) error {
 	appErr, ok := errors.AsType[*apperr.Error](err)
 	if !ok {
-		appErr = apperr.New("internal", "internal server error")
+		appErr = apperr.New("internal", "%s", err.Error())
 	}
 	return s.send(ctx, eventMessage{Event: activity.Event{Type: activity.EventError}, Code: appErr.Kind, Message: appErr.Message})
 }

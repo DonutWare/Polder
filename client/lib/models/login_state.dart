@@ -27,6 +27,7 @@ abstract class LoginState with _$LoginState {
     /// Checking whether the page's own origin is a Polder server, before showing any form.
     @Default(false) bool probingHostedServer,
     LoginFailure? failure,
+    Object? failureCause,
   }) = _LoginState;
 
   bool get canConnect => serverUrl.trim().isNotEmpty && !loading;

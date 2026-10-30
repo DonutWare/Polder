@@ -111,9 +111,9 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   void _createPage(String? root, {bool checklist = false}) {
     if (root == null) {
-      NotesActions.createInNotesFolder(context, ref, checklist: checklist);
+      NotesActions.createInNotesFolder(context, checklist: checklist);
     } else {
-      NotesActions.createPage(context, ref, folder: notesLevel(ref, root), checklist: checklist);
+      NotesActions.createPage(context, folder: notesLevel(ref, root), checklist: checklist);
     }
   }
 
@@ -162,7 +162,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       onPop: _closeNote,
       placeholder: SafeArea(
         left: false,
-        child: _NothingOpen(onCreate: () => NotesActions.createInNotesFolder(context, ref)),
+        child: _NothingOpen(onCreate: () => NotesActions.createInNotesFolder(context)),
       ),
       detail: switch (notePath) {
         null => null,

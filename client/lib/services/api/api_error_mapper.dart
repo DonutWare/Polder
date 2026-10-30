@@ -16,8 +16,8 @@ class ApiErrorInterceptor implements Interceptor {
     final Response<BodyType> response;
     try {
       response = await chain.proceed(chain.request);
-    } on http.ClientException {
-      throw const NetworkException();
+    } on http.ClientException catch (error) {
+      throw NetworkException(reason: error.message);
     }
     if (response.isSuccessful) return response;
     throw ApiErrorMapper.fromResponse(response.statusCode, await ApiErrorMapper._decodeBody(response));

@@ -172,7 +172,16 @@
 	"errorRateLimited": "Too many attempts. Wait a moment and try again.",
 	"errorUnauthorized": "Your session has expired. Please sign in again.",
 	"errorUnavailable": "The server is busy. Try again shortly.",
-	"errorUnknown": "Something went wrong.",
+	"errorPreconditionFailed": "It changed on the server while this was in progress.",
+	"errorServer": "The server ran into an error (HTTP {status}).",
+	"@errorServer": {
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"errorUnknown": "The app ran into an unexpected error.",
 	"expandSidebar": "Expand sidebar",
 	"folders": "Folders",
 	"generalSettings": "General",

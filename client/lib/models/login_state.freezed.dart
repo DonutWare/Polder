@@ -17,7 +17,7 @@ mixin _$LoginState {
 
  LoginStep get step; String get serverUrl; String get username; String get password; String get passwordConfirmation; bool get loading; bool get completed;/// The server is the one this web client was served from, so it can't be changed.
  bool get serverLocked;/// Checking whether the page's own origin is a Polder server, before showing any form.
- bool get probingHostedServer; LoginFailure? get failure;
+ bool get probingHostedServer; LoginFailure? get failure; Object? get failureCause;
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -29,20 +29,20 @@ $LoginStateCopyWith<LoginState> get copyWith => _$LoginStateCopyWithImpl<LoginSt
 @override
 bool operator ==(Object other) {
   final _this = this as LoginState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginState&&(identical(other.step, _this.step) || other.step == _this.step)&&(identical(other.serverUrl, _this.serverUrl) || other.serverUrl == _this.serverUrl)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.passwordConfirmation, _this.passwordConfirmation) || other.passwordConfirmation == _this.passwordConfirmation)&&(identical(other.loading, _this.loading) || other.loading == _this.loading)&&(identical(other.completed, _this.completed) || other.completed == _this.completed)&&(identical(other.serverLocked, _this.serverLocked) || other.serverLocked == _this.serverLocked)&&(identical(other.probingHostedServer, _this.probingHostedServer) || other.probingHostedServer == _this.probingHostedServer)&&(identical(other.failure, _this.failure) || other.failure == _this.failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginState&&(identical(other.step, _this.step) || other.step == _this.step)&&(identical(other.serverUrl, _this.serverUrl) || other.serverUrl == _this.serverUrl)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.passwordConfirmation, _this.passwordConfirmation) || other.passwordConfirmation == _this.passwordConfirmation)&&(identical(other.loading, _this.loading) || other.loading == _this.loading)&&(identical(other.completed, _this.completed) || other.completed == _this.completed)&&(identical(other.serverLocked, _this.serverLocked) || other.serverLocked == _this.serverLocked)&&(identical(other.probingHostedServer, _this.probingHostedServer) || other.probingHostedServer == _this.probingHostedServer)&&(identical(other.failure, _this.failure) || other.failure == _this.failure)&&const DeepCollectionEquality().equals(other.failureCause, _this.failureCause));
 }
 
 
 @override
 int get hashCode {
   final _this = this as LoginState;
-  return Object.hash(runtimeType,_this.step,_this.serverUrl,_this.username,_this.password,_this.passwordConfirmation,_this.loading,_this.completed,_this.serverLocked,_this.probingHostedServer,_this.failure);
+  return Object.hash(runtimeType,_this.step,_this.serverUrl,_this.username,_this.password,_this.passwordConfirmation,_this.loading,_this.completed,_this.serverLocked,_this.probingHostedServer,_this.failure,const DeepCollectionEquality().hash(_this.failureCause));
 }
 
 @override
 String toString() {
   final _this = this as LoginState;
-  return 'LoginState(step: ${_this.step}, serverUrl: ${_this.serverUrl}, username: ${_this.username}, password: ${_this.password}, passwordConfirmation: ${_this.passwordConfirmation}, loading: ${_this.loading}, completed: ${_this.completed}, serverLocked: ${_this.serverLocked}, probingHostedServer: ${_this.probingHostedServer}, failure: ${_this.failure})';
+  return 'LoginState(step: ${_this.step}, serverUrl: ${_this.serverUrl}, username: ${_this.username}, password: ${_this.password}, passwordConfirmation: ${_this.passwordConfirmation}, loading: ${_this.loading}, completed: ${_this.completed}, serverLocked: ${_this.serverLocked}, probingHostedServer: ${_this.probingHostedServer}, failure: ${_this.failure}, failureCause: ${_this.failureCause})';
 }
 
 
@@ -53,7 +53,7 @@ abstract mixin class $LoginStateCopyWith<$Res>  {
   factory $LoginStateCopyWith(LoginState value, $Res Function(LoginState) _then) = _$LoginStateCopyWithImpl;
 @useResult
 $Res call({
- LoginStep step, String serverUrl, String username, String password, String passwordConfirmation, bool loading, bool completed, bool serverLocked, bool probingHostedServer, LoginFailure? failure
+ LoginStep step, String serverUrl, String username, String password, String passwordConfirmation, bool loading, bool completed, bool serverLocked, bool probingHostedServer, LoginFailure? failure, Object? failureCause
 });
 
 
@@ -70,7 +70,7 @@ class _$LoginStateCopyWithImpl<$Res>
 
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? serverUrl = null,Object? username = null,Object? password = null,Object? passwordConfirmation = null,Object? loading = null,Object? completed = null,Object? serverLocked = null,Object? probingHostedServer = null,Object? failure = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? serverUrl = null,Object? username = null,Object? password = null,Object? passwordConfirmation = null,Object? loading = null,Object? completed = null,Object? serverLocked = null,Object? probingHostedServer = null,Object? failure = freezed,Object? failureCause = freezed,}) {
   return _then(LoginState(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as LoginStep,serverUrl: null == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
@@ -82,7 +82,7 @@ as bool,completed: null == completed ? _self.completed : completed // ignore: ca
 as bool,serverLocked: null == serverLocked ? _self.serverLocked : serverLocked // ignore: cast_nullable_to_non_nullable
 as bool,probingHostedServer: null == probingHostedServer ? _self.probingHostedServer : probingHostedServer // ignore: cast_nullable_to_non_nullable
 as bool,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as LoginFailure?,
+as LoginFailure?,failureCause: freezed == failureCause ? _self.failureCause : failureCause ,
   ));
 }
 
@@ -167,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LoginStep step,  String serverUrl,  String username,  String password,  String passwordConfirmation,  bool loading,  bool completed,  bool serverLocked,  bool probingHostedServer,  LoginFailure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LoginStep step,  String serverUrl,  String username,  String password,  String passwordConfirmation,  bool loading,  bool completed,  bool serverLocked,  bool probingHostedServer,  LoginFailure? failure,  Object? failureCause)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoginState() when $default != null:
-return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.passwordConfirmation,_that.loading,_that.completed,_that.serverLocked,_that.probingHostedServer,_that.failure);case _:
+return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.passwordConfirmation,_that.loading,_that.completed,_that.serverLocked,_that.probingHostedServer,_that.failure,_that.failureCause);case _:
   return orElse();
 
 }
@@ -188,10 +188,10 @@ return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LoginStep step,  String serverUrl,  String username,  String password,  String passwordConfirmation,  bool loading,  bool completed,  bool serverLocked,  bool probingHostedServer,  LoginFailure? failure)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LoginStep step,  String serverUrl,  String username,  String password,  String passwordConfirmation,  bool loading,  bool completed,  bool serverLocked,  bool probingHostedServer,  LoginFailure? failure,  Object? failureCause)  $default,) {final _that = this;
 switch (_that) {
 case _LoginState():
-return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.passwordConfirmation,_that.loading,_that.completed,_that.serverLocked,_that.probingHostedServer,_that.failure);case _:
+return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.passwordConfirmation,_that.loading,_that.completed,_that.serverLocked,_that.probingHostedServer,_that.failure,_that.failureCause);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +208,10 @@ return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LoginStep step,  String serverUrl,  String username,  String password,  String passwordConfirmation,  bool loading,  bool completed,  bool serverLocked,  bool probingHostedServer,  LoginFailure? failure)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LoginStep step,  String serverUrl,  String username,  String password,  String passwordConfirmation,  bool loading,  bool completed,  bool serverLocked,  bool probingHostedServer,  LoginFailure? failure,  Object? failureCause)?  $default,) {final _that = this;
 switch (_that) {
 case _LoginState() when $default != null:
-return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.passwordConfirmation,_that.loading,_that.completed,_that.serverLocked,_that.probingHostedServer,_that.failure);case _:
+return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.passwordConfirmation,_that.loading,_that.completed,_that.serverLocked,_that.probingHostedServer,_that.failure,_that.failureCause);case _:
   return null;
 
 }
@@ -223,7 +223,7 @@ return $default(_that.step,_that.serverUrl,_that.username,_that.password,_that.p
 
 
 class _LoginState extends LoginState {
-  const _LoginState({this.step = LoginStep.server, this.serverUrl = "", this.username = "", this.password = "", this.passwordConfirmation = "", this.loading = false, this.completed = false, this.serverLocked = false, this.probingHostedServer = false, this.failure}): super._();
+  const _LoginState({this.step = LoginStep.server, this.serverUrl = "", this.username = "", this.password = "", this.passwordConfirmation = "", this.loading = false, this.completed = false, this.serverLocked = false, this.probingHostedServer = false, this.failure, this.failureCause}): super._();
   
 
 @override@JsonKey() final  LoginStep step;
@@ -238,6 +238,7 @@ class _LoginState extends LoginState {
 /// Checking whether the page's own origin is a Polder server, before showing any form.
 @override@JsonKey() final  bool probingHostedServer;
 @override final  LoginFailure? failure;
+@override final  Object? failureCause;
 
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
@@ -249,18 +250,18 @@ _$LoginStateCopyWith<_LoginState> get copyWith => __$LoginStateCopyWithImpl<_Log
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginState&&(identical(other.step, step) || other.step == step)&&(identical(other.serverUrl, serverUrl) || other.serverUrl == serverUrl)&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.passwordConfirmation, passwordConfirmation) || other.passwordConfirmation == passwordConfirmation)&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.completed, completed) || other.completed == completed)&&(identical(other.serverLocked, serverLocked) || other.serverLocked == serverLocked)&&(identical(other.probingHostedServer, probingHostedServer) || other.probingHostedServer == probingHostedServer)&&(identical(other.failure, failure) || other.failure == failure));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginState&&(identical(other.step, step) || other.step == step)&&(identical(other.serverUrl, serverUrl) || other.serverUrl == serverUrl)&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.passwordConfirmation, passwordConfirmation) || other.passwordConfirmation == passwordConfirmation)&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.completed, completed) || other.completed == completed)&&(identical(other.serverLocked, serverLocked) || other.serverLocked == serverLocked)&&(identical(other.probingHostedServer, probingHostedServer) || other.probingHostedServer == probingHostedServer)&&(identical(other.failure, failure) || other.failure == failure)&&const DeepCollectionEquality().equals(other.failureCause, failureCause));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,step,serverUrl,username,password,passwordConfirmation,loading,completed,serverLocked,probingHostedServer,failure);
+    return Object.hash(runtimeType,step,serverUrl,username,password,passwordConfirmation,loading,completed,serverLocked,probingHostedServer,failure,const DeepCollectionEquality().hash(failureCause));
 }
 
 @override
 String toString() {
-    return 'LoginState(step: $step, serverUrl: $serverUrl, username: $username, password: $password, passwordConfirmation: $passwordConfirmation, loading: $loading, completed: $completed, serverLocked: $serverLocked, probingHostedServer: $probingHostedServer, failure: $failure)';
+    return 'LoginState(step: $step, serverUrl: $serverUrl, username: $username, password: $password, passwordConfirmation: $passwordConfirmation, loading: $loading, completed: $completed, serverLocked: $serverLocked, probingHostedServer: $probingHostedServer, failure: $failure, failureCause: $failureCause)';
 }
 
 
@@ -271,7 +272,7 @@ abstract mixin class _$LoginStateCopyWith<$Res> implements $LoginStateCopyWith<$
   factory _$LoginStateCopyWith(_LoginState value, $Res Function(_LoginState) _then) = __$LoginStateCopyWithImpl;
 @override @useResult
 $Res call({
- LoginStep step, String serverUrl, String username, String password, String passwordConfirmation, bool loading, bool completed, bool serverLocked, bool probingHostedServer, LoginFailure? failure
+ LoginStep step, String serverUrl, String username, String password, String passwordConfirmation, bool loading, bool completed, bool serverLocked, bool probingHostedServer, LoginFailure? failure, Object? failureCause
 });
 
 
@@ -288,7 +289,7 @@ class __$LoginStateCopyWithImpl<$Res>
 
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? serverUrl = null,Object? username = null,Object? password = null,Object? passwordConfirmation = null,Object? loading = null,Object? completed = null,Object? serverLocked = null,Object? probingHostedServer = null,Object? failure = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? serverUrl = null,Object? username = null,Object? password = null,Object? passwordConfirmation = null,Object? loading = null,Object? completed = null,Object? serverLocked = null,Object? probingHostedServer = null,Object? failure = freezed,Object? failureCause = freezed,}) {
   return _then(_LoginState(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as LoginStep,serverUrl: null == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
@@ -300,7 +301,7 @@ as bool,completed: null == completed ? _self.completed : completed // ignore: ca
 as bool,serverLocked: null == serverLocked ? _self.serverLocked : serverLocked // ignore: cast_nullable_to_non_nullable
 as bool,probingHostedServer: null == probingHostedServer ? _self.probingHostedServer : probingHostedServer // ignore: cast_nullable_to_non_nullable
 as bool,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as LoginFailure?,
+as LoginFailure?,failureCause: freezed == failureCause ? _self.failureCause : failureCause ,
   ));
 }
 

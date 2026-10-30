@@ -56,7 +56,9 @@ class UnavailableException extends ApiException {
 }
 
 class NetworkException extends ApiException {
-  const NetworkException({super.error});
+  const NetworkException({this.reason = "", super.error});
+
+  final String reason;
 }
 
 class ServerException extends ApiException {

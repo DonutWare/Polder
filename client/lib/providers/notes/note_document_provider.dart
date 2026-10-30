@@ -27,6 +27,7 @@ class NoteDocument {
     this.state = NoteSaveState.saved,
     this.conflict,
     this.draft,
+    this.saveError,
   });
 
   final FileEntry entry;
@@ -40,6 +41,8 @@ class NoteDocument {
 
   final NoteDraft? draft;
 
+  final Object? saveError;
+
   bool get dirty => text != savedText;
 
   NoteDocument copyWith({
@@ -49,6 +52,7 @@ class NoteDocument {
     NoteSaveState? state,
     FileEntry? Function()? conflict,
     NoteDraft? Function()? draft,
+    Object? saveError,
   }) => NoteDocument(
     entry: entry ?? this.entry,
     text: text ?? this.text,
@@ -57,6 +61,7 @@ class NoteDocument {
     state: state ?? this.state,
     conflict: conflict != null ? conflict() : this.conflict,
     draft: draft != null ? draft() : this.draft,
+    saveError: (state ?? this.state) == NoteSaveState.failed ? saveError ?? this.saveError : null,
   );
 }
 
@@ -189,9 +194,9 @@ class NoteDocumentNotifier extends AsyncNotifier<NoteDocument> {
     } on ConflictException catch (error) {
       if (!ref.mounted) return;
       state = AsyncData(state.requireValue.copyWith(state: NoteSaveState.conflict, conflict: () => error.current));
-    } on ApiException {
+    } on Object catch (error) {
       if (!ref.mounted) return;
-      state = AsyncData(state.requireValue.copyWith(state: NoteSaveState.failed));
+      state = AsyncData(state.requireValue.copyWith(state: NoteSaveState.failed, saveError: error));
       _checkpoint ??= Timer(checkpointInterval, () => unawaited(save()));
     }
   }

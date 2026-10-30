@@ -33,6 +33,7 @@ Future<List<String>?> scanDocument(BuildContext context, WidgetRef ref) async {
   } on DocumentScanException catch (error) {
     final message = switch (error.failure) {
       DocumentScanFailure.cameraDenied => localizations.scanCameraDenied,
+      DocumentScanFailure.other when error.reason.isNotEmpty => "${localizations.scanFailed}\n${error.reason}",
       DocumentScanFailure.other => localizations.scanFailed,
     };
     messenger?.showSnackBar(SnackBar(content: Text(message)));

@@ -8,9 +8,10 @@ import "package:cunning_document_scanner/cunning_document_scanner.dart";
 enum DocumentScanFailure { cameraDenied, other }
 
 class DocumentScanException implements Exception {
-  const DocumentScanException(this.failure);
+  const DocumentScanException(this.failure, {this.reason = ""});
 
   final DocumentScanFailure failure;
+  final String reason;
 }
 
 typedef ScannerAccent = ({Color light, Color dark});
@@ -40,6 +41,7 @@ class NativeDocumentScannerService implements DocumentScannerService {
     } on CunningDocumentScannerException catch (error) {
       throw DocumentScanException(
         error.code == "permission_denied" ? DocumentScanFailure.cameraDenied : DocumentScanFailure.other,
+        reason: error.message,
       );
     }
   }

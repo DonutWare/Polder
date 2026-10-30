@@ -129,13 +129,13 @@ class NotesHeaderActions extends ConsumerWidget {
             tooltip: localized.noteNewChecklist,
             visualDensity: density,
             icon: const Icon(IconsaxPlusLinear.task_square),
-            onPressed: () => NotesActions.createPage(context, ref, folder: level, checklist: true),
+            onPressed: () => NotesActions.createPage(context, folder: level, checklist: true),
           ),
           IconButton(
             tooltip: localized.noteNewPage,
             visualDensity: density,
             icon: const Icon(IconsaxPlusLinear.note_add),
-            onPressed: () => NotesActions.createPage(context, ref, folder: level),
+            onPressed: () => NotesActions.createPage(context, folder: level),
           ),
         ],
         if (onChangeFolder != null)

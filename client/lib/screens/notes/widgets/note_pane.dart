@@ -231,17 +231,18 @@ class _NotePaneState extends ConsumerState<NotePane> {
   Future<void> _rename(NoteDocument document) async {
     await _notifier.save();
     if (!mounted) return;
-    final node = await NotesActions.nodeFor(ref, document.entry);
+    final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry);
     if (!mounted) return;
-    final renamed = await NotesActions.rename(context, ref, node);
+    final renamed = await NotesActions.rename(context, node);
     if (renamed != null && mounted) ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.noteAt(renamed));
   }
 
   Future<void> _delete(NoteDocument document) async {
-    final node = await NotesActions.nodeFor(ref, document.entry);
+    final navigation = ref.read(navigationHistoryProvider.notifier);
+    final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry);
     if (!mounted) return;
-    final deleted = await NotesActions.delete(context, ref, node);
-    if (deleted && mounted) ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.notes);
+    final deleted = await NotesActions.delete(context, node);
+    if (deleted) navigation.replace(AppRoutes.notes);
   }
 
   Future<void> _resolveConflict(NoteDocument document, _ConflictChoice choice) async {
@@ -332,7 +333,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
           ],
         ),
         actions: [
-          _SaveStatus(state: document.state, onSave: _notifier.save),
+          _SaveStatus(state: document.state, error: document.saveError, onSave: _notifier.save),
           IconButton(
             tooltip: sourceMode ? localized.noteLivePreview : localized.noteSourceMode,
             isSelected: sourceMode,
@@ -563,9 +564,10 @@ enum _NoteMenu { checkboxes, history, showInFiles, rename, delete }
 enum _ConflictChoice { theirs, mine, copy }
 
 class _SaveStatus extends StatelessWidget {
-  const _SaveStatus({required this.state, required this.onSave});
+  const _SaveStatus({required this.state, required this.error, required this.onSave});
 
   final NoteSaveState state;
+  final Object? error;
   final Future<void> Function() onSave;
 
   @override
@@ -577,7 +579,11 @@ class _SaveStatus extends StatelessWidget {
       NoteSaveState.unsaved => (IconsaxPlusLinear.cloud_change, localized.noteUnsaved, colors.primary),
       NoteSaveState.saving => (IconsaxPlusLinear.cloud_change, localized.noteSaving, colors.onSurfaceVariant),
       NoteSaveState.conflict => (IconsaxPlusLinear.cloud_cross, localized.noteConflict, colors.error),
-      NoteSaveState.failed => (IconsaxPlusLinear.cloud_cross, localized.noteSaveFailed, colors.error),
+      NoteSaveState.failed => (
+        IconsaxPlusLinear.cloud_cross,
+        "${localized.noteSaveFailed}\n${localized.describeError(error)}",
+        colors.error,
+      ),
     };
     if (state == NoteSaveState.saving) {
       return const Padding(

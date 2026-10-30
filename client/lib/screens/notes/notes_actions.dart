@@ -25,13 +25,9 @@ import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
 
 abstract final class NotesActions {
-  static Future<void> createPage(
-    BuildContext context,
-    WidgetRef ref, {
-    required String folder,
-    bool checklist = false,
-  }) async {
+  static Future<void> createPage(BuildContext context, {required String folder, bool checklist = false}) async {
     final localized = context.localized;
+    final container = ProviderScope.containerOf(context, listen: false);
     final name = await showTextInputDialog(
       context,
       title: checklist ? localized.noteNewChecklist : localized.noteNewPage,
@@ -44,7 +40,7 @@ abstract final class NotesActions {
     final succeeded = await context.runWithFeedback(
       Future(
         () async => created = await _createNote(
-          ref,
+          container,
           folder: folder,
           name: name.trim(),
           content: checklist ? NoteChecklist.empty : "",
@@ -54,27 +50,27 @@ abstract final class NotesActions {
     if (succeeded && created != null && context.mounted) context.go(AppRoutes.noteAt(created!.path));
   }
 
-  static Future<void> createSubpage(BuildContext context, WidgetRef ref, NoteTreeNode parent) =>
-      createPage(context, ref, folder: parent.childrenPath);
+  static Future<void> createSubpage(BuildContext context, NoteTreeNode parent) =>
+      createPage(context, folder: parent.childrenPath);
 
-  static Future<void> createInNotesFolder(BuildContext context, WidgetRef ref, {bool checklist = false}) async {
-    var folder = await ref.read(notesFolderProvider.future);
+  static Future<void> createInNotesFolder(BuildContext context, {bool checklist = false}) async {
+    var folder = await ProviderScope.containerOf(context, listen: false).read(notesFolderProvider.future);
     if (!context.mounted) return;
     folder ??= await showNotesSetupDialog(context);
-    if (folder != null && context.mounted) await createPage(context, ref, folder: folder, checklist: checklist);
+    if (folder != null && context.mounted) await createPage(context, folder: folder, checklist: checklist);
   }
 
   static Future<FileEntry> _createNote(
-    WidgetRef ref, {
+    ProviderContainer container, {
     required String folder,
     required String name,
     required String content,
   }) async {
-    final api = ref.read(polderApiProvider);
+    final api = container.read(polderApiProvider);
     final fileName = uniqueName(name, noteExtension, await namesIn(api, folder));
     final bytes = utf8.encode(content);
     final created = await api.putContent(RemotePath.join(folder, fileName), Stream.value(bytes), length: bytes.length);
-    _refresh(ref, folder);
+    _refresh(container, folder);
     return created;
   }
 
@@ -86,17 +82,17 @@ abstract final class NotesActions {
     }
   }
 
-  static Future<NoteTreeNode> nodeFor(WidgetRef ref, FileEntry page) async {
+  static Future<NoteTreeNode> nodeFor(PolderApi api, FileEntry page) async {
     final node = NoteTreeNode(page: page);
     try {
-      final folder = await ref.read(polderApiProvider).stat(node.childrenPath);
+      final folder = await api.stat(node.childrenPath);
       return NoteTreeNode(page: page, folder: folder.isDir ? folder : null);
     } on NotFoundException {
       return node;
     }
   }
 
-  static Future<String?> rename(BuildContext context, WidgetRef ref, NoteTreeNode node) async {
+  static Future<String?> rename(BuildContext context, NoteTreeNode node) async {
     final localized = context.localized;
     final current = node.name;
     final name = await showTextInputDialog(
@@ -109,15 +105,15 @@ abstract final class NotesActions {
     );
     if (name == null || !context.mounted) return null;
     final parent = RemotePath.parent(node.path);
-    return _moveWithFeedback(context, ref, node, parent, name.trim());
+    return _moveWithFeedback(context, node, parent, name.trim());
   }
 
   static String _extension(FileEntry page) => page.name.substring(page.name.lastIndexOf(".") + 1);
 
-  static Future<String?> move(BuildContext context, WidgetRef ref, NoteTreeNode node) async {
+  static Future<String?> move(BuildContext context, NoteTreeNode node) async {
     final destination = await showRemoteFolderPicker(context, initialPath: RemotePath.parent(node.path));
     if (destination == null || destination == RemotePath.parent(node.path) || !context.mounted) return null;
-    return _moveWithFeedback(context, ref, node, destination, node.name);
+    return _moveWithFeedback(context, node, destination, node.name);
   }
 
   static bool canMoveInto(NoteTreeNode node, String destination) =>
@@ -126,19 +122,19 @@ abstract final class NotesActions {
       destination != node.path &&
       !RemotePath.isWithin(destination, node.childrenPath);
 
-  static Future<String?> moveInto(BuildContext context, WidgetRef ref, NoteTreeNode node, String destination) {
+  static Future<String?> moveInto(BuildContext context, NoteTreeNode node, String destination) {
     if (!canMoveInto(node, destination)) return Future.value();
-    return _moveWithFeedback(context, ref, node, destination, node.name);
+    return _moveWithFeedback(context, node, destination, node.name);
   }
 
   static Future<String?> _moveWithFeedback(
     BuildContext context,
-    WidgetRef ref,
     NoteTreeNode node,
     String destination,
     String name,
   ) async {
-    final moved = await context.runWithFeedback(_moveNode(ref, node, destination, name));
+    final container = ProviderScope.containerOf(context, listen: false);
+    final moved = await context.runWithFeedback(_moveNode(container, node, destination, name));
     if (!moved) return null;
     return RemotePath.join(destination, node.page == null ? name : "$name.${_extension(node.page!)}");
   }
@@ -154,19 +150,19 @@ abstract final class NotesActions {
     return movedFolder + path.substring(folder.length);
   }
 
-  static Future<void> _moveNode(WidgetRef ref, NoteTreeNode node, String destination, String name) async {
-    final api = ref.read(polderApiProvider);
+  static Future<void> _moveNode(ProviderContainer container, NoteTreeNode node, String destination, String name) async {
+    final api = container.read(polderApiProvider);
     final page = node.page;
     if (page != null) {
       await api.move(from: page.path, to: RemotePath.join(destination, "$name.${_extension(page)}"), baseRev: page.rev);
     }
     final folder = node.folder;
     if (folder != null) await api.move(from: folder.path, to: RemotePath.join(destination, name));
-    _refresh(ref, RemotePath.parent(node.path));
-    _refresh(ref, destination);
+    _refresh(container, RemotePath.parent(node.path));
+    _refresh(container, destination);
   }
 
-  static Future<bool> delete(BuildContext context, WidgetRef ref, NoteTreeNode node) async {
+  static Future<bool> delete(BuildContext context, NoteTreeNode node) async {
     final localized = context.localized;
     final confirmed = await showConfirmDialog(
       context,
@@ -176,24 +172,24 @@ abstract final class NotesActions {
       destructive: true,
     );
     if (!confirmed || !context.mounted) return false;
-    final api = ref.read(polderApiProvider);
-    return context.runWithFeedback(
-      Future(() async {
-        if (node.page case final page?) await api.delete(page.path);
-        if (node.folder case final folder?) await api.delete(folder.path);
-        _forgetLastNoteIn(ref, node);
-        _refresh(ref, RemotePath.parent(node.path));
-      }),
-    );
+    return context.runWithFeedback(_deleteNode(ProviderScope.containerOf(context, listen: false), node));
   }
 
-  static void _forgetLastNoteIn(WidgetRef ref, NoteTreeNode node) {
-    final last = ref.read(lastNoteProvider);
-    if (last != null && node.holds(last)) ref.read(lastNoteProvider.notifier).set(null);
+  static Future<void> _deleteNode(ProviderContainer container, NoteTreeNode node) async {
+    final api = container.read(polderApiProvider);
+    if (node.folder case final folder?) await api.delete(folder.path);
+    if (node.page case final page?) await api.delete(page.path);
+    _forgetLastNoteIn(container, node);
+    _refresh(container, RemotePath.parent(node.path));
   }
 
-  static void _refresh(WidgetRef ref, String folder) {
-    ref.invalidate(notesTreeProvider);
-    ref.invalidate(directoryProvider(folder));
+  static void _forgetLastNoteIn(ProviderContainer container, NoteTreeNode node) {
+    final last = container.read(lastNoteProvider);
+    if (last != null && node.holds(last)) container.read(lastNoteProvider.notifier).set(null);
+  }
+
+  static void _refresh(ProviderContainer container, String folder) {
+    container.invalidate(notesTreeProvider);
+    container.invalidate(directoryProvider(folder));
   }
 }

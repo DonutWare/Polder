@@ -72,8 +72,9 @@ func newError(ctx huma.Context, status int, message string, errs ...error) huma.
 		}
 	}
 	if status >= http.StatusInternalServerError {
-		logFailure(ctx, errors.Join(errs...))
-		return &errorResponse{status: http.StatusInternalServerError, Detail: errorDetail{Code: "internal", Message: "internal server error"}}
+		cause := errors.Join(errs...)
+		logFailure(ctx, cause)
+		return &errorResponse{status: http.StatusInternalServerError, Detail: errorDetail{Code: "internal", Message: internalMessage(message, cause)}}
 	}
 	if status == http.StatusUnprocessableEntity {
 		status = http.StatusBadRequest
@@ -86,6 +87,16 @@ func newError(ctx huma.Context, status int, message string, errs ...error) huma.
 		message = strings.TrimPrefix(message+": "+strings.Join(details, "; "), ": ")
 	}
 	return &errorResponse{status: status, Detail: errorDetail{Code: codeFor(status), Message: message}}
+}
+
+func internalMessage(message string, cause error) string {
+	if cause != nil {
+		return cause.Error()
+	}
+	if message != "" {
+		return message
+	}
+	return http.StatusText(http.StatusInternalServerError)
 }
 
 // appendDetail describes a validation problem by message and location only, never by the

@@ -55,7 +55,7 @@ func statusAndMessage(err error) (int, string) {
 			return code, appErr.Message
 		}
 	}
-	return http.StatusInternalServerError, "internal server error"
+	return http.StatusInternalServerError, err.Error()
 }
 
 func WriteError(w http.ResponseWriter, r *http.Request, err error) {

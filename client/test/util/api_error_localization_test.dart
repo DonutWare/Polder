@@ -19,12 +19,26 @@ void main() {
     );
   });
 
-  test("leaves out the message of an internal error", () {
+  test("shows what went wrong on the server", () {
     const error = ServerException(
-      error: ApiError(code: "internal", message: "internal server error"),
+      error: ApiError(code: "internal", message: "move to trash: permission denied"),
+      statusCode: 500,
     );
 
-    expect(localized.describeError(error), localized.errorUnknown);
+    expect(localized.describeError(error), "${localized.errorServer("500")}\nMove to trash: permission denied");
+  });
+
+  test("shows why the server could not be reached", () {
+    const error = NetworkException(reason: "Connection refused");
+
+    expect(localized.describeError(error), "${localized.errorNetwork}\nConnection refused");
+  });
+
+  test("shows the cause of an error inside the app", () {
+    expect(
+      localized.describeError(StateError("ref was disposed")),
+      "${localized.errorUnknown}\nBad state: ref was disposed",
+    );
   });
 
   test("keeps the summary alone without a server message", () {

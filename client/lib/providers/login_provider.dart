@@ -100,16 +100,16 @@ class LoginNotifier extends Notifier<LoginState> {
   }
 
   Future<void> _run(Future<void> Function() action) async {
-    state = state.copyWith(loading: true, failure: null);
+    state = state.copyWith(loading: true, failure: null, failureCause: null);
     try {
       await action();
       if (ref.mounted) state = state.copyWith(loading: false);
-    } on ApiException catch (error) {
-      if (ref.mounted) state = state.copyWith(loading: false, failure: _failureFor(error));
+    } on Object catch (error) {
+      if (ref.mounted) state = state.copyWith(loading: false, failure: _failureFor(error), failureCause: error);
     }
   }
 
-  LoginFailure _failureFor(ApiException error) => switch (error) {
+  LoginFailure _failureFor(Object error) => switch (error) {
     NetworkException() || NotFoundException() => LoginFailure.unreachable,
     UnauthorizedException() => LoginFailure.invalidCredentials,
     ForbiddenException() when state.step == LoginStep.setup => LoginFailure.setupUnavailable,
