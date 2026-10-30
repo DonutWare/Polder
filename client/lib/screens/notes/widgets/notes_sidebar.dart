@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
@@ -47,10 +46,56 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
     }
     return NoteDragAutoScroll(
       controller: _scroll,
-      child: SingleChildScrollView(
+      child: CustomScrollView(
         controller: _scroll,
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 96),
-        child: _TreeLevel(path: widget.root, depth: 0, selectedPath: widget.selectedPath, onOpen: widget.onOpen),
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            sliver: SliverToBoxAdapter(
+              child: _TreeLevel(path: widget.root, depth: 0, selectedPath: widget.selectedPath, onOpen: widget.onOpen),
+            ),
+          ),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: _TopLevelDropZone(root: widget.root, selectedPath: widget.selectedPath),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopLevelDropZone extends ConsumerWidget {
+  const _TopLevelDropZone({required this.root, required this.selectedPath});
+
+  static const _minHeight = 96.0;
+
+  final String root;
+  final String? selectedPath;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+    return NoteDropTarget(
+      destination: root,
+      onDrop: (node) => NoteNodeActions.drop(context, ref, node: node, destination: root, selectedPath: selectedPath),
+      builder: (context, active) => Container(
+        constraints: const BoxConstraints(minHeight: _minHeight),
+        margin: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: active ? colors.primaryContainer : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: active ? colors.primary : Colors.transparent, width: 2),
+        ),
+        child: active
+            ? Text(
+                context.localized.notesMoveToTop,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colors.onPrimaryContainer),
+              )
+            : null,
       ),
     );
   }

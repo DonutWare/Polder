@@ -947,6 +947,7 @@
 	"notesChooseAnotherName": "Choose another name",
 	"notesChangeFolder": "Change notes folder",
 	"notesEmptyFolder": "No pages yet.",
+	"notesMoveToTop": "Drop here to move to the top level",
 	"notesNothingOpenMessage": "Pick a page on the left, or start a new one.",
 	"noteNewPage": "New page",
 	"noteNewSubpage": "New subpage",
