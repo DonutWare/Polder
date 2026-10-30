@@ -9,3 +9,4 @@
 __debug_bin*
 client/lib/l10n/generated/*
 client/android/.kotlin/sessions/*
+client/android/build/reports/*

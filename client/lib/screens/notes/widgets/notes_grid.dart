@@ -130,7 +130,11 @@ class _NoteCard extends ConsumerWidget {
     destination: node.childrenPath,
     onDrop: (dropped) =>
         NoteNodeActions.drop(context, ref, node: dropped, destination: node.childrenPath, selectedPath: selectedPath),
-    builder: (context, active) => NoteDragSource(node: node, child: _card(context, ref, active)),
+    builder: (context, active) => NoteDragSource(
+      node: node,
+      onHold: (anchor) => _showMenu(context, ref, anchor),
+      child: _card(context, ref, active),
+    ),
   );
 
   Widget _card(BuildContext context, WidgetRef ref, bool dropActive) {

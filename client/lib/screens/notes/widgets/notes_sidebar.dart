@@ -209,8 +209,6 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
   static const _indent = 16.0;
   static const _leading = 12.0;
 
-  var _hovered = false;
-
   NoteTreeNode get node => widget.node;
 
   bool _isSelected(FileEntry? readme) {
@@ -256,6 +254,7 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
       onLinger: () => ref.read(expandedNotesProvider.notifier).expand(node.childrenPath),
       builder: (context, active) => NoteDragSource(
         node: node,
+        onHold: _showMenu,
         child: _row(
           context,
           selected: _isSelected(readme),
@@ -299,66 +298,40 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
     final colors = theme.colorScheme;
     final pointer = AdaptiveLayout.usesPointer(context);
     final height = NoteTargetSize.row(context);
-    final folder = node.folder;
     final radius = BorderRadius.circular(pointer ? 8 : 12);
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onSecondaryTapUp: (details) => _showMenu(details.globalPosition & Size.zero),
-        child: Material(
-          color: dropActive
-              ? colors.primaryContainer
-              : selected
-              ? colors.secondaryContainer
-              : Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: radius,
-            side: dropActive ? BorderSide(color: colors.primary, width: 2) : BorderSide.none,
-          ),
-          child: InkWell(
-            borderRadius: radius,
-            onTap: _open,
-            child: SizedBox(
-              height: height,
-              child: Row(
-                children: [
-                  SizedBox(width: _leading + widget.depth * _indent),
-                  Expanded(
-                    child: Text(
-                      node.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: (pointer ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge)?.copyWith(
-                        color: selected ? colors.onSecondaryContainer : (isSection ? colors.onSurfaceVariant : null),
-                        fontWeight: selected ? FontWeight.w600 : null,
-                      ),
+    return GestureDetector(
+      onSecondaryTapUp: (details) => _showMenu(details.globalPosition & Size.zero),
+      child: Material(
+        color: dropActive
+            ? colors.primaryContainer
+            : selected
+            ? colors.secondaryContainer
+            : Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: dropActive ? BorderSide(color: colors.primary, width: 2) : BorderSide.none,
+        ),
+        child: InkWell(
+          borderRadius: radius,
+          onTap: _open,
+          child: SizedBox(
+            height: height,
+            child: Row(
+              children: [
+                SizedBox(width: _leading + widget.depth * _indent),
+                Expanded(
+                  child: Text(
+                    node.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: (pointer ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge)?.copyWith(
+                      color: selected ? colors.onSecondaryContainer : (isSection ? colors.onSurfaceVariant : null),
+                      fontWeight: selected ? FontWeight.w600 : null,
                     ),
                   ),
-                  if (pointer && _hovered)
-                    _RowButton(
-                      icon: Icons.add,
-                      tooltip: context.localized.noteNewSubpage,
-                      onPressed: (_) => NoteNodeActions.createSubpage(context, ref, node),
-                    ),
-                  if (!pointer || _hovered)
-                    _RowButton(
-                      icon: Icons.more_horiz,
-                      tooltip: context.localized.moreOptions,
-                      onPressed: (buttonContext) => _showMenu(NoteNodeActions.anchorOf(buttonContext)),
-                    ),
-                  SizedBox.square(
-                    dimension: NoteTargetSize.button(context),
-                    child: folder == null || !node.hasChildren
-                        ? null
-                        : _RowButton(
-                            icon: expanded ? Icons.expand_less : Icons.expand_more,
-                            tooltip: expanded ? context.localized.noteCollapse : context.localized.noteExpand,
-                            onPressed: (_) => ref.read(expandedNotesProvider.notifier).toggle(folder.path),
-                          ),
-                  ),
-                ],
-              ),
+                ),
+                _disclosure(context, expanded: expanded, height: height),
+              ],
             ),
           ),
         ),
@@ -367,23 +340,26 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
   }
 }
 
-class _RowButton extends StatelessWidget {
-  const _RowButton({required this.icon, required this.tooltip, required this.onPressed});
-
-  final IconData icon;
-  final String tooltip;
-  final ValueChanged<BuildContext> onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = NoteTargetSize.button(context);
-    return Builder(
-      builder: (buttonContext) => IconButton(
-        icon: Icon(icon, size: AdaptiveLayout.usesPointer(context) ? 18 : 20),
-        tooltip: tooltip,
-        onPressed: () => onPressed(buttonContext),
-        padding: EdgeInsets.zero,
-        constraints: BoxConstraints.tightFor(width: size, height: size),
+extension on _TreeNodeState {
+  Widget _disclosure(BuildContext context, {required bool expanded, required double height}) {
+    final width = NoteTargetSize.button(context);
+    final folder = node.folder;
+    if (folder == null || !node.hasChildren) return const SizedBox(width: 12);
+    return Tooltip(
+      message: expanded ? context.localized.noteCollapse : context.localized.noteExpand,
+      child: InkResponse(
+        onTap: () => ref.read(expandedNotesProvider.notifier).toggle(folder.path),
+        radius: width / 2,
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: AnimatedRotation(
+            turns: expanded ? 0.25 : 0,
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOut,
+            child: Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+        ),
       ),
     );
   }

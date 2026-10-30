@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/gestures.dart";
 import "package:flutter/services.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -112,35 +113,60 @@ abstract final class NoteNodeActions {
   }
 }
 
-class NoteDragSource extends StatelessWidget {
-  const NoteDragSource({required this.node, required this.child, super.key});
+class NoteDragSource extends StatefulWidget {
+  const NoteDragSource({required this.node, required this.child, this.onHold, super.key});
 
   final NoteTreeNode node;
   final Widget child;
+  final ValueChanged<Rect>? onHold;
+
+  @override
+  State<NoteDragSource> createState() => _NoteDragSourceState();
+}
+
+class _NoteDragSourceState extends State<NoteDragSource> {
+  var _travelled = 0.0;
+
+  void _startHold() {
+    _travelled = 0;
+    unawaited(HapticFeedback.mediumImpact());
+  }
+
+  void _endHold(DraggableDetails details) {
+    final onHold = widget.onHold;
+    if (onHold == null || details.wasAccepted || _travelled > kTouchSlop || !mounted) return;
+    onHold(NoteNodeActions.anchorOf(context));
+  }
 
   @override
   Widget build(BuildContext context) {
     final scroller = NoteDragAutoScroll.maybeOf(context);
-    final feedback = _DragFeedback(node: node);
-    final dragging = Opacity(opacity: 0.4, child: child);
+    final feedback = _DragFeedback(node: widget.node);
+    final dragging = Opacity(opacity: 0.4, child: widget.child);
     if (AdaptiveLayout.usesPointer(context)) {
       return Draggable<NoteTreeNode>(
-        data: node,
+        data: widget.node,
         feedback: feedback,
         childWhenDragging: dragging,
         onDragUpdate: (details) => scroller?.follow(details.globalPosition),
         onDragEnd: (_) => scroller?.stop(),
-        child: child,
+        child: widget.child,
       );
     }
     return LongPressDraggable<NoteTreeNode>(
-      data: node,
+      data: widget.node,
       feedback: feedback,
       childWhenDragging: dragging,
-      onDragStarted: HapticFeedback.mediumImpact,
-      onDragUpdate: (details) => scroller?.follow(details.globalPosition),
-      onDragEnd: (_) => scroller?.stop(),
-      child: child,
+      onDragStarted: _startHold,
+      onDragUpdate: (details) {
+        _travelled += details.delta.distance;
+        scroller?.follow(details.globalPosition);
+      },
+      onDragEnd: (details) {
+        scroller?.stop();
+        _endHold(details);
+      },
+      child: widget.child,
     );
   }
 }
