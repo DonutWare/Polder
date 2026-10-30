@@ -5217,6 +5217,40 @@ extension $PathRequestExtension on PathRequest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class PreviewRegeneration {
+  const PreviewRegeneration({required this.files});
+
+  factory PreviewRegeneration.fromJson(Map<String, dynamic> json) => _$PreviewRegenerationFromJson(json);
+
+  static const toJsonFactory = _$PreviewRegenerationToJson;
+  Map<String, dynamic> toJson() => _$PreviewRegenerationToJson(this);
+
+  @JsonKey(name: 'files', includeIfNull: false)
+  final int files;
+  static const fromJsonFactory = _$PreviewRegenerationFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is PreviewRegeneration &&
+            (identical(other.files, files) || const DeepCollectionEquality().equals(other.files, files)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(files) ^ runtimeType.hashCode;
+}
+
+extension $PreviewRegenerationExtension on PreviewRegeneration {
+  PreviewRegeneration copyWith({int? files}) {
+    return PreviewRegeneration(files: files ?? this.files);
+  }
+
+  PreviewRegeneration copyWithWrapped({Wrapped<int>? files}) {
+    return PreviewRegeneration(files: (files != null ? files.value : this.files));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Profile {
   const Profile({
     required this.address,

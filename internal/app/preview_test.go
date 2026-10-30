@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"polder-server/internal/config"
+	"polder-server/internal/preview"
 )
 
 func TestVideosGetFrameThumbnails(t *testing.T) {
@@ -259,4 +260,35 @@ func fetchThumbnail(t *testing.T, user *client, path string) image.Image {
 		t.Fatalf("thumbnail of %s: status %d err %v", path, response.StatusCode, err)
 	}
 	return thumbnail
+}
+
+func TestAdminsCanRegenerateEveryPreview(t *testing.T) {
+	server := startServer(t, config.DriverSQLite, "")
+	admin := server.setupAdmin()
+	alice := server.createUser(admin, "alice", 0)
+	hash := uploadWithPreview(t, alice, "/cat.png", encodedPNG(t, 400, 300))
+	alice.put("/notes.txt", 0, []byte("hello"), http.StatusOK, nil)
+	thumbnails := filepath.Join(server.app.Config.PreviewCacheDir(), hash[:2], hash+"-*")
+	matches, _ := filepath.Glob(thumbnails)
+	for _, match := range matches {
+		if err := os.Remove(match); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	alice.mustJSON(http.MethodPost, "/admin/previews/regenerate", nil, http.StatusForbidden, nil)
+	var queued struct {
+		Files int64 `json:"files"`
+	}
+	admin.mustJSON(http.MethodPost, "/admin/previews/regenerate", nil, http.StatusAccepted, &queued)
+	if queued.Files != 2 {
+		t.Fatalf("want both files queued, got %d", queued.Files)
+	}
+	if ready := waitForPreview(t, alice, "/cat.png"); ready.PreviewState != "ready" {
+		t.Fatalf("preview not regenerated: %+v", ready)
+	}
+	if notes := waitForPreview(t, alice, "/notes.txt"); notes.PreviewState != "none" {
+		t.Fatalf("files without a preview should go back to none, got %s", notes.PreviewState)
+	}
+	expectFiles(t, thumbnails, len(preview.Sizes))
 }

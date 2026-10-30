@@ -331,6 +331,14 @@ func requestPreviews(ctx context.Context, q querier, mimeType string) (int64, er
 	return result.RowsAffected()
 }
 
+func requestAllPreviews(ctx context.Context, q querier) (int64, error) {
+	result, err := q.ExecContext(ctx, `UPDATE files SET preview_state = $1 WHERE is_dir = FALSE`, PreviewPending)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 func updateTextState(ctx context.Context, q querier, userID int64, cleanPath, hash string, state TextState) error {
 	_, err := q.ExecContext(ctx, `UPDATE files SET text_state = $1 WHERE user_id = $2 AND path_key = $3 AND hash = $4`,
 		state, userID, pathKey(cleanPath), hash)

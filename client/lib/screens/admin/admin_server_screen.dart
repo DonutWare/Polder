@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import "package:polder/screens/admin/widgets/federation_settings_group.dart";
+import "package:polder/screens/admin/widgets/preview_settings_group.dart";
 import "package:polder/screens/admin/widgets/search_settings_group.dart";
 import "package:polder/screens/admin/widgets/trash_settings_group.dart";
 import "package:polder/screens/admin/widgets/version_settings_group.dart";
@@ -22,6 +23,7 @@ class AdminServerScreen extends StatelessWidget {
           ServerTrashSettingsGroup(),
           ServerVersionSettingsGroup(),
           SearchSettingsGroup(),
+          PreviewSettingsGroup(),
           ServerFederationSettingsGroup(),
         ],
       ),

@@ -6,8 +6,9 @@ import (
 	"image"
 	_ "image/gif"
 	"image/jpeg"
-	_ "image/png"
+	"image/png"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
@@ -147,20 +148,48 @@ func findExif(file *os.File) *exif.Exif {
 	}
 }
 
-func writeThumbnail(decoded decodedImage, maxEdge int, target string) error {
+func writeThumbnail(decoded decodedImage, maxEdge int, base string) error {
 	thumbnail := applyOrientation(scaleToFit(decoded.image, maxEdge), decoded.orientation)
 	var encoded bytes.Buffer
-	if err := jpeg.Encode(&encoded, thumbnail, &jpeg.Options{Quality: thumbnailQuality}); err != nil {
+	extension, stale := jpegExtension, pngExtension
+	if hasTransparency(thumbnail) {
+		extension, stale = pngExtension, jpegExtension
+		if err := png.Encode(&encoded, thumbnail); err != nil {
+			return err
+		}
+	} else if err := jpeg.Encode(&encoded, thumbnail, &jpeg.Options{Quality: thumbnailQuality}); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(target), 0o750); err != nil {
+	if err := os.MkdirAll(filepath.Dir(base), 0o750); err != nil {
 		return err
 	}
+	target := base + extension
 	temp := target + ".tmp"
 	if err := os.WriteFile(temp, encoded.Bytes(), 0o640); err != nil {
 		return err
 	}
-	return os.Rename(temp, target)
+	if err := os.Rename(temp, target); err != nil {
+		return err
+	}
+	if err := os.Remove(base + stale); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	return nil
+}
+
+func hasTransparency(source image.Image) bool {
+	if opaque, ok := source.(interface{ Opaque() bool }); ok {
+		return !opaque.Opaque()
+	}
+	bounds := source.Bounds()
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			if _, _, _, alpha := source.At(x, y).RGBA(); alpha != 0xffff {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func scaleToFit(source image.Image, maxEdge int) image.Image {

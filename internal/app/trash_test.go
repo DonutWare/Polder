@@ -323,7 +323,7 @@ func TestThumbnailsAreRemovedOnceNothingUsesThem(t *testing.T) {
 		picture := encodedPNG(t, 400, 300)
 		hash := uploadWithPreview(t, alice, "/cat.png", picture)
 		uploadWithPreview(t, bob, "/same-cat.png", picture)
-		thumbnails := filepath.Join(server.app.Config.PreviewCacheDir(), hash[:2], hash+"-*.jpg")
+		thumbnails := filepath.Join(server.app.Config.PreviewCacheDir(), hash[:2], hash+"-*")
 
 		alice.mustJSON(http.MethodDelete, "/files?path=/cat.png", nil, http.StatusNoContent, nil)
 		alice.mustJSON(http.MethodDelete, "/trash", nil, http.StatusNoContent, nil)
@@ -335,7 +335,7 @@ func TestThumbnailsAreRemovedOnceNothingUsesThem(t *testing.T) {
 
 		replacedHash := uploadWithPreview(t, alice, "/dog.png", encodedPNG(t, 200, 100))
 		alice.put("/dog.png", -1, []byte("not an image anymore"), http.StatusOK, nil)
-		replacedThumbnails := filepath.Join(server.app.Config.PreviewCacheDir(), replacedHash[:2], replacedHash+"-*.jpg")
+		replacedThumbnails := filepath.Join(server.app.Config.PreviewCacheDir(), replacedHash[:2], replacedHash+"-*")
 		history := alice.versions("/dog.png")
 		expectFiles(t, replacedThumbnails, len(preview.Sizes))
 

@@ -1096,6 +1096,13 @@ PathRequest _$PathRequestFromJson(Map<String, dynamic> json) => PathRequest(path
 
 Map<String, dynamic> _$PathRequestToJson(PathRequest instance) => <String, dynamic>{'path': instance.path};
 
+PreviewRegeneration _$PreviewRegenerationFromJson(Map<String, dynamic> json) =>
+    PreviewRegeneration(files: (json['files'] as num).toInt());
+
+Map<String, dynamic> _$PreviewRegenerationToJson(PreviewRegeneration instance) => <String, dynamic>{
+  'files': instance.files,
+};
+
 Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile(
   address: json['address'] as String,
   age: (json['age'] as num?)?.toInt(),

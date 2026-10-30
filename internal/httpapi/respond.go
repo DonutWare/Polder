@@ -149,3 +149,7 @@ var binarySchema = &huma.Schema{Type: huma.TypeString, Format: "binary"}
 func binaryContent(contentType string) map[string]*huma.MediaType {
 	return map[string]*huma.MediaType{contentType: {Schema: binarySchema}}
 }
+
+func thumbnailContent() map[string]*huma.MediaType {
+	return map[string]*huma.MediaType{"image/jpeg": {Schema: binarySchema}, "image/png": {Schema: binarySchema}}
+}

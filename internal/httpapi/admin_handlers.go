@@ -100,6 +100,19 @@ func (a *API) updateServerSettings(ctx context.Context, input *jsonBody[settings
 	return respond(updated), nil
 }
 
+type previewRegeneration struct {
+	Files int64 `json:"files" doc:"Files queued for a new preview"`
+}
+
+func (a *API) regeneratePreviews(ctx context.Context, _ *struct{}) (*jsonBody[previewRegeneration], error) {
+	requested, err := a.previews.RegenerateAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	settingsLog.Info("previews regenerating", "files", requested, "by", currentUser(ctx).Username)
+	return respond(previewRegeneration{Files: requested}), nil
+}
+
 func changedFields(changes any) string {
 	value := reflect.ValueOf(changes)
 	var names []string

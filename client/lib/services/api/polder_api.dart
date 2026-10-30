@@ -362,6 +362,8 @@ class PolderApi {
   Future<TextExtractionStatus> textExtractionStatus() async =>
       (await _service.getSearchStatus()).body!.extraction.toModel();
 
+  Future<int> regeneratePreviews() async => (await _service.regeneratePreviews()).body!.files;
+
   Future<ServerLogPage> serverLogs({
     ServerLogFilter filter = const ServerLogFilter(),
     String? before,

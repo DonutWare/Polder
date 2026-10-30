@@ -612,6 +612,29 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<PreviewRegeneration>> _regeneratePreviews({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Make every file\'s preview again in the background',
+      operationId: 'regeneratePreviews',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/previews/regenerate');
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<PreviewRegeneration, PreviewRegeneration>($request);
+  }
+
+  @override
   Future<Response<SearchStatus>> _getSearchStatus({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -1861,7 +1884,7 @@ final class _$Polder extends Polder {
     String? size,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of an image, video or document',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of an image, video or document',
       operationId: 'previewFile',
       consumes: [],
       produces: [],
@@ -2017,7 +2040,7 @@ final class _$Polder extends Polder {
     String? size,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of an earlier version',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of an earlier version',
       operationId: 'previewFileVersion',
       consumes: [],
       produces: [],
@@ -2790,7 +2813,7 @@ final class _$Polder extends Polder {
     String? size,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of a file inside a share link',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share link',
       operationId: 'previewPublicLinkFile',
       consumes: [],
       produces: [],
@@ -3411,7 +3434,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     String? size,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of a file inside a share',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share',
       operationId: 'previewShareFile',
       consumes: [],
       produces: [],
@@ -3795,7 +3818,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     String? size,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of a deleted image, video or document',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of a deleted image, video or document',
       operationId: 'previewTrashItem',
       consumes: [],
       produces: [],

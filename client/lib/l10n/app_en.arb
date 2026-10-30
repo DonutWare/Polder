@@ -1415,5 +1415,12 @@
 	"@leaveShareMessage": {"placeholders": {"owner": {"type": "String"}}},
 	"showSharesInFiles": "Show in Files",
 	"showSharesInFilesHint": "Shares appear among your own files. When off, open them from here.",
-	"sharedByYou": "Shared by you"
+	"sharedByYou": "Shared by you",
+	"serverPreviewsGroup": "Previews",
+	"regeneratePreviews": "Regenerate previews",
+	"regeneratePreviewsHint": "Make every file's preview again in the background",
+	"regeneratePreviewsMessage": "Every file gets a new preview in the background. Until its new preview is ready, a file shows its icon.",
+	"regenerate": "Regenerate",
+	"previewsQueued": "{count, plural, =1{1 file queued for a new preview} other{{count} files queued for a new preview}}",
+	"@previewsQueued": {"placeholders": {"count": {"type": "int"}}}
 }

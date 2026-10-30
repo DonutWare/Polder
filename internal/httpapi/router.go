@@ -212,8 +212,8 @@ func (a *API) routes(api huma.API) {
 	register(v1, http.MethodGet, "/public/links/{code}/list", "listPublicLinkFiles", "List a folder inside a share link", a.listPublicLinkFiles)
 	register(v1, http.MethodGet, "/public/links/{code}/content", "downloadPublicLinkFile", "Download a file inside a share link; supports Range", a.downloadPublicLinkFile,
 		withResponse(http.StatusOK, "File content", binaryContent("application/octet-stream")))
-	register(v1, http.MethodGet, "/public/links/{code}/preview", "previewPublicLinkFile", "Get a JPEG thumbnail of a file inside a share link", a.previewPublicLinkFile,
-		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(v1, http.MethodGet, "/public/links/{code}/preview", "previewPublicLinkFile", "Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share link", a.previewPublicLinkFile,
+		withResponse(http.StatusOK, "Thumbnail", thumbnailContent()))
 	register(v1, http.MethodGet, "/public/links/{code}/archive", "downloadPublicLinkArchive", "Download a folder inside a share link as a zip", a.downloadPublicLinkArchive,
 		withResponse(http.StatusOK, "Zip archive", binaryContent("application/zip")))
 	register(v1, http.MethodPut, "/public/links/{code}/content", "uploadPublicLinkFile", "Upload a file into a share link that accepts uploads; it never replaces an existing file", a.uploadPublicLinkFile,
@@ -246,14 +246,14 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPost, "/files/move", "moveFile", "Move or rename a file or directory", a.moveFile)
 	register(user, http.MethodPost, "/files/copy", "copyFile", "Copy a file, or a directory with everything in it", a.copyFile)
 	register(user, http.MethodDelete, "/files", "deleteFile", "Delete a file or directory", a.deleteFile)
-	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a JPEG thumbnail of an image, video or document", a.previewFile,
-		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(user, http.MethodGet, "/files/preview", "previewFile", "Get a thumbnail (JPEG, or PNG when it has transparency) of an image, video or document", a.previewFile,
+		withResponse(http.StatusOK, "Thumbnail", thumbnailContent()))
 
 	register(user, http.MethodGet, "/files/versions", "listFileVersions", "List a file's earlier versions, newest first", a.listVersions)
 	register(user, http.MethodGet, "/files/versions/{versionID}/content", "downloadFileVersion", "Download an earlier version of a file", a.downloadVersion,
 		withResponse(http.StatusOK, "Version content", binaryContent("application/octet-stream")))
-	register(user, http.MethodGet, "/files/versions/{versionID}/preview", "previewFileVersion", "Get a JPEG thumbnail of an earlier version", a.previewVersion,
-		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(user, http.MethodGet, "/files/versions/{versionID}/preview", "previewFileVersion", "Get a thumbnail (JPEG, or PNG when it has transparency) of an earlier version", a.previewVersion,
+		withResponse(http.StatusOK, "Thumbnail", thumbnailContent()))
 	register(user, http.MethodPost, "/files/versions/{versionID}/restore", "restoreFileVersion", "Make an earlier version the current file; the current content is kept as a version", a.restoreVersion)
 	register(user, http.MethodDelete, "/files/versions/{versionID}", "deleteFileVersion", "Delete one earlier version permanently", a.deleteVersion)
 	register(user, http.MethodGet, "/versions/settings", "getVersionSettings", "How long earlier versions of files are kept", a.getVersionSettings)
@@ -274,8 +274,8 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPost, "/trash/{itemID}/restore", "restoreTrashItem", "Put a deleted item back where it was", a.restoreTrashItem)
 	register(user, http.MethodGet, "/trash/{itemID}/content", "downloadTrashItem", "Download a deleted item without restoring it; a directory comes as a zip", a.downloadTrashItem,
 		withResponse(http.StatusOK, "Item content", binaryContent("application/octet-stream")))
-	register(user, http.MethodGet, "/trash/{itemID}/preview", "previewTrashItem", "Get a JPEG thumbnail of a deleted image, video or document", a.previewTrashItem,
-		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(user, http.MethodGet, "/trash/{itemID}/preview", "previewTrashItem", "Get a thumbnail (JPEG, or PNG when it has transparency) of a deleted image, video or document", a.previewTrashItem,
+		withResponse(http.StatusOK, "Thumbnail", thumbnailContent()))
 	register(user, http.MethodDelete, "/trash/{itemID}", "deleteTrashItem", "Delete one item in the trash permanently", a.deleteTrashItem)
 
 	register(user, http.MethodGet, "/office/capabilities", "getOfficeCapabilities", "Which files the document editor can open", a.officeCapabilities)
@@ -307,8 +307,8 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/shares/{shareID}/stat", "statShareFile", "Get one file or folder inside a share", a.statShareFile)
 	register(user, http.MethodGet, "/shares/{shareID}/content", "downloadShareFile", "Download a file inside a share; supports Range", a.downloadShareFile,
 		withResponse(http.StatusOK, "File content", binaryContent("application/octet-stream")))
-	register(user, http.MethodGet, "/shares/{shareID}/preview", "previewShareFile", "Get a JPEG thumbnail of a file inside a share", a.previewShareFile,
-		withResponse(http.StatusOK, "Thumbnail", binaryContent("image/jpeg")))
+	register(user, http.MethodGet, "/shares/{shareID}/preview", "previewShareFile", "Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share", a.previewShareFile,
+		withResponse(http.StatusOK, "Thumbnail", thumbnailContent()))
 	register(user, http.MethodGet, "/shares/{shareID}/archive", "downloadShareArchive", "Download a folder inside a share as a zip", a.downloadShareArchive,
 		withResponse(http.StatusOK, "Zip archive", binaryContent("application/zip")))
 	register(user, http.MethodPut, "/shares/{shareID}/content", "uploadShareFile", "Upload a file into a share that allows changes", a.uploadShareFile,
@@ -380,6 +380,7 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodDelete, "/admin/branding/backgrounds/{imageID}", "removeBrandingBackground", "Remove one of the login screen's backgrounds", a.removeBrandingBackground)
 	register(admin, http.MethodGet, "/admin/search", "getSearchStatus", "State of the search index and of reading text from files", a.searchStatus)
 	register(admin, http.MethodPost, "/admin/search/rebuild", "rebuildSearchIndex", "Rebuild the search index from scratch in the background", a.rebuildSearchIndex, accepted)
+	register(admin, http.MethodPost, "/admin/previews/regenerate", "regeneratePreviews", "Make every file's preview again in the background", a.regeneratePreviews, accepted)
 	register(admin, http.MethodDelete, "/admin/users/{userID}", "deleteUser", "Delete a user; their files are archived on the server", a.deleteUser)
 	register(admin, http.MethodGet, "/admin/federation/servers", "listTrustedServers", "Servers this server federates with", a.listTrustedServers)
 	register(admin, http.MethodPost, "/admin/federation/servers", "addTrustedServer", "Trust a server for federated sharing; its signing key is pinned", a.addTrustedServer, created)

@@ -633,6 +633,29 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Make every file's preview again in the background
+  Future<chopper.Response<PreviewRegeneration>> regeneratePreviews() {
+    generatedMapping.putIfAbsent(PreviewRegeneration, () => PreviewRegeneration.fromJsonFactory);
+
+    return _regeneratePreviews();
+  }
+
+  ///Make every file's preview again in the background
+  @POST(path: '/api/v1/admin/previews/regenerate', optionalBody: true)
+  Future<chopper.Response<PreviewRegeneration>> _regeneratePreviews({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Make every file\'s preview again in the background',
+      operationId: 'regeneratePreviews',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
   ///State of the search index and of reading text from files
   Future<chopper.Response<SearchStatus>> getSearchStatus() {
     generatedMapping.putIfAbsent(SearchStatus, () => SearchStatus.fromJsonFactory);
@@ -1850,14 +1873,14 @@ abstract class Polder extends ChopperService {
     ),
   });
 
-  ///Get a JPEG thumbnail of an image, video or document
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of an image, video or document
   ///@param path
   ///@param size Thumbnail width and height in pixels
   Future<chopper.Response<Stream<List<int>>>> previewFile({String? path, enums.ApiV1FilesPreviewGetSize? size}) {
     return _previewFile(path: path, size: size?.value?.toString());
   }
 
-  ///Get a JPEG thumbnail of an image, video or document
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of an image, video or document
   ///@param path
   ///@param size Thumbnail width and height in pixels
   @GET(path: '/api/v1/files/preview')
@@ -1867,7 +1890,7 @@ abstract class Polder extends ChopperService {
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of an image, video or document',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of an image, video or document',
       operationId: 'previewFile',
       consumes: [],
       produces: [],
@@ -2001,7 +2024,7 @@ abstract class Polder extends ChopperService {
     ),
   });
 
-  ///Get a JPEG thumbnail of an earlier version
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of an earlier version
   ///@param versionID
   ///@param size Thumbnail width and height in pixels
   Future<chopper.Response<Stream<List<int>>>> previewFileVersion({
@@ -2011,7 +2034,7 @@ abstract class Polder extends ChopperService {
     return _previewFileVersion(versionID: versionID, size: size?.value?.toString());
   }
 
-  ///Get a JPEG thumbnail of an earlier version
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of an earlier version
   ///@param versionID
   ///@param size Thumbnail width and height in pixels
   @GET(path: '/api/v1/files/versions/{versionID}/preview')
@@ -2021,7 +2044,7 @@ abstract class Polder extends ChopperService {
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of an earlier version',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of an earlier version',
       operationId: 'previewFileVersion',
       consumes: [],
       produces: [],
@@ -2817,7 +2840,7 @@ abstract class Polder extends ChopperService {
     ),
   });
 
-  ///Get a JPEG thumbnail of a file inside a share link
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share link
   ///@param code
   ///@param path
   ///@param token The token from unlocking, for requests that cannot send headers
@@ -2839,7 +2862,7 @@ abstract class Polder extends ChopperService {
     );
   }
 
-  ///Get a JPEG thumbnail of a file inside a share link
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share link
   ///@param code
   ///@param path
   ///@param token The token from unlocking, for requests that cannot send headers
@@ -2855,7 +2878,7 @@ abstract class Polder extends ChopperService {
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of a file inside a share link',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share link',
       operationId: 'previewPublicLinkFile',
       consumes: [],
       produces: [],
@@ -3460,7 +3483,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     ),
   });
 
-  ///Get a JPEG thumbnail of a file inside a share
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share
   ///@param shareID
   ///@param path
   ///@param size Thumbnail width and height in pixels
@@ -3472,7 +3495,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     return _previewShareFile(shareID: shareID, path: path, size: size?.value?.toString());
   }
 
-  ///Get a JPEG thumbnail of a file inside a share
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share
   ///@param shareID
   ///@param path
   ///@param size Thumbnail width and height in pixels
@@ -3484,7 +3507,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of a file inside a share',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of a file inside a share',
       operationId: 'previewShareFile',
       consumes: [],
       produces: [],
@@ -3840,7 +3863,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     ),
   });
 
-  ///Get a JPEG thumbnail of a deleted image, video or document
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of a deleted image, video or document
   ///@param itemID
   ///@param size Thumbnail width and height in pixels
   Future<chopper.Response<Stream<List<int>>>> previewTrashItem({
@@ -3850,7 +3873,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     return _previewTrashItem(itemID: itemID, size: size?.value?.toString());
   }
 
-  ///Get a JPEG thumbnail of a deleted image, video or document
+  ///Get a thumbnail (JPEG, or PNG when it has transparency) of a deleted image, video or document
   ///@param itemID
   ///@param size Thumbnail width and height in pixels
   @GET(path: '/api/v1/trash/{itemID}/preview')
@@ -3860,7 +3883,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Get a JPEG thumbnail of a deleted image, video or document',
+      summary: 'Get a thumbnail (JPEG, or PNG when it has transparency) of a deleted image, video or document',
       operationId: 'previewTrashItem',
       consumes: [],
       produces: [],

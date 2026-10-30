@@ -745,5 +745,11 @@
 	"leaveShareMessage": "Het verdwijnt uit je bestanden. {owner} kan het opnieuw met je delen.",
 	"showSharesInFiles": "Tonen in Bestanden",
 	"showSharesInFilesHint": "Gedeelde items staan tussen je eigen bestanden. Uitgeschakeld open je ze alleen hier.",
-	"sharedByYou": "Door jou gedeeld"
+	"sharedByYou": "Door jou gedeeld",
+	"serverPreviewsGroup": "Voorbeelden",
+	"regeneratePreviews": "Voorbeelden opnieuw maken",
+	"regeneratePreviewsHint": "Maakt op de achtergrond van elk bestand een nieuw voorbeeld",
+	"regeneratePreviewsMessage": "Elk bestand krijgt op de achtergrond een nieuw voorbeeld. Tot dat klaar is, toont een bestand zijn pictogram.",
+	"regenerate": "Opnieuw maken",
+	"previewsQueued": "{count, plural, =1{1 bestand wacht op een nieuw voorbeeld} other{{count} bestanden wachten op een nieuw voorbeeld}}"
 }

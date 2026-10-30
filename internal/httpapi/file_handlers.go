@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -366,13 +367,14 @@ func (a *API) thumbnail(contentHash string, state files.PreviewState, size int) 
 	if state != files.PreviewReady || !a.previews.HasThumbnail(contentHash, size) {
 		return nil, apperr.NotFound("no preview available")
 	}
+	path := a.previews.ThumbnailPath(contentHash, size)
 	return &previewOutput{
-		ETag:         fmt.Sprintf(`"%s-%d"`, contentHash, size),
+		ETag:         fmt.Sprintf(`"%s-%d%s"`, contentHash, size, filepath.Ext(path)),
 		CacheControl: "private, max-age=86400",
-		ContentType:  "image/jpeg",
+		ContentType:  preview.ThumbnailContentType(path),
 		Body: func(ctx huma.Context) {
 			r, w := humachi.Unwrap(ctx)
-			http.ServeFile(w, r, a.previews.ThumbnailPath(contentHash, size))
+			http.ServeFile(w, r, path)
 		},
 	}, nil
 }

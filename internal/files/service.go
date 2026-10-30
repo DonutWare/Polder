@@ -441,6 +441,10 @@ func (s *Service) RequestPreviews(ctx context.Context, mimeType string) (int64, 
 	return requestPreviews(ctx, s.db, mimeType)
 }
 
+func (s *Service) RequestAllPreviews(ctx context.Context) (int64, error) {
+	return requestAllPreviews(ctx, s.db)
+}
+
 func (s *Service) UpdateTextState(ctx context.Context, userID int64, cleanPath, hash string, state TextState) error {
 	return updateTextState(ctx, s.db, userID, cleanPath, hash, state)
 }

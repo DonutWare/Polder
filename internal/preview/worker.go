@@ -43,6 +43,7 @@ type Worker struct {
 	cacheDir string
 	queue    chan job
 	cleanups chan struct{}
+	backlogs chan struct{}
 	pdf      pdfRenderer
 	ffmpeg   ffmpegRenderer
 	markdown *markdownRenderer
@@ -59,6 +60,7 @@ func NewWorker(fileService *files.Service, userStore *users.Store, cacheDir stri
 		cacheDir: cacheDir,
 		queue:    make(chan job, queueCapacity),
 		cleanups: make(chan struct{}, 1),
+		backlogs: make(chan struct{}, 1),
 		ffmpeg:   newFFmpegRenderer(ffmpeg),
 		markdown: newMarkdownRenderer(cacheDir),
 		office:   officeService,
@@ -74,6 +76,15 @@ func (w *Worker) RequestCleanup() {
 	case w.cleanups <- struct{}{}:
 	default:
 	}
+}
+
+func (w *Worker) RegenerateAll(ctx context.Context) (int64, error) {
+	requested, err := w.files.RequestAllPreviews(ctx)
+	if err != nil {
+		return 0, err
+	}
+	w.requestBacklog()
+	return requested, nil
 }
 
 func (w *Worker) Enqueue(userID int64, cleanPath string) {
@@ -101,6 +112,8 @@ func (w *Worker) Run(ctx context.Context) {
 			w.removeUnusedThumbnails(ctx)
 		case <-ticker.C:
 			w.processBacklog(ctx)
+		case <-w.backlogs:
+			w.processBacklog(ctx)
 		case <-pdfIdle.C:
 			w.pdf.close()
 		}
@@ -118,25 +131,40 @@ func (w *Worker) processBacklog(ctx context.Context) {
 		logger.Warn("load preview backlog", "error", err)
 		return
 	}
+	progressed := false
 	for _, entry := range pending {
-		w.process(ctx, job{userID: entry.UserID, path: entry.Path})
+		if w.process(ctx, job{userID: entry.UserID, path: entry.Path}) {
+			progressed = true
+		}
+	}
+	if progressed && len(pending) == backlogBatch {
+		w.requestBacklog()
 	}
 }
 
-func (w *Worker) process(ctx context.Context, next job) {
+func (w *Worker) requestBacklog() {
+	select {
+	case w.backlogs <- struct{}{}:
+	default:
+	}
+}
+
+func (w *Worker) process(ctx context.Context, next job) bool {
 	owner, err := w.users.ByID(ctx, next.userID)
 	if err != nil {
-		return
+		return false
 	}
 	entry, err := w.files.Stat(ctx, owner, next.path)
 	if err != nil || entry.IsDir || entry.PreviewState != files.PreviewPending {
-		return
+		return false
 	}
 
 	meta, state := w.generate(ctx, owner, entry, w.currentCapabilities(ctx))
 	if err := w.files.UpdateDerivedFields(ctx, owner.ID, entry.Path, entry.Hash, meta, state); err != nil {
 		logger.Warn("store preview state", "path", entry.Path, "error", err)
+		return false
 	}
+	return true
 }
 
 type render func(ctx context.Context, file *os.File, entry files.Entry) (decodedImage, error)
@@ -237,7 +265,7 @@ func (w *Worker) generate(ctx context.Context, owner users.User, entry files.Ent
 		return decoded.meta(), files.PreviewFailed
 	}
 	for _, size := range Sizes {
-		if err := writeThumbnail(decoded, size, w.ThumbnailPath(entry.Hash, size)); err != nil {
+		if err := writeThumbnail(decoded, size, w.thumbnailBase(entry.Hash, size)); err != nil {
 			logger.Warn("write thumbnail", "path", entry.Path, "error", err)
 			return decoded.meta(), files.PreviewFailed
 		}
@@ -269,8 +297,28 @@ func (w *Worker) removeUnusedThumbnails(ctx context.Context) {
 	}
 }
 
+const (
+	jpegExtension = ".jpg"
+	pngExtension  = ".png"
+)
+
+func (w *Worker) thumbnailBase(contentHash string, size int) string {
+	return filepath.Join(w.cacheDir, contentHash[:2], fmt.Sprintf("%s-%d", contentHash, size))
+}
+
 func (w *Worker) ThumbnailPath(contentHash string, size int) string {
-	return filepath.Join(w.cacheDir, contentHash[:2], fmt.Sprintf("%s-%d.jpg", contentHash, size))
+	base := w.thumbnailBase(contentHash, size)
+	if _, err := os.Stat(base + pngExtension); err == nil {
+		return base + pngExtension
+	}
+	return base + jpegExtension
+}
+
+func ThumbnailContentType(path string) string {
+	if strings.HasSuffix(path, pngExtension) {
+		return "image/png"
+	}
+	return "image/jpeg"
 }
 
 func (w *Worker) HasThumbnail(contentHash string, size int) bool {
