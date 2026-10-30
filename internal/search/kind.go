@@ -5,12 +5,17 @@ import (
 	"strings"
 )
 
-// Folder and file are the only kinds the search defines itself; every other kind is the top-level MIME
+// Folder, file and note are the only kinds the search defines itself; every other kind is the top-level MIME
 // type the system MIME database reports, such as image or application.
 const (
 	kindFolder = "folder"
 	kindFile   = "file"
+	kindNote   = "note"
 )
+
+func isNoteKind(value string) bool {
+	return value == kindNote || value == kindNote+"s"
+}
 
 func extensionOf(name string) string {
 	return strings.TrimPrefix(strings.ToLower(path.Ext(name)), ".")

@@ -23,7 +23,7 @@ import "package:polder/widgets/shared/message_view.dart";
 const _debounce = Duration(milliseconds: 150);
 const _maxDestinations = 4;
 const _tileExtent = 64.0;
-const _exampleTags = ["type=image", "type=pdf", "modified>7d", "size>100mb", "type=folder"];
+const _exampleTags = ["type=note", "type=image", "type=pdf", "modified>7d", "size>100mb", "type=folder"];
 
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({

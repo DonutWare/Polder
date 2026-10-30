@@ -130,6 +130,15 @@ func (s *Service) suggestValues(ctx context.Context, owner users.User, key Key, 
 		if strings.HasPrefix(kindFile, fragment) {
 			kinds = append(kinds, Suggestion{Kind: SuggestValue, Value: kindFile, Insert: kindFile})
 		}
+		if strings.HasPrefix(kindNote, fragment) {
+			notesFolder, err := s.users.NotesPath(ctx, owner.ID)
+			if err != nil {
+				return nil, err
+			}
+			if notesFolder != nil {
+				kinds = append(kinds, Suggestion{Kind: SuggestValue, Value: kindNote, Insert: kindNote})
+			}
+		}
 		seen := map[string]bool{}
 		var merged []Suggestion
 		for _, suggestion := range append(kinds, exts...) {

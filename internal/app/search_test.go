@@ -132,6 +132,29 @@ func TestSearchFilters(t *testing.T) {
 	})
 }
 
+func TestSearchFindsNotesInTheNotesFolder(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		alice.put("/Notes/Trip.md", 0, []byte("trip"), http.StatusOK, nil)
+		alice.put("/Notes/Trip/Day 1.md", 0, []byte("day"), http.StatusOK, nil)
+		alice.put("/Notes/photo.jpg", 0, []byte("jpg"), http.StatusOK, nil)
+		alice.put("/Docs/readme.md", 0, []byte("docs"), http.StatusOK, nil)
+
+		expectPaths(t, "type=note", alice.search("type=note"))
+
+		alice.mustJSON(http.MethodPut, "/notes/settings", map[string]string{"path": "/Notes"}, http.StatusOK, nil)
+		cases := map[string][]string{
+			"type=note":          {"/Notes/Trip.md", "/Notes/Trip/Day 1.md"},
+			"type=notes":         {"/Notes/Trip.md", "/Notes/Trip/Day 1.md"},
+			"day type=note":      {"/Notes/Trip/Day 1.md"},
+			"type=md type!=note": {"/Docs/readme.md"},
+		}
+		for query, want := range cases {
+			expectPaths(t, query, alice.search(query), want...)
+		}
+	})
+}
+
 func TestSearchFollowsChanges(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		admin := server.setupAdmin()

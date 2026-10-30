@@ -63,14 +63,35 @@ func (s *Service) Search(ctx context.Context, owner users.User, raw string, limi
 	if err := s.Sync(ctx, owner.ID); err != nil {
 		return Results{}, err
 	}
-	if parsed.HasTerms() {
-		return s.searchText(ctx, owner, parsed, response, limit, offset)
+	scope, err := s.scopeOf(ctx, owner)
+	if err != nil {
+		return Results{}, err
 	}
-	return s.searchFilters(ctx, owner, parsed, response, limit, offset)
+	if parsed.HasTerms() {
+		return s.searchText(ctx, owner, scope, parsed, response, limit, offset)
+	}
+	return s.searchFilters(ctx, owner, scope, parsed, response, limit, offset)
 }
 
-func (s *Service) searchFilters(ctx context.Context, owner users.User, parsed Query, response Results, limit, offset int) (Results, error) {
-	request := bleve.NewSearchRequestOptions(filterQuery(owner.ID, parsed), limit, offset, false)
+type filterScope struct {
+	userID      int64
+	notesFolder string
+}
+
+func (s *Service) scopeOf(ctx context.Context, owner users.User) (filterScope, error) {
+	notesFolder, err := s.users.NotesPath(ctx, owner.ID)
+	if err != nil {
+		return filterScope{}, err
+	}
+	scope := filterScope{userID: owner.ID}
+	if notesFolder != nil {
+		scope.notesFolder = *notesFolder
+	}
+	return scope, nil
+}
+
+func (s *Service) searchFilters(ctx context.Context, owner users.User, scope filterScope, parsed Query, response Results, limit, offset int) (Results, error) {
+	request := bleve.NewSearchRequestOptions(filterQuery(scope, parsed), limit, offset, false)
 	request.SortBy([]string{"-" + fieldMtime, "_id"})
 	request.AddFacet(fieldKind, bleve.NewFacetRequest(fieldKind, facetSize))
 	request.AddFacet(fieldExt, bleve.NewFacetRequest(fieldExt, facetSize))
@@ -118,9 +139,9 @@ type ranked struct {
 	locations bleveSearch.TermLocationMap
 }
 
-func (s *Service) searchText(ctx context.Context, owner users.User, parsed Query, response Results, limit, offset int) (Results, error) {
+func (s *Service) searchText(ctx context.Context, owner users.User, scope filterScope, parsed Query, response Results, limit, offset int) (Results, error) {
 	candidates := bleve.NewBooleanQuery()
-	candidates.AddFilter(filterQuery(owner.ID, parsed))
+	candidates.AddFilter(filterQuery(scope, parsed))
 	candidates.AddShould(textQuery(parsed.Terms)...)
 	candidates.SetMinShould(1)
 	nameHits, err := s.searchIndex(bleve.NewSearchRequestOptions(candidates, candidateWindow, 0, false))
@@ -130,7 +151,7 @@ func (s *Service) searchText(ctx context.Context, owner users.User, parsed Query
 	var contentHits bleveSearch.DocumentMatchCollection
 	if s.contentEnabled(ctx) {
 		inText := bleve.NewBooleanQuery()
-		inText.AddFilter(filterQuery(owner.ID, parsed))
+		inText.AddFilter(filterQuery(scope, parsed))
 		inText.AddMust(contentQuery(parsed.Terms))
 		request := bleve.NewSearchRequestOptions(inText, candidateWindow, 0, false)
 		request.IncludeLocations = true
@@ -292,8 +313,8 @@ func isCJK(r rune) bool {
 	return unicode.In(r, unicode.Han, unicode.Hiragana, unicode.Katakana, unicode.Hangul)
 }
 
-func filterQuery(userID int64, parsed Query) query.Query {
-	must := []query.Query{termQuery(fieldUser, userTerm(userID))}
+func filterQuery(scope filterScope, parsed Query) query.Query {
+	must := []query.Query{termQuery(fieldUser, userTerm(scope.userID))}
 	var mustNot []query.Query
 	include := map[Key][]string{}
 	exclude := map[Key][]string{}
@@ -334,10 +355,10 @@ func filterQuery(userID int64, parsed Query) query.Query {
 		}
 	}
 	for key, values := range include {
-		must = append(must, bleve.NewDisjunctionQuery(valueQueries(key, values)...))
+		must = append(must, bleve.NewDisjunctionQuery(valueQueries(scope, key, values)...))
 	}
 	for key, values := range exclude {
-		mustNot = append(mustNot, valueQueries(key, values)...)
+		mustNot = append(mustNot, valueQueries(scope, key, values)...)
 		if key == KeyIn {
 			for _, folder := range values {
 				mustNot = append(mustNot, termQuery(fieldFolder, strings.ToLower(folder)))
@@ -350,12 +371,14 @@ func filterQuery(userID int64, parsed Query) query.Query {
 	return combined
 }
 
-func valueQueries(key Key, values []string) []query.Query {
+func valueQueries(scope filterScope, key Key, values []string) []query.Query {
 	var queries []query.Query
 	for _, value := range values {
 		switch key {
 		case KeyType:
 			switch {
+			case isNoteKind(value):
+				queries = append(queries, notesQuery(scope.notesFolder))
 			case value == kindFile || value == kindFolder:
 				isDir := bleve.NewBoolFieldQuery(value == kindFolder)
 				isDir.SetField(fieldIsDir)
@@ -379,4 +402,17 @@ func valueQueries(key Key, values []string) []query.Query {
 		}
 	}
 	return queries
+}
+
+func notesQuery(notesFolder string) query.Query {
+	if notesFolder == "" {
+		return bleve.NewMatchNoneQuery()
+	}
+	markdown := termQuery(fieldMime, files.MarkdownMime)
+	if notesFolder == "/" {
+		return markdown
+	}
+	inside := bleve.NewPrefixQuery(strings.ToLower(notesFolder) + "/")
+	inside.SetField(fieldFolder)
+	return bleve.NewConjunctionQuery(markdown, inside)
 }
