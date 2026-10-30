@@ -1,4 +1,3 @@
-import "package:flutter/foundation.dart";
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
@@ -8,17 +7,14 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/item_selection.dart";
 import "package:polder/providers/browser/browser_selection_provider.dart";
 import "package:polder/screens/browser/widgets/browser_scope.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_drag.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
-
-bool get _apple => const {TargetPlatform.macOS, TargetPlatform.iOS}.contains(defaultTargetPlatform);
-
-bool get _commandPressed =>
-    _apple ? HardwareKeyboard.instance.isMetaPressed : HardwareKeyboard.instance.isControlPressed;
+import "package:polder/util/modifier_keys.dart";
 
 class EntryInteraction {
   const EntryInteraction({required this.selected, required this.onTap, this.onIconTap, this.onMenu});
@@ -47,7 +43,7 @@ class _SelectableEntryState extends ConsumerState<SelectableEntry> {
   Offset _lastClickPosition = Offset.zero;
 
   String get _name => widget.entry.name;
-  BrowserSelection get _selection => ref.read(browserSelectionProvider(widget.parentPath));
+  ItemSelection get _selection => ref.read(browserSelectionProvider(widget.parentPath));
   BrowserSelectionNotifier get _notifier => ref.read(browserSelectionProvider(widget.parentPath).notifier);
 
   List<FileEntry> _targets() => _selection.contains(_name) ? _notifier.selectedEntries : [widget.entry];
@@ -68,7 +64,7 @@ class _SelectableEntryState extends ConsumerState<SelectableEntry> {
     if (event.buttons & kSecondaryMouseButton != 0) return _selectForMenu();
     if (event.buttons & kPrimaryButton == 0) return;
     final keyboard = HardwareKeyboard.instance;
-    if (_apple && keyboard.isControlPressed) {
+    if (isApplePlatform && keyboard.isControlPressed) {
       _selectForMenu();
       return _showMenu(FileActions.menuPositionAt(context, event.position));
     }
@@ -79,7 +75,7 @@ class _SelectableEntryState extends ConsumerState<SelectableEntry> {
     _lastClick = doubleClick ? null : event.timeStamp;
     _lastClickPosition = event.position;
     if (keyboard.isShiftPressed) return _notifier.extendTo(_name);
-    if (_commandPressed) return _notifier.toggle(_name);
+    if (commandPressed) return _notifier.toggle(_name);
     if (doubleClick) {
       _notifier.only(_name);
       openEntry(context, widget.entry);
@@ -192,7 +188,7 @@ class _BrowserSelectionAreaState extends ConsumerState<BrowserSelectionArea> {
     final keyboard = HardwareKeyboard.instance;
     final key = event.logicalKey;
     final selection = ref.read(browserSelectionProvider(widget.parentPath));
-    final command = _commandPressed;
+    final command = commandPressed;
     final repeat = event is KeyRepeatEvent;
     final single = selection.length == 1 ? _notifier.selectedEntries.firstOrNull : null;
 
@@ -207,7 +203,7 @@ class _BrowserSelectionAreaState extends ConsumerState<BrowserSelectionArea> {
       _notifier.clear();
       return KeyEventResult.handled;
     }
-    final delete = _apple
+    final delete = isApplePlatform
         ? pressed(LogicalKeyboardKey.backspace, withCommand: true) || pressed(LogicalKeyboardKey.delete)
         : pressed(LogicalKeyboardKey.delete);
     if (delete && selection.isNotEmpty) {
@@ -216,7 +212,7 @@ class _BrowserSelectionAreaState extends ConsumerState<BrowserSelectionArea> {
       }
       return KeyEventResult.handled;
     }
-    final open = _apple
+    final open = isApplePlatform
         ? pressed(LogicalKeyboardKey.keyO, withCommand: true) ||
               pressed(LogicalKeyboardKey.arrowDown, withCommand: true)
         : pressed(LogicalKeyboardKey.enter) || pressed(LogicalKeyboardKey.numpadEnter);
@@ -224,12 +220,12 @@ class _BrowserSelectionAreaState extends ConsumerState<BrowserSelectionArea> {
       if (!repeat) openEntry(context, single);
       return KeyEventResult.handled;
     }
-    final rename = _apple ? pressed(LogicalKeyboardKey.enter) : pressed(LogicalKeyboardKey.f2);
+    final rename = isApplePlatform ? pressed(LogicalKeyboardKey.enter) : pressed(LogicalKeyboardKey.f2);
     if (rename && single != null) {
       if (!repeat) FileActions.rename(context, ref, parentPath: widget.parentPath, entry: single);
       return KeyEventResult.handled;
     }
-    final up = _apple
+    final up = isApplePlatform
         ? pressed(LogicalKeyboardKey.arrowUp, withCommand: true)
         : pressed(LogicalKeyboardKey.arrowUp, withAlt: true);
     final parentRoute = BrowserRoutes.of(context).parentRoute(widget.parentPath);

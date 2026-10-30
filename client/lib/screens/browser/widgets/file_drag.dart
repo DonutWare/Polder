@@ -11,6 +11,8 @@ import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/drag_chip.dart";
+import "package:polder/widgets/shared/escape_cancels_drag.dart";
 
 class FileDrag {
   const FileDrag({required this.parentPath, required this.entries});
@@ -31,21 +33,25 @@ class FileDragSource extends StatelessWidget {
     final feedback = _DragFeedback(entries: drag.entries);
     final dragging = Opacity(opacity: 0.4, child: child);
     if (!longPress) {
-      return Draggable<FileDrag>(
+      return EscapeCancelsDrag(
+        child: Draggable<FileDrag>(
+          data: drag,
+          feedback: feedback,
+          childWhenDragging: dragging,
+          dragAnchorStrategy: pointerDragAnchorStrategy,
+          child: child,
+        ),
+      );
+    }
+    return EscapeCancelsDrag(
+      child: LongPressDraggable<FileDrag>(
         data: drag,
         feedback: feedback,
         childWhenDragging: dragging,
         dragAnchorStrategy: pointerDragAnchorStrategy,
+        onDragStarted: HapticFeedback.mediumImpact,
         child: child,
-      );
-    }
-    return LongPressDraggable<FileDrag>(
-      data: drag,
-      feedback: feedback,
-      childWhenDragging: dragging,
-      dragAnchorStrategy: pointerDragAnchorStrategy,
-      onDragStarted: HapticFeedback.mediumImpact,
-      child: child,
+      ),
     );
   }
 }
@@ -79,35 +85,12 @@ class _DragFeedback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final single = entries.length == 1 ? entries.single : null;
     return Transform.translate(
       offset: const Offset(12, 12),
-      child: Material(
-        elevation: 6,
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              single == null
-                  ? Icon(IconsaxPlusLinear.copy, size: 18, color: theme.colorScheme.onSecondaryContainer)
-                  : FileTypeIcon(entry: single, size: 18),
-              const SizedBox(width: 8),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 240),
-                child: Text(
-                  single?.name ?? context.localized.activityItemCount(entries.length),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer),
-                ),
-              ),
-            ],
-          ),
-        ),
+      child: DragChip(
+        icon: single == null ? const Icon(IconsaxPlusLinear.copy) : FileTypeIcon(entry: single, size: 18),
+        label: single?.name ?? context.localized.activityItemCount(entries.length),
       ),
     );
   }

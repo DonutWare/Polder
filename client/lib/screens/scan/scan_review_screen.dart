@@ -14,6 +14,7 @@ import "package:polder/services/transfer/document_scanner_service.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/escape_cancels_drag.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 
@@ -103,11 +104,13 @@ class _ScanReviewScreenState extends ConsumerState<ScanReviewScreen> {
                   padding: const EdgeInsets.all(16),
                   itemCount: session.pages.length,
                   onReorderItem: _session.reorderPage,
-                  itemBuilder: (context, index) => _PageCard(
+                  itemBuilder: (context, index) => EscapeCancelsDrag(
                     key: ValueKey(session.pages[index]),
-                    path: session.pages[index],
-                    number: index + 1,
-                    onRemove: () => _session.removePage(index),
+                    child: _PageCard(
+                      path: session.pages[index],
+                      number: index + 1,
+                      onRemove: () => _session.removePage(index),
+                    ),
                   ),
                   footer: _AddPagesCard(onTap: _addPages),
                 ),
@@ -184,7 +187,7 @@ class _ScanReviewScreenState extends ConsumerState<ScanReviewScreen> {
 }
 
 class _PageCard extends StatelessWidget {
-  const _PageCard({required this.path, required this.number, required this.onRemove, super.key});
+  const _PageCard({required this.path, required this.number, required this.onRemove});
 
   final String path;
   final int number;

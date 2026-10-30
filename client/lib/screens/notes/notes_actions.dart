@@ -122,10 +122,36 @@ abstract final class NotesActions {
       destination != node.path &&
       !RemotePath.isWithin(destination, node.childrenPath);
 
-  static Future<String?> moveInto(BuildContext context, NoteTreeNode node, String destination) {
-    if (!canMoveInto(node, destination)) return Future.value();
-    return _moveWithFeedback(context, node, destination, node.name);
+  static bool canMoveAllInto(List<NoteTreeNode> nodes, String destination) =>
+      nodes.isNotEmpty && nodes.every((node) => canMoveInto(node, destination));
+
+  static Future<Map<NoteTreeNode, String>> moveAllInto(
+    BuildContext context,
+    List<NoteTreeNode> nodes,
+    String destination,
+  ) async {
+    final moved = <NoteTreeNode, String>{};
+    if (!canMoveAllInto(nodes, destination)) return moved;
+    final container = ProviderScope.containerOf(context, listen: false);
+    await context.runWithFeedback(
+      Future(() async {
+        for (final node in nodes) {
+          await _moveNode(container, node, destination, node.name);
+          moved[node] = _movedPath(node, destination, node.name);
+        }
+      }),
+    );
+    return moved;
   }
+
+  static Future<Map<NoteTreeNode, String>> moveAll(BuildContext context, List<NoteTreeNode> nodes) async {
+    final destination = await showRemoteFolderPicker(context, initialPath: RemotePath.parent(nodes.first.path));
+    if (destination == null || !context.mounted) return const {};
+    return moveAllInto(context, nodes, destination);
+  }
+
+  static String _movedPath(NoteTreeNode node, String destination, String name) =>
+      RemotePath.join(destination, node.page == null ? name : "$name.${_extension(node.page!)}");
 
   static Future<String?> _moveWithFeedback(
     BuildContext context,
@@ -136,7 +162,7 @@ abstract final class NotesActions {
     final container = ProviderScope.containerOf(context, listen: false);
     final moved = await context.runWithFeedback(_moveNode(container, node, destination, name));
     if (!moved) return null;
-    return RemotePath.join(destination, node.page == null ? name : "$name.${_extension(node.page!)}");
+    return _movedPath(node, destination, name);
   }
 
   static String? pathAfterMove(String? path, NoteTreeNode node, String movedTo) {
@@ -173,6 +199,27 @@ abstract final class NotesActions {
     );
     if (!confirmed || !context.mounted) return false;
     return context.runWithFeedback(_deleteNode(ProviderScope.containerOf(context, listen: false), node));
+  }
+
+  static Future<bool> deleteAll(BuildContext context, List<NoteTreeNode> nodes) async {
+    if (nodes.length == 1) return delete(context, nodes.single);
+    final localized = context.localized;
+    final confirmed = await showConfirmDialog(
+      context,
+      title: localized.noteDeleteManyTitle(nodes.length),
+      message: localized.noteDeleteManyMessage,
+      confirmLabel: localized.delete,
+      destructive: true,
+    );
+    if (!confirmed || !context.mounted) return false;
+    final container = ProviderScope.containerOf(context, listen: false);
+    return context.runWithFeedback(
+      Future(() async {
+        for (final node in nodes) {
+          await _deleteNode(container, node);
+        }
+      }),
+    );
   }
 
   static Future<void> _deleteNode(ProviderContainer container, NoteTreeNode node) async {

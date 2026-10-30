@@ -1,8 +1,13 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/item_selection.dart";
+import "package:polder/providers/notes/note_selection_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
 import "package:polder/screens/notes/notes_actions.dart";
@@ -10,6 +15,7 @@ import "package:polder/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder/screens/notes/widgets/notes_grid.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/util/modifier_keys.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
 
@@ -32,10 +38,12 @@ class NotesSidebar extends ConsumerStatefulWidget {
 
 class _NotesSidebarState extends ConsumerState<NotesSidebar> {
   final _scroll = ScrollController();
+  final _focus = FocusNode(debugLabel: "NotesSidebar");
 
   @override
   void dispose() {
     _scroll.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -44,24 +52,45 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
     if (ref.watch(notesViewModeProvider) == NotesViewMode.grid) {
       return NotesGrid(folder: notesLevel(ref, widget.root), selectedPath: widget.selectedPath, onOpen: widget.onOpen);
     }
-    return NoteDragAutoScroll(
-      controller: _scroll,
-      child: CustomScrollView(
-        controller: _scroll,
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            sliver: SliverToBoxAdapter(
-              child: _TreeLevel(path: widget.root, depth: 0, selectedPath: widget.selectedPath, onOpen: widget.onOpen),
-            ),
+    return Focus(
+      focusNode: _focus,
+      onKeyEvent: _onKey,
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) => _focus.requestFocus(),
+        child: NoteDragAutoScroll(
+          controller: _scroll,
+          child: CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                sliver: SliverToBoxAdapter(
+                  child: _TreeLevel(
+                    path: widget.root,
+                    root: widget.root,
+                    depth: 0,
+                    selectedPath: widget.selectedPath,
+                    onOpen: widget.onOpen,
+                  ),
+                ),
+              ),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _TopLevelDropZone(root: widget.root, selectedPath: widget.selectedPath),
+              ),
+            ],
           ),
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: _TopLevelDropZone(root: widget.root, selectedPath: widget.selectedPath),
-          ),
-        ],
+        ),
       ),
     );
+  }
+
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape) return KeyEventResult.ignored;
+    if (ref.read(noteSelectionProvider).isEmpty) return KeyEventResult.ignored;
+    ref.read(noteSelectionProvider.notifier).clear();
+    return KeyEventResult.handled;
   }
 }
 
@@ -78,24 +107,28 @@ class _TopLevelDropZone extends ConsumerWidget {
     final colors = Theme.of(context).colorScheme;
     return NoteDropTarget(
       destination: root,
-      onDrop: (node) => NoteNodeActions.drop(context, ref, node: node, destination: root, selectedPath: selectedPath),
-      builder: (context, active) => Container(
-        constraints: const BoxConstraints(minHeight: _minHeight),
-        margin: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-        alignment: Alignment.topCenter,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: active ? colors.primaryContainer : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: active ? colors.primary : Colors.transparent, width: 2),
+      onDrop: (drag) => NoteNodeActions.drop(context, ref, drag: drag, destination: root, selectedPath: selectedPath),
+      builder: (context, active) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: ref.read(noteSelectionProvider.notifier).clear,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: _minHeight),
+          margin: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+          alignment: Alignment.topCenter,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: active ? colors.primaryContainer : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: active ? colors.primary : Colors.transparent, width: 2),
+          ),
+          child: active
+              ? Text(
+                  context.localized.notesMoveToTop,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colors.onPrimaryContainer),
+                )
+              : null,
         ),
-        child: active
-            ? Text(
-                context.localized.notesMoveToTop,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colors.onPrimaryContainer),
-              )
-            : null,
       ),
     );
   }
@@ -118,8 +151,8 @@ class NotesTitle extends ConsumerWidget {
     final colors = Theme.of(context).colorScheme;
     return NoteDropTarget(
       destination: destination,
-      onDrop: (node) =>
-          NoteNodeActions.drop(context, ref, node: node, destination: destination, selectedPath: selectedPath),
+      onDrop: (drag) =>
+          NoteNodeActions.drop(context, ref, drag: drag, destination: destination, selectedPath: selectedPath),
       builder: (context, active) => AnimatedContainer(
         duration: const Duration(milliseconds: 120),
         decoration: BoxDecoration(
@@ -196,9 +229,16 @@ class NotesHeaderActions extends ConsumerWidget {
 }
 
 class _TreeLevel extends ConsumerWidget {
-  const _TreeLevel({required this.path, required this.depth, required this.selectedPath, required this.onOpen});
+  const _TreeLevel({
+    required this.path,
+    required this.root,
+    required this.depth,
+    required this.selectedPath,
+    required this.onOpen,
+  });
 
   final String path;
+  final String root;
   final int depth;
   final String? selectedPath;
   final ValueChanged<FileEntry> onOpen;
@@ -224,7 +264,14 @@ class _TreeLevel extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (final node in contents.nodes)
-              _TreeNode(key: ValueKey(node.path), node: node, depth: depth, selectedPath: selectedPath, onOpen: onOpen),
+              _TreeNode(
+                key: ValueKey(node.path),
+                node: node,
+                root: root,
+                depth: depth,
+                selectedPath: selectedPath,
+                onOpen: onOpen,
+              ),
           ],
         );
       },
@@ -235,6 +282,7 @@ class _TreeLevel extends ConsumerWidget {
 class _TreeNode extends ConsumerStatefulWidget {
   const _TreeNode({
     required this.node,
+    required this.root,
     required this.depth,
     required this.selectedPath,
     required this.onOpen,
@@ -242,6 +290,7 @@ class _TreeNode extends ConsumerStatefulWidget {
   });
 
   final NoteTreeNode node;
+  final String root;
   final int depth;
   final String? selectedPath;
   final ValueChanged<FileEntry> onOpen;
@@ -273,16 +322,68 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
     if (readme != null && mounted) widget.onOpen(readme);
   }
 
-  void _showMenu(Rect anchor) =>
-      NoteNodeActions.showMenuFor(context, ref, node: node, anchor: anchor, selectedPath: widget.selectedPath);
+  NoteSelectionNotifier get _selection => ref.read(noteSelectionProvider.notifier);
 
-  void _drop(NoteTreeNode dropped) => NoteNodeActions.drop(
-    context,
-    ref,
-    node: dropped,
-    destination: node.childrenPath,
-    selectedPath: widget.selectedPath,
-  );
+  NotesFolderContents? _contentsOf(String folder) =>
+      ref.exists(notesTreeProvider(folder)) ? ref.read(notesTreeProvider(folder)).value : null;
+
+  List<String> _visibleOrder() {
+    final expanded = ref.read(expandedNotesProvider);
+    return [
+      for (final visible in walkNoteTree(
+        widget.root,
+        contentsOf: _contentsOf,
+        descend: (candidate) => expanded.contains(candidate.childrenPath),
+      ))
+        visible.path,
+    ];
+  }
+
+  List<NoteTreeNode> _targets(ItemSelection? selection) {
+    if (selection == null || selection.length < 2) return [node];
+    final known = walkNoteTree(widget.root, contentsOf: _contentsOf, descend: (_) => true);
+    return outermostNotes([
+      for (final candidate in known)
+        if (selection.contains(candidate.path)) candidate,
+    ]);
+  }
+
+  void _includeOpenNote(List<String> order) {
+    final open = widget.selectedPath;
+    if (ref.read(noteSelectionProvider).isEmpty && open != null && open != node.path && order.contains(open)) {
+      _selection.only(open);
+    }
+  }
+
+  void _onTap() {
+    final selecting = ref.read(noteSelectionProvider).isNotEmpty;
+    if (AdaptiveLayout.usesPointer(context) && (shiftPressed || commandPressed)) {
+      final order = _visibleOrder();
+      _includeOpenNote(order);
+      shiftPressed ? _selection.extendTo(node.path, order) : _selection.toggle(node.path);
+      return;
+    }
+    if (!AdaptiveLayout.usesPointer(context) && selecting) return _selection.toggle(node.path);
+    _selection.clear();
+    unawaited(_open());
+  }
+
+  void _showMenu(Rect anchor) {
+    final selection = ref.read(noteSelectionProvider);
+    final inSelection = selection.contains(node.path);
+    if (!inSelection) _selection.clear();
+    NoteNodeActions.showMenuFor(
+      context,
+      ref,
+      nodes: _targets(inSelection ? selection : null),
+      anchor: anchor,
+      selectedPath: widget.selectedPath,
+      onSelect: AdaptiveLayout.usesPointer(context) ? null : () => _selection.toggle(node.path),
+    );
+  }
+
+  void _drop(NoteDrag drag) =>
+      NoteNodeActions.drop(context, ref, drag: drag, destination: node.childrenPath, selectedPath: widget.selectedPath);
 
   @override
   Widget build(BuildContext context) {
@@ -292,17 +393,21 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
       ref.watch(notesTreeProvider(folder.path).select((children) => children.hasValue));
     }
     final readme = folder == null || node.page != null ? null : ref.watch(notesTreeProvider(folder.path)).value?.readme;
+    final selection = ref.watch(
+      noteSelectionProvider.select((selection) => selection.contains(node.path) ? selection : null),
+    );
 
     final row = NoteDropTarget(
       destination: node.childrenPath,
       onDrop: _drop,
       onLinger: () => ref.read(expandedNotesProvider.notifier).expand(node.childrenPath),
       builder: (context, active) => NoteDragSource(
-        node: node,
+        nodes: _targets(selection),
         onHold: _showMenu,
         child: _row(
           context,
           selected: _isSelected(readme),
+          marked: selection != null,
           expanded: expanded,
           dropActive: active,
           isSection: node.page == null && readme == null,
@@ -321,6 +426,7 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
             child: expanded
                 ? _TreeLevel(
                     path: folder.path,
+                    root: widget.root,
                     depth: widget.depth + 1,
                     selectedPath: widget.selectedPath,
                     onOpen: widget.onOpen,
@@ -335,6 +441,7 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
   Widget _row(
     BuildContext context, {
     required bool selected,
+    required bool marked,
     required bool expanded,
     required bool dropActive,
     required bool isSection,
@@ -347,18 +454,19 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
     return GestureDetector(
       onSecondaryTapUp: (details) => _showMenu(details.globalPosition & Size.zero),
       child: Material(
-        color: dropActive
-            ? colors.primaryContainer
-            : selected
-            ? colors.secondaryContainer
-            : Colors.transparent,
+        color: switch ((dropActive, marked, selected)) {
+          (true, _, _) => colors.primaryContainer,
+          (_, true, _) => colors.primary.withValues(alpha: 0.16),
+          (_, _, true) => colors.secondaryContainer,
+          _ => Colors.transparent,
+        },
         shape: RoundedRectangleBorder(
           borderRadius: radius,
           side: dropActive ? BorderSide(color: colors.primary, width: 2) : BorderSide.none,
         ),
         child: InkWell(
           borderRadius: radius,
-          onTap: _open,
+          onTap: _onTap,
           child: SizedBox(
             height: height,
             child: Row(

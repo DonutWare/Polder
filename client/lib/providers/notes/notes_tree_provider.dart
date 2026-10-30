@@ -92,3 +92,25 @@ class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> with GuardedR
     return NotesFolderContents(nodes: nodes, readme: readme);
   }
 }
+
+List<NoteTreeNode> walkNoteTree(
+  String root, {
+  required NotesFolderContents? Function(String folder) contentsOf,
+  required bool Function(NoteTreeNode node) descend,
+}) {
+  final nodes = <NoteTreeNode>[];
+  void walk(String folder) {
+    for (final node in contentsOf(folder)?.nodes ?? const <NoteTreeNode>[]) {
+      nodes.add(node);
+      if (node.folder != null && node.hasChildren && descend(node)) walk(node.childrenPath);
+    }
+  }
+
+  walk(root);
+  return nodes;
+}
+
+List<NoteTreeNode> outermostNotes(Iterable<NoteTreeNode> nodes) => [
+  for (final node in nodes)
+    if (!nodes.any((other) => other != node && RemotePath.isWithin(node.path, other.childrenPath))) node,
+];

@@ -18,7 +18,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: NoteDragSource(
-              node: node,
+              nodes: [node],
               onHold: holds.add,
               child: const SizedBox(width: 200, height: 48, child: Text("Trip")),
             ),

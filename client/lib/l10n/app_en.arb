@@ -976,6 +976,16 @@
 	},
 	"noteDeleteMessage": "The page goes to the trash.",
 	"noteDeleteWithChildrenMessage": "The page and its subpages go to the trash.",
+	"noteDeleteManyTitle": "Delete {count} pages?",
+	"@noteDeleteManyTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"noteDeleteManyMessage": "The pages and any subpages go to the trash.",
+	"noteSelect": "Select",
 	"noteSaved": "Saved",
 	"noteUnsaved": "Unsaved changes; save now",
 	"noteSaving": "Saving",

@@ -8,6 +8,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/providers/app/navigation_history_provider.dart";
+import "package:polder/providers/notes/note_selection_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/renamed_note_provider.dart";
 import "package:polder/routes/app_routes.dart";
@@ -15,6 +16,8 @@ import "package:polder/screens/notes/notes_actions.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
+import "package:polder/widgets/shared/drag_chip.dart";
+import "package:polder/widgets/shared/escape_cancels_drag.dart";
 
 final expandedNotesProvider = NotifierProvider<ExpandedNotes, Set<String>>(ExpandedNotes.new);
 
@@ -44,7 +47,13 @@ abstract final class NoteTargetSize {
   static double button(BuildContext context) => AdaptiveLayout.usesPointer(context) ? 32 : 48;
 }
 
-enum _NodeAction { newSubpage, rename, move, delete }
+enum _NodeAction { newSubpage, rename, select, move, delete }
+
+class NoteDrag {
+  const NoteDrag(this.nodes);
+
+  final List<NoteTreeNode> nodes;
+}
 
 abstract final class NoteNodeActions {
   static Rect anchorOf(BuildContext context) {
@@ -55,19 +64,24 @@ abstract final class NoteNodeActions {
   static Future<void> showMenuFor(
     BuildContext context,
     WidgetRef ref, {
-    required NoteTreeNode node,
+    required List<NoteTreeNode> nodes,
     required Rect anchor,
     required String? selectedPath,
+    VoidCallback? onSelect,
   }) async {
     final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
     final local = Rect.fromPoints(overlay.globalToLocal(anchor.topLeft), overlay.globalToLocal(anchor.bottomRight));
     final localized = context.localized;
+    final single = nodes.length == 1 ? nodes.single : null;
     final action = await showMenu<_NodeAction>(
       context: context,
       position: RelativeRect.fromRect(local, Offset.zero & overlay.size),
       items: [
-        PopupMenuItem(value: _NodeAction.newSubpage, child: Text(localized.noteNewSubpage)),
-        PopupMenuItem(value: _NodeAction.rename, child: Text(localized.rename)),
+        if (single != null) ...[
+          PopupMenuItem(value: _NodeAction.newSubpage, child: Text(localized.noteNewSubpage)),
+          PopupMenuItem(value: _NodeAction.rename, child: Text(localized.rename)),
+          if (onSelect != null) PopupMenuItem(value: _NodeAction.select, child: Text(localized.noteSelect)),
+        ],
         PopupMenuItem(value: _NodeAction.move, child: Text(localized.noteMove)),
         PopupMenuItem(value: _NodeAction.delete, child: Text(localized.delete)),
       ],
@@ -75,16 +89,26 @@ abstract final class NoteNodeActions {
     if (action == null || !context.mounted) return;
     final navigation = ref.read(navigationHistoryProvider.notifier);
     final renames = ref.read(renamedNoteProvider.notifier);
+    final selection = ref.read(noteSelectionProvider.notifier);
     switch (action) {
       case _NodeAction.newSubpage:
-        await createSubpage(context, ref, node);
+        await createSubpage(context, ref, single!);
       case _NodeAction.rename:
-        _follow(navigation, renames, selectedPath, node, await NotesActions.rename(context, node));
+        final renamed = await NotesActions.rename(context, single!);
+        if (renamed != null) _follow(navigation, renames, selectedPath, {single: renamed});
+      case _NodeAction.select:
+        onSelect?.call();
       case _NodeAction.move:
-        _follow(navigation, renames, selectedPath, node, await NotesActions.move(context, node));
+        final moved = await NotesActions.moveAll(context, nodes);
+        if (moved.isNotEmpty) selection.clear();
+        _follow(navigation, renames, selectedPath, moved);
       case _NodeAction.delete:
-        final deleted = await NotesActions.delete(context, node);
-        if (deleted && selectedPath != null && node.holds(selectedPath)) navigation.replace(AppRoutes.notes);
+        final deleted = await NotesActions.deleteAll(context, nodes);
+        if (!deleted) return;
+        selection.clear();
+        if (selectedPath != null && nodes.any((node) => node.holds(selectedPath))) {
+          navigation.replace(AppRoutes.notes);
+        }
     }
   }
 
@@ -97,37 +121,42 @@ abstract final class NoteNodeActions {
   static Future<void> drop(
     BuildContext context,
     WidgetRef ref, {
-    required NoteTreeNode node,
+    required NoteDrag drag,
     required String destination,
     required String? selectedPath,
   }) async {
     final expanded = ref.read(expandedNotesProvider.notifier);
     final navigation = ref.read(navigationHistoryProvider.notifier);
     final renames = ref.read(renamedNoteProvider.notifier);
-    final movedTo = await NotesActions.moveInto(context, node, destination);
-    if (movedTo == null) return;
+    final selection = ref.read(noteSelectionProvider.notifier);
+    final moved = await NotesActions.moveAllInto(context, drag.nodes, destination);
+    if (moved.isEmpty) return;
+    selection.clear();
     expanded.expand(destination);
-    _follow(navigation, renames, selectedPath, node, movedTo);
+    _follow(navigation, renames, selectedPath, moved);
   }
 
   static void _follow(
     NavigationHistoryNotifier navigation,
     RenamedNote renames,
     String? selectedPath,
-    NoteTreeNode node,
-    String? movedTo,
+    Map<NoteTreeNode, String> moved,
   ) {
-    final selected = movedTo == null ? null : NotesActions.pathAfterMove(selectedPath, node, movedTo);
-    if (selectedPath == null || selected == null) return;
-    renames.record(selectedPath, selected);
-    navigation.replace(AppRoutes.noteAt(selected));
+    if (selectedPath == null) return;
+    for (final MapEntry(key: node, value: movedTo) in moved.entries) {
+      final selected = NotesActions.pathAfterMove(selectedPath, node, movedTo);
+      if (selected == null) continue;
+      renames.record(selectedPath, selected);
+      navigation.replace(AppRoutes.noteAt(selected));
+      return;
+    }
   }
 }
 
 class NoteDragSource extends StatefulWidget {
-  const NoteDragSource({required this.node, required this.child, this.onHold, super.key});
+  const NoteDragSource({required this.nodes, required this.child, this.onHold, super.key});
 
-  final NoteTreeNode node;
+  final List<NoteTreeNode> nodes;
   final Widget child;
   final ValueChanged<Rect>? onHold;
 
@@ -137,86 +166,74 @@ class NoteDragSource extends StatefulWidget {
 
 class _NoteDragSourceState extends State<NoteDragSource> {
   var _travelled = 0.0;
+  var _cancelled = false;
 
   void _startHold() {
     _travelled = 0;
+    _cancelled = false;
     unawaited(HapticFeedback.mediumImpact());
   }
 
   void _endHold(DraggableDetails details) {
     final onHold = widget.onHold;
-    if (onHold == null || details.wasAccepted || _travelled > kTouchSlop || !mounted) return;
+    if (onHold == null || _cancelled || details.wasAccepted || _travelled > kTouchSlop || !mounted) return;
     onHold(NoteNodeActions.anchorOf(context));
   }
 
   @override
   Widget build(BuildContext context) {
     final scroller = NoteDragAutoScroll.maybeOf(context);
-    final feedback = _DragFeedback(node: widget.node);
+    final drag = NoteDrag(widget.nodes);
+    final feedback = _DragFeedback(nodes: widget.nodes);
     final dragging = Opacity(opacity: 0.4, child: widget.child);
-    if (AdaptiveLayout.usesPointer(context)) {
-      return Draggable<NoteTreeNode>(
-        data: widget.node,
-        feedback: feedback,
-        childWhenDragging: dragging,
-        onDragUpdate: (details) => scroller?.follow(details.globalPosition),
-        onDragEnd: (_) => scroller?.stop(),
-        child: widget.child,
-      );
-    }
-    return LongPressDraggable<NoteTreeNode>(
-      data: widget.node,
-      feedback: feedback,
-      childWhenDragging: dragging,
-      onDragStarted: _startHold,
-      onDragUpdate: (details) {
-        _travelled += details.delta.distance;
-        scroller?.follow(details.globalPosition);
-      },
-      onDragEnd: (details) {
-        scroller?.stop();
-        _endHold(details);
-      },
-      child: widget.child,
+    return EscapeCancelsDrag(
+      onCancel: () => _cancelled = true,
+      child: AdaptiveLayout.usesPointer(context)
+          ? Draggable<NoteDrag>(
+              data: drag,
+              feedback: feedback,
+              childWhenDragging: dragging,
+              onDragUpdate: (details) => scroller?.follow(details.globalPosition),
+              onDragEnd: (_) => scroller?.stop(),
+              child: widget.child,
+            )
+          : _holdDraggable(drag, feedback, dragging, scroller),
     );
   }
+
+  Widget _holdDraggable(NoteDrag drag, Widget feedback, Widget dragging, NoteDragAutoScrollState? scroller) =>
+      LongPressDraggable<NoteDrag>(
+        data: drag,
+        feedback: feedback,
+        childWhenDragging: dragging,
+        onDragStarted: _startHold,
+        onDragUpdate: (details) {
+          _travelled += details.delta.distance;
+          scroller?.follow(details.globalPosition);
+        },
+        onDragEnd: (details) {
+          scroller?.stop();
+          _endHold(details);
+        },
+        child: widget.child,
+      );
 }
 
 class _DragFeedback extends StatelessWidget {
-  const _DragFeedback({required this.node});
+  const _DragFeedback({required this.nodes});
 
-  final NoteTreeNode node;
+  final List<NoteTreeNode> nodes;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Material(
-      elevation: 6,
-      color: theme.colorScheme.secondaryContainer,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              node.page == null ? IconsaxPlusLinear.folder : IconsaxPlusLinear.note_2,
-              size: 18,
-              color: theme.colorScheme.onSecondaryContainer,
-            ),
-            const SizedBox(width: 8),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 240),
-              child: Text(
-                node.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer),
-              ),
-            ),
-          ],
-        ),
-      ),
+    final single = nodes.length == 1 ? nodes.single : null;
+    return DragChip(
+      icon: Icon(switch (single) {
+        null => IconsaxPlusLinear.copy,
+        NoteTreeNode(page: null) => IconsaxPlusLinear.folder,
+        _ => IconsaxPlusLinear.note_2,
+      }),
+      label: single?.name ?? context.localized.activityItemCount(nodes.length),
     );
   }
 }
@@ -233,7 +250,7 @@ class NoteDropTarget extends StatefulWidget {
   static const lingerDelay = Duration(milliseconds: 700);
 
   final String destination;
-  final ValueChanged<NoteTreeNode> onDrop;
+  final ValueChanged<NoteDrag> onDrop;
   final Widget Function(BuildContext context, bool active) builder;
   final VoidCallback? onLinger;
 
@@ -250,8 +267,8 @@ class _NoteDropTargetState extends State<NoteDropTarget> {
     super.dispose();
   }
 
-  bool _accepts(DragTargetDetails<NoteTreeNode> details) {
-    final accepts = NotesActions.canMoveInto(details.data, widget.destination);
+  bool _accepts(DragTargetDetails<NoteDrag> details) {
+    final accepts = NotesActions.canMoveAllInto(details.data.nodes, widget.destination);
     if (accepts && widget.onLinger != null) _linger = Timer(NoteDropTarget.lingerDelay, widget.onLinger!);
     return accepts;
   }
@@ -262,7 +279,7 @@ class _NoteDropTargetState extends State<NoteDropTarget> {
   }
 
   @override
-  Widget build(BuildContext context) => DragTarget<NoteTreeNode>(
+  Widget build(BuildContext context) => DragTarget<NoteDrag>(
     onWillAcceptWithDetails: _accepts,
     onLeave: (_) => _leave(),
     onAcceptWithDetails: (details) {

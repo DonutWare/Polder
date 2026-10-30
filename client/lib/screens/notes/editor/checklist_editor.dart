@@ -7,6 +7,7 @@ import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_con
 import "package:polder/screens/notes/editor/note_editor.dart";
 import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/escape_cancels_drag.dart";
 
 class ChecklistEditor extends StatefulWidget {
   const ChecklistEditor({required this.controller, this.padding = EdgeInsets.zero, super.key});
@@ -256,14 +257,16 @@ class _ChecklistEditorState extends State<ChecklistEditor> {
               width: 24,
               child: index == null
                   ? null
-                  : ReorderableDragStartListener(
-                      index: index,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.grab,
-                        child: Icon(
-                          Icons.drag_indicator,
-                          size: 20,
-                          color: active ? colors.onSurfaceVariant : colors.onSurfaceVariant.withValues(alpha: 0.3),
+                  : EscapeCancelsDrag(
+                      child: ReorderableDragStartListener(
+                        index: index,
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.grab,
+                          child: Icon(
+                            Icons.drag_indicator,
+                            size: 20,
+                            color: active ? colors.onSurfaceVariant : colors.onSurfaceVariant.withValues(alpha: 0.3),
+                          ),
                         ),
                       ),
                     ),

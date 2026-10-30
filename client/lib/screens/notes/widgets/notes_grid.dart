@@ -129,9 +129,9 @@ class _NoteCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => NoteDropTarget(
     destination: node.childrenPath,
     onDrop: (dropped) =>
-        NoteNodeActions.drop(context, ref, node: dropped, destination: node.childrenPath, selectedPath: selectedPath),
+        NoteNodeActions.drop(context, ref, drag: dropped, destination: node.childrenPath, selectedPath: selectedPath),
     builder: (context, active) => NoteDragSource(
-      node: node,
+      nodes: [node],
       onHold: (anchor) => _showMenu(context, ref, anchor),
       child: _card(context, ref, active),
     ),
@@ -260,7 +260,7 @@ class _NoteCard extends ConsumerWidget {
   }
 
   void _showMenu(BuildContext context, WidgetRef ref, Rect anchor) =>
-      NoteNodeActions.showMenuFor(context, ref, node: node, anchor: anchor, selectedPath: selectedPath);
+      NoteNodeActions.showMenuFor(context, ref, nodes: [node], anchor: anchor, selectedPath: selectedPath);
 }
 
 class _ChecklistPreview extends StatelessWidget {
