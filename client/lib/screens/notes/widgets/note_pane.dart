@@ -13,6 +13,7 @@ import "package:polder/models/file_version.dart";
 import "package:polder/providers/app/navigation_history_provider.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
 import "package:polder/providers/notes/note_document_provider.dart";
+import "package:polder/providers/notes/renamed_note_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/providers/versions/file_versions_provider.dart";
@@ -79,8 +80,20 @@ class _NotePaneState extends ConsumerState<NotePane> {
   MarkdownEditingController? _controller;
   String _reported = "";
   bool _pickingLink = false;
+  NoteDocument? _carried;
 
   NoteDocumentNotifier get _notifier => ref.read(noteDocumentProvider(widget.path).notifier);
+
+  @override
+  void didUpdateWidget(NotePane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.path != widget.path) _carried = ref.read(noteDocumentProvider(oldWidget.path)).value;
+  }
+
+  void _follow(String renamed) {
+    ref.read(renamedNoteProvider.notifier).record(widget.path, renamed);
+    ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.noteAt(renamed));
+  }
 
   @override
   void initState() {
@@ -234,7 +247,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry);
     if (!mounted) return;
     final renamed = await NotesActions.rename(context, node);
-    if (renamed != null && mounted) ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.noteAt(renamed));
+    if (renamed != null && mounted) _follow(renamed);
   }
 
   Future<void> _delete(NoteDocument document) async {
@@ -266,12 +279,15 @@ class _NotePaneState extends ConsumerState<NotePane> {
 
   @override
   Widget build(BuildContext context) {
-    final document = ref.watch(noteDocumentProvider(widget.path));
+    final loaded = ref.watch(noteDocumentProvider(widget.path));
+    final document = switch (_carried) {
+      final carried? when !loaded.hasValue => AsyncData(carried),
+      _ => loaded,
+    };
     ref.listen(noteDocumentProvider(widget.path), (previous, next) {
       final moved = next.value?.entry.path;
-      if (moved != null && moved != widget.path && !(next.value?.dirty ?? true)) {
-        ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.noteAt(moved));
-      }
+      if (moved != null && moved != widget.path && !(next.value?.dirty ?? true)) _follow(moved);
+      if (next.hasValue) _carried = null;
       if (next.value case final value?) _followDocument(value);
     });
     return AnimatedSwitcher(

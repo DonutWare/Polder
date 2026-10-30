@@ -10,6 +10,7 @@ import "package:polder/providers/notes/note_document_provider.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
+import "package:polder/providers/notes/renamed_note_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/screens/notes/notes_actions.dart";
@@ -41,6 +42,17 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   var _sourceMode = false;
   FileEntry? _lastLinksEntry;
   var _askedForFolder = false;
+  String? _panePath;
+  Key? _paneKey;
+
+  Key _paneKeyFor(String notePath) {
+    final renamed = ref.watch(renamedNoteProvider);
+    final kept = _paneKey;
+    final continues = notePath == _panePath || (renamed != null && renamed == (from: _panePath, to: notePath));
+    _panePath = notePath;
+    if (kept != null && continues) return kept;
+    return _paneKey = ValueKey(notePath);
+  }
 
   @override
   void initState() {
@@ -167,7 +179,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       detail: switch (notePath) {
         null => null,
         final notePath when single => NotePane(
-          key: ValueKey(notePath),
+          key: _paneKeyFor(notePath),
           path: notePath,
           sourceMode: _sourceMode,
           onToggleSourceMode: _toggleSourceMode,
@@ -179,7 +191,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           onToggleLinks: () => _showLinksSheet(notePath),
         ),
         final notePath => SafeArea(
-          key: ValueKey(notePath),
+          key: _paneKeyFor(notePath),
           left: false,
           top: false,
           child: NotePane(

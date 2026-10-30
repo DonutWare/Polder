@@ -9,6 +9,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/providers/app/navigation_history_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder/providers/notes/renamed_note_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/notes/notes_actions.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
@@ -73,13 +74,14 @@ abstract final class NoteNodeActions {
     );
     if (action == null || !context.mounted) return;
     final navigation = ref.read(navigationHistoryProvider.notifier);
+    final renames = ref.read(renamedNoteProvider.notifier);
     switch (action) {
       case _NodeAction.newSubpage:
         await createSubpage(context, ref, node);
       case _NodeAction.rename:
-        _follow(navigation, selectedPath, node, await NotesActions.rename(context, node));
+        _follow(navigation, renames, selectedPath, node, await NotesActions.rename(context, node));
       case _NodeAction.move:
-        _follow(navigation, selectedPath, node, await NotesActions.move(context, node));
+        _follow(navigation, renames, selectedPath, node, await NotesActions.move(context, node));
       case _NodeAction.delete:
         final deleted = await NotesActions.delete(context, node);
         if (deleted && selectedPath != null && node.holds(selectedPath)) navigation.replace(AppRoutes.notes);
@@ -101,15 +103,24 @@ abstract final class NoteNodeActions {
   }) async {
     final expanded = ref.read(expandedNotesProvider.notifier);
     final navigation = ref.read(navigationHistoryProvider.notifier);
+    final renames = ref.read(renamedNoteProvider.notifier);
     final movedTo = await NotesActions.moveInto(context, node, destination);
     if (movedTo == null) return;
     expanded.expand(destination);
-    _follow(navigation, selectedPath, node, movedTo);
+    _follow(navigation, renames, selectedPath, node, movedTo);
   }
 
-  static void _follow(NavigationHistoryNotifier navigation, String? selectedPath, NoteTreeNode node, String? movedTo) {
+  static void _follow(
+    NavigationHistoryNotifier navigation,
+    RenamedNote renames,
+    String? selectedPath,
+    NoteTreeNode node,
+    String? movedTo,
+  ) {
     final selected = movedTo == null ? null : NotesActions.pathAfterMove(selectedPath, node, movedTo);
-    if (selected != null) navigation.replace(AppRoutes.noteAt(selected));
+    if (selectedPath == null || selected == null) return;
+    renames.record(selectedPath, selected);
+    navigation.replace(AppRoutes.noteAt(selected));
   }
 }
 
