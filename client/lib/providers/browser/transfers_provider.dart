@@ -2,16 +2,15 @@ import "dart:math";
 import "dart:typed_data";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_space.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/transfer.dart";
 import "package:polder/models/trash.dart";
-import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
+import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/providers/sync/sync_scheduler_provider.dart";
@@ -57,6 +56,15 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
       ref.invalidate(currentUserProvider);
       ref.read(syncSchedulerProvider)?.requestRun();
     });
+  }
+
+  Future<void> ensureFolder(String path) async {
+    try {
+      await ref.read(polderApiProvider).mkdir(path);
+    } on AlreadyExistsException {
+      return;
+    }
+    ref.invalidate(directoryProvider(RemotePath.parent(path)));
   }
 
   Future<void> download(FileEntry entry) => _downloadAndSave(

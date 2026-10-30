@@ -8,6 +8,7 @@ import "package:polder/providers/browser/browser_view_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder/screens/browser/widgets/file_drop_zone.dart";
 import "package:polder/screens/browser/widgets/file_grid_view.dart";
 import "package:polder/screens/browser/widgets/file_list_view.dart";
 import "package:polder/util/localization_helper.dart";
@@ -29,55 +30,61 @@ class DirectoryView extends ConsumerWidget {
     final pending = ref.watch(pendingUploadsProvider(path));
     final busyFolders = ref.watch(busyFoldersProvider(path));
     ref.watch(editorCapabilitiesProvider);
-    return AsyncValueView<DirectoryListing>(
-      value: ref.watch(directoryProvider(path)),
-      onRetry: notifier.refresh,
-      data: (listing) {
-        final items = mergePendingUploads(
-          ref.watch(browserSortProvider).apply(listing.entries),
-          pending,
-          busyFolders: busyFolders,
-        );
-        final view = ReadableWidth(
-          maxWidth: 1200,
-          builder: (context, inset) => RefreshIndicator(
-            edgeOffset: inset.top,
-            onRefresh: notifier.refresh,
-            child: items.isEmpty
-                ? RefreshableEmptyView(
-                    child: listing.indexing
-                        ? MessageView(icon: IconsaxPlusLinear.refresh_2, message: context.localized.indexingEmptyFolder)
-                        : MessageView(icon: IconsaxPlusLinear.folder_open, message: context.localized.emptyFolder),
-                  )
-                : _EntriesView(
-                    path: path,
-                    items: items,
-                    select: select,
-                    padding: inset + const EdgeInsets.fromLTRB(16, 8, 16, 96),
+    return FileDropZone(
+      path: path,
+      child: AsyncValueView<DirectoryListing>(
+        value: ref.watch(directoryProvider(path)),
+        onRetry: notifier.refresh,
+        data: (listing) {
+          final items = mergePendingUploads(
+            ref.watch(browserSortProvider).apply(listing.entries),
+            pending,
+            busyFolders: busyFolders,
+          );
+          final view = ReadableWidth(
+            maxWidth: 1200,
+            builder: (context, inset) => RefreshIndicator(
+              edgeOffset: inset.top,
+              onRefresh: notifier.refresh,
+              child: items.isEmpty
+                  ? RefreshableEmptyView(
+                      child: listing.indexing
+                          ? MessageView(
+                              icon: IconsaxPlusLinear.refresh_2,
+                              message: context.localized.indexingEmptyFolder,
+                            )
+                          : MessageView(icon: IconsaxPlusLinear.folder_open, message: context.localized.emptyFolder),
+                    )
+                  : _EntriesView(
+                      path: path,
+                      items: items,
+                      select: select,
+                      padding: inset + const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                    ),
+            ),
+          );
+          if (!listing.indexing || items.isEmpty) return view;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ReadableWidth(
+                maxWidth: 1200,
+                builder: (context, inset) => Padding(
+                  padding: EdgeInsets.fromLTRB(inset.left + 16, inset.top + 8, inset.right + 16, 0),
+                  child: NoticeTile(
+                    icon: IconsaxPlusLinear.refresh_2,
+                    text: context.localized.indexingBanner,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-          ),
-        );
-        if (!listing.indexing || items.isEmpty) return view;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ReadableWidth(
-              maxWidth: 1200,
-              builder: (context, inset) => Padding(
-                padding: EdgeInsets.fromLTRB(inset.left + 16, inset.top + 8, inset.right + 16, 0),
-                child: NoticeTile(
-                  icon: IconsaxPlusLinear.refresh_2,
-                  text: context.localized.indexingBanner,
-                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-            ),
-            Expanded(
-              child: MediaQuery.removePadding(context: context, removeTop: true, child: view),
-            ),
-          ],
-        );
-      },
+              Expanded(
+                child: MediaQuery.removePadding(context: context, removeTop: true, child: view),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

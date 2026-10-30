@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/screens/browser/widgets/browser_scope.dart";
+import "package:polder/screens/browser/widgets/file_drag.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
@@ -12,6 +13,7 @@ class Breadcrumbs extends StatelessWidget {
     required this.path,
     this.rootLabel,
     this.onNavigate,
+    this.acceptsMoves = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
     super.key,
   });
@@ -19,6 +21,7 @@ class Breadcrumbs extends StatelessWidget {
   final String path;
   final String? rootLabel;
   final ValueChanged<String>? onNavigate;
+  final bool acceptsMoves;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -43,13 +46,16 @@ class Breadcrumbs extends StatelessWidget {
           ),
           itemBuilder: (context, index) {
             final crumb = crumbs[crumbs.length - 1 - index];
-            return _Crumb(
+            Widget button(BuildContext context, bool highlighted) => _Crumb(
               path: crumb,
+              highlighted: highlighted,
               isCurrent: crumb == path,
               isRoot: routes.isRoot(crumb),
               rootLabel: rootLabel ?? routes.rootLabel,
               onNavigate: onNavigate ?? (target) => context.go(routes.routeFor(target)),
             );
+            if (!acceptsMoves) return button(context, false);
+            return FileMoveTarget(destination: crumb, builder: button);
           },
         ),
       ),
@@ -59,6 +65,7 @@ class Breadcrumbs extends StatelessWidget {
 
 class _Crumb extends StatelessWidget {
   const _Crumb({
+    required this.highlighted,
     required this.path,
     required this.isCurrent,
     required this.isRoot,
@@ -71,6 +78,7 @@ class _Crumb extends StatelessWidget {
   final bool isRoot;
   final String? rootLabel;
   final ValueChanged<String> onNavigate;
+  final bool highlighted;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +91,11 @@ class _Crumb extends StatelessWidget {
           minimumSize: const Size(0, 34),
           foregroundColor: cs.onSurfaceVariant,
           disabledForegroundColor: cs.onSurface,
-          backgroundColor: isCurrent ? AppColors.of(context).panel : null,
+          backgroundColor: highlighted
+              ? cs.primary.withValues(alpha: 0.12)
+              : isCurrent
+              ? AppColors.of(context).panel
+              : null,
         ),
         onPressed: isCurrent ? null : () => onNavigate(path),
         icon: isRoot ? const Icon(IconsaxPlusLinear.home_2, size: 16) : null,

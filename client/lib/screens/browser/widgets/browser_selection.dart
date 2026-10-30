@@ -11,6 +11,7 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/browser_selection_provider.dart";
 import "package:polder/screens/browser/widgets/browser_scope.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
+import "package:polder/screens/browser/widgets/file_drag.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
@@ -50,6 +51,11 @@ class _SelectableEntryState extends ConsumerState<SelectableEntry> {
   BrowserSelectionNotifier get _notifier => ref.read(browserSelectionProvider(widget.parentPath).notifier);
 
   List<FileEntry> _targets() => _selection.contains(_name) ? _notifier.selectedEntries : [widget.entry];
+
+  FileDrag? _drag() {
+    final entries = _targets();
+    return FileActions.canMove(entries) ? FileDrag(parentPath: widget.parentPath, entries: entries) : null;
+  }
 
   void _showMenu(RelativeRect position) =>
       FileActions.showMenuFor(context, ref, parentPath: widget.parentPath, entries: _targets(), position: position);
@@ -118,15 +124,18 @@ class _SelectableEntryState extends ConsumerState<SelectableEntry> {
   @override
   Widget build(BuildContext context) {
     final provider = browserSelectionProvider(widget.parentPath);
-    final selected = ref.watch(provider.select((selection) => selection.contains(_name)));
+    final selection = ref.watch(provider.select((selection) => selection.contains(_name) ? selection : null));
+    final selected = selection != null;
     if (!AdaptiveLayout.usesPointer(context)) {
+      final tile = widget.builder(
+        context,
+        EntryInteraction(selected: selected, onTap: _onTouchTap, onIconTap: () => _notifier.toggle(_name)),
+      );
+      final drag = selected ? _drag() : null;
       return GestureDetector(
-        onLongPressStart: _onLongPress,
+        onLongPressStart: drag == null ? _onLongPress : null,
         onSecondaryTapUp: (details) => _showMenu(FileActions.menuPositionAt(context, details.globalPosition)),
-        child: widget.builder(
-          context,
-          EntryInteraction(selected: selected, onTap: _onTouchTap, onIconTap: () => _notifier.toggle(_name)),
-        ),
+        child: drag == null ? tile : FileDragSource(drag: drag, longPress: true, child: tile),
       );
     }
     ref.listen(provider.select((selection) => selection.lead == _name), (_, lead) {
@@ -135,11 +144,13 @@ class _SelectableEntryState extends ConsumerState<SelectableEntry> {
         if (mounted) _reveal();
       });
     });
+    final tile = widget.builder(context, EntryInteraction(selected: selected, onTap: _onPointerTap, onMenu: _showMenu));
+    final drag = _drag();
     return Listener(
       onPointerDown: _onPointerDown,
       child: GestureDetector(
         onSecondaryTapUp: (details) => _showMenu(FileActions.menuPositionAt(context, details.globalPosition)),
-        child: widget.builder(context, EntryInteraction(selected: selected, onTap: _onPointerTap, onMenu: _showMenu)),
+        child: drag == null ? tile : FileDragSource(drag: drag, longPress: false, child: tile),
       ),
     );
   }

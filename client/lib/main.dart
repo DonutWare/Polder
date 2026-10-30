@@ -1,5 +1,7 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
+import "package:flutter/services.dart";
 import "package:flutter/widgets.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -14,6 +16,7 @@ import "package:polder/widgets/shared/polder_logo.dart";
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
+  if (kIsWeb) await BrowserContextMenu.disableContextMenu();
   await initializeBackgroundSync();
   await initializeDesktopWindow();
   unawaited(precachePolderIcon());

@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:polder/models/activity.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
+import "package:polder/screens/browser/widgets/file_drop_zone.dart";
 import "package:polder/screens/browser/widgets/file_list_tile.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/screens/browser/widgets/selection_highlight.dart";
@@ -69,6 +70,13 @@ class _FileListViewState extends State<FileListView> {
                 FileListTile(entry: entry, interaction: interaction, pending: item.pending, syncing: item.syncing),
           ),
         };
+        final droppable = entry != null && entry.isDir
+            ? FolderDropTarget(
+                folder: entry,
+                shape: (side) => GroupedTile.shapeFor(index, widget.items.length, side: side),
+                child: content,
+              )
+            : content;
         return GroupedTile(
           key: ValueKey(item.name),
           index: index,
@@ -77,9 +85,9 @@ class _FileListViewState extends State<FileListView> {
               ? SelectionHighlight(
                   key: ValueKey("selected-${item.name}"),
                   shape: (side) => GroupedTile.shapeFor(index, widget.items.length, side: side),
-                  child: content,
+                  child: droppable,
                 )
-              : content,
+              : droppable,
         );
       },
     ),

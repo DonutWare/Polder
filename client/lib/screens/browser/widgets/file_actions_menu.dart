@@ -26,7 +26,7 @@ enum _FileAction { open, edit, download, share, shareDetails, history, rename, c
 abstract final class FileActions {
   static RelativeRect menuPositionAt(BuildContext context, Offset globalPosition) {
     final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
-    return RelativeRect.fromRect(globalPosition & Size.zero, Offset.zero & overlay.size);
+    return RelativeRect.fromRect(overlay.globalToLocal(globalPosition) & Size.zero, Offset.zero & overlay.size);
   }
 
   static RelativeRect menuPositionBelow(BuildContext context) {
@@ -51,9 +51,7 @@ abstract final class FileActions {
     if (entries.isEmpty) return;
     final single = entries.length == 1 ? entries.single : null;
     final inShare = entries.any((entry) => entry.mount != null);
-    final includesShareRoot = entries.any((entry) => entry.isMountRoot);
-    bool allowed(bool Function(SharePermissions permissions) test) =>
-        !includesShareRoot && entries.every((entry) => entry.mount == null || test(entry.mount!.permissions));
+    bool allowed(bool Function(SharePermissions permissions) test) => _allowed(entries, test);
     final editable = single != null && (ref.read(editorCapabilitiesProvider).value?.canOpen(single) ?? false);
     final hasFiles = entries.any((entry) => !entry.isDir);
     final error = Theme.of(context).colorScheme.error;
@@ -75,8 +73,7 @@ abstract final class FileActions {
           iconMenuItem(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
         if (allowed((permissions) => permissions.create))
           iconMenuItem(_FileAction.copy, IconsaxPlusLinear.copy, context.localized.copy),
-        if (allowed((permissions) => permissions.create && permissions.delete))
-          iconMenuItem(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
+        if (canMove(entries)) iconMenuItem(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
         if (allowed((permissions) => permissions.delete))
           iconMenuItem(_FileAction.delete, IconsaxPlusLinear.trash, context.localized.delete, color: error),
       ],
@@ -162,6 +159,23 @@ abstract final class FileActions {
     if (destination == null || !context.mounted) return;
     await context.runWithFeedback(directory.copyAllTo(entries, destination, copySuffix: context.localized.copySuffix));
   }
+
+  static bool _allowed(List<FileEntry> entries, bool Function(SharePermissions permissions) test) =>
+      !entries.any((entry) => entry.isMountRoot) &&
+      entries.every((entry) => entry.mount == null || test(entry.mount!.permissions));
+
+  static bool canMove(List<FileEntry> entries) =>
+      _allowed(entries, (permissions) => permissions.create && permissions.delete);
+
+  static bool canMoveInto(
+    WidgetRef ref, {
+    required String parentPath,
+    required List<FileEntry> entries,
+    required String destination,
+  }) =>
+      destination != parentPath &&
+      !entries.any((entry) => entry.path == destination || RemotePath.isWithin(destination, entry.path)) &&
+      _withinSameShare(ref, entries, destination);
 
   static bool _withinSameShare(WidgetRef ref, List<FileEntry> entries, String destination) {
     if (entries.first.mount case final mount?) return mount.contains(destination);

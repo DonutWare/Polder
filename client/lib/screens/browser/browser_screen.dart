@@ -56,7 +56,7 @@ class BrowserScreen extends ConsumerWidget {
               ? Text(material.selectedRowCountTitle(selection.length))
               : routes.isRoot(path)
               ? Text(routes.rootLabel ?? context.localized.navFiles)
-              : Breadcrumbs(path: path, padding: EdgeInsets.zero),
+              : Breadcrumbs(path: path, acceptsMoves: true, padding: EdgeInsets.zero),
           actions: selecting
               ? [
                   IconButton(
