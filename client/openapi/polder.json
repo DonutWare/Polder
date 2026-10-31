@@ -3631,6 +3631,20 @@
         },
         "type": "object"
       },
+      "UnusedTagsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "removed": {
+            "description": "How many tags were deleted",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "removed"
+        ],
+        "type": "object"
+      },
       "UploadRequest": {
         "additionalProperties": false,
         "properties": {
@@ -12705,6 +12719,52 @@
           }
         ],
         "summary": "Remove tags from files, folders and notes",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/api/v1/tags/unused": {
+      "delete": {
+        "operationId": "deleteUnusedTags",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnusedTagsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete the user's tags that no item or own note carries",
         "tags": [
           "tags"
         ]

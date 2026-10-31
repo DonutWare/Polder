@@ -3773,6 +3773,29 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
   }
 
   @override
+  Future<Response<UnusedTagsResponse>> _deleteUnusedTags({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete the user\'s tags that no item or own note carries',
+      operationId: 'deleteUnusedTags',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/tags/unused');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<UnusedTagsResponse, UnusedTagsResponse>($request);
+  }
+
+  @override
   Future<Response<dynamic>> _deleteTag({
     required int? tagID,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(

@@ -273,6 +273,7 @@ func (a *API) routes(api huma.API) {
 
 	register(user, http.MethodGet, "/tags", "listTags", "The logged-in user's tags with how many items carry each", a.listTags)
 	register(user, http.MethodPost, "/tags", "createTag", "Create a tag; names are unique per user, ignoring case", a.createTag, created)
+	register(user, http.MethodDelete, "/tags/unused", "deleteUnusedTags", "Delete the user's tags that no item or own note carries", a.deleteUnusedTags)
 	register(user, http.MethodPatch, "/tags/{tagID}", "updateTag", "Rename or recolor a tag; a rename also rewrites the tag in the user's own notes", a.updateTag)
 	register(user, http.MethodDelete, "/tags/{tagID}", "deleteTag", "Delete a tag and remove it from the user's items and own notes", a.deleteTag)
 	register(user, http.MethodPost, "/tags/assign", "assignTags", "Add tags to files, folders and notes; unknown names become new tags", a.assignTags)

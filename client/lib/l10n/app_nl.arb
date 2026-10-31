@@ -772,5 +772,9 @@
 	"tagDeleteTitle": "#{name} verwijderen?",
 	"tagDeleteMessage": "{count, plural, =0{De tag wordt nergens gebruikt.} =1{Hij wordt van 1 item verwijderd, ook uit de tekst van je notities.} other{Hij wordt van {count} items verwijderd, ook uit de tekst van je notities.}}",
 	"tagSuggestionCreate": "Nieuwe tag",
-	"searchKeywordsTags": "labels, hashtags, kleuren, categorieën"
+	"searchKeywordsTags": "labels, hashtags, kleuren, categorieën",
+	"tagsDeleteUnused": "Ongebruikte tags verwijderen",
+	"tagsDeleteUnusedTitle": "Ongebruikte tags verwijderen?",
+	"tagsDeleteUnusedMessage": "{count, plural, =1{1 tag staat op geen enkel item en in geen van je notities. Deze wordt verwijderd.} other{{count} tags staan op geen enkel item en in geen van je notities. Ze worden verwijderd.}}",
+	"tagsUnusedDeleted": "{count, plural, =0{Geen ongebruikte tags} =1{1 tag verwijderd} other{{count} tags verwijderd}}"
 }

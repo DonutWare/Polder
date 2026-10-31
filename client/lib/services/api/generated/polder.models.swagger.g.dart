@@ -1702,6 +1702,13 @@ UnlockRequest _$UnlockRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UnlockRequestToJson(UnlockRequest instance) => <String, dynamic>{'password': ?instance.password};
 
+UnusedTagsResponse _$UnusedTagsResponseFromJson(Map<String, dynamic> json) =>
+    UnusedTagsResponse(removed: (json['removed'] as num).toInt());
+
+Map<String, dynamic> _$UnusedTagsResponseToJson(UnusedTagsResponse instance) => <String, dynamic>{
+  'removed': instance.removed,
+};
+
 UploadRequest _$UploadRequestFromJson(Map<String, dynamic> json) => UploadRequest(
   baseRev: (json['baseRev'] as num?)?.toInt(),
   chunks: (json['chunks'] as List<dynamic>?)?.map((e) => ChunkRef.fromJson(e as Map<String, dynamic>)).toList() ?? [],

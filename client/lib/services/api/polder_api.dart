@@ -150,6 +150,8 @@ class PolderApi {
 
   Future<void> deleteTag(int id) => _service.deleteTag(tagID: id);
 
+  Future<int> deleteUnusedTags() async => (await _service.deleteUnusedTags()).body!.removed;
+
   Future<List<TagAssignmentResult>> assignTags(List<String> paths, List<String> names) => _tagAssignmentResults(
     _service.assignTags(
       body: wire.TagAssignment(paths: paths, names: names),

@@ -8167,6 +8167,40 @@ extension $UnlockRequestExtension on UnlockRequest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class UnusedTagsResponse {
+  const UnusedTagsResponse({required this.removed});
+
+  factory UnusedTagsResponse.fromJson(Map<String, dynamic> json) => _$UnusedTagsResponseFromJson(json);
+
+  static const toJsonFactory = _$UnusedTagsResponseToJson;
+  Map<String, dynamic> toJson() => _$UnusedTagsResponseToJson(this);
+
+  @JsonKey(name: 'removed', includeIfNull: false)
+  final int removed;
+  static const fromJsonFactory = _$UnusedTagsResponseFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is UnusedTagsResponse &&
+            (identical(other.removed, removed) || const DeepCollectionEquality().equals(other.removed, removed)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(removed) ^ runtimeType.hashCode;
+}
+
+extension $UnusedTagsResponseExtension on UnusedTagsResponse {
+  UnusedTagsResponse copyWith({int? removed}) {
+    return UnusedTagsResponse(removed: removed ?? this.removed);
+  }
+
+  UnusedTagsResponse copyWithWrapped({Wrapped<int>? removed}) {
+    return UnusedTagsResponse(removed: (removed != null ? removed.value : this.removed));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class UploadRequest {
   const UploadRequest({
     this.baseRev,

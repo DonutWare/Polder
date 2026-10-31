@@ -25,8 +25,17 @@ class TagsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tags = ref.watch(tagsProvider);
     final notifier = ref.read(tagsProvider.notifier);
+    final unused = tags.value?.where((tag) => tag.count == 0).length ?? 0;
     return AppPage(
       title: Text(context.localized.tagsTitle),
+      actions: [
+        if (unused > 0)
+          IconButton(
+            tooltip: context.localized.tagsDeleteUnused,
+            icon: const Icon(IconsaxPlusLinear.broom),
+            onPressed: () => _deleteUnused(context, ref, unused),
+          ),
+      ],
       body: AsyncValueView<List<UserTag>>(
         value: tags,
         onRetry: notifier.refresh,
@@ -53,6 +62,25 @@ class TagsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<void> _deleteUnused(BuildContext context, WidgetRef ref, int unused) async {
+  final l = context.localized;
+  final notifier = ref.read(tagsProvider.notifier);
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final confirmed = await showConfirmDialog(
+    context,
+    title: l.tagsDeleteUnusedTitle,
+    message: l.tagsDeleteUnusedMessage(unused),
+    confirmLabel: l.delete,
+    destructive: true,
+  );
+  if (!confirmed || !context.mounted) return;
+  var removed = 0;
+  final succeeded = await context.runWithFeedback(() async {
+    removed = await notifier.deleteUnused();
+  }());
+  if (succeeded) messenger?.showSnackBar(SnackBar(content: Text(l.tagsUnusedDeleted(removed))));
 }
 
 class _TagTile extends ConsumerWidget {

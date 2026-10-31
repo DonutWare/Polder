@@ -3820,6 +3820,29 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     ),
   });
 
+  ///Delete the user's tags that no item or own note carries
+  Future<chopper.Response<UnusedTagsResponse>> deleteUnusedTags() {
+    generatedMapping.putIfAbsent(UnusedTagsResponse, () => UnusedTagsResponse.fromJsonFactory);
+
+    return _deleteUnusedTags();
+  }
+
+  ///Delete the user's tags that no item or own note carries
+  @DELETE(path: '/api/v1/tags/unused')
+  Future<chopper.Response<UnusedTagsResponse>> _deleteUnusedTags({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete the user\'s tags that no item or own note carries',
+      operationId: 'deleteUnusedTags',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  });
+
   ///Delete a tag and remove it from the user's items and own notes
   ///@param tagID
   Future<chopper.Response> deleteTag({required int? tagID}) {

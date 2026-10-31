@@ -137,6 +137,38 @@ func TestTagsOnFilesAndFolders(t *testing.T) {
 	})
 }
 
+func TestDeleteUnusedTagsKeepsTagsInUse(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		admin := server.setupAdmin()
+		alice := server.createUser(admin, "alice", 0)
+		bob := server.createUser(admin, "bob", 0)
+		alice.put("/report.pdf", 0, []byte("pdf"), http.StatusOK, nil)
+		alice.put("/plan.md", 0, []byte("Next steps #roadmap\n"), http.StatusOK, nil)
+		alice.assignTags([]string{"/report.pdf"}, "finance")
+		alice.mustJSON(http.MethodPost, "/tags", map[string]string{"name": "someday"}, http.StatusCreated, nil)
+		bob.mustJSON(http.MethodPost, "/tags", map[string]string{"name": "someday"}, http.StatusCreated, nil)
+		alice.waitForTag("roadmap", 1)
+
+		var deleted struct {
+			Removed int64 `json:"removed"`
+		}
+		alice.mustJSON(http.MethodDelete, "/tags/unused", nil, http.StatusOK, &deleted)
+		if deleted.Removed != 1 {
+			t.Fatalf("removed %d tags, want 1: %+v", deleted.Removed, alice.tags())
+		}
+		var names []string
+		for _, tag := range alice.tags() {
+			names = append(names, tag.Name)
+		}
+		if !slices.Equal(names, []string{"finance", "roadmap"}) {
+			t.Fatalf("left %v", names)
+		}
+		if _, ok := bob.tagNamed("someday"); !ok {
+			t.Fatal("another user's unused tag was deleted")
+		}
+	})
+}
+
 func TestTagsWrittenInNotes(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 0)

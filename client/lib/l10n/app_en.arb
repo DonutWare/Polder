@@ -1461,5 +1461,11 @@
 	"tagDeleteMessage": "{count, plural, =0{The tag is not used anywhere.} =1{It is removed from 1 item, including the text of your notes.} other{It is removed from {count} items, including the text of your notes.}}",
 	"@tagDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
 	"tagSuggestionCreate": "New tag",
-	"searchKeywordsTags": "labels, hashtags, colors, categories"
+	"searchKeywordsTags": "labels, hashtags, colors, categories",
+	"tagsDeleteUnused": "Delete unused tags",
+	"tagsDeleteUnusedTitle": "Delete unused tags?",
+	"tagsDeleteUnusedMessage": "{count, plural, =1{1 tag is not on any item or in any of your notes. It will be deleted.} other{{count} tags are not on any item or in any of your notes. They will be deleted.}}",
+	"@tagsDeleteUnusedMessage": {"placeholders": {"count": {"type": "int"}}},
+	"tagsUnusedDeleted": "{count, plural, =0{No unused tags} =1{1 tag deleted} other{{count} tags deleted}}",
+	"@tagsUnusedDeleted": {"placeholders": {"count": {"type": "int"}}}
 }

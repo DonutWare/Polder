@@ -94,6 +94,10 @@ func (s *Service) Delete(ctx context.Context, viewer users.User, id int64) error
 	return s.store.Delete(ctx, viewer.ID, id)
 }
 
+func (s *Service) DeleteUnused(ctx context.Context, viewer users.User) (int64, error) {
+	return s.store.DeleteUnused(ctx, viewer.ID)
+}
+
 func (s *Service) rewriteOwnNotes(ctx context.Context, owner users.User, key string, rewrite func([]byte) []byte) {
 	noteIDs, err := s.store.NotesWithTag(ctx, owner.ID, key)
 	if err != nil {

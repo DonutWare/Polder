@@ -144,6 +144,18 @@ func (s *Store) Delete(ctx context.Context, userID, id int64) error {
 	return database.RequireAffected(notFound())(s.db.ExecContext(ctx, `DELETE FROM tags WHERE user_id = $1 AND id = $2`, userID, id))
 }
 
+func (s *Store) DeleteUnused(ctx context.Context, userID int64) (int64, error) {
+	result, err := s.db.ExecContext(ctx,
+		`DELETE FROM tags WHERE user_id = $1
+		   AND NOT EXISTS (SELECT 1 FROM file_tags ft WHERE ft.tag_id = tags.id)
+		   AND NOT EXISTS (SELECT 1 FROM note_tags n JOIN files f ON f.id = n.file_id
+		                   WHERE f.user_id = tags.user_id AND n.name_key = tags.name_key)`, userID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 func (s *Store) AddManual(ctx context.Context, userID, fileID, tagID int64) error {
 	_, err := s.db.ExecContext(ctx,
 		`INSERT INTO file_tags (user_id, file_id, tag_id) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,

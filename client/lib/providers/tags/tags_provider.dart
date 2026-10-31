@@ -73,6 +73,12 @@ class TagsNotifier extends AsyncNotifier<List<UserTag>> {
     await _afterItemsChanged();
   }
 
+  Future<int> deleteUnused() async {
+    final removed = await _api.deleteUnusedTags();
+    await refresh();
+    return removed;
+  }
+
   Future<List<TagAssignmentResult>> assign(List<String> paths, List<String> names) async {
     final results = await _api.assignTags(paths, names);
     await _afterItemsChanged();

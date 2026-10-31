@@ -39,6 +39,10 @@ type tagAssignmentResponse struct {
 	Results []tagAssignmentResult `json:"results"`
 }
 
+type unusedTagsResponse struct {
+	Removed int64 `json:"removed" doc:"How many tags were deleted"`
+}
+
 func (a *API) listTags(ctx context.Context, _ *struct{}) (*jsonBody[[]tags.UserTag], error) {
 	list, err := a.tags.List(ctx, currentUser(ctx))
 	if err != nil {
@@ -65,6 +69,14 @@ func (a *API) updateTag(ctx context.Context, input *updateTagInput) (*jsonBody[t
 
 func (a *API) deleteTag(ctx context.Context, input *tagPath) (*struct{}, error) {
 	return nil, a.tags.Delete(ctx, currentUser(ctx), input.TagID)
+}
+
+func (a *API) deleteUnusedTags(ctx context.Context, _ *struct{}) (*jsonBody[unusedTagsResponse], error) {
+	removed, err := a.tags.DeleteUnused(ctx, currentUser(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return respond(unusedTagsResponse{Removed: removed}), nil
 }
 
 func (a *API) assignTags(ctx context.Context, input *jsonBody[tagAssignment]) (*jsonBody[tagAssignmentResponse], error) {
