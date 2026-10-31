@@ -21,6 +21,7 @@ ENV PATH=/flutter/bin:$PATH
 RUN flutter config --no-analytics >/dev/null && flutter precache --web
 WORKDIR /client
 COPY client/pubspec.yaml client/pubspec.lock ./
+COPY client/packages/ ./packages/
 RUN flutter pub get
 COPY client/ .
 # CanvasKit is served by Polder itself, so the web client also works on a LAN without internet.

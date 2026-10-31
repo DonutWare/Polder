@@ -182,9 +182,7 @@ func leadingNumber(text string) int {
 func ingredientsFrom(value any) []string {
 	var items []string
 	for _, item := range asList(value) {
-		for _, line := range cleanLines(textOf(item)) {
-			items = append(items, line)
-		}
+		items = append(items, cleanLines(textOf(item))...)
 	}
 	return items
 }
