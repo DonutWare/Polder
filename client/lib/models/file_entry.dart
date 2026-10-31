@@ -29,6 +29,8 @@ abstract class FileEntry with _$FileEntry {
     @JsonKey(unknownEnumValue: PreviewState.none) @Default(PreviewState.none) PreviewState previewState,
     FileMount? mount,
     @Default(false) bool sharedByYou,
+    @Default(<int>[]) List<int> tagIds,
+    @Default(<String>[]) List<String> otherTags,
   }) = _FileEntry;
 
   factory FileEntry.fromJson(Map<String, dynamic> json) => _$FileEntryFromJson(json);

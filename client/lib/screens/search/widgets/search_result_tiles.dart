@@ -9,6 +9,7 @@ import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/icon_badge.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 class SearchHitTile extends StatelessWidget {
   const SearchHitTile({
@@ -48,7 +49,15 @@ class SearchHitTile extends StatelessWidget {
       selectedColor: theme.colorScheme.onSurface,
       shape: snippet == null ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       leading: FileThumbnail(entry: entry, dimension: 40),
-      title: HighlightedText(text: entry.name, ranges: hit.nameMatches),
+      title: Row(
+        spacing: 8,
+        children: [
+          Flexible(
+            child: HighlightedText(text: entry.name, ranges: hit.nameMatches),
+          ),
+          EntryTagChips(entry: entry),
+        ],
+      ),
       isThreeLine: snippet != null,
       subtitle: snippet == null
           ? location

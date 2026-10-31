@@ -25,6 +25,7 @@ import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/models/upload_batch.dart";
 import "package:polder/models/user.dart";
+import "package:polder/models/user_tag.dart";
 import "package:polder/services/api/api_error_mapper.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 
@@ -43,7 +44,18 @@ extension EntryToModel on wire.Entry {
     previewState: _previewState(previewState.value),
     mount: mount?.toModel(),
     sharedByYou: shared ?? false,
+    tagIds: tagIds ?? const [],
+    otherTags: otherTags ?? const [],
   );
+}
+
+extension TagToModel on wire.UserTag {
+  UserTag toModel() =>
+      UserTag(id: id, name: name, color: parseHexColor(color) ?? const Color(0xFF8D8D8D), count: count);
+}
+
+extension TagAssignmentResultToModel on wire.TagAssignmentResult {
+  TagAssignmentResult toModel() => TagAssignmentResult(path: path, error: error);
 }
 
 extension MountToModel on wire.Mount {
@@ -547,6 +559,7 @@ extension QueryFilterToModel on wire.QueryFilter {
       wire.QueryFilterKey.$in => SearchKey.folder,
       wire.QueryFilterKey.modified => SearchKey.modified,
       wire.QueryFilterKey.size => SearchKey.size,
+      wire.QueryFilterKey.tag => SearchKey.tag,
       wire.QueryFilterKey.swaggerGeneratedUnknown => null,
     };
     final searchOp = switch (op) {

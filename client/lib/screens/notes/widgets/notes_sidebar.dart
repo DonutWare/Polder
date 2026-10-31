@@ -18,6 +18,7 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/modifier_keys.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 String notesLevel(WidgetRef ref, String root) {
   if (ref.watch(notesViewModeProvider) != NotesViewMode.grid) return root;
@@ -483,6 +484,7 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
                     ),
                   ),
                 ),
+                EntryTagDots(entry: node.page ?? node.folder!),
                 _disclosure(context, expanded: expanded, height: height),
               ],
             ),

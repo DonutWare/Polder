@@ -12,12 +12,17 @@ void main() {
       final tokens = tokenizeSearch('cat in="/My Photos" -type:gif size>=1mb unknown=x');
 
       expect(tokens.map((token) => token.text), ["cat", 'in="/My Photos"', "-type:gif", "size>=1mb", "unknown=x"]);
-      expect(tokens.map((token) => token.tagLength), [0, 3, 6, 6, 0]);
+      expect(tokens.map((token) => token.filterLength), [0, 3, 6, 6, 0]);
       expect(tokens[1].range, const TextRange(start: 4, end: 19));
     });
 
+    test("marks tag filters and #tags", () {
+      final tokens = tokenizeSearch("tag=work #home -#later #123");
+      expect(tokens.map((token) => token.filterLength), [4, 1, 2, 0]);
+    });
+
     test("a key without an operator is plain text", () {
-      expect(tokenizeSearch("type").single.isTag, isFalse);
+      expect(tokenizeSearch("type").single.isFilter, isFalse);
     });
   });
 
@@ -35,7 +40,7 @@ void main() {
   });
 
   group("replaceSearchRange", () {
-    test("replaces a tag in place and keeps one space after it", () {
+    test("replaces a filter in place and keeps one space after it", () {
       final (text, caret) = replaceSearchRange(
         "cat type=png size>1mb",
         const TextRange(start: 4, end: 12),
@@ -46,7 +51,7 @@ void main() {
       expect(caret, 13);
     });
 
-    test("removing a tag collapses the gap", () {
+    test("removing a filter collapses the gap", () {
       final (text, _) = replaceSearchRange("cat type=png size>1mb", const TextRange(start: 4, end: 12), "");
 
       expect(text, "cat size>1mb");
@@ -67,9 +72,9 @@ void main() {
     });
   });
 
-  test("appendSearchTag adds a tag after whatever was typed", () {
-    expect(appendSearchTag("", "type=pdf"), "type=pdf ");
-    expect(appendSearchTag("report  ", "type=pdf"), "report type=pdf ");
+  test("appendSearchFilter adds a filter after whatever was typed", () {
+    expect(appendSearchFilter("", "type=pdf"), "type=pdf ");
+    expect(appendSearchFilter("report  ", "type=pdf"), "report type=pdf ");
   });
 
   group("fuzzyMatch", () {

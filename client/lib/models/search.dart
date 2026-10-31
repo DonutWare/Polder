@@ -6,7 +6,7 @@ import "package:polder/models/file_entry.dart";
 
 part "search.freezed.dart";
 
-enum SearchKey { type, ext, folder, modified, size }
+enum SearchKey { type, ext, folder, modified, size, tag }
 
 enum SearchOp { equals, notEquals, greater, greaterOrEqual, less, lessOrEqual, between }
 

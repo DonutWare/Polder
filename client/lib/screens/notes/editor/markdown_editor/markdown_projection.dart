@@ -2,6 +2,7 @@ import "dart:math" as math;
 
 import "package:flutter/material.dart";
 
+import "package:polder/models/user_tag.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_source.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
@@ -19,7 +20,10 @@ class MarkdownPresentation {
     required this.onToggleTask,
     required this.onRevealBlock,
     this.blockBuilder,
+    this.tagColor = _noTagColor,
   });
+
+  static Color? _noTagColor(String key) => null;
 
   final MarkdownEditorStyle style;
   final double width;
@@ -29,6 +33,7 @@ class MarkdownPresentation {
   final void Function(MarkdownLine line) onToggleTask;
   final void Function(MarkdownBlock block) onRevealBlock;
   final MarkdownBlockBuilder? blockBuilder;
+  final Color? Function(String key) tagColor;
 }
 
 String unescapeMarkdown(String value) =>
@@ -217,6 +222,8 @@ class MarkdownProjection {
         _marker(node.contentEnd, node.end, code, active);
       case MarkdownInlineKind.url:
         _emit(node.start, node.end, _style.linkOf(style));
+      case MarkdownInlineKind.tag:
+        _emit(node.start, node.end, _tagStyle(style, _text.substring(node.contentStart, node.contentEnd)));
       case MarkdownInlineKind.link when !active && rendersAsEmbed(_text, node, line):
         _widget(_image(node, style, standalone: true), PlaceholderAlignment.bottom);
         _hide(node.start + 1, node.end);
@@ -246,6 +253,11 @@ class MarkdownProjection {
         _inlines(node.children, node.contentStart, node.contentEnd, inner, line);
         _marker(node.contentEnd, node.end, inner, active);
     }
+  }
+
+  TextStyle _tagStyle(TextStyle style, String name) {
+    final color = presentation.tagColor(tagKey(name)) ?? _style.accentColor;
+    return style.copyWith(color: color, fontWeight: FontWeight.w600, backgroundColor: color.withValues(alpha: 0.12));
   }
 
   bool _isStandalone(MarkdownInline node, MarkdownLine line) => node.start == line.contentStart && node.end == line.end;

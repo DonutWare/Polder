@@ -87,6 +87,12 @@ final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
         keywords: (l) => l.searchKeywordsAutoUpload,
       ),
     AppDestination(
+      route: AppRoutes.tags,
+      icon: IconsaxPlusLinear.tag,
+      label: (l) => l.tagsTitle,
+      keywords: (l) => l.searchKeywordsTags,
+    ),
+    AppDestination(
       route: AppRoutes.trash,
       icon: IconsaxPlusLinear.trash,
       label: (l) => l.navTrash,

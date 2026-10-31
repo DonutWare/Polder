@@ -27,6 +27,7 @@ import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/models/upload_batch.dart";
 import "package:polder/models/user.dart";
+import "package:polder/models/user_tag.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/federation_mappers.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
@@ -135,6 +136,37 @@ class PolderApi {
 
   Future<bool> setShowsSharesInFiles(bool shown) async =>
       (await _service.setShareDisplaySettings(body: wire.ShareDisplaySettings(showInFiles: shown))).body!.showInFiles;
+
+  Future<List<UserTag>> tags() async => [for (final tag in (await _service.listTags()).body!) tag.toModel()];
+
+  Future<UserTag> createTag(String name, {String? color}) async => (await _service.createTag(
+    body: wire.TagRequest(name: name, color: color),
+  )).body!.toModel();
+
+  Future<UserTag> updateTag(int id, {String? name, String? color}) async => (await _service.updateTag(
+    tagID: id,
+    body: wire.TagChange(name: name, color: color),
+  )).body!.toModel();
+
+  Future<void> deleteTag(int id) => _service.deleteTag(tagID: id);
+
+  Future<List<TagAssignmentResult>> assignTags(List<String> paths, List<String> names) => _tagAssignmentResults(
+    _service.assignTags(
+      body: wire.TagAssignment(paths: paths, names: names),
+    ),
+  );
+
+  Future<List<TagAssignmentResult>> unassignTags(List<String> paths, List<String> names) => _tagAssignmentResults(
+    _service.unassignTags(
+      body: wire.TagAssignment(paths: paths, names: names),
+    ),
+  );
+
+  Future<List<TagAssignmentResult>> _tagAssignmentResults(
+    Future<chopper.Response<wire.TagAssignmentResponse>> request,
+  ) async => [
+    for (final result in (await request).body!.results ?? const <wire.TagAssignmentResult>[]) result.toModel(),
+  ];
 
   Future<SearchResults> search(String query, {int limit = 50, int offset = 0}) async =>
       (await _service.searchFiles(q: query, limit: limit, offset: offset)).body!.toModel();

@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_mount.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
@@ -20,8 +21,9 @@ import "package:polder/widgets/shared/icon_menu_item.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/sharing/share_panel.dart";
+import "package:polder/widgets/tags/tag_picker.dart";
 
-enum _FileAction { open, edit, download, share, shareDetails, history, rename, copy, move, delete }
+enum _FileAction { open, edit, download, share, shareDetails, history, rename, tags, copy, move, delete }
 
 abstract final class FileActions {
   static RelativeRect menuPositionAt(BuildContext context, Offset globalPosition) {
@@ -71,6 +73,7 @@ abstract final class FileActions {
           iconMenuItem(_FileAction.history, IconsaxPlusLinear.clock, context.localized.versionHistory),
         if (single != null && allowed((permissions) => permissions.edit))
           iconMenuItem(_FileAction.rename, IconsaxPlusLinear.edit_2, context.localized.rename),
+        if (canTag(entries)) iconMenuItem(_FileAction.tags, IconsaxPlusLinear.tag, context.localized.tagsAction),
         if (allowed((permissions) => permissions.create))
           iconMenuItem(_FileAction.copy, IconsaxPlusLinear.copy, context.localized.copy),
         if (canMove(entries)) iconMenuItem(_FileAction.move, IconsaxPlusLinear.folder_open, context.localized.move),
@@ -97,6 +100,8 @@ abstract final class FileActions {
         await showFileHistory(context, single!);
       case _FileAction.rename:
         await rename(context, ref, parentPath: parentPath, entry: single!);
+      case _FileAction.tags:
+        await showTagPicker(context, entries);
       case _FileAction.copy:
         await copy(context, ref, parentPath: parentPath, entries: entries);
       case _FileAction.move:
@@ -105,6 +110,9 @@ abstract final class FileActions {
         await delete(context, ref, parentPath: parentPath, entries: entries);
     }
   }
+
+  static bool canTag(List<FileEntry> entries) =>
+      entries.every((entry) => entry.id != 0 && entry.mount?.kind != FileMountKind.federated);
 
   static Future<void> rename(
     BuildContext context,

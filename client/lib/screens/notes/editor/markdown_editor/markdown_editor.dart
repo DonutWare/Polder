@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:math" as math;
 
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
@@ -8,11 +9,13 @@ import "package:flutter/services.dart";
 import "package:cross_file/cross_file.dart";
 import "package:desktop_drop/desktop_drop.dart";
 
+import "package:polder/models/user_tag.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_commands.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_projection.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_source.dart";
+import "package:polder/screens/notes/editor/markdown_editor/tag_autocomplete.dart";
 
 class MarkdownEditor extends StatefulWidget {
   const MarkdownEditor({
@@ -27,6 +30,9 @@ class MarkdownEditor extends StatefulWidget {
     this.decoration = const InputDecoration.collapsed(hintText: null),
     this.autofocus = false,
     this.enableSuggestions = true,
+    this.tags = const [],
+    this.newTagLabel = "",
+    this.onTagTap,
     super.key,
   });
 
@@ -41,6 +47,9 @@ class MarkdownEditor extends StatefulWidget {
   final InputDecoration decoration;
   final bool autofocus;
   final bool enableSuggestions;
+  final List<UserTag> tags;
+  final String newTagLabel;
+  final void Function(String name)? onTagTap;
 
   @override
   State<MarkdownEditor> createState() => _MarkdownEditorState();
@@ -48,19 +57,28 @@ class MarkdownEditor extends StatefulWidget {
 
 class _MarkdownEditorState extends State<MarkdownEditor> {
   final _fieldKey = GlobalKey();
+  final _stackKey = GlobalKey();
   late final FocusNode _focus = FocusNode(onKeyEvent: _handleKey)..addListener(_refresh);
   final _scroll = ScrollController();
   bool _plainNewline = false;
   bool _dragging = false;
   _PointerDown? _down;
   double? _caretHeight;
+  TagQuery? _tagQuery;
+  List<TagOption> _tagOptions = const [];
+  int _highlightedTag = 0;
+  int? _dismissedTagAt;
+  Offset? _tagAnchor;
 
   MarkdownEditingController get _controller => widget.controller;
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_updateCaretHeight);
+    _controller
+      ..addListener(_updateCaretHeight)
+      ..addListener(_updateTagQuery);
+    _scroll.addListener(_placeTagSuggestions);
   }
 
   @override
@@ -69,8 +87,11 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller
         ..removeListener(_updateCaretHeight)
+        ..removeListener(_updateTagQuery)
         ..presentation = null;
-      widget.controller.addListener(_updateCaretHeight);
+      widget.controller
+        ..addListener(_updateCaretHeight)
+        ..addListener(_updateTagQuery);
     }
     _caretHeight = null;
   }
@@ -79,6 +100,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   void dispose() {
     _controller
       ..removeListener(_updateCaretHeight)
+      ..removeListener(_updateTagQuery)
       ..presentation = null;
     _focus.dispose();
     _scroll.dispose();
@@ -90,6 +112,57 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   void _updateCaretHeight() {
     final next = _caretHeightAt(_controller.selection.extentOffset);
     if (next != _caretHeight) setState(() => _caretHeight = next);
+  }
+
+  bool get _suggestingTags => _tagQuery != null && _tagOptions.isNotEmpty && _focus.hasFocus;
+
+  void _updateTagQuery() {
+    final query = tagQueryAt(_controller.source, _controller.value);
+    final visible = query != null && query.start != _dismissedTagAt ? query : null;
+    if (query?.start != _dismissedTagAt) _dismissedTagAt = null;
+    if (visible == null && _tagQuery == null) return;
+    final options = visible == null ? const <TagOption>[] : tagOptions(widget.tags, visible.partial);
+    if (visible?.partial != _tagQuery?.partial) _highlightedTag = 0;
+    setState(() {
+      _tagQuery = visible;
+      _tagOptions = options;
+    });
+    if (visible != null) WidgetsBinding.instance.addPostFrameCallback((_) => _placeTagSuggestions());
+  }
+
+  void _placeTagSuggestions() {
+    final query = _tagQuery;
+    final editable = _editable();
+    final stack = _stackKey.currentContext?.findRenderObject() as RenderBox?;
+    if (!mounted || query == null || editable == null || stack == null) return;
+    final caret = editable.getLocalRectForCaret(TextPosition(offset: query.start));
+    final anchor = stack.globalToLocal(editable.localToGlobal(caret.bottomLeft));
+    if (anchor != _tagAnchor) setState(() => _tagAnchor = anchor);
+  }
+
+  void _acceptTag(TagOption option) {
+    final query = _tagQuery;
+    if (query == null) return;
+    _controller.setValue(acceptTag(_controller.value, query, option.name), origin: Object());
+  }
+
+  KeyEventResult? _handleTagKey(LogicalKeyboardKey key) {
+    if (!_suggestingTags) return null;
+    if (key == LogicalKeyboardKey.arrowDown || key == LogicalKeyboardKey.arrowUp) {
+      final step = key == LogicalKeyboardKey.arrowDown ? 1 : -1;
+      setState(() => _highlightedTag = (_highlightedTag + step) % _tagOptions.length);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.tab) {
+      _acceptTag(_tagOptions[_highlightedTag.clamp(0, _tagOptions.length - 1)]);
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.escape) {
+      _dismissedTagAt = _tagQuery!.start;
+      _updateTagQuery();
+      return KeyEventResult.handled;
+    }
+    return null;
   }
 
   double _caretHeightAt(int offset) {
@@ -114,6 +187,8 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     final keyboard = HardwareKeyboard.instance;
     final command = keyboard.isMetaPressed || keyboard.isControlPressed;
     final key = event.logicalKey;
+    final tagResult = command ? null : _handleTagKey(key);
+    if (tagResult != null) return tagResult;
     if (command && key == LogicalKeyboardKey.keyZ) {
       keyboard.isShiftPressed ? _controller.redo() : _controller.undo();
       return KeyEventResult.handled;
@@ -202,15 +277,39 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   void _pointerUp(PointerUpEvent event) {
     final down = _down;
     _down = null;
-    if (down == null || widget.onLinkTap == null || (event.position - down.position).distance > kTouchSlop) return;
-    final link = _linkAt(event.position, down);
-    if (link == null) return;
-    widget.onLinkTap!(link);
+    if (down == null || (event.position - down.position).distance > kTouchSlop) return;
+    final tag = widget.onTagTap == null ? null : _tagAt(event.position, down);
+    if (tag != null) {
+      widget.onTagTap!(tag);
+    } else {
+      final link = widget.onLinkTap == null ? null : _linkAt(event.position, down);
+      if (link == null) return;
+      widget.onLinkTap!(link);
+    }
     scheduleMicrotask(() {
       if (!mounted) return;
       _controller.setValue(_controller.value.copyWith(selection: down.selection), addToHistory: false);
       if (!down.focused) _focus.unfocus();
     });
+  }
+
+  String? _tagAt(Offset global, _PointerDown down) {
+    final editable = _editable();
+    if (editable == null) return null;
+    final offset = editable.getPositionForPoint(global).offset;
+    final source = _controller.source;
+    final node = source.inlineAt(offset, (node) => node.kind == MarkdownInlineKind.tag);
+    if (node == null || !_tappedInactive(editable, global, down, node)) return null;
+    return source.text.substring(node.contentStart, node.contentEnd);
+  }
+
+  bool _tappedInactive(RenderEditable editable, Offset global, _PointerDown down, MarkdownInline node) {
+    final selection = down.selection;
+    final wasActive = down.focused && selection.isValid && selection.start <= node.end && selection.end >= node.start;
+    if (wasActive) return false;
+    final local = editable.globalToLocal(global);
+    final boxes = editable.getBoxesForSelection(TextSelection(baseOffset: node.start, extentOffset: node.end));
+    return boxes.any((box) => box.toRect().inflate(2).contains(local));
   }
 
   String? _linkAt(Offset global, _PointerDown down) {
@@ -223,12 +322,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
       (node) => node.kind == MarkdownInlineKind.link || node.kind == MarkdownInlineKind.url,
     );
     if (node == null || rendersAsEmbed(source.text, node, source.lineAt(node.start))) return null;
-    final selection = down.selection;
-    final wasActive = down.focused && selection.isValid && selection.start <= node.end && selection.end >= node.start;
-    if (wasActive) return null;
-    final local = editable.globalToLocal(global);
-    final boxes = editable.getBoxesForSelection(TextSelection(baseOffset: node.start, extentOffset: node.end));
-    if (!boxes.any((box) => box.toRect().inflate(2).contains(local))) return null;
+    if (!_tappedInactive(editable, global, down, node)) return null;
     return markdownDestination(source.text, node);
   }
 
@@ -247,6 +341,44 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     widget.onDropFiles!(files);
   }
 
+  Color? _tagColor(String key) {
+    for (final tag in widget.tags) {
+      if (tag.key == key) return tag.color;
+    }
+    return null;
+  }
+
+  Widget _withTagSuggestions(Widget editor) {
+    final anchor = _tagAnchor;
+    return Stack(
+      key: _stackKey,
+      fit: StackFit.expand,
+      children: [
+        editor,
+        if (_suggestingTags && anchor != null)
+          LayoutBuilder(
+            builder: (context, constraints) => Stack(
+              children: [
+                Positioned(
+                  left: anchor.dx.clamp(0, math.max(0, constraints.maxWidth - TagSuggestions.width)),
+                  top: anchor.dy + 4,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: math.max(120, constraints.maxHeight - anchor.dy - 8)),
+                    child: TagSuggestions(
+                      options: _tagOptions,
+                      highlighted: _highlightedTag,
+                      onSelect: _acceptTag,
+                      newTagLabel: widget.newTagLabel,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final editor = Padding(
@@ -262,6 +394,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
             onImageTap: (destination) => widget.onImageTap?.call(destination),
             onToggleTask: _toggleTask,
             onRevealBlock: _revealBlock,
+            tagColor: _tagColor,
           );
           return Listener(
             onPointerDown: _pointerDown,
@@ -293,7 +426,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
         },
       ),
     );
-    if (widget.onDropFiles == null) return editor;
+    if (widget.onDropFiles == null) return _withTagSuggestions(editor);
     final colors = Theme.of(context).colorScheme;
     return DropTarget(
       onDragEntered: (_) => setState(() => _dragging = true),
@@ -302,7 +435,7 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          editor,
+          _withTagSuggestions(editor),
           if (_dragging)
             IgnorePointer(
               child: DecoratedBox(

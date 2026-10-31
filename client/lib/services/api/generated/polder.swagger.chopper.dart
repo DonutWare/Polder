@@ -2875,15 +2875,16 @@ final class _$Polder extends Polder {
     int? limit,
     int? offset,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
-      description: '''Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Tags narrow the results; they have the form `key<op>values`:
+      description: '''Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Filters narrow the results; they have the form `key<op>values`:
 
 - `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`
 - `ext`: extensions only
 - `in`: a folder and everything below it, such as `in="/My Docs"`
 - `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`
 - `size`: such as `10mb`, `500kb`, `1.5gb`
+- `tag` (also `tags`): the user\'s tags, such as `tag=work`; `#work` is short for `tag=work` and `-#work` excludes it
 
-Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. Commas separate alternatives, separate tags must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified>7d` is newer than a week ago.''',
+Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified>7d` is newer than a week ago.''',
       summary: 'Find files and folders by name, text inside them, type, date and size',
       operationId: 'searchFiles',
       consumes: [],
@@ -2915,7 +2916,7 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
     int? cursor,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Complete the search tag under the cursor',
+      summary: 'Complete the search filter under the cursor',
       operationId: 'suggestSearch',
       consumes: [],
       produces: [],
@@ -3667,6 +3668,160 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       tag: swaggerMetaData,
     );
     return client.send<Manifest, Manifest>($request);
+  }
+
+  @override
+  Future<Response<List<UserTag>>> _listTags({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The logged-in user\'s tags with how many items carry each',
+      operationId: 'listTags',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/tags');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<UserTag>, UserTag>($request);
+  }
+
+  @override
+  Future<Response<UserTag>> _createTag({
+    required TagRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a tag; names are unique per user, ignoring case',
+      operationId: 'createTag',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/tags');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<UserTag, UserTag>($request);
+  }
+
+  @override
+  Future<Response<TagAssignmentResponse>> _assignTags({
+    required TagAssignment? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Add tags to files, folders and notes; unknown names become new tags',
+      operationId: 'assignTags',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/tags/assign');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<TagAssignmentResponse, TagAssignmentResponse>($request);
+  }
+
+  @override
+  Future<Response<TagAssignmentResponse>> _unassignTags({
+    required TagAssignment? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove tags from files, folders and notes',
+      operationId: 'unassignTags',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/tags/unassign');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<TagAssignmentResponse, TagAssignmentResponse>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteTag({
+    required int? tagID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Delete a tag and remove it from the user\'s items and own notes',
+      operationId: 'deleteTag',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/tags/${tagID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<UserTag>> _updateTag({
+    required int? tagID,
+    required TagChange? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Rename or recolor a tag; a rename also rewrites the tag in the user\'s own notes',
+      operationId: 'updateTag',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["tags"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/tags/${tagID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<UserTag, UserTag>($request);
   }
 
   @override

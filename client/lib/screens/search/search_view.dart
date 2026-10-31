@@ -23,7 +23,7 @@ import "package:polder/widgets/shared/message_view.dart";
 const _debounce = Duration(milliseconds: 150);
 const _maxDestinations = 4;
 const _tileExtent = 64.0;
-const _exampleTags = ["type=note", "type=image", "type=pdf", "modified>7d", "size>100mb", "type=folder"];
+const _exampleFilters = ["type=note", "type=image", "type=pdf", "modified>7d", "size>100mb", "type=folder"];
 
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({
@@ -118,7 +118,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
   Future<void> _addFilter() async {
     final filter = await showSearchFilterBuilder(context);
     if (filter == null || !mounted) return;
-    final text = appendSearchTag(_controller.text, formatSearchFilter(filter));
+    final text = appendSearchFilter(_controller.text, formatSearchFilter(filter));
     _setText(text, text.length);
   }
 
@@ -150,7 +150,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
       if (mounted) _controller.warnings = warnings;
     });
 
-    final freeText = tokenizeSearch(_query).where((token) => !token.isTag).map((token) => token.text).join(" ");
+    final freeText = tokenizeSearch(_query).where((token) => !token.isFilter).map((token) => token.text).join(" ");
     final destinations = freeText.isEmpty
         ? const <DestinationMatch>[]
         : matchDestinations(ref.watch(appDestinationsProvider), l, freeText).take(_maxDestinations).toList();
@@ -204,8 +204,8 @@ class _SearchViewState extends ConsumerState<SearchView> {
           Expanded(
             child: switch ((results, shown)) {
               (null, _) => _SearchHints(
-                onTag: (tag) {
-                  final text = appendSearchTag(_controller.text, tag);
+                onFilter: (filter) {
+                  final text = appendSearchFilter(_controller.text, filter);
                   _setText(text, text.length);
                 },
               ),
@@ -368,9 +368,9 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _SearchHints extends StatelessWidget {
-  const _SearchHints({required this.onTag});
+  const _SearchHints({required this.onFilter});
 
-  final ValueChanged<String> onTag;
+  final ValueChanged<String> onFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +386,9 @@ class _SearchHints extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: [for (final tag in _exampleTags) ActionChip(label: Text(tag), onPressed: () => onTag(tag))],
+          children: [
+            for (final filter in _exampleFilters) ActionChip(label: Text(filter), onPressed: () => onFilter(filter)),
+          ],
         ),
       ],
     );

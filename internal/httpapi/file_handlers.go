@@ -104,10 +104,11 @@ func (previewSize) Schema(huma.Registry) *huma.Schema {
 
 // downloadOutput and previewOutput write their body straight to the connection.
 type downloadOutput struct {
-	ETag        string `header:"ETag" doc:"The file's revision, quoted; send it in If-Match or If-None-Match"`
-	Rev         string `header:"X-Polder-Rev" doc:"The file's revision"`
-	ContentType string `header:"Content-Type"`
-	Body        func(huma.Context)
+	ETag         string `header:"ETag" doc:"The file's revision, quoted; send it in If-Match or If-None-Match"`
+	Rev          string `header:"X-Polder-Rev" doc:"The file's revision"`
+	CacheControl string `header:"Cache-Control"`
+	ContentType  string `header:"Content-Type"`
+	Body         func(huma.Context)
 }
 
 type previewOutput struct {
@@ -141,6 +142,9 @@ func (a *API) listFiles(ctx context.Context, input *pathQuery) (*jsonBody[listRe
 		entries = append(entries, a.mountRootEntries(ctx, mounts)...)
 		files.SortForListing(entries)
 	}
+	if err := a.attachTags(ctx, entries); err != nil {
+		return nil, err
+	}
 	return respond(listResponse{Path: listedPath, Entries: entries, Indexing: a.files.IsIndexing(owner.ID)}), nil
 }
 
@@ -160,6 +164,9 @@ func (a *API) statFile(ctx context.Context, input *pathQuery) (*jsonBody[files.E
 	if err := a.markShared(ctx, currentUser(ctx), marked); err != nil {
 		return nil, err
 	}
+	if err := a.attachTags(ctx, marked); err != nil {
+		return nil, err
+	}
 	return respond(marked[0]), nil
 }
 
@@ -177,10 +184,11 @@ func (a *API) downloadFile(ctx context.Context, input *downloadInput) (*download
 		return nil, err
 	}
 	return &downloadOutput{
-		ETag:        revisionETag(entry.Rev),
-		Rev:         fmt.Sprint(entry.Rev),
-		ContentType: entry.Mime,
-		Body:        a.serveFile(ctx, owner, file, entry, input.Range != ""),
+		CacheControl: "no-cache",
+		ETag:         revisionETag(entry.Rev),
+		Rev:          fmt.Sprint(entry.Rev),
+		ContentType:  entry.Mime,
+		Body:         a.serveFile(ctx, owner, file, entry, input.Range != ""),
 	}, nil
 }
 

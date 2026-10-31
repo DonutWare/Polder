@@ -15,6 +15,7 @@ extension ShellDestinationPresentation on ShellDestination {
     ShellDestination.sync => context.localized.navSync,
     ShellDestination.autoUpload => context.localized.navAutoUpload,
     ShellDestination.groups => context.localized.groups,
+    ShellDestination.tags => context.localized.tagsTitle,
     ShellDestination.trash => context.localized.navTrash,
     ShellDestination.settings => context.localized.navSettings,
   };
@@ -27,6 +28,7 @@ extension ShellDestinationPresentation on ShellDestination {
     ShellDestination.sync => IconsaxPlusLinear.refresh_2,
     ShellDestination.autoUpload => IconsaxPlusLinear.gallery_import,
     ShellDestination.groups => IconsaxPlusLinear.people,
+    ShellDestination.tags => IconsaxPlusLinear.tag,
     ShellDestination.trash => IconsaxPlusLinear.trash,
     ShellDestination.settings => IconsaxPlusLinear.setting_2,
   };
@@ -39,6 +41,7 @@ extension ShellDestinationPresentation on ShellDestination {
     ShellDestination.sync => IconsaxPlusBold.refresh_2,
     ShellDestination.autoUpload => IconsaxPlusBold.gallery_import,
     ShellDestination.groups => IconsaxPlusBold.people,
+    ShellDestination.tags => IconsaxPlusBold.tag,
     ShellDestination.trash => IconsaxPlusBold.trash,
     ShellDestination.settings => IconsaxPlusBold.setting_2,
   };

@@ -156,7 +156,7 @@ class SearchButton extends StatelessWidget {
         final folder = uri.path == AppRoutes.files ? uri.queryParameters[AppRoutes.pathParameter] : null;
         final scope = folder == null || folder == RemotePath.root
             ? ""
-            : appendSearchTag(
+            : appendSearchFilter(
                 "",
                 formatSearchFilter(SearchFilter(key: SearchKey.folder, op: SearchOp.equals, values: [folder])),
               );

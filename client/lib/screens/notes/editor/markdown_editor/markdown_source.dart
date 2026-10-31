@@ -1,8 +1,12 @@
+import "dart:math" as math;
+
+import "package:polder/models/user_tag.dart";
+
 enum MarkdownLineKind { paragraph, heading, bullet, ordered, task, quote }
 
 enum MarkdownBlockKind { code, table, callout, rule }
 
-enum MarkdownInlineKind { strong, emphasis, strikethrough, highlight, code, link, image, url, escape }
+enum MarkdownInlineKind { strong, emphasis, strikethrough, highlight, code, link, image, url, escape, tag }
 
 class MarkdownLine {
   const MarkdownLine({
@@ -162,7 +166,7 @@ final _quoteLine = RegExp(r"^ {0,3}>");
 final _tableDelimiter = RegExp(r"^ *\|? *:?-+:? *(\| *:?-+:? *)*\|? *$");
 final _rule = RegExp(r"^ {0,3}([-*_])( *\1){2,} *$");
 final _quotePrefix = RegExp(r"^(?: {0,3}>[ \t]?)+");
-final _heading = RegExp(r"^(#{1,6})(?:[ \t]+|$)");
+final _heading = RegExp(r"^(#{1,6})[ \t]+");
 final _task = RegExp(r"^([ \t]*)(?:[-*+]|\d{1,9}[.)])[ \t]+(\[[ xX]\])(?:[ \t]+|$)");
 final _bullet = RegExp(r"^([ \t]*)[-*+](?:[ \t]+|$)");
 final _ordered = RegExp(r"^([ \t]*)\d{1,9}[.)](?:[ \t]+|$)");
@@ -298,6 +302,10 @@ MarkdownInline? _inlineAt(String text, int index, int from, int to) {
     final url = _url(text, index, to);
     if (url != null) return url;
   }
+  if (char == "#" && startsTag(text, index, from)) {
+    final tag = _tag(text, index, to);
+    if (tag != null) return tag;
+  }
   for (final delimiter in _delimiters) {
     if (!text.startsWith(delimiter, index)) continue;
     final node = _delimited(text, delimiter, index, from, to);
@@ -306,6 +314,29 @@ MarkdownInline? _inlineAt(String text, int index, int from, int to) {
     return null;
   }
   return null;
+}
+
+final _tagBody = RegExp(r"[\p{L}\p{N}_\-/]+", unicode: true);
+final _tagBoundary = RegExp(r"[\p{L}\p{N}_&/#\\]", unicode: true);
+
+bool startsTag(String text, int index, int from) {
+  if (index == from) return true;
+  var previous = index - 1;
+  if (previous > from && _isLowSurrogate(text.codeUnitAt(previous))) previous--;
+  return !_tagBoundary.hasMatch(text.substring(previous, index));
+}
+
+bool _isLowSurrogate(int unit) => unit >= 0xdc00 && unit <= 0xdfff;
+
+MarkdownInline? _tag(String text, int index, int to) {
+  final match = _tagBody.matchAsPrefix(text, index + 1);
+  if (match == null) return null;
+  var end = math.min(match.end, to);
+  while (end > index + 1 && "/-".contains(text[end - 1])) {
+    end--;
+  }
+  if (!isValidTagName(text.substring(index + 1, end))) return null;
+  return MarkdownInline(kind: MarkdownInlineKind.tag, start: index, end: end, contentStart: index + 1, contentEnd: end);
 }
 
 MarkdownInline? _codeSpan(String text, int index, int to) {

@@ -257,6 +257,9 @@ func (a *API) listMounted(ctx context.Context, at mountedPath) (*jsonBody[listRe
 	}
 	listed.Body.Path = at.outer(listed.Body.Path)
 	listed.Body.Mount = &at.mount
+	if err := a.attachTags(ctx, listed.Body.Entries); err != nil {
+		return nil, err
+	}
 	return listed, nil
 }
 
@@ -300,10 +303,11 @@ func (a *API) downloadMounted(ctx context.Context, at mountedPath, input *downlo
 		return nil, err
 	}
 	return &downloadOutput{
-		ETag:        revisionETag(entry.Rev),
-		Rev:         fmt.Sprint(entry.Rev),
-		ContentType: entry.Mime,
-		Body:        a.serveFile(ctx, access.Owner, file, entry, input.Range != ""),
+		CacheControl: "no-cache",
+		ETag:         revisionETag(entry.Rev),
+		Rev:          fmt.Sprint(entry.Rev),
+		ContentType:  entry.Mime,
+		Body:         a.serveFile(ctx, access.Owner, file, entry, input.Range != ""),
 	}, nil
 }
 
@@ -313,8 +317,9 @@ func (a *API) downloadRemote(ctx context.Context, at mountedPath, input *downloa
 		return nil, err
 	}
 	return &downloadOutput{
-		ETag:        content.ETag,
-		ContentType: content.Mime,
+		CacheControl: "no-cache",
+		ETag:         content.ETag,
+		ContentType:  content.Mime,
 		Body: func(humaCtx huma.Context) {
 			defer content.Body.Close()
 			_, w := humachi.Unwrap(humaCtx)
@@ -433,7 +438,11 @@ func (a *API) respondMounted(ctx context.Context, at mountedPath) (*jsonBody[fil
 	if err != nil {
 		return nil, err
 	}
-	return respond(entry), nil
+	tagged := []files.Entry{entry}
+	if err := a.attachTags(ctx, tagged); err != nil {
+		return nil, err
+	}
+	return respond(tagged[0]), nil
 }
 
 func (a *API) mountRootEntries(ctx context.Context, mounts []incomingMount) []files.Entry {

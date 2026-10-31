@@ -4,24 +4,26 @@ import (
 	"context"
 
 	"polder-server/internal/extract"
+	"polder-server/internal/files"
 	"polder-server/internal/search"
 )
 
 const searchDescription = "Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, " +
 	"and small typos. It also matches the text inside files when the server reads it, including text recognised in " +
-	"images and scans; every word must appear, and quotes match a phrase. Name matches come first. Tags narrow the results; they have the form `key<op>values`:\n\n" +
+	"images and scans; every word must appear, and quotes match a phrase. Name matches come first. Filters narrow the results; they have the form `key<op>values`:\n\n" +
 	"- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, " +
 	"a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`\n" +
 	"- `ext`: extensions only\n" +
 	"- `in`: a folder and everything below it, such as `in=\"/My Docs\"`\n" +
 	"- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`\n" +
-	"- `size`: such as `10mb`, `500kb`, `1.5gb`\n\n" +
+	"- `size`: such as `10mb`, `500kb`, `1.5gb`\n" +
+	"- `tag` (also `tags`): the user's tags, such as `tag=work`; `#work` is short for `tag=work` and `-#work` excludes it\n\n" +
 	"Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. " +
-	"Commas separate alternatives, separate tags must all hold, and `modified=a..b` or `size=a..b` is a range. " +
+	"Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. " +
 	"A relative date is a moment: `modified>7d` is newer than a week ago."
 
 type searchInput struct {
-	Query  string `query:"q" doc:"What to look for; see the operation description for tags"`
+	Query  string `query:"q" doc:"What to look for; see the operation description for filters"`
 	Limit  int    `query:"limit" default:"50" minimum:"1" maximum:"200"`
 	Offset int    `query:"offset" default:"0" minimum:"0"`
 }
@@ -35,6 +37,16 @@ func (a *API) searchFiles(ctx context.Context, input *searchInput) (*jsonBody[se
 	response, err := a.search.Search(ctx, currentUser(ctx), input.Query, input.Limit, input.Offset)
 	if err != nil {
 		return nil, err
+	}
+	entries := make([]files.Entry, len(response.Results))
+	for i, match := range response.Results {
+		entries[i] = match.Entry
+	}
+	if err := a.attachTags(ctx, entries); err != nil {
+		return nil, err
+	}
+	for i := range response.Results {
+		response.Results[i].Entry = entries[i]
 	}
 	return respond(response), nil
 }

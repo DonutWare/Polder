@@ -3,7 +3,7 @@ import "package:flutter/widgets.dart";
 import "package:polder/models/search.dart";
 
 // Mirrors internal/search/query.go on the server, which stays the authority on what a query means. The
-// client only needs enough of the syntax to colour tags while typing and to write tags for the filter builder.
+// client only needs enough of the syntax to colour filters while typing and to write filters for the filter builder.
 
 const searchKeyAliases = {
   "type": SearchKey.type,
@@ -18,23 +18,26 @@ const searchKeyAliases = {
   "date": SearchKey.modified,
   "mtime": SearchKey.modified,
   "size": SearchKey.size,
+  "tag": SearchKey.tag,
+  "tags": SearchKey.tag,
 };
 
 const _operators = ["!=", ">=", "<=", ":", "=", ">", "<"];
 
 final _keyPattern = RegExp("^-?([A-Za-z]+)");
+final _hashTag = RegExp(r"^-?#(?=[\p{L}\p{N}_\-/]*\p{L})", unicode: true);
 
 @immutable
 class SearchToken {
-  const SearchToken({required this.range, required this.text, this.tagLength = 0});
+  const SearchToken({required this.range, required this.text, this.filterLength = 0});
 
   final TextRange range;
   final String text;
 
-  // Length of the key and operator when the token is a tag, 0 otherwise.
-  final int tagLength;
+  // Length of the key and operator when the token is a filter, 0 otherwise.
+  final int filterLength;
 
-  bool get isTag => tagLength > 0;
+  bool get isFilter => filterLength > 0;
 }
 
 List<SearchToken> tokenizeSearch(String query) {
@@ -48,7 +51,7 @@ List<SearchToken> tokenizeSearch(String query) {
       SearchToken(
         range: TextRange(start: start, end: end),
         text: text,
-        tagLength: _tagLength(text),
+        filterLength: _filterLength(text),
       ),
     );
     start = -1;
@@ -67,7 +70,9 @@ List<SearchToken> tokenizeSearch(String query) {
   return tokens;
 }
 
-int _tagLength(String text) {
+int _filterLength(String text) {
+  final hashTag = _hashTag.firstMatch(text);
+  if (hashTag != null) return hashTag.end;
   final match = _keyPattern.firstMatch(text);
   if (match == null || !searchKeyAliases.containsKey(match.group(1)!.toLowerCase())) return 0;
   final rest = text.substring(match.end);
@@ -83,6 +88,7 @@ String searchKeyText(SearchKey key) => switch (key) {
   SearchKey.folder => "in",
   SearchKey.modified => "modified",
   SearchKey.size => "size",
+  SearchKey.tag => "tag",
 };
 
 String formatSearchFilter(SearchFilter filter) {
@@ -113,7 +119,7 @@ String _quoteIfNeeded(String value) => value.contains(RegExp(r'[\s,"]')) ? '"${v
   return ("$before$replacement$after", before.length + replacement.length);
 }
 
-String appendSearchTag(String query, String tag) {
+String appendSearchFilter(String query, String filter) {
   final trimmed = query.trimRight();
-  return trimmed.isEmpty ? "$tag " : "$trimmed $tag ";
+  return trimmed.isEmpty ? "$filter " : "$trimmed $filter ";
 }

@@ -63,7 +63,7 @@ func (s *Service) Search(ctx context.Context, owner users.User, raw string, limi
 	if err := s.Sync(ctx, owner.ID); err != nil {
 		return Results{}, err
 	}
-	scope, err := s.scopeOf(ctx, owner)
+	scope, err := s.scopeOf(ctx, owner, parsed)
 	if err != nil {
 		return Results{}, err
 	}
@@ -76,18 +76,46 @@ func (s *Service) Search(ctx context.Context, owner users.User, raw string, limi
 type filterScope struct {
 	userID      int64
 	notesFolder string
+	tagged      map[string][]string
 }
 
-func (s *Service) scopeOf(ctx context.Context, owner users.User) (filterScope, error) {
+func (s *Service) scopeOf(ctx context.Context, owner users.User, parsed Query) (filterScope, error) {
 	notesFolder, err := s.users.NotesPath(ctx, owner.ID)
 	if err != nil {
 		return filterScope{}, err
 	}
-	scope := filterScope{userID: owner.ID}
+	scope := filterScope{userID: owner.ID, tagged: map[string][]string{}}
 	if notesFolder != nil {
 		scope.notesFolder = *notesFolder
 	}
-	return scope, nil
+	return scope, s.resolveTags(ctx, owner, parsed, scope.tagged)
+}
+
+func (s *Service) resolveTags(ctx context.Context, owner users.User, parsed Query, tagged map[string][]string) error {
+	for _, filter := range parsed.Filters {
+		if filter.Key != KeyTag {
+			continue
+		}
+		for _, key := range filter.Values {
+			if _, done := tagged[key]; done {
+				continue
+			}
+			ids, err := s.tagged.FileIDsWithTag(ctx, owner.ID, key)
+			if err != nil {
+				return err
+			}
+			tagged[key] = documentIDs(ids)
+		}
+	}
+	return nil
+}
+
+func documentIDs(ids []int64) []string {
+	documents := make([]string, 0, len(ids))
+	for _, id := range ids {
+		documents = append(documents, documentID(id))
+	}
+	return documents
 }
 
 func (s *Service) searchFilters(ctx context.Context, owner users.User, scope filterScope, parsed Query, response Results, limit, offset int) (Results, error) {
@@ -343,6 +371,12 @@ func filterQuery(scope filterScope, parsed Query) query.Query {
 			} else {
 				must = append(must, dates)
 			}
+		case KeyTag:
+			if filter.Op == OpIsNot {
+				mustNot = append(mustNot, taggedQuery(scope, filter.Values))
+			} else {
+				must = append(must, taggedQuery(scope, filter.Values))
+			}
 		case KeySize:
 			span := parsed.sizeRange(filter)
 			sizes := bleve.NewNumericRangeInclusiveQuery(span.min, span.max, &span.minInclusive, &span.maxInclusive)
@@ -402,6 +436,17 @@ func valueQueries(scope filterScope, key Key, values []string) []query.Query {
 		}
 	}
 	return queries
+}
+
+func taggedQuery(scope filterScope, keys []string) query.Query {
+	var ids []string
+	for _, key := range keys {
+		ids = append(ids, scope.tagged[key]...)
+	}
+	if len(ids) == 0 {
+		return bleve.NewMatchNoneQuery()
+	}
+	return bleve.NewDocIDQuery(ids)
 }
 
 func notesQuery(notesFolder string) query.Query {

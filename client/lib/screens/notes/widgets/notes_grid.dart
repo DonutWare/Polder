@@ -17,6 +17,7 @@ import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 class NotesGrid extends ConsumerStatefulWidget {
   const NotesGrid({required this.folder, required this.selectedPath, required this.onOpen, super.key});
@@ -190,6 +191,13 @@ class _NoteCard extends ConsumerWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: EntryTagChips(entry: node.page ?? node.folder!),
                 ),
               ),
               if (excerpt != null)

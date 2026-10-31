@@ -4,16 +4,19 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/search.dart";
+import "package:polder/models/user_tag.dart";
 import "package:polder/providers/search/search_provider.dart";
+import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/screens/search/widgets/search_filter_label.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 Future<SearchFilter?> showSearchFilterBuilder(BuildContext context) =>
     showDialog<SearchFilter>(context: context, builder: (_) => const SearchFilterBuilder());
 
-const _typeKeys = [SearchKey.type, SearchKey.modified, SearchKey.size, SearchKey.folder];
+const _typeKeys = [SearchKey.type, SearchKey.tag, SearchKey.modified, SearchKey.size, SearchKey.folder];
 const _relativePresets = ["today", "yesterday", "7d", "30d", "1y"];
 const _sizePresets = ["1mb", "10mb", "100mb", "1gb"];
 
@@ -37,7 +40,7 @@ class _SearchFilterBuilderState extends ConsumerState<SearchFilterBuilder> {
   }
 
   List<SearchOp> get _ops => switch (_key) {
-    SearchKey.type || SearchKey.ext || SearchKey.folder => const [SearchOp.equals, SearchOp.notEquals],
+    SearchKey.type || SearchKey.ext || SearchKey.folder || SearchKey.tag => const [SearchOp.equals, SearchOp.notEquals],
     SearchKey.modified => const [SearchOp.greater, SearchOp.less, SearchOp.equals, SearchOp.between],
     SearchKey.size => const [SearchOp.greater, SearchOp.less, SearchOp.between],
   };
@@ -219,6 +222,24 @@ class _SearchFilterBuilderState extends ConsumerState<SearchFilterBuilder> {
             ],
           ),
           _customField(l.searchCustomSize),
+        ];
+      case SearchKey.tag:
+        final tags = ref.watch(tagsProvider).value ?? const <UserTag>[];
+        return [
+          if (tags.isEmpty) Text(l.tagsEmpty),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final tag in tags)
+                FilterChip(
+                  avatar: TagDot(color: tag.color),
+                  label: Text("#${tag.name}"),
+                  selected: _values.contains(tag.key),
+                  onSelected: (_) => _toggle(tag.key),
+                ),
+            ],
+          ),
         ];
       case SearchKey.folder:
         return [

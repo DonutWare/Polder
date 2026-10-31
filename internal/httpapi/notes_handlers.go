@@ -61,6 +61,9 @@ func (a *API) listNotes(ctx context.Context, input *pathQuery) (*jsonBody[notesL
 	if err != nil {
 		return nil, err
 	}
+	if err := a.attachTags(ctx, entries); err != nil {
+		return nil, err
+	}
 	notesPerFolder := notesInFolders(listedPath, notesInside)
 	items := []notesItem{}
 	for _, entry := range entries {

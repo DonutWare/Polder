@@ -25,6 +25,7 @@ import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
 import "package:polder/screens/public_share/public_share_screen.dart";
 import "package:polder/screens/groups/groups_screen.dart";
+import "package:polder/screens/tags/tags_screen.dart";
 import "package:polder/screens/shared/shared_screen.dart";
 import "package:polder/screens/shell/app_shell.dart";
 import "package:polder/screens/shell/sync_background_activator.dart";
@@ -146,6 +147,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           _route(
             path: AppRoutes.trash,
             page: (_) => const UpScope(child: TrashScreen()),
+          ),
+          _route(
+            path: AppRoutes.tags,
+            page: (_) => const UpScope(child: TagsScreen()),
           ),
           _route(
             path: AppRoutes.groups,

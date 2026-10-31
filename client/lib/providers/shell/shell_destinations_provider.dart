@@ -12,6 +12,7 @@ enum ShellDestination {
   sync(AppRoutes.sync),
   autoUpload(AppRoutes.autoUpload),
   groups(AppRoutes.groups),
+  tags(AppRoutes.tags),
   trash(AppRoutes.trash),
   settings(AppRoutes.settings);
 
@@ -36,6 +37,7 @@ final stackedDestinationsProvider = Provider<List<ShellDestination>>((ref) {
     ShellDestination.activity,
     if (platform.supportsAutoUpload) ShellDestination.autoUpload,
     ShellDestination.groups,
+    ShellDestination.tags,
     ShellDestination.trash,
     ShellDestination.settings,
   ];

@@ -12,6 +12,7 @@ import (
 	"polder-server/internal/files"
 	"polder-server/internal/logging"
 	"polder-server/internal/settings"
+	"polder-server/internal/tags"
 	"polder-server/internal/users"
 )
 
@@ -33,6 +34,7 @@ type Service struct {
 	users      *users.Store
 	settings   *settings.Store
 	texts      TextSource
+	tagged     TaggedFiles
 	dir        string
 	databaseID string
 
@@ -42,12 +44,17 @@ type Service struct {
 	pokes    chan int64
 }
 
-func Open(dir, databaseID string, fileService *files.Service, userStore *users.Store, settingsStore *settings.Store, texts TextSource) (*Service, error) {
+type TaggedFiles interface {
+	FileIDsWithTag(ctx context.Context, viewerID int64, key string) ([]int64, error)
+	List(ctx context.Context, userID int64) ([]tags.UserTag, error)
+}
+
+func Open(dir, databaseID string, fileService *files.Service, userStore *users.Store, settingsStore *settings.Store, texts TextSource, tagged TaggedFiles) (*Service, error) {
 	opened, err := openIndex(dir, databaseID)
 	if err != nil {
 		return nil, err
 	}
-	return &Service{files: fileService, users: userStore, settings: settingsStore, texts: texts, dir: dir, databaseID: databaseID, index: opened,
+	return &Service{files: fileService, users: userStore, settings: settingsStore, texts: texts, tagged: tagged, dir: dir, databaseID: databaseID, index: opened,
 		pokes: make(chan int64, pokeCapacity)}, nil
 }
 

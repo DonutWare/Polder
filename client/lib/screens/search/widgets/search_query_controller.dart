@@ -29,8 +29,8 @@ class SearchQueryController extends TextEditingController {
 
     final styled = <(TextRange, TextStyle)>[];
     for (final token in tokenizeSearch(text)) {
-      if (!token.isTag) continue;
-      final keyEnd = token.range.start + token.tagLength;
+      if (!token.isFilter) continue;
+      final keyEnd = token.range.start + token.filterLength;
       styled
         ..add((TextRange(start: token.range.start, end: keyEnd), tagStyle))
         ..add((TextRange(start: keyEnd, end: token.range.end), valueStyle));

@@ -641,6 +641,14 @@
           "name": {
             "type": "string"
           },
+          "otherTags": {
+            "description": "Tags written in a note that the logged-in user has no tag for",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "path": {
             "type": "string"
           },
@@ -664,6 +672,15 @@
           "size": {
             "format": "int64",
             "type": "integer"
+          },
+          "tagIds": {
+            "description": "The logged-in user's tags on this item, including tags written in a note",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "nullable": true,
+            "type": "array"
           }
         },
         "required": [
@@ -2378,7 +2395,8 @@
               "ext",
               "in",
               "modified",
-              "size"
+              "size",
+              "tag"
             ],
             "type": "string"
           },
@@ -3302,6 +3320,98 @@
         ],
         "type": "object"
       },
+      "TagAssignment": {
+        "additionalProperties": false,
+        "properties": {
+          "names": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "nullable": true,
+            "type": "array"
+          },
+          "paths": {
+            "description": "Items to change, as paths in the user's files",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "paths",
+          "names"
+        ],
+        "type": "object"
+      },
+      "TagAssignmentResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/TagAssignmentResult"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object"
+      },
+      "TagAssignmentResult": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "description": "Why this item was left unchanged",
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "TagChange": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "description": "Hex color such as #3e63dd",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TagRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "description": "Hex color such as #3e63dd; empty picks the next palette color",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "TextSpan": {
         "additionalProperties": false,
         "properties": {
@@ -3647,6 +3757,34 @@
           "id",
           "username",
           "displayName"
+        ],
+        "type": "object"
+      },
+      "UserTag": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "description": "Hex color such as #3e63dd",
+            "type": "string"
+          },
+          "count": {
+            "description": "How many of your files, folders and notes carry the tag",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "count"
         ],
         "type": "object"
       },
@@ -7644,6 +7782,11 @@
             },
             "description": "File content",
             "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
               "Content-Type": {
                 "schema": {
                   "type": "string"
@@ -10474,16 +10617,16 @@
     },
     "/api/v1/search": {
       "get": {
-        "description": "Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Tags narrow the results; they have the form `key\u003cop\u003evalues`:\n\n- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`\n- `ext`: extensions only\n- `in`: a folder and everything below it, such as `in=\"/My Docs\"`\n- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`\n- `size`: such as `10mb`, `500kb`, `1.5gb`\n\nOperators are `=` or `:` (is), `!=` or a leading `-` (is not), and `\u003e`, `\u003e=`, `\u003c`, `\u003c=` for modified and size. Commas separate alternatives, separate tags must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified\u003e7d` is newer than a week ago.",
+        "description": "Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Filters narrow the results; they have the form `key\u003cop\u003evalues`:\n\n- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`\n- `ext`: extensions only\n- `in`: a folder and everything below it, such as `in=\"/My Docs\"`\n- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`\n- `size`: such as `10mb`, `500kb`, `1.5gb`\n- `tag` (also `tags`): the user's tags, such as `tag=work`; `#work` is short for `tag=work` and `-#work` excludes it\n\nOperators are `=` or `:` (is), `!=` or a leading `-` (is not), and `\u003e`, `\u003e=`, `\u003c`, `\u003c=` for modified and size. Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified\u003e7d` is newer than a week ago.",
         "operationId": "searchFiles",
         "parameters": [
           {
-            "description": "What to look for; see the operation description for tags",
+            "description": "What to look for; see the operation description for filters",
             "explode": false,
             "in": "query",
             "name": "q",
             "schema": {
-              "description": "What to look for; see the operation description for tags",
+              "description": "What to look for; see the operation description for filters",
               "type": "string"
             }
           },
@@ -10616,7 +10759,7 @@
             "bearer": []
           }
         ],
-        "summary": "Complete the search tag under the cursor",
+        "summary": "Complete the search filter under the cursor",
         "tags": [
           "search"
         ]
@@ -12348,6 +12491,337 @@
         "summary": "Get a file's chunk manifest for delta sync",
         "tags": [
           "sync"
+        ]
+      }
+    },
+    "/api/v1/tags": {
+      "get": {
+        "operationId": "listTags",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserTag"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The logged-in user's tags with how many items carry each",
+        "tags": [
+          "tags"
+        ]
+      },
+      "post": {
+        "operationId": "createTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTag"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a tag; names are unique per user, ignoring case",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/api/v1/tags/assign": {
+      "post": {
+        "operationId": "assignTags",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagAssignmentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add tags to files, folders and notes; unknown names become new tags",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/api/v1/tags/unassign": {
+      "post": {
+        "operationId": "unassignTags",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagAssignment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagAssignmentResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove tags from files, folders and notes",
+        "tags": [
+          "tags"
+        ]
+      }
+    },
+    "/api/v1/tags/{tagID}": {
+      "delete": {
+        "operationId": "deleteTag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tagID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a tag and remove it from the user's items and own notes",
+        "tags": [
+          "tags"
+        ]
+      },
+      "patch": {
+        "operationId": "updateTag",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tagID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTag"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rename or recolor a tag; a rename also rewrites the tag in the user's own notes",
+        "tags": [
+          "tags"
         ]
       }
     },

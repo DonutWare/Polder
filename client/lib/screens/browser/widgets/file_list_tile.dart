@@ -10,6 +10,7 @@ import "package:polder/screens/browser/widgets/file_metadata_text.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 class FileListTile extends StatelessWidget {
   const FileListTile({required this.entry, required this.interaction, this.pending, this.syncing, super.key});
@@ -51,7 +52,13 @@ class FileListTile extends StatelessWidget {
                 ],
               ),
             ),
-      title: Text(entry.name, overflow: TextOverflow.ellipsis),
+      title: Row(
+        spacing: 8,
+        children: [
+          Flexible(child: Text(entry.name, overflow: TextOverflow.ellipsis)),
+          EntryTagChips(entry: entry),
+        ],
+      ),
       subtitle: switch ((upload, syncing)) {
         (final PendingUpload upload, _) => Padding(
           padding: const EdgeInsets.only(top: 4),

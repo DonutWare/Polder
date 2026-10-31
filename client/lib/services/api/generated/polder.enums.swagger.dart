@@ -337,7 +337,9 @@ enum QueryFilterKey {
   @JsonValue('modified')
   modified('modified'),
   @JsonValue('size')
-  size('size');
+  size('size'),
+  @JsonValue('tag')
+  tag('tag');
 
   final String? value;
 

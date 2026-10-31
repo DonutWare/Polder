@@ -18,6 +18,7 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/drag_chip.dart";
 import "package:polder/widgets/shared/escape_cancels_drag.dart";
+import "package:polder/widgets/tags/tag_picker.dart";
 
 final expandedNotesProvider = NotifierProvider<ExpandedNotes, Set<String>>(ExpandedNotes.new);
 
@@ -47,7 +48,7 @@ abstract final class NoteTargetSize {
   static double button(BuildContext context) => AdaptiveLayout.usesPointer(context) ? 32 : 48;
 }
 
-enum _NodeAction { newSubpage, rename, select, move, delete }
+enum _NodeAction { newSubpage, rename, tags, select, move, delete }
 
 class NoteDrag {
   const NoteDrag(this.nodes);
@@ -80,8 +81,10 @@ abstract final class NoteNodeActions {
         if (single != null) ...[
           PopupMenuItem(value: _NodeAction.newSubpage, child: Text(localized.noteNewSubpage)),
           PopupMenuItem(value: _NodeAction.rename, child: Text(localized.rename)),
-          if (onSelect != null) PopupMenuItem(value: _NodeAction.select, child: Text(localized.noteSelect)),
         ],
+        PopupMenuItem(value: _NodeAction.tags, child: Text(localized.tagsAction)),
+        if (single != null && onSelect != null)
+          PopupMenuItem(value: _NodeAction.select, child: Text(localized.noteSelect)),
         PopupMenuItem(value: _NodeAction.move, child: Text(localized.noteMove)),
         PopupMenuItem(value: _NodeAction.delete, child: Text(localized.delete)),
       ],
@@ -96,6 +99,8 @@ abstract final class NoteNodeActions {
       case _NodeAction.rename:
         final renamed = await NotesActions.rename(context, single!);
         if (renamed != null) _follow(navigation, renames, selectedPath, {single: renamed});
+      case _NodeAction.tags:
+        await showTagPicker(context, [for (final node in nodes) node.page ?? node.folder!]);
       case _NodeAction.select:
         onSelect?.call();
       case _NodeAction.move:

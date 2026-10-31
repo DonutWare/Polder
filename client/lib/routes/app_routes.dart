@@ -16,6 +16,7 @@ abstract final class AppRoutes {
   static const trash = "/trash";
   static const shared = "/shared";
   static const groups = "/groups";
+  static const tags = "/tags";
   static const publicShare = "/share";
   static const settings = "/settings";
   static const generalSettings = "/settings/general";

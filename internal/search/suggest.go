@@ -11,6 +11,7 @@ import (
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search/query"
 
+	"polder-server/internal/tags"
 	"polder-server/internal/users"
 )
 
@@ -52,6 +53,9 @@ func (s *Service) Suggest(ctx context.Context, owner users.User, raw string, cur
 	offset := current.start
 	if strings.HasPrefix(text, "-") {
 		text, offset = text[1:], offset+1
+	}
+	if strings.HasPrefix(text, "#") {
+		return s.suggestHashTags(ctx, owner, strings.ToLower(text[1:]), offset, current.end)
 	}
 	keyEnd := 0
 	for keyEnd < len(text) && (text[keyEnd] >= 'a' && text[keyEnd] <= 'z' || text[keyEnd] >= 'A' && text[keyEnd] <= 'Z') {
@@ -159,8 +163,35 @@ func (s *Service) suggestValues(ctx context.Context, owner users.User, key Key, 
 		return prefixed(presets, fragment), nil
 	case KeySize:
 		return prefixed([]string{"1mb", "10mb", "100mb", "1gb"}, fragment), nil
+	case KeyTag:
+		return s.tagValues(ctx, owner, strings.TrimPrefix(fragment, "#"), "")
 	}
 	return nil, nil
+}
+
+func (s *Service) suggestHashTags(ctx context.Context, owner users.User, fragment string, start, end int) (Suggestions, error) {
+	values, err := s.tagValues(ctx, owner, fragment, "#")
+	if err != nil {
+		return Suggestions{}, err
+	}
+	return Suggestions{Start: start, End: end, Suggestions: append([]Suggestion{}, values[:min(len(values), maxSuggestions)]...)}, nil
+}
+
+func (s *Service) tagValues(ctx context.Context, owner users.User, fragment, prefix string) ([]Suggestion, error) {
+	list, err := s.tagged.List(ctx, owner.ID)
+	if err != nil {
+		return nil, err
+	}
+	var suggestions []Suggestion
+	for _, tag := range list {
+		if strings.Contains(tags.Key(tag.Name), fragment) {
+			suggestions = append(suggestions, Suggestion{Kind: SuggestValue, Value: tags.Key(tag.Name), Insert: prefix + tag.Name, Count: tag.Count})
+		}
+	}
+	sort.SliceStable(suggestions, func(i, j int) bool {
+		return strings.HasPrefix(suggestions[i].Value, fragment) && !strings.HasPrefix(suggestions[j].Value, fragment)
+	})
+	return suggestions, nil
 }
 
 func prefixed(values []string, fragment string) []Suggestion {

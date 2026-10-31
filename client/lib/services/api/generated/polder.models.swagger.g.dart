@@ -293,11 +293,13 @@ Entry _$EntryFromJson(Map<String, dynamic> json) => Entry(
   mount: json['mount'] == null ? null : Mount.fromJson(json['mount'] as Map<String, dynamic>),
   mtime: DateTime.parse(json['mtime'] as String),
   name: json['name'] as String,
+  otherTags: (json['otherTags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   path: json['path'] as String,
   previewState: entryPreviewStateFromJson(json['previewState']),
   rev: (json['rev'] as num).toInt(),
   shared: json['shared'] as bool?,
   size: (json['size'] as num).toInt(),
+  tagIds: (json['tagIds'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ?? [],
 );
 
 Map<String, dynamic> _$EntryToJson(Entry instance) => <String, dynamic>{
@@ -309,11 +311,13 @@ Map<String, dynamic> _$EntryToJson(Entry instance) => <String, dynamic>{
   'mount': ?instance.mount?.toJson(),
   'mtime': instance.mtime.toIso8601String(),
   'name': instance.name,
+  'otherTags': ?instance.otherTags,
   'path': instance.path,
   'previewState': ?entryPreviewStateToJson(instance.previewState),
   'rev': instance.rev,
   'shared': ?instance.shared,
   'size': instance.size,
+  'tagIds': ?instance.tagIds,
 };
 
 ErrorDetail _$ErrorDetailFromJson(Map<String, dynamic> json) =>
@@ -1549,6 +1553,52 @@ Map<String, dynamic> _$SuggestionsToJson(Suggestions instance) => <String, dynam
   'suggestions': ?instance.suggestions?.map((e) => e.toJson()).toList(),
 };
 
+TagAssignment _$TagAssignmentFromJson(Map<String, dynamic> json) => TagAssignment(
+  names: (json['names'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  paths: (json['paths'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+);
+
+Map<String, dynamic> _$TagAssignmentToJson(TagAssignment instance) => <String, dynamic>{
+  'names': ?instance.names,
+  'paths': ?instance.paths,
+};
+
+TagAssignmentResponse _$TagAssignmentResponseFromJson(Map<String, dynamic> json) => TagAssignmentResponse(
+  results:
+      (json['results'] as List<dynamic>?)
+          ?.map((e) => TagAssignmentResult.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+);
+
+Map<String, dynamic> _$TagAssignmentResponseToJson(TagAssignmentResponse instance) => <String, dynamic>{
+  'results': ?instance.results?.map((e) => e.toJson()).toList(),
+};
+
+TagAssignmentResult _$TagAssignmentResultFromJson(Map<String, dynamic> json) =>
+    TagAssignmentResult(error: json['error'] as String?, path: json['path'] as String);
+
+Map<String, dynamic> _$TagAssignmentResultToJson(TagAssignmentResult instance) => <String, dynamic>{
+  'error': ?instance.error,
+  'path': instance.path,
+};
+
+TagChange _$TagChangeFromJson(Map<String, dynamic> json) =>
+    TagChange(color: json['color'] as String?, name: json['name'] as String?);
+
+Map<String, dynamic> _$TagChangeToJson(TagChange instance) => <String, dynamic>{
+  'color': ?instance.color,
+  'name': ?instance.name,
+};
+
+TagRequest _$TagRequestFromJson(Map<String, dynamic> json) =>
+    TagRequest(color: json['color'] as String?, name: json['name'] as String);
+
+Map<String, dynamic> _$TagRequestToJson(TagRequest instance) => <String, dynamic>{
+  'color': ?instance.color,
+  'name': instance.name,
+};
+
 TextSpan _$TextSpanFromJson(Map<String, dynamic> json) =>
     TextSpan(end: (json['end'] as num).toInt(), start: (json['start'] as num).toInt());
 
@@ -1710,6 +1760,20 @@ Map<String, dynamic> _$UserSummaryToJson(UserSummary instance) => <String, dynam
   'displayName': instance.displayName,
   'id': instance.id,
   'username': instance.username,
+};
+
+UserTag _$UserTagFromJson(Map<String, dynamic> json) => UserTag(
+  color: json['color'] as String,
+  count: (json['count'] as num).toInt(),
+  id: (json['id'] as num).toInt(),
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$UserTagToJson(UserTag instance) => <String, dynamic>{
+  'color': instance.color,
+  'count': instance.count,
+  'id': instance.id,
+  'name': instance.name,
 };
 
 VersionListing _$VersionListingFromJson(Map<String, dynamic> json) => VersionListing(

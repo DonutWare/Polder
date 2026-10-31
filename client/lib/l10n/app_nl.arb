@@ -757,5 +757,20 @@
 	"regeneratePreviewsHint": "Maakt op de achtergrond van elk bestand een nieuw voorbeeld",
 	"regeneratePreviewsMessage": "Elk bestand krijgt op de achtergrond een nieuw voorbeeld. Tot dat klaar is, toont een bestand zijn pictogram.",
 	"regenerate": "Opnieuw maken",
-	"previewsQueued": "{count, plural, =1{1 bestand wacht op een nieuw voorbeeld} other{{count} bestanden wachten op een nieuw voorbeeld}}"
+	"previewsQueued": "{count, plural, =1{1 bestand wacht op een nieuw voorbeeld} other{{count} bestanden wachten op een nieuw voorbeeld}}",
+	"searchFieldTag": "Tag",
+	"tagsTitle": "Tags",
+	"tagsAction": "Tags…",
+	"tagPickerHint": "Zoek of maak een tag",
+	"tagInvalidName": "Gebruik letters, cijfers, -, _ of / zonder spaties",
+	"tagsEmpty": "Nog geen tags. Typ #naam in een notitie, of voeg er een toe via het menu van een item.",
+	"tagCreate": "Maak #{name}",
+	"tagUsage": "{count, plural, =0{Niet gebruikt} =1{1 item} other{{count} items}}",
+	"tagEditTitle": "Tag bewerken",
+	"tagName": "Naam",
+	"tagColor": "Kleur",
+	"tagDeleteTitle": "#{name} verwijderen?",
+	"tagDeleteMessage": "{count, plural, =0{De tag wordt nergens gebruikt.} =1{Hij wordt van 1 item verwijderd, ook uit de tekst van je notities.} other{Hij wordt van {count} items verwijderd, ook uit de tekst van je notities.}}",
+	"tagSuggestionCreate": "Nieuwe tag",
+	"searchKeywordsTags": "labels, hashtags, kleuren, categorieën"
 }

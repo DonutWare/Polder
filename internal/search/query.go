@@ -12,6 +12,8 @@ import (
 	"unicode/utf16"
 
 	"github.com/danielgtaylor/huma/v2"
+
+	"polder-server/internal/tags"
 )
 
 type Op string
@@ -39,14 +41,15 @@ const (
 	KeyIn       Key = "in"
 	KeyModified Key = "modified"
 	KeySize     Key = "size"
+	KeyTag      Key = "tag"
 )
 
 func (Key) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
-	s.Enum = []any{string(KeyType), string(KeyExt), string(KeyIn), string(KeyModified), string(KeySize)}
+	s.Enum = []any{string(KeyType), string(KeyExt), string(KeyIn), string(KeyModified), string(KeySize), string(KeyTag)}
 	return s
 }
 
-var Keys = []Key{KeyType, KeyExt, KeyIn, KeyModified, KeySize}
+var Keys = []Key{KeyType, KeyExt, KeyIn, KeyModified, KeySize, KeyTag}
 
 var keyAliases = map[string]Key{
 	"type": KeyType, "kind": KeyType, "is": KeyType,
@@ -54,6 +57,7 @@ var keyAliases = map[string]Key{
 	"in": KeyIn, "folder": KeyIn, "path": KeyIn,
 	"modified": KeyModified, "date": KeyModified, "mtime": KeyModified,
 	"size": KeySize,
+	"tag":  KeyTag, "tags": KeyTag,
 }
 
 // Longest operators first so "!=" is not read as "!" followed by "=".
@@ -97,7 +101,7 @@ type token struct {
 func Parse(raw string, now time.Time) Query {
 	query := Query{Filters: []QueryFilter{}, Warnings: []QueryWarning{}, now: now}
 	for _, tok := range tokenize(raw) {
-		if filter, isTag, problem := parseTag(tok, now); isTag {
+		if filter, isFilter, problem := parseFilter(tok, now); isFilter {
 			if problem != "" {
 				query.Warnings = append(query.Warnings, QueryWarning{Start: tok.start, End: tok.end, Message: problem})
 			} else if filter != nil {
@@ -145,11 +149,14 @@ func tokenize(raw string) []token {
 	return tokens
 }
 
-func parseTag(tok token, now time.Time) (*QueryFilter, bool, string) {
+func parseFilter(tok token, now time.Time) (*QueryFilter, bool, string) {
 	text := tok.text
 	negated := strings.HasPrefix(text, "-")
 	if negated {
 		text = text[1:]
+	}
+	if strings.HasPrefix(text, "#") {
+		return parseHashTag(tok, text[1:], negated)
 	}
 	keyEnd := 0
 	for keyEnd < len(text) && (text[keyEnd] >= 'a' && text[keyEnd] <= 'z' || text[keyEnd] >= 'A' && text[keyEnd] <= 'Z') {
@@ -185,6 +192,17 @@ func parseTag(tok token, now time.Time) (*QueryFilter, bool, string) {
 		return nil, true, problem
 	}
 	return &filter, true, ""
+}
+
+func parseHashTag(tok token, name string, negated bool) (*QueryFilter, bool, string) {
+	if !tags.ValidName(name) {
+		return nil, false, ""
+	}
+	op := OpIs
+	if negated {
+		op = OpIsNot
+	}
+	return &QueryFilter{Key: KeyTag, Op: op, Values: []string{tags.Key(name)}, Start: tok.start, End: tok.end}, true, ""
 }
 
 func splitValues(raw string) []string {
@@ -241,6 +259,17 @@ func normalize(filter *QueryFilter, values []string, now time.Time) string {
 		}
 		for _, value := range values {
 			filter.Values = append(filter.Values, cleanFolder(value))
+		}
+	case KeyTag:
+		if !equality {
+			return "tag only supports = and !="
+		}
+		for _, value := range values {
+			name := strings.TrimPrefix(value, "#")
+			if !tags.ValidName(name) {
+				return fmt.Sprintf("%q is not a tag name", value)
+			}
+			filter.Values = append(filter.Values, tags.Key(name))
 		}
 	case KeyModified, KeySize:
 		parse := func(value string) error {

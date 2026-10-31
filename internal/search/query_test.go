@@ -34,6 +34,11 @@ func TestParseTags(t *testing.T) {
 		{query: "type=application/zip", filters: []QueryFilter{{Key: KeyType, Op: OpIs, Values: []string{"application/zip"}, Start: 0, End: 20}}},
 		{query: "ext=application/zip", filters: []QueryFilter{}, warnings: 1},
 		{query: "-size>1mb", filters: []QueryFilter{}, warnings: 1},
+		{query: "tag=Work,#home", filters: []QueryFilter{{Key: KeyTag, Op: OpIs, Values: []string{"work", "home"}, Start: 0, End: 14}}},
+		{query: "#Work -#home", filters: []QueryFilter{{Key: KeyTag, Op: OpIs, Values: []string{"work"}, Start: 0, End: 5},
+			{Key: KeyTag, Op: OpIsNot, Values: []string{"home"}, Start: 6, End: 12}}},
+		{query: "#123", terms: []Term{{Text: "#123"}}, filters: []QueryFilter{}},
+		{query: "tag=has,1", filters: []QueryFilter{}, warnings: 1},
 		{query: "ü type=pdf", terms: []Term{{Text: "ü"}}, filters: []QueryFilter{{Key: KeyType, Op: OpIs, Values: []string{"pdf"}, Start: 2, End: 10}}},
 	}
 	for _, test := range tests {

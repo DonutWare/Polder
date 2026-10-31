@@ -55,6 +55,8 @@ type Entry struct {
 	TextState    TextState      `json:"-"`
 	Mount        *Mount         `json:"mount,omitempty" required:"false" doc:"Set on a share that sits in the user's files, and on everything inside it"`
 	Shared       bool           `json:"shared,omitempty" required:"false" doc:"Whether the user shares this item with someone: a user, a group, another server or a link"`
+	TagIDs       []int64        `json:"tagIds,omitempty" required:"false" doc:"The logged-in user's tags on this item, including tags written in a note"`
+	OtherTags    []string       `json:"otherTags,omitempty" required:"false" doc:"Tags written in a note that the logged-in user has no tag for"`
 }
 
 func newDirectoryEntry(userID int64, cleanPath string, mtime time.Time) Entry {

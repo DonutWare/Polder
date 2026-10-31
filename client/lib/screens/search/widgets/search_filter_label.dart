@@ -7,6 +7,7 @@ extension SearchKeyLabel on SearchKey {
     SearchKey.folder => l.searchFieldFolder,
     SearchKey.modified => l.searchFieldModified,
     SearchKey.size => l.searchFieldSize,
+    SearchKey.tag => l.searchFieldTag,
   };
 }
 

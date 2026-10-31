@@ -22,6 +22,8 @@ _FileEntry _$FileEntryFromJson(Map<String, dynamic> json) => _FileEntry(
       PreviewState.none,
   mount: json['mount'] == null ? null : FileMount.fromJson(json['mount'] as Map<String, dynamic>),
   sharedByYou: json['sharedByYou'] as bool? ?? false,
+  tagIds: (json['tagIds'] as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ?? const <int>[],
+  otherTags: (json['otherTags'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const <String>[],
 );
 
 Map<String, dynamic> _$FileEntryToJson(_FileEntry instance) => <String, dynamic>{
@@ -38,6 +40,8 @@ Map<String, dynamic> _$FileEntryToJson(_FileEntry instance) => <String, dynamic>
   'previewState': _$PreviewStateEnumMap[instance.previewState]!,
   'mount': ?instance.mount?.toJson(),
   'sharedByYou': instance.sharedByYou,
+  'tagIds': instance.tagIds,
+  'otherTags': instance.otherTags,
 };
 
 const _$PreviewStateEnumMap = {

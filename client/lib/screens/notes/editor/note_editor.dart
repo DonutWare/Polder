@@ -2,13 +2,17 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
 import "package:cross_file/cross_file.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_editor.dart";
 import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
 import "package:polder/screens/notes/editor/markdown_view.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
 import "package:polder/services/notes/note_markdown.dart";
+import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 const noteFieldDecoration = InputDecoration(
   isCollapsed: true,
@@ -36,7 +40,7 @@ const noteHistoryShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.keyY, control: true): RedoNoteIntent(),
 };
 
-class LiveNoteEditor extends StatelessWidget {
+class LiveNoteEditor extends ConsumerWidget {
   const LiveNoteEditor({
     required this.controller,
     required this.targets,
@@ -55,12 +59,15 @@ class LiveNoteEditor extends StatelessWidget {
   final EdgeInsets padding;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final body = theme.textTheme.bodyLarge!.copyWith(color: colors.onSurface, height: 1.5);
     return MarkdownEditor(
       controller: controller,
+      tags: ref.watch(tagsProvider).value ?? const [],
+      newTagLabel: context.localized.tagSuggestionCreate,
+      onTagTap: (name) => searchForTag(context, name),
       padding: padding,
       decoration: noteFieldDecoration,
       onLinkTap: onLink,

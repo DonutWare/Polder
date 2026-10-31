@@ -10,6 +10,7 @@ import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/theme/app_theme.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 class FileGridTile extends StatelessWidget {
   const FileGridTile({required this.entry, required this.interaction, this.pending, this.syncing, super.key});
@@ -104,6 +105,10 @@ class FileGridTile extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 6),
+                    child: EntryTagDots(entry: entry),
                   ),
                   if (entry.sharedByYou)
                     Padding(

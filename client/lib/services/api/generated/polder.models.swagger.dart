@@ -1335,11 +1335,13 @@ class Entry {
     this.mount,
     required this.mtime,
     required this.name,
+    this.otherTags,
     required this.path,
     required this.previewState,
     required this.rev,
     this.shared,
     required this.size,
+    this.tagIds,
   });
 
   factory Entry.fromJson(Map<String, dynamic> json) => _$EntryFromJson(json);
@@ -1363,6 +1365,8 @@ class Entry {
   final DateTime mtime;
   @JsonKey(name: 'name', includeIfNull: false)
   final String name;
+  @JsonKey(name: 'otherTags', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? otherTags;
   @JsonKey(name: 'path', includeIfNull: false)
   final String path;
   @JsonKey(
@@ -1378,6 +1382,8 @@ class Entry {
   final bool? shared;
   @JsonKey(name: 'size', includeIfNull: false)
   final int size;
+  @JsonKey(name: 'tagIds', includeIfNull: false, defaultValue: <int>[])
+  final List<int>? tagIds;
   static const fromJsonFactory = _$EntryFromJson;
 
   @override
@@ -1392,12 +1398,15 @@ class Entry {
             (identical(other.mount, mount) || const DeepCollectionEquality().equals(other.mount, mount)) &&
             (identical(other.mtime, mtime) || const DeepCollectionEquality().equals(other.mtime, mtime)) &&
             (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.otherTags, otherTags) ||
+                const DeepCollectionEquality().equals(other.otherTags, otherTags)) &&
             (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)) &&
             (identical(other.previewState, previewState) ||
                 const DeepCollectionEquality().equals(other.previewState, previewState)) &&
             (identical(other.rev, rev) || const DeepCollectionEquality().equals(other.rev, rev)) &&
             (identical(other.shared, shared) || const DeepCollectionEquality().equals(other.shared, shared)) &&
-            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)));
+            (identical(other.size, size) || const DeepCollectionEquality().equals(other.size, size)) &&
+            (identical(other.tagIds, tagIds) || const DeepCollectionEquality().equals(other.tagIds, tagIds)));
   }
 
   @override
@@ -1410,11 +1419,13 @@ class Entry {
       const DeepCollectionEquality().hash(mount) ^
       const DeepCollectionEquality().hash(mtime) ^
       const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(otherTags) ^
       const DeepCollectionEquality().hash(path) ^
       const DeepCollectionEquality().hash(previewState) ^
       const DeepCollectionEquality().hash(rev) ^
       const DeepCollectionEquality().hash(shared) ^
       const DeepCollectionEquality().hash(size) ^
+      const DeepCollectionEquality().hash(tagIds) ^
       runtimeType.hashCode;
 }
 
@@ -1428,11 +1439,13 @@ extension $EntryExtension on Entry {
     Mount? mount,
     DateTime? mtime,
     String? name,
+    List<String>? otherTags,
     String? path,
     enums.EntryPreviewState? previewState,
     int? rev,
     bool? shared,
     int? size,
+    List<int>? tagIds,
   }) {
     return Entry(
       hash: hash ?? this.hash,
@@ -1443,11 +1456,13 @@ extension $EntryExtension on Entry {
       mount: mount ?? this.mount,
       mtime: mtime ?? this.mtime,
       name: name ?? this.name,
+      otherTags: otherTags ?? this.otherTags,
       path: path ?? this.path,
       previewState: previewState ?? this.previewState,
       rev: rev ?? this.rev,
       shared: shared ?? this.shared,
       size: size ?? this.size,
+      tagIds: tagIds ?? this.tagIds,
     );
   }
 
@@ -1460,11 +1475,13 @@ extension $EntryExtension on Entry {
     Wrapped<Mount?>? mount,
     Wrapped<DateTime>? mtime,
     Wrapped<String>? name,
+    Wrapped<List<String>?>? otherTags,
     Wrapped<String>? path,
     Wrapped<enums.EntryPreviewState>? previewState,
     Wrapped<int>? rev,
     Wrapped<bool?>? shared,
     Wrapped<int>? size,
+    Wrapped<List<int>?>? tagIds,
   }) {
     return Entry(
       hash: (hash != null ? hash.value : this.hash),
@@ -1475,11 +1492,13 @@ extension $EntryExtension on Entry {
       mount: (mount != null ? mount.value : this.mount),
       mtime: (mtime != null ? mtime.value : this.mtime),
       name: (name != null ? name.value : this.name),
+      otherTags: (otherTags != null ? otherTags.value : this.otherTags),
       path: (path != null ? path.value : this.path),
       previewState: (previewState != null ? previewState.value : this.previewState),
       rev: (rev != null ? rev.value : this.rev),
       shared: (shared != null ? shared.value : this.shared),
       size: (size != null ? size.value : this.size),
+      tagIds: (tagIds != null ? tagIds.value : this.tagIds),
     );
   }
 }
@@ -7427,6 +7446,198 @@ extension $SuggestionsExtension on Suggestions {
 }
 
 @JsonSerializable(explicitToJson: true)
+class TagAssignment {
+  const TagAssignment({this.names, this.paths});
+
+  factory TagAssignment.fromJson(Map<String, dynamic> json) => _$TagAssignmentFromJson(json);
+
+  static const toJsonFactory = _$TagAssignmentToJson;
+  Map<String, dynamic> toJson() => _$TagAssignmentToJson(this);
+
+  @JsonKey(name: 'names', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? names;
+  @JsonKey(name: 'paths', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? paths;
+  static const fromJsonFactory = _$TagAssignmentFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TagAssignment &&
+            (identical(other.names, names) || const DeepCollectionEquality().equals(other.names, names)) &&
+            (identical(other.paths, paths) || const DeepCollectionEquality().equals(other.paths, paths)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(names) ^ const DeepCollectionEquality().hash(paths) ^ runtimeType.hashCode;
+}
+
+extension $TagAssignmentExtension on TagAssignment {
+  TagAssignment copyWith({List<String>? names, List<String>? paths}) {
+    return TagAssignment(names: names ?? this.names, paths: paths ?? this.paths);
+  }
+
+  TagAssignment copyWithWrapped({Wrapped<List<String>?>? names, Wrapped<List<String>?>? paths}) {
+    return TagAssignment(
+      names: (names != null ? names.value : this.names),
+      paths: (paths != null ? paths.value : this.paths),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TagAssignmentResponse {
+  const TagAssignmentResponse({this.results});
+
+  factory TagAssignmentResponse.fromJson(Map<String, dynamic> json) => _$TagAssignmentResponseFromJson(json);
+
+  static const toJsonFactory = _$TagAssignmentResponseToJson;
+  Map<String, dynamic> toJson() => _$TagAssignmentResponseToJson(this);
+
+  @JsonKey(name: 'results', includeIfNull: false, defaultValue: <TagAssignmentResult>[])
+  final List<TagAssignmentResult>? results;
+  static const fromJsonFactory = _$TagAssignmentResponseFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TagAssignmentResponse &&
+            (identical(other.results, results) || const DeepCollectionEquality().equals(other.results, results)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(results) ^ runtimeType.hashCode;
+}
+
+extension $TagAssignmentResponseExtension on TagAssignmentResponse {
+  TagAssignmentResponse copyWith({List<TagAssignmentResult>? results}) {
+    return TagAssignmentResponse(results: results ?? this.results);
+  }
+
+  TagAssignmentResponse copyWithWrapped({Wrapped<List<TagAssignmentResult>?>? results}) {
+    return TagAssignmentResponse(results: (results != null ? results.value : this.results));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TagAssignmentResult {
+  const TagAssignmentResult({this.error, required this.path});
+
+  factory TagAssignmentResult.fromJson(Map<String, dynamic> json) => _$TagAssignmentResultFromJson(json);
+
+  static const toJsonFactory = _$TagAssignmentResultToJson;
+  Map<String, dynamic> toJson() => _$TagAssignmentResultToJson(this);
+
+  @JsonKey(name: 'error', includeIfNull: false)
+  final String? error;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  static const fromJsonFactory = _$TagAssignmentResultFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TagAssignmentResult &&
+            (identical(other.error, error) || const DeepCollectionEquality().equals(other.error, error)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(error) ^ const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
+}
+
+extension $TagAssignmentResultExtension on TagAssignmentResult {
+  TagAssignmentResult copyWith({String? error, String? path}) {
+    return TagAssignmentResult(error: error ?? this.error, path: path ?? this.path);
+  }
+
+  TagAssignmentResult copyWithWrapped({Wrapped<String?>? error, Wrapped<String>? path}) {
+    return TagAssignmentResult(
+      error: (error != null ? error.value : this.error),
+      path: (path != null ? path.value : this.path),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TagChange {
+  const TagChange({this.color, this.name});
+
+  factory TagChange.fromJson(Map<String, dynamic> json) => _$TagChangeFromJson(json);
+
+  static const toJsonFactory = _$TagChangeToJson;
+  Map<String, dynamic> toJson() => _$TagChangeToJson(this);
+
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String? name;
+  static const fromJsonFactory = _$TagChangeFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TagChange &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(color) ^ const DeepCollectionEquality().hash(name) ^ runtimeType.hashCode;
+}
+
+extension $TagChangeExtension on TagChange {
+  TagChange copyWith({String? color, String? name}) {
+    return TagChange(color: color ?? this.color, name: name ?? this.name);
+  }
+
+  TagChange copyWithWrapped({Wrapped<String?>? color, Wrapped<String?>? name}) {
+    return TagChange(color: (color != null ? color.value : this.color), name: (name != null ? name.value : this.name));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TagRequest {
+  const TagRequest({this.color, required this.name});
+
+  factory TagRequest.fromJson(Map<String, dynamic> json) => _$TagRequestFromJson(json);
+
+  static const toJsonFactory = _$TagRequestToJson;
+  Map<String, dynamic> toJson() => _$TagRequestToJson(this);
+
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  static const fromJsonFactory = _$TagRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TagRequest &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(color) ^ const DeepCollectionEquality().hash(name) ^ runtimeType.hashCode;
+}
+
+extension $TagRequestExtension on TagRequest {
+  TagRequest copyWith({String? color, String? name}) {
+    return TagRequest(color: color ?? this.color, name: name ?? this.name);
+  }
+
+  TagRequest copyWithWrapped({Wrapped<String?>? color, Wrapped<String>? name}) {
+    return TagRequest(color: (color != null ? color.value : this.color), name: (name != null ? name.value : this.name));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class TextSpan {
   const TextSpan({required this.end, required this.start});
 
@@ -8247,6 +8458,59 @@ extension $UserSummaryExtension on UserSummary {
       displayName: (displayName != null ? displayName.value : this.displayName),
       id: (id != null ? id.value : this.id),
       username: (username != null ? username.value : this.username),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class UserTag {
+  const UserTag({required this.color, required this.count, required this.id, required this.name});
+
+  factory UserTag.fromJson(Map<String, dynamic> json) => _$UserTagFromJson(json);
+
+  static const toJsonFactory = _$UserTagToJson;
+  Map<String, dynamic> toJson() => _$UserTagToJson(this);
+
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String color;
+  @JsonKey(name: 'count', includeIfNull: false)
+  final int count;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  static const fromJsonFactory = _$UserTagFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is UserTag &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.count, count) || const DeepCollectionEquality().equals(other.count, count)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(count) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(name) ^
+      runtimeType.hashCode;
+}
+
+extension $UserTagExtension on UserTag {
+  UserTag copyWith({String? color, int? count, int? id, String? name}) {
+    return UserTag(color: color ?? this.color, count: count ?? this.count, id: id ?? this.id, name: name ?? this.name);
+  }
+
+  UserTag copyWithWrapped({Wrapped<String>? color, Wrapped<int>? count, Wrapped<int>? id, Wrapped<String>? name}) {
+    return UserTag(
+      color: (color != null ? color.value : this.color),
+      count: (count != null ? count.value : this.count),
+      id: (id != null ? id.value : this.id),
+      name: (name != null ? name.value : this.name),
     );
   }
 }

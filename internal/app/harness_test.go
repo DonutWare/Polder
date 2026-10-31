@@ -142,6 +142,8 @@ type fileEntry struct {
 	PreviewState string         `json:"previewState"`
 	Mount        *mountInfo     `json:"mount"`
 	Shared       bool           `json:"shared"`
+	TagIDs       []int64        `json:"tagIds"`
+	OtherTags    []string       `json:"otherTags"`
 }
 
 type mountInfo struct {

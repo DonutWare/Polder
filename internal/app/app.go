@@ -32,6 +32,7 @@ import (
 	"polder-server/internal/sharing"
 	"polder-server/internal/storage"
 	"polder-server/internal/syncing"
+	"polder-server/internal/tags"
 	"polder-server/internal/users"
 	"polder-server/internal/versions"
 	"polder-server/internal/webdav"
@@ -65,6 +66,7 @@ type App struct {
 	sync      *syncing.Service
 	versions  *versions.Worker
 	links     *links.Graph
+	tags      *tags.Service
 
 	federation         *federation.Service
 	trashPurgeRequests chan struct{}
@@ -144,7 +146,9 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	searchService, err := search.Open(cfg.SearchIndexDir(), databaseID, fileService, userStore, serverSettings, extractor.Cache())
+	tagService := tags.NewService(db, fileService, userStore)
+	fileService.OnContentChanged(tagService.Enqueue)
+	searchService, err := search.Open(cfg.SearchIndexDir(), databaseID, fileService, userStore, serverSettings, extractor.Cache(), tagService.Store())
 	if err != nil {
 		return nil, err
 	}
@@ -219,6 +223,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Office:                 officeService,
 		Versions:               versionWorker,
 		Links:                  linkGraph,
+		Tags:                   tagService,
 		LinkPreviews:           linkpreview.New(linkpreview.Options{}),
 		Groups:                 groupService,
 		Sharing:                sharingService,
@@ -246,6 +251,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		sync:      syncService,
 		versions:  versionWorker,
 		links:     linkGraph,
+		tags:      tagService,
 
 		federation:         federationService,
 		trashPurgeRequests: trashPurgeRequests,
@@ -288,6 +294,7 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	a.background.Go(func() { a.Search.Run(ctx) })
 	a.background.Go(func() { a.versions.Run(ctx) })
 	a.background.Go(func() { a.links.Run(ctx) })
+	a.background.Go(func() { a.tags.Run(ctx) })
 	a.background.Go(func() { a.federation.Run(ctx) })
 	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
 	a.background.Go(func() {
