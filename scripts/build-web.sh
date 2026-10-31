@@ -12,6 +12,8 @@ dist="$server_dir/internal/webui/dist"
   flutter build web --release --no-web-resources-cdn --no-wasm-dry-run
 )
 
+mkdir -p "$dist"
+touch "$dist/.gitkeep"
 find "$dist" -mindepth 1 ! -name .gitkeep -exec rm -rf {} +
 cp -R "$client_dir/build/web/." "$dist/"
 find "$dist" -name '*.symbols' -delete

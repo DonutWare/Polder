@@ -243,6 +243,7 @@ func (s *Service) fetchPage(ctx context.Context, target *url.URL) (Page, error) 
 		return Page{}, err
 	}
 	defer release()
+	defer func() { _ = response.Body.Close() }()
 	final := response.Request.URL
 	mediaType := mediaTypeOf(response)
 	if allowedImageTypes[mediaType] {
@@ -266,6 +267,7 @@ func (s *Service) fetchImage(ctx context.Context, target *url.URL) (Asset, error
 		return Asset{}, err
 	}
 	defer release()
+	defer func() { _ = response.Body.Close() }()
 	body, err := io.ReadAll(io.LimitReader(response.Body, maxImageBytes+1))
 	if err != nil {
 		return Asset{}, err
@@ -313,10 +315,7 @@ func (s *Service) get(ctx context.Context, target *url.URL, accept string) (*htt
 		release()
 		return nil, nil, fmt.Errorf("the link answered %s", response.Status)
 	}
-	return response, func() {
-		response.Body.Close()
-		release()
-	}, nil
+	return response, release, nil
 }
 
 func mediaTypeOf(response *http.Response) string {
