@@ -2915,6 +2915,30 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Create a recipe note from a web page, with its ingredients, steps and images
+  Future<chopper.Response<Entry>> importRecipe({required RecipeImportRequest? body}) {
+    generatedMapping.putIfAbsent(Entry, () => Entry.fromJsonFactory);
+
+    return _importRecipe(body: body);
+  }
+
+  ///Create a recipe note from a web page, with its ingredients, steps and images
+  @POST(path: '/api/v1/recipes/import', optionalBody: true)
+  Future<chopper.Response<Entry>> _importRecipe({
+    @Body() required RecipeImportRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a recipe note from a web page, with its ingredients, steps and images',
+      operationId: 'importRecipe',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["recipes"],
+      deprecated: false,
+    ),
+  });
+
   ///Find files and folders by name, text inside them, type, date and size
   ///@param q What to look for; see the operation description for filters
   ///@param limit

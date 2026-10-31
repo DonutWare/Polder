@@ -22,6 +22,7 @@ import "package:polder/screens/notes/widgets/notes_sidebar.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/dual_pane.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
+import "package:polder/widgets/shared/fab_menu.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
@@ -121,11 +122,19 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   Widget? _sidebar(String? root) =>
       root == null ? null : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open);
 
-  void _createPage(String? root, {bool checklist = false}) {
+  void _createPage(String? root, {NewNoteKind kind = NewNoteKind.page}) {
     if (root == null) {
-      NotesActions.createInNotesFolder(context, checklist: checklist);
+      NotesActions.createInNotesFolder(context, kind: kind);
     } else {
-      NotesActions.createPage(context, folder: notesLevel(ref, root), checklist: checklist);
+      NotesActions.createPage(context, folder: notesLevel(ref, root), kind: kind);
+    }
+  }
+
+  void _addRecipe(String? root) {
+    if (root == null) {
+      NotesActions.addRecipeInNotesFolder(context);
+    } else {
+      NotesActions.addRecipe(context, folder: notesLevel(ref, root));
     }
   }
 
@@ -145,30 +154,34 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     _lastLinksEntry = entry;
     return DualPane(
       title: NotesTitle(root: root, selectedPath: notePath),
-      listActions: [
-        if (root != null) NotesHeaderActions(root: root, showNewPage: !single, onChangeFolder: _changeFolder),
-      ],
+      listActions: [if (root != null) NotesHeaderActions(onChangeFolder: _changeFolder)],
       listLocation: AppRoutes.notes,
       maxListWidth: _listWidth,
       forceSingle: grid,
       list: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
-      listFloatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton.small(
-            heroTag: #newChecklist,
-            tooltip: context.localized.noteNewChecklist,
-            onPressed: () => _createPage(root, checklist: true),
-            child: const Icon(IconsaxPlusLinear.task_square),
-          ),
-          const SizedBox(height: 12),
-          FloatingActionButton(
-            heroTag: #newPage,
-            tooltip: context.localized.noteNewPage,
-            onPressed: () => _createPage(root),
-            child: const Icon(IconsaxPlusLinear.note_add),
-          ),
+      listFloatingActionButton: FabMenu(
+        icon: IconsaxPlusLinear.add,
+        tooltip: context.localized.add,
+        groups: [
+          [
+            FabMenuItem(
+              icon: IconsaxPlusLinear.note_add,
+              label: context.localized.noteNewPage,
+              onPressed: () => _createPage(root),
+            ),
+            FabMenuItem(
+              icon: IconsaxPlusLinear.task_square,
+              label: context.localized.noteNewChecklist,
+              onPressed: () => _createPage(root, kind: NewNoteKind.checklist),
+            ),
+          ],
+          [
+            FabMenuItem(
+              icon: IconsaxPlusLinear.cake,
+              label: context.localized.recipeAdd,
+              onPressed: () => _addRecipe(root),
+            ),
+          ],
         ],
       ),
       onPop: _closeNote,

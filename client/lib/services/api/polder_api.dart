@@ -252,6 +252,11 @@ class PolderApi {
 
   Future<LinkPreview> linkPreview(String url) async => (await _service.getLinkPreview(url: url)).body!.toModel();
 
+  Future<FileEntry> importRecipe({String? url, String? content, required String folder}) async =>
+      (await _service.importRecipe(
+        body: wire.RecipeImportRequest(url: url, content: content, folder: folder),
+      )).body!.toModel();
+
   Future<Uint8List?> linkPreviewImage(String url, LinkPreviewImageKind kind) => _thumbnail(
     () => _service.getLinkPreviewImage(url: url, kind: wire.ApiV1LinkPreviewsImageGetKind.values.byName(kind.name)),
   );

@@ -17,6 +17,7 @@ import "package:polder/screens/admin/admin_screen.dart";
 import "package:polder/screens/auto_upload/auto_upload_screen.dart";
 import "package:polder/screens/browser/browser_stack.dart";
 import "package:polder/screens/login/login_screen.dart";
+import "package:polder/screens/notes/cooking/cooking_screen.dart";
 import "package:polder/screens/notes/notes_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
@@ -77,6 +78,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             final extra => EditorTarget(extra! as FileEntry),
           },
         ),
+      ),
+      _route(
+        path: AppRoutes.cook,
+        redirect: (_, state) => state.uri.queryParameters.containsKey(AppRoutes.pathParameter) ? null : AppRoutes.notes,
+        page: (state) => _standalone(CookingScreen(path: state.uri.queryParameters[AppRoutes.pathParameter]!)),
       ),
       ShellRoute(
         builder: (_, _, child) => AppShell(child: child),

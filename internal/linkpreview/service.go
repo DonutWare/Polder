@@ -25,6 +25,7 @@ const (
 	fetchTimeout        = 10 * time.Second
 	maxRedirects        = 5
 	maxPageBytes        = 1 << 20
+	maxDocumentBytes    = 5 << 20
 	maxImageBytes       = 4 << 20
 	maxURLLength        = 2048
 	pageTTL             = 6 * time.Hour
@@ -38,7 +39,33 @@ const (
 	maxPerOwner         = 2
 	slotWait            = fetchTimeout
 	userAgent           = "Mozilla/5.0 (compatible; PolderLinkPreview/1.0)"
+	pageAccept          = "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5"
 )
+
+var documentHeaders = http.Header{
+	"User-Agent":      {userAgent},
+	"Accept":          {pageAccept},
+	"Accept-Language": {"en;q=0.9,nl;q=0.8,*;q=0.5"},
+}
+
+type statusError struct {
+	code   int
+	status string
+}
+
+func (e *statusError) Error() string { return "the link answered " + e.status }
+
+func refusedAutomatedVisit(err error) bool {
+	var status *statusError
+	if !errors.As(err, &status) {
+		return false
+	}
+	switch status.code {
+	case http.StatusUnauthorized, http.StatusForbidden, http.StatusTooManyRequests, http.StatusServiceUnavailable:
+		return true
+	}
+	return false
+}
 
 var (
 	errTooLarge = errors.New("the linked resource is too large")
@@ -177,6 +204,49 @@ func (s *Service) Image(ctx context.Context, owner int64, raw string, kind Kind)
 	return asset, nil
 }
 
+func (s *Service) Document(ctx context.Context, owner int64, raw string) ([]byte, *url.URL, error) {
+	target, err := validURL(raw)
+	if err != nil {
+		return nil, nil, err
+	}
+	release, err := s.owners.acquire(ctx, owner)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer release()
+	body, final, err := s.fetchDocument(ctx, target)
+	if errors.Is(err, errBusy) {
+		return nil, nil, apperr.Unavailable("too many links are loading, try again shortly")
+	}
+	if refusedAutomatedVisit(err) {
+		return nil, nil, apperr.Forbidden("the site refused to send the page to Polder; paste the recipe instead")
+	}
+	if err != nil {
+		return nil, nil, apperr.Invalid("the page could not be loaded: %v", err)
+	}
+	return body, final, nil
+}
+
+func (s *Service) ImageAt(ctx context.Context, owner int64, raw string) (Asset, error) {
+	target, err := validURL(raw)
+	if err != nil {
+		return Asset{}, err
+	}
+	release, err := s.owners.acquire(ctx, owner)
+	if err != nil {
+		return Asset{}, err
+	}
+	defer release()
+	asset, err := s.image(ctx, target.String())
+	if err != nil {
+		return Asset{}, err
+	}
+	if len(asset.Body) == 0 {
+		return Asset{}, apperr.NotFound("the image could not be loaded")
+	}
+	return asset, nil
+}
+
 func (s *Service) page(ctx context.Context, target *url.URL) (Page, error) {
 	key := target.String()
 	if page, ok := s.pages.get(key, s.now()); ok {
@@ -238,7 +308,7 @@ func share[T any](ctx context.Context, flights *singleflight.Group, key string, 
 }
 
 func (s *Service) fetchPage(ctx context.Context, target *url.URL) (Page, error) {
-	response, release, err := s.get(ctx, target, "text/html,application/xhtml+xml;q=0.9,*/*;q=0.5")
+	response, release, err := s.get(ctx, target, previewHeaders(pageAccept))
 	if err != nil {
 		return Page{}, err
 	}
@@ -261,8 +331,30 @@ func (s *Service) fetchPage(ctx context.Context, target *url.URL) (Page, error) 
 	return page, nil
 }
 
+func (s *Service) fetchDocument(ctx context.Context, target *url.URL) ([]byte, *url.URL, error) {
+	response, release, err := s.get(ctx, target, documentHeaders)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer release()
+	defer func() { _ = response.Body.Close() }()
+	mediaType := mediaTypeOf(response)
+	if mediaType != "text/html" && mediaType != "application/xhtml+xml" {
+		return nil, nil, fmt.Errorf("the link is not a web page")
+	}
+	reader, err := charset.NewReader(io.LimitReader(response.Body, maxDocumentBytes), response.Header.Get("Content-Type"))
+	if err != nil {
+		return nil, nil, err
+	}
+	body, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, nil, err
+	}
+	return body, response.Request.URL, nil
+}
+
 func (s *Service) fetchImage(ctx context.Context, target *url.URL) (Asset, error) {
-	response, release, err := s.get(ctx, target, "image/*")
+	response, release, err := s.get(ctx, target, previewHeaders("image/*"))
 	if err != nil {
 		return Asset{}, err
 	}
@@ -285,7 +377,11 @@ func (s *Service) fetchImage(ctx context.Context, target *url.URL) (Asset, error
 	return Asset{ContentType: contentType, Body: body}, nil
 }
 
-func (s *Service) get(ctx context.Context, target *url.URL, accept string) (*http.Response, func(), error) {
+func previewHeaders(accept string) http.Header {
+	return http.Header{"User-Agent": {userAgent}, "Accept": {accept}}
+}
+
+func (s *Service) get(ctx context.Context, target *url.URL, headers http.Header) (*http.Response, func(), error) {
 	wait := time.NewTimer(slotWait)
 	defer wait.Stop()
 	select {
@@ -303,8 +399,7 @@ func (s *Service) get(ctx context.Context, target *url.URL, accept string) (*htt
 		release()
 		return nil, nil, err
 	}
-	request.Header.Set("User-Agent", userAgent)
-	request.Header.Set("Accept", accept)
+	request.Header = headers.Clone()
 	response, err := s.client.Do(request)
 	if err != nil {
 		release()
@@ -313,7 +408,7 @@ func (s *Service) get(ctx context.Context, target *url.URL, accept string) (*htt
 	if response.StatusCode < 200 || response.StatusCode > 299 {
 		response.Body.Close()
 		release()
-		return nil, nil, fmt.Errorf("the link answered %s", response.Status)
+		return nil, nil, &statusError{code: response.StatusCode, status: response.Status}
 	}
 	return response, release, nil
 }

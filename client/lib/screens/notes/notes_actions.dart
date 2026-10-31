@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
+import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/notes/last_note_provider.dart";
@@ -13,9 +14,11 @@ import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
+import "package:polder/screens/notes/widgets/recipe_dialog.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/notes/note_checklist.dart";
+import "package:polder/services/notes/note_recipe.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
@@ -24,13 +27,32 @@ import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/shared/text_input_dialog.dart";
 
+enum NewNoteKind {
+  page,
+  checklist;
+
+  String title(AppLocalizations localized) => switch (this) {
+    page => localized.noteNewPage,
+    checklist => localized.noteNewChecklist,
+  };
+
+  String get content => switch (this) {
+    page => "",
+    checklist => NoteChecklist.empty,
+  };
+}
+
 abstract final class NotesActions {
-  static Future<void> createPage(BuildContext context, {required String folder, bool checklist = false}) async {
+  static Future<void> createPage(
+    BuildContext context, {
+    required String folder,
+    NewNoteKind kind = NewNoteKind.page,
+  }) async {
     final localized = context.localized;
     final container = ProviderScope.containerOf(context, listen: false);
     final name = await showTextInputDialog(
       context,
-      title: checklist ? localized.noteNewChecklist : localized.noteNewPage,
+      title: kind.title(localized),
       label: localized.name,
       confirmLabel: localized.create,
       isValid: (value) => RemotePath.isValidName(value.trim()),
@@ -39,12 +61,7 @@ abstract final class NotesActions {
     FileEntry? created;
     final succeeded = await context.runWithFeedback(
       Future(
-        () async => created = await _createNote(
-          container,
-          folder: folder,
-          name: name.trim(),
-          content: checklist ? NoteChecklist.empty : "",
-        ),
+        () async => created = await _createNote(container, folder: folder, name: name.trim(), content: kind.content),
       ),
     );
     if (succeeded && created != null && context.mounted) context.go(AppRoutes.noteAt(created!.path));
@@ -53,11 +70,32 @@ abstract final class NotesActions {
   static Future<void> createSubpage(BuildContext context, NoteTreeNode parent) =>
       createPage(context, folder: parent.childrenPath);
 
-  static Future<void> createInNotesFolder(BuildContext context, {bool checklist = false}) async {
-    var folder = await ProviderScope.containerOf(context, listen: false).read(notesFolderProvider.future);
-    if (!context.mounted) return;
-    folder ??= await showNotesSetupDialog(context);
-    if (folder != null && context.mounted) await createPage(context, folder: folder, checklist: checklist);
+  static Future<void> createInNotesFolder(BuildContext context, {NewNoteKind kind = NewNoteKind.page}) async {
+    final folder = await _notesFolder(context);
+    if (folder != null && context.mounted) await createPage(context, folder: folder, kind: kind);
+  }
+
+  static Future<void> addRecipe(BuildContext context, {required String folder}) async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final created = await showRecipeDialog(
+      context,
+      folder: folder,
+      createCustom: (name) => _createNote(container, folder: folder, name: name, content: NoteRecipe.template),
+    );
+    if (created == null || !context.mounted) return;
+    _refresh(container, folder);
+    context.go(AppRoutes.noteAt(created.path));
+  }
+
+  static Future<void> addRecipeInNotesFolder(BuildContext context) async {
+    final folder = await _notesFolder(context);
+    if (folder != null && context.mounted) await addRecipe(context, folder: folder);
+  }
+
+  static Future<String?> _notesFolder(BuildContext context) async {
+    final folder = await ProviderScope.containerOf(context, listen: false).read(notesFolderProvider.future);
+    if (folder != null || !context.mounted) return folder;
+    return showNotesSetupDialog(context);
   }
 
   static Future<FileEntry> _createNote(

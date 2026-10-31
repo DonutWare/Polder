@@ -5487,6 +5487,54 @@ extension $QueryWarningExtension on QueryWarning {
 }
 
 @JsonSerializable(explicitToJson: true)
+class RecipeImportRequest {
+  const RecipeImportRequest({this.content, required this.folder, this.url});
+
+  factory RecipeImportRequest.fromJson(Map<String, dynamic> json) => _$RecipeImportRequestFromJson(json);
+
+  static const toJsonFactory = _$RecipeImportRequestToJson;
+  Map<String, dynamic> toJson() => _$RecipeImportRequestToJson(this);
+
+  @JsonKey(name: 'content', includeIfNull: false)
+  final String? content;
+  @JsonKey(name: 'folder', includeIfNull: false)
+  final String folder;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String? url;
+  static const fromJsonFactory = _$RecipeImportRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is RecipeImportRequest &&
+            (identical(other.content, content) || const DeepCollectionEquality().equals(other.content, content)) &&
+            (identical(other.folder, folder) || const DeepCollectionEquality().equals(other.folder, folder)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(content) ^
+      const DeepCollectionEquality().hash(folder) ^
+      const DeepCollectionEquality().hash(url) ^
+      runtimeType.hashCode;
+}
+
+extension $RecipeImportRequestExtension on RecipeImportRequest {
+  RecipeImportRequest copyWith({String? content, String? folder, String? url}) {
+    return RecipeImportRequest(content: content ?? this.content, folder: folder ?? this.folder, url: url ?? this.url);
+  }
+
+  RecipeImportRequest copyWithWrapped({Wrapped<String?>? content, Wrapped<String>? folder, Wrapped<String?>? url}) {
+    return RecipeImportRequest(
+      content: (content != null ? content.value : this.content),
+      folder: (folder != null ? folder.value : this.folder),
+      url: (url != null ? url.value : this.url),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Recipient {
   const Recipient({this.avatar, required this.id, required this.kind, required this.name, this.username});
 

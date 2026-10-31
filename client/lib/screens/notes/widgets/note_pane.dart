@@ -33,6 +33,7 @@ import "package:polder/services/notes/format_actions.dart";
 import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/services/notes/note_link.dart";
 import "package:polder/services/notes/note_preview.dart";
+import "package:polder/services/notes/note_recipe.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/api_error_localization.dart";
@@ -315,6 +316,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     final readOnly = !document.editable || document.state == NoteSaveState.conflict;
     final controller = _controllerFor(document);
     final checklist = !sourceMode && NoteChecklist.isChecklist(controller.text);
+    final recipe = !checklist && NoteRecipe.isRecipe(controller.text);
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
@@ -350,6 +352,12 @@ class _NotePaneState extends ConsumerState<NotePane> {
         ),
         actions: [
           _SaveStatus(state: document.state, error: document.saveError, onSave: _notifier.save),
+          if (recipe)
+            IconButton(
+              tooltip: localized.recipeStartCooking,
+              icon: const Icon(IconsaxPlusLinear.cake),
+              onPressed: () => context.push(AppRoutes.cookAt(document.entry.path)),
+            ),
           IconButton(
             tooltip: sourceMode ? localized.noteLivePreview : localized.noteSourceMode,
             isSelected: sourceMode,
@@ -479,7 +487,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     );
   }
 
-  static const _readableWidth = 700.0;
+  static const _readableWidth = 1200.0;
   static const _fadeDuration = Duration(milliseconds: 180);
 
   NoteTargets _targets(NoteDocument document) {

@@ -77,6 +77,16 @@ class DualPane extends StatelessWidget {
     );
   }
 
+  Widget _withFloatingButton(Widget list) => switch (listFloatingActionButton) {
+    null => list,
+    final button => Stack(
+      children: [
+        Positioned.fill(child: list),
+        Positioned(right: 16, bottom: 16, child: button),
+      ],
+    ),
+  };
+
   Widget _dual(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final shown = detail ?? defaultDetail;
@@ -102,7 +112,7 @@ class DualPane extends StatelessWidget {
                           actions: listActions,
                           showUp: location != null && !AppRoutes.isTab(location),
                         ),
-                      Expanded(child: list),
+                      Expanded(child: _withFloatingButton(list)),
                     ],
                   ),
                 ),

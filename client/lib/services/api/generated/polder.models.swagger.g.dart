@@ -1153,6 +1153,18 @@ Map<String, dynamic> _$QueryWarningToJson(QueryWarning instance) => <String, dyn
   'start': instance.start,
 };
 
+RecipeImportRequest _$RecipeImportRequestFromJson(Map<String, dynamic> json) => RecipeImportRequest(
+  content: json['content'] as String?,
+  folder: json['folder'] as String,
+  url: json['url'] as String?,
+);
+
+Map<String, dynamic> _$RecipeImportRequestToJson(RecipeImportRequest instance) => <String, dynamic>{
+  'content': ?instance.content,
+  'folder': instance.folder,
+  'url': ?instance.url,
+};
+
 Recipient _$RecipientFromJson(Map<String, dynamic> json) => Recipient(
   avatar: json['avatar'] == null ? null : Avatar.fromJson(json['avatar'] as Map<String, dynamic>),
   id: (json['id'] as num).toInt(),

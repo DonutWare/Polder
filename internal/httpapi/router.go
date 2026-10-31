@@ -26,6 +26,7 @@ import (
 	"polder-server/internal/logging"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
+	"polder-server/internal/recipes"
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
 	"polder-server/internal/sharing"
@@ -55,6 +56,7 @@ type API struct {
 	links        *links.Graph
 	tags         *tags.Service
 	linkPreviews *linkpreview.Service
+	recipes      *recipes.Service
 	groups       *groups.Service
 	sharing      *sharing.Service
 	webdav       *webdav.Handler
@@ -90,6 +92,7 @@ type Dependencies struct {
 	Links                  *links.Graph
 	Tags                   *tags.Service
 	LinkPreviews           *linkpreview.Service
+	Recipes                *recipes.Service
 	Groups                 *groups.Service
 	Sharing                *sharing.Service
 	WebDAV                 *webdav.Handler
@@ -122,6 +125,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		links:        deps.Links,
 		tags:         deps.Tags,
 		linkPreviews: deps.LinkPreviews,
+		recipes:      deps.Recipes,
 		groups:       deps.Groups,
 		sharing:      deps.Sharing,
 		webdav:       deps.WebDAV,
@@ -333,6 +337,7 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/link-previews", "getLinkPreview", "Describe a web link with its title, summary and site, as the server sees it", a.linkPreview)
 	register(user, http.MethodGet, "/link-previews/image", "getLinkPreviewImage", "Get a web link's preview image or site icon, fetched by the server", a.linkPreviewImage,
 		withResponse(http.StatusOK, "Preview image", binaryContent("image/*")))
+	register(user, http.MethodPost, "/recipes/import", "importRecipe", "Create a recipe note from a web page, with its ingredients, steps and images", a.importRecipe, created, maxBody(recipeBodyLimit))
 	register(user, http.MethodGet, "/links", "listShareLinks", "The logged-in user's share links", a.listShareLinks)
 	register(user, http.MethodPost, "/links", "createShareLink", "Create a share link to a file or folder", a.createShareLink, created)
 	register(user, http.MethodPatch, "/links/{linkID}", "updateShareLink", "Change a share link's access, password or expiry", a.updateShareLink)

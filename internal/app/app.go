@@ -26,6 +26,7 @@ import (
 	"polder-server/internal/logging"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
+	"polder-server/internal/recipes"
 	"polder-server/internal/scanner"
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
@@ -206,6 +207,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	}
 	fileService.OnMutation(federationService.FileMutation)
 	officeService.UseShares(sharingService, federationService)
+	linkPreviews := linkpreview.New(linkpreview.Options{})
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
 		Sessions:               sessions,
@@ -224,7 +226,8 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Versions:               versionWorker,
 		Links:                  linkGraph,
 		Tags:                   tagService,
-		LinkPreviews:           linkpreview.New(linkpreview.Options{}),
+		LinkPreviews:           linkPreviews,
+		Recipes:                recipes.NewService(linkPreviews, fileService),
 		Groups:                 groupService,
 		Sharing:                sharingService,
 		WebDAV:                 webdav.NewHandler(fileService),

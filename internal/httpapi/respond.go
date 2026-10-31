@@ -15,6 +15,7 @@ var logger = logging.For("http")
 
 const (
 	smallBodyLimit  = 1 << 20
+	recipeBodyLimit = 8 << 20
 	uploadPlanLimit = 32 << 20
 )
 

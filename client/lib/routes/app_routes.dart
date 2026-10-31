@@ -9,6 +9,7 @@ abstract final class AppRoutes {
   static const scan = "/scan";
   static const pdf = "/pdf";
   static const editor = "/editor";
+  static const cook = "/cook";
   static const activity = "/activity";
   static const sync = "/sync";
   static const conflicts = "/sync/conflicts";
@@ -41,6 +42,8 @@ abstract final class AppRoutes {
       Uri(path: files, queryParameters: {pathParameter: path, selectParameter: ?select}).toString();
 
   static String noteAt(String path) => Uri(path: notes, queryParameters: {pathParameter: path}).toString();
+
+  static String cookAt(String path) => Uri(path: cook, queryParameters: {pathParameter: path}).toString();
 
   static bool isNoteLocation(String? location) {
     final uri = location == null ? null : Uri.tryParse(location);

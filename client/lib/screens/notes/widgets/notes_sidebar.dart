@@ -10,7 +10,6 @@ import "package:polder/models/item_selection.dart";
 import "package:polder/providers/notes/note_selection_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
-import "package:polder/screens/notes/notes_actions.dart";
 import "package:polder/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder/screens/notes/widgets/notes_grid.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
@@ -182,17 +181,14 @@ class NotesTitle extends ConsumerWidget {
 }
 
 class NotesHeaderActions extends ConsumerWidget {
-  const NotesHeaderActions({required this.root, required this.showNewPage, this.onChangeFolder, super.key});
+  const NotesHeaderActions({this.onChangeFolder, super.key});
 
-  final String root;
-  final bool showNewPage;
   final VoidCallback? onChangeFolder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localized = context.localized;
     final grid = ref.watch(notesViewModeProvider) == NotesViewMode.grid;
-    final level = notesLevel(ref, root);
     final density = AdaptiveLayout.usesPointer(context) ? VisualDensity.compact : VisualDensity.standard;
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -203,20 +199,6 @@ class NotesHeaderActions extends ConsumerWidget {
           icon: Icon(grid ? IconsaxPlusLinear.row_vertical : IconsaxPlusLinear.element_3),
           onPressed: ref.read(notesViewModeProvider.notifier).toggle,
         ),
-        if (showNewPage) ...[
-          IconButton(
-            tooltip: localized.noteNewChecklist,
-            visualDensity: density,
-            icon: const Icon(IconsaxPlusLinear.task_square),
-            onPressed: () => NotesActions.createPage(context, folder: level, checklist: true),
-          ),
-          IconButton(
-            tooltip: localized.noteNewPage,
-            visualDensity: density,
-            icon: const Icon(IconsaxPlusLinear.note_add),
-            onPressed: () => NotesActions.createPage(context, folder: level),
-          ),
-        ],
         if (onChangeFolder != null)
           IconButton(
             tooltip: localized.notesChangeFolder,

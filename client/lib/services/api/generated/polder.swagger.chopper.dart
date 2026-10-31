@@ -2870,6 +2870,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<Entry>> _importRecipe({
+    required RecipeImportRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a recipe note from a web page, with its ingredients, steps and images',
+      operationId: 'importRecipe',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["recipes"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/recipes/import');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Entry, Entry>($request);
+  }
+
+  @override
   Future<Response<Results>> _searchFiles({
     String? q,
     int? limit,

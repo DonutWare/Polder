@@ -2455,6 +2455,27 @@
         ],
         "type": "object"
       },
+      "RecipeImportRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "description": "The recipe pasted by the user, as the page's HTML source or as plain text with an ingredients and a steps heading; read instead of fetching the link",
+            "type": "string"
+          },
+          "folder": {
+            "description": "The folder the recipe note is created in; its images go in an attachments folder beside it",
+            "type": "string"
+          },
+          "url": {
+            "description": "The http or https page that holds the recipe; with content, it only names the source and resolves image links",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder"
+        ],
+        "type": "object"
+      },
       "Recipient": {
         "additionalProperties": false,
         "properties": {
@@ -10626,6 +10647,62 @@
         "summary": "Enter a share link's password, or open a link without one, to get a token for its contents",
         "tags": [
           "public"
+        ]
+      }
+    },
+    "/api/v1/recipes/import": {
+      "post": {
+        "operationId": "importRecipe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipeImportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a recipe note from a web page, with its ingredients, steps and images",
+        "tags": [
+          "recipes"
         ]
       }
     },
