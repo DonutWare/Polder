@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 
 import "package:polder/screens/settings/widgets/finder_settings_group.dart";
 import "package:polder/screens/settings/widgets/trash_settings_group.dart";
+import "package:polder/screens/settings/widgets/update_settings_group.dart";
 import "package:polder/screens/settings/widgets/version_settings_group.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
@@ -17,7 +18,7 @@ class GeneralSettingsScreen extends StatelessWidget {
       maxWidth: 720,
       builder: (context, inset) => ListView(
         padding: inset + const EdgeInsets.only(top: 8, bottom: 24),
-        children: const [FinderSettingsGroup(), TrashSettingsGroup(), VersionSettingsGroup()],
+        children: const [FinderSettingsGroup(), UpdateSettingsGroup(), TrashSettingsGroup(), VersionSettingsGroup()],
       ),
     ),
   );

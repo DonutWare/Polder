@@ -11,6 +11,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/providers/desktop/tray_status_provider.dart";
 import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/providers/update/update_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/util/byte_format.dart";
@@ -49,6 +50,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
   tray.MenuItem? _openItem;
   tray.MenuItem? _syncedItem;
   tray.MenuItem? _pauseItem;
+  tray.MenuItem? _updateItem;
   tray.MenuItem? _quitItem;
   final Map<(IconData, Color), tray.Image> _images = {};
 
@@ -70,6 +72,10 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       });
     }
     ref.listenManual(trayStatusProvider, (_, _) => _apply());
+    ref.listenManual(updateProvider, (previous, next) {
+      _applyUpdate();
+      if (next.restartRequested && !(previous?.restartRequested ?? false)) unawaited(_restartToUpdate());
+    });
   }
 
   @override
@@ -151,6 +157,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       ..label = view.paused ? l10n.resumeSync : l10n.pauseSync
       ..isEnabled = view.signedIn;
     _quitItem!.label = l10n.trayQuit;
+    _applyUpdate();
     icon.setTooltip([l10n.appTitle, view.status, ?view.speed].join("\n"));
     if (previous?.glyph != view.glyph || previous?.color != view.color) unawaited(_showGlyph(icon, view));
   }
@@ -201,9 +208,33 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       ..addItem(_syncedItem = item(_openSyncedFolders))
       ..addSeparator()
       ..addItem(_pauseItem = item(_togglePause))
-      ..addSeparator()
-      ..addItem(_quitItem = item(_requestQuit));
+      ..addSeparator();
+    if (ref.read(updateProvider).phase != UpdatePhase.disabled) {
+      menu
+        ..addItem(_updateItem = item(_updateClicked))
+        ..addSeparator();
+    }
+    menu.addItem(_quitItem = item(_requestQuit));
     icon.setContextMenu(menu);
+  }
+
+  void _applyUpdate() {
+    final l10n = _l10n;
+    final item = _updateItem;
+    if (l10n == null || item == null) return;
+    final state = ref.read(updateProvider);
+    item
+      ..label = state.phase == UpdatePhase.ready ? l10n.updatesRestart : l10n.updatesCheck
+      ..isEnabled = !state.busy;
+  }
+
+  void _updateClicked() {
+    final notifier = ref.read(updateProvider.notifier);
+    unawaited(ref.read(updateProvider).phase == UpdatePhase.ready ? notifier.restartToUpdate() : notifier.check());
+  }
+
+  Future<void> _restartToUpdate() async {
+    if (!await _requestQuit(restart: true)) ref.read(updateProvider.notifier).cancelRestart();
   }
 
   void _showSpeed(bool show) {
@@ -280,11 +311,12 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     await ((await ref.read(syncPausedProvider.future)) ? notifier.resume() : notifier.pause());
   }
 
-  Future<void> _requestQuit() async {
-    if (_quitting) return;
+  Future<bool> _requestQuit({bool restart = false}) async {
+    if (_quitting) return false;
     _quitting = true;
     try {
-      if (ref.read(trayStatusProvider).isSyncing && !await _confirmQuit()) return;
+      if (ref.read(trayStatusProvider).isSyncing && !await _confirmQuit()) return false;
+      await ref.read(updateProvider.notifier).installBeforeQuit(relaunch: restart);
       _icon?.dispose();
       _icon = null;
       if (Platform.isMacOS) {
@@ -292,6 +324,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       } else {
         await windowManager.destroy();
       }
+      return true;
     } finally {
       _quitting = false;
     }

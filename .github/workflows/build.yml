@@ -201,7 +201,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Windows EXE
-        run: flutter build windows --build-number=${{ github.run_number }}
+        run: flutter build windows --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ vars.UPDATE_PUBLIC_KEY }}
 
       - name: Compile Inno Setup installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
@@ -283,7 +283,7 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS app
-        run: flutter build macos --build-number=${{ github.run_number }}
+        run: flutter build macos --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ vars.UPDATE_PUBLIC_KEY }}
 
       - name: Install create-dmg
         run: brew install create-dmg
@@ -291,11 +291,16 @@ jobs:
       - name: Create DMG
         run: ./scripts/create_dmg.sh
 
+      - name: Create update zip
+        run: ditto -c -k --keepParent build/macos/Build/Products/Release-prod/Polder.app build/macos/Build/Products/Release-prod/macOS.zip
+
       - name: Archive macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: polder-macOS
-          path: client/build/macos/Build/Products/Release-prod/macOS.dmg
+          path: |
+            client/build/macos/Build/Products/Release-prod/macOS.dmg
+            client/build/macos/Build/Products/Release-prod/macOS.zip
 
   # flutter_inappwebview_linux only compiles against WPE WebKit 2.50-2.52: older releases lack APIs it uses and 2.54
   # removed one. Ubuntu doesn't ship WPE at all, so build on Debian with 2.52 pinned from the archive snapshot.
@@ -343,7 +348,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Linux app
-        run: flutter build linux --release --build-number=${{ github.run_number }}
+        run: flutter build linux --release --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ vars.UPDATE_PUBLIC_KEY }}
 
       - name: Fix RPATH
         run: |
@@ -363,6 +368,9 @@ jobs:
         run: |
           VERSION_TO_USE="${{ needs.fetch-info.outputs.version_name }}"
           sed -i -E "s/(version:\\s*)latest/\\1${VERSION_TO_USE}/" AppImageBuilder.yml
+          if [[ "${{ needs.fetch-info.outputs.build_type }}" == "nightly" ]]; then
+            sed -i "s/|latest|/|nightly|/" AppImageBuilder.yml
+          fi
           wget -O appimage-builder-x86_64.AppImage https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
           chmod +x appimage-builder-x86_64.AppImage
           mv appimage-builder-x86_64.AppImage /usr/local/bin/appimage-builder
@@ -481,7 +489,6 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        if: needs.fetch-info.outputs.build_type == 'nightly'
         uses: actions/checkout@v4.1.1
         with:
           fetch-depth: 0
@@ -609,7 +616,9 @@ jobs:
           path: polder-macOS
 
       - name: Move macOS
-        run: mv polder-macOS/macOS.dmg Polder-macOS-${{ steps.version.outputs.version }}.dmg
+        run: |
+          mv polder-macOS/macOS.dmg Polder-macOS-${{ steps.version.outputs.version }}.dmg
+          mv polder-macOS/macOS.zip Polder-macOS-${{ steps.version.outputs.version }}.zip
 
       - name: Download Artifacts Linux
         uses: actions/download-artifact@v4
@@ -644,13 +653,28 @@ jobs:
           cd polder-web
           zip -r ../Polder-Web-${{ steps.version.outputs.version }}.zip .
 
+      - name: Write update manifest
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          scripts/update-manifest.sh \
+            ${{ needs.fetch-info.outputs.build_type == 'nightly' && 'nightly' || 'stable' }} \
+            "$VERSION" \
+            ${{ github.run_number }} \
+            ${{ needs.fetch-info.outputs.build_type == 'nightly' && env.NIGHTLY_TAG || github.ref_name }} \
+            "Polder-macOS-$VERSION.zip" \
+            "Polder-Windows-$VERSION-Setup.exe" \
+            "Polder-Linux-$VERSION.AppImage"
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+
       - name: Create Release
         uses: softprops/action-gh-release@v2.2.2
         with:
           tag_name: ${{ needs.fetch-info.outputs.build_type == 'nightly' && env.NIGHTLY_TAG || github.ref_name }}
+          target_commitish: ${{ github.sha }}
           name: ${{ needs.fetch-info.outputs.build_type == 'nightly' && format('🌙 Nightly Build - {0}', steps.version.outputs.version) || '' }}
           body_path: ${{ needs.fetch-info.outputs.build_type == 'nightly' && 'changelog.md' || '' }}
-          draft: ${{ needs.fetch-info.outputs.build_type == 'release' }}
+          draft: true
           prerelease: ${{ needs.fetch-info.outputs.build_type == 'nightly' }}
           make_latest: ${{ needs.fetch-info.outputs.build_type == 'release' }}
           generate_release_notes: ${{ needs.fetch-info.outputs.build_type == 'release' }}
@@ -664,10 +688,19 @@ jobs:
             Polder-Windows-${{ steps.version.outputs.version }}.zip
             Polder-iOS-${{ steps.version.outputs.version }}.ipa
             Polder-macOS-${{ steps.version.outputs.version }}.dmg
+            Polder-macOS-${{ steps.version.outputs.version }}.zip
             Polder-Web-${{ steps.version.outputs.version }}.zip
             Polder-Linux-${{ steps.version.outputs.version }}.zip
             Polder-Linux-${{ steps.version.outputs.version }}.AppImage
             Polder-Linux-${{ steps.version.outputs.version }}.AppImage.zsync
+            update.json
+            update.json.sig
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish nightly release
+        if: needs.fetch-info.outputs.build_type == 'nightly'
+        run: gh release edit ${{ env.NIGHTLY_TAG }} --draft=false --prerelease
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

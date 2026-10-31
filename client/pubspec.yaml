@@ -65,6 +65,7 @@ dependencies:
   media_kit_libs_video: ^1.0.7
   media_viewer:
     path: packages/media_viewer
+  cryptography: ^2.9.0
 
 dependency_overrides:
   media_kit:

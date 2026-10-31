@@ -836,5 +836,22 @@
 	"videoCodecLabel": "Videocodec",
 	"frameRateLabel": "Framesnelheid",
 	"audioCodecLabel": "Audiocodec",
-	"bitrateLabel": "Bitrate"
+	"bitrateLabel": "Bitrate",
+	"updates": "Updates",
+	"updatesAutomatic": "Updates automatisch installeren",
+	"updatesAutomaticHint": "Download nieuwe versies op de achtergrond en installeer ze wanneer Polder afsluit",
+	"updatesNightly": "Nightly builds ontvangen",
+	"updatesNightlyHint": "Krijg de nieuwste ontwikkelversies eerder; ze kunnen fouten bevatten",
+	"updatesCheck": "Controleren op updates",
+	"updatesChecking": "Controleren op updates…",
+	"updatesUpToDate": "Polder is up-to-date",
+	"updatesFailed": "Kon niet controleren op updates",
+	"updatesAvailable": "Versie {version} ({build}) is beschikbaar",
+	"updatesDownloading": "Update downloaden… {percent}%",
+	"updatesReady": "Versie {version} ({build}) wordt geïnstalleerd wanneer Polder afsluit",
+	"updatesRestart": "Herstarten om bij te werken",
+	"updatesInstall": "Nu bijwerken",
+	"updatesDownload": "Downloaden",
+	"updatesReleaseNotes": "Wat is er nieuw",
+	"aboutNightly": "Nightly build"
 }

@@ -5,6 +5,8 @@ import "package:font_awesome_flutter/font_awesome_flutter.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/app/package_info_provider.dart";
 import "package:polder/providers/polder_system_info_provider.dart";
+import "package:polder/screens/settings/widgets/update_settings_group.dart";
+import "package:polder/util/build_channel.dart";
 import "package:polder/util/external_link.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
@@ -66,7 +68,9 @@ class AboutScreen extends ConsumerWidget {
                     Text(localized.aboutLegalese, textAlign: TextAlign.center),
                     const SizedBox(height: 8),
                     if (version != null) Text(localized.aboutVersion(version)),
+                    if (currentBuildChannel == BuildChannel.nightly) Text(localized.aboutNightly),
                     if (serverInfo != null) Text(localized.aboutServerInfo(serverInfo.version, serverInfo.buildNumber)),
+                    ConstrainedBox(constraints: const BoxConstraints(maxWidth: 480), child: const UpdateStatusTile()),
                     const SizedBox(height: 16),
                     Text(localized.aboutCreatedBy),
                   ],

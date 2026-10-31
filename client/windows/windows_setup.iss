@@ -22,6 +22,8 @@ OutputBaseFilename=polder_setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+CloseApplications=force
+RestartApplications=no
 
 SetupLogging=yes
 UninstallLogging=yes
@@ -50,8 +52,14 @@ Root: HKA; Subkey: "Software\Classes\polder\shell\open\command"; ValueType: stri
 
 [Run]
 Filename: "{app}\polder.exe"; Description: "{cm:LaunchProgram,Polder}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\polder.exe"; Flags: nowait; Check: RelaunchAfterUpdate
 
 [Code]
+function RelaunchAfterUpdate: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:RELAUNCH|0}') = '1');
+end;
+
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   case CurUninstallStep of
