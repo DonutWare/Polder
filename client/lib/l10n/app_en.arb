@@ -1500,5 +1500,12 @@
 	"recipeImportClipboardEmpty": "The clipboard holds no text.",
 	"recipeAdd": "Add recipe",
 	"recipeFromScratch": "Custom",
-	"recipeFromScratchMessage": "Start from an empty recipe with ingredients and steps to fill in yourself."
+	"recipeFromScratchMessage": "Start from an empty recipe with ingredients and steps to fill in yourself.",
+	"notesFilterByTag": "Filter by tag",
+	"notesFilterClear": "Clear",
+	"notesFilterNoTags": "No tags yet. Create tags to filter your notes by them.",
+	"notesFilterNoMatches": "No notes in your notes folder have these tags.",
+	"notesViewAll": "All notes",
+	"notesViewUntagged": "Untagged",
+	"notesViewUntaggedEmpty": "Every note in your notes folder has a tag."
 }

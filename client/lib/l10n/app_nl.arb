@@ -805,5 +805,12 @@
 	"recipeImportClipboardEmpty": "Er staat geen tekst op het klembord.",
 	"recipeAdd": "Recept toevoegen",
 	"recipeFromScratch": "Eigen recept",
-	"recipeFromScratchMessage": "Begin met een leeg recept met ingrediënten en stappen om zelf in te vullen."
+	"recipeFromScratchMessage": "Begin met een leeg recept met ingrediënten en stappen om zelf in te vullen.",
+	"notesFilterByTag": "Filteren op tag",
+	"notesFilterClear": "Wissen",
+	"notesFilterNoTags": "Nog geen tags. Maak tags aan om je notities erop te filteren.",
+	"notesFilterNoMatches": "Geen notities in je notitiemap hebben deze tags.",
+	"notesViewAll": "Alle notities",
+	"notesViewUntagged": "Zonder tags",
+	"notesViewUntaggedEmpty": "Elke notitie in je notitiemap heeft een tag."
 }

@@ -4,15 +4,17 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/notes/note_preview_provider.dart";
+import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
 import "package:polder/screens/notes/widgets/link_preview_card.dart";
 import "package:polder/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder/screens/notes/widgets/notes_tag_filter.dart";
 import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
@@ -20,9 +22,10 @@ import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
 
 class NotesGrid extends ConsumerStatefulWidget {
-  const NotesGrid({required this.folder, required this.selectedPath, required this.onOpen, super.key});
+  const NotesGrid({required this.folder, required this.selectedPath, required this.onOpen, this.nodes, super.key});
 
   final String folder;
+  final List<NoteTreeNode>? nodes;
   final String? selectedPath;
   final ValueChanged<FileEntry> onOpen;
 
@@ -31,10 +34,10 @@ class NotesGrid extends ConsumerStatefulWidget {
 }
 
 class _NotesGridState extends ConsumerState<NotesGrid> {
-  static const _minTileWidth = 150.0;
-  static const _minWideTileWidth = 220.0;
+  static const _minTileWidth = 175.0;
+  static const _minWideTileWidth = 225.0;
   static const _wideFrom = 600.0;
-  static const _spacing = 8.0;
+  static const _spacing = 16.0;
   static const _padding = EdgeInsets.fromLTRB(12, 4, 12, 96);
 
   final _scroll = ScrollController();
@@ -52,6 +55,10 @@ class _NotesGridState extends ConsumerState<NotesGrid> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.nodes case final nodes?) {
+      if (nodes.isEmpty) return const TaggedNotesEmpty();
+      return LayoutBuilder(builder: (context, constraints) => _masonry(nodes, constraints.maxWidth));
+    }
     final contents = ref.watch(notesTreeProvider(widget.folder));
     return AsyncValueView<NotesFolderContents>(
       value: contents,
@@ -105,6 +112,9 @@ class _NotesGridState extends ConsumerState<NotesGrid> {
   }
 }
 
+Color _tinted(Color base, Color? tint, double strength) =>
+    tint == null ? base : Color.alphaBlend(tint.withValues(alpha: strength), base);
+
 class _NoteCard extends ConsumerWidget {
   const _NoteCard({required this.node, required this.selectedPath, required this.onOpen, super.key});
 
@@ -143,12 +153,13 @@ class _NoteCard extends ConsumerWidget {
     final colors = theme.colorScheme;
     final page = node.page;
     final selected = page != null && page.path == selectedPath;
-    final preview = page == null ? null : ref.watch(notePreviewProvider(page)).value;
+    final preview = page == null ? null : ref.watch(notePreviewProvider(notePreviewKey(page))).value;
     final image = preview?.image;
     final checklist = preview?.checklist;
     final excerpt = checklist == null ? preview?.excerpt : null;
     final links = preview?.links.take(_maxLinkRows) ?? const <String>[];
     final foreground = selected ? colors.onSecondaryContainer : colors.onSurface;
+    final tint = noteTintOf(ref.watch(tagsByIdProvider), node.page ?? node.folder!);
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
@@ -156,10 +167,12 @@ class _NoteCard extends ConsumerWidget {
           ? colors.primaryContainer
           : selected
           ? colors.secondaryContainer
-          : colors.surfaceContainer,
+          : _tinted(colors.surfaceContainer, tint, 0.18),
       shape: squircle(
         AppRadius.inset,
-        side: dropActive ? BorderSide(color: colors.primary, width: 2) : BorderSide(color: colors.outlineVariant),
+        side: dropActive
+            ? BorderSide(color: colors.primary, width: 2)
+            : BorderSide(color: _tinted(colors.outlineVariant, tint, 0.5)),
       ),
       child: GestureDetector(
         onSecondaryTapUp: (details) => _showMenu(context, ref, details.globalPosition & Size.zero),
@@ -245,6 +258,7 @@ class _NoteCard extends ConsumerWidget {
                       style: TextButton.styleFrom(
                         minimumSize: Size(size, size),
                         padding: const EdgeInsets.symmetric(horizontal: 10),
+                        foregroundColor: noteTintOf(ref.watch(tagsByIdProvider), node.page ?? node.folder!),
                       ),
                       icon: const Icon(IconsaxPlusLinear.folder_open, size: 16),
                       label: Text(localized.noteSubpages, maxLines: 1, overflow: TextOverflow.ellipsis),

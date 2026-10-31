@@ -25,6 +25,10 @@ import "package:polder/widgets/shared/async_value_view.dart";
 import "package:polder/widgets/shared/fab_menu.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder/models/user_tag.dart";
+import "package:polder/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder/providers/tags/tags_provider.dart";
+import "package:polder/widgets/tags/tag_chip.dart";
 
 class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({this.notePath, super.key});
@@ -114,9 +118,17 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       onRetry: () => ref.invalidate(notesFolderProvider),
       data: (root) {
         if (root == null && widget.notePath == null) _askForFolderOnce();
-        return _notes(context, root);
+        return TagTapHandler(onTag: _filterOnTag, child: _notes(context, root));
       },
     );
+  }
+
+  bool _filterOnTag(String name) {
+    final tag = ref.read(tagsByKeyProvider)[tagKey(name)];
+    if (tag == null) return false;
+    ref.read(notesTagFilterProvider.notifier).only(tag.id);
+    if (widget.notePath != null && AdaptiveLayout.isSingle(context)) _closeNote(AppRoutes.notes);
+    return true;
   }
 
   Widget? _sidebar(String? root) =>

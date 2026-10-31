@@ -92,7 +92,7 @@ String searchKeyText(SearchKey key) => switch (key) {
 };
 
 String formatSearchFilter(SearchFilter filter) {
-  final values = filter.values.map(_quoteIfNeeded).toList();
+  final values = filter.values.map(quoteSearchValue).toList();
   final operator = switch (filter.op) {
     SearchOp.equals || SearchOp.between => "=",
     SearchOp.notEquals => "!=",
@@ -105,7 +105,7 @@ String formatSearchFilter(SearchFilter filter) {
   return "${searchKeyText(filter.key)}$operator$joined";
 }
 
-String _quoteIfNeeded(String value) => value.contains(RegExp(r'[\s,"]')) ? '"${value.replaceAll('"', "")}"' : value;
+String quoteSearchValue(String value) => value.contains(RegExp(r'[\s,"]')) ? '"${value.replaceAll('"', "")}"' : value;
 
 // Returns the new text and where the caret goes.
 (String, int) replaceSearchRange(String query, TextRange range, String replacement) {

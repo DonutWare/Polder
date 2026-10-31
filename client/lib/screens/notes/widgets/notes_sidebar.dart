@@ -12,6 +12,9 @@ import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
 import "package:polder/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder/screens/notes/widgets/notes_grid.dart";
+import "package:polder/screens/notes/widgets/notes_tag_filter.dart";
+import "package:polder/providers/tags/tags_provider.dart";
+import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/modifier_keys.dart";
@@ -48,7 +51,35 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ref.watch(notesTagFilterProvider) is AllNotes ? _allNotes() : _taggedNotes();
+
+  Widget _taggedNotes() => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const NotesViewChips(),
+      Expanded(
+        child: AsyncValueView<List<FileEntry>?>(
+          value: ref.watch(notesInViewProvider),
+          onRetry: () => ref.invalidate(notesIndexProvider),
+          data: (notes) => ref.watch(notesViewModeProvider) == NotesViewMode.grid
+              ? NotesGrid(
+                  folder: widget.root,
+                  nodes: [for (final note in notes ?? const <FileEntry>[]) NoteTreeNode(page: note)],
+                  selectedPath: widget.selectedPath,
+                  onOpen: widget.onOpen,
+                )
+              : TaggedNotesList(
+                  root: widget.root,
+                  notes: notes ?? const [],
+                  selectedPath: widget.selectedPath,
+                  onOpen: widget.onOpen,
+                ),
+        ),
+      ),
+    ],
+  );
+
+  Widget _allNotes() {
     if (ref.watch(notesViewModeProvider) == NotesViewMode.grid) {
       return NotesGrid(folder: notesLevel(ref, widget.root), selectedPath: widget.selectedPath, onOpen: widget.onOpen);
     }
@@ -145,7 +176,8 @@ class NotesTitle extends ConsumerWidget {
     final root = this.root;
     final title = Text(context.localized.navNotes, overflow: TextOverflow.ellipsis);
     if (root == null) return title;
-    final level = notesLevel(ref, root);
+    final filtering = ref.watch(notesTagFilterProvider) is! AllNotes;
+    final level = filtering ? root : notesLevel(ref, root);
     final nested = level != root;
     final destination = nested ? RemotePath.parent(level) : root;
     final colors = Theme.of(context).colorScheme;
@@ -199,6 +231,7 @@ class NotesHeaderActions extends ConsumerWidget {
           icon: Icon(grid ? IconsaxPlusLinear.row_vertical : IconsaxPlusLinear.element_3),
           onPressed: ref.read(notesViewModeProvider.notifier).toggle,
         ),
+        NotesViewPicker(density: density),
         if (onChangeFolder != null)
           IconButton(
             tooltip: localized.notesChangeFolder,
@@ -218,6 +251,7 @@ class _TreeLevel extends ConsumerWidget {
     required this.depth,
     required this.selectedPath,
     required this.onOpen,
+    this.parentTint,
   });
 
   final String path;
@@ -225,6 +259,7 @@ class _TreeLevel extends ConsumerWidget {
   final int depth;
   final String? selectedPath;
   final ValueChanged<FileEntry> onOpen;
+  final Color? parentTint;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -254,6 +289,7 @@ class _TreeLevel extends ConsumerWidget {
                 depth: depth,
                 selectedPath: selectedPath,
                 onOpen: onOpen,
+                parentTint: parentTint,
               ),
           ],
         );
@@ -269,6 +305,7 @@ class _TreeNode extends ConsumerStatefulWidget {
     required this.depth,
     required this.selectedPath,
     required this.onOpen,
+    this.parentTint,
     super.key,
   });
 
@@ -277,6 +314,7 @@ class _TreeNode extends ConsumerStatefulWidget {
   final int depth;
   final String? selectedPath;
   final ValueChanged<FileEntry> onOpen;
+  final Color? parentTint;
 
   @override
   ConsumerState<_TreeNode> createState() => _TreeNodeState();
@@ -285,6 +323,17 @@ class _TreeNode extends ConsumerStatefulWidget {
 class _TreeNodeState extends ConsumerState<_TreeNode> {
   static const _indent = 16.0;
   static const _leading = 12.0;
+  static const _groupInset = 8.0;
+  static const _maxTintedDepth = 3;
+
+  Color? get _tint => noteTintOf(ref.watch(tagsByIdProvider), node.page ?? node.folder!);
+
+  bool get _showsMarker => widget.depth > 0 && _tint != null && _tint != widget.parentTint;
+
+  Color? _groupColor(ColorScheme colors) {
+    if (widget.depth >= _maxTintedDepth) return null;
+    return _tint?.withValues(alpha: 0.12) ?? colors.onSurface.withValues(alpha: 0.04);
+  }
 
   NoteTreeNode get node => widget.node;
 
@@ -397,27 +446,39 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
         ),
       ),
     );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        row,
-        ClipRect(
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 160),
-            curve: Curves.easeOut,
-            alignment: Alignment.topCenter,
-            child: expanded
-                ? _TreeLevel(
-                    path: folder.path,
-                    root: widget.root,
-                    depth: widget.depth + 1,
-                    selectedPath: widget.selectedPath,
-                    onOpen: widget.onOpen,
-                  )
-                : const SizedBox(width: double.infinity),
+    final colors = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      decoration: BoxDecoration(
+        color: expanded ? _groupColor(colors) : null,
+        borderRadius: BorderRadius.circular(AdaptiveLayout.usesPointer(context) ? 8 : 12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          row,
+          ClipRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOut,
+              alignment: Alignment.topCenter,
+              child: expanded
+                  ? Padding(
+                      padding: const EdgeInsets.fromLTRB(_groupInset, 0, _groupInset / 2, _groupInset / 2),
+                      child: _TreeLevel(
+                        path: folder.path,
+                        root: widget.root,
+                        depth: widget.depth + 1,
+                        selectedPath: widget.selectedPath,
+                        onOpen: widget.onOpen,
+                        parentTint: _tint ?? widget.parentTint,
+                      ),
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -441,6 +502,7 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
           (true, _, _) => colors.primaryContainer,
           (_, true, _) => colors.primary.withValues(alpha: 0.16),
           (_, _, true) => colors.secondaryContainer,
+          _ when widget.depth == 0 && !expanded => _tint?.withValues(alpha: 0.14) ?? Colors.transparent,
           _ => Colors.transparent,
         },
         shape: RoundedRectangleBorder(
@@ -454,7 +516,8 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
             height: height,
             child: Row(
               children: [
-                SizedBox(width: _leading + widget.depth * _indent),
+                SizedBox(width: _leading + widget.depth * (_indent - _groupInset)),
+                if (_showsMarker) _TagMarker(color: _tint!),
                 Expanded(
                   child: Text(
                     node.name,
@@ -475,6 +538,22 @@ class _TreeNodeState extends ConsumerState<_TreeNode> {
       ),
     );
   }
+}
+
+class _TagMarker extends StatelessWidget {
+  const _TagMarker({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(right: 8),
+    child: Container(
+      width: 4,
+      height: 16,
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+    ),
+  );
 }
 
 extension on _TreeNodeState {

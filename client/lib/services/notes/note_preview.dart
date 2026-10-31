@@ -1,5 +1,5 @@
 import "package:markdown/markdown.dart" as md;
-
+import "package:polder/models/user_tag.dart";
 import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/services/notes/note_markdown.dart";
 
@@ -81,8 +81,13 @@ class NotePreview {
     _ => node.textContent,
   };
 
+  static final _inlineTag = RegExp(r"(?<![\p{L}\p{N}_&/#\\])#([\p{L}\p{N}_\-/]+)", unicode: true);
+
+  static String _withoutTags(String text) =>
+      text.replaceAllMapped(_inlineTag, (match) => isValidTagName(match.group(1)!) ? "" : match.group(0)!);
+
   static String? _clean(String text) {
-    final collapsed = text.replaceAll(RegExp(r"\s+"), " ").trim();
+    final collapsed = _withoutTags(text).replaceAll(RegExp(r"\s+"), " ").trim();
     if (collapsed.isEmpty) return null;
     return collapsed.length <= maxExcerptLength ? collapsed : "${collapsed.substring(0, maxExcerptLength)}…";
   }

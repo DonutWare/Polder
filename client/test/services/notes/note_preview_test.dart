@@ -50,4 +50,9 @@ See [the docs](https://example.com/docs) and https://keep.google.com.
 """);
     expect(preview.links, ["https://example.com/docs", "https://keep.google.com"]);
   });
+
+  test("excerpts leave out inline tags", () {
+    expect(NotePreview.of("#recept\n\nGyoza with #dinner crispy bottoms").excerpt, "Gyoza with crispy bottoms");
+    expect(NotePreview.of("Issue #12 and C# stay").excerpt, "Issue #12 and C# stay");
+  });
 }

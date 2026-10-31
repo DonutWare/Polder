@@ -10,8 +10,10 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/notes/last_note_provider.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
+import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
 import "package:polder/screens/notes/widgets/recipe_dialog.dart";
@@ -60,9 +62,10 @@ abstract final class NotesActions {
     if (name == null || !context.mounted) return;
     FileEntry? created;
     final succeeded = await context.runWithFeedback(
-      Future(
-        () async => created = await _createNote(container, folder: folder, name: name.trim(), content: kind.content),
-      ),
+      Future(() async {
+        created = await _createNote(container, folder: folder, name: name.trim(), content: kind.content);
+        await _applyTagFilter(container, created!);
+      }),
     );
     if (succeeded && created != null && context.mounted) context.go(AppRoutes.noteAt(created!.path));
   }
@@ -83,8 +86,18 @@ abstract final class NotesActions {
       createCustom: (name) => _createNote(container, folder: folder, name: name, content: NoteRecipe.template),
     );
     if (created == null || !context.mounted) return;
+    await context.runWithFeedback(_applyTagFilter(container, created));
     _refresh(container, folder);
-    context.go(AppRoutes.noteAt(created.path));
+    if (context.mounted) context.go(AppRoutes.noteAt(created.path));
+  }
+
+  static Future<void> _applyTagFilter(ProviderContainer container, FileEntry created) async {
+    final tags = container.read(tagsByIdProvider);
+    final view = container.read(notesTagFilterProvider);
+    if (view is! TaggedNotes) return;
+    final names = [for (final id in view.tagIds) ?tags[id]?.name];
+    if (names.isEmpty) return;
+    await container.read(tagsProvider.notifier).assign([created.path], names);
   }
 
   static Future<void> addRecipeInNotesFolder(BuildContext context) async {

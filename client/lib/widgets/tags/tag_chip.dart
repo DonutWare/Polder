@@ -49,7 +49,22 @@ class TagChip extends StatelessWidget {
   );
 }
 
-void searchForTag(BuildContext context, String name) => openSearch(context, initialQuery: "#$name ");
+void searchForTag(BuildContext context, String name) {
+  final handled = TagTapHandler.of(context)?.call(name) ?? false;
+  if (!handled) openSearch(context, initialQuery: "#$name ");
+}
+
+class TagTapHandler extends InheritedWidget {
+  const TagTapHandler({required this.onTag, required super.child, super.key});
+
+  final bool Function(String name) onTag;
+
+  static bool Function(String name)? of(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<TagTapHandler>()?.onTag;
+
+  @override
+  bool updateShouldNotify(TagTapHandler oldWidget) => false;
+}
 
 class EntryTagChips extends ConsumerWidget {
   const EntryTagChips({required this.entry, this.maxVisible = 2, super.key});
