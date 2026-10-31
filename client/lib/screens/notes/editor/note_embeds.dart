@@ -22,6 +22,17 @@ class NoteTargets {
   NoteLink? parse(String destination) => NoteLink.parse(destination, notePath: notePath);
 
   FileEntry? knownTarget(NoteLink link) => link.fileId == null ? null : byId[link.fileId];
+
+  List<FileEntry> mediaIn(String source, {required FileEntry opened}) {
+    final media = <String, FileEntry>{};
+    for (final sourceLink in findSourceLinks(source)) {
+      final link = parse(sourceLink.destination);
+      if (link == null) continue;
+      final target = link.path == opened.path ? opened : knownTarget(link);
+      if (target != null && target.isViewableMedia) media.putIfAbsent(target.path, () => target);
+    }
+    return media.containsKey(opened.path) ? media.values.toList() : [opened];
+  }
 }
 
 const notePreviewSize = 512;

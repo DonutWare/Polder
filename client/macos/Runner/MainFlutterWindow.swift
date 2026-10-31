@@ -4,6 +4,7 @@ import FlutterMacOS
 class MainFlutterWindow: NSWindow {
   private var titlebarChannel: FlutterMethodChannel?
   private var appChannel: FlutterMethodChannel?
+  private var wallpaperChannel: FlutterMethodChannel?
   private var finderLocation: FinderLocation?
   private var isSyncing = false
   private var quitConfirmed = false
@@ -49,6 +50,25 @@ class MainFlutterWindow: NSWindow {
       }
     }
     appChannel = app
+
+    let wallpaper = FlutterMethodChannel(
+      name: "polder/wallpaper", binaryMessenger: flutterViewController.engine.binaryMessenger)
+    wallpaper.setMethodCallHandler { call, result in
+      guard call.method == "set", let path = (call.arguments as? [String: Any])?["path"] as? String else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      do {
+        let image = URL(fileURLWithPath: path)
+        for screen in NSScreen.screens {
+          try NSWorkspace.shared.setDesktopImageURL(image, for: screen, options: [:])
+        }
+        result(nil)
+      } catch {
+        result(FlutterError(code: "wallpaper", message: error.localizedDescription, details: nil))
+      }
+    }
+    wallpaperChannel = wallpaper
     finderLocation = FinderLocation(messenger: flutterViewController.engine.binaryMessenger)
 
     NotificationCenter.default.addObserver(

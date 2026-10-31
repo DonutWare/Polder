@@ -1507,5 +1507,28 @@
 	"notesFilterNoMatches": "No notes in your notes folder have these tags.",
 	"notesViewAll": "All notes",
 	"notesViewUntagged": "Untagged",
-	"notesViewUntaggedEmpty": "Every note in your notes folder has a tag."
+	"notesViewUntaggedEmpty": "Every note in your notes folder has a tag.",
+	"durationLabel": "Duration",
+	"slideshow": "Slideshow",
+	"previousItem": "Previous",
+	"nextItem": "Next",
+	"mediaCounter": "{index} / {count}",
+	"@mediaCounter": {
+		"placeholders": {
+			"index": {
+				"type": "int"
+			},
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"couldNotLoadMedia": "This file couldn't be loaded",
+	"play": "Play",
+	"pause": "Pause",
+	"mute": "Mute",
+	"unmute": "Unmute",
+	"setAsWallpaper": "Set as wallpaper",
+	"wallpaperSet": "Wallpaper updated",
+	"setAs": "Set as…"
 }

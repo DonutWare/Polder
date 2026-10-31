@@ -4,16 +4,21 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/media_gallery.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/browser_scope.dart";
 import "package:polder/screens/browser/widgets/file_details_sheet.dart";
 
-Future<void> openEntry(BuildContext context, FileEntry entry) async {
+Future<void> openEntry(BuildContext context, FileEntry entry, {List<FileEntry>? gallery}) async {
   if (entry.isDir) return context.go(BrowserRoutes.of(context).routeFor(entry.path));
   if (entry.isMarkdown) return context.go(AppRoutes.noteAt(entry.path));
   if (entry.isPdf) {
     await context.push(AppRoutes.pdf, extra: entry);
+    return;
+  }
+  if (entry.isViewableMedia) {
+    await context.push(AppRoutes.media, extra: gallery == null ? entry : MediaGallery(entry, gallery));
     return;
   }
   if (await _editorCanEdit(context, entry)) {

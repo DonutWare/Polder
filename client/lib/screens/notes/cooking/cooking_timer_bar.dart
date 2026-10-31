@@ -5,14 +5,8 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/providers/notes/cooking_timers_provider.dart";
 import "package:polder/services/notes/note_recipe.dart";
+import "package:polder/util/duration_format.dart";
 import "package:polder/util/localization_helper.dart";
-
-String formatCountdown(Duration duration) {
-  final hours = duration.inHours;
-  final minutes = duration.inMinutes.remainder(60).toString().padLeft(hours > 0 ? 2 : 1, "0");
-  final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, "0");
-  return hours > 0 ? "$hours:$minutes:$seconds" : "$minutes:$seconds";
-}
 
 class CookingTimerChip extends ConsumerWidget {
   const CookingTimerChip({required this.stepNumber, required this.timer, super.key});
@@ -30,7 +24,7 @@ class CookingTimerChip extends ConsumerWidget {
       return ActionChip(
         avatar: const Icon(IconsaxPlusLinear.timer_1),
         label: Text(timer.label),
-        tooltip: context.localized.recipeStartTimer(formatCountdown(timer.duration)),
+        tooltip: context.localized.recipeStartTimer(timer.duration.clock),
         onPressed: () => timers.start(_key, timer.label, timer.duration),
       );
     }
@@ -81,9 +75,7 @@ class _RunningTimerChip extends StatelessWidget {
     return InputChip(
       avatar: Icon(IconsaxPlusLinear.timer_1, color: finished ? colors.onErrorContainer : colors.onSecondaryContainer),
       label: Text(
-        finished
-            ? context.localized.recipeTimerDone(timer.label)
-            : "${timer.label} · ${formatCountdown(timer.remainingAt(now))}",
+        finished ? context.localized.recipeTimerDone(timer.label) : "${timer.label} · ${timer.remainingAt(now).clock}",
         style: TextStyle(
           color: finished ? colors.onErrorContainer : colors.onSecondaryContainer,
           fontFeatures: const [FontFeature.tabularFigures()],

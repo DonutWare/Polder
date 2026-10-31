@@ -142,7 +142,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     if (ref.exists(noteDocumentProvider(widget.path))) unawaited(_notifier.save());
   }
 
-  Future<void> _openLink(String destination, NoteTargets targets) async {
+  Future<void> _openLink(String destination, NoteTargets targets, String source) async {
     final link = targets.parse(destination);
     if (link == null) {
       await openExternalLink(destination);
@@ -156,7 +156,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.localized.noteLinkMissing)));
       return;
     }
-    await openEntry(context, entry);
+    await openEntry(context, entry, gallery: targets.mediaIn(source, opened: entry));
   }
 
   Future<void> _insertLink(NoteDocument document) async {
@@ -461,7 +461,8 @@ class _NotePaneState extends ConsumerState<NotePane> {
                     contentWidth: _readableWidth,
                     builder: (context, gutters) {
                       final padding = gutters.copyWith(top: 16, bottom: 24);
-                      void openLink(String destination) => _openLink(destination, targets);
+                      void openLink(String destination) =>
+                          _openLink(destination, targets, _controller?.value.text ?? document.text);
                       if (readOnly && !sourceMode) {
                         return ReadOnlyNote(text: document.text, targets: targets, padding: padding, onLink: openLink);
                       }

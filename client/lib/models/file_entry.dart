@@ -50,6 +50,8 @@ abstract class FileEntry with _$FileEntry {
 
   bool get isVideo => mime.startsWith("video/");
 
+  bool get isViewableMedia => !isDir && (isImage || isVideo);
+
   bool get isAudio => mime.startsWith("audio/");
 
   bool get isPdf => mime == "application/pdf";
@@ -65,6 +67,11 @@ abstract class FileEntry with _$FileEntry {
   int? get pageCount => _metaInt("pages");
 
   DateTime? get takenAt => DateTime.tryParse(meta["takenAt"]?.toString() ?? "");
+
+  Duration? get duration => switch (meta["duration"]) {
+    final num seconds => Duration(milliseconds: (seconds * 1000).round()),
+    _ => null,
+  };
 
   int? _metaInt(String key) => switch (meta[key]) {
     final num value => value.toInt(),

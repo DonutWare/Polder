@@ -8,6 +8,7 @@ abstract final class AppRoutes {
   static const search = "/search";
   static const scan = "/scan";
   static const pdf = "/pdf";
+  static const media = "/media";
   static const editor = "/editor";
   static const cook = "/cook";
   static const activity = "/activity";

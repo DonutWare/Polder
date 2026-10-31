@@ -812,5 +812,18 @@
 	"notesFilterNoMatches": "Geen notities in je notitiemap hebben deze tags.",
 	"notesViewAll": "Alle notities",
 	"notesViewUntagged": "Zonder tags",
-	"notesViewUntaggedEmpty": "Elke notitie in je notitiemap heeft een tag."
+	"notesViewUntaggedEmpty": "Elke notitie in je notitiemap heeft een tag.",
+	"durationLabel": "Duur",
+	"slideshow": "Diavoorstelling",
+	"previousItem": "Vorige",
+	"nextItem": "Volgende",
+	"mediaCounter": "{index} / {count}",
+	"couldNotLoadMedia": "Dit bestand kon niet worden geladen",
+	"play": "Afspelen",
+	"pause": "Pauzeren",
+	"mute": "Geluid uit",
+	"unmute": "Geluid aan",
+	"setAsWallpaper": "Instellen als achtergrond",
+	"wallpaperSet": "Achtergrond ingesteld",
+	"setAs": "Instellen als…"
 }

@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_version.dart";
+import "package:polder/models/media_gallery.dart";
 import "package:polder/models/scan_session.dart";
 
 /// Turns the objects routes take as `extra` into JSON and back, so they survive when the router
@@ -37,6 +38,11 @@ class _Encoder extends Converter<Object?, Object?> {
           "hasPreview": version.hasPreview,
         },
     },
+    final MediaGallery gallery => {
+      "type": "media",
+      "entry": gallery.entry.toJson(),
+      "items": [for (final item in gallery.items) item.toJson()],
+    },
     final ScanRequest request => {"type": "scan", "directory": request.directory, "pages": request.pages},
     _ => null,
   };
@@ -53,6 +59,7 @@ class _Decoder extends Converter<Object?, Object?> {
       return switch (json["type"]) {
         "file" => _entry(json["entry"]),
         "editor" => EditorTarget(_entry(json["entry"]), version: _version(json["version"])),
+        "media" => MediaGallery(_entry(json["entry"]), [for (final item in json["items"] as List) _entry(item)]),
         "scan" => ScanRequest(directory: json["directory"] as String, pages: (json["pages"] as List).cast<String>()),
         _ => null,
       };

@@ -427,6 +427,8 @@ class FakePolderServer extends http.BaseClient {
 
   FakeNode _require(String path) => nodes[path] ?? (throw const _HttpError(404, "not_found"));
 
+  static const _mediaMimes = {"jpg": "image/jpeg", "png": "image/png", "mp4": "video/mp4"};
+
   Map<String, dynamic> _entry(String path) {
     final node = _require(path);
     return {
@@ -438,7 +440,7 @@ class FakePolderServer extends http.BaseClient {
       "mtime": node.mtime.toIso8601String(),
       "rev": node.rev,
       "hash": node.hash,
-      "mime": "",
+      "mime": node.isDir ? "" : _mediaMimes[RemotePath.extension(path).toLowerCase()] ?? "",
       "meta": <String, dynamic>{},
       "previewState": "none",
     };

@@ -5,6 +5,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_version.dart";
+import "package:polder/models/media_gallery.dart";
 import "package:polder/models/scan_session.dart";
 import "package:polder/routes/route_extra_codec.dart";
 
@@ -36,6 +37,14 @@ void main() {
     final restored = roundTrip(const ScanRequest(directory: "/scans", pages: ["/tmp/a.jpg"]))! as ScanRequest;
     expect(restored.directory, "/scans");
     expect(restored.pages, ["/tmp/a.jpg"]);
+  });
+
+  test("keeps a media gallery with its items in order", () {
+    final photo = FileEntry(id: 4, path: "/notes/b.jpg", name: "b.jpg", mime: "image/jpeg", mtime: DateTime.utc(2026));
+    final video = FileEntry(id: 5, path: "/notes/a.mp4", name: "a.mp4", mime: "video/mp4", mtime: DateTime.utc(2026));
+    final restored = roundTrip(MediaGallery(photo, [video, photo]))! as MediaGallery;
+    expect(restored.entry, photo);
+    expect(restored.items, [video, photo]);
   });
 
   test("reads anything else as nothing", () {

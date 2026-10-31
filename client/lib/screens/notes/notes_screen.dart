@@ -233,7 +233,10 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               width: _linksWidth,
               child: SafeArea(
                 left: false,
-                child: LinksPanel(entry: entry, onOpen: (target) => openEntry(context, target)),
+                child: LinksPanel(
+                  entry: entry,
+                  onOpen: (target) => openEntry(context, target, gallery: [target]),
+                ),
               ),
             )
           : null,
@@ -253,7 +256,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           entry: entry,
           onOpen: (target) {
             Navigator.pop(sheetContext);
-            openEntry(context, target);
+            openEntry(context, target, gallery: [target]);
           },
         ),
       ),

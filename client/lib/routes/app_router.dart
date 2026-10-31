@@ -6,6 +6,7 @@ import "package:go_router/go_router.dart";
 import "package:polder/models/account.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/media_gallery.dart";
 import "package:polder/models/scan_session.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
@@ -22,6 +23,7 @@ import "package:polder/screens/notes/notes_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/viewer/document_editor_screen.dart";
+import "package:polder/screens/viewer/media/media_viewer_screen.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
 import "package:polder/screens/public_share/public_share_screen.dart";
@@ -68,6 +70,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.pdf,
         redirect: (_, state) => state.extra is FileEntry ? null : AppRoutes.files,
         page: (state) => PdfViewerScreen(entry: state.extra! as FileEntry),
+      ),
+      _route(
+        path: AppRoutes.media,
+        redirect: (_, state) => state.extra is FileEntry || state.extra is MediaGallery ? null : AppRoutes.files,
+        page: (state) => switch (state.extra) {
+          final MediaGallery gallery => MediaViewerScreen(entry: gallery.entry, gallery: gallery.items),
+          final extra => MediaViewerScreen(entry: extra! as FileEntry),
+        },
       ),
       _route(
         path: AppRoutes.editor,

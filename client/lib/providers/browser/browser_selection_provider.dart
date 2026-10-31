@@ -5,8 +5,9 @@ import "package:polder/models/item_selection.dart";
 import "package:polder/providers/browser/browser_view_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 
-final browserSelectionProvider = NotifierProvider.autoDispose
-    .family<BrowserSelectionNotifier, ItemSelection, String>(BrowserSelectionNotifier.new);
+final browserSelectionProvider = NotifierProvider.autoDispose.family<BrowserSelectionNotifier, ItemSelection, String>(
+  BrowserSelectionNotifier.new,
+);
 
 class BrowserSelectionNotifier extends Notifier<ItemSelection> {
   BrowserSelectionNotifier(this.path);

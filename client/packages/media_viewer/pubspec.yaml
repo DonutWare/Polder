@@ -1,0 +1,17 @@
+name: media_viewer
+description: "Gesture layer for full-screen photo and video viewers: paging, zoom, info sheet and dismiss gestures, without any controls."
+publish_to: "none"
+
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
