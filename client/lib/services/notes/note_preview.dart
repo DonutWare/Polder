@@ -6,14 +6,15 @@ import "package:polder/services/notes/note_markdown.dart";
 class NotePreview {
   const NotePreview({this.image, this.excerpt, this.links = const [], this.checklist});
 
-  static const maxExcerptLength = 400;
+  static const maxExcerptLength = 700;
+  static const maxExcerptBlocks = 6;
   static const maxLinks = 10;
 
   factory NotePreview.of(String source) {
     final nodes = NoteMarkdownContext.empty.parse(source);
     return NotePreview(
       image: _firstImage(nodes),
-      excerpt: _firstParagraph(nodes) ?? _firstText(nodes),
+      excerpt: _excerpt(nodes),
       links: _webLinks(nodes),
       checklist: NoteChecklist.parse(source),
     );
@@ -56,21 +57,30 @@ class NotePreview {
     return uri != null && (uri.scheme == "http" || uri.scheme == "https") && uri.host.isNotEmpty;
   }
 
-  static String? _firstParagraph(List<md.Node> nodes) {
-    for (final node in nodes) {
-      if (node is md.Element && node.tag == "p") {
-        if (_clean(_text(node)) case final text?) return text;
-      }
+  static String? _excerpt(List<md.Node> nodes) {
+    final lines = <String>[];
+    var length = 0;
+    for (final line in _excerptLines(nodes)) {
+      if (lines.length >= maxExcerptBlocks || length >= maxExcerptLength) break;
+      lines.add(line);
+      length += line.length;
     }
-    return null;
+    if (lines.isEmpty) return null;
+    final joined = lines.join("\n");
+    return joined.length <= maxExcerptLength ? joined : "${joined.substring(0, maxExcerptLength)}…";
   }
 
-  static String? _firstText(List<md.Node> nodes) {
+  static Iterable<String> _excerptLines(List<md.Node> nodes) sync* {
     for (final node in nodes) {
       if (node is md.Element && _skipped.contains(node.tag)) continue;
-      if (_clean(_text(node)) case final text?) return text;
+      if (node is md.Element && (node.tag == "ul" || node.tag == "ol")) {
+        for (final item in node.children ?? const <md.Node>[]) {
+          if (_clean(_text(item)) case final text?) yield "• $text";
+        }
+        continue;
+      }
+      if (_clean(_text(node)) case final text?) yield text;
     }
-    return null;
   }
 
   static const _blocks = {"p", "li", "ul", "ol", "blockquote", "callout", "div"};
@@ -88,7 +98,6 @@ class NotePreview {
 
   static String? _clean(String text) {
     final collapsed = _withoutTags(text).replaceAll(RegExp(r"\s+"), " ").trim();
-    if (collapsed.isEmpty) return null;
-    return collapsed.length <= maxExcerptLength ? collapsed : "${collapsed.substring(0, maxExcerptLength)}…";
+    return collapsed.isEmpty ? null : collapsed;
   }
 }

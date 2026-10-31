@@ -3,7 +3,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:polder/services/notes/note_preview.dart";
 
 void main() {
-  test("the first image and first paragraph are picked", () {
+  test("the first image and the leading paragraphs are picked", () {
     final preview = NotePreview.of("""
 # Trip
 
@@ -15,7 +15,7 @@ across lines.
 Second paragraph.
 """);
     expect(preview.image, "photos/beach.jpg");
-    expect(preview.excerpt, "Some first words across lines.");
+    expect(preview.excerpt, "Some first words across lines.\nSecond paragraph.");
   });
 
   test("a paragraph holding only an image is not the excerpt", () {
@@ -24,10 +24,10 @@ Second paragraph.
     expect(preview.excerpt, "Text after.");
   });
 
-  test("without paragraphs the first non-heading block is used", () {
+  test("list items become separate excerpt lines and headings are skipped", () {
     final preview = NotePreview.of("# Title\n\n- one\n- two");
     expect(preview.image, isNull);
-    expect(preview.excerpt, "one two");
+    expect(preview.excerpt, "• one\n• two");
   });
 
   test("an empty note has no preview", () {

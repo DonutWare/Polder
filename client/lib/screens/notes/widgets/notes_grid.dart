@@ -200,7 +200,7 @@ class _NoteCard extends ConsumerWidget {
                         node.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600, color: foreground),
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600, color: foreground),
                       ),
                     ),
                   ],
@@ -218,9 +218,9 @@ class _NoteCard extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
                   child: Text(
                     excerpt,
-                    maxLines: 8,
+                    maxLines: 14,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: selected ? colors.onSecondaryContainer : colors.onSurfaceVariant,
                     ),
                   ),
