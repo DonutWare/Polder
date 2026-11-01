@@ -80,11 +80,12 @@ class _NotesGridState extends ConsumerState<NotesGrid> {
 
   Widget _masonry(List<NoteTreeNode> nodes, double width) {
     final columns = _columnsFor(width);
+    final insets = MediaQuery.paddingOf(context);
     return NoteDragAutoScroll(
       controller: _scroll,
       child: SingleChildScrollView(
         controller: _scroll,
-        padding: _padding,
+        padding: _padding + EdgeInsets.only(top: insets.top, bottom: insets.bottom),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: _spacing,

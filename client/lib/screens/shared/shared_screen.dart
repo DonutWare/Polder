@@ -3,7 +3,6 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-
 import "package:polder/models/federation.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/federation/federation_providers.dart";
@@ -44,6 +43,7 @@ class SharedScreen extends ConsumerWidget {
       listLocation: AppRoutes.shared,
       list: _SectionList(selected: DualPane.highlights(context) ? section ?? SharedSection.withMe : null),
       placeholder: MessageView(icon: IconsaxPlusLinear.share, message: localized.nothingSelected),
+      listScrollsUnderBars: true,
       defaultDetail: const _IncomingPage(key: ValueKey(SharedSection.withMe)),
       detail: switch ((section, shareId)) {
         (SharedSection.federated, final int shareId) => MountedShareScreen(
@@ -91,7 +91,7 @@ class _SectionList extends ConsumerWidget {
       onTap: () => context.go(AppRoutes.sharedSection(section.segment)),
     );
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8) + MediaQuery.paddingOf(context).copyWith(left: 0, right: 0),
       children: [
         item(SharedSection.withMe, IconsaxPlusLinear.import_1, localized.sharedWithMe, incoming),
         item(SharedSection.byMe, IconsaxPlusLinear.export_1, localized.sharedByMe, outgoing),

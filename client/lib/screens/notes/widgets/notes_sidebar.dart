@@ -56,24 +56,31 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
   Widget _taggedNotes() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const NotesViewChips(),
+      Padding(
+        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+        child: const NotesViewChips(),
+      ),
       Expanded(
-        child: AsyncValueView<List<FileEntry>?>(
-          value: ref.watch(notesInViewProvider),
-          onRetry: () => ref.invalidate(notesIndexProvider),
-          data: (notes) => ref.watch(notesViewModeProvider) == NotesViewMode.grid
-              ? NotesGrid(
-                  folder: widget.root,
-                  nodes: [for (final note in notes ?? const <FileEntry>[]) NoteTreeNode(page: note)],
-                  selectedPath: widget.selectedPath,
-                  onOpen: widget.onOpen,
-                )
-              : TaggedNotesList(
-                  root: widget.root,
-                  notes: notes ?? const [],
-                  selectedPath: widget.selectedPath,
-                  onOpen: widget.onOpen,
-                ),
+        child: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: AsyncValueView<List<FileEntry>?>(
+            value: ref.watch(notesInViewProvider),
+            onRetry: () => ref.invalidate(notesIndexProvider),
+            data: (notes) => ref.watch(notesViewModeProvider) == NotesViewMode.grid
+                ? NotesGrid(
+                    folder: widget.root,
+                    nodes: [for (final note in notes ?? const <FileEntry>[]) NoteTreeNode(page: note)],
+                    selectedPath: widget.selectedPath,
+                    onOpen: widget.onOpen,
+                  )
+                : TaggedNotesList(
+                    root: widget.root,
+                    notes: notes ?? const [],
+                    selectedPath: widget.selectedPath,
+                    onOpen: widget.onOpen,
+                  ),
+          ),
         ),
       ),
     ],
@@ -95,7 +102,8 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
             controller: _scroll,
             slivers: [
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8) + EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
                 sliver: SliverToBoxAdapter(
                   child: _TreeLevel(
                     path: widget.root,

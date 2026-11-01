@@ -170,6 +170,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       listLocation: AppRoutes.notes,
       maxListWidth: _listWidth,
       forceSingle: grid,
+      listScrollsUnderBars: true,
       list: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
       listFloatingActionButton: FabMenu(
         icon: IconsaxPlusLinear.add,

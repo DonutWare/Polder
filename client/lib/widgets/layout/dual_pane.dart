@@ -3,7 +3,6 @@ import "dart:math" as math;
 import "package:flutter/material.dart";
 
 import "package:go_router/go_router.dart";
-
 import "package:polder/routes/app_routes.dart";
 import "package:polder/routes/up_scope.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
@@ -23,6 +22,7 @@ class DualPane extends StatelessWidget {
     this.onPop,
     this.maxListWidth = defaultMaxListWidth,
     this.forceSingle = false,
+    this.listScrollsUnderBars = false,
     super.key,
   });
 
@@ -40,6 +40,7 @@ class DualPane extends StatelessWidget {
   final ValueChanged<String>? onPop;
   final double maxListWidth;
   final bool forceSingle;
+  final bool listScrollsUnderBars;
 
   static bool isDetail(BuildContext context) => context.getInheritedWidgetOfExactType<_DualDetail>() != null;
 
@@ -61,7 +62,7 @@ class DualPane extends StatelessWidget {
             title: title ?? const SizedBox.shrink(),
             actions: listActions,
             floatingActionButton: listFloatingActionButton,
-            body: SafeArea(child: list),
+            body: SafeArea(top: !listScrollsUnderBars, bottom: !listScrollsUnderBars, child: list),
           ),
         ),
         if (shown != null)
