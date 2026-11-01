@@ -825,5 +825,16 @@
 	"unmute": "Geluid aan",
 	"setAsWallpaper": "Instellen als achtergrond",
 	"wallpaperSet": "Achtergrond ingesteld",
-	"setAs": "Instellen als…"
+	"setAs": "Instellen als…",
+	"cameraLabel": "Camera",
+	"lensLabel": "Lens",
+	"apertureLabel": "Diafragma",
+	"shutterSpeedLabel": "Sluitertijd",
+	"focalLengthLabel": "Brandpuntsafstand",
+	"isoLabel": "ISO",
+	"locationLabel": "Locatie",
+	"videoCodecLabel": "Videocodec",
+	"frameRateLabel": "Framesnelheid",
+	"audioCodecLabel": "Audiocodec",
+	"bitrateLabel": "Bitrate"
 }

@@ -5,6 +5,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
 import "package:polder/providers/versions/file_versions_provider.dart";
+import "package:polder/screens/browser/widgets/capture_detail_rows.dart";
 import "package:polder/screens/browser/widgets/file_actions_row.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/screens/browser/widgets/mount_details_sheet.dart";
@@ -73,6 +74,7 @@ class FileDetailsList extends ConsumerWidget {
         if (entry.duration case final duration?) DetailRow(label: localized.durationLabel, value: duration.clock),
         if (entry.pageCount != null) DetailRow(label: localized.pages, value: "${entry.pageCount}"),
         if (entry.takenAt != null) DetailRow(label: localized.takenAt, value: entry.takenAt!.formatted(context)),
+        if (entry.isViewableMedia) CaptureDetailRows(entry: entry),
         if (entry.mount case final mount?) MountDetailRows(mount: mount),
         if (!entry.isDir && entry.mount == null)
           InkWell(

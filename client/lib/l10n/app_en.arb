@@ -1530,5 +1530,16 @@
 	"unmute": "Unmute",
 	"setAsWallpaper": "Set as wallpaper",
 	"wallpaperSet": "Wallpaper updated",
-	"setAs": "Set as…"
+	"setAs": "Set as…",
+	"cameraLabel": "Camera",
+	"lensLabel": "Lens",
+	"apertureLabel": "Aperture",
+	"shutterSpeedLabel": "Shutter speed",
+	"focalLengthLabel": "Focal length",
+	"isoLabel": "ISO",
+	"locationLabel": "Location",
+	"videoCodecLabel": "Video codec",
+	"frameRateLabel": "Frame rate",
+	"audioCodecLabel": "Audio codec",
+	"bitrateLabel": "Bitrate"
 }

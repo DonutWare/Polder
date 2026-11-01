@@ -73,8 +73,45 @@ abstract class FileEntry with _$FileEntry {
     _ => null,
   };
 
+  String? get cameraMake => _metaString("cameraMake");
+
+  String? get cameraModel => _metaString("cameraModel");
+
+  String? get lens => _metaString("lens");
+
+  double? get focalLength => _metaDouble("focalLength");
+
+  double? get aperture => _metaDouble("aperture");
+
+  double? get exposureTime => _metaDouble("exposureTime");
+
+  int? get iso => _metaInt("iso");
+
+  ({double latitude, double longitude})? get location => switch ((meta["latitude"], meta["longitude"])) {
+    (final num latitude, final num longitude) => (latitude: latitude.toDouble(), longitude: longitude.toDouble()),
+    _ => null,
+  };
+
+  String? get videoCodec => _metaString("videoCodec");
+
+  String? get audioCodec => _metaString("audioCodec");
+
+  double? get frameRate => _metaDouble("frameRate");
+
+  int? get bitrate => _metaInt("bitrate");
+
   int? _metaInt(String key) => switch (meta[key]) {
     final num value => value.toInt(),
+    _ => null,
+  };
+
+  double? _metaDouble(String key) => switch (meta[key]) {
+    final num value => value.toDouble(),
+    _ => null,
+  };
+
+  String? _metaString(String key) => switch (meta[key]) {
+    final String value when value.isNotEmpty => value,
     _ => null,
   };
 }

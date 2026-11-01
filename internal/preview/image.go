@@ -43,6 +43,7 @@ type decodedImage struct {
 	orientation orientation
 	pages       int
 	duration    float64
+	capture     capture
 }
 
 func (d decodedImage) meta() map[string]any {
@@ -59,6 +60,7 @@ func (d decodedImage) meta() map[string]any {
 	if d.duration > 0 {
 		meta["duration"] = d.duration
 	}
+	d.capture.addTo(meta)
 	return meta
 }
 
@@ -99,6 +101,7 @@ func (d *decodedImage) applyExif(metadata *exif.Exif, includeOrientation bool) {
 	if takenAt, err := metadata.DateTime(); err == nil {
 		d.takenAt = takenAt
 	}
+	d.capture.applyExif(metadata)
 	if !includeOrientation {
 		return
 	}

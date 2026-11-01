@@ -80,6 +80,7 @@ func (r ffmpegRenderer) renderVideo(ctx context.Context, file *os.File, maxEdge 
 	decoded := decodedImage{width: shown.width, height: shown.height, orientation: orientationNormal}
 	decoded.duration = probed.duration()
 	decoded.takenAt = probed.recordedAt()
+	decoded.capture = probed.capture()
 	return r.renderFrame(ctx, file, shown, decoded, decoded.duration*videoFrameOffset, maxEdge)
 }
 
@@ -168,14 +169,16 @@ type sideData struct {
 }
 
 type probeStream struct {
-	Index         int               `json:"index"`
-	CodecType     string            `json:"codec_type"`
-	Width         int               `json:"width"`
-	Height        int               `json:"height"`
-	ColorTransfer string            `json:"color_transfer"`
-	SideDataList  []sideData        `json:"side_data_list"`
-	Disposition   map[string]int    `json:"disposition"`
-	Tags          map[string]string `json:"tags"`
+	Index            int               `json:"index"`
+	CodecType        string            `json:"codec_type"`
+	CodecName        string            `json:"codec_name"`
+	AverageFrameRate string            `json:"avg_frame_rate"`
+	Width            int               `json:"width"`
+	Height           int               `json:"height"`
+	ColorTransfer    string            `json:"color_transfer"`
+	SideDataList     []sideData        `json:"side_data_list"`
+	Disposition      map[string]int    `json:"disposition"`
+	Tags             map[string]string `json:"tags"`
 }
 
 type probeTile struct {
@@ -203,6 +206,7 @@ type probeResult struct {
 	StreamGroups []probeStreamGroup `json:"stream_groups"`
 	Format       struct {
 		Duration string            `json:"duration"`
+		BitRate  string            `json:"bit_rate"`
 		Tags     map[string]string `json:"tags"`
 	} `json:"format"`
 }
