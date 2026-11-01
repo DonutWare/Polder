@@ -135,7 +135,7 @@ class MarkdownProjection {
       active ? _emit(start, end, _style.syntax(style)) : _hide(start, end);
 
   void _widget(Widget child, PlaceholderAlignment alignment) =>
-      _spans.add(WidgetSpan(child: child, alignment: alignment));
+      _spans.add(WidgetSpan(child: child, alignment: alignment, baseline: TextBaseline.alphabetic));
 
   void _line(MarkdownLine line, TextStyle style) {
     final active = _touches(line.start, line.end);
@@ -225,7 +225,7 @@ class MarkdownProjection {
       case MarkdownInlineKind.tag:
         _emit(node.start, node.end, _tagStyle(style, _text.substring(node.contentStart, node.contentEnd)));
       case MarkdownInlineKind.link when !active && rendersAsEmbed(_text, node, line):
-        _widget(_image(node, style, standalone: true), PlaceholderAlignment.bottom);
+        _widget(_image(node, style, standalone: true), PlaceholderAlignment.top);
         _hide(node.start + 1, node.end);
       case MarkdownInlineKind.link:
         _marker(node.start, node.contentStart, style, active);
@@ -240,7 +240,7 @@ class MarkdownProjection {
           final standalone = _isStandalone(node, line);
           _widget(
             _image(node, style, standalone: standalone),
-            standalone ? PlaceholderAlignment.bottom : PlaceholderAlignment.middle,
+            standalone ? PlaceholderAlignment.top : PlaceholderAlignment.middle,
           );
           _hide(node.start + 1, node.end);
         }
