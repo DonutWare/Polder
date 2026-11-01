@@ -6,8 +6,8 @@ import "package:polder/services/notes/note_markdown.dart";
 class NotePreview {
   const NotePreview({this.image, this.excerpt, this.links = const [], this.checklist});
 
-  static const maxExcerptLength = 700;
-  static const maxExcerptBlocks = 6;
+  static const maxExcerptLength = 250;
+  static const maxExcerptBlocks = 3;
   static const maxLinks = 10;
 
   factory NotePreview.of(String source) {
