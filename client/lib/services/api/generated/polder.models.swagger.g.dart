@@ -632,6 +632,14 @@ Map<String, dynamic> _$LinkMatchToJson(LinkMatch instance) => <String, dynamic>{
   'shareId': ?instance.shareId,
 };
 
+LinkOfficeSessionInputBody _$LinkOfficeSessionInputBodyFromJson(Map<String, dynamic> json) =>
+    LinkOfficeSessionInputBody(origin: json['origin'] as String, path: json['path'] as String);
+
+Map<String, dynamic> _$LinkOfficeSessionInputBodyToJson(LinkOfficeSessionInputBody instance) => <String, dynamic>{
+  'origin': instance.origin,
+  'path': instance.path,
+};
+
 LinkPermissionChanges _$LinkPermissionChangesFromJson(Map<String, dynamic> json) => LinkPermissionChanges(
   download: json['download'] as bool?,
   upload: json['upload'] as bool?,
@@ -1535,6 +1543,14 @@ Map<String, dynamic> _$SharePermissionsToJson(SharePermissions instance) => <Str
   'create': ?instance.create,
   'delete': ?instance.delete,
   'edit': ?instance.edit,
+};
+
+StreamTicket _$StreamTicketFromJson(Map<String, dynamic> json) =>
+    StreamTicket(expiresAt: DateTime.parse(json['expiresAt'] as String), ticket: json['ticket'] as String);
+
+Map<String, dynamic> _$StreamTicketToJson(StreamTicket instance) => <String, dynamic>{
+  'expiresAt': instance.expiresAt.toIso8601String(),
+  'ticket': instance.ticket,
 };
 
 Suggestion _$SuggestionFromJson(Map<String, dynamic> json) => Suggestion(

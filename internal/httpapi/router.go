@@ -215,6 +215,8 @@ func (a *API) routes(api huma.API) {
 
 	register(v1, http.MethodGet, "/server/info", "getServerInfo", "Version, commit and build of the server binary", a.getServerInfo)
 
+	register(v1, http.MethodGet, "/office/capabilities", "getOfficeCapabilities", "Which files the document editor can open", a.officeCapabilities)
+	register(v1, http.MethodPost, "/public/links/{code}/office-sessions", "startPublicLinkOfficeSession", "Let the document editor show a file inside a share link, read-only", a.startPublicLinkOfficeSession, created)
 	register(v1, http.MethodGet, "/public/links/{code}", "getPublicLink", "What a share link points to; hidden while it needs a password", a.getPublicLink)
 	register(v1, http.MethodPost, "/public/links/{code}/unlock", "unlockPublicLink", "Enter a share link's password, or open a link without one, to get a token for its contents", a.unlockPublicLink)
 	register(v1, http.MethodGet, "/public/links/{code}/list", "listPublicLinkFiles", "List a folder inside a share link", a.listPublicLinkFiles)
@@ -246,7 +248,8 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/files/stat", "statFile", "Get one file or directory", a.statFile)
 	register(user, http.MethodGet, "/files/links", "listFileLinks", "What a file links to and which files link to it", a.fileLinks)
 	register(user, http.MethodPost, "/files/resolve", "resolveFiles", "Look files up by id, wherever they are now", a.resolveFiles)
-	register(user, http.MethodGet, "/files/content", "downloadFile", "Download a file; supports Range and conditional requests", a.downloadFile,
+	register(user, http.MethodPost, "/files/stream-tickets", "createStreamTicket", "Get a ticket that lets a player without an Authorization header, such as a browser video element, read one file", a.createStreamTicket)
+	register(user, http.MethodGet, "/files/content", streamableOperation, "Download a file; supports Range and conditional requests", a.downloadFile,
 		withResponse(http.StatusOK, "File content", binaryContent("application/octet-stream")))
 	register(user, http.MethodPut, "/files/content", "uploadFile", "Upload a whole file as the request body", a.uploadFile,
 		withRequestBody(binaryContent("application/octet-stream")))
@@ -294,7 +297,6 @@ func (a *API) routes(api huma.API) {
 		withResponse(http.StatusOK, "Thumbnail", thumbnailContent()))
 	register(user, http.MethodDelete, "/trash/{itemID}", "deleteTrashItem", "Delete one item in the trash permanently", a.deleteTrashItem)
 
-	register(user, http.MethodGet, "/office/capabilities", "getOfficeCapabilities", "Which files the document editor can open", a.officeCapabilities)
 	register(user, http.MethodPost, "/office/sessions", "startOfficeSession", "Let the document editor open a file", a.startOfficeSession, created)
 
 	register(user, http.MethodGet, "/activity", "listActivity", "Page through what happened to files and sessions, newest first", a.listActivity)
@@ -411,6 +413,8 @@ func (a *API) routes(api huma.API) {
 		withResponse(http.StatusOK, "Log file", binaryContent("application/x-ndjson")))
 
 }
+
+const streamableOperation = "downloadFile"
 
 func register[I, O any](api huma.API, method, path, id, summary string, handler func(context.Context, *I) (*O, error), options ...func(*huma.Operation)) {
 	operation := huma.Operation{OperationID: id, Method: method, Path: path, Summary: summary, MaxBodyBytes: smallBodyLimit}

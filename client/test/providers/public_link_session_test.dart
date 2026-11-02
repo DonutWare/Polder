@@ -55,6 +55,19 @@ void main() {
             },
             "root": entryJson("/", isDir: true),
           });
+        case ("POST", "/public/links/Ab3dE9xQ2k/office-sessions"):
+          if (request.headers["x-polder-share-token"] != "token-1") {
+            return jsonResponse(401, {
+              "error": {"code": "unauthorized", "message": "unlock first"},
+            });
+          }
+          return jsonResponse(201, {
+            "editorUrl": "/office/editor?path=${(request.data! as Map)["path"]}",
+            "hostPage": "/office/host.html",
+            "accessToken": "wopi-token",
+            "accessTokenTtl": 0,
+            "readOnly": true,
+          });
         case ("GET", "/public/links/Ab3dE9xQ2k/list"):
           if (request.headers["x-polder-share-token"] != "token-1") {
             return jsonResponse(401, {
@@ -111,7 +124,9 @@ void main() {
     await unlocked();
     harness.filePicker.savesInBrowser = true;
 
-    await harness.container.read(transfersProvider.notifier).downloadFromSpace(space, FileEntry.folder("/Trip", rootName: "Trip"));
+    await harness.container
+        .read(transfersProvider.notifier)
+        .downloadFromSpace(space, FileEntry.folder("/Trip", rootName: "Trip"));
 
     final url = harness.filePicker.browserSaves["Trip.zip"]!;
     expect(url.toString(), startsWith("https://files.example.com/api/v1/public/links/Ab3dE9xQ2k/archive?"));
@@ -129,5 +144,34 @@ void main() {
     final url = harness.filePicker.browserSaves["photo.txt"]!;
     expect(url.path, "/api/v1/public/links/Ab3dE9xQ2k/content");
     expect(url.queryParameters, {"path": "/photo.txt", "token": "token-1", "download": "true"});
+  });
+
+  test("a video in a shared folder streams with the token in a header outside a browser", () async {
+    await unlocked();
+
+    final source = await harness.container.read(fileSpaceApiProvider(space)).mediaSource("/clip.mp4", inBrowser: false);
+
+    expect(source.url.queryParameters, {"path": "/clip.mp4"});
+    expect(source.headers, {"X-Polder-Share-Token": "token-1"});
+  });
+
+  test("a video in a shared folder streams with the token in its address in a browser", () async {
+    await unlocked();
+
+    final source = await harness.container.read(fileSpaceApiProvider(space)).mediaSource("/clip.mp4", inBrowser: true);
+
+    expect(source.url.queryParameters, {"path": "/clip.mp4", "token": "token-1"});
+    expect(source.headers, isEmpty);
+  });
+
+  test("a document in a shared folder opens in a read-only editor session", () async {
+    await unlocked();
+
+    final session = await harness.container
+        .read(fileSpaceApiProvider(space))
+        .startEditorSession("/report.docx", origin: "https://files.example.com");
+
+    expect(session.readOnly, isTrue);
+    expect(session.editorUrl, "/office/editor?path=/report.docx");
   });
 }

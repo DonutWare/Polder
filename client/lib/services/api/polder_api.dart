@@ -194,6 +194,19 @@ class PolderApi {
     return response.body!.map(_asBytes);
   }
 
+  Future<Uri> streamUrl(String path) async {
+    final ticket = (await _service.createStreamTicket(body: wire.PathRequest(path: path))).body!.ticket;
+    return _apiUrl(["files", "content"], {"path": path, "ticket": ticket});
+  }
+
+  Uri _apiUrl(List<String> segments, Map<String, String> query) {
+    final base = _service.client.baseUrl;
+    return base.replace(
+      pathSegments: [...base.pathSegments.where((segment) => segment.isNotEmpty), "api", "v1", ...segments],
+      queryParameters: query,
+    );
+  }
+
   Future<Uint8List> downloadBytes(String path, {void Function(int received, int total)? onProgress}) async =>
       _collect(await _service.downloadFile(path: path), onProgress);
 
@@ -669,13 +682,21 @@ class PolderApi {
   }) async =>
       _collect(await _service.downloadPublicLinkArchive(code: code, path: path, xPolderShareToken: token), onProgress);
 
-  Uri publicLinkDownloadUrl(String code, String token, String path, {required bool folder}) =>
-      _service.client.baseUrl.replace(
-        pathSegments: [
-          ..._service.client.baseUrl.pathSegments.where((segment) => segment.isNotEmpty),
-          ...["api", "v1", "public", "links", code, folder ? "archive" : "content"],
-        ],
-        queryParameters: {"path": path, "token": token, if (!folder) "download": "true"},
+  Future<EditorSession> startPublicLinkEditorSession(
+    String code,
+    String token,
+    String path, {
+    required String origin,
+  }) async => (await _service.startPublicLinkOfficeSession(
+    code: code,
+    xPolderShareToken: token,
+    body: wire.LinkOfficeSessionInputBody(path: path, origin: origin),
+  )).body!.toModel();
+
+  Uri publicLinkContentUrl(String code, String path, {required bool folder, String? token, bool download = false}) =>
+      _apiUrl(
+        ["public", "links", code, if (folder) "archive" else "content"],
+        {"path": path, "token": ?token, if (download) "download": "true"},
       );
 
   Future<Uint8List?> publicLinkPreview(String code, String token, String path, {int size = 256}) => _thumbnail(

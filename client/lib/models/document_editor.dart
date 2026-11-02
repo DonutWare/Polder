@@ -1,5 +1,6 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/models/file_version.dart";
 
 part "document_editor.freezed.dart";
@@ -61,8 +62,9 @@ abstract class EditorSession with _$EditorSession {
 }
 
 class EditorTarget {
-  const EditorTarget(this.entry, {this.version});
+  const EditorTarget(this.entry, {this.version, this.space});
 
   final FileEntry entry;
   final FileVersion? version;
+  final FileSpace? space;
 }

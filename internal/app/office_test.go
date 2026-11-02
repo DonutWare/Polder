@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -487,5 +488,58 @@ func TestOfficeEditsFilesFromOtherServers(t *testing.T) {
 	response, saved := a.wopi(session, http.MethodPost, "/contents", []byte("edited here"), map[string]string{"X-COOL-WOPI-Timestamp": lastModified})
 	if response.StatusCode != http.StatusOK || fake.content("report.docx") != "edited here" {
 		t.Fatalf("PutFile: %d %s, remote has %q", response.StatusCode, saved, fake.content("report.docx"))
+	}
+}
+
+func TestOfficeShowsFilesInsideLinksReadOnly(t *testing.T) {
+	server := startOfficeServer(t)
+	alice := server.createUser(server.setupAdmin(), "alice", 0)
+	alice.put("/Docs/report.docx", 0, []byte("draft"), http.StatusOK, nil)
+	alice.put("/secret.docx", 0, []byte("private"), http.StatusOK, nil)
+	link := alice.createLink(alice.stat("/Docs").ID, nil)
+	visitor := server.anonymous()
+	token := visitor.unlock(link.Code, "", http.StatusOK).Token
+	startSession := func(path string, expectedStatus int) officeSession {
+		var session officeSession
+		body, _ := json.Marshal(map[string]string{"path": path, "origin": server.server.URL})
+		visitor.expect(visitor.request(http.MethodPost, "/public/links/"+link.Code+"/office-sessions",
+			bytes.NewReader(body), visitor.withShareToken(token)), expectedStatus, &session)
+		return session
+	}
+
+	session := startSession("/report.docx", http.StatusCreated)
+	response, info := server.wopi(session, http.MethodGet, "", nil, nil)
+	if response.StatusCode != http.StatusOK || !session.ReadOnly || !strings.Contains(info, `"UserCanWrite":false`) ||
+		!strings.Contains(info, `"UserFriendlyName":"Guest"`) {
+		t.Fatalf("CheckFileInfo for a linked file: %d %s", response.StatusCode, info)
+	}
+	if response, content := server.wopi(session, http.MethodGet, "/contents", nil, nil); response.StatusCode != http.StatusOK || content != "draft" {
+		t.Fatalf("GetFile: %d %q", response.StatusCode, content)
+	}
+	if response, _ := server.wopi(session, http.MethodPost, "/contents", []byte("visitor's edit"), nil); response.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("PutFile through a link: %d", response.StatusCode)
+	}
+	if _, onServer := alice.download("/Docs/report.docx", nil); string(onServer) != "draft" {
+		t.Fatalf("a link visitor changed the file: %q", onServer)
+	}
+	startSession("/../secret.docx", http.StatusBadRequest)
+
+	alice.mustJSON(http.MethodPatch, fmt.Sprintf("/links/%d", link.ID), map[string]any{"permissions": map[string]bool{"view": true, "download": false}}, http.StatusOK, nil)
+	if response, _ := server.wopi(session, http.MethodGet, "/contents", nil, nil); response.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("an editor keeps no access once the link stops allowing downloads: %d", response.StatusCode)
+	}
+	startSession("/report.docx", http.StatusUnauthorized)
+	token = visitor.unlock(link.Code, "", http.StatusOK).Token
+	startSession("/report.docx", http.StatusForbidden)
+}
+
+func TestOfficeCapabilitiesNeedNoAccount(t *testing.T) {
+	server := startOfficeServer(t)
+	var capabilities struct {
+		Enabled bool `json:"enabled"`
+	}
+	server.anonymous().mustJSON(http.MethodGet, "/office/capabilities", nil, http.StatusOK, &capabilities)
+	if !capabilities.Enabled {
+		t.Fatal("a link visitor learns which files the editor opens")
 	}
 }

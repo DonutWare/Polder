@@ -14,6 +14,7 @@ import (
 
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
+	"polder-server/internal/auth"
 	"polder-server/internal/users"
 )
 
@@ -29,12 +30,7 @@ const (
 // to handlers through currentUser.
 func (a *API) requireUser(api huma.API) func(huma.Context, func(huma.Context)) {
 	return func(ctx huma.Context, next func(huma.Context)) {
-		token, found := strings.CutPrefix(ctx.Header("Authorization"), "Bearer ")
-		if !found || token == "" {
-			writeError(api, ctx, apperr.Unauthorized("missing bearer token"))
-			return
-		}
-		identity, err := a.auth.Authenticate(ctx.Context(), token)
+		identity, err := a.identify(ctx)
 		if err != nil {
 			writeError(api, ctx, err)
 			return
@@ -43,6 +39,17 @@ func (a *API) requireUser(api huma.API) func(huma.Context, func(huma.Context)) {
 		ctx = huma.WithValue(ctx, currentUserKey, identity.User)
 		next(huma.WithContext(ctx, activity.WithActor(ctx.Context(), activity.Actor{SessionID: identity.SessionID, Device: identity.Device})))
 	}
+}
+
+func (a *API) identify(ctx huma.Context) (auth.Identity, error) {
+	if token, found := strings.CutPrefix(ctx.Header("Authorization"), "Bearer "); found && token != "" {
+		return a.auth.Authenticate(ctx.Context(), token)
+	}
+	if ticket := ctx.Query(auth.StreamTicketParam); ticket != "" && ctx.Method() == http.MethodGet &&
+		ctx.Operation().OperationID == streamableOperation {
+		return a.auth.AuthenticateStream(ctx.Context(), ticket, ctx.Query("path"))
+	}
+	return auth.Identity{}, apperr.Unauthorized("missing bearer token")
 }
 
 func requireAdmin(api huma.API) func(huma.Context, func(huma.Context)) {

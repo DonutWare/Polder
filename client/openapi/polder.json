@@ -1344,6 +1344,24 @@
         },
         "type": "object"
       },
+      "LinkOfficeSessionInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "origin": {
+            "description": "The address the client uses for this server, such as https://polder.example.com; the editor page is loaded from it",
+            "type": "string"
+          },
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "origin"
+        ],
+        "type": "object"
+      },
       "LinkPermissionChanges": {
         "additionalProperties": false,
         "properties": {
@@ -3281,6 +3299,24 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "StreamTicket": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "ticket": {
+            "description": "Pass it as the ticket query parameter of GET /files/content for this path, without an Authorization header",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticket",
+          "expiresAt"
+        ],
         "type": "object"
       },
       "Suggestion": {
@@ -8470,6 +8506,62 @@
         ]
       }
     },
+    "/api/v1/files/stream-tickets": {
+      "post": {
+        "operationId": "createStreamTicket",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PathRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreamTicket"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a ticket that lets a player without an Authorization header, such as a browser video element, read one file",
+        "tags": [
+          "files"
+        ]
+      }
+    },
     "/api/v1/files/versions": {
       "get": {
         "operationId": "listFileVersions",
@@ -9990,16 +10082,6 @@
             },
             "description": "OK"
           },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
           "default": {
             "content": {
               "application/json": {
@@ -10011,11 +10093,6 @@
             "description": "Error"
           }
         },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
         "summary": "Which files the document editor can open",
         "tags": [
           "office"
@@ -10482,6 +10559,67 @@
           }
         },
         "summary": "List a folder inside a share link",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/v1/public/links/{code}/office-sessions": {
+      "post": {
+        "operationId": "startPublicLinkOfficeSession",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "maxLength": 32,
+              "type": "string"
+            }
+          },
+          {
+            "description": "The token from unlocking",
+            "in": "header",
+            "name": "X-Polder-Share-Token",
+            "schema": {
+              "description": "The token from unlocking",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkOfficeSessionInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditorSession"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Let the document editor show a file inside a share link, read-only",
         "tags": [
           "public"
         ]

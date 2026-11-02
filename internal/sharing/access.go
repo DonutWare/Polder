@@ -23,6 +23,12 @@ type Access struct {
 	CanDrop     bool
 	ExpiresAt   *time.Time
 	Via         string
+	Link        LinkRef
+}
+
+type LinkRef struct {
+	ID         int64
+	Generation int64
 }
 
 func (a Access) Permissions() SharePermissions {

@@ -1,6 +1,7 @@
 import "dart:typed_data";
 
 import "package:polder/models/directory_listing.dart";
+import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/services/api/polder_api.dart";
 
@@ -16,6 +17,12 @@ abstract interface class FileSpaceApi {
   Future<Uint8List> downloadArchive(String path, {ProgressCallback? onProgress});
 
   Future<Uri> downloadUrl(String path, {required bool folder});
+
+  Future<({Uri url, Map<String, String> headers})> mediaSource(String path, {required bool inBrowser});
+
+  Future<EditorCapabilities> editorCapabilities();
+
+  Future<EditorSession> startEditorSession(String path, {required String origin});
 
   Future<FileEntry> upload(
     String path,
@@ -56,7 +63,22 @@ class LinkSpaceApi implements FileSpaceApi {
 
   @override
   Future<Uri> downloadUrl(String path, {required bool folder}) async =>
-      _api.publicLinkDownloadUrl(_code, await _token(), path, folder: folder);
+      _api.publicLinkContentUrl(_code, path, folder: folder, token: await _token(), download: !folder);
+
+  @override
+  Future<({Uri url, Map<String, String> headers})> mediaSource(String path, {required bool inBrowser}) async {
+    final token = await _token();
+    return inBrowser
+        ? (url: _api.publicLinkContentUrl(_code, path, folder: false, token: token), headers: const <String, String>{})
+        : (url: _api.publicLinkContentUrl(_code, path, folder: false), headers: {"X-Polder-Share-Token": token});
+  }
+
+  @override
+  Future<EditorCapabilities> editorCapabilities() => _api.editorCapabilities();
+
+  @override
+  Future<EditorSession> startEditorSession(String path, {required String origin}) async =>
+      _api.startPublicLinkEditorSession(_code, await _token(), path, origin: origin);
 
   @override
   Future<FileEntry> upload(

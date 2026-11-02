@@ -3008,6 +3008,47 @@ extension $LinkMatchExtension on LinkMatch {
 }
 
 @JsonSerializable(explicitToJson: true)
+class LinkOfficeSessionInputBody {
+  const LinkOfficeSessionInputBody({required this.origin, required this.path});
+
+  factory LinkOfficeSessionInputBody.fromJson(Map<String, dynamic> json) => _$LinkOfficeSessionInputBodyFromJson(json);
+
+  static const toJsonFactory = _$LinkOfficeSessionInputBodyToJson;
+  Map<String, dynamic> toJson() => _$LinkOfficeSessionInputBodyToJson(this);
+
+  @JsonKey(name: 'origin', includeIfNull: false)
+  final String origin;
+  @JsonKey(name: 'path', includeIfNull: false)
+  final String path;
+  static const fromJsonFactory = _$LinkOfficeSessionInputBodyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LinkOfficeSessionInputBody &&
+            (identical(other.origin, origin) || const DeepCollectionEquality().equals(other.origin, origin)) &&
+            (identical(other.path, path) || const DeepCollectionEquality().equals(other.path, path)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(origin) ^ const DeepCollectionEquality().hash(path) ^ runtimeType.hashCode;
+}
+
+extension $LinkOfficeSessionInputBodyExtension on LinkOfficeSessionInputBody {
+  LinkOfficeSessionInputBody copyWith({String? origin, String? path}) {
+    return LinkOfficeSessionInputBody(origin: origin ?? this.origin, path: path ?? this.path);
+  }
+
+  LinkOfficeSessionInputBody copyWithWrapped({Wrapped<String>? origin, Wrapped<String>? path}) {
+    return LinkOfficeSessionInputBody(
+      origin: (origin != null ? origin.value : this.origin),
+      path: (path != null ? path.value : this.path),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class LinkPermissionChanges {
   const LinkPermissionChanges({this.download, this.upload, this.view});
 
@@ -7377,6 +7418,50 @@ extension $SharePermissionsExtension on SharePermissions {
       create: (create != null ? create.value : this.create),
       delete: (delete != null ? delete.value : this.delete),
       edit: (edit != null ? edit.value : this.edit),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class StreamTicket {
+  const StreamTicket({required this.expiresAt, required this.ticket});
+
+  factory StreamTicket.fromJson(Map<String, dynamic> json) => _$StreamTicketFromJson(json);
+
+  static const toJsonFactory = _$StreamTicketToJson;
+  Map<String, dynamic> toJson() => _$StreamTicketToJson(this);
+
+  @JsonKey(name: 'expiresAt', includeIfNull: false)
+  final DateTime expiresAt;
+  @JsonKey(name: 'ticket', includeIfNull: false)
+  final String ticket;
+  static const fromJsonFactory = _$StreamTicketFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is StreamTicket &&
+            (identical(other.expiresAt, expiresAt) ||
+                const DeepCollectionEquality().equals(other.expiresAt, expiresAt)) &&
+            (identical(other.ticket, ticket) || const DeepCollectionEquality().equals(other.ticket, ticket)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(expiresAt) ^
+      const DeepCollectionEquality().hash(ticket) ^
+      runtimeType.hashCode;
+}
+
+extension $StreamTicketExtension on StreamTicket {
+  StreamTicket copyWith({DateTime? expiresAt, String? ticket}) {
+    return StreamTicket(expiresAt: expiresAt ?? this.expiresAt, ticket: ticket ?? this.ticket);
+  }
+
+  StreamTicket copyWithWrapped({Wrapped<DateTime>? expiresAt, Wrapped<String>? ticket}) {
+    return StreamTicket(
+      expiresAt: (expiresAt != null ? expiresAt.value : this.expiresAt),
+      ticket: (ticket != null ? ticket.value : this.ticket),
     );
   }
 }

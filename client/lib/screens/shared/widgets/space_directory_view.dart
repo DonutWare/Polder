@@ -4,12 +4,14 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/directory_listing.dart";
+import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_space.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/browser/widgets/file_metadata_text.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/shared/widgets/space_file_opener.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
@@ -46,8 +48,12 @@ class SpaceDirectoryView extends ConsumerWidget {
                 : ListView.builder(
                     padding: inset + const EdgeInsets.fromLTRB(16, 8, 16, 96),
                     itemCount: entries.length,
-                    itemBuilder: (context, index) =>
-                        _SpaceEntryTile(location: location, entry: entries[index], onOpenFolder: onOpenFolder),
+                    itemBuilder: (context, index) => _SpaceEntryTile(
+                      location: location,
+                      entry: entries[index],
+                      siblings: entries,
+                      onOpenFolder: onOpenFolder,
+                    ),
                   ),
           ),
         );
@@ -57,10 +63,16 @@ class SpaceDirectoryView extends ConsumerWidget {
 }
 
 class _SpaceEntryTile extends ConsumerWidget {
-  const _SpaceEntryTile({required this.location, required this.entry, required this.onOpenFolder});
+  const _SpaceEntryTile({
+    required this.location,
+    required this.entry,
+    required this.siblings,
+    required this.onOpenFolder,
+  });
 
   final SpaceLocation location;
   final FileEntry entry;
+  final List<FileEntry> siblings;
   final ValueChanged<String> onOpenFolder;
 
   FileSpace get space => location.space;
@@ -75,7 +87,7 @@ class _SpaceEntryTile extends ConsumerWidget {
       leading: FileThumbnail.inSpace(space: space, entry: entry, dimension: 40),
       title: Text(entry.name, overflow: TextOverflow.ellipsis),
       subtitle: FileMetadataText(entry: entry),
-      onTap: () => entry.isDir ? onOpenFolder(entry.path) : showSpaceFileSheet(context, space, entry),
+      onTap: () => entry.isDir ? onOpenFolder(entry.path) : openSpaceEntry(context, space, entry, siblings: siblings),
       trailing: PopupMenuButton<_EntryAction>(
         icon: const Icon(IconsaxPlusLinear.more),
         onSelected: (action) => switch (action) {
@@ -139,27 +151,56 @@ class SpaceFileSheet extends ConsumerWidget {
   final bool dismissOnDownload;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 16,
-        children: [
-          FileThumbnail.inSpace(space: space, entry: entry, dimension: 220, fill: true),
-          Text(entry.name, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
-          FileMetadataText(entry: entry),
-          if (ref.watch(spaceCapabilitiesProvider(space)).canDownload)
-            FilledButton.icon(
-              icon: const Icon(IconsaxPlusLinear.document_download),
-              label: Text(context.localized.download),
-              onPressed: () {
-                if (dismissOnDownload) Navigator.pop(context);
-                ref.read(transfersProvider.notifier).downloadFromSpace(space, entry);
-              },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canDownload = ref.watch(spaceCapabilitiesProvider(space)).canDownload;
+    final editor = canDownload
+        ? ref.watch(spaceEditorCapabilitiesProvider(space)).value ?? const EditorCapabilities()
+        : const EditorCapabilities();
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 16,
+          children: [
+            FileThumbnail.inSpace(space: space, entry: entry, dimension: 220, fill: true),
+            Text(entry.name, style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
+            FileMetadataText(entry: entry),
+            if (canDownload && hasSpaceViewer(entry, editor))
+              FilledButton.icon(
+                icon: const Icon(IconsaxPlusLinear.eye),
+                label: Text(context.localized.open),
+                onPressed: () => openSpaceEntry(context, space, entry),
+              ),
+            SpaceDownloadButton(
+              space: space,
+              entry: entry,
+              onStarted: dismissOnDownload ? () => Navigator.pop(context) : null,
             ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
+}
+
+class SpaceDownloadButton extends ConsumerWidget {
+  const SpaceDownloadButton({required this.space, required this.entry, this.onStarted, super.key});
+
+  final FileSpace space;
+  final FileEntry entry;
+  final VoidCallback? onStarted;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(spaceCapabilitiesProvider(space)).canDownload) return const SizedBox.shrink();
+    return FilledButton.tonalIcon(
+      icon: const Icon(IconsaxPlusLinear.document_download),
+      label: Text(context.localized.download),
+      onPressed: () {
+        onStarted?.call();
+        ref.read(transfersProvider.notifier).downloadFromSpace(space, entry);
+      },
+    );
+  }
 }

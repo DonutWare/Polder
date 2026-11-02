@@ -8,6 +8,7 @@ import (
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/files"
+	"polder-server/internal/office"
 	"polder-server/internal/sharing"
 )
 
@@ -188,6 +189,35 @@ func (a *API) downloadPublicLinkArchive(ctx context.Context, input *linkPathQuer
 		return nil, err
 	}
 	return a.spaceArchive(ctx, access, input.Path)
+}
+
+type linkOfficeSessionInput struct {
+	Code        string `path:"code" maxLength:"32"`
+	HeaderToken string `header:"X-Polder-Share-Token" doc:"The token from unlocking"`
+	Body        struct {
+		Path   string `json:"path" minLength:"1"`
+		Origin string `json:"origin" doc:"The address the client uses for this server, such as https://polder.example.com; the editor page is loaded from it"`
+	}
+}
+
+func (a *API) startPublicLinkOfficeSession(ctx context.Context, input *linkOfficeSessionInput) (_ *jsonBody[office.EditorSession], err error) {
+	ctx, access, err := a.visitorAccess(ctx, input.Code, "", input.HeaderToken)
+	if err != nil {
+		return nil, err
+	}
+	defer access.Scrub(&err)
+	if err := access.RequireDownload(); err != nil {
+		return nil, err
+	}
+	absolute, err := access.Path(input.Body.Path)
+	if err != nil {
+		return nil, err
+	}
+	session, err := a.office.StartLinkSession(ctx, access.Owner, access.Link.ID, access.Link.Generation, absolute, input.Body.Origin)
+	if err != nil {
+		return nil, err
+	}
+	return respond(session), nil
 }
 
 func (a *API) uploadPublicLinkFile(ctx context.Context, input *linkUploadInput) (*jsonBody[files.Entry], error) {

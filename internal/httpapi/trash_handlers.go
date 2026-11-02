@@ -76,7 +76,7 @@ func (a *API) downloadTrashItem(ctx context.Context, input *trashItemPath) (*att
 			ContentType:        "application/zip",
 			ContentDisposition: attachment(item.Name + ".zip"),
 			Body: func(ctx huma.Context) {
-				if err := writeZip(ctx.BodyWriter(), absolute); err != nil {
+				if err := writeZip(ctx.BodyWriter(), absolute, nil); err != nil {
 					logger.Warn("zip trashed directory", "name", item.Name, "error", err)
 				}
 			},

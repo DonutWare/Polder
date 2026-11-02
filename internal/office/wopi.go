@@ -24,6 +24,8 @@ import (
 // Euro-Office does not, and saves only once everyone has closed the document.
 const wopiTime = "2006-01-02T15:04:05.000000Z"
 
+const guestName = "Guest"
+
 // documentChanged makes Collabora ask whether to overwrite the newer file or reload it.
 const documentChanged = `{"COOLStatusCode":1010}`
 
@@ -112,6 +114,13 @@ func (s *Service) authorize(w http.ResponseWriter, r *http.Request) (access, boo
 		}
 		granted.ReadOnly = granted.ReadOnly || !editable
 	}
+	if granted.LinkID != 0 {
+		if err := s.shares.LinkServesFile(r.Context(), granted.LinkID, granted.LinkGeneration, user.ID, entry.Path); err != nil {
+			http.Error(w, "the shared file is no longer available", http.StatusUnauthorized)
+			return access{}, false
+		}
+		granted.ReadOnly = true
+	}
 	if granted.VersionID == 0 {
 		return access{grant: granted, user: user, actor: actor, entry: entry}, true
 	}
@@ -183,6 +192,10 @@ func (s *Service) checkFileInfo(w http.ResponseWriter, r *http.Request) {
 		SupportsUpdate:          true,
 		PostMessageOrigin:       granted.grant.Origin,
 		FileVersionPostMessage:  s.kind == EuroOffice,
+	}
+	if granted.grant.LinkID != 0 {
+		info.UserID = "link-" + strconv.FormatInt(granted.grant.LinkID, 10)
+		info.UserFriendlyName = guestName
 	}
 	if version := granted.version; version != nil {
 		info.BaseFileName = versionFileName(granted.entry.Name, *version)

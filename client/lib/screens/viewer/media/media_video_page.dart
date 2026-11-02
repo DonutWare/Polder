@@ -7,8 +7,8 @@ import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/providers/browser/media_source.dart";
-import "package:polder/providers/browser/thumbnail_provider.dart";
 import "package:polder/screens/viewer/media/media_chrome.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/util/api_error_localization.dart";
@@ -22,10 +22,12 @@ class MediaVideoPage extends ConsumerStatefulWidget {
     required this.onPlayerChanged,
     this.onTap,
     this.onCompleted,
+    this.space,
     super.key,
   });
 
   final FileEntry entry;
+  final FileSpace? space;
   final bool active;
   final void Function(Player player, {required bool attached}) onPlayerChanged;
   final VoidCallback? onTap;
@@ -72,7 +74,7 @@ class _MediaVideoPageState extends ConsumerState<MediaVideoPage> {
     final generation = ++_generation;
     setState(() => _error = null);
     try {
-      final source = await resolveMediaSource(ref, widget.entry);
+      final source = await resolveMediaSource(ref, widget.entry, space: widget.space);
       if (!mounted || generation != _generation) return;
       final player = Player();
       _player = player;
@@ -128,7 +130,7 @@ class _MediaVideoPageState extends ConsumerState<MediaVideoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final poster = ref.watch(thumbnailProvider(mediaPoster(widget.entry))).value;
+    final poster = ref.watch(posterProviderFor(widget.entry, widget.space)).value;
     final controller = _controller;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

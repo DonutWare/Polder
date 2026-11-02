@@ -1950,6 +1950,30 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Get a ticket that lets a player without an Authorization header, such as a browser video element, read one file
+  Future<chopper.Response<StreamTicket>> createStreamTicket({required PathRequest? body}) {
+    generatedMapping.putIfAbsent(StreamTicket, () => StreamTicket.fromJsonFactory);
+
+    return _createStreamTicket(body: body);
+  }
+
+  ///Get a ticket that lets a player without an Authorization header, such as a browser video element, read one file
+  @POST(path: '/api/v1/files/stream-tickets', optionalBody: true)
+  Future<chopper.Response<StreamTicket>> _createStreamTicket({
+    @Body() required PathRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a ticket that lets a player without an Authorization header, such as a browser video element, read one file',
+      operationId: 'createStreamTicket',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  });
+
   ///List a file's earlier versions, newest first
   ///@param path Path inside the user's storage, such as /Photos/cat.jpg; empty means the root
   Future<chopper.Response<VersionListing>> listFileVersions({String? path}) {
@@ -2595,7 +2619,7 @@ abstract class Polder extends ChopperService {
       operationId: 'getOfficeCapabilities',
       consumes: [],
       produces: [],
-      security: ["bearer"],
+      security: [],
       tags: ["office"],
       deprecated: false,
     ),
@@ -2832,6 +2856,40 @@ abstract class Polder extends ChopperService {
       description: '',
       summary: 'List a folder inside a share link',
       operationId: 'listPublicLinkFiles',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  });
+
+  ///Let the document editor show a file inside a share link, read-only
+  ///@param code
+  ///@param X-Polder-Share-Token The token from unlocking
+  Future<chopper.Response<EditorSession>> startPublicLinkOfficeSession({
+    required String? code,
+    String? xPolderShareToken,
+    required LinkOfficeSessionInputBody? body,
+  }) {
+    generatedMapping.putIfAbsent(EditorSession, () => EditorSession.fromJsonFactory);
+
+    return _startPublicLinkOfficeSession(code: code, xPolderShareToken: xPolderShareToken?.toString(), body: body);
+  }
+
+  ///Let the document editor show a file inside a share link, read-only
+  ///@param code
+  ///@param X-Polder-Share-Token The token from unlocking
+  @POST(path: '/api/v1/public/links/{code}/office-sessions', optionalBody: true)
+  Future<chopper.Response<EditorSession>> _startPublicLinkOfficeSession({
+    @Path('code') required String? code,
+    @Header('X-Polder-Share-Token') String? xPolderShareToken,
+    @Body() required LinkOfficeSessionInputBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Let the document editor show a file inside a share link, read-only',
+      operationId: 'startPublicLinkOfficeSession',
       consumes: [],
       produces: [],
       security: [],

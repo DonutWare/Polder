@@ -7,17 +7,18 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:media_viewer/media_viewer.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/providers/browser/file_content_provider.dart";
-import "package:polder/providers/browser/thumbnail_provider.dart";
 import "package:polder/screens/viewer/media/media_chrome.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/shared/loading_indicator.dart";
 
 class MediaPhotoPage extends ConsumerStatefulWidget {
-  const MediaPhotoPage({required this.entry, required this.page, super.key});
+  const MediaPhotoPage({required this.entry, required this.page, this.space, super.key});
 
   final FileEntry entry;
   final MediaPage page;
+  final FileSpace? space;
 
   @override
   ConsumerState<MediaPhotoPage> createState() => _MediaPhotoPageState();
@@ -53,8 +54,8 @@ class _MediaPhotoPageState extends ConsumerState<MediaPhotoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final poster = ref.watch(thumbnailProvider(mediaPoster(widget.entry))).value;
-    final original = ref.watch(fileContentProvider(widget.entry));
+    final poster = ref.watch(posterProviderFor(widget.entry, widget.space)).value;
+    final original = ref.watch(fileContentProvider((widget.entry, widget.space)));
     final originalBytes = original.value;
     final measurable = _isSvg ? null : originalBytes ?? poster;
     if (measurable != null) _measure(measurable);
@@ -80,7 +81,7 @@ class _MediaPhotoPageState extends ConsumerState<MediaPhotoPage> {
             alignment: poster == null ? Alignment.center : const Alignment(0, 0.6),
             child: MediaFailure(
               compact: poster != null,
-              onRetry: () => ref.invalidate(fileContentProvider(widget.entry)),
+              onRetry: () => ref.invalidate(fileContentProvider((widget.entry, widget.space))),
             ),
           ),
       ],

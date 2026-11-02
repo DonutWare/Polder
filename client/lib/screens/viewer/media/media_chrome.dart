@@ -1,14 +1,19 @@
 import "dart:ui";
 
+import "dart:typed_data";
+
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/models/thumbnail_request.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/branding/branding_provider.dart";
+import "package:polder/providers/browser/thumbnail_provider.dart";
+import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/message_view.dart";
@@ -17,6 +22,10 @@ const _posterSize = 512;
 
 ThumbnailRequest mediaPoster(FileEntry entry) =>
     ThumbnailRequest.file(path: entry.path, rev: entry.rev, size: _posterSize);
+
+FutureProvider<Uint8List?> posterProviderFor(FileEntry entry, FileSpace? space) => space == null
+    ? thumbnailProvider(mediaPoster(entry))
+    : spaceThumbnailProvider((SpaceLocation(space: space, path: entry.path), _posterSize));
 
 class MediaViewerTheme extends ConsumerWidget {
   const MediaViewerTheme({required this.child, super.key});

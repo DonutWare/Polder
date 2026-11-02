@@ -150,4 +150,14 @@ void main() {
 
     await expectLater(api.me(), throwsA(isA<NetworkException>()));
   });
+
+  test("a stream address carries a ticket for that one file", () async {
+    serve((_) async => jsonResponse(200, {"ticket": "t-1", "expiresAt": "2026-11-02T20:00:00Z"}));
+
+    final url = await api.streamUrl("/Films/harbour.mp4");
+
+    expect(url.toString(), startsWith("https://cloud.test/api/v1/files/content?"));
+    expect(url.queryParameters, {"path": "/Films/harbour.mp4", "ticket": "t-1"});
+    expect(client.requests.single.data, {"path": "/Films/harbour.mp4"});
+  });
 }

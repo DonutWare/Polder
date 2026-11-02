@@ -5,19 +5,23 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/screens/notes/editor/note_image_provider.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/notes/note_link.dart";
 import "package:polder/services/notes/note_markdown.dart";
+import "package:polder/services/sharing/file_space_api.dart";
 
 class NoteTargets {
-  const NoteTargets({required this.notePath, required this.byId});
+  const NoteTargets({required this.notePath, required this.byId, this.space});
 
   final String notePath;
   final Map<int, FileEntry> byId;
+  final FileSpace? space;
 
   NoteLink? parse(String destination) => NoteLink.parse(destination, notePath: notePath);
 
@@ -50,6 +54,22 @@ ImageProvider noteImage(PolderApi api, NoteTargets targets, String destination) 
   );
 }
 
+ImageProvider spaceNoteImage(FileSpaceApi api, NoteTargets targets, String destination) {
+  final uri = Uri.tryParse(destination);
+  if (uri != null && (uri.scheme == "http" || uri.scheme == "https")) return NetworkImage(destination);
+  final path = targets.parse(destination)?.path;
+  return NoteImageProvider(
+    identity: "${targets.space}|${targets.notePath}|$destination",
+    load: () async {
+      if (path == null) throw StateError("the linked image is not inside this share");
+      final preview = await api.preview(path, size: notePreviewSize);
+      if (preview != null) return preview;
+      if (isVideoDestination(destination)) throw StateError("the linked video has no preview");
+      return api.download(path);
+    },
+  );
+}
+
 Future<Uint8List> _imageBytes(PolderApi api, NoteLink? link, FileEntry? known) async {
   final entry = known ?? (link?.path == null ? null : await api.stat(link!.path!));
   if (entry == null) throw StateError("the linked image does not exist");
@@ -70,7 +90,7 @@ class NoteLinkIcon extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final link = targets.parse(destination);
-    if (link == null) return const SizedBox.shrink();
+    if (link == null || targets.space != null) return const SizedBox.shrink();
     final entry =
         targets.knownTarget(link) ?? (link.path == null ? null : ref.watch(fileAtPathProvider(link.path!)).value);
     if (entry == null) {
@@ -111,7 +131,10 @@ class NoteImage extends ConsumerWidget {
             child: NotePlayOverlay(
               visible: isVideoDestination(destination),
               child: Image(
-                image: noteImage(ref.watch(polderApiProvider), targets, destination),
+                image: switch (targets.space) {
+                  final space? => spaceNoteImage(ref.watch(fileSpaceApiProvider(space)), targets, destination),
+                  null => noteImage(ref.watch(polderApiProvider), targets, destination),
+                },
                 gaplessPlayback: true,
                 frameBuilder: (context, child, frame, loadedSynchronously) => frame == null && !loadedSynchronously
                     ? Container(height: 160, width: 240, color: colors.surfaceContainerHighest)

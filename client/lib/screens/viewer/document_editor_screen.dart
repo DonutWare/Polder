@@ -4,15 +4,16 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/models/file_version.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/providers/versions/file_versions_provider.dart";
 import "package:polder/screens/browser/widgets/file_details_sheet.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
@@ -53,7 +54,12 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
 
   FileEntry get _entry => widget.target.entry;
 
-  Uri get _server => Uri.parse(ref.read(currentAccountProvider)!.serverUrl);
+  FileSpace? get _space => widget.target.space;
+
+  Uri get _server => Uri.parse(switch (_space) {
+    LinkSpace(:final serverUrl) => serverUrl,
+    null => ref.read(currentAccountProvider)!.serverUrl,
+  });
 
   @override
   void initState() {
@@ -75,8 +81,11 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
   Future<void> _start() async {
     setState(() => _session = const AsyncLoading());
     final result = await AsyncValue.guard(
-      () =>
+      () => switch (_space) {
+        final space? => ref.read(fileSpaceApiProvider(space)).startEditorSession(_entry.path, origin: _server.origin),
+        null =>
           ref.read(polderApiProvider).startEditorSession(_entry.path, origin: _server.origin, versionId: _version?.id),
+      },
     );
     if (mounted) setState(() => _session = result);
   }
@@ -178,7 +187,7 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
         setState(() => _state = success ? _SaveState.saved : _SaveState.unsaved);
       case ("UI_Close", _):
         unawaited(_close());
-      case ("UI_FileVersions", _):
+      case ("UI_FileVersions", _) when _space == null:
         unawaited(_showHistory());
     }
   }
@@ -218,7 +227,7 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
     }
     setState(() => _state = _SaveState.saved);
     await WidgetsBinding.instance.endOfFrame;
-    if (mounted) context.pop();
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -240,34 +249,37 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
             ],
           ),
           actions: [
-            IconButton(
-              tooltip: context.localized.download,
-              icon: const Icon(IconsaxPlusLinear.document_download),
-              onPressed: () async {
-                await _save();
-                final transfers = ref.read(transfersProvider.notifier);
-                await switch (_version) {
-                  final version? => transfers.downloadVersion(_entry, version),
-                  null => transfers.download(_entry),
-                };
-              },
-            ),
-            IconButton(
-              tooltip: context.localized.versionHistory,
-              icon: const Icon(IconsaxPlusLinear.clock),
-              onPressed: _showHistory,
-            ),
-            IconButton(
-              tooltip: context.localized.details,
-              icon: const Icon(IconsaxPlusLinear.info_circle),
-              onPressed: () => _overEditor(
-                () => showModalBottomSheet<void>(
-                  context: context,
-                  showDragHandle: true,
-                  builder: (_) => FileDetailsSheet(entry: _entry, onShowHistory: _showHistory),
+            if (_canDownload)
+              IconButton(
+                tooltip: context.localized.download,
+                icon: const Icon(IconsaxPlusLinear.document_download),
+                onPressed: () async {
+                  await _save();
+                  final transfers = ref.read(transfersProvider.notifier);
+                  await switch (_version) {
+                    final version? => transfers.downloadVersion(_entry, version),
+                    null => transfers.download(_entry, space: _space),
+                  };
+                },
+              ),
+            if (_space == null) ...[
+              IconButton(
+                tooltip: context.localized.versionHistory,
+                icon: const Icon(IconsaxPlusLinear.clock),
+                onPressed: _showHistory,
+              ),
+              IconButton(
+                tooltip: context.localized.details,
+                icon: const Icon(IconsaxPlusLinear.info_circle),
+                onPressed: () => _overEditor(
+                  () => showModalBottomSheet<void>(
+                    context: context,
+                    showDragHandle: true,
+                    builder: (_) => FileDetailsSheet(entry: _entry, onShowHistory: _showHistory),
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
         body: AsyncValueView<EditorSession>(
@@ -309,6 +321,11 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
       ),
     );
   }
+
+  bool get _canDownload => switch (_space) {
+    final space? => ref.watch(spaceCapabilitiesProvider(space)).canDownload,
+    null => true,
+  };
 
   String? _status(BuildContext context) {
     if (_session.value?.readOnly ?? false) return context.localized.editorReadOnly;

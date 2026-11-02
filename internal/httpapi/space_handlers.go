@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
+	"strconv"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -75,6 +77,17 @@ func (a *API) statIn(ctx context.Context, access sharing.Access, relative string
 	return absolute, entry, err
 }
 
+func (a *API) statInOrEmbedded(ctx context.Context, access sharing.Access, relative string, allowed func() error) (string, files.Entry, error) {
+	absolute, entry, err := a.statIn(ctx, access, relative, allowed)
+	if !apperr.Is(err, apperr.KindNotFound) {
+		return absolute, entry, err
+	}
+	if embedded, embeddedEntry, embedErr := a.sharing.EmbeddedFile(ctx, access, relative); embedErr == nil {
+		return embedded, embeddedEntry, nil
+	}
+	return absolute, entry, err
+}
+
 func (a *API) spaceStat(ctx context.Context, access sharing.Access, relative string) (_ *jsonBody[files.Entry], err error) {
 	defer access.Scrub(&err)
 	absolute, _, err := a.statIn(ctx, access, relative, access.RequireRead)
@@ -90,16 +103,17 @@ func (a *API) spaceStat(ctx context.Context, access sharing.Access, relative str
 
 func (a *API) spaceDownload(ctx context.Context, access sharing.Access, relative string, ranged, asAttachment bool) (_ *sharedContentOutput, err error) {
 	defer access.Scrub(&err)
-	if err := access.RequireDownload(); err != nil {
-		return nil, err
-	}
-	absolute, err := access.Path(relative)
+	absolute, _, err := a.statInOrEmbedded(ctx, access, relative, access.RequireDownload)
 	if err != nil {
 		return nil, err
 	}
 	file, entry, err := a.files.Open(ctx, access.Owner, absolute)
 	if err != nil {
 		return nil, err
+	}
+	if access.Link.ID != 0 && sharing.IsNote(entry) {
+		defer file.Close()
+		return a.serveVisitorNote(ctx, access, file, absolute, entry, asAttachment)
 	}
 	output := &sharedContentOutput{
 		ETag:        revisionETag(entry.Rev),
@@ -115,9 +129,39 @@ func (a *API) spaceDownload(ctx context.Context, access sharing.Access, relative
 	return output, nil
 }
 
+func (a *API) serveVisitorNote(ctx context.Context, access sharing.Access, note io.Reader, absolute string, entry files.Entry, asAttachment bool) (*sharedContentOutput, error) {
+	content, err := readVisitorNote(note, entry.Name)
+	if err != nil {
+		return nil, err
+	}
+	rewritten := a.sharing.VisitorNote(ctx, access, absolute, content)
+	output := &sharedContentOutput{
+		ContentType: entry.Mime,
+		NoSniff:     "nosniff",
+		Policy:      sandboxPolicy,
+		Body: func(humaCtx huma.Context) {
+			humaCtx.SetHeader("Content-Length", strconv.Itoa(len(rewritten)))
+			_, _ = humaCtx.BodyWriter().Write(rewritten)
+		},
+	}
+	if asAttachment {
+		output.ContentDisposition = attachment(entry.Name)
+	}
+	return output, nil
+}
+
+func (a *API) visitorNoteRewriter(ctx context.Context, access sharing.Access, folder string) noteRewriter {
+	if access.Link.ID == 0 {
+		return nil
+	}
+	return func(name string, content []byte) []byte {
+		return a.sharing.VisitorNote(ctx, access, path.Join(folder, name), content)
+	}
+}
+
 func (a *API) spacePreview(ctx context.Context, access sharing.Access, relative string, size previewSize) (_ *previewOutput, err error) {
 	defer access.Scrub(&err)
-	_, entry, err := a.statIn(ctx, access, relative, access.RequireRead)
+	_, entry, err := a.statInOrEmbedded(ctx, access, relative, access.RequireRead)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +194,7 @@ func (a *API) spaceArchive(ctx context.Context, access sharing.Access, relative 
 		ContentDisposition: attachment(entry.Name + ".zip"),
 		Body: func(humaCtx huma.Context) {
 			defer func() { <-a.archiveSlots }()
-			if err := writeZip(humaCtx.BodyWriter(), onDisk); err != nil {
+			if err := writeZip(humaCtx.BodyWriter(), onDisk, a.visitorNoteRewriter(ctx, access, absolute)); err != nil {
 				logger.Warn("zip shared folder", "owner", access.Owner.Username, "via", access.Via, "error", err)
 			}
 		},

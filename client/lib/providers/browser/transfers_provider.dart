@@ -77,12 +77,15 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     ref.invalidate(directoryProvider(RemotePath.parent(path)));
   }
 
-  Future<void> download(FileEntry entry) => _downloadAndSave(
-    name: entry.name,
-    size: entry.size,
-    mime: entry.mime,
-    fetch: (onProgress) => ref.read(polderApiProvider).downloadBytes(entry.path, onProgress: onProgress),
-  );
+  Future<void> download(FileEntry entry, {FileSpace? space}) => switch (space) {
+    final space? => downloadFromSpace(space, entry),
+    null => _downloadAndSave(
+      name: entry.name,
+      size: entry.size,
+      mime: entry.mime,
+      fetch: (onProgress) => ref.read(polderApiProvider).downloadBytes(entry.path, onProgress: onProgress),
+    ),
+  };
 
   Future<void> pickAndUploadToSpace(SpaceLocation location) async {
     final files = await ref.read(filePickerServiceProvider).pickFiles();

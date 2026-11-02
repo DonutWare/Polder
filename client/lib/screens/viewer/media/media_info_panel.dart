@@ -3,9 +3,12 @@ import "package:flutter/material.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/screens/browser/widgets/file_actions_row.dart";
 import "package:polder/screens/browser/widgets/file_details_sheet.dart";
+import "package:polder/screens/browser/widgets/file_metadata_text.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/shared/widgets/space_directory_view.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/date_format_extension.dart";
 
@@ -16,6 +19,7 @@ class MediaInfoPanel extends StatelessWidget {
     required this.onClose,
     required this.onRenamed,
     required this.onRemoved,
+    this.space,
     super.key,
   });
 
@@ -27,6 +31,7 @@ class MediaInfoPanel extends StatelessWidget {
   final VoidCallback onClose;
   final ValueChanged<String> onRenamed;
   final VoidCallback onRemoved;
+  final FileSpace? space;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +61,15 @@ class MediaInfoPanel extends StatelessWidget {
               child: Row(
                 spacing: 12,
                 children: [
-                  FileThumbnail(entry: entry, dimension: _thumbnailSize, fill: true),
+                  switch (space) {
+                    final space? => FileThumbnail.inSpace(
+                      space: space,
+                      entry: entry,
+                      dimension: _thumbnailSize,
+                      fill: true,
+                    ),
+                    null => FileThumbnail(entry: entry, dimension: _thumbnailSize, fill: true),
+                  },
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,27 +94,30 @@ class MediaInfoPanel extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    FileActionsRow(
-                      entry: entry,
-                      onRenamed: onRenamed,
-                      onRemoved: onRemoved,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                      child: DecoratedBox(
-                        decoration: ShapeDecoration(color: colors.inset, shape: squircle(AppRadius.inset + 4)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: FileDetailsList(entry: entry, closesRoute: false),
+                child: switch (space) {
+                  final space? => _SharedFileDetails(space: space, entry: entry),
+                  null => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FileActionsRow(
+                        entry: entry,
+                        onRenamed: onRenamed,
+                        onRemoved: onRemoved,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        child: DecoratedBox(
+                          decoration: ShapeDecoration(color: colors.inset, shape: squircle(AppRadius.inset + 4)),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: FileDetailsList(entry: entry, closesRoute: false),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                },
               ),
             ),
           ],
@@ -109,6 +125,26 @@ class MediaInfoPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SharedFileDetails extends StatelessWidget {
+  const _SharedFileDetails({required this.space, required this.entry});
+
+  final FileSpace space;
+  final FileEntry entry;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 12,
+      children: [
+        FileMetadataText(entry: entry),
+        SpaceDownloadButton(space: space, entry: entry),
+      ],
+    ),
+  );
 }
 
 class _DragHandle extends StatelessWidget {

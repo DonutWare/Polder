@@ -71,6 +71,7 @@ type Service struct {
 
 type SharedFiles interface {
 	CanEditSharedFile(ctx context.Context, recipient users.User, shareID, ownerID int64, ownerPath string) (bool, error)
+	LinkServesFile(ctx context.Context, linkID, generation, ownerID int64, ownerPath string) error
 }
 
 type RemoteFiles interface {
@@ -211,6 +212,23 @@ func (s *Service) StartSharedSession(ctx context.Context, owner, recipient users
 	}
 	return s.open(ctx, entry, origin, grant{
 		UserID: owner.ID, ActorID: recipient.ID, ShareID: shareID, FileID: entry.ID, Generation: generation, ReadOnly: readOnly,
+	})
+}
+
+func (s *Service) StartLinkSession(ctx context.Context, owner users.User, linkID, linkGeneration int64, ownerPath, origin string) (EditorSession, error) {
+	if !s.Enabled() || s.shares == nil {
+		return EditorSession{}, apperr.NotFound("no document editor is set up on this server")
+	}
+	entry, err := s.files.Stat(ctx, owner, ownerPath)
+	if err != nil {
+		return EditorSession{}, err
+	}
+	generation, err := s.generationOf(ctx, entry)
+	if err != nil {
+		return EditorSession{}, err
+	}
+	return s.open(ctx, entry, origin, grant{
+		UserID: owner.ID, LinkID: linkID, LinkGeneration: linkGeneration, FileID: entry.ID, Generation: generation, ReadOnly: true,
 	})
 }
 

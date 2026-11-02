@@ -390,7 +390,26 @@ func linkAccess(link linkRow, owner users.User, root files.Entry) Access {
 		CanDownload: link.Permissions.Download,
 		CanDrop:     link.Permissions.Upload,
 		Via:         "link:" + link.Code,
+		Link:        LinkRef{ID: link.ID, Generation: link.Generation},
 	}
+}
+
+func (s *Service) LinkServesFile(ctx context.Context, linkID, generation, ownerID int64, ownerPath string) error {
+	link, err := s.linkWhere(ctx, `id = $1`, linkID)
+	if err != nil {
+		return err
+	}
+	if expired(link.ExpiresAt, time.Now()) || link.Generation != generation || !link.Permissions.Download {
+		return linkNotFound()
+	}
+	owner, root, err := s.linkTarget(ctx, link)
+	if err != nil {
+		return err
+	}
+	if owner.ID != ownerID || !storage.IsSameOrDescendant(ownerPath, root.Path) {
+		return linkNotFound()
+	}
+	return nil
 }
 
 func (s *Service) MatchLink(ctx context.Context, user users.User, code string) (LinkMatch, error) {

@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/directory_listing.dart";
+import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_space.dart";
 import "package:polder/providers/polder_api_provider.dart";
@@ -39,6 +40,11 @@ final spaceThumbnailProvider = FutureProvider.autoDispose.family<Uint8List?, (Sp
   ref.cacheFor(const Duration(minutes: 5));
   final (location, size) = request;
   return ref.watch(fileSpaceApiProvider(location.space)).preview(location.path, size: size);
+});
+
+final spaceEditorCapabilitiesProvider = FutureProvider.autoDispose.family<EditorCapabilities, FileSpace>((ref, space) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(fileSpaceApiProvider(space)).editorCapabilities();
 });
 
 final spaceDirectoryProvider = AsyncNotifierProvider.autoDispose

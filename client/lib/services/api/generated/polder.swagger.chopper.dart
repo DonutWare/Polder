@@ -1961,6 +1961,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<StreamTicket>> _createStreamTicket({
+    required PathRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Get a ticket that lets a player without an Authorization header, such as a browser video element, read one file',
+      operationId: 'createStreamTicket',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["files"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/files/stream-tickets');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<StreamTicket, StreamTicket>($request);
+  }
+
+  @override
   Future<Response<VersionListing>> _listFileVersions({
     String? path,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -2586,7 +2612,7 @@ final class _$Polder extends Polder {
       operationId: 'getOfficeCapabilities',
       consumes: [],
       produces: [],
-      security: ["bearer"],
+      security: [],
       tags: ["office"],
       deprecated: false,
     ),
@@ -2802,6 +2828,39 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<ListResponse, ListResponse>($request);
+  }
+
+  @override
+  Future<Response<EditorSession>> _startPublicLinkOfficeSession({
+    required String? code,
+    String? xPolderShareToken,
+    required LinkOfficeSessionInputBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Let the document editor show a file inside a share link, read-only',
+      operationId: 'startPublicLinkOfficeSession',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["public"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/public/links/${code}/office-sessions');
+    final Map<String, String> $headers = {
+      if (xPolderShareToken != null) 'X-Polder-Share-Token': xPolderShareToken,
+    };
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<EditorSession, EditorSession>($request);
   }
 
   @override

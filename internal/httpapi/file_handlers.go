@@ -15,6 +15,7 @@ import (
 
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
+	"polder-server/internal/auth"
 	"polder-server/internal/files"
 	"polder-server/internal/links"
 	"polder-server/internal/preview"
@@ -302,6 +303,21 @@ func (a *API) trackedWrite(ctx context.Context, owner users.User, request files.
 		_, _ = io.CopyN(io.Discard, body, *size)
 	}
 	return entry, err
+}
+
+type streamTicket struct {
+	Ticket    string    `json:"ticket" doc:"Pass it as the ticket query parameter of GET /files/content for this path, without an Authorization header"`
+	ExpiresAt time.Time `json:"expiresAt"`
+}
+
+func (a *API) createStreamTicket(ctx context.Context, input *jsonBody[pathRequest]) (*jsonBody[streamTicket], error) {
+	actor := activity.ActorFrom(ctx)
+	identity := auth.Identity{User: currentUser(ctx), SessionID: actor.SessionID, Device: actor.Device}
+	ticket, expiresAt, err := a.auth.IssueStreamTicket(identity, input.Body.Path)
+	if err != nil {
+		return nil, err
+	}
+	return respond(streamTicket{Ticket: ticket, ExpiresAt: expiresAt}), nil
 }
 
 func (a *API) makeDirectory(ctx context.Context, input *jsonBody[pathRequest]) (*jsonBody[files.Entry], error) {

@@ -10,8 +10,8 @@ import "package:media_viewer/media_viewer.dart";
 import "package:wakelock_plus/wakelock_plus.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/file_space.dart";
 import "package:polder/providers/browser/media_siblings_provider.dart";
-import "package:polder/providers/browser/thumbnail_provider.dart";
 import "package:polder/screens/viewer/media/media_chrome.dart";
 import "package:polder/screens/viewer/media/media_info_panel.dart";
 import "package:polder/screens/viewer/media/media_photo_page.dart";
@@ -22,10 +22,11 @@ import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/util/remote_path.dart";
 
 class MediaViewerScreen extends ConsumerStatefulWidget {
-  const MediaViewerScreen({required this.entry, this.gallery, super.key});
+  const MediaViewerScreen({required this.entry, this.gallery, this.space, super.key});
 
   final FileEntry entry;
   final List<FileEntry>? gallery;
+  final FileSpace? space;
 
   @override
   ConsumerState<MediaViewerScreen> createState() => _MediaViewerScreenState();
@@ -52,7 +53,7 @@ class _MediaViewerScreenState extends ConsumerState<MediaViewerScreen> with Sing
     super.dispose();
   }
 
-  List<FileEntry> get _items => _itemsFrom(ref.read(mediaSiblingsProvider(_folder)));
+  List<FileEntry> get _items => _itemsFrom(widget.space == null ? ref.read(mediaSiblingsProvider(_folder)) : null);
 
   String get _folder => RemotePath.parent(widget.entry.path);
 
@@ -92,7 +93,7 @@ class _MediaViewerScreenState extends ConsumerState<MediaViewerScreen> with Sing
     final items = _items;
     final index = items.indexWhere((candidate) => candidate.path == item.path);
     for (var i = math.max(0, index - _neighbourRange); i <= math.min(items.length - 1, index + _neighbourRange); i++) {
-      unawaited(ref.read(thumbnailProvider(mediaPoster(items[i])).future).then<void>((_) {}, onError: (_) {}));
+      unawaited(ref.read(posterProviderFor(items[i], widget.space).future).then<void>((_) {}, onError: (_) {}));
     }
   }
 
@@ -116,7 +117,7 @@ class _MediaViewerScreenState extends ConsumerState<MediaViewerScreen> with Sing
 
   @override
   Widget build(BuildContext context) {
-    final items = _itemsFrom(ref.watch(mediaSiblingsProvider(_folder)));
+    final items = _itemsFrom(widget.space == null ? ref.watch(mediaSiblingsProvider(_folder)) : null);
     if (items.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(Navigator.of(context).maybePop());
@@ -177,8 +178,9 @@ class _MediaViewerScreenState extends ConsumerState<MediaViewerScreen> with Sing
           onPlayerChanged: _attachPlayer,
           onTap: page.onTap,
           onCompleted: _slideshow.videoCompleted,
+          space: widget.space,
         )
-      : MediaPhotoPage(entry: item, page: page);
+      : MediaPhotoPage(entry: item, page: page, space: widget.space);
 
   Widget _info(BuildContext context, FileEntry item, MediaInfoPlacement placement) {
     final panel = MediaInfoPanel(
@@ -187,6 +189,7 @@ class _MediaViewerScreenState extends ConsumerState<MediaViewerScreen> with Sing
       onClose: _viewer.toggleInfo,
       onRenamed: (path) => _onRenamed(item, path),
       onRemoved: () => _onRemoved(item),
+      space: widget.space,
     );
     if (placement == MediaInfoPlacement.sheet) return panel;
     return SafeArea(
