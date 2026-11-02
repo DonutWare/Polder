@@ -15,6 +15,8 @@ abstract interface class FileSpaceApi {
 
   Future<Uint8List> downloadArchive(String path, {ProgressCallback? onProgress});
 
+  Future<Uri> downloadUrl(String path, {required bool folder});
+
   Future<FileEntry> upload(
     String path,
     Stream<List<int>> body, {
@@ -51,6 +53,10 @@ class LinkSpaceApi implements FileSpaceApi {
   @override
   Future<Uint8List> downloadArchive(String path, {ProgressCallback? onProgress}) async =>
       _api.downloadPublicLinkArchive(_code, await _token(), path, onProgress: onProgress);
+
+  @override
+  Future<Uri> downloadUrl(String path, {required bool folder}) async =>
+      _api.publicLinkDownloadUrl(_code, await _token(), path, folder: folder);
 
   @override
   Future<FileEntry> upload(

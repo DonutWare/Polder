@@ -1,7 +1,9 @@
 import "package:flutter_test/flutter_test.dart";
 
+import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_space.dart";
 import "package:polder/models/sharing.dart";
+import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/providers/sharing/public_link_session_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
@@ -97,5 +99,35 @@ void main() {
     final listing = await harness.container.read(spaceDirectoryProvider(location).future);
     expect(listing.entries.single.path, "/photo.txt");
     expect(harness.container.read(spaceCapabilitiesProvider(space)).canUpload, isTrue);
+  });
+
+  Future<void> unlocked() async {
+    harness.container.listen(publicLinkSessionProvider(space), (_, _) {});
+    await harness.container.read(publicLinkSessionProvider(space).future);
+    await harness.container.read(publicLinkSessionProvider(space).notifier).unlock("hunter22");
+  }
+
+  test("in a browser a shared folder is saved by the browser as a zip", () async {
+    await unlocked();
+    harness.filePicker.savesInBrowser = true;
+
+    await harness.container.read(transfersProvider.notifier).downloadFromSpace(space, FileEntry.folder("/Trip", rootName: "Trip"));
+
+    final url = harness.filePicker.browserSaves["Trip.zip"]!;
+    expect(url.toString(), startsWith("https://files.example.com/api/v1/public/links/Ab3dE9xQ2k/archive?"));
+    expect(url.queryParameters, {"path": "/Trip", "token": "token-1"});
+    expect(harness.container.read(transfersProvider), isEmpty);
+  });
+
+  test("in a browser a shared file is saved by the browser", () async {
+    await unlocked();
+    harness.filePicker.savesInBrowser = true;
+    final file = FileEntry(path: "/photo.txt", name: "photo.txt", mtime: DateTime.utc(2026));
+
+    await harness.container.read(transfersProvider.notifier).downloadFromSpace(space, file);
+
+    final url = harness.filePicker.browserSaves["photo.txt"]!;
+    expect(url.path, "/api/v1/public/links/Ab3dE9xQ2k/content");
+    expect(url.queryParameters, {"path": "/photo.txt", "token": "token-1", "download": "true"});
   });
 }

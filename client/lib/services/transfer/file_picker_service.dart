@@ -4,6 +4,7 @@ import "dart:typed_data";
 import "package:cross_file/cross_file.dart";
 import "package:file_picker/file_picker.dart";
 import "package:path/path.dart" as p;
+import "package:polder/util/browser_download.dart";
 
 abstract interface class PickedFile {
   String get name;
@@ -19,6 +20,10 @@ abstract interface class FilePickerService {
   Future<String?> pickDirectory();
 
   Future<void> saveFile({required String name, required Uint8List bytes, required String mime});
+
+  bool get savesInBrowser;
+
+  void saveFromUrl(Uri url, {required String name});
 }
 
 class PlatformFilePickerService implements FilePickerService {
@@ -43,6 +48,12 @@ class PlatformFilePickerService implements FilePickerService {
     await _unsandboxedMacOsReady;
     await FilePicker.saveFile(fileName: name, bytes: bytes, mimeType: mime.isEmpty ? "application/octet-stream" : mime);
   }
+
+  @override
+  bool get savesInBrowser => canSaveInBrowser;
+
+  @override
+  void saveFromUrl(Uri url, {required String name}) => saveInBrowser(url, name);
 }
 
 class LocalPickedFile implements PickedFile {

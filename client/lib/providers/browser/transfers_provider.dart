@@ -8,6 +8,7 @@ import "package:polder/models/file_version.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/transfer.dart";
 import "package:polder/models/trash.dart";
+import "package:polder/models/user.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
@@ -43,6 +44,7 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     final remotePath = RemotePath.join(directory, file.name);
     final transfer = _start(file.name, TransferDirection.upload, length, remotePath: remotePath);
     await _track(transfer, () async {
+      await _ensureRoomFor(length);
       await ref
           .read(polderApiProvider)
           .putContent(
@@ -57,6 +59,14 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
       ref.read(syncSchedulerProvider)?.requestRun();
     });
   }
+
+  Future<void> _ensureRoomFor(int length) async {
+    if (_fits(await ref.read(currentUserProvider.future), length)) return;
+    if (_fits(await ref.refresh(currentUserProvider.future), length)) return;
+    throw const QuotaExceededException();
+  }
+
+  static bool _fits(User user, int length) => !user.hasQuota || user.usedBytes + length <= user.quotaBytes;
 
   Future<void> ensureFolder(String path) async {
     try {
@@ -96,17 +106,22 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     });
   }
 
-  Future<void> downloadFromSpace(FileSpace space, FileEntry entry) => _downloadAndSave(
-    name: entry.isDir ? "${entry.name}.zip" : entry.name,
-    size: entry.isDir ? 0 : entry.size,
-    mime: entry.isDir ? "application/zip" : entry.mime,
-    fetch: (onProgress) {
-      final api = ref.read(fileSpaceApiProvider(space));
-      return entry.isDir
+  Future<void> downloadFromSpace(FileSpace space, FileEntry entry) async {
+    final name = entry.isDir ? "${entry.name}.zip" : entry.name;
+    final api = ref.read(fileSpaceApiProvider(space));
+    final picker = ref.read(filePickerServiceProvider);
+    if (picker.savesInBrowser) {
+      return picker.saveFromUrl(await api.downloadUrl(entry.path, folder: entry.isDir), name: name);
+    }
+    await _downloadAndSave(
+      name: name,
+      size: entry.isDir ? 0 : entry.size,
+      mime: entry.isDir ? "application/zip" : entry.mime,
+      fetch: (onProgress) => entry.isDir
           ? api.downloadArchive(entry.path, onProgress: onProgress)
-          : api.download(entry.path, onProgress: onProgress);
-    },
-  );
+          : api.download(entry.path, onProgress: onProgress),
+    );
+  }
 
   Future<void> downloadVersion(FileEntry entry, FileVersion version) => _downloadAndSave(
     name: entry.name,

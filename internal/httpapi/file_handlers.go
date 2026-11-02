@@ -294,9 +294,13 @@ func (a *API) trackedWrite(ctx context.Context, owner users.User, request files.
 		Owner: owner, Direction: activity.DirectionUpload, Path: request.Path, Total: size, ClientID: clientID,
 	})
 	defer transfer.Hold()()
-	request.Content = transfer.Reader(request.Content)
+	body := request.Content
+	request.Content, request.Size = transfer.Reader(body), size
 	entry, err := a.files.Write(activity.WithTransfer(ctx, transfer), owner, request)
 	a.activity.Finish(ctx, transfer, err)
+	if err != nil && size != nil {
+		_, _ = io.CopyN(io.Discard, body, *size)
+	}
 	return entry, err
 }
 

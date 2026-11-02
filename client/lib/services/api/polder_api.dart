@@ -669,6 +669,15 @@ class PolderApi {
   }) async =>
       _collect(await _service.downloadPublicLinkArchive(code: code, path: path, xPolderShareToken: token), onProgress);
 
+  Uri publicLinkDownloadUrl(String code, String token, String path, {required bool folder}) =>
+      _service.client.baseUrl.replace(
+        pathSegments: [
+          ..._service.client.baseUrl.pathSegments.where((segment) => segment.isNotEmpty),
+          ...["api", "v1", "public", "links", code, folder ? "archive" : "content"],
+        ],
+        queryParameters: {"path": path, "token": token, if (!folder) "download": "true"},
+      );
+
   Future<Uint8List?> publicLinkPreview(String code, String token, String path, {int size = 256}) => _thumbnail(
     () => _service.previewPublicLinkFile(
       code: code,

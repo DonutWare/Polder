@@ -463,10 +463,11 @@ class SignedInServer extends http.BaseClient {
   SignedInServer(this.server);
 
   final FakePolderServer server;
+  Map<String, dynamic> me = userJson();
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    if (request.url.path == "/api/v1/auth/me") return jsonResponse(200, userJson());
+    if (request.url.path == "/api/v1/auth/me") return jsonResponse(200, me);
     return server.send(request);
   }
 }

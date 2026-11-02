@@ -2,9 +2,11 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
+import "package:intl/intl.dart";
 
 import "package:polder/models/transfer.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/api_error_localization.dart";
 import "package:polder/util/localization_helper.dart";
@@ -66,13 +68,28 @@ class _TransferTile extends StatelessWidget {
       ),
       title: Text(transfer.name, overflow: TextOverflow.ellipsis),
       subtitle: switch (transfer.status) {
-        TransferStatus.running => Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: LevelBar(fraction: transfer.progress, color: cs.primary, height: 4),
+        TransferStatus.running => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 4,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: LevelBar(fraction: transfer.progress, color: cs.primary, height: 4),
+            ),
+            Text(_progressLabel(context), style: Theme.of(context).textTheme.bodySmall),
+          ],
         ),
         TransferStatus.done => Text(context.localized.transferDone),
         TransferStatus.failed => Text(context.describeError(transfer.error), style: TextStyle(color: cs.error)),
       },
     );
+  }
+
+  String _progressLabel(BuildContext context) {
+    final summary = transferSummary(context, bytes: transfer.transferred, total: transfer.total, rate: transfer.rate);
+    final progress = transfer.progress;
+    if (progress == null) return summary;
+    final percent = NumberFormat.percentPattern(context.localeName).format((progress.clamp(0, 1) * 100).floor() / 100);
+    return "$percent · $summary";
   }
 }

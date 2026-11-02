@@ -23,6 +23,7 @@ type WriteRequest struct {
 	Mtime        time.Time
 	ExpectedHash string
 	Content      io.Reader
+	Size         *int64
 	Housekeeping bool
 }
 
@@ -55,6 +56,9 @@ func (s *Service) Write(ctx context.Context, owner users.User, request WriteRequ
 	budget, err := s.writeBudget(ctx, s.db, owner, current.Size)
 	if err != nil {
 		return Entry{}, err
+	}
+	if budget != unlimitedBudget && request.Size != nil && *request.Size > budget {
+		return Entry{}, apperr.QuotaExceeded("this upload exceeds your storage quota")
 	}
 
 	staged, err := s.stage(filepath.Dir(absolute), request.Content, budget)
