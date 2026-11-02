@@ -14,6 +14,8 @@ import (
 
 	"polder-server/internal/activity"
 	"polder-server/internal/auth"
+	"polder-server/internal/caldav"
+	"polder-server/internal/calendar"
 	"polder-server/internal/config"
 	"polder-server/internal/database"
 	"polder-server/internal/extract"
@@ -24,6 +26,7 @@ import (
 	"polder-server/internal/linkpreview"
 	"polder-server/internal/links"
 	"polder-server/internal/logging"
+	"polder-server/internal/mail"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
 	"polder-server/internal/recipes"
@@ -49,6 +52,7 @@ const (
 	logPurgeInterval      = 24 * time.Hour
 
 	attachmentCleanupInterval = 24 * time.Hour
+	calendarPruneInterval     = 24 * time.Hour
 )
 
 type App struct {
@@ -68,6 +72,7 @@ type App struct {
 	versions  *versions.Worker
 	links     *links.Graph
 	tags      *tags.Service
+	calendar  *calendar.Service
 
 	federation         *federation.Service
 	trashPurgeRequests chan struct{}
@@ -208,6 +213,17 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	fileService.OnMutation(federationService.FileMutation)
 	officeService.UseShares(sharingService, federationService)
 	linkPreviews := linkpreview.New(linkpreview.Options{})
+	calendarService := calendar.NewService(db, userStore, groupService, activityHub, calendar.Options{
+		MaxResourceBytes:          cfg.CalendarMaxEventBytes,
+		SubscriptionMinRefresh:    cfg.CalendarSubscriptionMinRefresh,
+		AllowPrivateSubscriptions: cfg.CalendarSubscriptionsAllowPrivate,
+		PublicURL:                 cfg.PublicBaseURL(),
+		RSVPKey:                   tokens.DerivedKey(calendar.RSVPKeyPurpose),
+		Mailer: mail.NewSender(mail.Options{
+			Host: cfg.SMTPHost, Port: cfg.SMTPPort, Username: cfg.SMTPUsername, Password: cfg.SMTPPassword,
+			From: cfg.SMTPFrom, Security: cfg.SMTPSecurity,
+		}),
+	})
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
 		Sessions:               sessions,
@@ -226,6 +242,9 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Versions:               versionWorker,
 		Links:                  linkGraph,
 		Tags:                   tagService,
+		Calendar:               calendarService,
+		CalDAV:                 caldav.NewHandler(calendarService),
+		PublicURL:              cfg.PublicBaseURL(),
 		LinkPreviews:           linkPreviews,
 		Recipes:                recipes.NewService(linkPreviews, fileService),
 		Groups:                 groupService,
@@ -255,6 +274,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		versions:  versionWorker,
 		links:     linkGraph,
 		tags:      tagService,
+		calendar:  calendarService,
 
 		federation:         federationService,
 		trashPurgeRequests: trashPurgeRequests,
@@ -299,6 +319,11 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	a.background.Go(func() { a.links.Run(ctx) })
 	a.background.Go(func() { a.tags.Run(ctx) })
 	a.background.Go(func() { a.federation.Run(ctx) })
+	a.background.Go(func() { a.calendar.RunReminders(ctx) })
+	a.background.Go(func() {
+		repeatOnRequest(ctx, calendar.SubscriptionCheckInterval(), a.calendar.RefreshRequests(), "refresh calendar subscriptions", a.calendar.RefreshDueSubscriptions)
+	})
+	a.background.Go(func() { repeat(ctx, calendarPruneInterval, "prune calendar history", a.calendar.PruneChanges) })
 	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
 	a.background.Go(func() {
 		repeatOnRequest(ctx, trashPurgeInterval, a.trashPurgeRequests, "purge expired trash", func(ctx context.Context) error {

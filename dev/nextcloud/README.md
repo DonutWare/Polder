@@ -51,8 +51,8 @@ docker compose logs -f polder
    from Nextcloud and with `admin@nextcloud.test` from Polder. Leave
    Nextcloud's **Trusted servers** setting alone; it only accepts other
    Nextcloud servers and answers "No Nextcloud server" for Polder.
-3. In Nextcloud's share box, type `jop@polder.test` and pick
-   **jop (polder.test)**. The install hook turns off sharing by email, which
+3. In Nextcloud's share box, type `<user>@polder.test` and pick
+   **<user> (polder.test)**. The install hook turns off sharing by email, which
    would otherwise offer the same address as an email share.
 
 Nextcloud sends OCM shares without the certificates imported with `occ`, so

@@ -52,6 +52,79 @@ extension $AcceptInviteRequestExtension on AcceptInviteRequest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class Alarm {
+  const Alarm({required this.action, this.at, this.description, this.offsetMinutes, this.relativeToEnd});
+
+  factory Alarm.fromJson(Map<String, dynamic> json) => _$AlarmFromJson(json);
+
+  static const toJsonFactory = _$AlarmToJson;
+  Map<String, dynamic> toJson() => _$AlarmToJson(this);
+
+  @JsonKey(name: 'action', includeIfNull: false)
+  final String action;
+  @JsonKey(name: 'at', includeIfNull: false)
+  final DateTime? at;
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String? description;
+  @JsonKey(name: 'offsetMinutes', includeIfNull: false)
+  final int? offsetMinutes;
+  @JsonKey(name: 'relativeToEnd', includeIfNull: false)
+  final bool? relativeToEnd;
+  static const fromJsonFactory = _$AlarmFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Alarm &&
+            (identical(other.action, action) || const DeepCollectionEquality().equals(other.action, action)) &&
+            (identical(other.at, at) || const DeepCollectionEquality().equals(other.at, at)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.offsetMinutes, offsetMinutes) ||
+                const DeepCollectionEquality().equals(other.offsetMinutes, offsetMinutes)) &&
+            (identical(other.relativeToEnd, relativeToEnd) ||
+                const DeepCollectionEquality().equals(other.relativeToEnd, relativeToEnd)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(action) ^
+      const DeepCollectionEquality().hash(at) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(offsetMinutes) ^
+      const DeepCollectionEquality().hash(relativeToEnd) ^
+      runtimeType.hashCode;
+}
+
+extension $AlarmExtension on Alarm {
+  Alarm copyWith({String? action, DateTime? at, String? description, int? offsetMinutes, bool? relativeToEnd}) {
+    return Alarm(
+      action: action ?? this.action,
+      at: at ?? this.at,
+      description: description ?? this.description,
+      offsetMinutes: offsetMinutes ?? this.offsetMinutes,
+      relativeToEnd: relativeToEnd ?? this.relativeToEnd,
+    );
+  }
+
+  Alarm copyWithWrapped({
+    Wrapped<String>? action,
+    Wrapped<DateTime?>? at,
+    Wrapped<String?>? description,
+    Wrapped<int?>? offsetMinutes,
+    Wrapped<bool?>? relativeToEnd,
+  }) {
+    return Alarm(
+      action: (action != null ? action.value : this.action),
+      at: (at != null ? at.value : this.at),
+      description: (description != null ? description.value : this.description),
+      offsetMinutes: (offsetMinutes != null ? offsetMinutes.value : this.offsetMinutes),
+      relativeToEnd: (relativeToEnd != null ? relativeToEnd.value : this.relativeToEnd),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class AppPassword {
   const AppPassword({
     required this.createdAt,
@@ -247,6 +320,139 @@ extension $AppearanceExtension on Appearance {
     return Appearance(
       accentColor: (accentColor != null ? accentColor.value : this.accentColor),
       theme: (theme != null ? theme.value : this.theme),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Attendee {
+  const Attendee({
+    required this.email,
+    this.name,
+    this.role,
+    this.scheduleStatus,
+    required this.self,
+    required this.status,
+  });
+
+  factory Attendee.fromJson(Map<String, dynamic> json) => _$AttendeeFromJson(json);
+
+  static const toJsonFactory = _$AttendeeToJson;
+  Map<String, dynamic> toJson() => _$AttendeeToJson(this);
+
+  @JsonKey(name: 'email', includeIfNull: false)
+  final String email;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String? name;
+  @JsonKey(name: 'role', includeIfNull: false)
+  final String? role;
+  @JsonKey(name: 'scheduleStatus', includeIfNull: false)
+  final String? scheduleStatus;
+  @JsonKey(name: 'self', includeIfNull: false)
+  final bool self;
+  @JsonKey(name: 'status', includeIfNull: false)
+  final String status;
+  static const fromJsonFactory = _$AttendeeFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Attendee &&
+            (identical(other.email, email) || const DeepCollectionEquality().equals(other.email, email)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)) &&
+            (identical(other.scheduleStatus, scheduleStatus) ||
+                const DeepCollectionEquality().equals(other.scheduleStatus, scheduleStatus)) &&
+            (identical(other.self, self) || const DeepCollectionEquality().equals(other.self, self)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(email) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(role) ^
+      const DeepCollectionEquality().hash(scheduleStatus) ^
+      const DeepCollectionEquality().hash(self) ^
+      const DeepCollectionEquality().hash(status) ^
+      runtimeType.hashCode;
+}
+
+extension $AttendeeExtension on Attendee {
+  Attendee copyWith({String? email, String? name, String? role, String? scheduleStatus, bool? self, String? status}) {
+    return Attendee(
+      email: email ?? this.email,
+      name: name ?? this.name,
+      role: role ?? this.role,
+      scheduleStatus: scheduleStatus ?? this.scheduleStatus,
+      self: self ?? this.self,
+      status: status ?? this.status,
+    );
+  }
+
+  Attendee copyWithWrapped({
+    Wrapped<String>? email,
+    Wrapped<String?>? name,
+    Wrapped<String?>? role,
+    Wrapped<String?>? scheduleStatus,
+    Wrapped<bool>? self,
+    Wrapped<String>? status,
+  }) {
+    return Attendee(
+      email: (email != null ? email.value : this.email),
+      name: (name != null ? name.value : this.name),
+      role: (role != null ? role.value : this.role),
+      scheduleStatus: (scheduleStatus != null ? scheduleStatus.value : this.scheduleStatus),
+      self: (self != null ? self.value : this.self),
+      status: (status != null ? status.value : this.status),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class AttendeeInput {
+  const AttendeeInput({required this.email, this.name, this.role});
+
+  factory AttendeeInput.fromJson(Map<String, dynamic> json) => _$AttendeeInputFromJson(json);
+
+  static const toJsonFactory = _$AttendeeInputToJson;
+  Map<String, dynamic> toJson() => _$AttendeeInputToJson(this);
+
+  @JsonKey(name: 'email', includeIfNull: false)
+  final String email;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String? name;
+  @JsonKey(name: 'role', includeIfNull: false)
+  final String? role;
+  static const fromJsonFactory = _$AttendeeInputFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AttendeeInput &&
+            (identical(other.email, email) || const DeepCollectionEquality().equals(other.email, email)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(email) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(role) ^
+      runtimeType.hashCode;
+}
+
+extension $AttendeeInputExtension on AttendeeInput {
+  AttendeeInput copyWith({String? email, String? name, String? role}) {
+    return AttendeeInput(email: email ?? this.email, name: name ?? this.name, role: role ?? this.role);
+  }
+
+  AttendeeInput copyWithWrapped({Wrapped<String>? email, Wrapped<String?>? name, Wrapped<String?>? role}) {
+    return AttendeeInput(
+      email: (email != null ? email.value : this.email),
+      name: (name != null ? name.value : this.name),
+      role: (role != null ? role.value : this.role),
     );
   }
 }
@@ -458,6 +664,723 @@ extension $BrandingExtension on Branding {
       message: (message != null ? message.value : this.message),
       name: (name != null ? name.value : this.name),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class BusyPeriod {
+  const BusyPeriod({required this.end, required this.start, required this.tentative});
+
+  factory BusyPeriod.fromJson(Map<String, dynamic> json) => _$BusyPeriodFromJson(json);
+
+  static const toJsonFactory = _$BusyPeriodToJson;
+  Map<String, dynamic> toJson() => _$BusyPeriodToJson(this);
+
+  @JsonKey(name: 'end', includeIfNull: false)
+  final DateTime end;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final DateTime start;
+  @JsonKey(name: 'tentative', includeIfNull: false)
+  final bool tentative;
+  static const fromJsonFactory = _$BusyPeriodFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is BusyPeriod &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.tentative, tentative) ||
+                const DeepCollectionEquality().equals(other.tentative, tentative)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(start) ^
+      const DeepCollectionEquality().hash(tentative) ^
+      runtimeType.hashCode;
+}
+
+extension $BusyPeriodExtension on BusyPeriod {
+  BusyPeriod copyWith({DateTime? end, DateTime? start, bool? tentative}) {
+    return BusyPeriod(end: end ?? this.end, start: start ?? this.start, tentative: tentative ?? this.tentative);
+  }
+
+  BusyPeriod copyWithWrapped({Wrapped<DateTime>? end, Wrapped<DateTime>? start, Wrapped<bool>? tentative}) {
+    return BusyPeriod(
+      end: (end != null ? end.value : this.end),
+      start: (start != null ? start.value : this.start),
+      tentative: (tentative != null ? tentative.value : this.tentative),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class CalDAVInfo {
+  const CalDAVInfo({
+    required this.hint,
+    required this.homeUrl,
+    required this.principalUrl,
+    required this.serverUrl,
+    required this.username,
+  });
+
+  factory CalDAVInfo.fromJson(Map<String, dynamic> json) => _$CalDAVInfoFromJson(json);
+
+  static const toJsonFactory = _$CalDAVInfoToJson;
+  Map<String, dynamic> toJson() => _$CalDAVInfoToJson(this);
+
+  @JsonKey(name: 'hint', includeIfNull: false)
+  final String hint;
+  @JsonKey(name: 'homeUrl', includeIfNull: false)
+  final String homeUrl;
+  @JsonKey(name: 'principalUrl', includeIfNull: false)
+  final String principalUrl;
+  @JsonKey(name: 'serverUrl', includeIfNull: false)
+  final String serverUrl;
+  @JsonKey(name: 'username', includeIfNull: false)
+  final String username;
+  static const fromJsonFactory = _$CalDAVInfoFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is CalDAVInfo &&
+            (identical(other.hint, hint) || const DeepCollectionEquality().equals(other.hint, hint)) &&
+            (identical(other.homeUrl, homeUrl) || const DeepCollectionEquality().equals(other.homeUrl, homeUrl)) &&
+            (identical(other.principalUrl, principalUrl) ||
+                const DeepCollectionEquality().equals(other.principalUrl, principalUrl)) &&
+            (identical(other.serverUrl, serverUrl) ||
+                const DeepCollectionEquality().equals(other.serverUrl, serverUrl)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(hint) ^
+      const DeepCollectionEquality().hash(homeUrl) ^
+      const DeepCollectionEquality().hash(principalUrl) ^
+      const DeepCollectionEquality().hash(serverUrl) ^
+      const DeepCollectionEquality().hash(username) ^
+      runtimeType.hashCode;
+}
+
+extension $CalDAVInfoExtension on CalDAVInfo {
+  CalDAVInfo copyWith({String? hint, String? homeUrl, String? principalUrl, String? serverUrl, String? username}) {
+    return CalDAVInfo(
+      hint: hint ?? this.hint,
+      homeUrl: homeUrl ?? this.homeUrl,
+      principalUrl: principalUrl ?? this.principalUrl,
+      serverUrl: serverUrl ?? this.serverUrl,
+      username: username ?? this.username,
+    );
+  }
+
+  CalDAVInfo copyWithWrapped({
+    Wrapped<String>? hint,
+    Wrapped<String>? homeUrl,
+    Wrapped<String>? principalUrl,
+    Wrapped<String>? serverUrl,
+    Wrapped<String>? username,
+  }) {
+    return CalDAVInfo(
+      hint: (hint != null ? hint.value : this.hint),
+      homeUrl: (homeUrl != null ? homeUrl.value : this.homeUrl),
+      principalUrl: (principalUrl != null ? principalUrl.value : this.principalUrl),
+      serverUrl: (serverUrl != null ? serverUrl.value : this.serverUrl),
+      username: (username != null ? username.value : this.username),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Calendar {
+  const Calendar({
+    required this.access,
+    required this.color,
+    required this.createdAt,
+    required this.description,
+    this.fetchError,
+    this.fetchedAt,
+    required this.hidden,
+    required this.id,
+    required this.isDefault,
+    required this.kind,
+    required this.name,
+    required this.notify,
+    required this.order,
+    this.owner,
+    this.refreshSeconds,
+    this.sourceUrl,
+    required this.timezone,
+    required this.updatedAt,
+    required this.uri,
+  });
+
+  factory Calendar.fromJson(Map<String, dynamic> json) => _$CalendarFromJson(json);
+
+  static const toJsonFactory = _$CalendarToJson;
+  Map<String, dynamic> toJson() => _$CalendarToJson(this);
+
+  @JsonKey(name: 'access', includeIfNull: false, toJson: calendarAccessToJson, fromJson: calendarAccessFromJson)
+  final enums.CalendarAccess access;
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String color;
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String description;
+  @JsonKey(name: 'fetchError', includeIfNull: false)
+  final String? fetchError;
+  @JsonKey(name: 'fetchedAt', includeIfNull: false)
+  final DateTime? fetchedAt;
+  @JsonKey(name: 'hidden', includeIfNull: false)
+  final bool hidden;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'isDefault', includeIfNull: false)
+  final bool isDefault;
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: calendarKindToJson, fromJson: calendarKindFromJson)
+  final enums.CalendarKind kind;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  @JsonKey(name: 'notify', includeIfNull: false)
+  final bool notify;
+  @JsonKey(name: 'order', includeIfNull: false)
+  final int order;
+  @JsonKey(name: 'owner', includeIfNull: false)
+  final UserSummary? owner;
+  @JsonKey(name: 'refreshSeconds', includeIfNull: false)
+  final int? refreshSeconds;
+  @JsonKey(name: 'sourceUrl', includeIfNull: false)
+  final String? sourceUrl;
+  @JsonKey(name: 'timezone', includeIfNull: false)
+  final String timezone;
+  @JsonKey(name: 'updatedAt', includeIfNull: false)
+  final DateTime updatedAt;
+  @JsonKey(name: 'uri', includeIfNull: false)
+  final String uri;
+  static const fromJsonFactory = _$CalendarFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Calendar &&
+            (identical(other.access, access) || const DeepCollectionEquality().equals(other.access, access)) &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.fetchError, fetchError) ||
+                const DeepCollectionEquality().equals(other.fetchError, fetchError)) &&
+            (identical(other.fetchedAt, fetchedAt) ||
+                const DeepCollectionEquality().equals(other.fetchedAt, fetchedAt)) &&
+            (identical(other.hidden, hidden) || const DeepCollectionEquality().equals(other.hidden, hidden)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.isDefault, isDefault) ||
+                const DeepCollectionEquality().equals(other.isDefault, isDefault)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.notify, notify) || const DeepCollectionEquality().equals(other.notify, notify)) &&
+            (identical(other.order, order) || const DeepCollectionEquality().equals(other.order, order)) &&
+            (identical(other.owner, owner) || const DeepCollectionEquality().equals(other.owner, owner)) &&
+            (identical(other.refreshSeconds, refreshSeconds) ||
+                const DeepCollectionEquality().equals(other.refreshSeconds, refreshSeconds)) &&
+            (identical(other.sourceUrl, sourceUrl) ||
+                const DeepCollectionEquality().equals(other.sourceUrl, sourceUrl)) &&
+            (identical(other.timezone, timezone) || const DeepCollectionEquality().equals(other.timezone, timezone)) &&
+            (identical(other.updatedAt, updatedAt) ||
+                const DeepCollectionEquality().equals(other.updatedAt, updatedAt)) &&
+            (identical(other.uri, uri) || const DeepCollectionEquality().equals(other.uri, uri)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(access) ^
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(fetchError) ^
+      const DeepCollectionEquality().hash(fetchedAt) ^
+      const DeepCollectionEquality().hash(hidden) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(isDefault) ^
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(notify) ^
+      const DeepCollectionEquality().hash(order) ^
+      const DeepCollectionEquality().hash(owner) ^
+      const DeepCollectionEquality().hash(refreshSeconds) ^
+      const DeepCollectionEquality().hash(sourceUrl) ^
+      const DeepCollectionEquality().hash(timezone) ^
+      const DeepCollectionEquality().hash(updatedAt) ^
+      const DeepCollectionEquality().hash(uri) ^
+      runtimeType.hashCode;
+}
+
+extension $CalendarExtension on Calendar {
+  Calendar copyWith({
+    enums.CalendarAccess? access,
+    String? color,
+    DateTime? createdAt,
+    String? description,
+    String? fetchError,
+    DateTime? fetchedAt,
+    bool? hidden,
+    int? id,
+    bool? isDefault,
+    enums.CalendarKind? kind,
+    String? name,
+    bool? notify,
+    int? order,
+    UserSummary? owner,
+    int? refreshSeconds,
+    String? sourceUrl,
+    String? timezone,
+    DateTime? updatedAt,
+    String? uri,
+  }) {
+    return Calendar(
+      access: access ?? this.access,
+      color: color ?? this.color,
+      createdAt: createdAt ?? this.createdAt,
+      description: description ?? this.description,
+      fetchError: fetchError ?? this.fetchError,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      hidden: hidden ?? this.hidden,
+      id: id ?? this.id,
+      isDefault: isDefault ?? this.isDefault,
+      kind: kind ?? this.kind,
+      name: name ?? this.name,
+      notify: notify ?? this.notify,
+      order: order ?? this.order,
+      owner: owner ?? this.owner,
+      refreshSeconds: refreshSeconds ?? this.refreshSeconds,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
+      timezone: timezone ?? this.timezone,
+      updatedAt: updatedAt ?? this.updatedAt,
+      uri: uri ?? this.uri,
+    );
+  }
+
+  Calendar copyWithWrapped({
+    Wrapped<enums.CalendarAccess>? access,
+    Wrapped<String>? color,
+    Wrapped<DateTime>? createdAt,
+    Wrapped<String>? description,
+    Wrapped<String?>? fetchError,
+    Wrapped<DateTime?>? fetchedAt,
+    Wrapped<bool>? hidden,
+    Wrapped<int>? id,
+    Wrapped<bool>? isDefault,
+    Wrapped<enums.CalendarKind>? kind,
+    Wrapped<String>? name,
+    Wrapped<bool>? notify,
+    Wrapped<int>? order,
+    Wrapped<UserSummary?>? owner,
+    Wrapped<int?>? refreshSeconds,
+    Wrapped<String?>? sourceUrl,
+    Wrapped<String>? timezone,
+    Wrapped<DateTime>? updatedAt,
+    Wrapped<String>? uri,
+  }) {
+    return Calendar(
+      access: (access != null ? access.value : this.access),
+      color: (color != null ? color.value : this.color),
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      description: (description != null ? description.value : this.description),
+      fetchError: (fetchError != null ? fetchError.value : this.fetchError),
+      fetchedAt: (fetchedAt != null ? fetchedAt.value : this.fetchedAt),
+      hidden: (hidden != null ? hidden.value : this.hidden),
+      id: (id != null ? id.value : this.id),
+      isDefault: (isDefault != null ? isDefault.value : this.isDefault),
+      kind: (kind != null ? kind.value : this.kind),
+      name: (name != null ? name.value : this.name),
+      notify: (notify != null ? notify.value : this.notify),
+      order: (order != null ? order.value : this.order),
+      owner: (owner != null ? owner.value : this.owner),
+      refreshSeconds: (refreshSeconds != null ? refreshSeconds.value : this.refreshSeconds),
+      sourceUrl: (sourceUrl != null ? sourceUrl.value : this.sourceUrl),
+      timezone: (timezone != null ? timezone.value : this.timezone),
+      updatedAt: (updatedAt != null ? updatedAt.value : this.updatedAt),
+      uri: (uri != null ? uri.value : this.uri),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class CalendarChange {
+  const CalendarChange({
+    this.color,
+    this.description,
+    this.hidden,
+    this.name,
+    this.notify,
+    this.order,
+    this.refreshSeconds,
+    this.timezone,
+  });
+
+  factory CalendarChange.fromJson(Map<String, dynamic> json) => _$CalendarChangeFromJson(json);
+
+  static const toJsonFactory = _$CalendarChangeToJson;
+  Map<String, dynamic> toJson() => _$CalendarChangeToJson(this);
+
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String? description;
+  @JsonKey(name: 'hidden', includeIfNull: false)
+  final bool? hidden;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String? name;
+  @JsonKey(name: 'notify', includeIfNull: false)
+  final bool? notify;
+  @JsonKey(name: 'order', includeIfNull: false)
+  final int? order;
+  @JsonKey(name: 'refreshSeconds', includeIfNull: false)
+  final int? refreshSeconds;
+  @JsonKey(name: 'timezone', includeIfNull: false)
+  final String? timezone;
+  static const fromJsonFactory = _$CalendarChangeFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is CalendarChange &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.hidden, hidden) || const DeepCollectionEquality().equals(other.hidden, hidden)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.notify, notify) || const DeepCollectionEquality().equals(other.notify, notify)) &&
+            (identical(other.order, order) || const DeepCollectionEquality().equals(other.order, order)) &&
+            (identical(other.refreshSeconds, refreshSeconds) ||
+                const DeepCollectionEquality().equals(other.refreshSeconds, refreshSeconds)) &&
+            (identical(other.timezone, timezone) || const DeepCollectionEquality().equals(other.timezone, timezone)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(hidden) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(notify) ^
+      const DeepCollectionEquality().hash(order) ^
+      const DeepCollectionEquality().hash(refreshSeconds) ^
+      const DeepCollectionEquality().hash(timezone) ^
+      runtimeType.hashCode;
+}
+
+extension $CalendarChangeExtension on CalendarChange {
+  CalendarChange copyWith({
+    String? color,
+    String? description,
+    bool? hidden,
+    String? name,
+    bool? notify,
+    int? order,
+    int? refreshSeconds,
+    String? timezone,
+  }) {
+    return CalendarChange(
+      color: color ?? this.color,
+      description: description ?? this.description,
+      hidden: hidden ?? this.hidden,
+      name: name ?? this.name,
+      notify: notify ?? this.notify,
+      order: order ?? this.order,
+      refreshSeconds: refreshSeconds ?? this.refreshSeconds,
+      timezone: timezone ?? this.timezone,
+    );
+  }
+
+  CalendarChange copyWithWrapped({
+    Wrapped<String?>? color,
+    Wrapped<String?>? description,
+    Wrapped<bool?>? hidden,
+    Wrapped<String?>? name,
+    Wrapped<bool?>? notify,
+    Wrapped<int?>? order,
+    Wrapped<int?>? refreshSeconds,
+    Wrapped<String?>? timezone,
+  }) {
+    return CalendarChange(
+      color: (color != null ? color.value : this.color),
+      description: (description != null ? description.value : this.description),
+      hidden: (hidden != null ? hidden.value : this.hidden),
+      name: (name != null ? name.value : this.name),
+      notify: (notify != null ? notify.value : this.notify),
+      order: (order != null ? order.value : this.order),
+      refreshSeconds: (refreshSeconds != null ? refreshSeconds.value : this.refreshSeconds),
+      timezone: (timezone != null ? timezone.value : this.timezone),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class CalendarReminder {
+  const CalendarReminder({
+    required this.allDay,
+    required this.calendarId,
+    required this.end,
+    required this.eventId,
+    this.location,
+    this.recurrenceId,
+    required this.start,
+    required this.summary,
+    required this.triggerAt,
+    required this.uid,
+  });
+
+  factory CalendarReminder.fromJson(Map<String, dynamic> json) => _$CalendarReminderFromJson(json);
+
+  static const toJsonFactory = _$CalendarReminderToJson;
+  Map<String, dynamic> toJson() => _$CalendarReminderToJson(this);
+
+  @JsonKey(name: 'allDay', includeIfNull: false)
+  final bool allDay;
+  @JsonKey(name: 'calendarId', includeIfNull: false)
+  final int calendarId;
+  @JsonKey(name: 'end', includeIfNull: false)
+  final DateTime end;
+  @JsonKey(name: 'eventId', includeIfNull: false)
+  final int eventId;
+  @JsonKey(name: 'location', includeIfNull: false)
+  final String? location;
+  @JsonKey(name: 'recurrenceId', includeIfNull: false)
+  final String? recurrenceId;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final DateTime start;
+  @JsonKey(name: 'summary', includeIfNull: false)
+  final String summary;
+  @JsonKey(name: 'triggerAt', includeIfNull: false)
+  final DateTime triggerAt;
+  @JsonKey(name: 'uid', includeIfNull: false)
+  final String uid;
+  static const fromJsonFactory = _$CalendarReminderFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is CalendarReminder &&
+            (identical(other.allDay, allDay) || const DeepCollectionEquality().equals(other.allDay, allDay)) &&
+            (identical(other.calendarId, calendarId) ||
+                const DeepCollectionEquality().equals(other.calendarId, calendarId)) &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.eventId, eventId) || const DeepCollectionEquality().equals(other.eventId, eventId)) &&
+            (identical(other.location, location) || const DeepCollectionEquality().equals(other.location, location)) &&
+            (identical(other.recurrenceId, recurrenceId) ||
+                const DeepCollectionEquality().equals(other.recurrenceId, recurrenceId)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.summary, summary) || const DeepCollectionEquality().equals(other.summary, summary)) &&
+            (identical(other.triggerAt, triggerAt) ||
+                const DeepCollectionEquality().equals(other.triggerAt, triggerAt)) &&
+            (identical(other.uid, uid) || const DeepCollectionEquality().equals(other.uid, uid)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(allDay) ^
+      const DeepCollectionEquality().hash(calendarId) ^
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(eventId) ^
+      const DeepCollectionEquality().hash(location) ^
+      const DeepCollectionEquality().hash(recurrenceId) ^
+      const DeepCollectionEquality().hash(start) ^
+      const DeepCollectionEquality().hash(summary) ^
+      const DeepCollectionEquality().hash(triggerAt) ^
+      const DeepCollectionEquality().hash(uid) ^
+      runtimeType.hashCode;
+}
+
+extension $CalendarReminderExtension on CalendarReminder {
+  CalendarReminder copyWith({
+    bool? allDay,
+    int? calendarId,
+    DateTime? end,
+    int? eventId,
+    String? location,
+    String? recurrenceId,
+    DateTime? start,
+    String? summary,
+    DateTime? triggerAt,
+    String? uid,
+  }) {
+    return CalendarReminder(
+      allDay: allDay ?? this.allDay,
+      calendarId: calendarId ?? this.calendarId,
+      end: end ?? this.end,
+      eventId: eventId ?? this.eventId,
+      location: location ?? this.location,
+      recurrenceId: recurrenceId ?? this.recurrenceId,
+      start: start ?? this.start,
+      summary: summary ?? this.summary,
+      triggerAt: triggerAt ?? this.triggerAt,
+      uid: uid ?? this.uid,
+    );
+  }
+
+  CalendarReminder copyWithWrapped({
+    Wrapped<bool>? allDay,
+    Wrapped<int>? calendarId,
+    Wrapped<DateTime>? end,
+    Wrapped<int>? eventId,
+    Wrapped<String?>? location,
+    Wrapped<String?>? recurrenceId,
+    Wrapped<DateTime>? start,
+    Wrapped<String>? summary,
+    Wrapped<DateTime>? triggerAt,
+    Wrapped<String>? uid,
+  }) {
+    return CalendarReminder(
+      allDay: (allDay != null ? allDay.value : this.allDay),
+      calendarId: (calendarId != null ? calendarId.value : this.calendarId),
+      end: (end != null ? end.value : this.end),
+      eventId: (eventId != null ? eventId.value : this.eventId),
+      location: (location != null ? location.value : this.location),
+      recurrenceId: (recurrenceId != null ? recurrenceId.value : this.recurrenceId),
+      start: (start != null ? start.value : this.start),
+      summary: (summary != null ? summary.value : this.summary),
+      triggerAt: (triggerAt != null ? triggerAt.value : this.triggerAt),
+      uid: (uid != null ? uid.value : this.uid),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class CalendarShare {
+  const CalendarShare({
+    required this.access,
+    required this.calendarId,
+    required this.createdAt,
+    this.group,
+    required this.id,
+    this.user,
+  });
+
+  factory CalendarShare.fromJson(Map<String, dynamic> json) => _$CalendarShareFromJson(json);
+
+  static const toJsonFactory = _$CalendarShareToJson;
+  Map<String, dynamic> toJson() => _$CalendarShareToJson(this);
+
+  @JsonKey(
+    name: 'access',
+    includeIfNull: false,
+    toJson: calendarShareAccessToJson,
+    fromJson: calendarShareAccessFromJson,
+  )
+  final enums.CalendarShareAccess access;
+  @JsonKey(name: 'calendarId', includeIfNull: false)
+  final int calendarId;
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'group', includeIfNull: false)
+  final GroupSummary? group;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'user', includeIfNull: false)
+  final UserSummary? user;
+  static const fromJsonFactory = _$CalendarShareFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is CalendarShare &&
+            (identical(other.access, access) || const DeepCollectionEquality().equals(other.access, access)) &&
+            (identical(other.calendarId, calendarId) ||
+                const DeepCollectionEquality().equals(other.calendarId, calendarId)) &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.group, group) || const DeepCollectionEquality().equals(other.group, group)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.user, user) || const DeepCollectionEquality().equals(other.user, user)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(access) ^
+      const DeepCollectionEquality().hash(calendarId) ^
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(group) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(user) ^
+      runtimeType.hashCode;
+}
+
+extension $CalendarShareExtension on CalendarShare {
+  CalendarShare copyWith({
+    enums.CalendarShareAccess? access,
+    int? calendarId,
+    DateTime? createdAt,
+    GroupSummary? group,
+    int? id,
+    UserSummary? user,
+  }) {
+    return CalendarShare(
+      access: access ?? this.access,
+      calendarId: calendarId ?? this.calendarId,
+      createdAt: createdAt ?? this.createdAt,
+      group: group ?? this.group,
+      id: id ?? this.id,
+      user: user ?? this.user,
+    );
+  }
+
+  CalendarShare copyWithWrapped({
+    Wrapped<enums.CalendarShareAccess>? access,
+    Wrapped<int>? calendarId,
+    Wrapped<DateTime>? createdAt,
+    Wrapped<GroupSummary?>? group,
+    Wrapped<int>? id,
+    Wrapped<UserSummary?>? user,
+  }) {
+    return CalendarShare(
+      access: (access != null ? access.value : this.access),
+      calendarId: (calendarId != null ? calendarId.value : this.calendarId),
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      group: (group != null ? group.value : this.group),
+      id: (id != null ? id.value : this.id),
+      user: (user != null ? user.value : this.user),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class CalendarUpdate {
+  const CalendarUpdate({required this.calendarId});
+
+  factory CalendarUpdate.fromJson(Map<String, dynamic> json) => _$CalendarUpdateFromJson(json);
+
+  static const toJsonFactory = _$CalendarUpdateToJson;
+  Map<String, dynamic> toJson() => _$CalendarUpdateToJson(this);
+
+  @JsonKey(name: 'calendarId', includeIfNull: false)
+  final int calendarId;
+  static const fromJsonFactory = _$CalendarUpdateFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is CalendarUpdate &&
+            (identical(other.calendarId, calendarId) ||
+                const DeepCollectionEquality().equals(other.calendarId, calendarId)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(calendarId) ^ runtimeType.hashCode;
+}
+
+extension $CalendarUpdateExtension on CalendarUpdate {
+  CalendarUpdate copyWith({int? calendarId}) {
+    return CalendarUpdate(calendarId: calendarId ?? this.calendarId);
+  }
+
+  CalendarUpdate copyWithWrapped({Wrapped<int>? calendarId}) {
+    return CalendarUpdate(calendarId: (calendarId != null ? calendarId.value : this.calendarId));
   }
 }
 
@@ -1586,12 +2509,784 @@ extension $ErrorResponseExtension on ErrorResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class Event {
+  const Event({
+    this.alarms,
+    required this.allDay,
+    this.attendees,
+    required this.busyOnly,
+    required this.calendarId,
+    this.categories,
+    this.color,
+    this.description,
+    required this.end,
+    required this.etag,
+    this.exceptionDates,
+    required this.id,
+    this.location,
+    this.organizer,
+    required this.$override,
+    this.recurrenceId,
+    required this.recurring,
+    this.rrule,
+    required this.sequence,
+    required this.showAs,
+    required this.start,
+    required this.status,
+    required this.summary,
+    this.timezone,
+    required this.uid,
+    required this.updatedAt,
+    this.url,
+  });
+
+  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
+
+  static const toJsonFactory = _$EventToJson;
+  Map<String, dynamic> toJson() => _$EventToJson(this);
+
+  @JsonKey(name: 'alarms', includeIfNull: false, defaultValue: <Alarm>[])
+  final List<Alarm>? alarms;
+  @JsonKey(name: 'allDay', includeIfNull: false)
+  final bool allDay;
+  @JsonKey(name: 'attendees', includeIfNull: false, defaultValue: <Attendee>[])
+  final List<Attendee>? attendees;
+  @JsonKey(name: 'busyOnly', includeIfNull: false)
+  final bool busyOnly;
+  @JsonKey(name: 'calendarId', includeIfNull: false)
+  final int calendarId;
+  @JsonKey(name: 'categories', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? categories;
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String? description;
+  @JsonKey(name: 'end', includeIfNull: false)
+  final DateTime end;
+  @JsonKey(name: 'etag', includeIfNull: false)
+  final String etag;
+  @JsonKey(name: 'exceptionDates', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? exceptionDates;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'location', includeIfNull: false)
+  final String? location;
+  @JsonKey(name: 'organizer', includeIfNull: false)
+  final Person? organizer;
+  @JsonKey(name: 'override', includeIfNull: false)
+  final bool $override;
+  @JsonKey(name: 'recurrenceId', includeIfNull: false)
+  final String? recurrenceId;
+  @JsonKey(name: 'recurring', includeIfNull: false)
+  final bool recurring;
+  @JsonKey(name: 'rrule', includeIfNull: false)
+  final String? rrule;
+  @JsonKey(name: 'sequence', includeIfNull: false)
+  final int sequence;
+  @JsonKey(name: 'showAs', includeIfNull: false, toJson: eventShowAsToJson, fromJson: eventShowAsFromJson)
+  final enums.EventShowAs showAs;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final DateTime start;
+  @JsonKey(name: 'status', includeIfNull: false)
+  final String status;
+  @JsonKey(name: 'summary', includeIfNull: false)
+  final String summary;
+  @JsonKey(name: 'timezone', includeIfNull: false)
+  final String? timezone;
+  @JsonKey(name: 'uid', includeIfNull: false)
+  final String uid;
+  @JsonKey(name: 'updatedAt', includeIfNull: false)
+  final DateTime updatedAt;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String? url;
+  static const fromJsonFactory = _$EventFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Event &&
+            (identical(other.alarms, alarms) || const DeepCollectionEquality().equals(other.alarms, alarms)) &&
+            (identical(other.allDay, allDay) || const DeepCollectionEquality().equals(other.allDay, allDay)) &&
+            (identical(other.attendees, attendees) ||
+                const DeepCollectionEquality().equals(other.attendees, attendees)) &&
+            (identical(other.busyOnly, busyOnly) || const DeepCollectionEquality().equals(other.busyOnly, busyOnly)) &&
+            (identical(other.calendarId, calendarId) ||
+                const DeepCollectionEquality().equals(other.calendarId, calendarId)) &&
+            (identical(other.categories, categories) ||
+                const DeepCollectionEquality().equals(other.categories, categories)) &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.etag, etag) || const DeepCollectionEquality().equals(other.etag, etag)) &&
+            (identical(other.exceptionDates, exceptionDates) ||
+                const DeepCollectionEquality().equals(other.exceptionDates, exceptionDates)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.location, location) || const DeepCollectionEquality().equals(other.location, location)) &&
+            (identical(other.organizer, organizer) ||
+                const DeepCollectionEquality().equals(other.organizer, organizer)) &&
+            (identical(other.$override, $override) ||
+                const DeepCollectionEquality().equals(other.$override, $override)) &&
+            (identical(other.recurrenceId, recurrenceId) ||
+                const DeepCollectionEquality().equals(other.recurrenceId, recurrenceId)) &&
+            (identical(other.recurring, recurring) ||
+                const DeepCollectionEquality().equals(other.recurring, recurring)) &&
+            (identical(other.rrule, rrule) || const DeepCollectionEquality().equals(other.rrule, rrule)) &&
+            (identical(other.sequence, sequence) || const DeepCollectionEquality().equals(other.sequence, sequence)) &&
+            (identical(other.showAs, showAs) || const DeepCollectionEquality().equals(other.showAs, showAs)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.summary, summary) || const DeepCollectionEquality().equals(other.summary, summary)) &&
+            (identical(other.timezone, timezone) || const DeepCollectionEquality().equals(other.timezone, timezone)) &&
+            (identical(other.uid, uid) || const DeepCollectionEquality().equals(other.uid, uid)) &&
+            (identical(other.updatedAt, updatedAt) ||
+                const DeepCollectionEquality().equals(other.updatedAt, updatedAt)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(alarms) ^
+      const DeepCollectionEquality().hash(allDay) ^
+      const DeepCollectionEquality().hash(attendees) ^
+      const DeepCollectionEquality().hash(busyOnly) ^
+      const DeepCollectionEquality().hash(calendarId) ^
+      const DeepCollectionEquality().hash(categories) ^
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(etag) ^
+      const DeepCollectionEquality().hash(exceptionDates) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(location) ^
+      const DeepCollectionEquality().hash(organizer) ^
+      const DeepCollectionEquality().hash($override) ^
+      const DeepCollectionEquality().hash(recurrenceId) ^
+      const DeepCollectionEquality().hash(recurring) ^
+      const DeepCollectionEquality().hash(rrule) ^
+      const DeepCollectionEquality().hash(sequence) ^
+      const DeepCollectionEquality().hash(showAs) ^
+      const DeepCollectionEquality().hash(start) ^
+      const DeepCollectionEquality().hash(status) ^
+      const DeepCollectionEquality().hash(summary) ^
+      const DeepCollectionEquality().hash(timezone) ^
+      const DeepCollectionEquality().hash(uid) ^
+      const DeepCollectionEquality().hash(updatedAt) ^
+      const DeepCollectionEquality().hash(url) ^
+      runtimeType.hashCode;
+}
+
+extension $EventExtension on Event {
+  Event copyWith({
+    List<Alarm>? alarms,
+    bool? allDay,
+    List<Attendee>? attendees,
+    bool? busyOnly,
+    int? calendarId,
+    List<String>? categories,
+    String? color,
+    String? description,
+    DateTime? end,
+    String? etag,
+    List<String>? exceptionDates,
+    int? id,
+    String? location,
+    Person? organizer,
+    bool? $override,
+    String? recurrenceId,
+    bool? recurring,
+    String? rrule,
+    int? sequence,
+    enums.EventShowAs? showAs,
+    DateTime? start,
+    String? status,
+    String? summary,
+    String? timezone,
+    String? uid,
+    DateTime? updatedAt,
+    String? url,
+  }) {
+    return Event(
+      alarms: alarms ?? this.alarms,
+      allDay: allDay ?? this.allDay,
+      attendees: attendees ?? this.attendees,
+      busyOnly: busyOnly ?? this.busyOnly,
+      calendarId: calendarId ?? this.calendarId,
+      categories: categories ?? this.categories,
+      color: color ?? this.color,
+      description: description ?? this.description,
+      end: end ?? this.end,
+      etag: etag ?? this.etag,
+      exceptionDates: exceptionDates ?? this.exceptionDates,
+      id: id ?? this.id,
+      location: location ?? this.location,
+      organizer: organizer ?? this.organizer,
+      $override: $override ?? this.$override,
+      recurrenceId: recurrenceId ?? this.recurrenceId,
+      recurring: recurring ?? this.recurring,
+      rrule: rrule ?? this.rrule,
+      sequence: sequence ?? this.sequence,
+      showAs: showAs ?? this.showAs,
+      start: start ?? this.start,
+      status: status ?? this.status,
+      summary: summary ?? this.summary,
+      timezone: timezone ?? this.timezone,
+      uid: uid ?? this.uid,
+      updatedAt: updatedAt ?? this.updatedAt,
+      url: url ?? this.url,
+    );
+  }
+
+  Event copyWithWrapped({
+    Wrapped<List<Alarm>?>? alarms,
+    Wrapped<bool>? allDay,
+    Wrapped<List<Attendee>?>? attendees,
+    Wrapped<bool>? busyOnly,
+    Wrapped<int>? calendarId,
+    Wrapped<List<String>?>? categories,
+    Wrapped<String?>? color,
+    Wrapped<String?>? description,
+    Wrapped<DateTime>? end,
+    Wrapped<String>? etag,
+    Wrapped<List<String>?>? exceptionDates,
+    Wrapped<int>? id,
+    Wrapped<String?>? location,
+    Wrapped<Person?>? organizer,
+    Wrapped<bool>? $override,
+    Wrapped<String?>? recurrenceId,
+    Wrapped<bool>? recurring,
+    Wrapped<String?>? rrule,
+    Wrapped<int>? sequence,
+    Wrapped<enums.EventShowAs>? showAs,
+    Wrapped<DateTime>? start,
+    Wrapped<String>? status,
+    Wrapped<String>? summary,
+    Wrapped<String?>? timezone,
+    Wrapped<String>? uid,
+    Wrapped<DateTime>? updatedAt,
+    Wrapped<String?>? url,
+  }) {
+    return Event(
+      alarms: (alarms != null ? alarms.value : this.alarms),
+      allDay: (allDay != null ? allDay.value : this.allDay),
+      attendees: (attendees != null ? attendees.value : this.attendees),
+      busyOnly: (busyOnly != null ? busyOnly.value : this.busyOnly),
+      calendarId: (calendarId != null ? calendarId.value : this.calendarId),
+      categories: (categories != null ? categories.value : this.categories),
+      color: (color != null ? color.value : this.color),
+      description: (description != null ? description.value : this.description),
+      end: (end != null ? end.value : this.end),
+      etag: (etag != null ? etag.value : this.etag),
+      exceptionDates: (exceptionDates != null ? exceptionDates.value : this.exceptionDates),
+      id: (id != null ? id.value : this.id),
+      location: (location != null ? location.value : this.location),
+      organizer: (organizer != null ? organizer.value : this.organizer),
+      $override: ($override != null ? $override.value : this.$override),
+      recurrenceId: (recurrenceId != null ? recurrenceId.value : this.recurrenceId),
+      recurring: (recurring != null ? recurring.value : this.recurring),
+      rrule: (rrule != null ? rrule.value : this.rrule),
+      sequence: (sequence != null ? sequence.value : this.sequence),
+      showAs: (showAs != null ? showAs.value : this.showAs),
+      start: (start != null ? start.value : this.start),
+      status: (status != null ? status.value : this.status),
+      summary: (summary != null ? summary.value : this.summary),
+      timezone: (timezone != null ? timezone.value : this.timezone),
+      uid: (uid != null ? uid.value : this.uid),
+      updatedAt: (updatedAt != null ? updatedAt.value : this.updatedAt),
+      url: (url != null ? url.value : this.url),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class EventDetails {
+  const EventDetails({
+    this.alarms,
+    required this.allDay,
+    this.attendees,
+    required this.busyOnly,
+    required this.calendarId,
+    this.categories,
+    this.color,
+    this.description,
+    required this.end,
+    required this.etag,
+    this.exceptionDates,
+    required this.id,
+    this.location,
+    this.organizer,
+    required this.$override,
+    this.overrides,
+    this.recurrenceId,
+    required this.recurring,
+    this.rrule,
+    required this.sequence,
+    required this.showAs,
+    required this.start,
+    required this.status,
+    required this.summary,
+    this.timezone,
+    required this.uid,
+    required this.updatedAt,
+    this.url,
+  });
+
+  factory EventDetails.fromJson(Map<String, dynamic> json) => _$EventDetailsFromJson(json);
+
+  static const toJsonFactory = _$EventDetailsToJson;
+  Map<String, dynamic> toJson() => _$EventDetailsToJson(this);
+
+  @JsonKey(name: 'alarms', includeIfNull: false, defaultValue: <Alarm>[])
+  final List<Alarm>? alarms;
+  @JsonKey(name: 'allDay', includeIfNull: false)
+  final bool allDay;
+  @JsonKey(name: 'attendees', includeIfNull: false, defaultValue: <Attendee>[])
+  final List<Attendee>? attendees;
+  @JsonKey(name: 'busyOnly', includeIfNull: false)
+  final bool busyOnly;
+  @JsonKey(name: 'calendarId', includeIfNull: false)
+  final int calendarId;
+  @JsonKey(name: 'categories', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? categories;
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String? description;
+  @JsonKey(name: 'end', includeIfNull: false)
+  final DateTime end;
+  @JsonKey(name: 'etag', includeIfNull: false)
+  final String etag;
+  @JsonKey(name: 'exceptionDates', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? exceptionDates;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'location', includeIfNull: false)
+  final String? location;
+  @JsonKey(name: 'organizer', includeIfNull: false)
+  final Person? organizer;
+  @JsonKey(name: 'override', includeIfNull: false)
+  final bool $override;
+  @JsonKey(name: 'overrides', includeIfNull: false, defaultValue: <Event>[])
+  final List<Event>? overrides;
+  @JsonKey(name: 'recurrenceId', includeIfNull: false)
+  final String? recurrenceId;
+  @JsonKey(name: 'recurring', includeIfNull: false)
+  final bool recurring;
+  @JsonKey(name: 'rrule', includeIfNull: false)
+  final String? rrule;
+  @JsonKey(name: 'sequence', includeIfNull: false)
+  final int sequence;
+  @JsonKey(name: 'showAs', includeIfNull: false, toJson: eventDetailsShowAsToJson, fromJson: eventDetailsShowAsFromJson)
+  final enums.EventDetailsShowAs showAs;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final DateTime start;
+  @JsonKey(name: 'status', includeIfNull: false)
+  final String status;
+  @JsonKey(name: 'summary', includeIfNull: false)
+  final String summary;
+  @JsonKey(name: 'timezone', includeIfNull: false)
+  final String? timezone;
+  @JsonKey(name: 'uid', includeIfNull: false)
+  final String uid;
+  @JsonKey(name: 'updatedAt', includeIfNull: false)
+  final DateTime updatedAt;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String? url;
+  static const fromJsonFactory = _$EventDetailsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is EventDetails &&
+            (identical(other.alarms, alarms) || const DeepCollectionEquality().equals(other.alarms, alarms)) &&
+            (identical(other.allDay, allDay) || const DeepCollectionEquality().equals(other.allDay, allDay)) &&
+            (identical(other.attendees, attendees) ||
+                const DeepCollectionEquality().equals(other.attendees, attendees)) &&
+            (identical(other.busyOnly, busyOnly) || const DeepCollectionEquality().equals(other.busyOnly, busyOnly)) &&
+            (identical(other.calendarId, calendarId) ||
+                const DeepCollectionEquality().equals(other.calendarId, calendarId)) &&
+            (identical(other.categories, categories) ||
+                const DeepCollectionEquality().equals(other.categories, categories)) &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.etag, etag) || const DeepCollectionEquality().equals(other.etag, etag)) &&
+            (identical(other.exceptionDates, exceptionDates) ||
+                const DeepCollectionEquality().equals(other.exceptionDates, exceptionDates)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.location, location) || const DeepCollectionEquality().equals(other.location, location)) &&
+            (identical(other.organizer, organizer) ||
+                const DeepCollectionEquality().equals(other.organizer, organizer)) &&
+            (identical(other.$override, $override) ||
+                const DeepCollectionEquality().equals(other.$override, $override)) &&
+            (identical(other.overrides, overrides) ||
+                const DeepCollectionEquality().equals(other.overrides, overrides)) &&
+            (identical(other.recurrenceId, recurrenceId) ||
+                const DeepCollectionEquality().equals(other.recurrenceId, recurrenceId)) &&
+            (identical(other.recurring, recurring) ||
+                const DeepCollectionEquality().equals(other.recurring, recurring)) &&
+            (identical(other.rrule, rrule) || const DeepCollectionEquality().equals(other.rrule, rrule)) &&
+            (identical(other.sequence, sequence) || const DeepCollectionEquality().equals(other.sequence, sequence)) &&
+            (identical(other.showAs, showAs) || const DeepCollectionEquality().equals(other.showAs, showAs)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.summary, summary) || const DeepCollectionEquality().equals(other.summary, summary)) &&
+            (identical(other.timezone, timezone) || const DeepCollectionEquality().equals(other.timezone, timezone)) &&
+            (identical(other.uid, uid) || const DeepCollectionEquality().equals(other.uid, uid)) &&
+            (identical(other.updatedAt, updatedAt) ||
+                const DeepCollectionEquality().equals(other.updatedAt, updatedAt)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(alarms) ^
+      const DeepCollectionEquality().hash(allDay) ^
+      const DeepCollectionEquality().hash(attendees) ^
+      const DeepCollectionEquality().hash(busyOnly) ^
+      const DeepCollectionEquality().hash(calendarId) ^
+      const DeepCollectionEquality().hash(categories) ^
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(etag) ^
+      const DeepCollectionEquality().hash(exceptionDates) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(location) ^
+      const DeepCollectionEquality().hash(organizer) ^
+      const DeepCollectionEquality().hash($override) ^
+      const DeepCollectionEquality().hash(overrides) ^
+      const DeepCollectionEquality().hash(recurrenceId) ^
+      const DeepCollectionEquality().hash(recurring) ^
+      const DeepCollectionEquality().hash(rrule) ^
+      const DeepCollectionEquality().hash(sequence) ^
+      const DeepCollectionEquality().hash(showAs) ^
+      const DeepCollectionEquality().hash(start) ^
+      const DeepCollectionEquality().hash(status) ^
+      const DeepCollectionEquality().hash(summary) ^
+      const DeepCollectionEquality().hash(timezone) ^
+      const DeepCollectionEquality().hash(uid) ^
+      const DeepCollectionEquality().hash(updatedAt) ^
+      const DeepCollectionEquality().hash(url) ^
+      runtimeType.hashCode;
+}
+
+extension $EventDetailsExtension on EventDetails {
+  EventDetails copyWith({
+    List<Alarm>? alarms,
+    bool? allDay,
+    List<Attendee>? attendees,
+    bool? busyOnly,
+    int? calendarId,
+    List<String>? categories,
+    String? color,
+    String? description,
+    DateTime? end,
+    String? etag,
+    List<String>? exceptionDates,
+    int? id,
+    String? location,
+    Person? organizer,
+    bool? $override,
+    List<Event>? overrides,
+    String? recurrenceId,
+    bool? recurring,
+    String? rrule,
+    int? sequence,
+    enums.EventDetailsShowAs? showAs,
+    DateTime? start,
+    String? status,
+    String? summary,
+    String? timezone,
+    String? uid,
+    DateTime? updatedAt,
+    String? url,
+  }) {
+    return EventDetails(
+      alarms: alarms ?? this.alarms,
+      allDay: allDay ?? this.allDay,
+      attendees: attendees ?? this.attendees,
+      busyOnly: busyOnly ?? this.busyOnly,
+      calendarId: calendarId ?? this.calendarId,
+      categories: categories ?? this.categories,
+      color: color ?? this.color,
+      description: description ?? this.description,
+      end: end ?? this.end,
+      etag: etag ?? this.etag,
+      exceptionDates: exceptionDates ?? this.exceptionDates,
+      id: id ?? this.id,
+      location: location ?? this.location,
+      organizer: organizer ?? this.organizer,
+      $override: $override ?? this.$override,
+      overrides: overrides ?? this.overrides,
+      recurrenceId: recurrenceId ?? this.recurrenceId,
+      recurring: recurring ?? this.recurring,
+      rrule: rrule ?? this.rrule,
+      sequence: sequence ?? this.sequence,
+      showAs: showAs ?? this.showAs,
+      start: start ?? this.start,
+      status: status ?? this.status,
+      summary: summary ?? this.summary,
+      timezone: timezone ?? this.timezone,
+      uid: uid ?? this.uid,
+      updatedAt: updatedAt ?? this.updatedAt,
+      url: url ?? this.url,
+    );
+  }
+
+  EventDetails copyWithWrapped({
+    Wrapped<List<Alarm>?>? alarms,
+    Wrapped<bool>? allDay,
+    Wrapped<List<Attendee>?>? attendees,
+    Wrapped<bool>? busyOnly,
+    Wrapped<int>? calendarId,
+    Wrapped<List<String>?>? categories,
+    Wrapped<String?>? color,
+    Wrapped<String?>? description,
+    Wrapped<DateTime>? end,
+    Wrapped<String>? etag,
+    Wrapped<List<String>?>? exceptionDates,
+    Wrapped<int>? id,
+    Wrapped<String?>? location,
+    Wrapped<Person?>? organizer,
+    Wrapped<bool>? $override,
+    Wrapped<List<Event>?>? overrides,
+    Wrapped<String?>? recurrenceId,
+    Wrapped<bool>? recurring,
+    Wrapped<String?>? rrule,
+    Wrapped<int>? sequence,
+    Wrapped<enums.EventDetailsShowAs>? showAs,
+    Wrapped<DateTime>? start,
+    Wrapped<String>? status,
+    Wrapped<String>? summary,
+    Wrapped<String?>? timezone,
+    Wrapped<String>? uid,
+    Wrapped<DateTime>? updatedAt,
+    Wrapped<String?>? url,
+  }) {
+    return EventDetails(
+      alarms: (alarms != null ? alarms.value : this.alarms),
+      allDay: (allDay != null ? allDay.value : this.allDay),
+      attendees: (attendees != null ? attendees.value : this.attendees),
+      busyOnly: (busyOnly != null ? busyOnly.value : this.busyOnly),
+      calendarId: (calendarId != null ? calendarId.value : this.calendarId),
+      categories: (categories != null ? categories.value : this.categories),
+      color: (color != null ? color.value : this.color),
+      description: (description != null ? description.value : this.description),
+      end: (end != null ? end.value : this.end),
+      etag: (etag != null ? etag.value : this.etag),
+      exceptionDates: (exceptionDates != null ? exceptionDates.value : this.exceptionDates),
+      id: (id != null ? id.value : this.id),
+      location: (location != null ? location.value : this.location),
+      organizer: (organizer != null ? organizer.value : this.organizer),
+      $override: ($override != null ? $override.value : this.$override),
+      overrides: (overrides != null ? overrides.value : this.overrides),
+      recurrenceId: (recurrenceId != null ? recurrenceId.value : this.recurrenceId),
+      recurring: (recurring != null ? recurring.value : this.recurring),
+      rrule: (rrule != null ? rrule.value : this.rrule),
+      sequence: (sequence != null ? sequence.value : this.sequence),
+      showAs: (showAs != null ? showAs.value : this.showAs),
+      start: (start != null ? start.value : this.start),
+      status: (status != null ? status.value : this.status),
+      summary: (summary != null ? summary.value : this.summary),
+      timezone: (timezone != null ? timezone.value : this.timezone),
+      uid: (uid != null ? uid.value : this.uid),
+      updatedAt: (updatedAt != null ? updatedAt.value : this.updatedAt),
+      url: (url != null ? url.value : this.url),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class EventInput {
+  const EventInput({
+    this.alarms,
+    this.allDay,
+    this.attendees,
+    this.categories,
+    this.color,
+    this.description,
+    this.end,
+    this.location,
+    this.rrule,
+    this.showAs,
+    required this.start,
+    this.status,
+    required this.summary,
+    this.timezone,
+    this.url,
+  });
+
+  factory EventInput.fromJson(Map<String, dynamic> json) => _$EventInputFromJson(json);
+
+  static const toJsonFactory = _$EventInputToJson;
+  Map<String, dynamic> toJson() => _$EventInputToJson(this);
+
+  @JsonKey(name: 'alarms', includeIfNull: false, defaultValue: <Alarm>[])
+  final List<Alarm>? alarms;
+  @JsonKey(name: 'allDay', includeIfNull: false)
+  final bool? allDay;
+  @JsonKey(name: 'attendees', includeIfNull: false, defaultValue: <AttendeeInput>[])
+  final List<AttendeeInput>? attendees;
+  @JsonKey(name: 'categories', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? categories;
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String? description;
+  @JsonKey(name: 'end', includeIfNull: false)
+  final DateTime? end;
+  @JsonKey(name: 'location', includeIfNull: false)
+  final String? location;
+  @JsonKey(name: 'rrule', includeIfNull: false)
+  final String? rrule;
+  @JsonKey(
+    name: 'showAs',
+    includeIfNull: false,
+    toJson: eventInputShowAsNullableToJson,
+    fromJson: eventInputShowAsNullableFromJson,
+  )
+  final enums.EventInputShowAs? showAs;
+  @JsonKey(name: 'start', includeIfNull: false)
+  final DateTime start;
+  @JsonKey(name: 'status', includeIfNull: false)
+  final String? status;
+  @JsonKey(name: 'summary', includeIfNull: false)
+  final String summary;
+  @JsonKey(name: 'timezone', includeIfNull: false)
+  final String? timezone;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String? url;
+  static const fromJsonFactory = _$EventInputFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is EventInput &&
+            (identical(other.alarms, alarms) || const DeepCollectionEquality().equals(other.alarms, alarms)) &&
+            (identical(other.allDay, allDay) || const DeepCollectionEquality().equals(other.allDay, allDay)) &&
+            (identical(other.attendees, attendees) ||
+                const DeepCollectionEquality().equals(other.attendees, attendees)) &&
+            (identical(other.categories, categories) ||
+                const DeepCollectionEquality().equals(other.categories, categories)) &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
+            (identical(other.location, location) || const DeepCollectionEquality().equals(other.location, location)) &&
+            (identical(other.rrule, rrule) || const DeepCollectionEquality().equals(other.rrule, rrule)) &&
+            (identical(other.showAs, showAs) || const DeepCollectionEquality().equals(other.showAs, showAs)) &&
+            (identical(other.start, start) || const DeepCollectionEquality().equals(other.start, start)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.summary, summary) || const DeepCollectionEquality().equals(other.summary, summary)) &&
+            (identical(other.timezone, timezone) || const DeepCollectionEquality().equals(other.timezone, timezone)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(alarms) ^
+      const DeepCollectionEquality().hash(allDay) ^
+      const DeepCollectionEquality().hash(attendees) ^
+      const DeepCollectionEquality().hash(categories) ^
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(end) ^
+      const DeepCollectionEquality().hash(location) ^
+      const DeepCollectionEquality().hash(rrule) ^
+      const DeepCollectionEquality().hash(showAs) ^
+      const DeepCollectionEquality().hash(start) ^
+      const DeepCollectionEquality().hash(status) ^
+      const DeepCollectionEquality().hash(summary) ^
+      const DeepCollectionEquality().hash(timezone) ^
+      const DeepCollectionEquality().hash(url) ^
+      runtimeType.hashCode;
+}
+
+extension $EventInputExtension on EventInput {
+  EventInput copyWith({
+    List<Alarm>? alarms,
+    bool? allDay,
+    List<AttendeeInput>? attendees,
+    List<String>? categories,
+    String? color,
+    String? description,
+    DateTime? end,
+    String? location,
+    String? rrule,
+    enums.EventInputShowAs? showAs,
+    DateTime? start,
+    String? status,
+    String? summary,
+    String? timezone,
+    String? url,
+  }) {
+    return EventInput(
+      alarms: alarms ?? this.alarms,
+      allDay: allDay ?? this.allDay,
+      attendees: attendees ?? this.attendees,
+      categories: categories ?? this.categories,
+      color: color ?? this.color,
+      description: description ?? this.description,
+      end: end ?? this.end,
+      location: location ?? this.location,
+      rrule: rrule ?? this.rrule,
+      showAs: showAs ?? this.showAs,
+      start: start ?? this.start,
+      status: status ?? this.status,
+      summary: summary ?? this.summary,
+      timezone: timezone ?? this.timezone,
+      url: url ?? this.url,
+    );
+  }
+
+  EventInput copyWithWrapped({
+    Wrapped<List<Alarm>?>? alarms,
+    Wrapped<bool?>? allDay,
+    Wrapped<List<AttendeeInput>?>? attendees,
+    Wrapped<List<String>?>? categories,
+    Wrapped<String?>? color,
+    Wrapped<String?>? description,
+    Wrapped<DateTime?>? end,
+    Wrapped<String?>? location,
+    Wrapped<String?>? rrule,
+    Wrapped<enums.EventInputShowAs?>? showAs,
+    Wrapped<DateTime>? start,
+    Wrapped<String?>? status,
+    Wrapped<String>? summary,
+    Wrapped<String?>? timezone,
+    Wrapped<String?>? url,
+  }) {
+    return EventInput(
+      alarms: (alarms != null ? alarms.value : this.alarms),
+      allDay: (allDay != null ? allDay.value : this.allDay),
+      attendees: (attendees != null ? attendees.value : this.attendees),
+      categories: (categories != null ? categories.value : this.categories),
+      color: (color != null ? color.value : this.color),
+      description: (description != null ? description.value : this.description),
+      end: (end != null ? end.value : this.end),
+      location: (location != null ? location.value : this.location),
+      rrule: (rrule != null ? rrule.value : this.rrule),
+      showAs: (showAs != null ? showAs.value : this.showAs),
+      start: (start != null ? start.value : this.start),
+      status: (status != null ? status.value : this.status),
+      summary: (summary != null ? summary.value : this.summary),
+      timezone: (timezone != null ? timezone.value : this.timezone),
+      url: (url != null ? url.value : this.url),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class EventMessage {
   const EventMessage({
+    this.calendar,
     this.code,
     this.dirs,
     this.entry,
     this.message,
+    this.reminder,
     this.status,
     this.transfer,
     this.transfers,
@@ -1605,6 +3300,8 @@ class EventMessage {
   static const toJsonFactory = _$EventMessageToJson;
   Map<String, dynamic> toJson() => _$EventMessageToJson(this);
 
+  @JsonKey(name: 'calendar', includeIfNull: false)
+  final CalendarUpdate? calendar;
   @JsonKey(name: 'code', includeIfNull: false)
   final String? code;
   @JsonKey(name: 'dirs', includeIfNull: false, defaultValue: <String>[])
@@ -1613,6 +3310,8 @@ class EventMessage {
   final LogEntry? entry;
   @JsonKey(name: 'message', includeIfNull: false)
   final String? message;
+  @JsonKey(name: 'reminder', includeIfNull: false)
+  final CalendarReminder? reminder;
   @JsonKey(
     name: 'status',
     includeIfNull: false,
@@ -1636,10 +3335,12 @@ class EventMessage {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is EventMessage &&
+            (identical(other.calendar, calendar) || const DeepCollectionEquality().equals(other.calendar, calendar)) &&
             (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
             (identical(other.dirs, dirs) || const DeepCollectionEquality().equals(other.dirs, dirs)) &&
             (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
             (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.reminder, reminder) || const DeepCollectionEquality().equals(other.reminder, reminder)) &&
             (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
             (identical(other.transfer, transfer) || const DeepCollectionEquality().equals(other.transfer, transfer)) &&
             (identical(other.transfers, transfers) ||
@@ -1651,10 +3352,12 @@ class EventMessage {
 
   @override
   int get hashCode =>
+      const DeepCollectionEquality().hash(calendar) ^
       const DeepCollectionEquality().hash(code) ^
       const DeepCollectionEquality().hash(dirs) ^
       const DeepCollectionEquality().hash(entry) ^
       const DeepCollectionEquality().hash(message) ^
+      const DeepCollectionEquality().hash(reminder) ^
       const DeepCollectionEquality().hash(status) ^
       const DeepCollectionEquality().hash(transfer) ^
       const DeepCollectionEquality().hash(transfers) ^
@@ -1666,10 +3369,12 @@ class EventMessage {
 
 extension $EventMessageExtension on EventMessage {
   EventMessage copyWith({
+    CalendarUpdate? calendar,
     String? code,
     List<String>? dirs,
     LogEntry? entry,
     String? message,
+    CalendarReminder? reminder,
     enums.EventMessageStatus? status,
     LiveTransfer? transfer,
     List<LiveTransfer>? transfers,
@@ -1678,10 +3383,12 @@ extension $EventMessageExtension on EventMessage {
     int? userId,
   }) {
     return EventMessage(
+      calendar: calendar ?? this.calendar,
       code: code ?? this.code,
       dirs: dirs ?? this.dirs,
       entry: entry ?? this.entry,
       message: message ?? this.message,
+      reminder: reminder ?? this.reminder,
       status: status ?? this.status,
       transfer: transfer ?? this.transfer,
       transfers: transfers ?? this.transfers,
@@ -1692,10 +3399,12 @@ extension $EventMessageExtension on EventMessage {
   }
 
   EventMessage copyWithWrapped({
+    Wrapped<CalendarUpdate?>? calendar,
     Wrapped<String?>? code,
     Wrapped<List<String>?>? dirs,
     Wrapped<LogEntry?>? entry,
     Wrapped<String?>? message,
+    Wrapped<CalendarReminder?>? reminder,
     Wrapped<enums.EventMessageStatus?>? status,
     Wrapped<LiveTransfer?>? transfer,
     Wrapped<List<LiveTransfer>?>? transfers,
@@ -1704,10 +3413,12 @@ extension $EventMessageExtension on EventMessage {
     Wrapped<int>? userId,
   }) {
     return EventMessage(
+      calendar: (calendar != null ? calendar.value : this.calendar),
       code: (code != null ? code.value : this.code),
       dirs: (dirs != null ? dirs.value : this.dirs),
       entry: (entry != null ? entry.value : this.entry),
       message: (message != null ? message.value : this.message),
+      reminder: (reminder != null ? reminder.value : this.reminder),
       status: (status != null ? status.value : this.status),
       transfer: (transfer != null ? transfer.value : this.transfer),
       transfers: (transfers != null ? transfers.value : this.transfers),
@@ -1903,6 +3614,119 @@ extension $FederationStatusExtension on FederationStatus {
       cloudId: (cloudId != null ? cloudId.value : this.cloudId),
       configured: (configured != null ? configured.value : this.configured),
       enabled: (enabled != null ? enabled.value : this.enabled),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Feed {
+  const Feed({
+    required this.calendarId,
+    required this.createdAt,
+    required this.id,
+    this.lastUsedAt,
+    required this.mode,
+    required this.name,
+    this.url,
+    this.webcalUrl,
+  });
+
+  factory Feed.fromJson(Map<String, dynamic> json) => _$FeedFromJson(json);
+
+  static const toJsonFactory = _$FeedToJson;
+  Map<String, dynamic> toJson() => _$FeedToJson(this);
+
+  @JsonKey(name: 'calendarId', includeIfNull: false)
+  final int calendarId;
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'lastUsedAt', includeIfNull: false)
+  final DateTime? lastUsedAt;
+  @JsonKey(name: 'mode', includeIfNull: false, toJson: feedModeToJson, fromJson: feedModeFromJson)
+  final enums.FeedMode mode;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String? url;
+  @JsonKey(name: 'webcalUrl', includeIfNull: false)
+  final String? webcalUrl;
+  static const fromJsonFactory = _$FeedFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Feed &&
+            (identical(other.calendarId, calendarId) ||
+                const DeepCollectionEquality().equals(other.calendarId, calendarId)) &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.lastUsedAt, lastUsedAt) ||
+                const DeepCollectionEquality().equals(other.lastUsedAt, lastUsedAt)) &&
+            (identical(other.mode, mode) || const DeepCollectionEquality().equals(other.mode, mode)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)) &&
+            (identical(other.webcalUrl, webcalUrl) ||
+                const DeepCollectionEquality().equals(other.webcalUrl, webcalUrl)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(calendarId) ^
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(lastUsedAt) ^
+      const DeepCollectionEquality().hash(mode) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(url) ^
+      const DeepCollectionEquality().hash(webcalUrl) ^
+      runtimeType.hashCode;
+}
+
+extension $FeedExtension on Feed {
+  Feed copyWith({
+    int? calendarId,
+    DateTime? createdAt,
+    int? id,
+    DateTime? lastUsedAt,
+    enums.FeedMode? mode,
+    String? name,
+    String? url,
+    String? webcalUrl,
+  }) {
+    return Feed(
+      calendarId: calendarId ?? this.calendarId,
+      createdAt: createdAt ?? this.createdAt,
+      id: id ?? this.id,
+      lastUsedAt: lastUsedAt ?? this.lastUsedAt,
+      mode: mode ?? this.mode,
+      name: name ?? this.name,
+      url: url ?? this.url,
+      webcalUrl: webcalUrl ?? this.webcalUrl,
+    );
+  }
+
+  Feed copyWithWrapped({
+    Wrapped<int>? calendarId,
+    Wrapped<DateTime>? createdAt,
+    Wrapped<int>? id,
+    Wrapped<DateTime?>? lastUsedAt,
+    Wrapped<enums.FeedMode>? mode,
+    Wrapped<String>? name,
+    Wrapped<String?>? url,
+    Wrapped<String?>? webcalUrl,
+  }) {
+    return Feed(
+      calendarId: (calendarId != null ? calendarId.value : this.calendarId),
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      id: (id != null ? id.value : this.id),
+      lastUsedAt: (lastUsedAt != null ? lastUsedAt.value : this.lastUsedAt),
+      mode: (mode != null ? mode.value : this.mode),
+      name: (name != null ? name.value : this.name),
+      url: (url != null ? url.value : this.url),
+      webcalUrl: (webcalUrl != null ? webcalUrl.value : this.webcalUrl),
     );
   }
 }
@@ -2281,6 +4105,44 @@ extension $GroupRefExtension on GroupRef {
 }
 
 @JsonSerializable(explicitToJson: true)
+class GroupSummary {
+  const GroupSummary({required this.id, required this.name});
+
+  factory GroupSummary.fromJson(Map<String, dynamic> json) => _$GroupSummaryFromJson(json);
+
+  static const toJsonFactory = _$GroupSummaryToJson;
+  Map<String, dynamic> toJson() => _$GroupSummaryToJson(this);
+
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  static const fromJsonFactory = _$GroupSummaryFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is GroupSummary &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(id) ^ const DeepCollectionEquality().hash(name) ^ runtimeType.hashCode;
+}
+
+extension $GroupSummaryExtension on GroupSummary {
+  GroupSummary copyWith({int? id, String? name}) {
+    return GroupSummary(id: id ?? this.id, name: name ?? this.name);
+  }
+
+  GroupSummary copyWithWrapped({Wrapped<int>? id, Wrapped<String>? name}) {
+    return GroupSummary(id: (id != null ? id.value : this.id), name: (name != null ? name.value : this.name));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class HealthStatus {
   const HealthStatus({required this.status});
 
@@ -2352,6 +4214,170 @@ extension $ImageInfoExtension on ImageInfo {
     return ImageInfo(
       contentType: (contentType != null ? contentType.value : this.contentType),
       id: (id != null ? id.value : this.id),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ImportResult {
+  const ImportResult({required this.created, this.errors, required this.skipped, required this.updated});
+
+  factory ImportResult.fromJson(Map<String, dynamic> json) => _$ImportResultFromJson(json);
+
+  static const toJsonFactory = _$ImportResultToJson;
+  Map<String, dynamic> toJson() => _$ImportResultToJson(this);
+
+  @JsonKey(name: 'created', includeIfNull: false)
+  final int created;
+  @JsonKey(name: 'errors', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? errors;
+  @JsonKey(name: 'skipped', includeIfNull: false)
+  final int skipped;
+  @JsonKey(name: 'updated', includeIfNull: false)
+  final int updated;
+  static const fromJsonFactory = _$ImportResultFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ImportResult &&
+            (identical(other.created, created) || const DeepCollectionEquality().equals(other.created, created)) &&
+            (identical(other.errors, errors) || const DeepCollectionEquality().equals(other.errors, errors)) &&
+            (identical(other.skipped, skipped) || const DeepCollectionEquality().equals(other.skipped, skipped)) &&
+            (identical(other.updated, updated) || const DeepCollectionEquality().equals(other.updated, updated)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(created) ^
+      const DeepCollectionEquality().hash(errors) ^
+      const DeepCollectionEquality().hash(skipped) ^
+      const DeepCollectionEquality().hash(updated) ^
+      runtimeType.hashCode;
+}
+
+extension $ImportResultExtension on ImportResult {
+  ImportResult copyWith({int? created, List<String>? errors, int? skipped, int? updated}) {
+    return ImportResult(
+      created: created ?? this.created,
+      errors: errors ?? this.errors,
+      skipped: skipped ?? this.skipped,
+      updated: updated ?? this.updated,
+    );
+  }
+
+  ImportResult copyWithWrapped({
+    Wrapped<int>? created,
+    Wrapped<List<String>?>? errors,
+    Wrapped<int>? skipped,
+    Wrapped<int>? updated,
+  }) {
+    return ImportResult(
+      created: (created != null ? created.value : this.created),
+      errors: (errors != null ? errors.value : this.errors),
+      skipped: (skipped != null ? skipped.value : this.skipped),
+      updated: (updated != null ? updated.value : this.updated),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class InboxItem {
+  const InboxItem({
+    required this.createdAt,
+    required this.id,
+    required this.method,
+    required this.sender,
+    required this.summary,
+    required this.uid,
+    required this.uri,
+  });
+
+  factory InboxItem.fromJson(Map<String, dynamic> json) => _$InboxItemFromJson(json);
+
+  static const toJsonFactory = _$InboxItemToJson;
+  Map<String, dynamic> toJson() => _$InboxItemToJson(this);
+
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'method', includeIfNull: false)
+  final String method;
+  @JsonKey(name: 'sender', includeIfNull: false)
+  final String sender;
+  @JsonKey(name: 'summary', includeIfNull: false)
+  final String summary;
+  @JsonKey(name: 'uid', includeIfNull: false)
+  final String uid;
+  @JsonKey(name: 'uri', includeIfNull: false)
+  final String uri;
+  static const fromJsonFactory = _$InboxItemFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is InboxItem &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.method, method) || const DeepCollectionEquality().equals(other.method, method)) &&
+            (identical(other.sender, sender) || const DeepCollectionEquality().equals(other.sender, sender)) &&
+            (identical(other.summary, summary) || const DeepCollectionEquality().equals(other.summary, summary)) &&
+            (identical(other.uid, uid) || const DeepCollectionEquality().equals(other.uid, uid)) &&
+            (identical(other.uri, uri) || const DeepCollectionEquality().equals(other.uri, uri)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(method) ^
+      const DeepCollectionEquality().hash(sender) ^
+      const DeepCollectionEquality().hash(summary) ^
+      const DeepCollectionEquality().hash(uid) ^
+      const DeepCollectionEquality().hash(uri) ^
+      runtimeType.hashCode;
+}
+
+extension $InboxItemExtension on InboxItem {
+  InboxItem copyWith({
+    DateTime? createdAt,
+    int? id,
+    String? method,
+    String? sender,
+    String? summary,
+    String? uid,
+    String? uri,
+  }) {
+    return InboxItem(
+      createdAt: createdAt ?? this.createdAt,
+      id: id ?? this.id,
+      method: method ?? this.method,
+      sender: sender ?? this.sender,
+      summary: summary ?? this.summary,
+      uid: uid ?? this.uid,
+      uri: uri ?? this.uri,
+    );
+  }
+
+  InboxItem copyWithWrapped({
+    Wrapped<DateTime>? createdAt,
+    Wrapped<int>? id,
+    Wrapped<String>? method,
+    Wrapped<String>? sender,
+    Wrapped<String>? summary,
+    Wrapped<String>? uid,
+    Wrapped<String>? uri,
+  }) {
+    return InboxItem(
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      id: (id != null ? id.value : this.id),
+      method: (method != null ? method.value : this.method),
+      sender: (sender != null ? sender.value : this.sender),
+      summary: (summary != null ? summary.value : this.summary),
+      uid: (uid != null ? uid.value : this.uid),
+      uri: (uri != null ? uri.value : this.uri),
     );
   }
 }
@@ -4294,6 +6320,41 @@ extension $MountPermissionsExtension on MountPermissions {
 }
 
 @JsonSerializable(explicitToJson: true)
+class MoveEventInputBody {
+  const MoveEventInputBody({required this.calendarId});
+
+  factory MoveEventInputBody.fromJson(Map<String, dynamic> json) => _$MoveEventInputBodyFromJson(json);
+
+  static const toJsonFactory = _$MoveEventInputBodyToJson;
+  Map<String, dynamic> toJson() => _$MoveEventInputBodyToJson(this);
+
+  @JsonKey(name: 'calendarId', includeIfNull: false)
+  final int calendarId;
+  static const fromJsonFactory = _$MoveEventInputBodyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is MoveEventInputBody &&
+            (identical(other.calendarId, calendarId) ||
+                const DeepCollectionEquality().equals(other.calendarId, calendarId)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(calendarId) ^ runtimeType.hashCode;
+}
+
+extension $MoveEventInputBodyExtension on MoveEventInputBody {
+  MoveEventInputBody copyWith({int? calendarId}) {
+    return MoveEventInputBody(calendarId: calendarId ?? this.calendarId);
+  }
+
+  MoveEventInputBody copyWithWrapped({Wrapped<int>? calendarId}) {
+    return MoveEventInputBody(calendarId: (calendarId != null ? calendarId.value : this.calendarId));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class MoveRequest {
   const MoveRequest({this.baseRev, required this.from, required this.to});
 
@@ -4441,6 +6502,187 @@ extension $NewAppPasswordExtension on NewAppPassword {
       readOnly: (readOnly != null ? readOnly.value : this.readOnly),
       token: (token != null ? token.value : this.token),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NewCalendar {
+  const NewCalendar({this.color, this.description, required this.name, this.timezone, this.uri});
+
+  factory NewCalendar.fromJson(Map<String, dynamic> json) => _$NewCalendarFromJson(json);
+
+  static const toJsonFactory = _$NewCalendarToJson;
+  Map<String, dynamic> toJson() => _$NewCalendarToJson(this);
+
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'description', includeIfNull: false)
+  final String? description;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  @JsonKey(name: 'timezone', includeIfNull: false)
+  final String? timezone;
+  @JsonKey(name: 'uri', includeIfNull: false)
+  final String? uri;
+  static const fromJsonFactory = _$NewCalendarFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NewCalendar &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.description, description) ||
+                const DeepCollectionEquality().equals(other.description, description)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.timezone, timezone) || const DeepCollectionEquality().equals(other.timezone, timezone)) &&
+            (identical(other.uri, uri) || const DeepCollectionEquality().equals(other.uri, uri)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(description) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(timezone) ^
+      const DeepCollectionEquality().hash(uri) ^
+      runtimeType.hashCode;
+}
+
+extension $NewCalendarExtension on NewCalendar {
+  NewCalendar copyWith({String? color, String? description, String? name, String? timezone, String? uri}) {
+    return NewCalendar(
+      color: color ?? this.color,
+      description: description ?? this.description,
+      name: name ?? this.name,
+      timezone: timezone ?? this.timezone,
+      uri: uri ?? this.uri,
+    );
+  }
+
+  NewCalendar copyWithWrapped({
+    Wrapped<String?>? color,
+    Wrapped<String?>? description,
+    Wrapped<String>? name,
+    Wrapped<String?>? timezone,
+    Wrapped<String?>? uri,
+  }) {
+    return NewCalendar(
+      color: (color != null ? color.value : this.color),
+      description: (description != null ? description.value : this.description),
+      name: (name != null ? name.value : this.name),
+      timezone: (timezone != null ? timezone.value : this.timezone),
+      uri: (uri != null ? uri.value : this.uri),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NewCalendarShare {
+  const NewCalendarShare({required this.access, required this.recipientId, required this.recipientKind});
+
+  factory NewCalendarShare.fromJson(Map<String, dynamic> json) => _$NewCalendarShareFromJson(json);
+
+  static const toJsonFactory = _$NewCalendarShareToJson;
+  Map<String, dynamic> toJson() => _$NewCalendarShareToJson(this);
+
+  @JsonKey(
+    name: 'access',
+    includeIfNull: false,
+    toJson: newCalendarShareAccessToJson,
+    fromJson: newCalendarShareAccessFromJson,
+  )
+  final enums.NewCalendarShareAccess access;
+  @JsonKey(name: 'recipientId', includeIfNull: false)
+  final int recipientId;
+  @JsonKey(
+    name: 'recipientKind',
+    includeIfNull: false,
+    toJson: newCalendarShareRecipientKindToJson,
+    fromJson: newCalendarShareRecipientKindFromJson,
+  )
+  final enums.NewCalendarShareRecipientKind recipientKind;
+  static const fromJsonFactory = _$NewCalendarShareFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NewCalendarShare &&
+            (identical(other.access, access) || const DeepCollectionEquality().equals(other.access, access)) &&
+            (identical(other.recipientId, recipientId) ||
+                const DeepCollectionEquality().equals(other.recipientId, recipientId)) &&
+            (identical(other.recipientKind, recipientKind) ||
+                const DeepCollectionEquality().equals(other.recipientKind, recipientKind)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(access) ^
+      const DeepCollectionEquality().hash(recipientId) ^
+      const DeepCollectionEquality().hash(recipientKind) ^
+      runtimeType.hashCode;
+}
+
+extension $NewCalendarShareExtension on NewCalendarShare {
+  NewCalendarShare copyWith({
+    enums.NewCalendarShareAccess? access,
+    int? recipientId,
+    enums.NewCalendarShareRecipientKind? recipientKind,
+  }) {
+    return NewCalendarShare(
+      access: access ?? this.access,
+      recipientId: recipientId ?? this.recipientId,
+      recipientKind: recipientKind ?? this.recipientKind,
+    );
+  }
+
+  NewCalendarShare copyWithWrapped({
+    Wrapped<enums.NewCalendarShareAccess>? access,
+    Wrapped<int>? recipientId,
+    Wrapped<enums.NewCalendarShareRecipientKind>? recipientKind,
+  }) {
+    return NewCalendarShare(
+      access: (access != null ? access.value : this.access),
+      recipientId: (recipientId != null ? recipientId.value : this.recipientId),
+      recipientKind: (recipientKind != null ? recipientKind.value : this.recipientKind),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NewFeed {
+  const NewFeed({required this.mode, this.name});
+
+  factory NewFeed.fromJson(Map<String, dynamic> json) => _$NewFeedFromJson(json);
+
+  static const toJsonFactory = _$NewFeedToJson;
+  Map<String, dynamic> toJson() => _$NewFeedToJson(this);
+
+  @JsonKey(name: 'mode', includeIfNull: false, toJson: newFeedModeToJson, fromJson: newFeedModeFromJson)
+  final enums.NewFeedMode mode;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String? name;
+  static const fromJsonFactory = _$NewFeedFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NewFeed &&
+            (identical(other.mode, mode) || const DeepCollectionEquality().equals(other.mode, mode)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(mode) ^ const DeepCollectionEquality().hash(name) ^ runtimeType.hashCode;
+}
+
+extension $NewFeedExtension on NewFeed {
+  NewFeed copyWith({enums.NewFeedMode? mode, String? name}) {
+    return NewFeed(mode: mode ?? this.mode, name: name ?? this.name);
+  }
+
+  NewFeed copyWithWrapped({Wrapped<enums.NewFeedMode>? mode, Wrapped<String?>? name}) {
+    return NewFeed(mode: (mode != null ? mode.value : this.mode), name: (name != null ? name.value : this.name));
   }
 }
 
@@ -4699,6 +6941,70 @@ extension $NewShareLinkExtension on NewShareLink {
       fileId: (fileId != null ? fileId.value : this.fileId),
       password: (password != null ? password.value : this.password),
       permissions: (permissions != null ? permissions.value : this.permissions),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NewSubscription {
+  const NewSubscription({this.color, this.name, this.refreshSeconds, required this.url});
+
+  factory NewSubscription.fromJson(Map<String, dynamic> json) => _$NewSubscriptionFromJson(json);
+
+  static const toJsonFactory = _$NewSubscriptionToJson;
+  Map<String, dynamic> toJson() => _$NewSubscriptionToJson(this);
+
+  @JsonKey(name: 'color', includeIfNull: false)
+  final String? color;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String? name;
+  @JsonKey(name: 'refreshSeconds', includeIfNull: false)
+  final int? refreshSeconds;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String url;
+  static const fromJsonFactory = _$NewSubscriptionFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NewSubscription &&
+            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.refreshSeconds, refreshSeconds) ||
+                const DeepCollectionEquality().equals(other.refreshSeconds, refreshSeconds)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(color) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(refreshSeconds) ^
+      const DeepCollectionEquality().hash(url) ^
+      runtimeType.hashCode;
+}
+
+extension $NewSubscriptionExtension on NewSubscription {
+  NewSubscription copyWith({String? color, String? name, int? refreshSeconds, String? url}) {
+    return NewSubscription(
+      color: color ?? this.color,
+      name: name ?? this.name,
+      refreshSeconds: refreshSeconds ?? this.refreshSeconds,
+      url: url ?? this.url,
+    );
+  }
+
+  NewSubscription copyWithWrapped({
+    Wrapped<String?>? color,
+    Wrapped<String?>? name,
+    Wrapped<int?>? refreshSeconds,
+    Wrapped<String>? url,
+  }) {
+    return NewSubscription(
+      color: (color != null ? color.value : this.color),
+      name: (name != null ? name.value : this.name),
+      refreshSeconds: (refreshSeconds != null ? refreshSeconds.value : this.refreshSeconds),
+      url: (url != null ? url.value : this.url),
     );
   }
 }
@@ -5273,6 +7579,54 @@ extension $PathRequestExtension on PathRequest {
 
   PathRequest copyWithWrapped({Wrapped<String>? path}) {
     return PathRequest(path: (path != null ? path.value : this.path));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Person {
+  const Person({required this.email, this.name, required this.self});
+
+  factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
+
+  static const toJsonFactory = _$PersonToJson;
+  Map<String, dynamic> toJson() => _$PersonToJson(this);
+
+  @JsonKey(name: 'email', includeIfNull: false)
+  final String email;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String? name;
+  @JsonKey(name: 'self', includeIfNull: false)
+  final bool self;
+  static const fromJsonFactory = _$PersonFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Person &&
+            (identical(other.email, email) || const DeepCollectionEquality().equals(other.email, email)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.self, self) || const DeepCollectionEquality().equals(other.self, self)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(email) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(self) ^
+      runtimeType.hashCode;
+}
+
+extension $PersonExtension on Person {
+  Person copyWith({String? email, String? name, bool? self}) {
+    return Person(email: email ?? this.email, name: name ?? this.name, self: self ?? this.self);
+  }
+
+  Person copyWithWrapped({Wrapped<String>? email, Wrapped<String?>? name, Wrapped<bool>? self}) {
+    return Person(
+      email: (email != null ? email.value : this.email),
+      name: (name != null ? name.value : this.name),
+      self: (self != null ? self.value : this.self),
+    );
   }
 }
 
@@ -6121,6 +8475,50 @@ extension $RoleChangeExtension on RoleChange {
 
   RoleChange copyWithWrapped({Wrapped<enums.RoleChangeRole>? role}) {
     return RoleChange(role: (role != null ? role.value : this.role));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class RsvpEventInputBody {
+  const RsvpEventInputBody({this.recurrenceId, required this.status});
+
+  factory RsvpEventInputBody.fromJson(Map<String, dynamic> json) => _$RsvpEventInputBodyFromJson(json);
+
+  static const toJsonFactory = _$RsvpEventInputBodyToJson;
+  Map<String, dynamic> toJson() => _$RsvpEventInputBodyToJson(this);
+
+  @JsonKey(name: 'recurrenceId', includeIfNull: false)
+  final String? recurrenceId;
+  @JsonKey(name: 'status', includeIfNull: false)
+  final String status;
+  static const fromJsonFactory = _$RsvpEventInputBodyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is RsvpEventInputBody &&
+            (identical(other.recurrenceId, recurrenceId) ||
+                const DeepCollectionEquality().equals(other.recurrenceId, recurrenceId)) &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(recurrenceId) ^
+      const DeepCollectionEquality().hash(status) ^
+      runtimeType.hashCode;
+}
+
+extension $RsvpEventInputBodyExtension on RsvpEventInputBody {
+  RsvpEventInputBody copyWith({String? recurrenceId, String? status}) {
+    return RsvpEventInputBody(recurrenceId: recurrenceId ?? this.recurrenceId, status: status ?? this.status);
+  }
+
+  RsvpEventInputBody copyWithWrapped({Wrapped<String?>? recurrenceId, Wrapped<String>? status}) {
+    return RsvpEventInputBody(
+      recurrenceId: (recurrenceId != null ? recurrenceId.value : this.recurrenceId),
+      status: (status != null ? status.value : this.status),
+    );
   }
 }
 
@@ -8334,6 +10732,46 @@ extension $UnusedTagsResponseExtension on UnusedTagsResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class UpdateCalendarShareInputBody {
+  const UpdateCalendarShareInputBody({required this.access});
+
+  factory UpdateCalendarShareInputBody.fromJson(Map<String, dynamic> json) =>
+      _$UpdateCalendarShareInputBodyFromJson(json);
+
+  static const toJsonFactory = _$UpdateCalendarShareInputBodyToJson;
+  Map<String, dynamic> toJson() => _$UpdateCalendarShareInputBodyToJson(this);
+
+  @JsonKey(
+    name: 'access',
+    includeIfNull: false,
+    toJson: updateCalendarShareInputBodyAccessToJson,
+    fromJson: updateCalendarShareInputBodyAccessFromJson,
+  )
+  final enums.UpdateCalendarShareInputBodyAccess access;
+  static const fromJsonFactory = _$UpdateCalendarShareInputBodyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is UpdateCalendarShareInputBody &&
+            (identical(other.access, access) || const DeepCollectionEquality().equals(other.access, access)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(access) ^ runtimeType.hashCode;
+}
+
+extension $UpdateCalendarShareInputBodyExtension on UpdateCalendarShareInputBody {
+  UpdateCalendarShareInputBody copyWith({enums.UpdateCalendarShareInputBodyAccess? access}) {
+    return UpdateCalendarShareInputBody(access: access ?? this.access);
+  }
+
+  UpdateCalendarShareInputBody copyWithWrapped({Wrapped<enums.UpdateCalendarShareInputBodyAccess>? access}) {
+    return UpdateCalendarShareInputBody(access: (access != null ? access.value : this.access));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class UploadRequest {
   const UploadRequest({
     this.baseRev,
@@ -8562,6 +11000,44 @@ extension $UserExtension on User {
       usedBytes: (usedBytes != null ? usedBytes.value : this.usedBytes),
       username: (username != null ? username.value : this.username),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class UserBusy {
+  const UserBusy({this.busy, required this.user});
+
+  factory UserBusy.fromJson(Map<String, dynamic> json) => _$UserBusyFromJson(json);
+
+  static const toJsonFactory = _$UserBusyToJson;
+  Map<String, dynamic> toJson() => _$UserBusyToJson(this);
+
+  @JsonKey(name: 'busy', includeIfNull: false, defaultValue: <BusyPeriod>[])
+  final List<BusyPeriod>? busy;
+  @JsonKey(name: 'user', includeIfNull: false)
+  final UserSummary user;
+  static const fromJsonFactory = _$UserBusyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is UserBusy &&
+            (identical(other.busy, busy) || const DeepCollectionEquality().equals(other.busy, busy)) &&
+            (identical(other.user, user) || const DeepCollectionEquality().equals(other.user, user)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(busy) ^ const DeepCollectionEquality().hash(user) ^ runtimeType.hashCode;
+}
+
+extension $UserBusyExtension on UserBusy {
+  UserBusy copyWith({List<BusyPeriod>? busy, UserSummary? user}) {
+    return UserBusy(busy: busy ?? this.busy, user: user ?? this.user);
+  }
+
+  UserBusy copyWithWrapped({Wrapped<List<BusyPeriod>?>? busy, Wrapped<UserSummary>? user}) {
+    return UserBusy(busy: (busy != null ? busy.value : this.busy), user: (user != null ? user.value : this.user));
   }
 }
 
@@ -9134,6 +11610,174 @@ List<enums.AppearanceTheme>? appearanceThemeNullableListFromJson(
   return appearanceTheme.map((e) => appearanceThemeFromJson(e.toString())).toList();
 }
 
+String? calendarAccessNullableToJson(enums.CalendarAccess? calendarAccess) {
+  return calendarAccess?.value;
+}
+
+String? calendarAccessToJson(enums.CalendarAccess calendarAccess) {
+  return calendarAccess.value;
+}
+
+enums.CalendarAccess calendarAccessFromJson(Object? calendarAccess, [enums.CalendarAccess? defaultValue]) {
+  return enums.CalendarAccess.values.firstWhereOrNull((e) => e.value == calendarAccess) ??
+      defaultValue ??
+      enums.CalendarAccess.swaggerGeneratedUnknown;
+}
+
+enums.CalendarAccess? calendarAccessNullableFromJson(Object? calendarAccess, [enums.CalendarAccess? defaultValue]) {
+  if (calendarAccess == null) {
+    return null;
+  }
+  return enums.CalendarAccess.values.firstWhereOrNull((e) => e.value == calendarAccess) ?? defaultValue;
+}
+
+String calendarAccessExplodedListToJson(List<enums.CalendarAccess>? calendarAccess) {
+  return calendarAccess?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> calendarAccessListToJson(List<enums.CalendarAccess>? calendarAccess) {
+  if (calendarAccess == null) {
+    return [];
+  }
+
+  return calendarAccess.map((e) => e.value!).toList();
+}
+
+List<enums.CalendarAccess> calendarAccessListFromJson(
+  List? calendarAccess, [
+  List<enums.CalendarAccess>? defaultValue,
+]) {
+  if (calendarAccess == null) {
+    return defaultValue ?? [];
+  }
+
+  return calendarAccess.map((e) => calendarAccessFromJson(e.toString())).toList();
+}
+
+List<enums.CalendarAccess>? calendarAccessNullableListFromJson(
+  List? calendarAccess, [
+  List<enums.CalendarAccess>? defaultValue,
+]) {
+  if (calendarAccess == null) {
+    return defaultValue;
+  }
+
+  return calendarAccess.map((e) => calendarAccessFromJson(e.toString())).toList();
+}
+
+String? calendarKindNullableToJson(enums.CalendarKind? calendarKind) {
+  return calendarKind?.value;
+}
+
+String? calendarKindToJson(enums.CalendarKind calendarKind) {
+  return calendarKind.value;
+}
+
+enums.CalendarKind calendarKindFromJson(Object? calendarKind, [enums.CalendarKind? defaultValue]) {
+  return enums.CalendarKind.values.firstWhereOrNull((e) => e.value == calendarKind) ??
+      defaultValue ??
+      enums.CalendarKind.swaggerGeneratedUnknown;
+}
+
+enums.CalendarKind? calendarKindNullableFromJson(Object? calendarKind, [enums.CalendarKind? defaultValue]) {
+  if (calendarKind == null) {
+    return null;
+  }
+  return enums.CalendarKind.values.firstWhereOrNull((e) => e.value == calendarKind) ?? defaultValue;
+}
+
+String calendarKindExplodedListToJson(List<enums.CalendarKind>? calendarKind) {
+  return calendarKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> calendarKindListToJson(List<enums.CalendarKind>? calendarKind) {
+  if (calendarKind == null) {
+    return [];
+  }
+
+  return calendarKind.map((e) => e.value!).toList();
+}
+
+List<enums.CalendarKind> calendarKindListFromJson(List? calendarKind, [List<enums.CalendarKind>? defaultValue]) {
+  if (calendarKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return calendarKind.map((e) => calendarKindFromJson(e.toString())).toList();
+}
+
+List<enums.CalendarKind>? calendarKindNullableListFromJson(
+  List? calendarKind, [
+  List<enums.CalendarKind>? defaultValue,
+]) {
+  if (calendarKind == null) {
+    return defaultValue;
+  }
+
+  return calendarKind.map((e) => calendarKindFromJson(e.toString())).toList();
+}
+
+String? calendarShareAccessNullableToJson(enums.CalendarShareAccess? calendarShareAccess) {
+  return calendarShareAccess?.value;
+}
+
+String? calendarShareAccessToJson(enums.CalendarShareAccess calendarShareAccess) {
+  return calendarShareAccess.value;
+}
+
+enums.CalendarShareAccess calendarShareAccessFromJson(
+  Object? calendarShareAccess, [
+  enums.CalendarShareAccess? defaultValue,
+]) {
+  return enums.CalendarShareAccess.values.firstWhereOrNull((e) => e.value == calendarShareAccess) ??
+      defaultValue ??
+      enums.CalendarShareAccess.swaggerGeneratedUnknown;
+}
+
+enums.CalendarShareAccess? calendarShareAccessNullableFromJson(
+  Object? calendarShareAccess, [
+  enums.CalendarShareAccess? defaultValue,
+]) {
+  if (calendarShareAccess == null) {
+    return null;
+  }
+  return enums.CalendarShareAccess.values.firstWhereOrNull((e) => e.value == calendarShareAccess) ?? defaultValue;
+}
+
+String calendarShareAccessExplodedListToJson(List<enums.CalendarShareAccess>? calendarShareAccess) {
+  return calendarShareAccess?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> calendarShareAccessListToJson(List<enums.CalendarShareAccess>? calendarShareAccess) {
+  if (calendarShareAccess == null) {
+    return [];
+  }
+
+  return calendarShareAccess.map((e) => e.value!).toList();
+}
+
+List<enums.CalendarShareAccess> calendarShareAccessListFromJson(
+  List? calendarShareAccess, [
+  List<enums.CalendarShareAccess>? defaultValue,
+]) {
+  if (calendarShareAccess == null) {
+    return defaultValue ?? [];
+  }
+
+  return calendarShareAccess.map((e) => calendarShareAccessFromJson(e.toString())).toList();
+}
+
+List<enums.CalendarShareAccess>? calendarShareAccessNullableListFromJson(
+  List? calendarShareAccess, [
+  List<enums.CalendarShareAccess>? defaultValue,
+]) {
+  if (calendarShareAccess == null) {
+    return defaultValue;
+  }
+
+  return calendarShareAccess.map((e) => calendarShareAccessFromJson(e.toString())).toList();
+}
+
 String? changeTypeNullableToJson(enums.ChangeType? changeType) {
   return changeType?.value;
 }
@@ -9409,6 +12053,174 @@ List<enums.EntryPreviewState>? entryPreviewStateNullableListFromJson(
   return entryPreviewState.map((e) => entryPreviewStateFromJson(e.toString())).toList();
 }
 
+String? eventShowAsNullableToJson(enums.EventShowAs? eventShowAs) {
+  return eventShowAs?.value;
+}
+
+String? eventShowAsToJson(enums.EventShowAs eventShowAs) {
+  return eventShowAs.value;
+}
+
+enums.EventShowAs eventShowAsFromJson(Object? eventShowAs, [enums.EventShowAs? defaultValue]) {
+  return enums.EventShowAs.values.firstWhereOrNull((e) => e.value == eventShowAs) ??
+      defaultValue ??
+      enums.EventShowAs.swaggerGeneratedUnknown;
+}
+
+enums.EventShowAs? eventShowAsNullableFromJson(Object? eventShowAs, [enums.EventShowAs? defaultValue]) {
+  if (eventShowAs == null) {
+    return null;
+  }
+  return enums.EventShowAs.values.firstWhereOrNull((e) => e.value == eventShowAs) ?? defaultValue;
+}
+
+String eventShowAsExplodedListToJson(List<enums.EventShowAs>? eventShowAs) {
+  return eventShowAs?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> eventShowAsListToJson(List<enums.EventShowAs>? eventShowAs) {
+  if (eventShowAs == null) {
+    return [];
+  }
+
+  return eventShowAs.map((e) => e.value!).toList();
+}
+
+List<enums.EventShowAs> eventShowAsListFromJson(List? eventShowAs, [List<enums.EventShowAs>? defaultValue]) {
+  if (eventShowAs == null) {
+    return defaultValue ?? [];
+  }
+
+  return eventShowAs.map((e) => eventShowAsFromJson(e.toString())).toList();
+}
+
+List<enums.EventShowAs>? eventShowAsNullableListFromJson(List? eventShowAs, [List<enums.EventShowAs>? defaultValue]) {
+  if (eventShowAs == null) {
+    return defaultValue;
+  }
+
+  return eventShowAs.map((e) => eventShowAsFromJson(e.toString())).toList();
+}
+
+String? eventDetailsShowAsNullableToJson(enums.EventDetailsShowAs? eventDetailsShowAs) {
+  return eventDetailsShowAs?.value;
+}
+
+String? eventDetailsShowAsToJson(enums.EventDetailsShowAs eventDetailsShowAs) {
+  return eventDetailsShowAs.value;
+}
+
+enums.EventDetailsShowAs eventDetailsShowAsFromJson(
+  Object? eventDetailsShowAs, [
+  enums.EventDetailsShowAs? defaultValue,
+]) {
+  return enums.EventDetailsShowAs.values.firstWhereOrNull((e) => e.value == eventDetailsShowAs) ??
+      defaultValue ??
+      enums.EventDetailsShowAs.swaggerGeneratedUnknown;
+}
+
+enums.EventDetailsShowAs? eventDetailsShowAsNullableFromJson(
+  Object? eventDetailsShowAs, [
+  enums.EventDetailsShowAs? defaultValue,
+]) {
+  if (eventDetailsShowAs == null) {
+    return null;
+  }
+  return enums.EventDetailsShowAs.values.firstWhereOrNull((e) => e.value == eventDetailsShowAs) ?? defaultValue;
+}
+
+String eventDetailsShowAsExplodedListToJson(List<enums.EventDetailsShowAs>? eventDetailsShowAs) {
+  return eventDetailsShowAs?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> eventDetailsShowAsListToJson(List<enums.EventDetailsShowAs>? eventDetailsShowAs) {
+  if (eventDetailsShowAs == null) {
+    return [];
+  }
+
+  return eventDetailsShowAs.map((e) => e.value!).toList();
+}
+
+List<enums.EventDetailsShowAs> eventDetailsShowAsListFromJson(
+  List? eventDetailsShowAs, [
+  List<enums.EventDetailsShowAs>? defaultValue,
+]) {
+  if (eventDetailsShowAs == null) {
+    return defaultValue ?? [];
+  }
+
+  return eventDetailsShowAs.map((e) => eventDetailsShowAsFromJson(e.toString())).toList();
+}
+
+List<enums.EventDetailsShowAs>? eventDetailsShowAsNullableListFromJson(
+  List? eventDetailsShowAs, [
+  List<enums.EventDetailsShowAs>? defaultValue,
+]) {
+  if (eventDetailsShowAs == null) {
+    return defaultValue;
+  }
+
+  return eventDetailsShowAs.map((e) => eventDetailsShowAsFromJson(e.toString())).toList();
+}
+
+String? eventInputShowAsNullableToJson(enums.EventInputShowAs? eventInputShowAs) {
+  return eventInputShowAs?.value;
+}
+
+String? eventInputShowAsToJson(enums.EventInputShowAs eventInputShowAs) {
+  return eventInputShowAs.value;
+}
+
+enums.EventInputShowAs eventInputShowAsFromJson(Object? eventInputShowAs, [enums.EventInputShowAs? defaultValue]) {
+  return enums.EventInputShowAs.values.firstWhereOrNull((e) => e.value == eventInputShowAs) ??
+      defaultValue ??
+      enums.EventInputShowAs.swaggerGeneratedUnknown;
+}
+
+enums.EventInputShowAs? eventInputShowAsNullableFromJson(
+  Object? eventInputShowAs, [
+  enums.EventInputShowAs? defaultValue,
+]) {
+  if (eventInputShowAs == null) {
+    return null;
+  }
+  return enums.EventInputShowAs.values.firstWhereOrNull((e) => e.value == eventInputShowAs) ?? defaultValue;
+}
+
+String eventInputShowAsExplodedListToJson(List<enums.EventInputShowAs>? eventInputShowAs) {
+  return eventInputShowAs?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> eventInputShowAsListToJson(List<enums.EventInputShowAs>? eventInputShowAs) {
+  if (eventInputShowAs == null) {
+    return [];
+  }
+
+  return eventInputShowAs.map((e) => e.value!).toList();
+}
+
+List<enums.EventInputShowAs> eventInputShowAsListFromJson(
+  List? eventInputShowAs, [
+  List<enums.EventInputShowAs>? defaultValue,
+]) {
+  if (eventInputShowAs == null) {
+    return defaultValue ?? [];
+  }
+
+  return eventInputShowAs.map((e) => eventInputShowAsFromJson(e.toString())).toList();
+}
+
+List<enums.EventInputShowAs>? eventInputShowAsNullableListFromJson(
+  List? eventInputShowAs, [
+  List<enums.EventInputShowAs>? defaultValue,
+]) {
+  if (eventInputShowAs == null) {
+    return defaultValue;
+  }
+
+  return eventInputShowAs.map((e) => eventInputShowAsFromJson(e.toString())).toList();
+}
+
 String? eventMessageStatusNullableToJson(enums.EventMessageStatus? eventMessageStatus) {
   return eventMessageStatus?.value;
 }
@@ -9587,6 +12399,55 @@ List<enums.ExtractionStatusOcr>? extractionStatusOcrNullableListFromJson(
   }
 
   return extractionStatusOcr.map((e) => extractionStatusOcrFromJson(e.toString())).toList();
+}
+
+String? feedModeNullableToJson(enums.FeedMode? feedMode) {
+  return feedMode?.value;
+}
+
+String? feedModeToJson(enums.FeedMode feedMode) {
+  return feedMode.value;
+}
+
+enums.FeedMode feedModeFromJson(Object? feedMode, [enums.FeedMode? defaultValue]) {
+  return enums.FeedMode.values.firstWhereOrNull((e) => e.value == feedMode) ??
+      defaultValue ??
+      enums.FeedMode.swaggerGeneratedUnknown;
+}
+
+enums.FeedMode? feedModeNullableFromJson(Object? feedMode, [enums.FeedMode? defaultValue]) {
+  if (feedMode == null) {
+    return null;
+  }
+  return enums.FeedMode.values.firstWhereOrNull((e) => e.value == feedMode) ?? defaultValue;
+}
+
+String feedModeExplodedListToJson(List<enums.FeedMode>? feedMode) {
+  return feedMode?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> feedModeListToJson(List<enums.FeedMode>? feedMode) {
+  if (feedMode == null) {
+    return [];
+  }
+
+  return feedMode.map((e) => e.value!).toList();
+}
+
+List<enums.FeedMode> feedModeListFromJson(List? feedMode, [List<enums.FeedMode>? defaultValue]) {
+  if (feedMode == null) {
+    return defaultValue ?? [];
+  }
+
+  return feedMode.map((e) => feedModeFromJson(e.toString())).toList();
+}
+
+List<enums.FeedMode>? feedModeNullableListFromJson(List? feedMode, [List<enums.FeedMode>? defaultValue]) {
+  if (feedMode == null) {
+    return defaultValue;
+  }
+
+  return feedMode.map((e) => feedModeFromJson(e.toString())).toList();
 }
 
 String? groupMyRoleNullableToJson(enums.GroupMyRole? groupMyRole) {
@@ -9968,6 +12829,184 @@ List<enums.MountKind>? mountKindNullableListFromJson(List? mountKind, [List<enum
   }
 
   return mountKind.map((e) => mountKindFromJson(e.toString())).toList();
+}
+
+String? newCalendarShareAccessNullableToJson(enums.NewCalendarShareAccess? newCalendarShareAccess) {
+  return newCalendarShareAccess?.value;
+}
+
+String? newCalendarShareAccessToJson(enums.NewCalendarShareAccess newCalendarShareAccess) {
+  return newCalendarShareAccess.value;
+}
+
+enums.NewCalendarShareAccess newCalendarShareAccessFromJson(
+  Object? newCalendarShareAccess, [
+  enums.NewCalendarShareAccess? defaultValue,
+]) {
+  return enums.NewCalendarShareAccess.values.firstWhereOrNull((e) => e.value == newCalendarShareAccess) ??
+      defaultValue ??
+      enums.NewCalendarShareAccess.swaggerGeneratedUnknown;
+}
+
+enums.NewCalendarShareAccess? newCalendarShareAccessNullableFromJson(
+  Object? newCalendarShareAccess, [
+  enums.NewCalendarShareAccess? defaultValue,
+]) {
+  if (newCalendarShareAccess == null) {
+    return null;
+  }
+  return enums.NewCalendarShareAccess.values.firstWhereOrNull((e) => e.value == newCalendarShareAccess) ?? defaultValue;
+}
+
+String newCalendarShareAccessExplodedListToJson(List<enums.NewCalendarShareAccess>? newCalendarShareAccess) {
+  return newCalendarShareAccess?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> newCalendarShareAccessListToJson(List<enums.NewCalendarShareAccess>? newCalendarShareAccess) {
+  if (newCalendarShareAccess == null) {
+    return [];
+  }
+
+  return newCalendarShareAccess.map((e) => e.value!).toList();
+}
+
+List<enums.NewCalendarShareAccess> newCalendarShareAccessListFromJson(
+  List? newCalendarShareAccess, [
+  List<enums.NewCalendarShareAccess>? defaultValue,
+]) {
+  if (newCalendarShareAccess == null) {
+    return defaultValue ?? [];
+  }
+
+  return newCalendarShareAccess.map((e) => newCalendarShareAccessFromJson(e.toString())).toList();
+}
+
+List<enums.NewCalendarShareAccess>? newCalendarShareAccessNullableListFromJson(
+  List? newCalendarShareAccess, [
+  List<enums.NewCalendarShareAccess>? defaultValue,
+]) {
+  if (newCalendarShareAccess == null) {
+    return defaultValue;
+  }
+
+  return newCalendarShareAccess.map((e) => newCalendarShareAccessFromJson(e.toString())).toList();
+}
+
+String? newCalendarShareRecipientKindNullableToJson(
+  enums.NewCalendarShareRecipientKind? newCalendarShareRecipientKind,
+) {
+  return newCalendarShareRecipientKind?.value;
+}
+
+String? newCalendarShareRecipientKindToJson(enums.NewCalendarShareRecipientKind newCalendarShareRecipientKind) {
+  return newCalendarShareRecipientKind.value;
+}
+
+enums.NewCalendarShareRecipientKind newCalendarShareRecipientKindFromJson(
+  Object? newCalendarShareRecipientKind, [
+  enums.NewCalendarShareRecipientKind? defaultValue,
+]) {
+  return enums.NewCalendarShareRecipientKind.values.firstWhereOrNull((e) => e.value == newCalendarShareRecipientKind) ??
+      defaultValue ??
+      enums.NewCalendarShareRecipientKind.swaggerGeneratedUnknown;
+}
+
+enums.NewCalendarShareRecipientKind? newCalendarShareRecipientKindNullableFromJson(
+  Object? newCalendarShareRecipientKind, [
+  enums.NewCalendarShareRecipientKind? defaultValue,
+]) {
+  if (newCalendarShareRecipientKind == null) {
+    return null;
+  }
+  return enums.NewCalendarShareRecipientKind.values.firstWhereOrNull((e) => e.value == newCalendarShareRecipientKind) ??
+      defaultValue;
+}
+
+String newCalendarShareRecipientKindExplodedListToJson(
+  List<enums.NewCalendarShareRecipientKind>? newCalendarShareRecipientKind,
+) {
+  return newCalendarShareRecipientKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> newCalendarShareRecipientKindListToJson(
+  List<enums.NewCalendarShareRecipientKind>? newCalendarShareRecipientKind,
+) {
+  if (newCalendarShareRecipientKind == null) {
+    return [];
+  }
+
+  return newCalendarShareRecipientKind.map((e) => e.value!).toList();
+}
+
+List<enums.NewCalendarShareRecipientKind> newCalendarShareRecipientKindListFromJson(
+  List? newCalendarShareRecipientKind, [
+  List<enums.NewCalendarShareRecipientKind>? defaultValue,
+]) {
+  if (newCalendarShareRecipientKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return newCalendarShareRecipientKind.map((e) => newCalendarShareRecipientKindFromJson(e.toString())).toList();
+}
+
+List<enums.NewCalendarShareRecipientKind>? newCalendarShareRecipientKindNullableListFromJson(
+  List? newCalendarShareRecipientKind, [
+  List<enums.NewCalendarShareRecipientKind>? defaultValue,
+]) {
+  if (newCalendarShareRecipientKind == null) {
+    return defaultValue;
+  }
+
+  return newCalendarShareRecipientKind.map((e) => newCalendarShareRecipientKindFromJson(e.toString())).toList();
+}
+
+String? newFeedModeNullableToJson(enums.NewFeedMode? newFeedMode) {
+  return newFeedMode?.value;
+}
+
+String? newFeedModeToJson(enums.NewFeedMode newFeedMode) {
+  return newFeedMode.value;
+}
+
+enums.NewFeedMode newFeedModeFromJson(Object? newFeedMode, [enums.NewFeedMode? defaultValue]) {
+  return enums.NewFeedMode.values.firstWhereOrNull((e) => e.value == newFeedMode) ??
+      defaultValue ??
+      enums.NewFeedMode.swaggerGeneratedUnknown;
+}
+
+enums.NewFeedMode? newFeedModeNullableFromJson(Object? newFeedMode, [enums.NewFeedMode? defaultValue]) {
+  if (newFeedMode == null) {
+    return null;
+  }
+  return enums.NewFeedMode.values.firstWhereOrNull((e) => e.value == newFeedMode) ?? defaultValue;
+}
+
+String newFeedModeExplodedListToJson(List<enums.NewFeedMode>? newFeedMode) {
+  return newFeedMode?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> newFeedModeListToJson(List<enums.NewFeedMode>? newFeedMode) {
+  if (newFeedMode == null) {
+    return [];
+  }
+
+  return newFeedMode.map((e) => e.value!).toList();
+}
+
+List<enums.NewFeedMode> newFeedModeListFromJson(List? newFeedMode, [List<enums.NewFeedMode>? defaultValue]) {
+  if (newFeedMode == null) {
+    return defaultValue ?? [];
+  }
+
+  return newFeedMode.map((e) => newFeedModeFromJson(e.toString())).toList();
+}
+
+List<enums.NewFeedMode>? newFeedModeNullableListFromJson(List? newFeedMode, [List<enums.NewFeedMode>? defaultValue]) {
+  if (newFeedMode == null) {
+    return defaultValue;
+  }
+
+  return newFeedMode.map((e) => newFeedModeFromJson(e.toString())).toList();
 }
 
 String? newMemberRoleNullableToJson(enums.NewMemberRole? newMemberRole) {
@@ -10643,6 +13682,84 @@ List<enums.TrashRetentionSource>? trashRetentionSourceNullableListFromJson(
   return trashRetentionSource.map((e) => trashRetentionSourceFromJson(e.toString())).toList();
 }
 
+String? updateCalendarShareInputBodyAccessNullableToJson(
+  enums.UpdateCalendarShareInputBodyAccess? updateCalendarShareInputBodyAccess,
+) {
+  return updateCalendarShareInputBodyAccess?.value;
+}
+
+String? updateCalendarShareInputBodyAccessToJson(
+  enums.UpdateCalendarShareInputBodyAccess updateCalendarShareInputBodyAccess,
+) {
+  return updateCalendarShareInputBodyAccess.value;
+}
+
+enums.UpdateCalendarShareInputBodyAccess updateCalendarShareInputBodyAccessFromJson(
+  Object? updateCalendarShareInputBodyAccess, [
+  enums.UpdateCalendarShareInputBodyAccess? defaultValue,
+]) {
+  return enums.UpdateCalendarShareInputBodyAccess.values.firstWhereOrNull(
+        (e) => e.value == updateCalendarShareInputBodyAccess,
+      ) ??
+      defaultValue ??
+      enums.UpdateCalendarShareInputBodyAccess.swaggerGeneratedUnknown;
+}
+
+enums.UpdateCalendarShareInputBodyAccess? updateCalendarShareInputBodyAccessNullableFromJson(
+  Object? updateCalendarShareInputBodyAccess, [
+  enums.UpdateCalendarShareInputBodyAccess? defaultValue,
+]) {
+  if (updateCalendarShareInputBodyAccess == null) {
+    return null;
+  }
+  return enums.UpdateCalendarShareInputBodyAccess.values.firstWhereOrNull(
+        (e) => e.value == updateCalendarShareInputBodyAccess,
+      ) ??
+      defaultValue;
+}
+
+String updateCalendarShareInputBodyAccessExplodedListToJson(
+  List<enums.UpdateCalendarShareInputBodyAccess>? updateCalendarShareInputBodyAccess,
+) {
+  return updateCalendarShareInputBodyAccess?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> updateCalendarShareInputBodyAccessListToJson(
+  List<enums.UpdateCalendarShareInputBodyAccess>? updateCalendarShareInputBodyAccess,
+) {
+  if (updateCalendarShareInputBodyAccess == null) {
+    return [];
+  }
+
+  return updateCalendarShareInputBodyAccess.map((e) => e.value!).toList();
+}
+
+List<enums.UpdateCalendarShareInputBodyAccess> updateCalendarShareInputBodyAccessListFromJson(
+  List? updateCalendarShareInputBodyAccess, [
+  List<enums.UpdateCalendarShareInputBodyAccess>? defaultValue,
+]) {
+  if (updateCalendarShareInputBodyAccess == null) {
+    return defaultValue ?? [];
+  }
+
+  return updateCalendarShareInputBodyAccess
+      .map((e) => updateCalendarShareInputBodyAccessFromJson(e.toString()))
+      .toList();
+}
+
+List<enums.UpdateCalendarShareInputBodyAccess>? updateCalendarShareInputBodyAccessNullableListFromJson(
+  List? updateCalendarShareInputBodyAccess, [
+  List<enums.UpdateCalendarShareInputBodyAccess>? defaultValue,
+]) {
+  if (updateCalendarShareInputBodyAccess == null) {
+    return defaultValue;
+  }
+
+  return updateCalendarShareInputBodyAccess
+      .map((e) => updateCalendarShareInputBodyAccessFromJson(e.toString()))
+      .toList();
+}
+
 String? userRoleNullableToJson(enums.UserRole? userRole) {
   return userRole?.value;
 }
@@ -10812,6 +13929,166 @@ List<enums.ApiV1AdminLogsGetLevel>? apiV1AdminLogsGetLevelNullableListFromJson(
   }
 
   return apiV1AdminLogsGetLevel.map((e) => apiV1AdminLogsGetLevelFromJson(e.toString())).toList();
+}
+
+String? apiV1CalendarsCalendarIDEventsEventIDDeleteScopeNullableToJson(
+  enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope? apiV1CalendarsCalendarIDEventsEventIDDeleteScope,
+) {
+  return apiV1CalendarsCalendarIDEventsEventIDDeleteScope?.value;
+}
+
+String? apiV1CalendarsCalendarIDEventsEventIDDeleteScopeToJson(
+  enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope apiV1CalendarsCalendarIDEventsEventIDDeleteScope,
+) {
+  return apiV1CalendarsCalendarIDEventsEventIDDeleteScope.value;
+}
+
+enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope apiV1CalendarsCalendarIDEventsEventIDDeleteScopeFromJson(
+  Object? apiV1CalendarsCalendarIDEventsEventIDDeleteScope, [
+  enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope? defaultValue,
+]) {
+  return enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope.values.firstWhereOrNull(
+        (e) => e.value == apiV1CalendarsCalendarIDEventsEventIDDeleteScope,
+      ) ??
+      defaultValue ??
+      enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope.swaggerGeneratedUnknown;
+}
+
+enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope?
+apiV1CalendarsCalendarIDEventsEventIDDeleteScopeNullableFromJson(
+  Object? apiV1CalendarsCalendarIDEventsEventIDDeleteScope, [
+  enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope? defaultValue,
+]) {
+  if (apiV1CalendarsCalendarIDEventsEventIDDeleteScope == null) {
+    return null;
+  }
+  return enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope.values.firstWhereOrNull(
+        (e) => e.value == apiV1CalendarsCalendarIDEventsEventIDDeleteScope,
+      ) ??
+      defaultValue;
+}
+
+String apiV1CalendarsCalendarIDEventsEventIDDeleteScopeExplodedListToJson(
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope>? apiV1CalendarsCalendarIDEventsEventIDDeleteScope,
+) {
+  return apiV1CalendarsCalendarIDEventsEventIDDeleteScope?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> apiV1CalendarsCalendarIDEventsEventIDDeleteScopeListToJson(
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope>? apiV1CalendarsCalendarIDEventsEventIDDeleteScope,
+) {
+  if (apiV1CalendarsCalendarIDEventsEventIDDeleteScope == null) {
+    return [];
+  }
+
+  return apiV1CalendarsCalendarIDEventsEventIDDeleteScope.map((e) => e.value!).toList();
+}
+
+List<enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope>
+apiV1CalendarsCalendarIDEventsEventIDDeleteScopeListFromJson(
+  List? apiV1CalendarsCalendarIDEventsEventIDDeleteScope, [
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope>? defaultValue,
+]) {
+  if (apiV1CalendarsCalendarIDEventsEventIDDeleteScope == null) {
+    return defaultValue ?? [];
+  }
+
+  return apiV1CalendarsCalendarIDEventsEventIDDeleteScope
+      .map((e) => apiV1CalendarsCalendarIDEventsEventIDDeleteScopeFromJson(e.toString()))
+      .toList();
+}
+
+List<enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope>?
+apiV1CalendarsCalendarIDEventsEventIDDeleteScopeNullableListFromJson(
+  List? apiV1CalendarsCalendarIDEventsEventIDDeleteScope, [
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope>? defaultValue,
+]) {
+  if (apiV1CalendarsCalendarIDEventsEventIDDeleteScope == null) {
+    return defaultValue;
+  }
+
+  return apiV1CalendarsCalendarIDEventsEventIDDeleteScope
+      .map((e) => apiV1CalendarsCalendarIDEventsEventIDDeleteScopeFromJson(e.toString()))
+      .toList();
+}
+
+String? apiV1CalendarsCalendarIDEventsEventIDPutScopeNullableToJson(
+  enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope? apiV1CalendarsCalendarIDEventsEventIDPutScope,
+) {
+  return apiV1CalendarsCalendarIDEventsEventIDPutScope?.value;
+}
+
+String? apiV1CalendarsCalendarIDEventsEventIDPutScopeToJson(
+  enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope apiV1CalendarsCalendarIDEventsEventIDPutScope,
+) {
+  return apiV1CalendarsCalendarIDEventsEventIDPutScope.value;
+}
+
+enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope apiV1CalendarsCalendarIDEventsEventIDPutScopeFromJson(
+  Object? apiV1CalendarsCalendarIDEventsEventIDPutScope, [
+  enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope? defaultValue,
+]) {
+  return enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope.values.firstWhereOrNull(
+        (e) => e.value == apiV1CalendarsCalendarIDEventsEventIDPutScope,
+      ) ??
+      defaultValue ??
+      enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope.swaggerGeneratedUnknown;
+}
+
+enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope? apiV1CalendarsCalendarIDEventsEventIDPutScopeNullableFromJson(
+  Object? apiV1CalendarsCalendarIDEventsEventIDPutScope, [
+  enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope? defaultValue,
+]) {
+  if (apiV1CalendarsCalendarIDEventsEventIDPutScope == null) {
+    return null;
+  }
+  return enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope.values.firstWhereOrNull(
+        (e) => e.value == apiV1CalendarsCalendarIDEventsEventIDPutScope,
+      ) ??
+      defaultValue;
+}
+
+String apiV1CalendarsCalendarIDEventsEventIDPutScopeExplodedListToJson(
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope>? apiV1CalendarsCalendarIDEventsEventIDPutScope,
+) {
+  return apiV1CalendarsCalendarIDEventsEventIDPutScope?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> apiV1CalendarsCalendarIDEventsEventIDPutScopeListToJson(
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope>? apiV1CalendarsCalendarIDEventsEventIDPutScope,
+) {
+  if (apiV1CalendarsCalendarIDEventsEventIDPutScope == null) {
+    return [];
+  }
+
+  return apiV1CalendarsCalendarIDEventsEventIDPutScope.map((e) => e.value!).toList();
+}
+
+List<enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope> apiV1CalendarsCalendarIDEventsEventIDPutScopeListFromJson(
+  List? apiV1CalendarsCalendarIDEventsEventIDPutScope, [
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope>? defaultValue,
+]) {
+  if (apiV1CalendarsCalendarIDEventsEventIDPutScope == null) {
+    return defaultValue ?? [];
+  }
+
+  return apiV1CalendarsCalendarIDEventsEventIDPutScope
+      .map((e) => apiV1CalendarsCalendarIDEventsEventIDPutScopeFromJson(e.toString()))
+      .toList();
+}
+
+List<enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope>?
+apiV1CalendarsCalendarIDEventsEventIDPutScopeNullableListFromJson(
+  List? apiV1CalendarsCalendarIDEventsEventIDPutScope, [
+  List<enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope>? defaultValue,
+]) {
+  if (apiV1CalendarsCalendarIDEventsEventIDPutScope == null) {
+    return defaultValue;
+  }
+
+  return apiV1CalendarsCalendarIDEventsEventIDPutScope
+      .map((e) => apiV1CalendarsCalendarIDEventsEventIDPutScopeFromJson(e.toString()))
+      .toList();
 }
 
 int? apiV1FilesPreviewGetSizeNullableToJson(enums.ApiV1FilesPreviewGetSize? apiV1FilesPreviewGetSize) {

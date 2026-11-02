@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/dav"
 	"polder-server/internal/files"
 	"polder-server/internal/sharing"
 	"polder-server/internal/storage"
@@ -66,7 +67,7 @@ func (h *Handler) Serve(w http.ResponseWriter, r *http.Request, space Space) {
 	w.Header().Set("MS-Author-Via", "DAV")
 	relative, found := space.relativePath(r.URL.Path)
 	if !found {
-		WriteError(w, r, apperr.NotFound("no such resource"))
+		dav.WriteError(w, r, apperr.NotFound("no such resource"))
 		return
 	}
 	absolute, err := space.Access.Path(relative)
@@ -106,12 +107,12 @@ func (h *Handler) dispatch(req *request) error {
 		return h.unlock(req)
 	}
 	req.w.Header().Set("Allow", allowedMethods)
-	return withStatus(http.StatusMethodNotAllowed, "method not allowed")
+	return dav.WithStatus(http.StatusMethodNotAllowed, "method not allowed")
 }
 
 func (h *Handler) fail(w http.ResponseWriter, r *http.Request, space Space, err error) {
 	space.Access.Scrub(&err)
-	WriteError(w, r, err)
+	dav.WriteError(w, r, err)
 }
 
 func (h *Handler) options(req *request) error {
@@ -226,20 +227,20 @@ func baseRevision(req *request, current files.Entry, exists bool) (int64, error)
 	switch {
 	case ifNoneMatch == "*":
 		if exists {
-			return 0, withStatus(http.StatusPreconditionFailed, "the resource already exists")
+			return 0, dav.WithStatus(http.StatusPreconditionFailed, "the resource already exists")
 		}
 		return files.BaseRevMustNotExist, nil
 	case ifMatch == "":
 		return files.BaseRevAny, nil
 	case !exists:
-		return 0, withStatus(http.StatusPreconditionFailed, "the resource does not exist")
+		return 0, dav.WithStatus(http.StatusPreconditionFailed, "the resource does not exist")
 	case ifMatch == "*":
 		return current.Rev, nil
 	}
 	first, _, _ := strings.Cut(ifMatch, ",")
 	rev, ok := parseETag(first)
 	if !ok || rev != current.Rev {
-		return 0, withStatus(http.StatusPreconditionFailed, "the resource has changed")
+		return 0, dav.WithStatus(http.StatusPreconditionFailed, "the resource has changed")
 	}
 	return rev, nil
 }

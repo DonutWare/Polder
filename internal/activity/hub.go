@@ -38,15 +38,19 @@ const (
 	EventTransferFinished EventType = "transfer.finished"
 	EventActivity         EventType = "activity.created"
 	EventFilesChanged     EventType = "files.changed"
+	EventCalendarChanged  EventType = "calendar.changed"
+	EventCalendarReminder EventType = "calendar.reminder"
 )
 
 type Event struct {
-	Type     EventType     `json:"type"`
-	UserID   int64         `json:"userId"`
-	Transfer *LiveTransfer `json:"transfer,omitempty"`
-	Status   Status        `json:"status,omitempty"`
-	LogEntry *LogEntry     `json:"entry,omitempty"`
-	Dirs     []string      `json:"dirs,omitempty"`
+	Type     EventType         `json:"type"`
+	UserID   int64             `json:"userId"`
+	Transfer *LiveTransfer     `json:"transfer,omitempty"`
+	Status   Status            `json:"status,omitempty"`
+	LogEntry *LogEntry         `json:"entry,omitempty"`
+	Dirs     []string          `json:"dirs,omitempty"`
+	Calendar *CalendarUpdate   `json:"calendar,omitempty"`
+	Reminder *CalendarReminder `json:"reminder,omitempty"`
 }
 
 type LiveTransfer struct {

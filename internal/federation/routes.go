@@ -20,6 +20,7 @@ import (
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/database"
+	"polder-server/internal/dav"
 	"polder-server/internal/sharing"
 	"polder-server/internal/webdav"
 )
@@ -37,7 +38,7 @@ type Guard interface {
 	Secure(r *http.Request) bool
 }
 
-func (s *Service) Routes(router chi.Router, guard Guard, dav *webdav.Handler) {
+func (s *Service) Routes(router chi.Router, guard Guard, files *webdav.Handler) {
 	discovery := s.enabledOnly(s.serveDiscovery)
 	router.Get("/.well-known/ocm", discovery)
 	router.Get("/ocm-provider", discovery)
@@ -45,7 +46,7 @@ func (s *Service) Routes(router chi.Router, guard Guard, dav *webdav.Handler) {
 	router.Post(ocmPath+"/shares", s.enabledOnly(func(w http.ResponseWriter, r *http.Request) { s.handleShare(w, r, guard) }))
 	router.Post(ocmPath+notificationsPath, s.enabledOnly(func(w http.ResponseWriter, r *http.Request) { s.handleNotification(w, r, guard) }))
 	router.Post(ocmPath+inviteAcceptedPath, s.enabledOnly(func(w http.ResponseWriter, r *http.Request) { s.handleInviteAccepted(w, r, guard) }))
-	public := s.enabledOnly(func(w http.ResponseWriter, r *http.Request) { s.servePublicDAV(w, r, guard, dav) })
+	public := s.enabledOnly(func(w http.ResponseWriter, r *http.Request) { s.servePublicDAV(w, r, guard, files) })
 	router.Handle(publicWebDAVPath, public)
 	router.Handle(publicWebDAVPath+"/*", public)
 }
@@ -431,20 +432,20 @@ func shareSecretFrom(r *http.Request) (string, bool) {
 	return secret, ok && secret != ""
 }
 
-func (s *Service) servePublicDAV(w http.ResponseWriter, r *http.Request, guard Guard, dav *webdav.Handler) {
+func (s *Service) servePublicDAV(w http.ResponseWriter, r *http.Request, guard Guard, files *webdav.Handler) {
 	if !guard.Secure(r) {
-		webdav.WriteError(w, r, apperr.Forbidden("WebDAV needs HTTPS"))
+		dav.WriteError(w, r, apperr.Forbidden("WebDAV needs HTTPS"))
 		return
 	}
 	address := clientAddress(r)
 	key := limiterKeyShareToken + address
 	if guard.Blocked(key) {
-		webdav.WriteError(w, r, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute"))
+		dav.WriteError(w, r, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute"))
 		return
 	}
 	secret, ok := shareSecretFrom(r)
 	if !ok {
-		webdav.WriteError(w, r, apperr.Unauthorized("authenticate with the share token"))
+		dav.WriteError(w, r, apperr.Unauthorized("authenticate with the share token"))
 		return
 	}
 	access, err := s.ForSecret(r.Context(), secret)
@@ -452,10 +453,10 @@ func (s *Service) servePublicDAV(w http.ResponseWriter, r *http.Request, guard G
 		if apperr.Is(err, apperr.KindUnauthorized) {
 			guard.Fail(key)
 		}
-		webdav.WriteError(w, r, err)
+		dav.WriteError(w, r, err)
 		return
 	}
 	space := webdav.Space{Access: access, Root: publicWebDAVPath, Principal: "federated:" + hashSecret(secret)[:24]}
 	ctx := activity.WithActor(r.Context(), activity.Actor{Device: federationDevice, Via: access.Via})
-	dav.Serve(w, r.WithContext(ctx), space)
+	files.Serve(w, r.WithContext(ctx), space)
 }

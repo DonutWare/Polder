@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 
+	"polder-server/internal/dav"
 	"polder-server/internal/files"
 )
 
@@ -17,7 +18,7 @@ func (h *Handler) get(req *request) error {
 	if err != nil {
 		if current, exists, statErr := h.stat(req, req.absolute); statErr == nil && exists && current.IsDir {
 			req.w.Header().Set("Allow", allowedMethods)
-			return withStatus(http.StatusMethodNotAllowed, "collections cannot be downloaded")
+			return dav.WithStatus(http.StatusMethodNotAllowed, "collections cannot be downloaded")
 		}
 		return err
 	}
@@ -34,7 +35,7 @@ func (h *Handler) get(req *request) error {
 
 func (h *Handler) put(req *request) error {
 	if req.r.Header.Get("Content-Range") != "" {
-		return withStatus(http.StatusBadRequest, "partial uploads are not supported")
+		return dav.WithStatus(http.StatusBadRequest, "partial uploads are not supported")
 	}
 	current, exists, err := h.stat(req, req.absolute)
 	if err != nil {
@@ -42,7 +43,7 @@ func (h *Handler) put(req *request) error {
 	}
 	if exists && current.IsDir {
 		req.w.Header().Set("Allow", allowedMethods)
-		return withStatus(http.StatusMethodNotAllowed, "cannot replace a collection with a file")
+		return dav.WithStatus(http.StatusMethodNotAllowed, "cannot replace a collection with a file")
 	}
 	if err := h.requireWritable(req, exists); err != nil {
 		return err
@@ -88,14 +89,14 @@ func (h *Handler) requireWritable(req *request, exists bool) error {
 
 func (h *Handler) mkcol(req *request) error {
 	if req.r.ContentLength > 0 || len(req.r.TransferEncoding) > 0 {
-		return withStatus(http.StatusUnsupportedMediaType, "MKCOL does not take a body")
+		return dav.WithStatus(http.StatusUnsupportedMediaType, "MKCOL does not take a body")
 	}
 	if _, exists, err := h.stat(req, req.absolute); err != nil || exists {
 		if err != nil {
 			return err
 		}
 		req.w.Header().Set("Allow", allowedMethods)
-		return withStatus(http.StatusMethodNotAllowed, "the resource already exists")
+		return dav.WithStatus(http.StatusMethodNotAllowed, "the resource already exists")
 	}
 	if err := req.space.Access.RequireCreate(); err != nil {
 		return err
@@ -119,7 +120,7 @@ func (h *Handler) mkcol(req *request) error {
 
 func (h *Handler) delete(req *request) error {
 	if req.absolute == req.space.Access.Root.Path {
-		return withStatus(http.StatusForbidden, "the root of this space cannot be deleted")
+		return dav.WithStatus(http.StatusForbidden, "the root of this space cannot be deleted")
 	}
 	if err := req.space.Access.RequireDelete(); err != nil {
 		return err
@@ -129,7 +130,7 @@ func (h *Handler) delete(req *request) error {
 		return err
 	}
 	if !exists {
-		return withStatus(http.StatusNotFound, "no such resource")
+		return dav.WithStatus(http.StatusNotFound, "no such resource")
 	}
 	if err := h.checkLocks(req, req.absolute, current.IsDir, true); err != nil {
 		return err
@@ -152,18 +153,18 @@ func (h *Handler) delete(req *request) error {
 func (h *Handler) destination(req *request) (string, string, error) {
 	raw := req.r.Header.Get("Destination")
 	if raw == "" {
-		return "", "", withStatus(http.StatusBadRequest, "missing Destination header")
+		return "", "", dav.WithStatus(http.StatusBadRequest, "missing Destination header")
 	}
 	parsed, err := url.Parse(raw)
 	if err != nil {
-		return "", "", withStatus(http.StatusBadRequest, "invalid Destination header")
+		return "", "", dav.WithStatus(http.StatusBadRequest, "invalid Destination header")
 	}
 	if parsed.Host != "" && !strings.EqualFold(parsed.Host, req.r.Host) {
-		return "", "", withStatus(http.StatusBadGateway, "the destination is on another server")
+		return "", "", dav.WithStatus(http.StatusBadGateway, "the destination is on another server")
 	}
 	relative, found := req.space.relativePath(parsed.Path)
 	if !found {
-		return "", "", withStatus(http.StatusBadGateway, "the destination is outside this space")
+		return "", "", dav.WithStatus(http.StatusBadGateway, "the destination is outside this space")
 	}
 	absolute, err := req.space.Access.Inner(relative)
 	return relative, absolute, err
@@ -172,14 +173,14 @@ func (h *Handler) destination(req *request) (string, string, error) {
 func (h *Handler) moveOrCopy(req *request, copying bool) error {
 	access := req.space.Access
 	if _, err := access.Inner(req.relative); err != nil {
-		return withStatus(http.StatusForbidden, "the root of this space cannot be moved or copied")
+		return dav.WithStatus(http.StatusForbidden, "the root of this space cannot be moved or copied")
 	}
 	_, to, err := h.destination(req)
 	if err != nil {
 		return err
 	}
 	if to == req.absolute {
-		return withStatus(http.StatusForbidden, "source and destination are the same")
+		return dav.WithStatus(http.StatusForbidden, "source and destination are the same")
 	}
 	if err := access.RequireMove(req.absolute, to, copying); err != nil {
 		return err
@@ -189,14 +190,14 @@ func (h *Handler) moveOrCopy(req *request, copying bool) error {
 		return err
 	}
 	if !exists {
-		return withStatus(http.StatusNotFound, "no such resource")
+		return dav.WithStatus(http.StatusNotFound, "no such resource")
 	}
 	target, targetExists, err := h.stat(req, to)
 	if err != nil {
 		return err
 	}
 	if targetExists && strings.EqualFold(strings.TrimSpace(req.r.Header.Get("Overwrite")), "F") {
-		return withStatus(http.StatusPreconditionFailed, "the destination exists and Overwrite is F")
+		return dav.WithStatus(http.StatusPreconditionFailed, "the destination exists and Overwrite is F")
 	}
 	if err := h.requireParent(req, to); err != nil {
 		return err

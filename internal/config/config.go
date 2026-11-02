@@ -58,6 +58,17 @@ type Config struct {
 	VideoHWAccelDevice  string `yaml:"videoHwaccelDevice"`
 	PublicURL           string `yaml:"publicUrl"`
 	WebDAVAllowInsecure bool   `yaml:"webdavAllowInsecure"`
+
+	CalendarMaxEventBytes             int           `yaml:"calendarMaxEventBytes"`
+	CalendarSubscriptionMinRefresh    time.Duration `yaml:"calendarSubscriptionMinRefresh"`
+	CalendarSubscriptionsAllowPrivate bool          `yaml:"calendarSubscriptionsAllowPrivate"`
+
+	SMTPHost     string `yaml:"smtpHost"`
+	SMTPPort     int    `yaml:"smtpPort"`
+	SMTPUsername string `yaml:"smtpUsername"`
+	SMTPPassword string `yaml:"smtpPassword"`
+	SMTPFrom     string `yaml:"smtpFrom"`
+	SMTPSecurity string `yaml:"smtpSecurity"`
 }
 
 func Default() Config {
@@ -76,6 +87,10 @@ func Default() Config {
 		OCRModelURL:        "https://github.com/tesseract-ocr/tessdata_fast/raw/main",
 		FFmpegPath:         "ffmpeg",
 		VideoHWAccel:       "auto",
+
+		CalendarMaxEventBytes:          1 << 20,
+		CalendarSubscriptionMinRefresh: 15 * time.Minute,
+		SMTPSecurity:                   "starttls",
 	}
 }
 
@@ -122,6 +137,11 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.VideoHWAccel = envOr("POLDER_VIDEO_HWACCEL", cfg.VideoHWAccel)
 	cfg.VideoHWAccelDevice = envOr("POLDER_VIDEO_HWACCEL_DEVICE", cfg.VideoHWAccelDevice)
 	cfg.PublicURL = envOr("POLDER_PUBLIC_URL", cfg.PublicURL)
+	cfg.SMTPHost = envOr("POLDER_SMTP_HOST", cfg.SMTPHost)
+	cfg.SMTPUsername = envOr("POLDER_SMTP_USERNAME", cfg.SMTPUsername)
+	cfg.SMTPPassword = envOr("POLDER_SMTP_PASSWORD", cfg.SMTPPassword)
+	cfg.SMTPFrom = envOr("POLDER_SMTP_FROM", cfg.SMTPFrom)
+	cfg.SMTPSecurity = envOr("POLDER_SMTP_SECURITY", cfg.SMTPSecurity)
 	if value, ok := os.LookupEnv("POLDER_TRUSTED_PROXIES"); ok {
 		cfg.TrustedProxies = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || unicode.IsSpace(r) })
 	}
@@ -161,6 +181,34 @@ func (cfg *Config) mergeEnvironment() error {
 		}
 		cfg.WebDAVAllowInsecure = allow
 	}
+	if value, ok := os.LookupEnv("POLDER_SMTP_PORT"); ok {
+		port, err := strconv.Atoi(value)
+		if err != nil {
+			return fmt.Errorf("POLDER_SMTP_PORT: %w", err)
+		}
+		cfg.SMTPPort = port
+	}
+	if value, ok := os.LookupEnv("POLDER_CALENDAR_MAX_EVENT_BYTES"); ok {
+		size, err := strconv.Atoi(value)
+		if err != nil {
+			return fmt.Errorf("POLDER_CALENDAR_MAX_EVENT_BYTES: %w", err)
+		}
+		cfg.CalendarMaxEventBytes = size
+	}
+	if value, ok := os.LookupEnv("POLDER_CALENDAR_SUBSCRIPTION_MIN_REFRESH"); ok {
+		interval, err := time.ParseDuration(value)
+		if err != nil {
+			return fmt.Errorf("POLDER_CALENDAR_SUBSCRIPTION_MIN_REFRESH: %w", err)
+		}
+		cfg.CalendarSubscriptionMinRefresh = interval
+	}
+	if value, ok := os.LookupEnv("POLDER_CALENDAR_SUBSCRIPTIONS_ALLOW_PRIVATE"); ok {
+		allow, err := strconv.ParseBool(value)
+		if err != nil {
+			return fmt.Errorf("POLDER_CALENDAR_SUBSCRIPTIONS_ALLOW_PRIVATE: %w", err)
+		}
+		cfg.CalendarSubscriptionsAllowPrivate = allow
+	}
 	if value, ok := os.LookupEnv("POLDER_WATCH_FILES"); ok {
 		watch, err := strconv.ParseBool(value)
 		if err != nil {
@@ -179,6 +227,9 @@ func (cfg Config) validate() error {
 		return errors.New("logRetentionDays must be at least 1")
 	}
 	if _, err := cfg.TrustedProxyRanges(); err != nil {
+		return err
+	}
+	if err := cfg.validateCalendar(); err != nil {
 		return err
 	}
 	if cfg.CollaboraURL != "" && cfg.EuroOfficeURL != "" {
@@ -209,6 +260,27 @@ func (cfg Config) validate() error {
 	default:
 		return fmt.Errorf("unknown database driver %q (use %q or %q)", cfg.DatabaseDriver, DriverSQLite, DriverPostgres)
 	}
+}
+
+func (cfg Config) validateCalendar() error {
+	if cfg.CalendarMaxEventBytes < 4<<10 || cfg.CalendarMaxEventBytes > 16<<20 {
+		return errors.New("calendarMaxEventBytes must be between 4096 and 16777216")
+	}
+	if cfg.CalendarSubscriptionMinRefresh < time.Minute {
+		return errors.New("calendarSubscriptionMinRefresh must be at least 1m")
+	}
+	if cfg.SMTPPort < 0 || cfg.SMTPPort > 65535 {
+		return errors.New("smtpPort must be between 0 and 65535")
+	}
+	switch cfg.SMTPSecurity {
+	case "", "starttls", "tls", "none":
+	default:
+		return fmt.Errorf("smtpSecurity: %q is not starttls, tls or none", cfg.SMTPSecurity)
+	}
+	if cfg.SMTPHost != "" && cfg.SMTPFrom == "" {
+		return errors.New("smtpFrom is required when smtpHost is set")
+	}
+	return nil
 }
 
 func (cfg Config) TrustedProxyRanges() ([]netip.Prefix, error) {

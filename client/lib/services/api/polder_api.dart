@@ -6,6 +6,7 @@ import "package:chopper/chopper.dart" as chopper;
 import "package:polder/models/activity.dart";
 import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/branding.dart";
+import "package:polder/models/calendar.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
@@ -29,6 +30,7 @@ import "package:polder/models/upload_batch.dart";
 import "package:polder/models/user.dart";
 import "package:polder/models/user_tag.dart";
 import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/calendar_mappers.dart";
 import "package:polder/services/api/federation_mappers.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 import "package:polder/services/api/pending_uploads.dart";
@@ -533,6 +535,26 @@ class PolderApi {
   )).body!.toModel();
 
   Future<void> deleteAppPassword(int id) => _service.deleteAppPassword(appPasswordID: id);
+
+  Future<List<CalendarSummary>> calendars() async => [
+    for (final calendar in (await _service.listCalendars()).body!) calendar.toModel(),
+  ];
+
+  Future<List<CalendarFeed>> calendarFeeds(int calendarId) async => [
+    for (final feed in (await _service.listCalendarFeeds(calendarID: calendarId)).body!) feed.toModel(),
+  ];
+
+  Future<CreatedCalendarFeed> createCalendarFeed(
+    int calendarId, {
+    required CalendarFeedMode mode,
+    String? name,
+  }) async => (await _service.createCalendarFeed(
+    calendarID: calendarId,
+    body: wire.NewFeed(mode: mode.toWire(), name: name),
+  )).body!.toCreated();
+
+  Future<void> deleteCalendarFeed(int calendarId, int feedId) =>
+      _service.deleteCalendarFeed(calendarID: calendarId, feedID: feedId);
 
   Future<FederationStatus> federationStatus() async => (await _service.getFederationStatus()).body!.toModel();
 

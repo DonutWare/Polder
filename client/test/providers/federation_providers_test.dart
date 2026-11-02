@@ -4,7 +4,7 @@ import "package:polder/models/federation.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/federation/federation_providers.dart";
-import "package:polder/screens/settings/widgets/app_passwords_group.dart";
+import "package:polder/util/dav_addresses.dart";
 
 import "../support/provider_harness.dart";
 import "../support/scripted_client.dart";
@@ -162,11 +162,25 @@ void main() {
     );
   });
 
-  test("cloud IDs and WebDAV addresses", () {
+  test("cloud IDs and DAV addresses", () {
     expect(looksLikeCloudId("alice@cloud.example.com"), isTrue);
     expect(looksLikeCloudId("alice@example.com@cloud.example.com:8443/nc"), isTrue);
     expect(looksLikeCloudId("alice"), isFalse);
     expect(looksLikeCloudId("alice @host"), isFalse);
-    expect(webdavAddress("https://files.example.com/", "jop"), "https://files.example.com/dav/files/jop/");
+    expect(webdavAddress("https://files.example.com/", "alice"), "https://files.example.com/dav/files/alice/");
+    expect(caldavAddress("https://files.example.com"), "https://files.example.com/dav/");
+    expect(
+      calendarAddress("https://files.example.com/", "alice", "shared-7"),
+      "https://files.example.com/dav/calendars/alice/shared-7/",
+    );
+    expect(
+      subscriptionAddress("https://files.example.com/", "/ical/abc.ics"),
+      "https://files.example.com/ical/abc.ics",
+    );
+    expect(
+      subscriptionAddress("https://files.example.com", "https://cal.example.com/ical/abc.ics"),
+      "https://cal.example.com/ical/abc.ics",
+    );
+    expect(webcalAddress("https://files.example.com/ical/abc.ics"), "webcal://files.example.com/ical/abc.ics");
   });
 }

@@ -83,6 +83,39 @@ Polder itself or from a reverse proxy listed in `trustedProxies`.
 | --- | --- | --- |
 | `webdavAllowInsecure` | `POLDER_WEBDAV_ALLOW_INSECURE` | Accept app passwords over plain HTTP, for testing only |
 
+## Calendar
+
+Calendars sync over CalDAV with app passwords and can be published as secret
+subscription links. Users find their CalDAV addresses and manage subscription
+links under account settings in the app. CalDAV has the same HTTPS
+requirement as WebDAV. Set `publicUrl` so subscription links and invitation
+emails carry the server's address.
+
+Apps may log in with the email address from the user's profile instead of the
+username. For calendar apps that set themselves up from an email address
+alone, the email's domain needs DNS records pointing at Polder:
+
+```
+_caldavs._tcp.example.com. SRV 0 1 443 files.example.com.
+_caldavs._tcp.example.com. TXT "path=/dav/"
+```
+
+Invitations to people with a Polder account are matched by the email address
+in their profile. Other attendees get an email with an answer link, which
+needs an SMTP server.
+
+| Setting | Environment variable | Meaning |
+| --- | --- | --- |
+| `calendarMaxEventBytes` | `POLDER_CALENDAR_MAX_EVENT_BYTES` | Largest event apps may store, in bytes (default 1 MiB) |
+| `calendarSubscriptionMinRefresh` | `POLDER_CALENDAR_SUBSCRIPTION_MIN_REFRESH` | Shortest time between refreshes of a subscribed feed (default `15m`) |
+| `calendarSubscriptionsAllowPrivate` | `POLDER_CALENDAR_SUBSCRIPTIONS_ALLOW_PRIVATE` | Allow subscribing to feeds on private networks, such as other services on the same LAN |
+| `smtpHost` | `POLDER_SMTP_HOST` | Mail server for invitations to people outside Polder |
+| `smtpPort` | `POLDER_SMTP_PORT` | Mail server port (default 587, or 465 with `tls`) |
+| `smtpUsername` | `POLDER_SMTP_USERNAME` | Mail server login |
+| `smtpPassword` | `POLDER_SMTP_PASSWORD` | Mail server password |
+| `smtpFrom` | `POLDER_SMTP_FROM` | Sender address, such as `Polder <calendar@example.com>` |
+| `smtpSecurity` | `POLDER_SMTP_SECURITY` | `starttls` (default), `tls` or `none` |
+
 ## Federation
 
 Polder shares with other servers using

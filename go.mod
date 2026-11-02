@@ -6,6 +6,7 @@ require (
 	github.com/blevesearch/bleve/v2 v2.6.1
 	github.com/coder/websocket v1.8.15
 	github.com/danielgtaylor/huma/v2 v2.39.1
+	github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-text/typesetting v0.3.5
@@ -15,6 +16,7 @@ require (
 	github.com/klippa-app/go-pdfium v1.21.1
 	github.com/pressly/goose/v3 v3.28.0
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
+	github.com/teambition/rrule-go v1.8.2
 	github.com/tetratelabs/wazero v1.12.0
 	github.com/yuin/goldmark v1.8.6
 	golang.org/x/crypto v0.57.0
