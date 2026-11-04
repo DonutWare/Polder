@@ -1,10 +1,13 @@
 package preview
 
 import (
+	"context"
 	"image"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"polder-server/internal/files"
 )
 
 const markdownFixture = `---
@@ -92,5 +95,18 @@ func TestMarkdownPreviewDrawsEveryScript(t *testing.T) {
 func TestEmptyMarkdownPreviewIsBlankPage(t *testing.T) {
 	if rows := inkedRows(renderFixture(t, "")); rows != 0 {
 		t.Fatalf("empty note drew %d rows", rows)
+	}
+}
+
+func TestMarkdownPreviewSurvivesTextWithoutFontCoverage(t *testing.T) {
+	renderFixture(t, "# \U000F0000\U000F0001 heading\n\nplain \U000F0002 text ￿​\u0000 end\n\n- \U0010FFFD\n")
+}
+
+func TestRenderSafelyTurnsPanicIntoError(t *testing.T) {
+	panicking := func(context.Context, *os.File, files.Entry) (decodedImage, error) {
+		panic("boom")
+	}
+	if _, err := renderSafely(context.Background(), panicking, nil, files.Entry{Path: "/note.md"}); err == nil {
+		t.Fatal("expected an error from a panicking renderer")
 	}
 }

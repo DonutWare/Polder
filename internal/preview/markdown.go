@@ -393,11 +393,20 @@ func (r *markdownRenderer) layout(text string, style textStyle, width int, right
 		direction = di.DirectionRTL
 	}
 	input := shaping.Input{Text: runes, RunEnd: len(runes), Direction: direction, Size: fixed.Int26_6(style.size * 64)}
+	fallback := r.fonts.ResolveFace(' ')
 	var shaped []shaping.Output
 	for _, run := range r.segmenter.Split(input, r.fonts) {
-		if run.Face != nil {
-			shaped = append(shaped, r.shaper.Shape(run))
+		if run.Face == nil {
+			run.Face = fallback
 		}
+		if run.Face == nil {
+			return nil
+		}
+		output := r.shaper.Shape(run)
+		if len(output.Glyphs) == 0 {
+			return nil
+		}
+		shaped = append(shaped, output)
 	}
 	if len(shaped) == 0 {
 		return nil

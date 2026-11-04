@@ -8,6 +8,7 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"slices"
 	"strings"
 	"time"
@@ -251,7 +252,7 @@ func (w *Worker) generate(ctx context.Context, owner users.User, entry files.Ent
 	}
 	defer file.Close()
 
-	decoded, err := render(ctx, file, entry)
+	decoded, err := renderSafely(ctx, render, file, entry)
 	if errors.Is(err, office.ErrUnavailable) {
 		logger.Warn("document previews paused", "error", err, "retry", officeRetryDelay)
 		w.officePausedUntil = time.Now().Add(officeRetryDelay)
@@ -271,6 +272,16 @@ func (w *Worker) generate(ctx context.Context, owner users.User, entry files.Ent
 		}
 	}
 	return decoded.meta(), files.PreviewReady
+}
+
+func renderSafely(ctx context.Context, render render, file *os.File, entry files.Entry) (decoded decodedImage, err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			logger.Error("preview renderer panicked", "path", entry.Path, "mime", entry.Mime, "panic", recovered, "stack", string(debug.Stack()))
+			decoded, err = decodedImage{}, fmt.Errorf("preview renderer panicked: %v", recovered)
+		}
+	}()
+	return render(ctx, file, entry)
 }
 
 func (w *Worker) removeUnusedThumbnails(ctx context.Context) {
