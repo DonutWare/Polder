@@ -201,7 +201,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Windows EXE
-        run: flutter build windows --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ vars.UPDATE_PUBLIC_KEY }}
+        run: flutter build windows --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
 
       - name: Compile Inno Setup installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
@@ -283,7 +283,7 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS app
-        run: flutter build macos --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ vars.UPDATE_PUBLIC_KEY }}
+        run: flutter build macos --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
 
       - name: Install create-dmg
         run: brew install create-dmg
@@ -348,7 +348,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Linux app
-        run: flutter build linux --release --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ vars.UPDATE_PUBLIC_KEY }}
+        run: flutter build linux --release --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
 
       - name: Fix RPATH
         run: |
