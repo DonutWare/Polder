@@ -99,7 +99,7 @@ func TestEmptyMarkdownPreviewIsBlankPage(t *testing.T) {
 }
 
 func TestMarkdownPreviewSurvivesTextWithoutFontCoverage(t *testing.T) {
-	renderFixture(t, "# \U000F0000\U000F0001 heading\n\nplain \U000F0002 text ￿​\u0000 end\n\n- \U0010FFFD\n")
+	renderFixture(t, "# \U000F0000\U000F0001 heading\n\nplain \U000F0002 text \uFFFF\u200B\u0000 end\n\n- \U0010FFFD\n")
 }
 
 func TestRenderSafelyTurnsPanicIntoError(t *testing.T) {
