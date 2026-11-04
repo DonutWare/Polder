@@ -527,41 +527,44 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate changelog
-        if: needs.fetch-info.outputs.build_type == 'nightly'
         run: |
-          LATEST_STABLE_RELEASE=$(gh release list --limit 50 --exclude-drafts --json tagName,isPrerelease --jq '.[] | select(.isPrerelease == false) | .tagName' | head -1 || echo "")
+          PREVIOUS_RELEASE=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -vx "${{ steps.version.outputs.tag }}" | head -1 || echo "")
+          RANGE=${PREVIOUS_RELEASE:+$PREVIOUS_RELEASE..}HEAD
 
-          cat > changelog.md <<-EOF
+          if [[ "${{ needs.fetch-info.outputs.build_type }}" == "nightly" ]]; then
+            IMAGE_TAG="${{ env.NIGHTLY_TAG }}"
+            cat > changelog.md <<-EOF
           # $(date -u "+%Y-%m-%d %H:%M:%S UTC")
 
           This is an automated nightly build containing the latest changes from the develop branch.
 
           **⚠️ Warning:** This is a development build and may contain bugs or incomplete features.
 
-          ## 🐳 Server
-
-          \`\`\`
-          docker pull ${{ steps.version.outputs.image }}:${{ env.NIGHTLY_TAG }}
-          \`\`\`
-          EOF
-
-          if [ -n "$LATEST_STABLE_RELEASE" ]; then
-            cat >> changelog.md <<-EOF
-
-          ## 📋 What's Changed
-
-          See all changes since the latest release: [Compare $LATEST_STABLE_RELEASE...HEAD](https://github.com/${{ github.repository }}/compare/$LATEST_STABLE_RELEASE...HEAD)
           EOF
           else
-            cat >> changelog.md <<-EOF
-
-          ## 📋 What's Changed
-
-          See all changes: [View commits](https://github.com/${{ github.repository }}/commits/develop)
-          EOF
+            IMAGE_TAG="${{ steps.version.outputs.version }}"
+            : > changelog.md
           fi
 
           cat >> changelog.md <<-EOF
+          ## 🐳 Server
+
+          \`\`\`
+          docker pull ${{ steps.version.outputs.image }}:${IMAGE_TAG}
+          \`\`\`
+
+          ## 📋 What's Changed
+
+          EOF
+          python3 .github/scripts/changelog.py "$RANGE" >> changelog.md
+
+          if [ -n "$PREVIOUS_RELEASE" ]; then
+            COMPARE_TARGET=${{ needs.fetch-info.outputs.build_type == 'nightly' && github.sha || steps.version.outputs.tag }}
+            echo "**Full Changelog:** https://github.com/${{ github.repository }}/compare/$PREVIOUS_RELEASE...$COMPARE_TARGET" >> changelog.md
+          fi
+
+          if [[ "${{ needs.fetch-info.outputs.build_type }}" == "nightly" ]]; then
+            cat >> changelog.md <<-EOF
 
           ---
 
@@ -570,8 +573,7 @@ jobs:
           📝 **Commit:** ${{ github.sha }}
           🌿 **Branch:** develop
           EOF
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fi
 
       - name: Download Artifacts Android
         uses: actions/download-artifact@v4
@@ -679,11 +681,10 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           target_commitish: ${{ github.sha }}
           name: ${{ needs.fetch-info.outputs.build_type == 'nightly' && format('🌙 Nightly Build - {0}', steps.version.outputs.version) || '' }}
-          body_path: ${{ needs.fetch-info.outputs.build_type == 'nightly' && 'changelog.md' || '' }}
+          body_path: changelog.md
           draft: true
           prerelease: ${{ needs.fetch-info.outputs.build_type == 'nightly' }}
           make_latest: ${{ needs.fetch-info.outputs.build_type == 'release' }}
-          generate_release_notes: ${{ needs.fetch-info.outputs.build_type == 'release' }}
           fail_on_unmatched_files: true
           files: |
             Polder-Android-${{ steps.version.outputs.version }}-arm64-v8a.apk
