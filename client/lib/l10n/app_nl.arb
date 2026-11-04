@@ -846,6 +846,7 @@
 	"updatesChecking": "Controleren op updates…",
 	"updatesUpToDate": "Polder is up-to-date",
 	"updatesFailed": "Kon niet controleren op updates",
+	"updatesInstallFailed": "Kon versie {version} ({build}) niet installeren",
 	"updatesAvailable": "Versie {version} ({build}) is beschikbaar",
 	"updatesDownloading": "Update downloaden… {percent}%",
 	"updatesReady": "Versie {version} ({build}) wordt geïnstalleerd wanneer Polder afsluit",

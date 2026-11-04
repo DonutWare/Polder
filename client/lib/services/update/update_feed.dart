@@ -8,7 +8,7 @@ import "package:polder/util/build_channel.dart";
 
 const _configuredPublicKey = String.fromEnvironment("POLDER_UPDATE_PUBLIC_KEY");
 
-const updateSigningConfigured = _configuredPublicKey != "";
+const _ed25519PublicKeyLength = 32;
 
 class UpdateFeedException implements Exception {
   const UpdateFeedException(this.message);
@@ -20,14 +20,30 @@ class UpdateFeedException implements Exception {
 }
 
 class UpdateFeed {
-  UpdateFeed(this._client, {String publicKey = _configuredPublicKey})
-    : _publicKey = SimplePublicKey(base64Decode(publicKey), type: KeyPairType.ed25519);
+  UpdateFeed(http.Client client, {String publicKey = _configuredPublicKey})
+    : this._(client, _decodePublicKey(publicKey) ?? (throw ArgumentError.value(publicKey, "publicKey")));
+
+  UpdateFeed._(this._client, this._publicKey);
+
+  static UpdateFeed? tryCreate(http.Client client, {String publicKey = _configuredPublicKey}) {
+    final key = _decodePublicKey(publicKey);
+    return key == null ? null : UpdateFeed._(client, key);
+  }
 
   static const manifestName = "update.json";
   static const signatureName = "update.json.sig";
 
   final http.Client _client;
   final SimplePublicKey _publicKey;
+
+  static SimplePublicKey? _decodePublicKey(String encoded) {
+    try {
+      final bytes = base64Decode(encoded.trim());
+      return bytes.length == _ed25519PublicKeyLength ? SimplePublicKey(bytes, type: KeyPairType.ed25519) : null;
+    } on FormatException {
+      return null;
+    }
+  }
 
   Future<UpdateManifest?> fetch(BuildChannel channel) async {
     final manifest = await _download(_url(channel, manifestName));

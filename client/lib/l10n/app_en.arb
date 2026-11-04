@@ -1551,6 +1551,8 @@
 	"updatesChecking": "Checking for updates…",
 	"updatesUpToDate": "Polder is up to date",
 	"updatesFailed": "Couldn't check for updates",
+	"updatesInstallFailed": "Couldn't install version {version} ({build})",
+	"@updatesInstallFailed": {"placeholders": {"version": {"type": "String"}, "build": {"type": "int"}}},
 	"updatesAvailable": "Version {version} ({build}) is available",
 	"@updatesAvailable": {"placeholders": {"version": {"type": "String"}, "build": {"type": "int"}}},
 	"updatesDownloading": "Downloading update… {percent}%",

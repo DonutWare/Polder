@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
 
@@ -145,13 +147,31 @@ void main() {
     expect(platform.downloaded, isEmpty);
   });
 
+  test("keeps the update it failed to download", () async {
+    platform = _FailingDownloadPlatform();
+    final updates = container();
+    feed.manifests[BuildChannel.stable] = manifest(build: 12);
+
+    await updates.read(updateProvider.notifier).check();
+
+    expect(updates.read(updateProvider).phase, UpdatePhase.failed);
+    expect(updates.read(updateProvider).manifest?.build, 12);
+  });
+
   test("reports a failed check", () async {
     final updates = container(withFeed: _FailingFeed());
 
     await updates.read(updateProvider.notifier).check();
 
     expect(updates.read(updateProvider).phase, UpdatePhase.failed);
+    expect(updates.read(updateProvider).manifest, isNull);
   });
+}
+
+class _FailingDownloadPlatform extends FakeUpdatePlatform {
+  @override
+  Future<String> download(UpdateManifest manifest, {required void Function(double progress) onProgress}) async =>
+      throw const FileSystemException("disk full");
 }
 
 class _FailingFeed extends FakeUpdateFeed {

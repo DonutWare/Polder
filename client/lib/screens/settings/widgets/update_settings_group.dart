@@ -92,6 +92,7 @@ class UpdateStatusTile extends ConsumerWidget {
     return switch (state.phase) {
       UpdatePhase.checking => localized.updatesChecking,
       UpdatePhase.upToDate => localized.updatesUpToDate,
+      UpdatePhase.failed when manifest != null => localized.updatesInstallFailed(manifest.version, manifest.build),
       UpdatePhase.failed => localized.updatesFailed,
       UpdatePhase.downloading => localized.updatesDownloading((state.progress * 100).round()),
       UpdatePhase.ready => localized.updatesReady(manifest!.version, manifest.build),

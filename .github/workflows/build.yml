@@ -222,7 +222,7 @@ jobs:
           path: client\windows\Output\polder_setup.exe
 
   build-ios:
-    runs-on: macos-latest
+    runs-on: xcode-27
     needs: [fetch-info]
     defaults:
       run:
@@ -498,8 +498,14 @@ jobs:
         run: |
           if [[ "${{ needs.fetch-info.outputs.build_type }}" == "nightly" ]]; then
             echo "version=${{ needs.fetch-info.outputs.nightly_version }}" >> $GITHUB_OUTPUT
+            echo "tag=${{ env.NIGHTLY_TAG }}" >> $GITHUB_OUTPUT
           else
             echo "version=${{ needs.fetch-info.outputs.version_name }}" >> $GITHUB_OUTPUT
+            if [[ "${{ github.ref_type }}" == "tag" ]]; then
+              echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            else
+              echo "tag=v${{ needs.fetch-info.outputs.version_name }}" >> $GITHUB_OUTPUT
+            fi
           fi
           echo "image=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/polder" >> $GITHUB_OUTPUT
 
@@ -660,7 +666,7 @@ jobs:
             ${{ needs.fetch-info.outputs.build_type == 'nightly' && 'nightly' || 'stable' }} \
             "$VERSION" \
             ${{ github.run_number }} \
-            ${{ needs.fetch-info.outputs.build_type == 'nightly' && env.NIGHTLY_TAG || github.ref_name }} \
+            ${{ steps.version.outputs.tag }} \
             "Polder-macOS-$VERSION.zip" \
             "Polder-Windows-$VERSION-Setup.exe" \
             "Polder-Linux-$VERSION.AppImage"
@@ -670,7 +676,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2.2.2
         with:
-          tag_name: ${{ needs.fetch-info.outputs.build_type == 'nightly' && env.NIGHTLY_TAG || github.ref_name }}
+          tag_name: ${{ steps.version.outputs.tag }}
           target_commitish: ${{ github.sha }}
           name: ${{ needs.fetch-info.outputs.build_type == 'nightly' && format('🌙 Nightly Build - {0}', steps.version.outputs.version) || '' }}
           body_path: ${{ needs.fetch-info.outputs.build_type == 'nightly' && 'changelog.md' || '' }}

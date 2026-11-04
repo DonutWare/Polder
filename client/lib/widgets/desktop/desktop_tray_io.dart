@@ -224,13 +224,21 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     if (l10n == null || item == null) return;
     final state = ref.read(updateProvider);
     item
-      ..label = state.phase == UpdatePhase.ready ? l10n.updatesRestart : l10n.updatesCheck
+      ..label = switch (state) {
+        UpdateState(phase: UpdatePhase.ready) => l10n.updatesRestart,
+        UpdateState(phase: UpdatePhase.available, inPlace: true) => l10n.updatesInstall,
+        _ => l10n.updatesCheck,
+      }
       ..isEnabled = !state.busy;
   }
 
   void _updateClicked() {
     final notifier = ref.read(updateProvider.notifier);
-    unawaited(ref.read(updateProvider).phase == UpdatePhase.ready ? notifier.restartToUpdate() : notifier.check());
+    unawaited(switch (ref.read(updateProvider)) {
+      UpdateState(phase: UpdatePhase.ready) ||
+      UpdateState(phase: UpdatePhase.available, inPlace: true) => notifier.restartToUpdate(),
+      _ => notifier.check(),
+    });
   }
 
   Future<void> _restartToUpdate() async {

@@ -80,4 +80,15 @@ void main() {
 
     expect(feed.fetch(BuildChannel.stable), throwsA(isA<UpdateFeedException>()));
   });
+
+  test("only creates a feed for a raw Ed25519 public key", () async {
+    final client = MockClient((_) async => http.Response("", 404));
+    final pem = "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA${key.publicKey}\n-----END PUBLIC KEY-----";
+    final spki = base64Encode([...List.filled(12, 0), ...base64Decode(key.publicKey)]);
+
+    expect(UpdateFeed.tryCreate(client, publicKey: key.publicKey), isNotNull);
+    expect(UpdateFeed.tryCreate(client, publicKey: ""), isNull);
+    expect(UpdateFeed.tryCreate(client, publicKey: pem), isNull);
+    expect(UpdateFeed.tryCreate(client, publicKey: spki), isNull);
+  });
 }

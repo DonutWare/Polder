@@ -24,9 +24,7 @@ final updatePlatformProvider = Provider<UpdatePlatform>(
   (ref) => createUpdatePlatform(ref.watch(_updateHttpClientProvider)),
 );
 
-final updateFeedProvider = Provider<UpdateFeed?>(
-  (ref) => updateSigningConfigured ? UpdateFeed(ref.watch(_updateHttpClientProvider)) : null,
-);
+final updateFeedProvider = Provider<UpdateFeed?>((ref) => UpdateFeed.tryCreate(ref.watch(_updateHttpClientProvider)));
 
 final currentBuildProvider = FutureProvider<int>(
   (ref) async => int.tryParse((await ref.watch(packageInfoProvider.future)).buildNumber) ?? 0,
@@ -85,12 +83,18 @@ class UpdateNotifier extends Notifier<UpdateState> {
   Future<void> _check(UpdatePreferences preferences) async {
     if (state.phase == UpdatePhase.disabled || state.busy || state.phase == UpdatePhase.ready) return;
     state = const UpdateState(UpdatePhase.checking);
+    final UpdateManifest? manifest;
     try {
-      final manifest = await _newest(nightly: preferences.nightly);
-      if (manifest == null) {
-        state = const UpdateState(UpdatePhase.upToDate);
-        return;
-      }
+      manifest = await _newest(nightly: preferences.nightly);
+    } catch (_) {
+      state = const UpdateState(UpdatePhase.failed);
+      return;
+    }
+    if (manifest == null) {
+      state = const UpdateState(UpdatePhase.upToDate);
+      return;
+    }
+    try {
       final inPlace = await ref.read(updatePlatformProvider).canInstallInPlace();
       if (inPlace && preferences.automatic) {
         await _download(manifest);
@@ -98,7 +102,7 @@ class UpdateNotifier extends Notifier<UpdateState> {
         state = UpdateState(UpdatePhase.available, manifest: manifest, inPlace: inPlace);
       }
     } catch (_) {
-      state = const UpdateState(UpdatePhase.failed);
+      state = UpdateState(UpdatePhase.failed, manifest: manifest);
     }
   }
 
