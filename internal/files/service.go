@@ -401,7 +401,7 @@ func (s *Service) renameOnDisk(owner users.User, from, to string) error {
 	if err != nil {
 		return err
 	}
-	if err := os.Rename(absoluteFrom, absoluteTo); err != nil {
+	if err := storage.Move(absoluteFrom, absoluteTo); err != nil {
 		return fmt.Errorf("rename: %w", err)
 	}
 	return nil

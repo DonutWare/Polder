@@ -140,7 +140,7 @@ func (d *Disk) MoveToTrash(username, absolutePath, storageID, name string) error
 	if err := os.MkdirAll(filepath.Dir(target), dirPermissions); err != nil {
 		return err
 	}
-	return os.Rename(absolutePath, target)
+	return Move(absolutePath, target)
 }
 
 func (d *Disk) RemoveTrashItem(username, storageID string) error {

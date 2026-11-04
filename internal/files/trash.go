@@ -121,7 +121,7 @@ func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, 
 		return 0, noUndo, fmt.Errorf("move to trash: %w", err)
 	}
 	undo := func() {
-		_ = os.Rename(s.disk.TrashItemPath(owner.Username, storageID, entry.Name), absolute)
+		_ = storage.Move(s.disk.TrashItemPath(owner.Username, storageID, entry.Name), absolute)
 		_ = s.disk.RemoveTrashItem(owner.Username, storageID)
 	}
 	deletedAt := time.Now().UTC()
@@ -218,10 +218,10 @@ func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int
 			return err
 		}
 		source := s.disk.TrashItemPath(owner.Username, item.storageID, item.Name)
-		if err := os.Rename(source, absolute); err != nil {
+		if err := storage.Move(source, absolute); err != nil {
 			return fmt.Errorf("restore from trash: %w", err)
 		}
-		undo = append(undo, func() { _ = os.Rename(absolute, source) })
+		undo = append(undo, func() { _ = storage.Move(absolute, source) })
 		sidecar, err := s.readTrashSidecar(owner.Username, item.storageID)
 		if err != nil {
 			logger.Warn("read trash details, restored files get new ids", "item", item.ID, "error", err)
