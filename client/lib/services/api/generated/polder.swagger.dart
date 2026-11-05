@@ -1678,7 +1678,7 @@ abstract class Polder extends ChopperService {
     ),
   });
 
-  ///Add the events of an .ics file; events with a known UID are replaced
+  ///Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced
   ///@param calendarID
   Future<chopper.Response<ImportResult>> importCalendar({required int? calendarID, required Object? body}) {
     generatedMapping.putIfAbsent(ImportResult, () => ImportResult.fromJsonFactory);
@@ -1686,7 +1686,7 @@ abstract class Polder extends ChopperService {
     return _importCalendar(calendarID: calendarID, body: body);
   }
 
-  ///Add the events of an .ics file; events with a known UID are replaced
+  ///Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced
   ///@param calendarID
   @POST(path: '/api/v1/calendars/{calendarID}/import', optionalBody: true)
   Future<chopper.Response<ImportResult>> _importCalendar({
@@ -1695,7 +1695,7 @@ abstract class Polder extends ChopperService {
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Add the events of an .ics file; events with a known UID are replaced',
+      summary: 'Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced',
       operationId: 'importCalendar',
       consumes: [],
       produces: [],

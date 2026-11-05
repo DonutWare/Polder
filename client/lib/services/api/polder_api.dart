@@ -612,6 +612,72 @@ class PolderApi {
         body: wire.RsvpEventInputBody(status: status.toWire(), recurrenceId: event.ref.recurrenceId),
       );
 
+  Future<cal.CalendarInfo> createCalendar(String sourceId, {required String name, Color? color}) async =>
+      (await _service.createCalendar(
+        body: wire.NewCalendar(name: name, color: color == null ? null : hexColor(color)),
+      )).body!.toInfo(sourceId);
+
+  Future<void> updateCalendar(int calendarId, {String? name, Color? color, bool? hidden, int? refreshSeconds}) =>
+      _service.updateCalendar(
+        calendarID: calendarId,
+        body: wire.CalendarChange(
+          name: name,
+          color: color == null ? null : hexColor(color),
+          hidden: hidden,
+          refreshSeconds: refreshSeconds,
+        ),
+      );
+
+  Future<void> deleteCalendar(int calendarId) => _service.deleteCalendar(calendarID: calendarId);
+
+  Future<void> setDefaultCalendar(int calendarId) => _service.setDefaultCalendar(calendarID: calendarId);
+
+  Future<cal.CalendarInfo> subscribeCalendar(
+    String sourceId, {
+    required String url,
+    String? name,
+    Color? color,
+    int? refreshSeconds,
+  }) async => (await _service.subscribeCalendar(
+    body: wire.NewSubscription(
+      url: url,
+      name: name,
+      color: color == null ? null : hexColor(color),
+      refreshSeconds: refreshSeconds,
+    ),
+  )).body!.toInfo(sourceId);
+
+  Future<void> refreshCalendar(int calendarId) => _service.refreshCalendar(calendarID: calendarId);
+
+  Future<CalendarImportResult> importCalendar(int calendarId, Uint8List content) async =>
+      (await _service.importCalendar(calendarID: calendarId, body: content)).body!.toModel();
+
+  Future<List<CalendarShare>> calendarShares(int calendarId) async => [
+    for (final share in (await _service.listCalendarShares(calendarID: calendarId)).body!) share.toModel(),
+  ];
+
+  Future<CalendarShare> shareCalendar(int calendarId, ShareTarget target, CalendarShareAccess access) async =>
+      (await _service.shareCalendar(
+        calendarID: calendarId,
+        body: wire.NewCalendarShare(
+          recipientId: target.id,
+          recipientKind: target.isGroup
+              ? wire.NewCalendarShareRecipientKind.group
+              : wire.NewCalendarShareRecipientKind.user,
+          access: access.toWire(),
+        ),
+      )).body!.toModel();
+
+  Future<void> updateCalendarShare(int calendarId, int shareId, CalendarShareAccess access) =>
+      _service.updateCalendarShare(
+        calendarID: calendarId,
+        shareID: shareId,
+        body: wire.UpdateCalendarShareInputBody(access: access.toUpdateWire()),
+      );
+
+  Future<void> removeCalendarShare(int calendarId, int shareId) =>
+      _service.removeCalendarShare(calendarID: calendarId, shareID: shareId);
+
   Future<List<CalendarFeed>> calendarFeeds(int calendarId) async => [
     for (final feed in (await _service.listCalendarFeeds(calendarID: calendarId)).body!) feed.toModel(),
   ];

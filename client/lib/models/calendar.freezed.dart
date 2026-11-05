@@ -858,4 +858,574 @@ $CalendarFeedCopyWith<$Res> get feed {
 }
 }
 
+/// @nodoc
+mixin _$CalendarShare {
+
+ int get id; int get calendarId; ShareTarget get recipient; CalendarShareAccess get access;
+/// Create a copy of CalendarShare
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CalendarShareCopyWith<CalendarShare> get copyWith => _$CalendarShareCopyWithImpl<CalendarShare>(this as CalendarShare, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CalendarShare;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CalendarShare&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.calendarId, _this.calendarId) || other.calendarId == _this.calendarId)&&(identical(other.recipient, _this.recipient) || other.recipient == _this.recipient)&&(identical(other.access, _this.access) || other.access == _this.access));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as CalendarShare;
+  return Object.hash(runtimeType,_this.id,_this.calendarId,_this.recipient,_this.access);
+}
+
+@override
+String toString() {
+  final _this = this as CalendarShare;
+  return 'CalendarShare(id: ${_this.id}, calendarId: ${_this.calendarId}, recipient: ${_this.recipient}, access: ${_this.access})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CalendarShareCopyWith<$Res>  {
+  factory $CalendarShareCopyWith(CalendarShare value, $Res Function(CalendarShare) _then) = _$CalendarShareCopyWithImpl;
+@useResult
+$Res call({
+ int id, int calendarId, ShareTarget recipient, CalendarShareAccess access
+});
+
+
+$ShareTargetCopyWith<$Res> get recipient;
+
+}
+/// @nodoc
+class _$CalendarShareCopyWithImpl<$Res>
+    implements $CalendarShareCopyWith<$Res> {
+  _$CalendarShareCopyWithImpl(this._self, this._then);
+
+  final CalendarShare _self;
+  final $Res Function(CalendarShare) _then;
+
+/// Create a copy of CalendarShare
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? calendarId = null,Object? recipient = null,Object? access = null,}) {
+  return _then(CalendarShare(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,calendarId: null == calendarId ? _self.calendarId : calendarId // ignore: cast_nullable_to_non_nullable
+as int,recipient: null == recipient ? _self.recipient : recipient // ignore: cast_nullable_to_non_nullable
+as ShareTarget,access: null == access ? _self.access : access // ignore: cast_nullable_to_non_nullable
+as CalendarShareAccess,
+  ));
+}
+/// Create a copy of CalendarShare
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ShareTargetCopyWith<$Res> get recipient {
+  
+  return $ShareTargetCopyWith<$Res>(_self.recipient, (value) {
+    return _then(_self.copyWith(recipient: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [CalendarShare].
+extension CalendarSharePatterns on CalendarShare {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CalendarShare value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CalendarShare() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CalendarShare value)  $default,){
+final _that = this;
+switch (_that) {
+case _CalendarShare():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CalendarShare value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CalendarShare() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  int calendarId,  ShareTarget recipient,  CalendarShareAccess access)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CalendarShare() when $default != null:
+return $default(_that.id,_that.calendarId,_that.recipient,_that.access);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  int calendarId,  ShareTarget recipient,  CalendarShareAccess access)  $default,) {final _that = this;
+switch (_that) {
+case _CalendarShare():
+return $default(_that.id,_that.calendarId,_that.recipient,_that.access);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  int calendarId,  ShareTarget recipient,  CalendarShareAccess access)?  $default,) {final _that = this;
+switch (_that) {
+case _CalendarShare() when $default != null:
+return $default(_that.id,_that.calendarId,_that.recipient,_that.access);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _CalendarShare implements CalendarShare {
+  const _CalendarShare({required this.id, required this.calendarId, required this.recipient, required this.access});
+  
+
+@override final  int id;
+@override final  int calendarId;
+@override final  ShareTarget recipient;
+@override final  CalendarShareAccess access;
+
+/// Create a copy of CalendarShare
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CalendarShareCopyWith<_CalendarShare> get copyWith => __$CalendarShareCopyWithImpl<_CalendarShare>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CalendarShare&&(identical(other.id, id) || other.id == id)&&(identical(other.calendarId, calendarId) || other.calendarId == calendarId)&&(identical(other.recipient, recipient) || other.recipient == recipient)&&(identical(other.access, access) || other.access == access));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,calendarId,recipient,access);
+}
+
+@override
+String toString() {
+    return 'CalendarShare(id: $id, calendarId: $calendarId, recipient: $recipient, access: $access)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CalendarShareCopyWith<$Res> implements $CalendarShareCopyWith<$Res> {
+  factory _$CalendarShareCopyWith(_CalendarShare value, $Res Function(_CalendarShare) _then) = __$CalendarShareCopyWithImpl;
+@override @useResult
+$Res call({
+ int id, int calendarId, ShareTarget recipient, CalendarShareAccess access
+});
+
+
+@override $ShareTargetCopyWith<$Res> get recipient;
+
+}
+/// @nodoc
+class __$CalendarShareCopyWithImpl<$Res>
+    implements _$CalendarShareCopyWith<$Res> {
+  __$CalendarShareCopyWithImpl(this._self, this._then);
+
+  final _CalendarShare _self;
+  final $Res Function(_CalendarShare) _then;
+
+/// Create a copy of CalendarShare
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? calendarId = null,Object? recipient = null,Object? access = null,}) {
+  return _then(_CalendarShare(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,calendarId: null == calendarId ? _self.calendarId : calendarId // ignore: cast_nullable_to_non_nullable
+as int,recipient: null == recipient ? _self.recipient : recipient // ignore: cast_nullable_to_non_nullable
+as ShareTarget,access: null == access ? _self.access : access // ignore: cast_nullable_to_non_nullable
+as CalendarShareAccess,
+  ));
+}
+
+/// Create a copy of CalendarShare
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ShareTargetCopyWith<$Res> get recipient {
+  
+  return $ShareTargetCopyWith<$Res>(_self.recipient, (value) {
+    return _then(_self.copyWith(recipient: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$CalendarImportResult {
+
+ int get created; int get updated; int get skipped; List<String> get errors;
+/// Create a copy of CalendarImportResult
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CalendarImportResultCopyWith<CalendarImportResult> get copyWith => _$CalendarImportResultCopyWithImpl<CalendarImportResult>(this as CalendarImportResult, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CalendarImportResult;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CalendarImportResult&&(identical(other.created, _this.created) || other.created == _this.created)&&(identical(other.updated, _this.updated) || other.updated == _this.updated)&&(identical(other.skipped, _this.skipped) || other.skipped == _this.skipped)&&const DeepCollectionEquality().equals(other.errors, _this.errors));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as CalendarImportResult;
+  return Object.hash(runtimeType,_this.created,_this.updated,_this.skipped,const DeepCollectionEquality().hash(_this.errors));
+}
+
+@override
+String toString() {
+  final _this = this as CalendarImportResult;
+  return 'CalendarImportResult(created: ${_this.created}, updated: ${_this.updated}, skipped: ${_this.skipped}, errors: ${_this.errors})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CalendarImportResultCopyWith<$Res>  {
+  factory $CalendarImportResultCopyWith(CalendarImportResult value, $Res Function(CalendarImportResult) _then) = _$CalendarImportResultCopyWithImpl;
+@useResult
+$Res call({
+ int created, int updated, int skipped, List<String> errors
+});
+
+
+
+
+}
+/// @nodoc
+class _$CalendarImportResultCopyWithImpl<$Res>
+    implements $CalendarImportResultCopyWith<$Res> {
+  _$CalendarImportResultCopyWithImpl(this._self, this._then);
+
+  final CalendarImportResult _self;
+  final $Res Function(CalendarImportResult) _then;
+
+/// Create a copy of CalendarImportResult
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? created = null,Object? updated = null,Object? skipped = null,Object? errors = null,}) {
+  return _then(CalendarImportResult(
+created: null == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
+as int,updated: null == updated ? _self.updated : updated // ignore: cast_nullable_to_non_nullable
+as int,skipped: null == skipped ? _self.skipped : skipped // ignore: cast_nullable_to_non_nullable
+as int,errors: null == errors ? _self.errors : errors // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CalendarImportResult].
+extension CalendarImportResultPatterns on CalendarImportResult {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CalendarImportResult value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CalendarImportResult() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CalendarImportResult value)  $default,){
+final _that = this;
+switch (_that) {
+case _CalendarImportResult():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CalendarImportResult value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CalendarImportResult() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int created,  int updated,  int skipped,  List<String> errors)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CalendarImportResult() when $default != null:
+return $default(_that.created,_that.updated,_that.skipped,_that.errors);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int created,  int updated,  int skipped,  List<String> errors)  $default,) {final _that = this;
+switch (_that) {
+case _CalendarImportResult():
+return $default(_that.created,_that.updated,_that.skipped,_that.errors);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int created,  int updated,  int skipped,  List<String> errors)?  $default,) {final _that = this;
+switch (_that) {
+case _CalendarImportResult() when $default != null:
+return $default(_that.created,_that.updated,_that.skipped,_that.errors);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _CalendarImportResult implements CalendarImportResult {
+  const _CalendarImportResult({required this.created, required this.updated, required this.skipped,  List<String> errors = const []}): _errors = errors;
+  
+
+@override final  int created;
+@override final  int updated;
+@override final  int skipped;
+ final  List<String> _errors;
+@override@JsonKey() List<String> get errors {
+  if (_errors is EqualUnmodifiableListView) return _errors;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_errors);
+}
+
+
+/// Create a copy of CalendarImportResult
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CalendarImportResultCopyWith<_CalendarImportResult> get copyWith => __$CalendarImportResultCopyWithImpl<_CalendarImportResult>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CalendarImportResult&&(identical(other.created, created) || other.created == created)&&(identical(other.updated, updated) || other.updated == updated)&&(identical(other.skipped, skipped) || other.skipped == skipped)&&const DeepCollectionEquality().equals(other.errors, _errors));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,created,updated,skipped,const DeepCollectionEquality().hash(_errors));
+}
+
+@override
+String toString() {
+    return 'CalendarImportResult(created: $created, updated: $updated, skipped: $skipped, errors: $errors)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CalendarImportResultCopyWith<$Res> implements $CalendarImportResultCopyWith<$Res> {
+  factory _$CalendarImportResultCopyWith(_CalendarImportResult value, $Res Function(_CalendarImportResult) _then) = __$CalendarImportResultCopyWithImpl;
+@override @useResult
+$Res call({
+ int created, int updated, int skipped, List<String> errors
+});
+
+
+
+
+}
+/// @nodoc
+class __$CalendarImportResultCopyWithImpl<$Res>
+    implements _$CalendarImportResultCopyWith<$Res> {
+  __$CalendarImportResultCopyWithImpl(this._self, this._then);
+
+  final _CalendarImportResult _self;
+  final $Res Function(_CalendarImportResult) _then;
+
+/// Create a copy of CalendarImportResult
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? created = null,Object? updated = null,Object? skipped = null,Object? errors = null,}) {
+  return _then(_CalendarImportResult(
+created: null == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
+as int,updated: null == updated ? _self.updated : updated // ignore: cast_nullable_to_non_nullable
+as int,skipped: null == skipped ? _self.skipped : skipped // ignore: cast_nullable_to_non_nullable
+as int,errors: null == errors ? _self._errors : errors // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+
+}
+
 // dart format on

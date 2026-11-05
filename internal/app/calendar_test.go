@@ -545,6 +545,17 @@ func TestCalendarSubscriptionsFollowRemoteFeeds(t *testing.T) {
 	alice.mustJSON(http.MethodPost, fmt.Sprintf("/calendars/%d/events", subscribed.ID), map[string]any{"summary": "x", "start": "2030-08-01T10:00:00Z"}, http.StatusForbidden, nil)
 	alice.mustJSON(http.MethodPost, fmt.Sprintf("/calendars/%d/refresh", subscribed.ID), nil, http.StatusOK, nil)
 
+	named := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/calendar")
+		_, _ = w.Write([]byte(strings.Replace(feed, "BEGIN:VEVENT", "X-WR-CALNAME:Holidays in the Netherlands\r\nBEGIN:VEVENT", 1)))
+	}))
+	defer named.Close()
+	var unnamed calendarInfo
+	alice.mustJSON(http.MethodPost, "/calendars/subscriptions", map[string]any{"url": named.URL}, http.StatusCreated, &unnamed)
+	if unnamed.Name != "Holidays in the Netherlands" {
+		t.Fatalf("a subscription without a name is called %q", unnamed.Name)
+	}
+
 	password := alice.createAppPassword("phone", false, "password1")
 	path := "/dav/calendars/alice/" + subscribed.URI + "/remote-1.ics"
 	server.dav("alice", password.Token).expect(http.MethodPut, path, feed, nil, http.StatusForbidden)

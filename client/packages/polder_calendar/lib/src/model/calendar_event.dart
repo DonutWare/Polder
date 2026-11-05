@@ -1,5 +1,3 @@
-import "package:flutter/painting.dart";
-
 import "package:freezed_annotation/freezed_annotation.dart";
 
 import "package:polder_calendar/src/model/calendar_ref.dart";
@@ -64,7 +62,6 @@ abstract class CalendarEvent with _$CalendarEvent {
     @Default(false) bool modifiedOccurrence,
     @Default(EventStatus.confirmed) EventStatus status,
     @Default(EventShowAs.busy) EventShowAs showAs,
-    Color? color,
     @Default(false) bool busyOnly,
     EventPerson? organizer,
     @Default([]) List<EventAttendee> attendees,

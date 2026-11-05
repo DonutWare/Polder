@@ -139,9 +139,6 @@ class CalendarLocalizationsNl extends CalendarLocalizations {
   String get color => 'Kleur';
 
   @override
-  String get calendarColor => 'Agendakleur';
-
-  @override
   String get repeatNone => 'Herhaalt niet';
 
   @override

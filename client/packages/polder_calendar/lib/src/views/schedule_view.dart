@@ -345,6 +345,28 @@ class _ScheduleTile extends StatelessWidget {
     return "${from ?? ""} – ${until ?? ""}".trim();
   }
 
+  double _timeColumnWidth(BuildContext context) {
+    final widest = DateTime(2000, 1, 1, 23, 58);
+    final labels = [
+      "${formatTime(context, widest)} – ${formatTime(context, widest)}",
+      CalendarLocalizations.of(context).allDay,
+    ];
+    final style = Theme.of(context).textTheme.bodySmall;
+    final scaler = MediaQuery.textScalerOf(context);
+    var width = 0.0;
+    for (final label in labels) {
+      final painter = TextPainter(
+        text: TextSpan(text: label, style: style),
+        textDirection: Directionality.of(context),
+        textScaler: scaler,
+        maxLines: 1,
+      )..layout();
+      width = width > painter.width ? width : painter.width;
+      painter.dispose();
+    }
+    return width.ceilToDouble() + 2;
+  }
+
   @override
   Widget build(BuildContext context) {
     final strings = CalendarLocalizations.of(context);
@@ -358,7 +380,7 @@ class _ScheduleTile extends StatelessWidget {
       style: theme.textTheme.titleSmall?.copyWith(decoration: isDeclined(event) ? TextDecoration.lineThrough : null),
     );
     final details = [
-      _Detail(icon: event.allDay ? IconsaxPlusLinear.sun_1 : IconsaxPlusLinear.clock, text: time),
+      _Detail(text: time),
       if (location.isNotEmpty) _Detail(icon: IconsaxPlusLinear.location, text: location),
       if (event.recurring) const Icon(IconsaxPlusLinear.repeat, size: 14),
     ];
@@ -381,9 +403,9 @@ class _ScheduleTile extends StatelessWidget {
               data: IconThemeData(color: theme.colorScheme.onSurfaceVariant),
               child: wide
                   ? Row(
-                      spacing: 16,
+                      spacing: 12,
                       children: [
-                        SizedBox(width: 140, child: details.first),
+                        SizedBox(width: _timeColumnWidth(context), child: details.first),
                         Expanded(flex: 3, child: title),
                         if (location.isNotEmpty) Flexible(flex: 2, child: details[1]),
                         if (event.recurring) details.last,
@@ -406,9 +428,9 @@ class _ScheduleTile extends StatelessWidget {
 }
 
 class _Detail extends StatelessWidget {
-  const _Detail({required this.icon, required this.text});
+  const _Detail({required this.text, this.icon});
 
-  final IconData icon;
+  final IconData? icon;
   final String text;
 
   @override
@@ -418,7 +440,7 @@ class _Detail extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       spacing: 4,
       children: [
-        Icon(icon, size: 14),
+        if (icon != null) Icon(icon, size: 14),
         Flexible(
           child: Text(
             text,

@@ -27,20 +27,6 @@ class EventEditor extends StatefulWidget {
     super.key,
   });
 
-  static const palette = [
-    Color(0xFFD50000),
-    Color(0xFFE67C73),
-    Color(0xFFF4511E),
-    Color(0xFFF6BF26),
-    Color(0xFF33B679),
-    Color(0xFF0B8043),
-    Color(0xFF039BE5),
-    Color(0xFF3F51B5),
-    Color(0xFF7986CB),
-    Color(0xFF8E24AA),
-    Color(0xFF616161),
-  ];
-
   static const timedReminders = [0, -5, -10, -15, -30, -60, -24 * 60];
   static const allDayReminders = [9 * 60, -15 * 60, -(6 * 24 + 15) * 60];
 
@@ -63,7 +49,6 @@ class _EventEditorState extends State<EventEditor> {
   late var _end = widget.draft.end;
   late Object _repeat = _initialRepeat();
   late var _reminders = [...widget.draft.reminders];
-  late var _color = widget.draft.color;
   late var _calendar = widget.calendar;
   var _repeatTouched = false;
 
@@ -104,7 +89,6 @@ class _EventEditorState extends State<EventEditor> {
       location: _text(_location),
       description: _text(_description),
       reminders: _reminders,
-      color: _color,
     ),
   ));
 
@@ -243,7 +227,7 @@ class _EventEditorState extends State<EventEditor> {
                   width: 18,
                   height: 18,
                   decoration: ShapeDecoration(
-                    color: _color ?? calendarColor ?? theme.colorScheme.primary,
+                    color: calendarColor ?? theme.colorScheme.primary,
                     shape: CalendarStyle.squircle(6),
                   ),
                 ),
@@ -325,31 +309,11 @@ class _EventEditorState extends State<EventEditor> {
               ),
             ],
           ),
-          _Section(
-            children: [
-              _FieldRow(
-                leading: const Icon(IconsaxPlusLinear.colorfilter),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _ColorDot(
-                        color: calendarColor ?? theme.colorScheme.primary,
-                        selected: _color == null,
-                        tooltip: strings.calendarColor,
-                        onTap: () => setState(() => _color = null),
-                      ),
-                      for (final color in EventEditor.palette)
-                        _ColorDot(color: color, selected: _color == color, onTap: () => setState(() => _color = color)),
-                    ],
-                  ),
-                ),
-              ),
-              if (widget.canChangeCalendar &&
-                  widget.calendars.length > 1 &&
-                  widget.calendars.any((calendar) => calendar.ref == _calendar))
+          if (widget.canChangeCalendar &&
+              widget.calendars.length > 1 &&
+              widget.calendars.any((calendar) => calendar.ref == _calendar))
+            _Section(
+              children: [
                 _FieldRow(
                   leading: const Icon(IconsaxPlusLinear.calendar_1),
                   child: DropdownButtonHideUnderline(
@@ -359,13 +323,29 @@ class _EventEditorState extends State<EventEditor> {
                       onChanged: (calendar) => setState(() => _calendar = calendar ?? _calendar),
                       items: [
                         for (final calendar in widget.calendars)
-                          DropdownMenuItem(value: calendar.ref, child: Text(calendar.name)),
+                          DropdownMenuItem(
+                            value: calendar.ref,
+                            child: Row(
+                              spacing: 12,
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: calendar.color ?? theme.colorScheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Flexible(child: Text(calendar.name, overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),
                 ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -469,28 +449,4 @@ class _FieldRow extends StatelessWidget {
       ],
     ),
   );
-}
-
-class _ColorDot extends StatelessWidget {
-  const _ColorDot({required this.color, required this.selected, required this.onTap, this.tooltip});
-
-  final Color color;
-  final bool selected;
-  final VoidCallback onTap;
-  final String? tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    final dot = InkResponse(
-      onTap: onTap,
-      radius: 20,
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        child: selected ? Icon(IconsaxPlusLinear.tick_circle, size: 18, color: foregroundOn(color)) : null,
-      ),
-    );
-    return tooltip == null ? dot : Tooltip(message: tooltip, child: dot);
-  }
 }

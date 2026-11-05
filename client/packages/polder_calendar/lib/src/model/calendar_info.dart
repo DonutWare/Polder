@@ -21,7 +21,12 @@ abstract class CalendarInfo with _$CalendarInfo {
     @Default(false) bool isDefault,
     @Default(false) bool subscription,
     String? ownerName,
+    String? sourceUrl,
+    DateTime? fetchedAt,
+    String? fetchError,
   }) = _CalendarInfo;
+
+  bool get shared => access != CalendarAccess.owner;
 
   bool get writable => !subscription && (access == CalendarAccess.owner || access == CalendarAccess.readWrite);
 }

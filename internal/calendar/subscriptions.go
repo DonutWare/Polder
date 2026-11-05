@@ -10,6 +10,9 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"unicode/utf8"
+
+	"github.com/emersion/go-ical"
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/netguard"
@@ -110,6 +113,24 @@ func (s *Service) Subscribe(ctx context.Context, viewer users.User, request NewS
 	}
 	s.refresh(ctx, stored)
 	return s.Get(ctx, viewer, id)
+}
+
+func (s *Service) adoptFeedName(ctx context.Context, c Calendar, header ical.Props) {
+	if c.Name != hostOf(c.SourceURL) {
+		return
+	}
+	prop := header.Get("X-WR-CALNAME")
+	if prop == nil {
+		return
+	}
+	name := strings.TrimSpace(prop.Value)
+	if name == "" || name == c.Name || utf8.RuneCountInString(name) > maxNameLength {
+		return
+	}
+	c.Name = name
+	if err := s.store.UpdateCalendar(ctx, c); err != nil {
+		logger.Warn("name a calendar subscription after its feed", "calendar", c.ID, "error", err)
+	}
 }
 
 func hostOf(raw string) string {
@@ -213,10 +234,16 @@ func (s *Service) fetchSubscription(ctx context.Context, c Calendar) (string, st
 }
 
 func (s *Service) syncSubscription(ctx context.Context, c Calendar, body []byte) error {
+	if closed, truncated := closeTruncated(body); truncated {
+		logger.Warn("a calendar feed ended early; keeping its complete events", "calendar", c.ID)
+		body = closed
+	}
 	split, err := splitByUID(body)
 	if err != nil {
 		return err
 	}
+	s.adoptFeedName(ctx, c, split.header)
+	tidyFeed(c.SourceURL, split)
 	existing, err := s.store.ObjectMetas(ctx, c.ID)
 	if err != nil {
 		return err

@@ -846,7 +846,7 @@ as DateTime?,
 /// @nodoc
 mixin _$CalendarEvent {
 
- EventRef get ref; String get etag; String get summary; DateTime get start; DateTime get end; bool get allDay; String? get description; String? get location; String? get url; String? get timezone; String? get rrule; bool get recurring; bool get modifiedOccurrence; EventStatus get status; EventShowAs get showAs; Color? get color; bool get busyOnly; EventPerson? get organizer; List<EventAttendee> get attendees; List<EventReminder> get reminders;
+ EventRef get ref; String get etag; String get summary; DateTime get start; DateTime get end; bool get allDay; String? get description; String? get location; String? get url; String? get timezone; String? get rrule; bool get recurring; bool get modifiedOccurrence; EventStatus get status; EventShowAs get showAs; bool get busyOnly; EventPerson? get organizer; List<EventAttendee> get attendees; List<EventReminder> get reminders;
 /// Create a copy of CalendarEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -858,20 +858,20 @@ $CalendarEventCopyWith<CalendarEvent> get copyWith => _$CalendarEventCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as CalendarEvent;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CalendarEvent&&(identical(other.ref, _this.ref) || other.ref == _this.ref)&&(identical(other.etag, _this.etag) || other.etag == _this.etag)&&(identical(other.summary, _this.summary) || other.summary == _this.summary)&&(identical(other.start, _this.start) || other.start == _this.start)&&(identical(other.end, _this.end) || other.end == _this.end)&&(identical(other.allDay, _this.allDay) || other.allDay == _this.allDay)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.url, _this.url) || other.url == _this.url)&&(identical(other.timezone, _this.timezone) || other.timezone == _this.timezone)&&(identical(other.rrule, _this.rrule) || other.rrule == _this.rrule)&&(identical(other.recurring, _this.recurring) || other.recurring == _this.recurring)&&(identical(other.modifiedOccurrence, _this.modifiedOccurrence) || other.modifiedOccurrence == _this.modifiedOccurrence)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.showAs, _this.showAs) || other.showAs == _this.showAs)&&(identical(other.color, _this.color) || other.color == _this.color)&&(identical(other.busyOnly, _this.busyOnly) || other.busyOnly == _this.busyOnly)&&(identical(other.organizer, _this.organizer) || other.organizer == _this.organizer)&&const DeepCollectionEquality().equals(other.attendees, _this.attendees)&&const DeepCollectionEquality().equals(other.reminders, _this.reminders));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CalendarEvent&&(identical(other.ref, _this.ref) || other.ref == _this.ref)&&(identical(other.etag, _this.etag) || other.etag == _this.etag)&&(identical(other.summary, _this.summary) || other.summary == _this.summary)&&(identical(other.start, _this.start) || other.start == _this.start)&&(identical(other.end, _this.end) || other.end == _this.end)&&(identical(other.allDay, _this.allDay) || other.allDay == _this.allDay)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.url, _this.url) || other.url == _this.url)&&(identical(other.timezone, _this.timezone) || other.timezone == _this.timezone)&&(identical(other.rrule, _this.rrule) || other.rrule == _this.rrule)&&(identical(other.recurring, _this.recurring) || other.recurring == _this.recurring)&&(identical(other.modifiedOccurrence, _this.modifiedOccurrence) || other.modifiedOccurrence == _this.modifiedOccurrence)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.showAs, _this.showAs) || other.showAs == _this.showAs)&&(identical(other.busyOnly, _this.busyOnly) || other.busyOnly == _this.busyOnly)&&(identical(other.organizer, _this.organizer) || other.organizer == _this.organizer)&&const DeepCollectionEquality().equals(other.attendees, _this.attendees)&&const DeepCollectionEquality().equals(other.reminders, _this.reminders));
 }
 
 
 @override
 int get hashCode {
   final _this = this as CalendarEvent;
-  return Object.hashAll([runtimeType,_this.ref,_this.etag,_this.summary,_this.start,_this.end,_this.allDay,_this.description,_this.location,_this.url,_this.timezone,_this.rrule,_this.recurring,_this.modifiedOccurrence,_this.status,_this.showAs,_this.color,_this.busyOnly,_this.organizer,const DeepCollectionEquality().hash(_this.attendees),const DeepCollectionEquality().hash(_this.reminders)]);
+  return Object.hashAll([runtimeType,_this.ref,_this.etag,_this.summary,_this.start,_this.end,_this.allDay,_this.description,_this.location,_this.url,_this.timezone,_this.rrule,_this.recurring,_this.modifiedOccurrence,_this.status,_this.showAs,_this.busyOnly,_this.organizer,const DeepCollectionEquality().hash(_this.attendees),const DeepCollectionEquality().hash(_this.reminders)]);
 }
 
 @override
 String toString() {
   final _this = this as CalendarEvent;
-  return 'CalendarEvent(ref: ${_this.ref}, etag: ${_this.etag}, summary: ${_this.summary}, start: ${_this.start}, end: ${_this.end}, allDay: ${_this.allDay}, description: ${_this.description}, location: ${_this.location}, url: ${_this.url}, timezone: ${_this.timezone}, rrule: ${_this.rrule}, recurring: ${_this.recurring}, modifiedOccurrence: ${_this.modifiedOccurrence}, status: ${_this.status}, showAs: ${_this.showAs}, color: ${_this.color}, busyOnly: ${_this.busyOnly}, organizer: ${_this.organizer}, attendees: ${_this.attendees}, reminders: ${_this.reminders})';
+  return 'CalendarEvent(ref: ${_this.ref}, etag: ${_this.etag}, summary: ${_this.summary}, start: ${_this.start}, end: ${_this.end}, allDay: ${_this.allDay}, description: ${_this.description}, location: ${_this.location}, url: ${_this.url}, timezone: ${_this.timezone}, rrule: ${_this.rrule}, recurring: ${_this.recurring}, modifiedOccurrence: ${_this.modifiedOccurrence}, status: ${_this.status}, showAs: ${_this.showAs}, busyOnly: ${_this.busyOnly}, organizer: ${_this.organizer}, attendees: ${_this.attendees}, reminders: ${_this.reminders})';
 }
 
 
@@ -882,7 +882,7 @@ abstract mixin class $CalendarEventCopyWith<$Res>  {
   factory $CalendarEventCopyWith(CalendarEvent value, $Res Function(CalendarEvent) _then) = _$CalendarEventCopyWithImpl;
 @useResult
 $Res call({
- EventRef ref, String etag, String summary, DateTime start, DateTime end, bool allDay, String? description, String? location, String? url, String? timezone, String? rrule, bool recurring, bool modifiedOccurrence, EventStatus status, EventShowAs showAs, Color? color, bool busyOnly, EventPerson? organizer, List<EventAttendee> attendees, List<EventReminder> reminders
+ EventRef ref, String etag, String summary, DateTime start, DateTime end, bool allDay, String? description, String? location, String? url, String? timezone, String? rrule, bool recurring, bool modifiedOccurrence, EventStatus status, EventShowAs showAs, bool busyOnly, EventPerson? organizer, List<EventAttendee> attendees, List<EventReminder> reminders
 });
 
 
@@ -899,7 +899,7 @@ class _$CalendarEventCopyWithImpl<$Res>
 
 /// Create a copy of CalendarEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? ref = null,Object? etag = null,Object? summary = null,Object? start = null,Object? end = null,Object? allDay = null,Object? description = freezed,Object? location = freezed,Object? url = freezed,Object? timezone = freezed,Object? rrule = freezed,Object? recurring = null,Object? modifiedOccurrence = null,Object? status = null,Object? showAs = null,Object? color = freezed,Object? busyOnly = null,Object? organizer = freezed,Object? attendees = null,Object? reminders = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? ref = null,Object? etag = null,Object? summary = null,Object? start = null,Object? end = null,Object? allDay = null,Object? description = freezed,Object? location = freezed,Object? url = freezed,Object? timezone = freezed,Object? rrule = freezed,Object? recurring = null,Object? modifiedOccurrence = null,Object? status = null,Object? showAs = null,Object? busyOnly = null,Object? organizer = freezed,Object? attendees = null,Object? reminders = null,}) {
   return _then(CalendarEvent(
 ref: null == ref ? _self.ref : ref // ignore: cast_nullable_to_non_nullable
 as EventRef,etag: null == etag ? _self.etag : etag // ignore: cast_nullable_to_non_nullable
@@ -916,8 +916,7 @@ as String?,recurring: null == recurring ? _self.recurring : recurring // ignore:
 as bool,modifiedOccurrence: null == modifiedOccurrence ? _self.modifiedOccurrence : modifiedOccurrence // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EventStatus,showAs: null == showAs ? _self.showAs : showAs // ignore: cast_nullable_to_non_nullable
-as EventShowAs,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as Color?,busyOnly: null == busyOnly ? _self.busyOnly : busyOnly // ignore: cast_nullable_to_non_nullable
+as EventShowAs,busyOnly: null == busyOnly ? _self.busyOnly : busyOnly // ignore: cast_nullable_to_non_nullable
 as bool,organizer: freezed == organizer ? _self.organizer : organizer // ignore: cast_nullable_to_non_nullable
 as EventPerson?,attendees: null == attendees ? _self.attendees : attendees // ignore: cast_nullable_to_non_nullable
 as List<EventAttendee>,reminders: null == reminders ? _self.reminders : reminders // ignore: cast_nullable_to_non_nullable
@@ -1027,10 +1026,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EventRef ref,  String etag,  String summary,  DateTime start,  DateTime end,  bool allDay,  String? description,  String? location,  String? url,  String? timezone,  String? rrule,  bool recurring,  bool modifiedOccurrence,  EventStatus status,  EventShowAs showAs,  Color? color,  bool busyOnly,  EventPerson? organizer,  List<EventAttendee> attendees,  List<EventReminder> reminders)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EventRef ref,  String etag,  String summary,  DateTime start,  DateTime end,  bool allDay,  String? description,  String? location,  String? url,  String? timezone,  String? rrule,  bool recurring,  bool modifiedOccurrence,  EventStatus status,  EventShowAs showAs,  bool busyOnly,  EventPerson? organizer,  List<EventAttendee> attendees,  List<EventReminder> reminders)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CalendarEvent() when $default != null:
-return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.allDay,_that.description,_that.location,_that.url,_that.timezone,_that.rrule,_that.recurring,_that.modifiedOccurrence,_that.status,_that.showAs,_that.color,_that.busyOnly,_that.organizer,_that.attendees,_that.reminders);case _:
+return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.allDay,_that.description,_that.location,_that.url,_that.timezone,_that.rrule,_that.recurring,_that.modifiedOccurrence,_that.status,_that.showAs,_that.busyOnly,_that.organizer,_that.attendees,_that.reminders);case _:
   return orElse();
 
 }
@@ -1048,10 +1047,10 @@ return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.a
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EventRef ref,  String etag,  String summary,  DateTime start,  DateTime end,  bool allDay,  String? description,  String? location,  String? url,  String? timezone,  String? rrule,  bool recurring,  bool modifiedOccurrence,  EventStatus status,  EventShowAs showAs,  Color? color,  bool busyOnly,  EventPerson? organizer,  List<EventAttendee> attendees,  List<EventReminder> reminders)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EventRef ref,  String etag,  String summary,  DateTime start,  DateTime end,  bool allDay,  String? description,  String? location,  String? url,  String? timezone,  String? rrule,  bool recurring,  bool modifiedOccurrence,  EventStatus status,  EventShowAs showAs,  bool busyOnly,  EventPerson? organizer,  List<EventAttendee> attendees,  List<EventReminder> reminders)  $default,) {final _that = this;
 switch (_that) {
 case _CalendarEvent():
-return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.allDay,_that.description,_that.location,_that.url,_that.timezone,_that.rrule,_that.recurring,_that.modifiedOccurrence,_that.status,_that.showAs,_that.color,_that.busyOnly,_that.organizer,_that.attendees,_that.reminders);case _:
+return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.allDay,_that.description,_that.location,_that.url,_that.timezone,_that.rrule,_that.recurring,_that.modifiedOccurrence,_that.status,_that.showAs,_that.busyOnly,_that.organizer,_that.attendees,_that.reminders);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1068,10 +1067,10 @@ return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.a
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EventRef ref,  String etag,  String summary,  DateTime start,  DateTime end,  bool allDay,  String? description,  String? location,  String? url,  String? timezone,  String? rrule,  bool recurring,  bool modifiedOccurrence,  EventStatus status,  EventShowAs showAs,  Color? color,  bool busyOnly,  EventPerson? organizer,  List<EventAttendee> attendees,  List<EventReminder> reminders)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EventRef ref,  String etag,  String summary,  DateTime start,  DateTime end,  bool allDay,  String? description,  String? location,  String? url,  String? timezone,  String? rrule,  bool recurring,  bool modifiedOccurrence,  EventStatus status,  EventShowAs showAs,  bool busyOnly,  EventPerson? organizer,  List<EventAttendee> attendees,  List<EventReminder> reminders)?  $default,) {final _that = this;
 switch (_that) {
 case _CalendarEvent() when $default != null:
-return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.allDay,_that.description,_that.location,_that.url,_that.timezone,_that.rrule,_that.recurring,_that.modifiedOccurrence,_that.status,_that.showAs,_that.color,_that.busyOnly,_that.organizer,_that.attendees,_that.reminders);case _:
+return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.allDay,_that.description,_that.location,_that.url,_that.timezone,_that.rrule,_that.recurring,_that.modifiedOccurrence,_that.status,_that.showAs,_that.busyOnly,_that.organizer,_that.attendees,_that.reminders);case _:
   return null;
 
 }
@@ -1083,7 +1082,7 @@ return $default(_that.ref,_that.etag,_that.summary,_that.start,_that.end,_that.a
 
 
 class _CalendarEvent extends CalendarEvent {
-  const _CalendarEvent({required this.ref, required this.etag, required this.summary, required this.start, required this.end, this.allDay = false, this.description, this.location, this.url, this.timezone, this.rrule, this.recurring = false, this.modifiedOccurrence = false, this.status = EventStatus.confirmed, this.showAs = EventShowAs.busy, this.color, this.busyOnly = false, this.organizer,  List<EventAttendee> attendees = const [],  List<EventReminder> reminders = const []}): _attendees = attendees,_reminders = reminders,super._();
+  const _CalendarEvent({required this.ref, required this.etag, required this.summary, required this.start, required this.end, this.allDay = false, this.description, this.location, this.url, this.timezone, this.rrule, this.recurring = false, this.modifiedOccurrence = false, this.status = EventStatus.confirmed, this.showAs = EventShowAs.busy, this.busyOnly = false, this.organizer,  List<EventAttendee> attendees = const [],  List<EventReminder> reminders = const []}): _attendees = attendees,_reminders = reminders,super._();
   
 
 @override final  EventRef ref;
@@ -1101,7 +1100,6 @@ class _CalendarEvent extends CalendarEvent {
 @override@JsonKey() final  bool modifiedOccurrence;
 @override@JsonKey() final  EventStatus status;
 @override@JsonKey() final  EventShowAs showAs;
-@override final  Color? color;
 @override@JsonKey() final  bool busyOnly;
 @override final  EventPerson? organizer;
  final  List<EventAttendee> _attendees;
@@ -1129,18 +1127,18 @@ _$CalendarEventCopyWith<_CalendarEvent> get copyWith => __$CalendarEventCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CalendarEvent&&(identical(other.ref, ref) || other.ref == ref)&&(identical(other.etag, etag) || other.etag == etag)&&(identical(other.summary, summary) || other.summary == summary)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.allDay, allDay) || other.allDay == allDay)&&(identical(other.description, description) || other.description == description)&&(identical(other.location, location) || other.location == location)&&(identical(other.url, url) || other.url == url)&&(identical(other.timezone, timezone) || other.timezone == timezone)&&(identical(other.rrule, rrule) || other.rrule == rrule)&&(identical(other.recurring, recurring) || other.recurring == recurring)&&(identical(other.modifiedOccurrence, modifiedOccurrence) || other.modifiedOccurrence == modifiedOccurrence)&&(identical(other.status, status) || other.status == status)&&(identical(other.showAs, showAs) || other.showAs == showAs)&&(identical(other.color, color) || other.color == color)&&(identical(other.busyOnly, busyOnly) || other.busyOnly == busyOnly)&&(identical(other.organizer, organizer) || other.organizer == organizer)&&const DeepCollectionEquality().equals(other.attendees, _attendees)&&const DeepCollectionEquality().equals(other.reminders, _reminders));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CalendarEvent&&(identical(other.ref, ref) || other.ref == ref)&&(identical(other.etag, etag) || other.etag == etag)&&(identical(other.summary, summary) || other.summary == summary)&&(identical(other.start, start) || other.start == start)&&(identical(other.end, end) || other.end == end)&&(identical(other.allDay, allDay) || other.allDay == allDay)&&(identical(other.description, description) || other.description == description)&&(identical(other.location, location) || other.location == location)&&(identical(other.url, url) || other.url == url)&&(identical(other.timezone, timezone) || other.timezone == timezone)&&(identical(other.rrule, rrule) || other.rrule == rrule)&&(identical(other.recurring, recurring) || other.recurring == recurring)&&(identical(other.modifiedOccurrence, modifiedOccurrence) || other.modifiedOccurrence == modifiedOccurrence)&&(identical(other.status, status) || other.status == status)&&(identical(other.showAs, showAs) || other.showAs == showAs)&&(identical(other.busyOnly, busyOnly) || other.busyOnly == busyOnly)&&(identical(other.organizer, organizer) || other.organizer == organizer)&&const DeepCollectionEquality().equals(other.attendees, _attendees)&&const DeepCollectionEquality().equals(other.reminders, _reminders));
 }
 
 
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,ref,etag,summary,start,end,allDay,description,location,url,timezone,rrule,recurring,modifiedOccurrence,status,showAs,color,busyOnly,organizer,const DeepCollectionEquality().hash(_attendees),const DeepCollectionEquality().hash(_reminders)]);
+    return Object.hashAll([runtimeType,ref,etag,summary,start,end,allDay,description,location,url,timezone,rrule,recurring,modifiedOccurrence,status,showAs,busyOnly,organizer,const DeepCollectionEquality().hash(_attendees),const DeepCollectionEquality().hash(_reminders)]);
 }
 
 @override
 String toString() {
-    return 'CalendarEvent(ref: $ref, etag: $etag, summary: $summary, start: $start, end: $end, allDay: $allDay, description: $description, location: $location, url: $url, timezone: $timezone, rrule: $rrule, recurring: $recurring, modifiedOccurrence: $modifiedOccurrence, status: $status, showAs: $showAs, color: $color, busyOnly: $busyOnly, organizer: $organizer, attendees: $attendees, reminders: $reminders)';
+    return 'CalendarEvent(ref: $ref, etag: $etag, summary: $summary, start: $start, end: $end, allDay: $allDay, description: $description, location: $location, url: $url, timezone: $timezone, rrule: $rrule, recurring: $recurring, modifiedOccurrence: $modifiedOccurrence, status: $status, showAs: $showAs, busyOnly: $busyOnly, organizer: $organizer, attendees: $attendees, reminders: $reminders)';
 }
 
 
@@ -1151,7 +1149,7 @@ abstract mixin class _$CalendarEventCopyWith<$Res> implements $CalendarEventCopy
   factory _$CalendarEventCopyWith(_CalendarEvent value, $Res Function(_CalendarEvent) _then) = __$CalendarEventCopyWithImpl;
 @override @useResult
 $Res call({
- EventRef ref, String etag, String summary, DateTime start, DateTime end, bool allDay, String? description, String? location, String? url, String? timezone, String? rrule, bool recurring, bool modifiedOccurrence, EventStatus status, EventShowAs showAs, Color? color, bool busyOnly, EventPerson? organizer, List<EventAttendee> attendees, List<EventReminder> reminders
+ EventRef ref, String etag, String summary, DateTime start, DateTime end, bool allDay, String? description, String? location, String? url, String? timezone, String? rrule, bool recurring, bool modifiedOccurrence, EventStatus status, EventShowAs showAs, bool busyOnly, EventPerson? organizer, List<EventAttendee> attendees, List<EventReminder> reminders
 });
 
 
@@ -1168,7 +1166,7 @@ class __$CalendarEventCopyWithImpl<$Res>
 
 /// Create a copy of CalendarEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? ref = null,Object? etag = null,Object? summary = null,Object? start = null,Object? end = null,Object? allDay = null,Object? description = freezed,Object? location = freezed,Object? url = freezed,Object? timezone = freezed,Object? rrule = freezed,Object? recurring = null,Object? modifiedOccurrence = null,Object? status = null,Object? showAs = null,Object? color = freezed,Object? busyOnly = null,Object? organizer = freezed,Object? attendees = null,Object? reminders = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? ref = null,Object? etag = null,Object? summary = null,Object? start = null,Object? end = null,Object? allDay = null,Object? description = freezed,Object? location = freezed,Object? url = freezed,Object? timezone = freezed,Object? rrule = freezed,Object? recurring = null,Object? modifiedOccurrence = null,Object? status = null,Object? showAs = null,Object? busyOnly = null,Object? organizer = freezed,Object? attendees = null,Object? reminders = null,}) {
   return _then(_CalendarEvent(
 ref: null == ref ? _self.ref : ref // ignore: cast_nullable_to_non_nullable
 as EventRef,etag: null == etag ? _self.etag : etag // ignore: cast_nullable_to_non_nullable
@@ -1185,8 +1183,7 @@ as String?,recurring: null == recurring ? _self.recurring : recurring // ignore:
 as bool,modifiedOccurrence: null == modifiedOccurrence ? _self.modifiedOccurrence : modifiedOccurrence // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EventStatus,showAs: null == showAs ? _self.showAs : showAs // ignore: cast_nullable_to_non_nullable
-as EventShowAs,color: freezed == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
-as Color?,busyOnly: null == busyOnly ? _self.busyOnly : busyOnly // ignore: cast_nullable_to_non_nullable
+as EventShowAs,busyOnly: null == busyOnly ? _self.busyOnly : busyOnly // ignore: cast_nullable_to_non_nullable
 as bool,organizer: freezed == organizer ? _self.organizer : organizer // ignore: cast_nullable_to_non_nullable
 as EventPerson?,attendees: null == attendees ? _self._attendees : attendees // ignore: cast_nullable_to_non_nullable
 as List<EventAttendee>,reminders: null == reminders ? _self._reminders : reminders // ignore: cast_nullable_to_non_nullable

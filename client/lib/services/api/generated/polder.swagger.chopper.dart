@@ -1642,7 +1642,7 @@ final class _$Polder extends Polder {
     required Object? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
-      summary: 'Add the events of an .ics file; events with a known UID are replaced',
+      summary: 'Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced',
       operationId: 'importCalendar',
       consumes: [],
       produces: [],

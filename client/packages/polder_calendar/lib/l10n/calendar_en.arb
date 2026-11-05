@@ -65,7 +65,6 @@
 	"removeNotification": "Remove notification",
 	"calendar": "Calendar",
 	"color": "Color",
-	"calendarColor": "Calendar color",
 	"repeatNone": "Does not repeat",
 	"repeatWeekdays": "Every weekday (Monday to Friday)",
 	"repeatCustom": "Custom",

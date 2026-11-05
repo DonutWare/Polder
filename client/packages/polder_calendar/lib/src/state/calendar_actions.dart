@@ -33,38 +33,68 @@ class EventMark {
 }
 
 class EventMotion {
-  const EventMotion({this.appearing, this.removing = const []});
+  const EventMotion({this.appearing, this.removing = const [], this.hiding = const {}, this.revealing = const {}});
 
   final EventMark? appearing;
   final List<EventMark> removing;
+  final Set<CalendarRef> hiding;
+  final Set<CalendarRef> revealing;
 
   bool isAppearing(CalendarEvent event) => appearing?.matches(event) ?? false;
 
-  bool isRemoving(CalendarEvent event) => removing.any((mark) => mark.matches(event));
+  bool isRevealing(CalendarEvent event) => revealing.contains(event.calendar);
+
+  bool isRemoving(CalendarEvent event) =>
+      hiding.contains(event.calendar) || removing.any((mark) => mark.matches(event));
+
+  EventMotion copyWith({
+    EventMark? Function()? appearing,
+    List<EventMark>? removing,
+    Set<CalendarRef>? hiding,
+    Set<CalendarRef>? revealing,
+  }) => EventMotion(
+    appearing: appearing == null ? this.appearing : appearing(),
+    removing: removing ?? this.removing,
+    hiding: hiding ?? this.hiding,
+    revealing: revealing ?? this.revealing,
+  );
 }
 
 class CalendarMotion extends Notifier<EventMotion> {
   static const removeDuration = Duration(milliseconds: 260);
+  static const revealDuration = Duration(milliseconds: 420);
+  static const revealWindow = Duration(seconds: 3);
 
   @override
   EventMotion build() => const EventMotion();
 
   void appear(CalendarEvent event, RecurrenceScope scope) =>
-      state = EventMotion(appearing: EventMark(event, scope), removing: state.removing);
+      state = state.copyWith(appearing: () => EventMark(event, scope));
 
   EventMark remove(CalendarEvent event, RecurrenceScope scope) {
     final mark = EventMark(event, scope);
-    state = EventMotion(appearing: state.appearing, removing: [...state.removing, mark]);
+    state = state.copyWith(removing: [...state.removing, mark]);
     return mark;
   }
 
-  void restore(EventMark mark) => state = EventMotion(
-    appearing: state.appearing,
+  void restore(EventMark mark) => state = state.copyWith(
     removing: [
       for (final removing in state.removing)
         if (removing != mark) removing,
     ],
   );
+
+  Future<void> hideCalendar(CalendarRef calendar) async {
+    state = state.copyWith(hiding: {...state.hiding, calendar}, revealing: {...state.revealing}..remove(calendar));
+    await Future<void>.delayed(removeDuration);
+    if (ref.mounted) state = state.copyWith(hiding: {...state.hiding}..remove(calendar));
+  }
+
+  Future<void> revealCalendar(CalendarRef calendar) async {
+    state = state.copyWith(revealing: {...state.revealing, calendar}, hiding: {...state.hiding}..remove(calendar));
+    await Future<void>.delayed(revealWindow);
+    if (ref.mounted) state = state.copyWith(revealing: {...state.revealing}..remove(calendar));
+  }
 }
 
 class CalendarActions {

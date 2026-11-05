@@ -311,7 +311,7 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodDelete, "/calendars/{calendarID}", "deleteCalendar", "Delete an own calendar with its events, or leave a calendar shared with the user", a.deleteCalendar)
 	register(user, http.MethodPost, "/calendars/{calendarID}/default", "setDefaultCalendar", "Make a calendar the one invitations land in", a.setDefaultCalendar)
 	register(user, http.MethodPost, "/calendars/{calendarID}/refresh", "refreshCalendar", "Fetch a subscribed feed now", a.refreshCalendar)
-	register(user, http.MethodPost, "/calendars/{calendarID}/import", "importCalendar", "Add the events of an .ics file; events with a known UID are replaced", a.importCalendar,
+	register(user, http.MethodPost, "/calendars/{calendarID}/import", "importCalendar", "Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced", a.importCalendar,
 		maxBody(calendarImportLimit), withRequestBody(binaryContent("text/calendar")))
 	register(user, http.MethodGet, "/calendars/{calendarID}/export", "exportCalendar", "Download a calendar as an .ics file", a.exportCalendar,
 		withResponse(http.StatusOK, "Calendar file", binaryContent("text/calendar")))

@@ -54,4 +54,8 @@ class PolderCalendarSource implements CalendarSource {
 
   @override
   Future<void> respond(CalendarEvent event, AttendeeStatus status) => _api.respondToCalendarEvent(event, status);
+
+  @override
+  Future<void> setHidden(CalendarRef calendar, bool hidden) =>
+      _api.updateCalendar(int.parse(calendar.calendarId), hidden: hidden);
 }

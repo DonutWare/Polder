@@ -2517,7 +2517,6 @@ class Event {
     required this.busyOnly,
     required this.calendarId,
     this.categories,
-    this.color,
     this.description,
     required this.end,
     required this.etag,
@@ -2557,8 +2556,6 @@ class Event {
   final int calendarId;
   @JsonKey(name: 'categories', includeIfNull: false, defaultValue: <String>[])
   final List<String>? categories;
-  @JsonKey(name: 'color', includeIfNull: false)
-  final String? color;
   @JsonKey(name: 'description', includeIfNull: false)
   final String? description;
   @JsonKey(name: 'end', includeIfNull: false)
@@ -2614,7 +2611,6 @@ class Event {
                 const DeepCollectionEquality().equals(other.calendarId, calendarId)) &&
             (identical(other.categories, categories) ||
                 const DeepCollectionEquality().equals(other.categories, categories)) &&
-            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
             (identical(other.description, description) ||
                 const DeepCollectionEquality().equals(other.description, description)) &&
             (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
@@ -2652,7 +2648,6 @@ class Event {
       const DeepCollectionEquality().hash(busyOnly) ^
       const DeepCollectionEquality().hash(calendarId) ^
       const DeepCollectionEquality().hash(categories) ^
-      const DeepCollectionEquality().hash(color) ^
       const DeepCollectionEquality().hash(description) ^
       const DeepCollectionEquality().hash(end) ^
       const DeepCollectionEquality().hash(etag) ^
@@ -2684,7 +2679,6 @@ extension $EventExtension on Event {
     bool? busyOnly,
     int? calendarId,
     List<String>? categories,
-    String? color,
     String? description,
     DateTime? end,
     String? etag,
@@ -2713,7 +2707,6 @@ extension $EventExtension on Event {
       busyOnly: busyOnly ?? this.busyOnly,
       calendarId: calendarId ?? this.calendarId,
       categories: categories ?? this.categories,
-      color: color ?? this.color,
       description: description ?? this.description,
       end: end ?? this.end,
       etag: etag ?? this.etag,
@@ -2744,7 +2737,6 @@ extension $EventExtension on Event {
     Wrapped<bool>? busyOnly,
     Wrapped<int>? calendarId,
     Wrapped<List<String>?>? categories,
-    Wrapped<String?>? color,
     Wrapped<String?>? description,
     Wrapped<DateTime>? end,
     Wrapped<String>? etag,
@@ -2773,7 +2765,6 @@ extension $EventExtension on Event {
       busyOnly: (busyOnly != null ? busyOnly.value : this.busyOnly),
       calendarId: (calendarId != null ? calendarId.value : this.calendarId),
       categories: (categories != null ? categories.value : this.categories),
-      color: (color != null ? color.value : this.color),
       description: (description != null ? description.value : this.description),
       end: (end != null ? end.value : this.end),
       etag: (etag != null ? etag.value : this.etag),
@@ -2807,7 +2798,6 @@ class EventDetails {
     required this.busyOnly,
     required this.calendarId,
     this.categories,
-    this.color,
     this.description,
     required this.end,
     required this.etag,
@@ -2848,8 +2838,6 @@ class EventDetails {
   final int calendarId;
   @JsonKey(name: 'categories', includeIfNull: false, defaultValue: <String>[])
   final List<String>? categories;
-  @JsonKey(name: 'color', includeIfNull: false)
-  final String? color;
   @JsonKey(name: 'description', includeIfNull: false)
   final String? description;
   @JsonKey(name: 'end', includeIfNull: false)
@@ -2907,7 +2895,6 @@ class EventDetails {
                 const DeepCollectionEquality().equals(other.calendarId, calendarId)) &&
             (identical(other.categories, categories) ||
                 const DeepCollectionEquality().equals(other.categories, categories)) &&
-            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
             (identical(other.description, description) ||
                 const DeepCollectionEquality().equals(other.description, description)) &&
             (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
@@ -2947,7 +2934,6 @@ class EventDetails {
       const DeepCollectionEquality().hash(busyOnly) ^
       const DeepCollectionEquality().hash(calendarId) ^
       const DeepCollectionEquality().hash(categories) ^
-      const DeepCollectionEquality().hash(color) ^
       const DeepCollectionEquality().hash(description) ^
       const DeepCollectionEquality().hash(end) ^
       const DeepCollectionEquality().hash(etag) ^
@@ -2980,7 +2966,6 @@ extension $EventDetailsExtension on EventDetails {
     bool? busyOnly,
     int? calendarId,
     List<String>? categories,
-    String? color,
     String? description,
     DateTime? end,
     String? etag,
@@ -3010,7 +2995,6 @@ extension $EventDetailsExtension on EventDetails {
       busyOnly: busyOnly ?? this.busyOnly,
       calendarId: calendarId ?? this.calendarId,
       categories: categories ?? this.categories,
-      color: color ?? this.color,
       description: description ?? this.description,
       end: end ?? this.end,
       etag: etag ?? this.etag,
@@ -3042,7 +3026,6 @@ extension $EventDetailsExtension on EventDetails {
     Wrapped<bool>? busyOnly,
     Wrapped<int>? calendarId,
     Wrapped<List<String>?>? categories,
-    Wrapped<String?>? color,
     Wrapped<String?>? description,
     Wrapped<DateTime>? end,
     Wrapped<String>? etag,
@@ -3072,7 +3055,6 @@ extension $EventDetailsExtension on EventDetails {
       busyOnly: (busyOnly != null ? busyOnly.value : this.busyOnly),
       calendarId: (calendarId != null ? calendarId.value : this.calendarId),
       categories: (categories != null ? categories.value : this.categories),
-      color: (color != null ? color.value : this.color),
       description: (description != null ? description.value : this.description),
       end: (end != null ? end.value : this.end),
       etag: (etag != null ? etag.value : this.etag),
@@ -3105,7 +3087,6 @@ class EventInput {
     this.allDay,
     this.attendees,
     this.categories,
-    this.color,
     this.description,
     this.end,
     this.location,
@@ -3131,8 +3112,6 @@ class EventInput {
   final List<AttendeeInput>? attendees;
   @JsonKey(name: 'categories', includeIfNull: false, defaultValue: <String>[])
   final List<String>? categories;
-  @JsonKey(name: 'color', includeIfNull: false)
-  final String? color;
   @JsonKey(name: 'description', includeIfNull: false)
   final String? description;
   @JsonKey(name: 'end', includeIfNull: false)
@@ -3170,7 +3149,6 @@ class EventInput {
                 const DeepCollectionEquality().equals(other.attendees, attendees)) &&
             (identical(other.categories, categories) ||
                 const DeepCollectionEquality().equals(other.categories, categories)) &&
-            (identical(other.color, color) || const DeepCollectionEquality().equals(other.color, color)) &&
             (identical(other.description, description) ||
                 const DeepCollectionEquality().equals(other.description, description)) &&
             (identical(other.end, end) || const DeepCollectionEquality().equals(other.end, end)) &&
@@ -3190,7 +3168,6 @@ class EventInput {
       const DeepCollectionEquality().hash(allDay) ^
       const DeepCollectionEquality().hash(attendees) ^
       const DeepCollectionEquality().hash(categories) ^
-      const DeepCollectionEquality().hash(color) ^
       const DeepCollectionEquality().hash(description) ^
       const DeepCollectionEquality().hash(end) ^
       const DeepCollectionEquality().hash(location) ^
@@ -3210,7 +3187,6 @@ extension $EventInputExtension on EventInput {
     bool? allDay,
     List<AttendeeInput>? attendees,
     List<String>? categories,
-    String? color,
     String? description,
     DateTime? end,
     String? location,
@@ -3227,7 +3203,6 @@ extension $EventInputExtension on EventInput {
       allDay: allDay ?? this.allDay,
       attendees: attendees ?? this.attendees,
       categories: categories ?? this.categories,
-      color: color ?? this.color,
       description: description ?? this.description,
       end: end ?? this.end,
       location: location ?? this.location,
@@ -3246,7 +3221,6 @@ extension $EventInputExtension on EventInput {
     Wrapped<bool?>? allDay,
     Wrapped<List<AttendeeInput>?>? attendees,
     Wrapped<List<String>?>? categories,
-    Wrapped<String?>? color,
     Wrapped<String?>? description,
     Wrapped<DateTime?>? end,
     Wrapped<String?>? location,
@@ -3263,7 +3237,6 @@ extension $EventInputExtension on EventInput {
       allDay: (allDay != null ? allDay.value : this.allDay),
       attendees: (attendees != null ? attendees.value : this.attendees),
       categories: (categories != null ? categories.value : this.categories),
-      color: (color != null ? color.value : this.color),
       description: (description != null ? description.value : this.description),
       end: (end != null ? end.value : this.end),
       location: (location != null ? location.value : this.location),

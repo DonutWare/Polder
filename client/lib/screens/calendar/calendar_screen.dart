@@ -5,12 +5,11 @@ import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/calendar/calendar_providers.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/calendar/widgets/calendar_sidebar.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/app_page.dart";
-import "package:polder/widgets/shared/app_checkbox.dart";
-import "package:polder/widgets/shared/icon_badge.dart";
-import "package:polder/widgets/shared/nav_group.dart";
 import "package:polder_calendar/polder_calendar.dart";
 
 class CalendarScreen extends ConsumerStatefulWidget {
@@ -38,6 +37,27 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   void _toggleMonth() => setState(() => _monthOpen = !_monthOpen);
 
+  Future<void> _openAgendas(CalendarViewMode mode, DateTime anchor) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    useSafeArea: true,
+    builder: (sheet) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.75,
+      maxChildSize: 0.95,
+      builder: (sheet, controller) => CalendarSidebar(
+        anchor: anchor,
+        controller: controller,
+        padding: const EdgeInsets.only(left: 4, right: 4, bottom: 24),
+        onSelectDay: (day) {
+          Navigator.pop(sheet);
+          _navigate(mode, day);
+        },
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final phone = AdaptiveLayout.isPhone(context);
@@ -57,6 +77,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       actions: [
         CalendarPeriodButtons(mode: mode, anchor: anchor, onNavigate: _navigate, showArrows: !phone),
         CalendarViewMenu(mode: mode, compact: phone, onSelected: (mode) => _navigate(mode, anchor)),
+        if (single)
+          IconButton(
+            tooltip: context.localized.calendarManage,
+            icon: const Icon(IconsaxPlusLinear.calendar_2),
+            onPressed: () => _openAgendas(mode, anchor),
+          ),
       ],
       body: SafeArea(
         child: Column(
@@ -72,17 +98,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              MiniMonth(
-                                selected: anchor,
-                                showHeader: false,
-                                showWeekNumbers: true,
-                                onSelect: (day) => _navigate(mode, day),
-                              ),
-                              const _CalendarList(onlyWhenSeveral: true),
-                            ],
+                          child: MiniMonth(
+                            selected: anchor,
+                            showHeader: false,
+                            showWeekNumbers: true,
+                            onSelect: (day) => _navigate(mode, day),
                           ),
                         ),
                       )
@@ -116,18 +136,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               color: colors.surfaceContainerLow,
               child: SafeArea(
                 right: false,
-                child: ListView(
-                  padding: const EdgeInsets.only(top: 12, bottom: 24),
-                  children: [
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-                        child: MiniMonth(selected: anchor, onSelect: (day) => _navigate(mode, day)),
-                      ),
-                    ),
-                    const _CalendarList(),
-                  ],
-                ),
+                child: CalendarSidebar(anchor: anchor, onSelectDay: (day) => _navigate(mode, day)),
               ),
             ),
           ),
@@ -170,33 +179,4 @@ class _MonthToggle extends StatelessWidget {
       ),
     ),
   );
-}
-
-class _CalendarList extends ConsumerWidget {
-  const _CalendarList({this.onlyWhenSeveral = false});
-
-  final bool onlyWhenSeveral;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final calendars = ref.watch(calendarListProvider).value ?? const <CalendarInfo>[];
-    if (calendars.isEmpty || onlyWhenSeveral && calendars.length < 2) return const SizedBox.shrink();
-    final hidden = ref.watch(hiddenCalendarsProvider);
-    final primary = Theme.of(context).colorScheme.primary;
-    void toggle(CalendarInfo calendar) => ref.read(hiddenCalendarsProvider.notifier).toggle(calendar.ref);
-    return NavGroup(
-      title: CalendarLocalizations.of(context).calendars,
-      children: [
-        for (final calendar in calendars)
-          ListTile(
-            contentPadding: const EdgeInsetsDirectional.only(start: 16, end: 4),
-            leading: IconBadge(icon: IconsaxPlusLinear.calendar_1, color: calendar.color ?? primary, size: 32),
-            title: Text(calendar.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-            subtitle: calendar.ownerName == null ? null : Text(calendar.ownerName!, maxLines: 1),
-            trailing: AppCheckbox(value: !hidden.contains(calendar.ref), onChanged: (_) => toggle(calendar)),
-            onTap: () => toggle(calendar),
-          ),
-      ],
-    );
-  }
 }

@@ -47,4 +47,6 @@ abstract interface class CalendarSource {
   Future<CalendarEvent> move(CalendarEvent event, CalendarRef target);
 
   Future<void> respond(CalendarEvent event, AttendeeStatus status);
+
+  Future<void> setHidden(CalendarRef calendar, bool hidden);
 }

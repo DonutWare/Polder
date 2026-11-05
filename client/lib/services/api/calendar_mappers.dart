@@ -1,6 +1,8 @@
 import "package:polder/models/branding.dart";
 import "package:polder/models/calendar.dart";
+import "package:polder/models/sharing.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
+import "package:polder/services/api/sharing_mappers.dart";
 import "package:polder_calendar/polder_calendar.dart" as cal;
 
 extension CalendarToModel on wire.Calendar {
@@ -55,7 +57,44 @@ extension CalendarToInfo on wire.Calendar {
     isDefault: isDefault,
     subscription: kind == wire.CalendarKind.subscription,
     ownerName: owner?.displayName,
+    sourceUrl: sourceUrl,
+    fetchedAt: fetchedAt?.toLocal(),
+    fetchError: fetchError == null || fetchError!.isEmpty ? null : fetchError,
   );
+}
+
+extension CalendarShareToModel on wire.CalendarShare {
+  CalendarShare toModel() => CalendarShare(
+    id: id,
+    calendarId: calendarId,
+    recipient: group != null
+        ? ShareTarget(kind: ShareTargetKind.group, id: group!.id, name: group!.name)
+        : user!.toModel(),
+    access: switch (access) {
+      wire.CalendarShareAccess.readwrite => CalendarShareAccess.readWrite,
+      wire.CalendarShareAccess.freebusy => CalendarShareAccess.freeBusy,
+      _ => CalendarShareAccess.read,
+    },
+  );
+}
+
+extension ImportResultToModel on wire.ImportResult {
+  CalendarImportResult toModel() =>
+      CalendarImportResult(created: created, updated: updated, skipped: skipped, errors: errors ?? const []);
+}
+
+extension CalendarShareAccessToWire on CalendarShareAccess {
+  wire.NewCalendarShareAccess toWire() => switch (this) {
+    CalendarShareAccess.freeBusy => wire.NewCalendarShareAccess.freebusy,
+    CalendarShareAccess.readWrite => wire.NewCalendarShareAccess.readwrite,
+    CalendarShareAccess.read => wire.NewCalendarShareAccess.read,
+  };
+
+  wire.UpdateCalendarShareInputBodyAccess toUpdateWire() => switch (this) {
+    CalendarShareAccess.freeBusy => wire.UpdateCalendarShareInputBodyAccess.freebusy,
+    CalendarShareAccess.readWrite => wire.UpdateCalendarShareInputBodyAccess.readwrite,
+    CalendarShareAccess.read => wire.UpdateCalendarShareInputBodyAccess.read,
+  };
 }
 
 extension EventToModel on wire.Event {
@@ -79,7 +118,6 @@ extension EventToModel on wire.Event {
     modifiedOccurrence: $override,
     status: _status(status),
     showAs: showAs == wire.EventShowAs.free ? cal.EventShowAs.free : cal.EventShowAs.busy,
-    color: color == null ? null : parseHexColor(color!),
     busyOnly: busyOnly,
     organizer: organizer?.toModel(),
     attendees: [for (final attendee in attendees ?? const <wire.Attendee>[]) attendee.toModel()],
@@ -149,7 +187,6 @@ extension EventDraftToWire on cal.EventDraft {
     rrule: rrule,
     status: status.name.toUpperCase(),
     showAs: showAs == cal.EventShowAs.free ? wire.EventInputShowAs.free : wire.EventInputShowAs.busy,
-    color: color == null ? null : hexColor(color!),
     attendees: [for (final person in attendees) wire.AttendeeInput(email: person.email, name: person.name)],
     alarms: [
       for (final reminder in reminders)

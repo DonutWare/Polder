@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/emersion/go-ical"
 
@@ -15,7 +14,6 @@ import (
 
 const (
 	defaultEventLength = time.Hour
-	maxColorLength     = 32
 )
 
 var validStatuses = map[string]bool{"CONFIRMED": true, "TENTATIVE": true, "CANCELLED": true}
@@ -116,11 +114,6 @@ func applyDetails(component *ical.Component, input EventInput) error {
 	default:
 		return apperr.Invalid("showAs is busy or free")
 	}
-	color := strings.TrimSpace(input.Color)
-	if utf8.RuneCountInString(color) > maxColorLength {
-		return apperr.Invalid("a color name has at most %d characters", maxColorLength)
-	}
-	setText(component, ical.PropColor, color)
 	component.Props.Del(ical.PropCategories)
 	if len(input.Categories) > 0 {
 		prop := ical.NewProp(ical.PropCategories)

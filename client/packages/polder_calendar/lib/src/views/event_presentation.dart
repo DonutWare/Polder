@@ -46,7 +46,7 @@ extension EventPresentation on CalendarEvent {
       : summary;
 
   Color colorIn(BuildContext context, Map<CalendarRef, Color?> calendarColors) =>
-      color ?? calendarColors[calendar] ?? Theme.of(context).colorScheme.primary;
+      calendarColors[calendar] ?? Theme.of(context).colorScheme.primary;
 }
 
 extension CalendarViewModeLabel on CalendarViewMode {

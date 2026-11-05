@@ -63,6 +63,9 @@ class _FakeSource implements CalendarSource {
 
   @override
   Future<void> respond(CalendarEvent event, AttendeeStatus status) => throw UnimplementedError();
+
+  @override
+  Future<void> setHidden(CalendarRef calendar, bool hidden) async {}
 }
 
 CalendarEvent _event(String id, DateTime start, DateTime end, {bool allDay = false}) => CalendarEvent(

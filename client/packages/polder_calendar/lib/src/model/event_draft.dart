@@ -1,5 +1,3 @@
-import "package:flutter/painting.dart";
-
 import "package:freezed_annotation/freezed_annotation.dart";
 
 import "package:polder_calendar/src/model/calendar_event.dart";
@@ -22,7 +20,6 @@ abstract class EventDraft with _$EventDraft {
     String? rrule,
     @Default(EventStatus.confirmed) EventStatus status,
     @Default(EventShowAs.busy) EventShowAs showAs,
-    Color? color,
     @Default([]) List<EventPerson> attendees,
     @Default([]) List<EventReminder> reminders,
   }) = _EventDraft;
@@ -39,7 +36,6 @@ abstract class EventDraft with _$EventDraft {
     rrule: event.rrule,
     status: event.status,
     showAs: event.showAs,
-    color: event.color,
     attendees: [for (final attendee in event.attendees) attendee.person],
     reminders: event.reminders,
   );

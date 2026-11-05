@@ -25,7 +25,11 @@ class EventTransition extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final removing = ref.watch(calendarMotionProvider.select((motion) => motion.isRemoving(event)));
     final appearing = ref.watch(calendarMotionProvider.select((motion) => motion.isAppearing(event)));
+    final revealing = ref.watch(calendarMotionProvider.select((motion) => motion.isRevealing(event)));
     const duration = CalendarMotion.removeDuration;
+    if (revealing && !appearing) {
+      return _Reveal(collapse: collapse, child: child);
+    }
     Widget result = TweenAnimationBuilder<double>(
       tween: Tween(begin: appearing ? 0 : 1, end: 1),
       duration: const Duration(milliseconds: 900),
@@ -43,7 +47,7 @@ class EventTransition extends ConsumerWidget {
                       shape: CalendarStyle.squircle(
                         CalendarStyle.tagRadius,
                         side: BorderSide(
-                          color: color ?? event.color ?? Theme.of(context).colorScheme.primary,
+                          color: color ?? Theme.of(context).colorScheme.primary,
                           width: 2 * (1 - progress),
                         ),
                       ),
@@ -69,6 +73,31 @@ class EventTransition extends ConsumerWidget {
       child: removing ? const SizedBox(width: double.infinity) : result,
     );
   }
+}
+
+class _Reveal extends StatelessWidget {
+  const _Reveal({required this.collapse, required this.child});
+
+  final bool collapse;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: CalendarMotion.revealDuration,
+    curve: Curves.easeOutCubic,
+    builder: (context, progress, child) {
+      final faded = Opacity(
+        opacity: progress,
+        child: Transform.scale(scale: 0.8 + 0.2 * progress, child: child),
+      );
+      if (!collapse) return faded;
+      return ClipRect(
+        child: Align(alignment: Alignment.topCenter, heightFactor: progress, child: faded),
+      );
+    },
+    child: child,
+  );
 }
 
 class EventSurface extends StatelessWidget {

@@ -6,6 +6,7 @@ import "package:polder_calendar/src/model/calendar_event.dart";
 import "package:polder_calendar/src/model/calendar_info.dart";
 import "package:polder_calendar/src/model/calendar_ref.dart";
 import "package:polder_calendar/src/source/calendar_source.dart";
+import "package:polder_calendar/src/state/calendar_actions.dart";
 import "package:polder_calendar/src/time/calendar_view_mode.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 import "package:flutter/material.dart" show DateTimeRange;
@@ -30,6 +31,7 @@ final calendarChangesProvider = StreamProvider<CalendarRef>((ref) {
 });
 
 final calendarListProvider = FutureProvider.autoDispose<List<CalendarInfo>>((ref) async {
+  ref.listen(calendarChangesProvider, (_, _) => ref.invalidateSelf());
   final sources = ref.watch(calendarSourcesProvider);
   final lists = await Future.wait([for (final source in sources) source.calendars()]);
   return [for (final list in lists) ...list];
@@ -49,8 +51,19 @@ class HiddenCalendarsNotifier extends Notifier<Set<CalendarRef>> {
     };
   }
 
-  void toggle(CalendarRef calendar) =>
-      state = state.contains(calendar) ? ({...state}..remove(calendar)) : {...state, calendar};
+  Future<void> toggle(CalendarRef calendar) async {
+    final hide = !state.contains(calendar);
+    final motion = ref.read(calendarMotionProvider.notifier);
+    unawaited(hide ? motion.hideCalendar(calendar) : motion.revealCalendar(calendar));
+    state = hide ? {...state, calendar} : ({...state}..remove(calendar));
+    try {
+      await ref.read(calendarSourceProvider(calendar.sourceId))?.setHidden(calendar, hide);
+      if (!hide) ref.invalidate(monthEventsProvider);
+    } catch (_) {
+      state = hide ? ({...state}..remove(calendar)) : {...state, calendar};
+      rethrow;
+    }
+  }
 }
 
 final monthEventsProvider = FutureProvider.autoDispose.family<List<CalendarEvent>, DateTime>((ref, month) async {
@@ -66,7 +79,8 @@ final monthEventsProvider = FutureProvider.autoDispose.family<List<CalendarEvent
 });
 
 final rangeEventsProvider = Provider.autoDispose.family<AsyncValue<List<CalendarEvent>>, VisibleRange>((ref, range) {
-  final hidden = ref.watch(hiddenCalendarsProvider);
+  final leaving = ref.watch(calendarMotionProvider.select((motion) => motion.hiding));
+  final hidden = ref.watch(hiddenCalendarsProvider).difference(leaving);
   final months = <AsyncValue<List<CalendarEvent>>>[
     for (var month = range.start.firstOfMonth; month.isBefore(range.end); month = month.addMonths(1))
       ref.watch(monthEventsProvider(month)),

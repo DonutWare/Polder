@@ -1,12 +1,14 @@
 package calendar
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"errors"
 	"io"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -17,7 +19,11 @@ import (
 	"polder-server/internal/users"
 )
 
-const maxImportErrors = 20
+const (
+	maxImportErrors     = 20
+	maxArchiveCalendars = 100
+	maxArchiveBytes     = 50 << 20
+)
 
 var safeUIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._@-]{0,200}$`)
 
@@ -41,6 +47,34 @@ type splitCalendar struct {
 	byUID     map[string][]*ical.Component
 	order     []string
 	header    ical.Props
+}
+
+func closeTruncated(data []byte) ([]byte, bool) {
+	depth, complete, offset := 0, 0, 0
+	for offset < len(data) {
+		end := bytes.IndexByte(data[offset:], '\n')
+		if end < 0 {
+			end = len(data)
+		} else {
+			end += offset + 1
+		}
+		line := strings.ToUpper(strings.TrimRight(string(data[offset:end]), "\r\n"))
+		switch {
+		case strings.HasPrefix(line, "BEGIN:"):
+			depth++
+		case strings.HasPrefix(line, "END:"):
+			depth--
+			if depth == 1 {
+				complete = end
+			}
+		}
+		offset = end
+	}
+	if depth <= 0 || complete == 0 {
+		return nil, false
+	}
+	closed := append(bytes.Clone(data[:complete]), "END:VCALENDAR\r\n"...)
+	return closed, true
 }
 
 func splitByUID(data []byte) (splitCalendar, error) {
@@ -108,22 +142,86 @@ func (s *Service) Import(ctx context.Context, viewer users.User, calendarID int6
 	if err := requireWritable(c); err != nil {
 		return ImportResult{}, err
 	}
-	split, err := splitByUID(data)
+	files, err := calendarFiles(data)
 	if err != nil {
 		return ImportResult{}, err
 	}
-	result := ImportResult{Errors: []string{}}
-	for _, uid := range split.order {
-		outcome, err := s.importOne(ctx, c, split, uid)
+	splits := make([]splitCalendar, 0, len(files))
+	for _, file := range files {
+		split, err := splitByUID(file)
 		if err != nil {
-			if len(result.Errors) < maxImportErrors {
-				result.Errors = append(result.Errors, uid+": "+err.Error())
-			}
-			continue
+			return ImportResult{}, err
 		}
-		result.add(outcome)
+		splits = append(splits, split)
+	}
+	result := ImportResult{Errors: []string{}}
+	for _, split := range splits {
+		for _, uid := range split.order {
+			outcome, err := s.importOne(ctx, c, split, uid)
+			if err != nil {
+				if len(result.Errors) < maxImportErrors {
+					result.Errors = append(result.Errors, uid+": "+err.Error())
+				}
+				continue
+			}
+			result.add(outcome)
+		}
 	}
 	return result, nil
+}
+
+func calendarFiles(data []byte) ([][]byte, error) {
+	if !bytes.HasPrefix(data, []byte("PK\x03\x04")) {
+		return [][]byte{data}, nil
+	}
+	archive, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		return nil, invalidData("the archive cannot be read: %v", err)
+	}
+	var files [][]byte
+	var total int64
+	for _, entry := range archive.File {
+		if !isCalendarEntry(entry) {
+			continue
+		}
+		if len(files) == maxArchiveCalendars {
+			return nil, invalidData("an archive holds at most %d calendar files", maxArchiveCalendars)
+		}
+		content, err := readArchiveEntry(entry, maxArchiveBytes-total)
+		if err != nil {
+			return nil, err
+		}
+		total += int64(len(content))
+		files = append(files, content)
+	}
+	if len(files) == 0 {
+		return nil, invalidData("the archive holds no .ics files")
+	}
+	return files, nil
+}
+
+func isCalendarEntry(entry *zip.File) bool {
+	name := entry.Name
+	return !entry.FileInfo().IsDir() &&
+		!strings.HasPrefix(name, "__MACOSX/") &&
+		!strings.HasPrefix(path.Base(name), ".") &&
+		strings.EqualFold(path.Ext(name), ".ics")
+}
+
+func readArchiveEntry(entry *zip.File, budget int64) ([]byte, error) {
+	reader, err := entry.Open()
+	if err != nil {
+		return nil, invalidData("%s cannot be read: %v", entry.Name, err)
+	}
+	defer reader.Close()
+	content, err := io.ReadAll(io.LimitReader(reader, budget+1))
+	if err != nil {
+		return nil, invalidData("%s cannot be read: %v", entry.Name, err)
+	}
+	if int64(len(content)) > budget {
+		return nil, invalidData("the calendars in the archive are larger than %d MiB", maxArchiveBytes>>20)
+	}
+	return content, nil
 }
 
 type importOutcome int

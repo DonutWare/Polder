@@ -85,7 +85,6 @@ type Event struct {
 	Override       bool       `json:"override" doc:"This occurrence differs from the rest of the series"`
 	Status         string     `json:"status" doc:"CONFIRMED, TENTATIVE or CANCELLED"`
 	ShowAs         ShowAs     `json:"showAs"`
-	Color          string     `json:"color,omitempty" required:"false"`
 	Categories     []string   `json:"categories,omitempty" required:"false"`
 	Organizer      *Person    `json:"organizer,omitempty" required:"false"`
 	Attendees      []Attendee `json:"attendees"`
@@ -112,7 +111,6 @@ type EventInput struct {
 	RRule       string          `json:"rrule,omitempty" required:"false" doc:"Recurrence rule such as FREQ=WEEKLY;BYDAY=MO,WE"`
 	Status      string          `json:"status,omitempty" required:"false" doc:"CONFIRMED, TENTATIVE or CANCELLED"`
 	ShowAs      ShowAs          `json:"showAs,omitempty" required:"false"`
-	Color       string          `json:"color,omitempty" required:"false"`
 	Categories  []string        `json:"categories,omitempty" required:"false" maxItems:"50"`
 	Attendees   []AttendeeInput `json:"attendees,omitempty" required:"false" maxItems:"200"`
 	Alarms      []Alarm         `json:"alarms,omitempty" required:"false" maxItems:"20"`
@@ -213,7 +211,6 @@ func describeComponent(c Calendar, object Object, resource *Resource, component 
 		URL:         propText(component, ical.PropURL),
 		Status:      strings.ToUpper(propText(component, ical.PropStatus)),
 		ShowAs:      ShowAsBusy,
-		Color:       propText(component, ical.PropColor),
 		Recurring:   resource.Recurring(),
 		Attendees:   []Attendee{},
 		Alarms:      []Alarm{},

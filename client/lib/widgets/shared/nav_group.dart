@@ -7,11 +7,20 @@ import "package:polder/widgets/shared/icon_badge.dart";
 
 /// A titled stack of tiles on panel surfaces; the outer corners are round, the joins tight.
 class NavGroup extends StatelessWidget {
-  const NavGroup({required this.title, required this.children, this.trailing, super.key});
+  const NavGroup({
+    required this.title,
+    required this.children,
+    this.trailing,
+    this.collapsed = false,
+    this.onToggle,
+    super.key,
+  });
 
   final String title;
   final Widget? trailing;
   final List<Widget> children;
+  final bool collapsed;
+  final VoidCallback? onToggle;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -19,28 +28,68 @@ class NavGroup extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        NavGroupHeader(title: title, trailing: trailing),
-        for (final (i, child) in children.indexed) GroupedTile(index: i, count: children.length, child: child),
+        NavGroupHeader(title: title, trailing: trailing, collapsed: collapsed, onToggle: onToggle),
+        AnimatedSize(
+          duration: AppMotion.spatialDuration,
+          curve: AppMotion.spatial,
+          alignment: Alignment.topCenter,
+          child: collapsed
+              ? const SizedBox(width: double.infinity)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final (i, child) in children.indexed)
+                      GroupedTile(index: i, count: children.length, child: child),
+                  ],
+                ),
+        ),
       ],
     ),
   );
 }
 
 class NavGroupHeader extends StatelessWidget {
-  const NavGroupHeader({required this.title, this.trailing, super.key});
+  const NavGroupHeader({required this.title, this.trailing, this.collapsed = false, this.onToggle, super.key});
 
   final String title;
   final Widget? trailing;
+  final bool collapsed;
+  final VoidCallback? onToggle;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final label = Text(title, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary));
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
       child: Row(
         children: [
           Expanded(
-            child: Text(title, style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.primary)),
+            child: onToggle == null
+                ? label
+                : Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: InkWell(
+                      customBorder: squircle(AppRadius.control),
+                      onTap: onToggle,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 4,
+                          children: [
+                            Flexible(child: label),
+                            AnimatedRotation(
+                              turns: collapsed ? -0.25 : 0,
+                              duration: AppMotion.spatialDuration,
+                              curve: AppMotion.spatial,
+                              child: Icon(IconsaxPlusLinear.arrow_down, size: 16, color: theme.colorScheme.primary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
           ),
           ?trailing,
         ],

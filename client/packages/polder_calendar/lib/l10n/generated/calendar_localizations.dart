@@ -338,12 +338,6 @@ abstract class CalendarLocalizations {
   /// **'Color'**
   String get color;
 
-  /// No description provided for @calendarColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Calendar color'**
-  String get calendarColor;
-
   /// No description provided for @repeatNone.
   ///
   /// In en, this message translates to:

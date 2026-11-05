@@ -1145,9 +1145,6 @@
             "nullable": true,
             "type": "array"
           },
-          "color": {
-            "type": "string"
-          },
           "description": {
             "type": "string"
           },
@@ -1282,9 +1279,6 @@
             },
             "nullable": true,
             "type": "array"
-          },
-          "color": {
-            "type": "string"
           },
           "description": {
             "type": "string"
@@ -1424,9 +1418,6 @@
             "maxItems": 50,
             "nullable": true,
             "type": "array"
-          },
-          "color": {
-            "type": "string"
           },
           "description": {
             "maxLength": 65536,
@@ -9002,7 +8993,7 @@
             "bearer": []
           }
         ],
-        "summary": "Add the events of an .ics file; events with a known UID are replaced",
+        "summary": "Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced",
         "tags": [
           "calendars"
         ]
