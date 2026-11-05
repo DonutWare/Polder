@@ -1,6 +1,7 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
 import "package:polder/models/activity.dart";
+import "package:polder/models/calendar_reminder.dart";
 
 part "server_event.freezed.dart";
 
@@ -19,6 +20,10 @@ sealed class ServerEvent with _$ServerEvent {
   const factory ServerEvent.activityCreated(ActivityEntry entry) = ActivityCreatedEvent;
 
   const factory ServerEvent.filesChanged(int userId, List<String> dirs) = FilesChangedEvent;
+
+  const factory ServerEvent.calendarChanged(int userId, int calendarId) = CalendarChangedEvent;
+
+  const factory ServerEvent.calendarReminder(int userId, CalendarReminder reminder) = CalendarReminderEvent;
 
   const factory ServerEvent.error(String code, String message) = ServerErrorEvent;
 

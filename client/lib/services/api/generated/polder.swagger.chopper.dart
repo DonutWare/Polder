@@ -1028,6 +1028,774 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<List<Calendar>>> _listCalendars({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'The calendars the logged-in user owns or that are shared with them',
+      operationId: 'listCalendars',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Calendar>, Calendar>($request);
+  }
+
+  @override
+  Future<Response<Calendar>> _createCalendar({
+    required NewCalendar? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a calendar',
+      operationId: 'createCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Calendar, Calendar>($request);
+  }
+
+  @override
+  Future<Response<CalDAVInfo>> _getCalDAVInfo({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How to connect calendar apps over CalDAV',
+      operationId: 'getCalDAVInfo',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/caldav');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<CalDAVInfo, CalDAVInfo>($request);
+  }
+
+  @override
+  Future<Response<List<Event>>> _listCalendarEvents({
+    required DateTime? from,
+    required DateTime? to,
+    List<int>? calendarIds,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Every occurrence of the user\'s events in a time window, with repeating events expanded',
+      operationId: 'listCalendarEvents',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/events');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'from': from,
+      'to': to,
+      'calendarIds': calendarIds,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Event>, Event>($request);
+  }
+
+  @override
+  Future<Response<List<UserBusy>>> _getFreeBusy({
+    required List<int>? userIds,
+    required DateTime? from,
+    required DateTime? to,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'When other people on this server are busy',
+      operationId: 'getFreeBusy',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/freebusy');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'userIds': userIds,
+      'from': from,
+      'to': to,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<UserBusy>, UserBusy>($request);
+  }
+
+  @override
+  Future<Response<List<InboxItem>>> _listCalendarInbox({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Invitations, answers and cancellations the user received',
+      operationId: 'listCalendarInbox',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/inbox');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<InboxItem>, InboxItem>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteCalendarInboxItem({
+    required String? uri,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove a message from the calendar inbox',
+      operationId: 'deleteCalendarInboxItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/inbox/${uri}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<Calendar>> _subscribeCalendar({
+    required NewSubscription? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Follow an ICS feed from another service as a read-only calendar',
+      operationId: 'subscribeCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/subscriptions');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Calendar, Calendar>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteCalendar({
+    required int? calendarID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete an own calendar with its events, or leave a calendar shared with the user',
+      operationId: 'deleteCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<Calendar>> _getCalendar({
+    required int? calendarID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'One calendar',
+      operationId: 'getCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Calendar, Calendar>($request);
+  }
+
+  @override
+  Future<Response<Calendar>> _updateCalendar({
+    required int? calendarID,
+    required CalendarChange? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change a calendar; on a shared calendar only the user\'s own name, color, order, visibility and reminders change',
+      operationId: 'updateCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Calendar, Calendar>($request);
+  }
+
+  @override
+  Future<Response<Calendar>> _setDefaultCalendar({
+    required int? calendarID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Make a calendar the one invitations land in',
+      operationId: 'setDefaultCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/default');
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Calendar, Calendar>($request);
+  }
+
+  @override
+  Future<Response<EventDetails>> _createCalendarEvent({
+    required int? calendarID,
+    required EventInput? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create an event; attendees get an invitation',
+      operationId: 'createCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/events');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<EventDetails, EventDetails>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    String? scope,
+    String? recurrenceId,
+    String? ifMatch,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Delete an event, one occurrence of it, or it from one occurrence on',
+      operationId: 'deleteCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/events/${eventID}',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'scope': scope,
+      'recurrenceId': recurrenceId,
+    };
+    final Map<String, String> $headers = {
+      if (ifMatch != null) 'If-Match': ifMatch,
+    };
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<EventDetails>> _getCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'One event with its changed occurrences',
+      operationId: 'getCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/events/${eventID}',
+    );
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<EventDetails, EventDetails>($request);
+  }
+
+  @override
+  Future<Response<EventDetails>> _updateCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    String? scope,
+    String? recurrenceId,
+    String? ifMatch,
+    required EventInput? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Change an event, one occurrence of it, or it from one occurrence on',
+      operationId: 'updateCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/events/${eventID}',
+    );
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'scope': scope,
+      'recurrenceId': recurrenceId,
+    };
+    final Map<String, String> $headers = {
+      if (ifMatch != null) 'If-Match': ifMatch,
+    };
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      parameters: $params,
+      headers: $headers,
+      tag: swaggerMetaData,
+    );
+    return client.send<EventDetails, EventDetails>($request);
+  }
+
+  @override
+  Future<Response<EventDetails>> _moveCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    required MoveEventInputBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Move an event to another calendar',
+      operationId: 'moveCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/events/${eventID}/move',
+    );
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<EventDetails, EventDetails>($request);
+  }
+
+  @override
+  Future<Response<EventDetails>> _respondToCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    required RsvpEventInputBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Answer an invitation; the organizer is told',
+      operationId: 'respondToCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/events/${eventID}/rsvp',
+    );
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<EventDetails, EventDetails>($request);
+  }
+
+  @override
+  Future<Response<String>> _exportCalendar({
+    required int? calendarID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a calendar as an .ics file',
+      operationId: 'exportCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/export');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<String, String>($request);
+  }
+
+  @override
+  Future<Response<List<Feed>>> _listCalendarFeeds({
+    required int? calendarID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The secret addresses other apps can subscribe to',
+      operationId: 'listCalendarFeeds',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/feeds');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<Feed>, Feed>($request);
+  }
+
+  @override
+  Future<Response<Feed>> _createCalendarFeed({
+    required int? calendarID,
+    required NewFeed? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a secret address for subscribing from other apps; the address is returned once',
+      operationId: 'createCalendarFeed',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/feeds');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<Feed, Feed>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteCalendarFeed({
+    required int? calendarID,
+    required int? feedID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Revoke a secret address; it stops working at once',
+      operationId: 'deleteCalendarFeed',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/feeds/${feedID}',
+    );
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<ImportResult>> _importCalendar({
+    required int? calendarID,
+    required Object? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced',
+      operationId: 'importCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/import');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<ImportResult, ImportResult>($request);
+  }
+
+  @override
+  Future<Response<Calendar>> _refreshCalendar({
+    required int? calendarID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Fetch a subscribed feed now',
+      operationId: 'refreshCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/refresh');
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<Calendar, Calendar>($request);
+  }
+
+  @override
+  Future<Response<List<CalendarShare>>> _listCalendarShares({
+    required int? calendarID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Who an own calendar is shared with',
+      operationId: 'listCalendarShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/shares');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<CalendarShare>, CalendarShare>($request);
+  }
+
+  @override
+  Future<Response<CalendarShare>> _shareCalendar({
+    required int? calendarID,
+    required NewCalendarShare? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Share an own calendar with a user or a group',
+      operationId: 'shareCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/calendars/${calendarID}/shares');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<CalendarShare, CalendarShare>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _removeCalendarShare({
+    required int? calendarID,
+    required int? shareID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop sharing a calendar with someone',
+      operationId: 'removeCalendarShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/shares/${shareID}',
+    );
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<CalendarShare>> _updateCalendarShare({
+    required int? calendarID,
+    required int? shareID,
+    required UpdateCalendarShareInputBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change what a share allows',
+      operationId: 'updateCalendarShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/calendars/${calendarID}/shares/${shareID}',
+    );
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<CalendarShare, CalendarShare>($request);
+  }
+
+  @override
   Future<Response<DirectoryResponse>> _searchDirectory({
     String? q,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(

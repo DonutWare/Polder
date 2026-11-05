@@ -60,6 +60,12 @@ final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
       keywords: (l) => l.searchKeywordsNotes,
     ),
     AppDestination(
+      route: AppRoutes.calendar,
+      icon: IconsaxPlusLinear.calendar_1,
+      label: (l) => l.navCalendar,
+      keywords: (l) => l.searchKeywordsCalendar,
+    ),
+    AppDestination(
       route: AppRoutes.activity,
       icon: IconsaxPlusLinear.activity,
       label: (l) => l.navActivity,

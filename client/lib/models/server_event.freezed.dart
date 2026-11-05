@@ -56,7 +56,7 @@ extension ServerEventPatterns on ServerEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ReadyEvent value)?  ready,TResult Function( SnapshotEvent value)?  snapshot,TResult Function( TransferEvent value)?  transfer,TResult Function( ActivityCreatedEvent value)?  activityCreated,TResult Function( FilesChangedEvent value)?  filesChanged,TResult Function( ServerErrorEvent value)?  error,TResult Function( DisconnectedEvent value)?  disconnected,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ReadyEvent value)?  ready,TResult Function( SnapshotEvent value)?  snapshot,TResult Function( TransferEvent value)?  transfer,TResult Function( ActivityCreatedEvent value)?  activityCreated,TResult Function( FilesChangedEvent value)?  filesChanged,TResult Function( CalendarChangedEvent value)?  calendarChanged,TResult Function( CalendarReminderEvent value)?  calendarReminder,TResult Function( ServerErrorEvent value)?  error,TResult Function( DisconnectedEvent value)?  disconnected,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
@@ -64,7 +64,9 @@ return ready(_that);case SnapshotEvent() when snapshot != null:
 return snapshot(_that);case TransferEvent() when transfer != null:
 return transfer(_that);case ActivityCreatedEvent() when activityCreated != null:
 return activityCreated(_that);case FilesChangedEvent() when filesChanged != null:
-return filesChanged(_that);case ServerErrorEvent() when error != null:
+return filesChanged(_that);case CalendarChangedEvent() when calendarChanged != null:
+return calendarChanged(_that);case CalendarReminderEvent() when calendarReminder != null:
+return calendarReminder(_that);case ServerErrorEvent() when error != null:
 return error(_that);case DisconnectedEvent() when disconnected != null:
 return disconnected(_that);case _:
   return orElse();
@@ -84,7 +86,7 @@ return disconnected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ReadyEvent value)  ready,required TResult Function( SnapshotEvent value)  snapshot,required TResult Function( TransferEvent value)  transfer,required TResult Function( ActivityCreatedEvent value)  activityCreated,required TResult Function( FilesChangedEvent value)  filesChanged,required TResult Function( ServerErrorEvent value)  error,required TResult Function( DisconnectedEvent value)  disconnected,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ReadyEvent value)  ready,required TResult Function( SnapshotEvent value)  snapshot,required TResult Function( TransferEvent value)  transfer,required TResult Function( ActivityCreatedEvent value)  activityCreated,required TResult Function( FilesChangedEvent value)  filesChanged,required TResult Function( CalendarChangedEvent value)  calendarChanged,required TResult Function( CalendarReminderEvent value)  calendarReminder,required TResult Function( ServerErrorEvent value)  error,required TResult Function( DisconnectedEvent value)  disconnected,}){
 final _that = this;
 switch (_that) {
 case ReadyEvent():
@@ -92,7 +94,9 @@ return ready(_that);case SnapshotEvent():
 return snapshot(_that);case TransferEvent():
 return transfer(_that);case ActivityCreatedEvent():
 return activityCreated(_that);case FilesChangedEvent():
-return filesChanged(_that);case ServerErrorEvent():
+return filesChanged(_that);case CalendarChangedEvent():
+return calendarChanged(_that);case CalendarReminderEvent():
+return calendarReminder(_that);case ServerErrorEvent():
 return error(_that);case DisconnectedEvent():
 return disconnected(_that);}
 }
@@ -108,7 +112,7 @@ return disconnected(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ReadyEvent value)?  ready,TResult? Function( SnapshotEvent value)?  snapshot,TResult? Function( TransferEvent value)?  transfer,TResult? Function( ActivityCreatedEvent value)?  activityCreated,TResult? Function( FilesChangedEvent value)?  filesChanged,TResult? Function( ServerErrorEvent value)?  error,TResult? Function( DisconnectedEvent value)?  disconnected,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ReadyEvent value)?  ready,TResult? Function( SnapshotEvent value)?  snapshot,TResult? Function( TransferEvent value)?  transfer,TResult? Function( ActivityCreatedEvent value)?  activityCreated,TResult? Function( FilesChangedEvent value)?  filesChanged,TResult? Function( CalendarChangedEvent value)?  calendarChanged,TResult? Function( CalendarReminderEvent value)?  calendarReminder,TResult? Function( ServerErrorEvent value)?  error,TResult? Function( DisconnectedEvent value)?  disconnected,}){
 final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
@@ -116,7 +120,9 @@ return ready(_that);case SnapshotEvent() when snapshot != null:
 return snapshot(_that);case TransferEvent() when transfer != null:
 return transfer(_that);case ActivityCreatedEvent() when activityCreated != null:
 return activityCreated(_that);case FilesChangedEvent() when filesChanged != null:
-return filesChanged(_that);case ServerErrorEvent() when error != null:
+return filesChanged(_that);case CalendarChangedEvent() when calendarChanged != null:
+return calendarChanged(_that);case CalendarReminderEvent() when calendarReminder != null:
+return calendarReminder(_that);case ServerErrorEvent() when error != null:
 return error(_that);case DisconnectedEvent() when disconnected != null:
 return disconnected(_that);case _:
   return null;
@@ -135,14 +141,16 @@ return disconnected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  ready,TResult Function( List<LiveTransfer> transfers)?  snapshot,TResult Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult Function( ActivityEntry entry)?  activityCreated,TResult Function( int userId,  List<String> dirs)?  filesChanged,TResult Function( String code,  String message)?  error,TResult Function()?  disconnected,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  ready,TResult Function( List<LiveTransfer> transfers)?  snapshot,TResult Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult Function( ActivityEntry entry)?  activityCreated,TResult Function( int userId,  List<String> dirs)?  filesChanged,TResult Function( int userId,  int calendarId)?  calendarChanged,TResult Function( int userId,  CalendarReminder reminder)?  calendarReminder,TResult Function( String code,  String message)?  error,TResult Function()?  disconnected,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
 return ready();case SnapshotEvent() when snapshot != null:
 return snapshot(_that.transfers);case TransferEvent() when transfer != null:
 return transfer(_that.phase,_that.transfer);case ActivityCreatedEvent() when activityCreated != null:
 return activityCreated(_that.entry);case FilesChangedEvent() when filesChanged != null:
-return filesChanged(_that.userId,_that.dirs);case ServerErrorEvent() when error != null:
+return filesChanged(_that.userId,_that.dirs);case CalendarChangedEvent() when calendarChanged != null:
+return calendarChanged(_that.userId,_that.calendarId);case CalendarReminderEvent() when calendarReminder != null:
+return calendarReminder(_that.userId,_that.reminder);case ServerErrorEvent() when error != null:
 return error(_that.code,_that.message);case DisconnectedEvent() when disconnected != null:
 return disconnected();case _:
   return orElse();
@@ -162,14 +170,16 @@ return disconnected();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  ready,required TResult Function( List<LiveTransfer> transfers)  snapshot,required TResult Function( TransferPhase phase,  LiveTransfer transfer)  transfer,required TResult Function( ActivityEntry entry)  activityCreated,required TResult Function( int userId,  List<String> dirs)  filesChanged,required TResult Function( String code,  String message)  error,required TResult Function()  disconnected,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  ready,required TResult Function( List<LiveTransfer> transfers)  snapshot,required TResult Function( TransferPhase phase,  LiveTransfer transfer)  transfer,required TResult Function( ActivityEntry entry)  activityCreated,required TResult Function( int userId,  List<String> dirs)  filesChanged,required TResult Function( int userId,  int calendarId)  calendarChanged,required TResult Function( int userId,  CalendarReminder reminder)  calendarReminder,required TResult Function( String code,  String message)  error,required TResult Function()  disconnected,}) {final _that = this;
 switch (_that) {
 case ReadyEvent():
 return ready();case SnapshotEvent():
 return snapshot(_that.transfers);case TransferEvent():
 return transfer(_that.phase,_that.transfer);case ActivityCreatedEvent():
 return activityCreated(_that.entry);case FilesChangedEvent():
-return filesChanged(_that.userId,_that.dirs);case ServerErrorEvent():
+return filesChanged(_that.userId,_that.dirs);case CalendarChangedEvent():
+return calendarChanged(_that.userId,_that.calendarId);case CalendarReminderEvent():
+return calendarReminder(_that.userId,_that.reminder);case ServerErrorEvent():
 return error(_that.code,_that.message);case DisconnectedEvent():
 return disconnected();}
 }
@@ -185,14 +195,16 @@ return disconnected();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  ready,TResult? Function( List<LiveTransfer> transfers)?  snapshot,TResult? Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult? Function( ActivityEntry entry)?  activityCreated,TResult? Function( int userId,  List<String> dirs)?  filesChanged,TResult? Function( String code,  String message)?  error,TResult? Function()?  disconnected,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  ready,TResult? Function( List<LiveTransfer> transfers)?  snapshot,TResult? Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult? Function( ActivityEntry entry)?  activityCreated,TResult? Function( int userId,  List<String> dirs)?  filesChanged,TResult? Function( int userId,  int calendarId)?  calendarChanged,TResult? Function( int userId,  CalendarReminder reminder)?  calendarReminder,TResult? Function( String code,  String message)?  error,TResult? Function()?  disconnected,}) {final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
 return ready();case SnapshotEvent() when snapshot != null:
 return snapshot(_that.transfers);case TransferEvent() when transfer != null:
 return transfer(_that.phase,_that.transfer);case ActivityCreatedEvent() when activityCreated != null:
 return activityCreated(_that.entry);case FilesChangedEvent() when filesChanged != null:
-return filesChanged(_that.userId,_that.dirs);case ServerErrorEvent() when error != null:
+return filesChanged(_that.userId,_that.dirs);case CalendarChangedEvent() when calendarChanged != null:
+return calendarChanged(_that.userId,_that.calendarId);case CalendarReminderEvent() when calendarReminder != null:
+return calendarReminder(_that.userId,_that.reminder);case ServerErrorEvent() when error != null:
 return error(_that.code,_that.message);case DisconnectedEvent() when disconnected != null:
 return disconnected();case _:
   return null;
@@ -538,6 +550,155 @@ as List<String>,
 }
 
 
+}
+
+/// @nodoc
+
+
+class CalendarChangedEvent extends ServerEvent {
+  const CalendarChangedEvent(this.userId, this.calendarId): super._();
+  
+
+ final  int userId;
+ final  int calendarId;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CalendarChangedEventCopyWith<CalendarChangedEvent> get copyWith => _$CalendarChangedEventCopyWithImpl<CalendarChangedEvent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is CalendarChangedEvent&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.calendarId, calendarId) || other.calendarId == calendarId));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,userId,calendarId);
+}
+
+@override
+String toString() {
+    return 'ServerEvent.calendarChanged(userId: $userId, calendarId: $calendarId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CalendarChangedEventCopyWith<$Res> implements $ServerEventCopyWith<$Res> {
+  factory $CalendarChangedEventCopyWith(CalendarChangedEvent value, $Res Function(CalendarChangedEvent) _then) = _$CalendarChangedEventCopyWithImpl;
+@useResult
+$Res call({
+ int userId, int calendarId
+});
+
+
+
+
+}
+/// @nodoc
+class _$CalendarChangedEventCopyWithImpl<$Res>
+    implements $CalendarChangedEventCopyWith<$Res> {
+  _$CalendarChangedEventCopyWithImpl(this._self, this._then);
+
+  final CalendarChangedEvent _self;
+  final $Res Function(CalendarChangedEvent) _then;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? calendarId = null,}) {
+  return _then(CalendarChangedEvent(
+null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as int,null == calendarId ? _self.calendarId : calendarId // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class CalendarReminderEvent extends ServerEvent {
+  const CalendarReminderEvent(this.userId, this.reminder): super._();
+  
+
+ final  int userId;
+ final  CalendarReminder reminder;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CalendarReminderEventCopyWith<CalendarReminderEvent> get copyWith => _$CalendarReminderEventCopyWithImpl<CalendarReminderEvent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is CalendarReminderEvent&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.reminder, reminder) || other.reminder == reminder));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,userId,reminder);
+}
+
+@override
+String toString() {
+    return 'ServerEvent.calendarReminder(userId: $userId, reminder: $reminder)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CalendarReminderEventCopyWith<$Res> implements $ServerEventCopyWith<$Res> {
+  factory $CalendarReminderEventCopyWith(CalendarReminderEvent value, $Res Function(CalendarReminderEvent) _then) = _$CalendarReminderEventCopyWithImpl;
+@useResult
+$Res call({
+ int userId, CalendarReminder reminder
+});
+
+
+$CalendarReminderCopyWith<$Res> get reminder;
+
+}
+/// @nodoc
+class _$CalendarReminderEventCopyWithImpl<$Res>
+    implements $CalendarReminderEventCopyWith<$Res> {
+  _$CalendarReminderEventCopyWithImpl(this._self, this._then);
+
+  final CalendarReminderEvent _self;
+  final $Res Function(CalendarReminderEvent) _then;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? reminder = null,}) {
+  return _then(CalendarReminderEvent(
+null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as int,null == reminder ? _self.reminder : reminder // ignore: cast_nullable_to_non_nullable
+as CalendarReminder,
+  ));
+}
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CalendarReminderCopyWith<$Res> get reminder {
+  
+  return $CalendarReminderCopyWith<$Res>(_self.reminder, (value) {
+    return _then(_self.copyWith(reminder: value));
+  });
+}
 }
 
 /// @nodoc

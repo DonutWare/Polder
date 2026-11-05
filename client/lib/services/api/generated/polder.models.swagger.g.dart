@@ -14,6 +14,22 @@ Map<String, dynamic> _$AcceptInviteRequestToJson(AcceptInviteRequest instance) =
   'token': instance.token,
 };
 
+Alarm _$AlarmFromJson(Map<String, dynamic> json) => Alarm(
+  action: json['action'] as String,
+  at: json['at'] == null ? null : DateTime.parse(json['at'] as String),
+  description: json['description'] as String?,
+  offsetMinutes: (json['offsetMinutes'] as num?)?.toInt(),
+  relativeToEnd: json['relativeToEnd'] as bool?,
+);
+
+Map<String, dynamic> _$AlarmToJson(Alarm instance) => <String, dynamic>{
+  'action': instance.action,
+  'at': ?instance.at?.toIso8601String(),
+  'description': ?instance.description,
+  'offsetMinutes': ?instance.offsetMinutes,
+  'relativeToEnd': ?instance.relativeToEnd,
+};
+
 AppPassword _$AppPasswordFromJson(Map<String, dynamic> json) => AppPassword(
   createdAt: DateTime.parse(json['createdAt'] as String),
   id: (json['id'] as num).toInt(),
@@ -50,6 +66,33 @@ Appearance _$AppearanceFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$AppearanceToJson(Appearance instance) => <String, dynamic>{
   'accentColor': ?instance.accentColor,
   'theme': ?appearanceThemeNullableToJson(instance.theme),
+};
+
+Attendee _$AttendeeFromJson(Map<String, dynamic> json) => Attendee(
+  email: json['email'] as String,
+  name: json['name'] as String?,
+  role: json['role'] as String?,
+  scheduleStatus: json['scheduleStatus'] as String?,
+  self: json['self'] as bool,
+  status: json['status'] as String,
+);
+
+Map<String, dynamic> _$AttendeeToJson(Attendee instance) => <String, dynamic>{
+  'email': instance.email,
+  'name': ?instance.name,
+  'role': ?instance.role,
+  'scheduleStatus': ?instance.scheduleStatus,
+  'self': instance.self,
+  'status': instance.status,
+};
+
+AttendeeInput _$AttendeeInputFromJson(Map<String, dynamic> json) =>
+    AttendeeInput(email: json['email'] as String, name: json['name'] as String?, role: json['role'] as String?);
+
+Map<String, dynamic> _$AttendeeInputToJson(AttendeeInput instance) => <String, dynamic>{
+  'email': instance.email,
+  'name': ?instance.name,
+  'role': ?instance.role,
 };
 
 Avatar _$AvatarFromJson(Map<String, dynamic> json) =>
@@ -97,6 +140,151 @@ Map<String, dynamic> _$BrandingToJson(Branding instance) => <String, dynamic>{
   'icon': ?instance.icon?.toJson(),
   'message': instance.message,
   'name': instance.name,
+};
+
+BusyPeriod _$BusyPeriodFromJson(Map<String, dynamic> json) => BusyPeriod(
+  end: DateTime.parse(json['end'] as String),
+  start: DateTime.parse(json['start'] as String),
+  tentative: json['tentative'] as bool,
+);
+
+Map<String, dynamic> _$BusyPeriodToJson(BusyPeriod instance) => <String, dynamic>{
+  'end': instance.end.toIso8601String(),
+  'start': instance.start.toIso8601String(),
+  'tentative': instance.tentative,
+};
+
+CalDAVInfo _$CalDAVInfoFromJson(Map<String, dynamic> json) => CalDAVInfo(
+  hint: json['hint'] as String,
+  homeUrl: json['homeUrl'] as String,
+  principalUrl: json['principalUrl'] as String,
+  serverUrl: json['serverUrl'] as String,
+  username: json['username'] as String,
+);
+
+Map<String, dynamic> _$CalDAVInfoToJson(CalDAVInfo instance) => <String, dynamic>{
+  'hint': instance.hint,
+  'homeUrl': instance.homeUrl,
+  'principalUrl': instance.principalUrl,
+  'serverUrl': instance.serverUrl,
+  'username': instance.username,
+};
+
+Calendar _$CalendarFromJson(Map<String, dynamic> json) => Calendar(
+  access: calendarAccessFromJson(json['access']),
+  color: json['color'] as String,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  description: json['description'] as String,
+  fetchError: json['fetchError'] as String?,
+  fetchedAt: json['fetchedAt'] == null ? null : DateTime.parse(json['fetchedAt'] as String),
+  hidden: json['hidden'] as bool,
+  id: (json['id'] as num).toInt(),
+  isDefault: json['isDefault'] as bool,
+  kind: calendarKindFromJson(json['kind']),
+  name: json['name'] as String,
+  notify: json['notify'] as bool,
+  order: (json['order'] as num).toInt(),
+  owner: json['owner'] == null ? null : UserSummary.fromJson(json['owner'] as Map<String, dynamic>),
+  refreshSeconds: (json['refreshSeconds'] as num?)?.toInt(),
+  sourceUrl: json['sourceUrl'] as String?,
+  timezone: json['timezone'] as String,
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  uri: json['uri'] as String,
+);
+
+Map<String, dynamic> _$CalendarToJson(Calendar instance) => <String, dynamic>{
+  'access': ?calendarAccessToJson(instance.access),
+  'color': instance.color,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'description': instance.description,
+  'fetchError': ?instance.fetchError,
+  'fetchedAt': ?instance.fetchedAt?.toIso8601String(),
+  'hidden': instance.hidden,
+  'id': instance.id,
+  'isDefault': instance.isDefault,
+  'kind': ?calendarKindToJson(instance.kind),
+  'name': instance.name,
+  'notify': instance.notify,
+  'order': instance.order,
+  'owner': ?instance.owner?.toJson(),
+  'refreshSeconds': ?instance.refreshSeconds,
+  'sourceUrl': ?instance.sourceUrl,
+  'timezone': instance.timezone,
+  'updatedAt': instance.updatedAt.toIso8601String(),
+  'uri': instance.uri,
+};
+
+CalendarChange _$CalendarChangeFromJson(Map<String, dynamic> json) => CalendarChange(
+  color: json['color'] as String?,
+  description: json['description'] as String?,
+  hidden: json['hidden'] as bool?,
+  name: json['name'] as String?,
+  notify: json['notify'] as bool?,
+  order: (json['order'] as num?)?.toInt(),
+  refreshSeconds: (json['refreshSeconds'] as num?)?.toInt(),
+  timezone: json['timezone'] as String?,
+);
+
+Map<String, dynamic> _$CalendarChangeToJson(CalendarChange instance) => <String, dynamic>{
+  'color': ?instance.color,
+  'description': ?instance.description,
+  'hidden': ?instance.hidden,
+  'name': ?instance.name,
+  'notify': ?instance.notify,
+  'order': ?instance.order,
+  'refreshSeconds': ?instance.refreshSeconds,
+  'timezone': ?instance.timezone,
+};
+
+CalendarReminder _$CalendarReminderFromJson(Map<String, dynamic> json) => CalendarReminder(
+  allDay: json['allDay'] as bool,
+  calendarId: (json['calendarId'] as num).toInt(),
+  end: DateTime.parse(json['end'] as String),
+  eventId: (json['eventId'] as num).toInt(),
+  location: json['location'] as String?,
+  recurrenceId: json['recurrenceId'] as String?,
+  start: DateTime.parse(json['start'] as String),
+  summary: json['summary'] as String,
+  triggerAt: DateTime.parse(json['triggerAt'] as String),
+  uid: json['uid'] as String,
+);
+
+Map<String, dynamic> _$CalendarReminderToJson(CalendarReminder instance) => <String, dynamic>{
+  'allDay': instance.allDay,
+  'calendarId': instance.calendarId,
+  'end': instance.end.toIso8601String(),
+  'eventId': instance.eventId,
+  'location': ?instance.location,
+  'recurrenceId': ?instance.recurrenceId,
+  'start': instance.start.toIso8601String(),
+  'summary': instance.summary,
+  'triggerAt': instance.triggerAt.toIso8601String(),
+  'uid': instance.uid,
+};
+
+CalendarShare _$CalendarShareFromJson(Map<String, dynamic> json) => CalendarShare(
+  access: calendarShareAccessFromJson(json['access']),
+  calendarId: (json['calendarId'] as num).toInt(),
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  group: json['group'] == null ? null : GroupSummary.fromJson(json['group'] as Map<String, dynamic>),
+  id: (json['id'] as num).toInt(),
+  user: json['user'] == null ? null : UserSummary.fromJson(json['user'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$CalendarShareToJson(CalendarShare instance) => <String, dynamic>{
+  'access': ?calendarShareAccessToJson(instance.access),
+  'calendarId': instance.calendarId,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'group': ?instance.group?.toJson(),
+  'id': instance.id,
+  'user': ?instance.user?.toJson(),
+};
+
+CalendarUpdate _$CalendarUpdateFromJson(Map<String, dynamic> json) =>
+    CalendarUpdate(calendarId: (json['calendarId'] as num).toInt());
+
+Map<String, dynamic> _$CalendarUpdateToJson(CalendarUpdate instance) => <String, dynamic>{
+  'calendarId': instance.calendarId,
 };
 
 Change _$ChangeFromJson(Map<String, dynamic> json) => Change(
@@ -336,11 +524,170 @@ Map<String, dynamic> _$ErrorResponseToJson(ErrorResponse instance) => <String, d
   'error': instance.error.toJson(),
 };
 
+Event _$EventFromJson(Map<String, dynamic> json) => Event(
+  alarms: (json['alarms'] as List<dynamic>?)?.map((e) => Alarm.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  allDay: json['allDay'] as bool,
+  attendees:
+      (json['attendees'] as List<dynamic>?)?.map((e) => Attendee.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  busyOnly: json['busyOnly'] as bool,
+  calendarId: (json['calendarId'] as num).toInt(),
+  categories: (json['categories'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  description: json['description'] as String?,
+  end: DateTime.parse(json['end'] as String),
+  etag: json['etag'] as String,
+  exceptionDates: (json['exceptionDates'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  id: (json['id'] as num).toInt(),
+  location: json['location'] as String?,
+  organizer: json['organizer'] == null ? null : Person.fromJson(json['organizer'] as Map<String, dynamic>),
+  $override: json['override'] as bool,
+  recurrenceId: json['recurrenceId'] as String?,
+  recurring: json['recurring'] as bool,
+  rrule: json['rrule'] as String?,
+  sequence: (json['sequence'] as num).toInt(),
+  showAs: eventShowAsFromJson(json['showAs']),
+  start: DateTime.parse(json['start'] as String),
+  status: json['status'] as String,
+  summary: json['summary'] as String,
+  timezone: json['timezone'] as String?,
+  uid: json['uid'] as String,
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  url: json['url'] as String?,
+);
+
+Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
+  'alarms': ?instance.alarms?.map((e) => e.toJson()).toList(),
+  'allDay': instance.allDay,
+  'attendees': ?instance.attendees?.map((e) => e.toJson()).toList(),
+  'busyOnly': instance.busyOnly,
+  'calendarId': instance.calendarId,
+  'categories': ?instance.categories,
+  'description': ?instance.description,
+  'end': instance.end.toIso8601String(),
+  'etag': instance.etag,
+  'exceptionDates': ?instance.exceptionDates,
+  'id': instance.id,
+  'location': ?instance.location,
+  'organizer': ?instance.organizer?.toJson(),
+  'override': instance.$override,
+  'recurrenceId': ?instance.recurrenceId,
+  'recurring': instance.recurring,
+  'rrule': ?instance.rrule,
+  'sequence': instance.sequence,
+  'showAs': ?eventShowAsToJson(instance.showAs),
+  'start': instance.start.toIso8601String(),
+  'status': instance.status,
+  'summary': instance.summary,
+  'timezone': ?instance.timezone,
+  'uid': instance.uid,
+  'updatedAt': instance.updatedAt.toIso8601String(),
+  'url': ?instance.url,
+};
+
+EventDetails _$EventDetailsFromJson(Map<String, dynamic> json) => EventDetails(
+  alarms: (json['alarms'] as List<dynamic>?)?.map((e) => Alarm.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  allDay: json['allDay'] as bool,
+  attendees:
+      (json['attendees'] as List<dynamic>?)?.map((e) => Attendee.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  busyOnly: json['busyOnly'] as bool,
+  calendarId: (json['calendarId'] as num).toInt(),
+  categories: (json['categories'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  description: json['description'] as String?,
+  end: DateTime.parse(json['end'] as String),
+  etag: json['etag'] as String,
+  exceptionDates: (json['exceptionDates'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  id: (json['id'] as num).toInt(),
+  location: json['location'] as String?,
+  organizer: json['organizer'] == null ? null : Person.fromJson(json['organizer'] as Map<String, dynamic>),
+  $override: json['override'] as bool,
+  overrides:
+      (json['overrides'] as List<dynamic>?)?.map((e) => Event.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  recurrenceId: json['recurrenceId'] as String?,
+  recurring: json['recurring'] as bool,
+  rrule: json['rrule'] as String?,
+  sequence: (json['sequence'] as num).toInt(),
+  showAs: eventDetailsShowAsFromJson(json['showAs']),
+  start: DateTime.parse(json['start'] as String),
+  status: json['status'] as String,
+  summary: json['summary'] as String,
+  timezone: json['timezone'] as String?,
+  uid: json['uid'] as String,
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  url: json['url'] as String?,
+);
+
+Map<String, dynamic> _$EventDetailsToJson(EventDetails instance) => <String, dynamic>{
+  'alarms': ?instance.alarms?.map((e) => e.toJson()).toList(),
+  'allDay': instance.allDay,
+  'attendees': ?instance.attendees?.map((e) => e.toJson()).toList(),
+  'busyOnly': instance.busyOnly,
+  'calendarId': instance.calendarId,
+  'categories': ?instance.categories,
+  'description': ?instance.description,
+  'end': instance.end.toIso8601String(),
+  'etag': instance.etag,
+  'exceptionDates': ?instance.exceptionDates,
+  'id': instance.id,
+  'location': ?instance.location,
+  'organizer': ?instance.organizer?.toJson(),
+  'override': instance.$override,
+  'overrides': ?instance.overrides?.map((e) => e.toJson()).toList(),
+  'recurrenceId': ?instance.recurrenceId,
+  'recurring': instance.recurring,
+  'rrule': ?instance.rrule,
+  'sequence': instance.sequence,
+  'showAs': ?eventDetailsShowAsToJson(instance.showAs),
+  'start': instance.start.toIso8601String(),
+  'status': instance.status,
+  'summary': instance.summary,
+  'timezone': ?instance.timezone,
+  'uid': instance.uid,
+  'updatedAt': instance.updatedAt.toIso8601String(),
+  'url': ?instance.url,
+};
+
+EventInput _$EventInputFromJson(Map<String, dynamic> json) => EventInput(
+  alarms: (json['alarms'] as List<dynamic>?)?.map((e) => Alarm.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  allDay: json['allDay'] as bool?,
+  attendees:
+      (json['attendees'] as List<dynamic>?)?.map((e) => AttendeeInput.fromJson(e as Map<String, dynamic>)).toList() ??
+      [],
+  categories: (json['categories'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  description: json['description'] as String?,
+  end: json['end'] == null ? null : DateTime.parse(json['end'] as String),
+  location: json['location'] as String?,
+  rrule: json['rrule'] as String?,
+  showAs: eventInputShowAsNullableFromJson(json['showAs']),
+  start: DateTime.parse(json['start'] as String),
+  status: json['status'] as String?,
+  summary: json['summary'] as String,
+  timezone: json['timezone'] as String?,
+  url: json['url'] as String?,
+);
+
+Map<String, dynamic> _$EventInputToJson(EventInput instance) => <String, dynamic>{
+  'alarms': ?instance.alarms?.map((e) => e.toJson()).toList(),
+  'allDay': ?instance.allDay,
+  'attendees': ?instance.attendees?.map((e) => e.toJson()).toList(),
+  'categories': ?instance.categories,
+  'description': ?instance.description,
+  'end': ?instance.end?.toIso8601String(),
+  'location': ?instance.location,
+  'rrule': ?instance.rrule,
+  'showAs': ?eventInputShowAsNullableToJson(instance.showAs),
+  'start': instance.start.toIso8601String(),
+  'status': ?instance.status,
+  'summary': instance.summary,
+  'timezone': ?instance.timezone,
+  'url': ?instance.url,
+};
+
 EventMessage _$EventMessageFromJson(Map<String, dynamic> json) => EventMessage(
+  calendar: json['calendar'] == null ? null : CalendarUpdate.fromJson(json['calendar'] as Map<String, dynamic>),
   code: json['code'] as String?,
   dirs: (json['dirs'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   entry: json['entry'] == null ? null : LogEntry.fromJson(json['entry'] as Map<String, dynamic>),
   message: json['message'] as String?,
+  reminder: json['reminder'] == null ? null : CalendarReminder.fromJson(json['reminder'] as Map<String, dynamic>),
   status: eventMessageStatusNullableFromJson(json['status']),
   transfer: json['transfer'] == null ? null : LiveTransfer.fromJson(json['transfer'] as Map<String, dynamic>),
   transfers:
@@ -352,10 +699,12 @@ EventMessage _$EventMessageFromJson(Map<String, dynamic> json) => EventMessage(
 );
 
 Map<String, dynamic> _$EventMessageToJson(EventMessage instance) => <String, dynamic>{
+  'calendar': ?instance.calendar?.toJson(),
   'code': ?instance.code,
   'dirs': ?instance.dirs,
   'entry': ?instance.entry?.toJson(),
   'message': ?instance.message,
+  'reminder': ?instance.reminder?.toJson(),
   'status': ?eventMessageStatusNullableToJson(instance.status),
   'transfer': ?instance.transfer?.toJson(),
   'transfers': ?instance.transfers?.map((e) => e.toJson()).toList(),
@@ -404,6 +753,28 @@ Map<String, dynamic> _$FederationStatusToJson(FederationStatus instance) => <Str
   'cloudId': instance.cloudId,
   'configured': instance.configured,
   'enabled': instance.enabled,
+};
+
+Feed _$FeedFromJson(Map<String, dynamic> json) => Feed(
+  calendarId: (json['calendarId'] as num).toInt(),
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  id: (json['id'] as num).toInt(),
+  lastUsedAt: json['lastUsedAt'] == null ? null : DateTime.parse(json['lastUsedAt'] as String),
+  mode: feedModeFromJson(json['mode']),
+  name: json['name'] as String,
+  url: json['url'] as String?,
+  webcalUrl: json['webcalUrl'] as String?,
+);
+
+Map<String, dynamic> _$FeedToJson(Feed instance) => <String, dynamic>{
+  'calendarId': instance.calendarId,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'id': instance.id,
+  'lastUsedAt': ?instance.lastUsedAt?.toIso8601String(),
+  'mode': ?feedModeToJson(instance.mode),
+  'name': instance.name,
+  'url': ?instance.url,
+  'webcalUrl': ?instance.webcalUrl,
 };
 
 FileError _$FileErrorFromJson(Map<String, dynamic> json) => FileError(
@@ -484,6 +855,14 @@ GroupRef _$GroupRefFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$GroupRefToJson(GroupRef instance) => <String, dynamic>{'id': instance.id, 'name': instance.name};
 
+GroupSummary _$GroupSummaryFromJson(Map<String, dynamic> json) =>
+    GroupSummary(id: (json['id'] as num).toInt(), name: json['name'] as String);
+
+Map<String, dynamic> _$GroupSummaryToJson(GroupSummary instance) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+};
+
 HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) => HealthStatus(status: json['status'] as String);
 
 Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) => <String, dynamic>{'status': instance.status};
@@ -494,6 +873,40 @@ ImageInfo _$ImageInfoFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ImageInfoToJson(ImageInfo instance) => <String, dynamic>{
   'contentType': instance.contentType,
   'id': instance.id,
+};
+
+ImportResult _$ImportResultFromJson(Map<String, dynamic> json) => ImportResult(
+  created: (json['created'] as num).toInt(),
+  errors: (json['errors'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  skipped: (json['skipped'] as num).toInt(),
+  updated: (json['updated'] as num).toInt(),
+);
+
+Map<String, dynamic> _$ImportResultToJson(ImportResult instance) => <String, dynamic>{
+  'created': instance.created,
+  'errors': ?instance.errors,
+  'skipped': instance.skipped,
+  'updated': instance.updated,
+};
+
+InboxItem _$InboxItemFromJson(Map<String, dynamic> json) => InboxItem(
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  id: (json['id'] as num).toInt(),
+  method: json['method'] as String,
+  sender: json['sender'] as String,
+  summary: json['summary'] as String,
+  uid: json['uid'] as String,
+  uri: json['uri'] as String,
+);
+
+Map<String, dynamic> _$InboxItemToJson(InboxItem instance) => <String, dynamic>{
+  'createdAt': instance.createdAt.toIso8601String(),
+  'id': instance.id,
+  'method': instance.method,
+  'sender': instance.sender,
+  'summary': instance.summary,
+  'uid': instance.uid,
+  'uri': instance.uri,
 };
 
 Incoming _$IncomingFromJson(Map<String, dynamic> json) => Incoming(
@@ -909,6 +1322,13 @@ Map<String, dynamic> _$MountPermissionsToJson(MountPermissions instance) => <Str
   'edit': instance.edit,
 };
 
+MoveEventInputBody _$MoveEventInputBodyFromJson(Map<String, dynamic> json) =>
+    MoveEventInputBody(calendarId: (json['calendarId'] as num).toInt());
+
+Map<String, dynamic> _$MoveEventInputBodyToJson(MoveEventInputBody instance) => <String, dynamic>{
+  'calendarId': instance.calendarId,
+};
+
 MoveRequest _$MoveRequestFromJson(Map<String, dynamic> json) =>
     MoveRequest(baseRev: (json['baseRev'] as num?)?.toInt(), from: json['from'] as String, to: json['to'] as String);
 
@@ -936,6 +1356,42 @@ Map<String, dynamic> _$NewAppPasswordToJson(NewAppPassword instance) => <String,
   'name': instance.name,
   'readOnly': instance.readOnly,
   'token': instance.token,
+};
+
+NewCalendar _$NewCalendarFromJson(Map<String, dynamic> json) => NewCalendar(
+  color: json['color'] as String?,
+  description: json['description'] as String?,
+  name: json['name'] as String,
+  timezone: json['timezone'] as String?,
+  uri: json['uri'] as String?,
+);
+
+Map<String, dynamic> _$NewCalendarToJson(NewCalendar instance) => <String, dynamic>{
+  'color': ?instance.color,
+  'description': ?instance.description,
+  'name': instance.name,
+  'timezone': ?instance.timezone,
+  'uri': ?instance.uri,
+};
+
+NewCalendarShare _$NewCalendarShareFromJson(Map<String, dynamic> json) => NewCalendarShare(
+  access: newCalendarShareAccessFromJson(json['access']),
+  recipientId: (json['recipientId'] as num).toInt(),
+  recipientKind: newCalendarShareRecipientKindFromJson(json['recipientKind']),
+);
+
+Map<String, dynamic> _$NewCalendarShareToJson(NewCalendarShare instance) => <String, dynamic>{
+  'access': ?newCalendarShareAccessToJson(instance.access),
+  'recipientId': instance.recipientId,
+  'recipientKind': ?newCalendarShareRecipientKindToJson(instance.recipientKind),
+};
+
+NewFeed _$NewFeedFromJson(Map<String, dynamic> json) =>
+    NewFeed(mode: newFeedModeFromJson(json['mode']), name: json['name'] as String?);
+
+Map<String, dynamic> _$NewFeedToJson(NewFeed instance) => <String, dynamic>{
+  'mode': ?newFeedModeToJson(instance.mode),
+  'name': ?instance.name,
 };
 
 NewMember _$NewMemberFromJson(Map<String, dynamic> json) =>
@@ -990,6 +1446,20 @@ Map<String, dynamic> _$NewShareLinkToJson(NewShareLink instance) => <String, dyn
   'fileId': instance.fileId,
   'password': ?instance.password,
   'permissions': ?instance.permissions?.toJson(),
+};
+
+NewSubscription _$NewSubscriptionFromJson(Map<String, dynamic> json) => NewSubscription(
+  color: json['color'] as String?,
+  name: json['name'] as String?,
+  refreshSeconds: (json['refreshSeconds'] as num?)?.toInt(),
+  url: json['url'] as String,
+);
+
+Map<String, dynamic> _$NewSubscriptionToJson(NewSubscription instance) => <String, dynamic>{
+  'color': ?instance.color,
+  'name': ?instance.name,
+  'refreshSeconds': ?instance.refreshSeconds,
+  'url': instance.url,
 };
 
 NewUser _$NewUserFromJson(Map<String, dynamic> json) => NewUser(
@@ -1107,6 +1577,15 @@ Map<String, dynamic> _$PasswordChangeToJson(PasswordChange instance) => <String,
 PathRequest _$PathRequestFromJson(Map<String, dynamic> json) => PathRequest(path: json['path'] as String);
 
 Map<String, dynamic> _$PathRequestToJson(PathRequest instance) => <String, dynamic>{'path': instance.path};
+
+Person _$PersonFromJson(Map<String, dynamic> json) =>
+    Person(email: json['email'] as String, name: json['name'] as String?, self: json['self'] as bool);
+
+Map<String, dynamic> _$PersonToJson(Person instance) => <String, dynamic>{
+  'email': instance.email,
+  'name': ?instance.name,
+  'self': instance.self,
+};
 
 PreviewRegeneration _$PreviewRegenerationFromJson(Map<String, dynamic> json) =>
     PreviewRegeneration(files: (json['files'] as num).toInt());
@@ -1284,6 +1763,14 @@ RoleChange _$RoleChangeFromJson(Map<String, dynamic> json) => RoleChange(role: r
 
 Map<String, dynamic> _$RoleChangeToJson(RoleChange instance) => <String, dynamic>{
   'role': ?roleChangeRoleToJson(instance.role),
+};
+
+RsvpEventInputBody _$RsvpEventInputBodyFromJson(Map<String, dynamic> json) =>
+    RsvpEventInputBody(recurrenceId: json['recurrenceId'] as String?, status: json['status'] as String);
+
+Map<String, dynamic> _$RsvpEventInputBodyToJson(RsvpEventInputBody instance) => <String, dynamic>{
+  'recurrenceId': ?instance.recurrenceId,
+  'status': instance.status,
 };
 
 SearchStatus _$SearchStatusFromJson(Map<String, dynamic> json) => SearchStatus(
@@ -1737,6 +2224,13 @@ Map<String, dynamic> _$UnusedTagsResponseToJson(UnusedTagsResponse instance) => 
   'removed': instance.removed,
 };
 
+UpdateCalendarShareInputBody _$UpdateCalendarShareInputBodyFromJson(Map<String, dynamic> json) =>
+    UpdateCalendarShareInputBody(access: updateCalendarShareInputBodyAccessFromJson(json['access']));
+
+Map<String, dynamic> _$UpdateCalendarShareInputBodyToJson(UpdateCalendarShareInputBody instance) => <String, dynamic>{
+  'access': ?updateCalendarShareInputBodyAccessToJson(instance.access),
+};
+
 UploadRequest _$UploadRequestFromJson(Map<String, dynamic> json) => UploadRequest(
   baseRev: (json['baseRev'] as num?)?.toInt(),
   chunks: (json['chunks'] as List<dynamic>?)?.map((e) => ChunkRef.fromJson(e as Map<String, dynamic>)).toList() ?? [],
@@ -1781,6 +2275,16 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'role': ?userRoleToJson(instance.role),
   'usedBytes': instance.usedBytes,
   'username': instance.username,
+};
+
+UserBusy _$UserBusyFromJson(Map<String, dynamic> json) => UserBusy(
+  busy: (json['busy'] as List<dynamic>?)?.map((e) => BusyPeriod.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  user: UserSummary.fromJson(json['user'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$UserBusyToJson(UserBusy instance) => <String, dynamic>{
+  'busy': ?instance.busy?.map((e) => e.toJson()).toList(),
+  'user': instance.user.toJson(),
 };
 
 UserSummary _$UserSummaryFromJson(Map<String, dynamic> json) => UserSummary(

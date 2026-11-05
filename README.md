@@ -38,6 +38,7 @@
 * Notes - Create a knowledgedatabase link notes inside of another note
 * Collabora Online or Euro-Office support - Edit documents directly on all platforms.
 * WebDAV - Mount your files in Finder, Explorer or any WebDAV app using app passwords
+* Calendar - Repeating events, reminders, invitations and shared calendars; sync with any CalDAV app, subscribe to ICS feeds, or publish a calendar as a secret ICS address
 * Federation - Share with people on other servers that support Open Cloud Mesh (OCM)
 * Platforms
   - Android

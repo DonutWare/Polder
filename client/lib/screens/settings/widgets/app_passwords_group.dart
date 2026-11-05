@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
@@ -10,6 +9,8 @@ import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/api_error_localization.dart";
+import "package:polder/util/clipboard.dart";
+import "package:polder/util/dav_addresses.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/loading_button.dart";
@@ -25,6 +26,7 @@ class AppPasswordsGroup extends ConsumerWidget {
     final account = ref.watch(currentAccountProvider);
     final passwords = ref.watch(appPasswordsProvider);
     final address = account == null ? null : webdavAddress(account.serverUrl, account.user.username);
+    final calendarServer = account == null ? null : caldavAddress(account.serverUrl);
     return NavGroup(
       title: localized.appPasswords,
       trailing: TextButton.icon(
@@ -40,7 +42,19 @@ class AppPasswordsGroup extends ConsumerWidget {
           trailing: IconButton(
             tooltip: localized.copy,
             icon: const Icon(IconsaxPlusLinear.copy),
-            onPressed: address == null ? null : () => _copy(context, address, localized.webdavAddressCopied),
+            onPressed: address == null ? null : () => copyWithNotice(context, address, localized.webdavAddressCopied),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(IconsaxPlusLinear.calendar_1),
+          title: Text(localized.caldavAddress),
+          subtitle: Text(calendarServer ?? "", overflow: TextOverflow.ellipsis),
+          trailing: IconButton(
+            tooltip: localized.copy,
+            icon: const Icon(IconsaxPlusLinear.copy),
+            onPressed: calendarServer == null
+                ? null
+                : () => copyWithNotice(context, calendarServer, localized.caldavAddressCopied),
           ),
         ),
         Padding(
@@ -79,16 +93,6 @@ class AppPasswordsGroup extends ConsumerWidget {
       builder: (_) => _CreatedDialog(created: created),
     );
   }
-}
-
-String webdavAddress(String serverUrl, String username) {
-  final base = serverUrl.endsWith("/") ? serverUrl.substring(0, serverUrl.length - 1) : serverUrl;
-  return "$base/dav/files/${Uri.encodeComponent(username)}/";
-}
-
-void _copy(BuildContext context, String value, String message) {
-  Clipboard.setData(ClipboardData(text: value));
-  ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(message)));
 }
 
 class _AppPasswordTile extends ConsumerWidget {
@@ -258,7 +262,7 @@ class _CreatedDialog extends StatelessWidget {
         TextButton.icon(
           icon: const Icon(IconsaxPlusLinear.copy),
           label: Text(localized.copy),
-          onPressed: () => _copy(context, created.token, localized.appPasswordCopied),
+          onPressed: () => copyWithNotice(context, created.token, localized.appPasswordCopied),
         ),
         FilledButton(onPressed: () => Navigator.of(context).pop(), child: Text(localized.done)),
       ],

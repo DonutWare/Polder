@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:dynamic_color/dynamic_color.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/theme/fading_predictive_back.dart";
+import "package:polder_calendar/polder_calendar.dart";
 
 abstract final class AppRadius {
   static const panel = 24.0;
@@ -246,7 +247,15 @@ abstract final class AppTheme {
       textTheme: text,
       scaffoldBackgroundColor: colors.canvas,
       canvasColor: colors.canvas,
-      extensions: [colors],
+      extensions: [
+        colors,
+        CalendarStyle(
+          canvas: colors.canvas,
+          panel: colors.panel,
+          inset: colors.inset,
+          border: colors.border,
+        ),
+      ],
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: FadingPredictiveBackPageTransitionsBuilder(),

@@ -21,6 +21,35 @@
         ],
         "type": "object"
       },
+      "Alarm": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "description": "DISPLAY, EMAIL or AUDIO",
+            "type": "string"
+          },
+          "at": {
+            "description": "A fixed moment, instead of an offset",
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "offsetMinutes": {
+            "description": "Minutes from the start, or the end with relativeToEnd; negative is before",
+            "format": "int64",
+            "type": "integer"
+          },
+          "relativeToEnd": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "type": "object"
+      },
       "AppPassword": {
         "additionalProperties": false,
         "properties": {
@@ -98,6 +127,61 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "Attendee": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "description": "REQ-PARTICIPANT, OPT-PARTICIPANT, CHAIR or NON-PARTICIPANT",
+            "type": "string"
+          },
+          "scheduleStatus": {
+            "description": "How delivering the invitation went, as an iTIP status code",
+            "type": "string"
+          },
+          "self": {
+            "description": "Whether this is the logged-in user",
+            "type": "boolean"
+          },
+          "status": {
+            "description": "NEEDS-ACTION, ACCEPTED, DECLINED, TENTATIVE or DELEGATED",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "email",
+          "self"
+        ],
+        "type": "object"
+      },
+      "AttendeeInput": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "maxLength": 254,
+            "minLength": 3,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "role": {
+            "description": "REQ-PARTICIPANT (default), OPT-PARTICIPANT, CHAIR or NON-PARTICIPANT",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
         "type": "object"
       },
       "Avatar": {
@@ -199,6 +283,301 @@
           "message",
           "accentColor",
           "backgrounds"
+        ],
+        "type": "object"
+      },
+      "BusyPeriod": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "tentative": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "tentative"
+        ],
+        "type": "object"
+      },
+      "CalDAVInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "hint": {
+            "type": "string"
+          },
+          "homeUrl": {
+            "description": "Where the user's calendars are",
+            "type": "string"
+          },
+          "principalUrl": {
+            "type": "string"
+          },
+          "serverUrl": {
+            "description": "The address to add to calendar apps; they discover the rest",
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "serverUrl",
+          "principalUrl",
+          "homeUrl",
+          "username",
+          "hint"
+        ],
+        "type": "object"
+      },
+      "Calendar": {
+        "additionalProperties": false,
+        "properties": {
+          "access": {
+            "description": "What the logged-in user may do with the calendar",
+            "enum": [
+              "owner",
+              "readwrite",
+              "read",
+              "freebusy"
+            ],
+            "type": "string"
+          },
+          "color": {
+            "description": "Hex color such as #3e63dd",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "fetchError": {
+            "description": "Why the last refresh of a subscription failed",
+            "type": "string"
+          },
+          "fetchedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hidden": {
+            "description": "Whether the logged-in user hid the calendar from their views",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isDefault": {
+            "description": "Invitations land in the default calendar",
+            "type": "boolean"
+          },
+          "kind": {
+            "enum": [
+              "local",
+              "subscription"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "notify": {
+            "description": "Whether the logged-in user gets reminders for the calendar's events",
+            "type": "boolean"
+          },
+          "order": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserSummary"
+          },
+          "refreshSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sourceUrl": {
+            "description": "The ICS feed a subscription follows",
+            "type": "string"
+          },
+          "timezone": {
+            "description": "IANA timezone for all-day and floating events; empty means UTC",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uri": {
+            "description": "The calendar's path segment under the CalDAV home",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "uri",
+          "name",
+          "description",
+          "color",
+          "timezone",
+          "order",
+          "kind",
+          "isDefault",
+          "access",
+          "hidden",
+          "notify",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "CalendarChange": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "name": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "notify": {
+            "type": "boolean"
+          },
+          "order": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "refreshSeconds": {
+            "description": "How often a subscription is refreshed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CalendarReminder": {
+        "additionalProperties": false,
+        "properties": {
+          "allDay": {
+            "type": "boolean"
+          },
+          "calendarId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "end": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "eventId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "recurrenceId": {
+            "description": "Which occurrence of a repeating event the reminder is for",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "triggerAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "calendarId",
+          "eventId",
+          "uid",
+          "summary",
+          "start",
+          "end",
+          "allDay",
+          "triggerAt"
+        ],
+        "type": "object"
+      },
+      "CalendarShare": {
+        "additionalProperties": false,
+        "properties": {
+          "access": {
+            "enum": [
+              "owner",
+              "readwrite",
+              "read",
+              "freebusy"
+            ],
+            "type": "string"
+          },
+          "calendarId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "group": {
+            "$ref": "#/components/schemas/GroupSummary"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          }
+        },
+        "required": [
+          "id",
+          "calendarId",
+          "access",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "CalendarUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "calendarId": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calendarId"
         ],
         "type": "object"
       },
@@ -731,9 +1110,372 @@
         ],
         "type": "object"
       },
+      "Event": {
+        "additionalProperties": false,
+        "properties": {
+          "alarms": {
+            "items": {
+              "$ref": "#/components/schemas/Alarm"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "allDay": {
+            "type": "boolean"
+          },
+          "attendees": {
+            "items": {
+              "$ref": "#/components/schemas/Attendee"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "busyOnly": {
+            "description": "Only the time is shown because the calendar is shared as free/busy",
+            "type": "boolean"
+          },
+          "calendarId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "end": {
+            "description": "Exclusive; for all-day events the day after the last day",
+            "format": "date-time",
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "exceptionDates": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "organizer": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "override": {
+            "description": "This occurrence differs from the rest of the series",
+            "type": "boolean"
+          },
+          "recurrenceId": {
+            "description": "Which occurrence this is, as a UTC date-time (or date) to pass back when editing one occurrence",
+            "type": "string"
+          },
+          "recurring": {
+            "type": "boolean"
+          },
+          "rrule": {
+            "type": "string"
+          },
+          "sequence": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "showAs": {
+            "enum": [
+              "busy",
+              "free"
+            ],
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "description": "CONFIRMED, TENTATIVE or CANCELLED",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "timezone": {
+            "description": "IANA timezone the event was planned in",
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "calendarId",
+          "uid",
+          "etag",
+          "summary",
+          "start",
+          "end",
+          "allDay",
+          "recurring",
+          "override",
+          "status",
+          "showAs",
+          "attendees",
+          "alarms",
+          "sequence",
+          "busyOnly",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "EventDetails": {
+        "additionalProperties": false,
+        "properties": {
+          "alarms": {
+            "items": {
+              "$ref": "#/components/schemas/Alarm"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "allDay": {
+            "type": "boolean"
+          },
+          "attendees": {
+            "items": {
+              "$ref": "#/components/schemas/Attendee"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "busyOnly": {
+            "description": "Only the time is shown because the calendar is shared as free/busy",
+            "type": "boolean"
+          },
+          "calendarId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "description": {
+            "type": "string"
+          },
+          "end": {
+            "description": "Exclusive; for all-day events the day after the last day",
+            "format": "date-time",
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "exceptionDates": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "organizer": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "override": {
+            "description": "This occurrence differs from the rest of the series",
+            "type": "boolean"
+          },
+          "overrides": {
+            "description": "Occurrences of the series that were changed one by one",
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "recurrenceId": {
+            "description": "Which occurrence this is, as a UTC date-time (or date) to pass back when editing one occurrence",
+            "type": "string"
+          },
+          "recurring": {
+            "type": "boolean"
+          },
+          "rrule": {
+            "type": "string"
+          },
+          "sequence": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "showAs": {
+            "enum": [
+              "busy",
+              "free"
+            ],
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "description": "CONFIRMED, TENTATIVE or CANCELLED",
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "timezone": {
+            "description": "IANA timezone the event was planned in",
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "overrides",
+          "id",
+          "calendarId",
+          "uid",
+          "etag",
+          "summary",
+          "start",
+          "end",
+          "allDay",
+          "recurring",
+          "override",
+          "status",
+          "showAs",
+          "attendees",
+          "alarms",
+          "sequence",
+          "busyOnly",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "EventInput": {
+        "additionalProperties": false,
+        "properties": {
+          "alarms": {
+            "items": {
+              "$ref": "#/components/schemas/Alarm"
+            },
+            "maxItems": 20,
+            "nullable": true,
+            "type": "array"
+          },
+          "allDay": {
+            "type": "boolean"
+          },
+          "attendees": {
+            "items": {
+              "$ref": "#/components/schemas/AttendeeInput"
+            },
+            "maxItems": 200,
+            "nullable": true,
+            "type": "array"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "nullable": true,
+            "type": "array"
+          },
+          "description": {
+            "maxLength": 65536,
+            "type": "string"
+          },
+          "end": {
+            "description": "Exclusive; for all-day events only the date counts; an hour after the start when empty",
+            "format": "date-time",
+            "type": "string"
+          },
+          "location": {
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "rrule": {
+            "description": "Recurrence rule such as FREQ=WEEKLY;BYDAY=MO,WE",
+            "type": "string"
+          },
+          "showAs": {
+            "enum": [
+              "busy",
+              "free"
+            ],
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "description": "CONFIRMED, TENTATIVE or CANCELLED",
+            "type": "string"
+          },
+          "summary": {
+            "maxLength": 1024,
+            "type": "string"
+          },
+          "timezone": {
+            "description": "IANA timezone to plan the event in; UTC when empty",
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 2048,
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary",
+          "start"
+        ],
+        "type": "object"
+      },
       "EventMessage": {
         "additionalProperties": false,
         "properties": {
+          "calendar": {
+            "$ref": "#/components/schemas/CalendarUpdate"
+          },
           "code": {
             "type": "string"
           },
@@ -749,6 +1491,9 @@
           },
           "message": {
             "type": "string"
+          },
+          "reminder": {
+            "$ref": "#/components/schemas/CalendarReminder"
           },
           "status": {
             "enum": [
@@ -777,7 +1522,9 @@
               "transfer.progress",
               "transfer.finished",
               "activity.created",
-              "files.changed"
+              "files.changed",
+              "calendar.changed",
+              "calendar.reminder"
             ],
             "type": "string"
           },
@@ -883,6 +1630,54 @@
           "enabled",
           "configured",
           "cloudId"
+        ],
+        "type": "object"
+      },
+      "Feed": {
+        "additionalProperties": false,
+        "properties": {
+          "calendarId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "mode": {
+            "description": "full shares every detail; busy only shows when the calendar is busy",
+            "enum": [
+              "full",
+              "busy"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "description": "The secret address; only returned when the feed is created",
+            "type": "string"
+          },
+          "webcalUrl": {
+            "description": "The same address for calendar apps that open webcal:// links",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "calendarId",
+          "name",
+          "mode",
+          "createdAt"
         ],
         "type": "object"
       },
@@ -1048,6 +1843,23 @@
         ],
         "type": "object"
       },
+      "GroupSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
       "HealthStatus": {
         "additionalProperties": false,
         "properties": {
@@ -1075,6 +1887,78 @@
         "required": [
           "id",
           "contentType"
+        ],
+        "type": "object"
+      },
+      "ImportResult": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "errors": {
+            "description": "Why some events could not be imported",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "skipped": {
+            "description": "Events identical to what the calendar already holds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "created",
+          "updated",
+          "skipped",
+          "errors"
+        ],
+        "type": "object"
+      },
+      "InboxItem": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "method": {
+            "description": "REQUEST, REPLY or CANCEL",
+            "type": "string"
+          },
+          "sender": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "uri",
+          "method",
+          "uid",
+          "sender",
+          "summary",
+          "createdAt"
         ],
         "type": "object"
       },
@@ -1954,6 +2838,20 @@
         ],
         "type": "object"
       },
+      "MoveEventInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "calendarId": {
+            "description": "The calendar to move the event to",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calendarId"
+        ],
+        "type": "object"
+      },
       "MoveRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2014,6 +2912,88 @@
           "readOnly",
           "createdAt",
           "lastUsedAddress"
+        ],
+        "type": "object"
+      },
+      "NewCalendar": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "description": "Hex color such as #3e63dd; empty picks the next palette color",
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "timezone": {
+            "description": "IANA timezone such as Europe/Amsterdam",
+            "type": "string"
+          },
+          "uri": {
+            "description": "Path segment under the CalDAV home; derived from the name when empty",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "NewCalendarShare": {
+        "additionalProperties": false,
+        "properties": {
+          "access": {
+            "description": "freebusy shows only when the calendar is busy",
+            "enum": [
+              "owner",
+              "readwrite",
+              "read",
+              "freebusy"
+            ],
+            "type": "string"
+          },
+          "recipientId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "recipientKind": {
+            "enum": [
+              "user",
+              "group"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "recipientKind",
+          "recipientId",
+          "access"
+        ],
+        "type": "object"
+      },
+      "NewFeed": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "enum": [
+              "full",
+              "busy"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
         ],
         "type": "object"
       },
@@ -2120,6 +3100,33 @@
         },
         "required": [
           "fileId"
+        ],
+        "type": "object"
+      },
+      "NewSubscription": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "type": "string"
+          },
+          "refreshSeconds": {
+            "description": "How often to refresh; the server enforces a minimum",
+            "format": "int64",
+            "type": "integer"
+          },
+          "url": {
+            "description": "An http, https or webcal address of an ICS feed",
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
         ],
         "type": "object"
       },
@@ -2349,6 +3356,26 @@
         },
         "required": [
           "path"
+        ],
+        "type": "object"
+      },
+      "Person": {
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "self": {
+            "description": "Whether this is the logged-in user",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "email",
+          "self"
         ],
         "type": "object"
       },
@@ -2748,6 +3775,23 @@
         },
         "required": [
           "role"
+        ],
+        "type": "object"
+      },
+      "RsvpEventInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "recurrenceId": {
+            "description": "Answer for one occurrence only",
+            "type": "string"
+          },
+          "status": {
+            "description": "ACCEPTED, DECLINED or TENTATIVE",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
         ],
         "type": "object"
       },
@@ -3702,6 +4746,24 @@
         ],
         "type": "object"
       },
+      "UpdateCalendarShareInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "access": {
+            "enum": [
+              "owner",
+              "readwrite",
+              "read",
+              "freebusy"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "access"
+        ],
+        "type": "object"
+      },
       "UploadRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3803,6 +4865,26 @@
           "createdAt",
           "profile",
           "appearance"
+        ],
+        "type": "object"
+      },
+      "UserBusy": {
+        "additionalProperties": false,
+        "properties": {
+          "busy": {
+            "items": {
+              "$ref": "#/components/schemas/BusyPeriod"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary"
+          }
+        },
+        "required": [
+          "user",
+          "busy"
         ],
         "type": "object"
       },
@@ -6400,6 +7482,1836 @@
         "summary": "The server's icon",
         "tags": [
           "branding"
+        ]
+      }
+    },
+    "/api/v1/calendars": {
+      "get": {
+        "operationId": "listCalendars",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Calendar"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The calendars the logged-in user owns or that are shared with them",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "post": {
+        "operationId": "createCalendar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewCalendar"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a calendar",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/caldav": {
+      "get": {
+        "operationId": "getCalDAVInfo",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalDAVInfo"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "How to connect calendar apps over CalDAV",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/events": {
+      "get": {
+        "operationId": "listCalendarEvents",
+        "parameters": [
+          {
+            "description": "Start of the window, RFC 3339",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "description": "Start of the window, RFC 3339",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End of the window, RFC 3339; at most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "description": "End of the window, RFC 3339; at most 366 days after from",
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Calendars to include; all visible calendars when empty",
+            "explode": false,
+            "in": "query",
+            "name": "calendarIds",
+            "schema": {
+              "description": "Calendars to include; all visible calendars when empty",
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "nullable": true,
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Every occurrence of the user's events in a time window, with repeating events expanded",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/freebusy": {
+      "get": {
+        "operationId": "getFreeBusy",
+        "parameters": [
+          {
+            "description": "The people to look up",
+            "explode": false,
+            "in": "query",
+            "name": "userIds",
+            "required": true,
+            "schema": {
+              "description": "The people to look up",
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "nullable": true,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserBusy"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "When other people on this server are busy",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/inbox": {
+      "get": {
+        "operationId": "listCalendarInbox",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InboxItem"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invitations, answers and cancellations the user received",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/inbox/{uri}": {
+      "delete": {
+        "operationId": "deleteCalendarInboxItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uri",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a message from the calendar inbox",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/subscriptions": {
+      "post": {
+        "operationId": "subscribeCalendar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewSubscription"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Follow an ICS feed from another service as a read-only calendar",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}": {
+      "delete": {
+        "operationId": "deleteCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an own calendar with its events, or leave a calendar shared with the user",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "get": {
+        "operationId": "getCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One calendar",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "patch": {
+        "operationId": "updateCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalendarChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a calendar; on a shared calendar only the user's own name, color, order, visibility and reminders change",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/default": {
+      "post": {
+        "operationId": "setDefaultCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Make a calendar the one invitations land in",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/events": {
+      "post": {
+        "operationId": "createCalendarEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetails"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an event; attendees get an invitation",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/events/{eventID}": {
+      "delete": {
+        "operationId": "deleteCalendarEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "enum": [
+                "this",
+                "following",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "recurrenceId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an event, one occurrence of it, or it from one occurrence on",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "get": {
+        "operationId": "getCalendarEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetails"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One event with its changed occurrences",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "put": {
+        "operationId": "updateCalendarEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "For repeating events: this occurrence, this and following, or all (default)",
+            "explode": false,
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "description": "For repeating events: this occurrence, this and following, or all (default)",
+              "enum": [
+                "this",
+                "following",
+                "all"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The occurrence to change, from an event's recurrenceId",
+            "explode": false,
+            "in": "query",
+            "name": "recurrenceId",
+            "schema": {
+              "description": "The occurrence to change, from an event's recurrenceId",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The event's etag, to refuse the change if someone else changed it first",
+            "in": "header",
+            "name": "If-Match",
+            "schema": {
+              "description": "The event's etag, to refuse the change if someone else changed it first",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetails"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change an event, one occurrence of it, or it from one occurrence on",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/events/{eventID}/move": {
+      "post": {
+        "operationId": "moveCalendarEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveEventInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetails"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Move an event to another calendar",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/events/{eventID}/rsvp": {
+      "post": {
+        "operationId": "respondToCalendarEvent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RsvpEventInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetails"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Answer an invitation; the organizer is told",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/export": {
+      "get": {
+        "operationId": "exportCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/calendar": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string",
+                  "x-contentMediaType": "application/octet-stream"
+                }
+              }
+            },
+            "description": "Calendar file",
+            "headers": {
+              "Content-Disposition": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a calendar as an .ics file",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/feeds": {
+      "get": {
+        "operationId": "listCalendarFeeds",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Feed"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The secret addresses other apps can subscribe to",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "post": {
+        "operationId": "createCalendarFeed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewFeed"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Feed"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a secret address for subscribing from other apps; the address is returned once",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/feeds/{feedID}": {
+      "delete": {
+        "operationId": "deleteCalendarFeed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "feedID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke a secret address; it stops working at once",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/import": {
+      "post": {
+        "operationId": "importCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "text/calendar": {
+              "schema": {
+                "format": "binary",
+                "type": "string",
+                "x-contentMediaType": "application/octet-stream"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImportResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/refresh": {
+      "post": {
+        "operationId": "refreshCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Calendar"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fetch a subscribed feed now",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/shares": {
+      "get": {
+        "operationId": "listCalendarShares",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CalendarShare"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Who an own calendar is shared with",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "post": {
+        "operationId": "shareCalendar",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewCalendarShare"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarShare"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Share an own calendar with a user or a group",
+        "tags": [
+          "calendars"
+        ]
+      }
+    },
+    "/api/v1/calendars/{calendarID}/shares/{shareID}": {
+      "delete": {
+        "operationId": "removeCalendarShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Stop sharing a calendar with someone",
+        "tags": [
+          "calendars"
+        ]
+      },
+      "patch": {
+        "operationId": "updateCalendarShare",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "calendarID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "shareID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCalendarShareInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarShare"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change what a share allows",
+        "tags": [
+          "calendars"
         ]
       }
     },

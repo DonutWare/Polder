@@ -20,6 +20,56 @@ enum AppearanceTheme {
   const AppearanceTheme(this.value);
 }
 
+enum CalendarAccess {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('owner')
+  owner('owner'),
+  @JsonValue('readwrite')
+  readwrite('readwrite'),
+  @JsonValue('read')
+  read('read'),
+  @JsonValue('freebusy')
+  freebusy('freebusy');
+
+  final String? value;
+
+  const CalendarAccess(this.value);
+}
+
+enum CalendarKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('local')
+  local('local'),
+  @JsonValue('subscription')
+  subscription('subscription');
+
+  final String? value;
+
+  const CalendarKind(this.value);
+}
+
+enum CalendarShareAccess {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('owner')
+  owner('owner'),
+  @JsonValue('readwrite')
+  readwrite('readwrite'),
+  @JsonValue('read')
+  read('read'),
+  @JsonValue('freebusy')
+  freebusy('freebusy');
+
+  final String? value;
+
+  const CalendarShareAccess(this.value);
+}
+
 enum ChangeType {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -98,6 +148,48 @@ enum EntryPreviewState {
   const EntryPreviewState(this.value);
 }
 
+enum EventShowAs {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('busy')
+  busy('busy'),
+  @JsonValue('free')
+  free('free');
+
+  final String? value;
+
+  const EventShowAs(this.value);
+}
+
+enum EventDetailsShowAs {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('busy')
+  busy('busy'),
+  @JsonValue('free')
+  free('free');
+
+  final String? value;
+
+  const EventDetailsShowAs(this.value);
+}
+
+enum EventInputShowAs {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('busy')
+  busy('busy'),
+  @JsonValue('free')
+  free('free');
+
+  final String? value;
+
+  const EventInputShowAs(this.value);
+}
+
 enum EventMessageStatus {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -133,7 +225,11 @@ enum EventMessageType {
   @JsonValue('activity.created')
   activityCreated('activity.created'),
   @JsonValue('files.changed')
-  filesChanged('files.changed');
+  filesChanged('files.changed'),
+  @JsonValue('calendar.changed')
+  calendarChanged('calendar.changed'),
+  @JsonValue('calendar.reminder')
+  calendarReminder('calendar.reminder');
 
   final String? value;
 
@@ -154,6 +250,20 @@ enum ExtractionStatusOcr {
   final String? value;
 
   const ExtractionStatusOcr(this.value);
+}
+
+enum FeedMode {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('full')
+  full('full'),
+  @JsonValue('busy')
+  busy('busy');
+
+  final String? value;
+
+  const FeedMode(this.value);
 }
 
 enum GroupMyRole {
@@ -278,6 +388,52 @@ enum MountKind {
   final String? value;
 
   const MountKind(this.value);
+}
+
+enum NewCalendarShareAccess {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('owner')
+  owner('owner'),
+  @JsonValue('readwrite')
+  readwrite('readwrite'),
+  @JsonValue('read')
+  read('read'),
+  @JsonValue('freebusy')
+  freebusy('freebusy');
+
+  final String? value;
+
+  const NewCalendarShareAccess(this.value);
+}
+
+enum NewCalendarShareRecipientKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('user')
+  user('user'),
+  @JsonValue('group')
+  group('group');
+
+  final String? value;
+
+  const NewCalendarShareRecipientKind(this.value);
+}
+
+enum NewFeedMode {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('full')
+  full('full'),
+  @JsonValue('busy')
+  busy('busy');
+
+  final String? value;
+
+  const NewFeedMode(this.value);
 }
 
 enum NewMemberRole {
@@ -476,6 +632,24 @@ enum TrashRetentionSource {
   const TrashRetentionSource(this.value);
 }
 
+enum UpdateCalendarShareInputBodyAccess {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('owner')
+  owner('owner'),
+  @JsonValue('readwrite')
+  readwrite('readwrite'),
+  @JsonValue('read')
+  read('read'),
+  @JsonValue('freebusy')
+  freebusy('freebusy');
+
+  final String? value;
+
+  const UpdateCalendarShareInputBodyAccess(this.value);
+}
+
 enum UserRole {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -520,6 +694,38 @@ enum ApiV1AdminLogsGetLevel {
   final String? value;
 
   const ApiV1AdminLogsGetLevel(this.value);
+}
+
+enum ApiV1CalendarsCalendarIDEventsEventIDDeleteScope {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('this')
+  $this('this'),
+  @JsonValue('following')
+  following('following'),
+  @JsonValue('all')
+  all('all');
+
+  final String? value;
+
+  const ApiV1CalendarsCalendarIDEventsEventIDDeleteScope(this.value);
+}
+
+enum ApiV1CalendarsCalendarIDEventsEventIDPutScope {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('this')
+  $this('this'),
+  @JsonValue('following')
+  following('following'),
+  @JsonValue('all')
+  all('all');
+
+  final String? value;
+
+  const ApiV1CalendarsCalendarIDEventsEventIDPutScope(this.value);
 }
 
 enum ApiV1FilesPreviewGetSize {

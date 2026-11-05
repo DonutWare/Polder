@@ -10,6 +10,7 @@ import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/screens/settings/widgets/app_passwords_group.dart";
+import "package:polder/screens/settings/widgets/calendars_group.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/api_error_localization.dart";
@@ -50,6 +51,7 @@ class AccountScreen extends ConsumerWidget {
                   ),
                   NavGroup(title: localized.changePassword, children: const [_PasswordForm()]),
                   const AppPasswordsGroup(),
+                  const CalendarsGroup(),
                   NavGroup(
                     title: localized.appearance,
                     children: const [Padding(padding: EdgeInsets.all(20), child: AppearanceSettings())],

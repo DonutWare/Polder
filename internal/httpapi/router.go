@@ -17,6 +17,8 @@ import (
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/auth"
+	"polder-server/internal/caldav"
+	"polder-server/internal/calendar"
 	"polder-server/internal/extract"
 	"polder-server/internal/federation"
 	"polder-server/internal/files"
@@ -55,6 +57,8 @@ type API struct {
 	versions     *versions.Worker
 	links        *links.Graph
 	tags         *tags.Service
+	calendar     *calendar.Service
+	caldav       *caldav.Handler
 	linkPreviews *linkpreview.Service
 	recipes      *recipes.Service
 	groups       *groups.Service
@@ -66,6 +70,7 @@ type API struct {
 	federationLimiter *failedAttemptLimiter
 
 	webdavAllowInsecure bool
+	publicURL           string
 
 	linkLimiter  *failedAttemptLimiter
 	archiveSlots chan struct{}
@@ -91,6 +96,9 @@ type Dependencies struct {
 	Versions               *versions.Worker
 	Links                  *links.Graph
 	Tags                   *tags.Service
+	Calendar               *calendar.Service
+	CalDAV                 *caldav.Handler
+	PublicURL              string
 	LinkPreviews           *linkpreview.Service
 	Recipes                *recipes.Service
 	Groups                 *groups.Service
@@ -124,6 +132,8 @@ func NewRouter(deps Dependencies) http.Handler {
 		versions:     deps.Versions,
 		links:        deps.Links,
 		tags:         deps.Tags,
+		calendar:     deps.Calendar,
+		caldav:       deps.CalDAV,
 		linkPreviews: deps.LinkPreviews,
 		recipes:      deps.Recipes,
 		groups:       deps.Groups,
@@ -135,6 +145,7 @@ func NewRouter(deps Dependencies) http.Handler {
 		federationLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute * federationLimitFactor),
 
 		webdavAllowInsecure: deps.WebDAVAllowInsecure,
+		publicURL:           deps.PublicURL,
 
 		linkLimiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 		archiveSlots: make(chan struct{}, maxConcurrentArchives),
@@ -151,6 +162,7 @@ func NewRouter(deps Dependencies) http.Handler {
 	router.Handle("/api/*", http.HandlerFunc(endpointNotFound))
 	deps.Office.Routes(router)
 	api.webDAVRoutes(router)
+	api.calDAVRoutes(router)
 	if deps.Federation != nil {
 		deps.Federation.Routes(router, federationGuard{api: api}, deps.WebDAV)
 	}
@@ -285,6 +297,37 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodDelete, "/tags/{tagID}", "deleteTag", "Delete a tag and remove it from the user's items and own notes", a.deleteTag)
 	register(user, http.MethodPost, "/tags/assign", "assignTags", "Add tags to files, folders and notes; unknown names become new tags", a.assignTags)
 	register(user, http.MethodPost, "/tags/unassign", "unassignTags", "Remove tags from files, folders and notes", a.unassignTags)
+
+	register(user, http.MethodGet, "/calendars", "listCalendars", "The calendars the logged-in user owns or that are shared with them", a.listCalendars)
+	register(user, http.MethodPost, "/calendars", "createCalendar", "Create a calendar", a.createCalendar, created)
+	register(user, http.MethodGet, "/calendars/events", "listCalendarEvents", "Every occurrence of the user's events in a time window, with repeating events expanded", a.listEvents)
+	register(user, http.MethodGet, "/calendars/freebusy", "getFreeBusy", "When other people on this server are busy", a.freeBusy)
+	register(user, http.MethodGet, "/calendars/inbox", "listCalendarInbox", "Invitations, answers and cancellations the user received", a.calendarInbox)
+	register(user, http.MethodDelete, "/calendars/inbox/{uri}", "deleteCalendarInboxItem", "Remove a message from the calendar inbox", a.deleteCalendarInboxItem)
+	register(user, http.MethodGet, "/calendars/caldav", "getCalDAVInfo", "How to connect calendar apps over CalDAV", a.calDAVInfo)
+	register(user, http.MethodPost, "/calendars/subscriptions", "subscribeCalendar", "Follow an ICS feed from another service as a read-only calendar", a.subscribeCalendar, created)
+	register(user, http.MethodGet, "/calendars/{calendarID}", "getCalendar", "One calendar", a.getCalendar)
+	register(user, http.MethodPatch, "/calendars/{calendarID}", "updateCalendar", "Change a calendar; on a shared calendar only the user's own name, color, order, visibility and reminders change", a.updateCalendar)
+	register(user, http.MethodDelete, "/calendars/{calendarID}", "deleteCalendar", "Delete an own calendar with its events, or leave a calendar shared with the user", a.deleteCalendar)
+	register(user, http.MethodPost, "/calendars/{calendarID}/default", "setDefaultCalendar", "Make a calendar the one invitations land in", a.setDefaultCalendar)
+	register(user, http.MethodPost, "/calendars/{calendarID}/refresh", "refreshCalendar", "Fetch a subscribed feed now", a.refreshCalendar)
+	register(user, http.MethodPost, "/calendars/{calendarID}/import", "importCalendar", "Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced", a.importCalendar,
+		maxBody(calendarImportLimit), withRequestBody(binaryContent("text/calendar")))
+	register(user, http.MethodGet, "/calendars/{calendarID}/export", "exportCalendar", "Download a calendar as an .ics file", a.exportCalendar,
+		withResponse(http.StatusOK, "Calendar file", binaryContent("text/calendar")))
+	register(user, http.MethodGet, "/calendars/{calendarID}/events/{eventID}", "getCalendarEvent", "One event with its changed occurrences", a.getEvent)
+	register(user, http.MethodPost, "/calendars/{calendarID}/events", "createCalendarEvent", "Create an event; attendees get an invitation", a.createEvent, created)
+	register(user, http.MethodPut, "/calendars/{calendarID}/events/{eventID}", "updateCalendarEvent", "Change an event, one occurrence of it, or it from one occurrence on", a.updateEvent)
+	register(user, http.MethodDelete, "/calendars/{calendarID}/events/{eventID}", "deleteCalendarEvent", "Delete an event, one occurrence of it, or it from one occurrence on", a.deleteEvent)
+	register(user, http.MethodPost, "/calendars/{calendarID}/events/{eventID}/move", "moveCalendarEvent", "Move an event to another calendar", a.moveEvent)
+	register(user, http.MethodPost, "/calendars/{calendarID}/events/{eventID}/rsvp", "respondToCalendarEvent", "Answer an invitation; the organizer is told", a.respondToEvent)
+	register(user, http.MethodGet, "/calendars/{calendarID}/shares", "listCalendarShares", "Who an own calendar is shared with", a.listCalendarShares)
+	register(user, http.MethodPost, "/calendars/{calendarID}/shares", "shareCalendar", "Share an own calendar with a user or a group", a.shareCalendar, created)
+	register(user, http.MethodPatch, "/calendars/{calendarID}/shares/{shareID}", "updateCalendarShare", "Change what a share allows", a.updateCalendarShare)
+	register(user, http.MethodDelete, "/calendars/{calendarID}/shares/{shareID}", "removeCalendarShare", "Stop sharing a calendar with someone", a.removeCalendarShare)
+	register(user, http.MethodGet, "/calendars/{calendarID}/feeds", "listCalendarFeeds", "The secret addresses other apps can subscribe to", a.listCalendarFeeds)
+	register(user, http.MethodPost, "/calendars/{calendarID}/feeds", "createCalendarFeed", "Create a secret address for subscribing from other apps; the address is returned once", a.createCalendarFeed, created)
+	register(user, http.MethodDelete, "/calendars/{calendarID}/feeds/{feedID}", "deleteCalendarFeed", "Revoke a secret address; it stops working at once", a.deleteCalendarFeed)
 
 	register(user, http.MethodGet, "/trash", "listTrash", "List deleted items, most recent first", a.listTrash)
 	register(user, http.MethodDelete, "/trash", "emptyTrash", "Delete everything in the trash permanently", a.emptyTrash)

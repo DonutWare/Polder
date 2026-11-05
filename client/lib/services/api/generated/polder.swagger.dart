@@ -1033,6 +1033,818 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///The calendars the logged-in user owns or that are shared with them
+  Future<chopper.Response<List<Calendar>>> listCalendars() {
+    generatedMapping.putIfAbsent(Calendar, () => Calendar.fromJsonFactory);
+
+    return _listCalendars();
+  }
+
+  ///The calendars the logged-in user owns or that are shared with them
+  @GET(path: '/api/v1/calendars')
+  Future<chopper.Response<List<Calendar>>> _listCalendars({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The calendars the logged-in user owns or that are shared with them',
+      operationId: 'listCalendars',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Create a calendar
+  Future<chopper.Response<Calendar>> createCalendar({required NewCalendar? body}) {
+    generatedMapping.putIfAbsent(Calendar, () => Calendar.fromJsonFactory);
+
+    return _createCalendar(body: body);
+  }
+
+  ///Create a calendar
+  @POST(path: '/api/v1/calendars', optionalBody: true)
+  Future<chopper.Response<Calendar>> _createCalendar({
+    @Body() required NewCalendar? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a calendar',
+      operationId: 'createCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///How to connect calendar apps over CalDAV
+  Future<chopper.Response<CalDAVInfo>> getCalDAVInfo() {
+    generatedMapping.putIfAbsent(CalDAVInfo, () => CalDAVInfo.fromJsonFactory);
+
+    return _getCalDAVInfo();
+  }
+
+  ///How to connect calendar apps over CalDAV
+  @GET(path: '/api/v1/calendars/caldav')
+  Future<chopper.Response<CalDAVInfo>> _getCalDAVInfo({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'How to connect calendar apps over CalDAV',
+      operationId: 'getCalDAVInfo',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Every occurrence of the user's events in a time window, with repeating events expanded
+  ///@param from Start of the window, RFC 3339
+  ///@param to End of the window, RFC 3339; at most 366 days after from
+  ///@param calendarIds Calendars to include; all visible calendars when empty
+  Future<chopper.Response<List<Event>>> listCalendarEvents({
+    required DateTime? from,
+    required DateTime? to,
+    List<int>? calendarIds,
+  }) {
+    generatedMapping.putIfAbsent(Event, () => Event.fromJsonFactory);
+
+    return _listCalendarEvents(from: from, to: to, calendarIds: calendarIds);
+  }
+
+  ///Every occurrence of the user's events in a time window, with repeating events expanded
+  ///@param from Start of the window, RFC 3339
+  ///@param to End of the window, RFC 3339; at most 366 days after from
+  ///@param calendarIds Calendars to include; all visible calendars when empty
+  @GET(path: '/api/v1/calendars/events')
+  Future<chopper.Response<List<Event>>> _listCalendarEvents({
+    @Query('from') required DateTime? from,
+    @Query('to') required DateTime? to,
+    @Query('calendarIds') List<int>? calendarIds,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Every occurrence of the user\'s events in a time window, with repeating events expanded',
+      operationId: 'listCalendarEvents',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///When other people on this server are busy
+  ///@param userIds The people to look up
+  ///@param from
+  ///@param to
+  Future<chopper.Response<List<UserBusy>>> getFreeBusy({
+    required List<int>? userIds,
+    required DateTime? from,
+    required DateTime? to,
+  }) {
+    generatedMapping.putIfAbsent(UserBusy, () => UserBusy.fromJsonFactory);
+
+    return _getFreeBusy(userIds: userIds, from: from, to: to);
+  }
+
+  ///When other people on this server are busy
+  ///@param userIds The people to look up
+  ///@param from
+  ///@param to
+  @GET(path: '/api/v1/calendars/freebusy')
+  Future<chopper.Response<List<UserBusy>>> _getFreeBusy({
+    @Query('userIds') required List<int>? userIds,
+    @Query('from') required DateTime? from,
+    @Query('to') required DateTime? to,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'When other people on this server are busy',
+      operationId: 'getFreeBusy',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Invitations, answers and cancellations the user received
+  Future<chopper.Response<List<InboxItem>>> listCalendarInbox() {
+    generatedMapping.putIfAbsent(InboxItem, () => InboxItem.fromJsonFactory);
+
+    return _listCalendarInbox();
+  }
+
+  ///Invitations, answers and cancellations the user received
+  @GET(path: '/api/v1/calendars/inbox')
+  Future<chopper.Response<List<InboxItem>>> _listCalendarInbox({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Invitations, answers and cancellations the user received',
+      operationId: 'listCalendarInbox',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Remove a message from the calendar inbox
+  ///@param uri
+  Future<chopper.Response> deleteCalendarInboxItem({required String? uri}) {
+    return _deleteCalendarInboxItem(uri: uri);
+  }
+
+  ///Remove a message from the calendar inbox
+  ///@param uri
+  @DELETE(path: '/api/v1/calendars/inbox/{uri}')
+  Future<chopper.Response> _deleteCalendarInboxItem({
+    @Path('uri') required String? uri,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove a message from the calendar inbox',
+      operationId: 'deleteCalendarInboxItem',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Follow an ICS feed from another service as a read-only calendar
+  Future<chopper.Response<Calendar>> subscribeCalendar({required NewSubscription? body}) {
+    generatedMapping.putIfAbsent(Calendar, () => Calendar.fromJsonFactory);
+
+    return _subscribeCalendar(body: body);
+  }
+
+  ///Follow an ICS feed from another service as a read-only calendar
+  @POST(path: '/api/v1/calendars/subscriptions', optionalBody: true)
+  Future<chopper.Response<Calendar>> _subscribeCalendar({
+    @Body() required NewSubscription? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Follow an ICS feed from another service as a read-only calendar',
+      operationId: 'subscribeCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Delete an own calendar with its events, or leave a calendar shared with the user
+  ///@param calendarID
+  Future<chopper.Response> deleteCalendar({required int? calendarID}) {
+    return _deleteCalendar(calendarID: calendarID);
+  }
+
+  ///Delete an own calendar with its events, or leave a calendar shared with the user
+  ///@param calendarID
+  @DELETE(path: '/api/v1/calendars/{calendarID}')
+  Future<chopper.Response> _deleteCalendar({
+    @Path('calendarID') required int? calendarID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete an own calendar with its events, or leave a calendar shared with the user',
+      operationId: 'deleteCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///One calendar
+  ///@param calendarID
+  Future<chopper.Response<Calendar>> getCalendar({required int? calendarID}) {
+    generatedMapping.putIfAbsent(Calendar, () => Calendar.fromJsonFactory);
+
+    return _getCalendar(calendarID: calendarID);
+  }
+
+  ///One calendar
+  ///@param calendarID
+  @GET(path: '/api/v1/calendars/{calendarID}')
+  Future<chopper.Response<Calendar>> _getCalendar({
+    @Path('calendarID') required int? calendarID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'One calendar',
+      operationId: 'getCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change a calendar; on a shared calendar only the user's own name, color, order, visibility and reminders change
+  ///@param calendarID
+  Future<chopper.Response<Calendar>> updateCalendar({required int? calendarID, required CalendarChange? body}) {
+    generatedMapping.putIfAbsent(Calendar, () => Calendar.fromJsonFactory);
+
+    return _updateCalendar(calendarID: calendarID, body: body);
+  }
+
+  ///Change a calendar; on a shared calendar only the user's own name, color, order, visibility and reminders change
+  ///@param calendarID
+  @PATCH(path: '/api/v1/calendars/{calendarID}', optionalBody: true)
+  Future<chopper.Response<Calendar>> _updateCalendar({
+    @Path('calendarID') required int? calendarID,
+    @Body() required CalendarChange? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change a calendar; on a shared calendar only the user\'s own name, color, order, visibility and reminders change',
+      operationId: 'updateCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Make a calendar the one invitations land in
+  ///@param calendarID
+  Future<chopper.Response<Calendar>> setDefaultCalendar({required int? calendarID}) {
+    generatedMapping.putIfAbsent(Calendar, () => Calendar.fromJsonFactory);
+
+    return _setDefaultCalendar(calendarID: calendarID);
+  }
+
+  ///Make a calendar the one invitations land in
+  ///@param calendarID
+  @POST(path: '/api/v1/calendars/{calendarID}/default', optionalBody: true)
+  Future<chopper.Response<Calendar>> _setDefaultCalendar({
+    @Path('calendarID') required int? calendarID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Make a calendar the one invitations land in',
+      operationId: 'setDefaultCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Create an event; attendees get an invitation
+  ///@param calendarID
+  Future<chopper.Response<EventDetails>> createCalendarEvent({required int? calendarID, required EventInput? body}) {
+    generatedMapping.putIfAbsent(EventDetails, () => EventDetails.fromJsonFactory);
+
+    return _createCalendarEvent(calendarID: calendarID, body: body);
+  }
+
+  ///Create an event; attendees get an invitation
+  ///@param calendarID
+  @POST(path: '/api/v1/calendars/{calendarID}/events', optionalBody: true)
+  Future<chopper.Response<EventDetails>> _createCalendarEvent({
+    @Path('calendarID') required int? calendarID,
+    @Body() required EventInput? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create an event; attendees get an invitation',
+      operationId: 'createCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Delete an event, one occurrence of it, or it from one occurrence on
+  ///@param calendarID
+  ///@param eventID
+  ///@param scope
+  ///@param recurrenceId
+  ///@param If-Match
+  Future<chopper.Response> deleteCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    enums.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope? scope,
+    String? recurrenceId,
+    String? ifMatch,
+  }) {
+    return _deleteCalendarEvent(
+      calendarID: calendarID,
+      eventID: eventID,
+      scope: scope?.value?.toString(),
+      recurrenceId: recurrenceId,
+      ifMatch: ifMatch?.toString(),
+    );
+  }
+
+  ///Delete an event, one occurrence of it, or it from one occurrence on
+  ///@param calendarID
+  ///@param eventID
+  ///@param scope
+  ///@param recurrenceId
+  ///@param If-Match
+  @DELETE(path: '/api/v1/calendars/{calendarID}/events/{eventID}')
+  Future<chopper.Response> _deleteCalendarEvent({
+    @Path('calendarID') required int? calendarID,
+    @Path('eventID') required int? eventID,
+    @Query('scope') String? scope,
+    @Query('recurrenceId') String? recurrenceId,
+    @Header('If-Match') String? ifMatch,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Delete an event, one occurrence of it, or it from one occurrence on',
+      operationId: 'deleteCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///One event with its changed occurrences
+  ///@param calendarID
+  ///@param eventID
+  Future<chopper.Response<EventDetails>> getCalendarEvent({required int? calendarID, required int? eventID}) {
+    generatedMapping.putIfAbsent(EventDetails, () => EventDetails.fromJsonFactory);
+
+    return _getCalendarEvent(calendarID: calendarID, eventID: eventID);
+  }
+
+  ///One event with its changed occurrences
+  ///@param calendarID
+  ///@param eventID
+  @GET(path: '/api/v1/calendars/{calendarID}/events/{eventID}')
+  Future<chopper.Response<EventDetails>> _getCalendarEvent({
+    @Path('calendarID') required int? calendarID,
+    @Path('eventID') required int? eventID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'One event with its changed occurrences',
+      operationId: 'getCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change an event, one occurrence of it, or it from one occurrence on
+  ///@param calendarID
+  ///@param eventID
+  ///@param scope For repeating events: this occurrence, this and following, or all (default)
+  ///@param recurrenceId The occurrence to change, from an event's recurrenceId
+  ///@param If-Match The event's etag, to refuse the change if someone else changed it first
+  Future<chopper.Response<EventDetails>> updateCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    enums.ApiV1CalendarsCalendarIDEventsEventIDPutScope? scope,
+    String? recurrenceId,
+    String? ifMatch,
+    required EventInput? body,
+  }) {
+    generatedMapping.putIfAbsent(EventDetails, () => EventDetails.fromJsonFactory);
+
+    return _updateCalendarEvent(
+      calendarID: calendarID,
+      eventID: eventID,
+      scope: scope?.value?.toString(),
+      recurrenceId: recurrenceId,
+      ifMatch: ifMatch?.toString(),
+      body: body,
+    );
+  }
+
+  ///Change an event, one occurrence of it, or it from one occurrence on
+  ///@param calendarID
+  ///@param eventID
+  ///@param scope For repeating events: this occurrence, this and following, or all (default)
+  ///@param recurrenceId The occurrence to change, from an event's recurrenceId
+  ///@param If-Match The event's etag, to refuse the change if someone else changed it first
+  @PUT(path: '/api/v1/calendars/{calendarID}/events/{eventID}', optionalBody: true)
+  Future<chopper.Response<EventDetails>> _updateCalendarEvent({
+    @Path('calendarID') required int? calendarID,
+    @Path('eventID') required int? eventID,
+    @Query('scope') String? scope,
+    @Query('recurrenceId') String? recurrenceId,
+    @Header('If-Match') String? ifMatch,
+    @Body() required EventInput? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change an event, one occurrence of it, or it from one occurrence on',
+      operationId: 'updateCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Move an event to another calendar
+  ///@param calendarID
+  ///@param eventID
+  Future<chopper.Response<EventDetails>> moveCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    required MoveEventInputBody? body,
+  }) {
+    generatedMapping.putIfAbsent(EventDetails, () => EventDetails.fromJsonFactory);
+
+    return _moveCalendarEvent(calendarID: calendarID, eventID: eventID, body: body);
+  }
+
+  ///Move an event to another calendar
+  ///@param calendarID
+  ///@param eventID
+  @POST(path: '/api/v1/calendars/{calendarID}/events/{eventID}/move', optionalBody: true)
+  Future<chopper.Response<EventDetails>> _moveCalendarEvent({
+    @Path('calendarID') required int? calendarID,
+    @Path('eventID') required int? eventID,
+    @Body() required MoveEventInputBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Move an event to another calendar',
+      operationId: 'moveCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Answer an invitation; the organizer is told
+  ///@param calendarID
+  ///@param eventID
+  Future<chopper.Response<EventDetails>> respondToCalendarEvent({
+    required int? calendarID,
+    required int? eventID,
+    required RsvpEventInputBody? body,
+  }) {
+    generatedMapping.putIfAbsent(EventDetails, () => EventDetails.fromJsonFactory);
+
+    return _respondToCalendarEvent(calendarID: calendarID, eventID: eventID, body: body);
+  }
+
+  ///Answer an invitation; the organizer is told
+  ///@param calendarID
+  ///@param eventID
+  @POST(path: '/api/v1/calendars/{calendarID}/events/{eventID}/rsvp', optionalBody: true)
+  Future<chopper.Response<EventDetails>> _respondToCalendarEvent({
+    @Path('calendarID') required int? calendarID,
+    @Path('eventID') required int? eventID,
+    @Body() required RsvpEventInputBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Answer an invitation; the organizer is told',
+      operationId: 'respondToCalendarEvent',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Download a calendar as an .ics file
+  ///@param calendarID
+  Future<chopper.Response<String>> exportCalendar({required int? calendarID}) {
+    return _exportCalendar(calendarID: calendarID);
+  }
+
+  ///Download a calendar as an .ics file
+  ///@param calendarID
+  @GET(path: '/api/v1/calendars/{calendarID}/export')
+  Future<chopper.Response<String>> _exportCalendar({
+    @Path('calendarID') required int? calendarID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Download a calendar as an .ics file',
+      operationId: 'exportCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///The secret addresses other apps can subscribe to
+  ///@param calendarID
+  Future<chopper.Response<List<Feed>>> listCalendarFeeds({required int? calendarID}) {
+    generatedMapping.putIfAbsent(Feed, () => Feed.fromJsonFactory);
+
+    return _listCalendarFeeds(calendarID: calendarID);
+  }
+
+  ///The secret addresses other apps can subscribe to
+  ///@param calendarID
+  @GET(path: '/api/v1/calendars/{calendarID}/feeds')
+  Future<chopper.Response<List<Feed>>> _listCalendarFeeds({
+    @Path('calendarID') required int? calendarID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The secret addresses other apps can subscribe to',
+      operationId: 'listCalendarFeeds',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Create a secret address for subscribing from other apps; the address is returned once
+  ///@param calendarID
+  Future<chopper.Response<Feed>> createCalendarFeed({required int? calendarID, required NewFeed? body}) {
+    generatedMapping.putIfAbsent(Feed, () => Feed.fromJsonFactory);
+
+    return _createCalendarFeed(calendarID: calendarID, body: body);
+  }
+
+  ///Create a secret address for subscribing from other apps; the address is returned once
+  ///@param calendarID
+  @POST(path: '/api/v1/calendars/{calendarID}/feeds', optionalBody: true)
+  Future<chopper.Response<Feed>> _createCalendarFeed({
+    @Path('calendarID') required int? calendarID,
+    @Body() required NewFeed? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Create a secret address for subscribing from other apps; the address is returned once',
+      operationId: 'createCalendarFeed',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Revoke a secret address; it stops working at once
+  ///@param calendarID
+  ///@param feedID
+  Future<chopper.Response> deleteCalendarFeed({required int? calendarID, required int? feedID}) {
+    return _deleteCalendarFeed(calendarID: calendarID, feedID: feedID);
+  }
+
+  ///Revoke a secret address; it stops working at once
+  ///@param calendarID
+  ///@param feedID
+  @DELETE(path: '/api/v1/calendars/{calendarID}/feeds/{feedID}')
+  Future<chopper.Response> _deleteCalendarFeed({
+    @Path('calendarID') required int? calendarID,
+    @Path('feedID') required int? feedID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Revoke a secret address; it stops working at once',
+      operationId: 'deleteCalendarFeed',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced
+  ///@param calendarID
+  Future<chopper.Response<ImportResult>> importCalendar({required int? calendarID, required Object? body}) {
+    generatedMapping.putIfAbsent(ImportResult, () => ImportResult.fromJsonFactory);
+
+    return _importCalendar(calendarID: calendarID, body: body);
+  }
+
+  ///Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced
+  ///@param calendarID
+  @POST(path: '/api/v1/calendars/{calendarID}/import', optionalBody: true)
+  Future<chopper.Response<ImportResult>> _importCalendar({
+    @Path('calendarID') required int? calendarID,
+    @Body() required Object? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Add the events of an .ics file, or of every .ics file in a .zip such as a Google Calendar export; events with a known UID are replaced',
+      operationId: 'importCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Fetch a subscribed feed now
+  ///@param calendarID
+  Future<chopper.Response<Calendar>> refreshCalendar({required int? calendarID}) {
+    generatedMapping.putIfAbsent(Calendar, () => Calendar.fromJsonFactory);
+
+    return _refreshCalendar(calendarID: calendarID);
+  }
+
+  ///Fetch a subscribed feed now
+  ///@param calendarID
+  @POST(path: '/api/v1/calendars/{calendarID}/refresh', optionalBody: true)
+  Future<chopper.Response<Calendar>> _refreshCalendar({
+    @Path('calendarID') required int? calendarID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Fetch a subscribed feed now',
+      operationId: 'refreshCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Who an own calendar is shared with
+  ///@param calendarID
+  Future<chopper.Response<List<CalendarShare>>> listCalendarShares({required int? calendarID}) {
+    generatedMapping.putIfAbsent(CalendarShare, () => CalendarShare.fromJsonFactory);
+
+    return _listCalendarShares(calendarID: calendarID);
+  }
+
+  ///Who an own calendar is shared with
+  ///@param calendarID
+  @GET(path: '/api/v1/calendars/{calendarID}/shares')
+  Future<chopper.Response<List<CalendarShare>>> _listCalendarShares({
+    @Path('calendarID') required int? calendarID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Who an own calendar is shared with',
+      operationId: 'listCalendarShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Share an own calendar with a user or a group
+  ///@param calendarID
+  Future<chopper.Response<CalendarShare>> shareCalendar({required int? calendarID, required NewCalendarShare? body}) {
+    generatedMapping.putIfAbsent(CalendarShare, () => CalendarShare.fromJsonFactory);
+
+    return _shareCalendar(calendarID: calendarID, body: body);
+  }
+
+  ///Share an own calendar with a user or a group
+  ///@param calendarID
+  @POST(path: '/api/v1/calendars/{calendarID}/shares', optionalBody: true)
+  Future<chopper.Response<CalendarShare>> _shareCalendar({
+    @Path('calendarID') required int? calendarID,
+    @Body() required NewCalendarShare? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Share an own calendar with a user or a group',
+      operationId: 'shareCalendar',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Stop sharing a calendar with someone
+  ///@param calendarID
+  ///@param shareID
+  Future<chopper.Response> removeCalendarShare({required int? calendarID, required int? shareID}) {
+    return _removeCalendarShare(calendarID: calendarID, shareID: shareID);
+  }
+
+  ///Stop sharing a calendar with someone
+  ///@param calendarID
+  ///@param shareID
+  @DELETE(path: '/api/v1/calendars/{calendarID}/shares/{shareID}')
+  Future<chopper.Response> _removeCalendarShare({
+    @Path('calendarID') required int? calendarID,
+    @Path('shareID') required int? shareID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop sharing a calendar with someone',
+      operationId: 'removeCalendarShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change what a share allows
+  ///@param calendarID
+  ///@param shareID
+  Future<chopper.Response<CalendarShare>> updateCalendarShare({
+    required int? calendarID,
+    required int? shareID,
+    required UpdateCalendarShareInputBody? body,
+  }) {
+    generatedMapping.putIfAbsent(CalendarShare, () => CalendarShare.fromJsonFactory);
+
+    return _updateCalendarShare(calendarID: calendarID, shareID: shareID, body: body);
+  }
+
+  ///Change what a share allows
+  ///@param calendarID
+  ///@param shareID
+  @PATCH(path: '/api/v1/calendars/{calendarID}/shares/{shareID}', optionalBody: true)
+  Future<chopper.Response<CalendarShare>> _updateCalendarShare({
+    @Path('calendarID') required int? calendarID,
+    @Path('shareID') required int? shareID,
+    @Body() required UpdateCalendarShareInputBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change what a share allows',
+      operationId: 'updateCalendarShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["calendars"],
+      deprecated: false,
+    ),
+  });
+
   ///Find users and groups to share with
   ///@param q Part of a username, name or group name; empty lists the first matches
   Future<chopper.Response<DirectoryResponse>> searchDirectory({String? q}) {

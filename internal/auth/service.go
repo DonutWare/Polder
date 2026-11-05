@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"strings"
 	"sync"
 	"time"
 
@@ -142,10 +143,15 @@ func (s *Service) AuthenticateAppPassword(ctx context.Context, username, token, 
 	if err != nil {
 		return users.User{}, AppPassword{}, err
 	}
-	if user.Username != username {
+	if !knownAs(user, username) {
 		return users.User{}, AppPassword{}, invalid
 	}
 	return user, identity.Password, nil
+}
+
+func knownAs(user users.User, login string) bool {
+	email := user.Profile.Email
+	return user.Username == login || (email != "" && strings.EqualFold(email, strings.TrimSpace(login)))
 }
 
 var dummyHash, _ = Argon2Hasher{}.Hash("timing-equalizer")

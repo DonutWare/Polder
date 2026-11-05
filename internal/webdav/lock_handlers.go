@@ -7,30 +7,31 @@ import (
 	"strings"
 	"time"
 
+	"polder-server/internal/dav"
 	"polder-server/internal/files"
 )
 
 func (h *Handler) lock(req *request) error {
 	if !req.space.canWrite() {
-		return withStatus(http.StatusForbidden, "this space is read-only")
+		return dav.WithStatus(http.StatusForbidden, "this space is read-only")
 	}
 	timeout := lockTimeout(req.r.Header.Get("Timeout"))
-	root, err := readXMLBody(req.r)
+	root, err := dav.ReadBody(req.r)
 	if err != nil {
 		return err
 	}
 	if root == nil {
 		return h.refreshLock(req, timeout)
 	}
-	if root.name != dav("lockinfo") {
-		return errMalformedXML
+	if root.Name != dav.DAV("lockinfo") {
+		return dav.ErrMalformedXML
 	}
 	scope := lockScopeExclusive
-	if lockScope := root.child(nsDAV, "lockscope"); lockScope != nil && lockScope.child(nsDAV, "shared") != nil {
+	if lockScope := root.Child(dav.NamespaceDAV, "lockscope"); lockScope != nil && lockScope.Child(dav.NamespaceDAV, "shared") != nil {
 		scope = lockScopeShared
 	}
-	if lockType := root.child(nsDAV, "locktype"); lockType == nil || lockType.child(nsDAV, "write") == nil {
-		return withStatus(http.StatusUnprocessableEntity, "only write locks are supported")
+	if lockType := root.Child(dav.NamespaceDAV, "locktype"); lockType == nil || lockType.Child(dav.NamespaceDAV, "write") == nil {
+		return dav.WithStatus(http.StatusUnprocessableEntity, "only write locks are supported")
 	}
 	depth := lockDepthInfinite
 	switch req.r.Header.Get("Depth") {
@@ -38,7 +39,7 @@ func (h *Handler) lock(req *request) error {
 		depth = lockDepthResourceOnly
 	case "", "infinity":
 	default:
-		return withStatus(http.StatusBadRequest, "LOCK takes Depth 0 or infinity")
+		return dav.WithStatus(http.StatusBadRequest, "LOCK takes Depth 0 or infinity")
 	}
 	created, err := h.createIfMissing(req)
 	if err != nil {
@@ -49,7 +50,7 @@ func (h *Handler) lock(req *request) error {
 		key:       req.space.key(req.absolute),
 		scope:     scope,
 		depth:     depth,
-		owner:     lockOwner(root.child(nsDAV, "owner")),
+		owner:     lockOwner(root.Child(dav.NamespaceDAV, "owner")),
 		timeout:   timeout,
 	})
 	if err != nil {
@@ -99,11 +100,11 @@ func (h *Handler) refreshLock(req *request, timeout time.Duration) error {
 func (h *Handler) unlock(req *request) error {
 	token := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(req.r.Header.Get("Lock-Token")), "<"), ">")
 	if token == "" {
-		return withStatus(http.StatusBadRequest, "missing Lock-Token header")
+		return dav.WithStatus(http.StatusBadRequest, "missing Lock-Token header")
 	}
 	if err := h.locks.Unlock(req.space.Principal, req.space.key(req.absolute), token); err != nil {
 		if errors.Is(err, errLockTokenMismatch) {
-			return withStatus(http.StatusConflict, "the lock token does not cover this resource")
+			return dav.WithStatus(http.StatusConflict, "the lock token does not cover this resource")
 		}
 		return err
 	}
@@ -126,13 +127,13 @@ func lockTimeout(header string) time.Duration {
 	return defaultLockTimeout
 }
 
-func lockOwner(owner *xmlElement) string {
+func lockOwner(owner *dav.Element) string {
 	if owner == nil {
 		return ""
 	}
-	text := owner.text
-	if href := owner.child(nsDAV, "href"); href != nil {
-		text = href.text
+	text := owner.Text
+	if href := owner.Child(dav.NamespaceDAV, "href"); href != nil {
+		text = href.Text
 	}
 	text = strings.TrimSpace(text)
 	if len(text) > maxLockOwnerLength {
@@ -142,42 +143,42 @@ func lockOwner(owner *xmlElement) string {
 }
 
 func writeLockResponse(w http.ResponseWriter, lock Lock, status int) {
-	body := newXMLWriter()
-	body.start("d:prop", namespaceAttributes(nsDAV)...)
+	body := dav.NewWriter()
+	body.Start("d:prop", dav.NamespaceAttributes(dav.NamespaceDAV)...)
 	writeLockDiscovery(body, []Lock{lock})
-	body.end("d:prop")
-	body.writeTo(w, status)
+	body.End("d:prop")
+	body.WriteTo(w, status)
 }
 
-func writeLockDiscovery(w *xmlWriter, locks []Lock) {
+func writeLockDiscovery(w *dav.Writer, locks []Lock) {
 	if len(locks) == 0 {
-		w.empty("d:lockdiscovery")
+		w.Empty("d:lockdiscovery")
 		return
 	}
-	w.start("d:lockdiscovery")
+	w.Start("d:lockdiscovery")
 	for _, lock := range locks {
-		w.start("d:activelock")
-		w.start("d:locktype")
-		w.empty("d:write")
-		w.end("d:locktype")
-		w.start("d:lockscope")
-		w.empty("d:" + lock.Scope)
-		w.end("d:lockscope")
+		w.Start("d:activelock")
+		w.Start("d:locktype")
+		w.Empty("d:write")
+		w.End("d:locktype")
+		w.Start("d:lockscope")
+		w.Empty("d:" + lock.Scope)
+		w.End("d:lockscope")
 		depth := "infinity"
 		if lock.Depth == lockDepthResourceOnly {
 			depth = "0"
 		}
-		w.element("d:depth", depth)
+		w.Element("d:depth", depth)
 		if lock.Owner != "" {
-			w.start("d:owner")
-			w.element("d:href", lock.Owner)
-			w.end("d:owner")
+			w.Start("d:owner")
+			w.Element("d:href", lock.Owner)
+			w.End("d:owner")
 		}
-		w.element("d:timeout", "Second-"+strconv.FormatInt(int64(lock.Timeout/time.Second), 10))
-		w.start("d:locktoken")
-		w.element("d:href", lock.Token)
-		w.end("d:locktoken")
-		w.end("d:activelock")
+		w.Element("d:timeout", "Second-"+strconv.FormatInt(int64(lock.Timeout/time.Second), 10))
+		w.Start("d:locktoken")
+		w.Element("d:href", lock.Token)
+		w.End("d:locktoken")
+		w.End("d:activelock")
 	}
-	w.end("d:lockdiscovery")
+	w.End("d:lockdiscovery")
 }

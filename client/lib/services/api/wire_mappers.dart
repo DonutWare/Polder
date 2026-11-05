@@ -1,18 +1,18 @@
 import "package:flutter/material.dart";
 
 import "package:polder/models/activity.dart";
-import "package:polder/models/api_error.dart";
 import "package:polder/models/admin_user_requests.dart";
+import "package:polder/models/api_error.dart";
 import "package:polder/models/branding.dart";
+import "package:polder/models/calendar_reminder.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
-import "package:polder/models/file_mount.dart";
-import "package:polder/models/sharing.dart";
 import "package:polder/models/file_links.dart";
-import "package:polder/models/link_preview.dart";
+import "package:polder/models/file_mount.dart";
 import "package:polder/models/file_version.dart";
+import "package:polder/models/link_preview.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
 import "package:polder/models/search.dart";
@@ -21,6 +21,7 @@ import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
 import "package:polder/models/setup_status.dart";
+import "package:polder/models/sharing.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/models/upload_batch.dart";
@@ -496,10 +497,29 @@ extension EventMessageToModel on wire.EventMessage {
     wire.EventMessageType.filesChanged => ServerEvent.filesChanged(userId, dirs ?? const []),
     wire.EventMessageType.error => ServerEvent.error(code ?? "", message ?? ""),
     wire.EventMessageType.swaggerGeneratedUnknown => null,
+    wire.EventMessageType.calendarChanged =>
+      calendar == null ? null : ServerEvent.calendarChanged(userId, calendar!.calendarId),
+    wire.EventMessageType.calendarReminder =>
+      reminder == null ? null : ServerEvent.calendarReminder(userId, reminder!.toModel()),
   };
 
   ServerEvent? _transfer(TransferPhase phase) =>
       transfer == null ? null : ServerEvent.transfer(phase, transfer!.toModel());
+}
+
+extension CalendarReminderToModel on wire.CalendarReminder {
+  CalendarReminder toModel() => CalendarReminder(
+    calendarId: calendarId,
+    eventId: eventId,
+    uid: uid,
+    recurrenceId: recurrenceId,
+    summary: summary,
+    location: location,
+    start: start,
+    end: end,
+    allDay: allDay,
+    triggerAt: triggerAt,
+  );
 }
 
 extension ActivityScopeToWire on ActivityScope {

@@ -1,10 +1,13 @@
+import "package:intl/intl.dart";
 import "package:polder/models/group.dart";
 import "package:polder/util/remote_path.dart";
+import "package:polder_calendar/polder_calendar.dart";
 
 abstract final class AppRoutes {
   static const login = "/login";
   static const files = "/files";
   static const notes = "/notes";
+  static const calendar = "/calendar";
   static const search = "/search";
   static const scan = "/scan";
   static const pdf = "/pdf";
@@ -38,11 +41,18 @@ abstract final class AppRoutes {
   static const scopeParameter = "scope";
   static const serverParameter = "server";
   static const fromParameter = "from";
+  static const viewParameter = "view";
+  static const dateParameter = "date";
 
   static String filesAt(String path, {String? select}) =>
       Uri(path: files, queryParameters: {pathParameter: path, selectParameter: ?select}).toString();
 
   static String noteAt(String path) => Uri(path: notes, queryParameters: {pathParameter: path}).toString();
+
+  static String calendarAt(CalendarViewMode mode, DateTime date) => Uri(
+    path: calendar,
+    queryParameters: {viewParameter: mode.slug, dateParameter: DateFormat("yyyy-MM-dd").format(date)},
+  ).toString();
 
   static String cookAt(String path) => Uri(path: cook, queryParameters: {pathParameter: path}).toString();
 
@@ -113,8 +123,13 @@ abstract final class AppRoutes {
     };
   }
 
-  static bool isTab(String location) =>
-      [files, shared, notes, sync].any((root) => location == root || location.startsWith(RegExp("$root[/?]")));
+  static bool isTab(String location) => [
+    files,
+    shared,
+    notes,
+    calendar,
+    sync,
+  ].any((root) => location == root || location.startsWith(RegExp("$root[/?]")));
 
   static bool isTabRoot(Uri location, {required bool single}) {
     final up = upFrom(location, single: single);

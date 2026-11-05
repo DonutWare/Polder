@@ -8,6 +8,7 @@ enum ShellDestination {
   files(AppRoutes.files),
   shared(AppRoutes.shared),
   notes(AppRoutes.notes),
+  calendar(AppRoutes.calendar),
   activity(AppRoutes.activity),
   sync(AppRoutes.sync),
   autoUpload(AppRoutes.autoUpload),
@@ -27,6 +28,7 @@ final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
     ShellDestination.files,
     ShellDestination.shared,
     ShellDestination.notes,
+    ShellDestination.calendar,
     if (platform.supportsFolderSync) ShellDestination.sync,
   ];
 });

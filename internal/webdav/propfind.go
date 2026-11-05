@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"polder-server/internal/dav"
 	"polder-server/internal/files"
 )
 
@@ -29,104 +30,103 @@ const (
 
 type propfindRequest struct {
 	mode  propfindMode
-	names []propName
+	names []dav.Name
 }
 
 type liveProp struct {
-	name    propName
+	name    dav.Name
 	allprop bool
-	write   func(w *xmlWriter, space Space, res resource, locks *LockManager) bool
+	write   func(w *dav.Writer, space Space, res resource, locks *LockManager) bool
 }
 
-func dav(local string) propName { return propName{Space: nsDAV, Local: local} }
-func oc(local string) propName  { return propName{Space: nsOwnCloud, Local: local} }
+func oc(local string) dav.Name { return dav.Name{Space: dav.NamespaceOwnCloud, Local: local} }
 
 var liveProps = []liveProp{
-	{dav("resourcetype"), true, func(w *xmlWriter, _ Space, res resource, _ *LockManager) bool {
+	{dav.DAV("resourcetype"), true, func(w *dav.Writer, _ Space, res resource, _ *LockManager) bool {
 		if res.entry.IsDir {
-			w.start("d:resourcetype")
-			w.empty("d:collection")
-			w.end("d:resourcetype")
+			w.Start("d:resourcetype")
+			w.Empty("d:collection")
+			w.End("d:resourcetype")
 		} else {
-			w.empty("d:resourcetype")
+			w.Empty("d:resourcetype")
 		}
 		return true
 	}},
-	{dav("getcontentlength"), true, func(w *xmlWriter, _ Space, res resource, _ *LockManager) bool {
+	{dav.DAV("getcontentlength"), true, func(w *dav.Writer, _ Space, res resource, _ *LockManager) bool {
 		if res.entry.IsDir {
 			return false
 		}
-		w.element("d:getcontentlength", strconv.FormatInt(res.entry.Size, 10))
+		w.Element("d:getcontentlength", strconv.FormatInt(res.entry.Size, 10))
 		return true
 	}},
-	{dav("getlastmodified"), true, func(w *xmlWriter, _ Space, res resource, _ *LockManager) bool {
-		w.element("d:getlastmodified", lastModified(res.entry).UTC().Format(http.TimeFormat))
+	{dav.DAV("getlastmodified"), true, func(w *dav.Writer, _ Space, res resource, _ *LockManager) bool {
+		w.Element("d:getlastmodified", lastModified(res.entry).UTC().Format(http.TimeFormat))
 		return true
 	}},
-	{dav("getetag"), true, func(w *xmlWriter, _ Space, res resource, _ *LockManager) bool {
-		w.element("d:getetag", res.etag)
+	{dav.DAV("getetag"), true, func(w *dav.Writer, _ Space, res resource, _ *LockManager) bool {
+		w.Element("d:getetag", res.etag)
 		return true
 	}},
-	{dav("getcontenttype"), true, func(w *xmlWriter, _ Space, res resource, _ *LockManager) bool {
-		w.element("d:getcontenttype", contentType(res.entry))
+	{dav.DAV("getcontenttype"), true, func(w *dav.Writer, _ Space, res resource, _ *LockManager) bool {
+		w.Element("d:getcontenttype", contentType(res.entry))
 		return true
 	}},
-	{dav("displayname"), true, func(w *xmlWriter, _ Space, res resource, _ *LockManager) bool {
+	{dav.DAV("displayname"), true, func(w *dav.Writer, _ Space, res resource, _ *LockManager) bool {
 		if res.entry.Name == "" {
 			return false
 		}
-		w.element("d:displayname", res.entry.Name)
+		w.Element("d:displayname", res.entry.Name)
 		return true
 	}},
-	{dav("supportedlock"), true, func(w *xmlWriter, _ Space, _ resource, _ *LockManager) bool {
-		w.start("d:supportedlock")
+	{dav.DAV("supportedlock"), true, func(w *dav.Writer, _ Space, _ resource, _ *LockManager) bool {
+		w.Start("d:supportedlock")
 		for _, scope := range []string{lockScopeExclusive, lockScopeShared} {
-			w.start("d:lockentry")
-			w.start("d:lockscope")
-			w.empty("d:" + scope)
-			w.end("d:lockscope")
-			w.start("d:locktype")
-			w.empty("d:write")
-			w.end("d:locktype")
-			w.end("d:lockentry")
+			w.Start("d:lockentry")
+			w.Start("d:lockscope")
+			w.Empty("d:" + scope)
+			w.End("d:lockscope")
+			w.Start("d:locktype")
+			w.Empty("d:write")
+			w.End("d:locktype")
+			w.End("d:lockentry")
 		}
-		w.end("d:supportedlock")
+		w.End("d:supportedlock")
 		return true
 	}},
-	{dav("lockdiscovery"), true, func(w *xmlWriter, space Space, res resource, locks *LockManager) bool {
+	{dav.DAV("lockdiscovery"), true, func(w *dav.Writer, space Space, res resource, locks *LockManager) bool {
 		writeLockDiscovery(w, locks.Discover(space.key(res.absolute)))
 		return true
 	}},
-	{dav("quota-used-bytes"), true, func(w *xmlWriter, space Space, res resource, _ *LockManager) bool {
+	{dav.DAV("quota-used-bytes"), true, func(w *dav.Writer, space Space, res resource, _ *LockManager) bool {
 		if !res.entry.IsDir || space.Quota == nil {
 			return false
 		}
-		w.element("d:quota-used-bytes", strconv.FormatInt(space.Quota.Used, 10))
+		w.Element("d:quota-used-bytes", strconv.FormatInt(space.Quota.Used, 10))
 		return true
 	}},
-	{dav("quota-available-bytes"), true, func(w *xmlWriter, space Space, res resource, _ *LockManager) bool {
+	{dav.DAV("quota-available-bytes"), true, func(w *dav.Writer, space Space, res resource, _ *LockManager) bool {
 		if !res.entry.IsDir || space.Quota == nil || space.Quota.Limit <= 0 {
 			return false
 		}
-		w.element("d:quota-available-bytes", strconv.FormatInt(max(space.Quota.Limit-space.Quota.Used, 0), 10))
+		w.Element("d:quota-available-bytes", strconv.FormatInt(max(space.Quota.Limit-space.Quota.Used, 0), 10))
 		return true
 	}},
-	{oc("permissions"), false, func(w *xmlWriter, space Space, res resource, _ *LockManager) bool {
-		w.element("oc:permissions", ownCloudPermissions(space, res))
+	{oc("permissions"), false, func(w *dav.Writer, space Space, res resource, _ *LockManager) bool {
+		w.Element("oc:permissions", ownCloudPermissions(space, res))
 		return true
 	}},
-	{propName{Space: nsOCM, Local: "share-permissions"}, false, func(w *xmlWriter, space Space, res resource, _ *LockManager) bool {
-		w.element("ocm:share-permissions", ocmPermissions(space))
+	{dav.Name{Space: dav.NamespaceOCM, Local: "share-permissions"}, false, func(w *dav.Writer, space Space, res resource, _ *LockManager) bool {
+		w.Element("ocm:share-permissions", ocmPermissions(space))
 		return true
 	}},
-	{propName{Space: nsOCS, Local: "share-permissions"}, false, func(w *xmlWriter, space Space, res resource, _ *LockManager) bool {
-		w.element("ocs:share-permissions", strconv.Itoa(shareMask(space, res)))
+	{dav.Name{Space: dav.NamespaceOCS, Local: "share-permissions"}, false, func(w *dav.Writer, space Space, res resource, _ *LockManager) bool {
+		w.Element("ocs:share-permissions", strconv.Itoa(shareMask(space, res)))
 		return true
 	}},
 }
 
-var livePropByName = func() map[propName]liveProp {
-	byName := make(map[propName]liveProp, len(liveProps))
+var livePropByName = func() map[dav.Name]liveProp {
+	byName := make(map[dav.Name]liveProp, len(liveProps))
 	for _, prop := range liveProps {
 		byName[prop.name] = prop
 	}
@@ -199,29 +199,29 @@ func ocmPermissions(space Space) string {
 }
 
 func parsePropfind(r *http.Request) (propfindRequest, error) {
-	root, err := readXMLBody(r)
+	root, err := dav.ReadBody(r)
 	if err != nil || root == nil {
 		return propfindRequest{mode: modeAllProp}, err
 	}
-	if root.name != dav("propfind") {
-		return propfindRequest{}, errMalformedXML
+	if root.Name != dav.DAV("propfind") {
+		return propfindRequest{}, dav.ErrMalformedXML
 	}
-	if root.child(nsDAV, "propname") != nil {
+	if root.Child(dav.NamespaceDAV, "propname") != nil {
 		return propfindRequest{mode: modePropName}, nil
 	}
-	prop := root.child(nsDAV, "prop")
+	prop := root.Child(dav.NamespaceDAV, "prop")
 	if prop == nil {
 		return propfindRequest{mode: modeAllProp}, nil
 	}
-	if len(prop.children) > maxRequestedProps {
-		return propfindRequest{}, errBodyTooLarge
+	if len(prop.Children) > maxRequestedProps {
+		return propfindRequest{}, dav.ErrBodyTooLarge
 	}
 	request := propfindRequest{mode: modeProp}
-	for _, child := range prop.children {
-		if !child.name.valid() {
-			return propfindRequest{}, errMalformedXML
+	for _, child := range prop.Children {
+		if !child.Name.Valid() {
+			return propfindRequest{}, dav.ErrMalformedXML
 		}
-		request.names = append(request.names, child.name)
+		request.names = append(request.names, child.Name)
 	}
 	return request, nil
 }
@@ -232,7 +232,7 @@ func (h *Handler) propfind(req *request) error {
 	}
 	depth := req.r.Header.Get("Depth")
 	if depth != "0" && depth != "1" {
-		return withStatus(http.StatusForbidden, "only Depth 0 and 1 are supported")
+		return dav.WithStatus(http.StatusForbidden, "only Depth 0 and 1 are supported")
 	}
 	query, err := parsePropfind(req.r)
 	if err != nil {
@@ -242,13 +242,13 @@ func (h *Handler) propfind(req *request) error {
 	if err != nil {
 		return err
 	}
-	body := newXMLWriter()
-	body.start("d:multistatus", namespaceAttributes(nsDAV, nsOwnCloud, nsOCM, nsOCS)...)
+	body := dav.NewWriter()
+	body.Start("d:multistatus", dav.NamespaceAttributes(dav.NamespaceDAV, dav.NamespaceOwnCloud, dav.NamespaceOCM, dav.NamespaceOCS)...)
 	for _, res := range resources {
 		h.writeResponse(body, req.space, res, query)
 	}
-	body.end("d:multistatus")
-	body.writeTo(req.w, http.StatusMultiStatus)
+	body.End("d:multistatus")
+	body.WriteTo(req.w, http.StatusMultiStatus)
 	return nil
 }
 
@@ -286,18 +286,18 @@ func (h *Handler) resources(req *request, withChildren bool) ([]resource, error)
 	return resources, nil
 }
 
-func (h *Handler) writeResponse(w *xmlWriter, space Space, res resource, query propfindRequest) {
-	w.start("d:response")
-	w.element("d:href", space.href(res.relative, res.entry.IsDir))
-	found := &xmlWriter{}
-	missing := &xmlWriter{}
-	foreign := &foreignNames{}
+func (h *Handler) writeResponse(w *dav.Writer, space Space, res resource, query propfindRequest) {
+	w.Start("d:response")
+	w.Element("d:href", space.href(res.relative, res.entry.IsDir))
+	found := &dav.Writer{}
+	missing := &dav.Writer{}
+	foreign := &dav.ForeignNames{}
 	switch query.mode {
 	case modePropName:
 		for _, prop := range liveProps {
-			if prop.write(&xmlWriter{}, space, res, h.locks) {
-				name, attributes := foreign.qualified(prop.name)
-				found.empty(name, attributes...)
+			if prop.write(&dav.Writer{}, space, res, h.locks) {
+				name, attributes := foreign.Qualified(prop.name)
+				found.Empty(name, attributes...)
 			}
 		}
 	case modeAllProp:
@@ -312,88 +312,72 @@ func (h *Handler) writeResponse(w *xmlWriter, space Space, res resource, query p
 			if known && prop.write(found, space, res, h.locks) {
 				continue
 			}
-			qualified, attributes := foreign.qualified(name)
-			missing.empty(qualified, attributes...)
+			qualified, attributes := foreign.Qualified(name)
+			missing.Empty(qualified, attributes...)
 		}
 	}
-	writePropstat(w, found, http.StatusOK)
-	writePropstat(w, missing, http.StatusNotFound)
-	w.end("d:response")
-}
-
-func writePropstat(w *xmlWriter, props *xmlWriter, status int) {
-	if props.buffer.Len() == 0 {
-		return
-	}
-	w.start("d:propstat")
-	w.start("d:prop")
-	w.buffer.Write(props.buffer.Bytes())
-	w.end("d:prop")
-	w.element("d:status", statusLine(status))
-	w.end("d:propstat")
-}
-
-func statusLine(status int) string {
-	return "HTTP/1.1 " + strconv.Itoa(status) + " " + http.StatusText(status)
+	dav.WritePropstat(w, found, http.StatusOK)
+	dav.WritePropstat(w, missing, http.StatusNotFound)
+	w.End("d:response")
 }
 
 func (h *Handler) proppatch(req *request) error {
 	if !req.space.canWrite() {
-		return withStatus(http.StatusForbidden, "this space is read-only")
+		return dav.WithStatus(http.StatusForbidden, "this space is read-only")
 	}
-	root, err := readXMLBody(req.r)
+	root, err := dav.ReadBody(req.r)
 	if err != nil {
 		return err
 	}
-	if root == nil || root.name != dav("propertyupdate") {
-		return errMalformedXML
+	if root == nil || root.Name != dav.DAV("propertyupdate") {
+		return dav.ErrMalformedXML
 	}
 	entry, exists, err := h.stat(req, req.absolute)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		return withStatus(http.StatusNotFound, "no such resource")
+		return dav.WithStatus(http.StatusNotFound, "no such resource")
 	}
 	if err := h.checkLocks(req, req.absolute, false, false); err != nil {
 		return err
 	}
-	accepted := &xmlWriter{}
-	protected := &xmlWriter{}
-	foreign := &foreignNames{}
+	accepted := &dav.Writer{}
+	protected := &dav.Writer{}
+	foreign := &dav.ForeignNames{}
 	count := 0
-	for _, operation := range root.children {
-		if operation.name.Space != nsDAV || (operation.name.Local != "set" && operation.name.Local != "remove") {
+	for _, operation := range root.Children {
+		if operation.Name.Space != dav.NamespaceDAV || (operation.Name.Local != "set" && operation.Name.Local != "remove") {
 			continue
 		}
-		prop := operation.child(nsDAV, "prop")
+		prop := operation.Child(dav.NamespaceDAV, "prop")
 		if prop == nil {
 			continue
 		}
-		for _, child := range prop.children {
-			if count++; count > maxRequestedProps || !child.name.valid() {
-				return errMalformedXML
+		for _, child := range prop.Children {
+			if count++; count > maxRequestedProps || !child.Name.Valid() {
+				return dav.ErrMalformedXML
 			}
-			name, attributes := foreign.qualified(child.name)
-			if child.name.Space == nsDAV {
-				protected.empty(name, attributes...)
+			name, attributes := foreign.Qualified(child.Name)
+			if child.Name.Space == dav.NamespaceDAV {
+				protected.Empty(name, attributes...)
 			} else {
-				accepted.empty(name, attributes...)
+				accepted.Empty(name, attributes...)
 			}
 		}
 	}
-	body := newXMLWriter()
-	body.start("d:multistatus", namespaceAttributes(nsDAV, nsOwnCloud, nsOCM, nsOCS)...)
-	body.start("d:response")
-	body.element("d:href", req.space.href(req.relative, entry.IsDir))
-	if protected.buffer.Len() > 0 {
-		writePropstat(body, protected, http.StatusForbidden)
-		writePropstat(body, accepted, http.StatusFailedDependency)
+	body := dav.NewWriter()
+	body.Start("d:multistatus", dav.NamespaceAttributes(dav.NamespaceDAV, dav.NamespaceOwnCloud, dav.NamespaceOCM, dav.NamespaceOCS)...)
+	body.Start("d:response")
+	body.Element("d:href", req.space.href(req.relative, entry.IsDir))
+	if protected.Len() > 0 {
+		dav.WritePropstat(body, protected, http.StatusForbidden)
+		dav.WritePropstat(body, accepted, http.StatusFailedDependency)
 	} else {
-		writePropstat(body, accepted, http.StatusOK)
+		dav.WritePropstat(body, accepted, http.StatusOK)
 	}
-	body.end("d:response")
-	body.end("d:multistatus")
-	body.writeTo(req.w, http.StatusMultiStatus)
+	body.End("d:response")
+	body.End("d:multistatus")
+	body.WriteTo(req.w, http.StatusMultiStatus)
 	return nil
 }

@@ -11,6 +11,7 @@ import (
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/auth"
+	"polder-server/internal/dav"
 	"polder-server/internal/logging"
 	"polder-server/internal/sharing"
 	"polder-server/internal/users"
@@ -41,13 +42,13 @@ func (a *API) serveOwnFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if chi.URLParam(r, "username") != user.Username {
-		webdav.WriteError(w, r, apperr.NotFound("no such resource"))
+		dav.WriteError(w, r, apperr.NotFound("no such resource"))
 		return
 	}
 	root := davFilesPrefix + "/" + user.Username
 	rootEntry, err := a.files.Stat(r.Context(), user, "/")
 	if err != nil {
-		webdav.WriteError(w, r, err)
+		dav.WriteError(w, r, err)
 		return
 	}
 	writable := !password.ReadOnly
@@ -66,19 +67,19 @@ func (a *API) serveOwnFiles(w http.ResponseWriter, r *http.Request) {
 
 func (a *API) davUser(w http.ResponseWriter, r *http.Request) (users.User, auth.AppPassword, bool) {
 	if !a.secureTransport(r) {
-		webdav.WriteError(w, r, apperr.Forbidden("WebDAV needs HTTPS; behind a reverse proxy, add the proxy to trustedProxies"))
+		dav.WriteError(w, r, apperr.Forbidden("WebDAV needs HTTPS; behind a reverse proxy, add the proxy to trustedProxies"))
 		return users.User{}, auth.AppPassword{}, false
 	}
 	username, token, ok := r.BasicAuth()
 	if !ok {
-		webdav.WriteError(w, r, apperr.Unauthorized("log in with your username and an app password"))
+		dav.WriteError(w, r, apperr.Unauthorized("log in with your username and an app password"))
 		return users.User{}, auth.AppPassword{}, false
 	}
 	address := clientAddress(r.RemoteAddr)
 	keys := []string{"dav:" + address, "dav-user:" + username}
 	if a.limiter.blocked(keys...) {
 		davLog.Warn("WebDAV login refused: too many failed attempts", "user", username, "address", address)
-		webdav.WriteError(w, r, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute"))
+		dav.WriteError(w, r, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute"))
 		return users.User{}, auth.AppPassword{}, false
 	}
 	user, password, err := a.auth.AuthenticateAppPassword(r.Context(), username, token, address)
@@ -87,7 +88,7 @@ func (a *API) davUser(w http.ResponseWriter, r *http.Request) (users.User, auth.
 			a.limiter.fail(keys...)
 			davLog.Warn("WebDAV login failed", "user", username, "address", address)
 		}
-		webdav.WriteError(w, r, err)
+		dav.WriteError(w, r, err)
 		return users.User{}, auth.AppPassword{}, false
 	}
 	noteUsername(r.Context(), user.Username)

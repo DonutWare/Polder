@@ -65,6 +65,8 @@ dependencies:
   media_kit_libs_video: ^1.0.7
   media_viewer:
     path: packages/media_viewer
+  polder_calendar:
+    path: packages/polder_calendar
   cryptography: ^2.9.0
 
 dependency_overrides:
