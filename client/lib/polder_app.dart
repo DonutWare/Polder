@@ -13,6 +13,7 @@ import "package:polder/widgets/desktop/desktop_tray.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";
 import "package:polder/widgets/layout/window_titlebar.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder_calendar/polder_calendar.dart";
 
 class PolderApp extends ConsumerStatefulWidget {
   const PolderApp({super.key});
@@ -48,7 +49,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
       theme: AppTheme.build(seed, Brightness.light),
       darkTheme: AppTheme.build(seed, Brightness.dark),
       themeMode: appearance.mode,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: [...AppLocalizations.localizationsDelegates, CalendarLocalizations.delegate],
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (_, child) => AdaptiveLayoutBuilder(
         child: (_) => DesktopTray(

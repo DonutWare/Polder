@@ -1260,6 +1260,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  polder_calendar:
+    dependency: "direct main"
+    description:
+      path: "packages/polder_calendar"
+      relative: true
+    source: path
+    version: "0.1.0"
   pool:
     dependency: transitive
     description:

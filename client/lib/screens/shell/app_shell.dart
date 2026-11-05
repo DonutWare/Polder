@@ -10,6 +10,7 @@ import "package:polder/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/search/open_search.dart";
+import "package:polder/screens/shell/calendar_reminder_listener.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/screens/shell/sync_background_activator.dart";
 import "package:polder/screens/shell/widgets/more_options.dart";
@@ -76,7 +77,7 @@ class AppShell extends ConsumerWidget {
               unawaited(context.push(destination.route));
             },
             sidebarFooter: const QuotaBar(),
-            child: SearchShortcut(child: child),
+            child: CalendarReminderListener(child: SearchShortcut(child: child)),
           ),
         ),
       ),

@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: calendar_en.arb
+output-localization-file: calendar_localizations.dart
+output-class: CalendarLocalizations
+nullable-getter: false
+output-dir: lib/l10n/generated

@@ -455,6 +455,8 @@
 	"serverVersionsLimitHint": "Standaard en maximum voor iedere gebruiker",
 	"quotaHistory": "Daarvan is {size} versiegeschiedenis",
 	"navNotes": "Notities",
+	"navCalendar": "Agenda",
+	"searchKeywordsCalendar": "agenda, kalender, afspraken, planning, vergaderingen",
 	"searchKeywordsNotes": "notities, markdown, wiki, kennisbank, pagina's, dagboek",
 	"notesSetupTitle": "Notities instellen",
 	"notesSetupMessage": "Notities zijn markdown-bestanden in een map naar keuze. Kies een naam voor de map; die wordt aangemaakt als hij nog niet bestaat.",
@@ -880,5 +882,7 @@
 	"updatesInstall": "Nu bijwerken",
 	"updatesDownload": "Downloaden",
 	"updatesReleaseNotes": "Wat is er nieuw",
-	"aboutNightly": "Nightly build"
+	"aboutNightly": "Nightly build",
+	"calendarReminder": "Herinnering: {summary} om {time}",
+	"calendarReminderAllDay": "Herinnering: {summary} op {date}"
 }

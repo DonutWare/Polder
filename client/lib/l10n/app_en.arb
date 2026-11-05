@@ -927,6 +927,8 @@
 		}
 	},
 	"navNotes": "Notes",
+	"navCalendar": "Calendar",
+	"searchKeywordsCalendar": "calendar, agenda, events, appointments, schedule, meetings",
 	"searchKeywordsNotes": "notes, markdown, wiki, knowledge base, pages, journal",
 	"notesSetupTitle": "Set up notes",
 	"notesSetupMessage": "Notes are markdown files in a folder of your choice. Pick a name for the folder; it's created if it doesn't exist yet.",
@@ -1589,5 +1591,27 @@
 	"updatesInstall": "Update now",
 	"updatesDownload": "Download",
 	"updatesReleaseNotes": "Release notes",
-	"aboutNightly": "Nightly build"
+	"aboutNightly": "Nightly build",
+	"calendarReminder": "Reminder: {summary} at {time}",
+	"@calendarReminder": {
+		"placeholders": {
+			"summary": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarReminderAllDay": "Reminder: {summary} on {date}",
+	"@calendarReminderAllDay": {
+		"placeholders": {
+			"summary": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	}
 }

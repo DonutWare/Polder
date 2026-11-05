@@ -1,0 +1,31 @@
+name: polder_calendar
+description: "Calendar views and state for Polder apps: schedule, day, 3-day, week and month over pluggable calendar sources."
+publish_to: "none"
+
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  flutter_svg: ^2.3.0
+  freezed_annotation: ^3.1.0
+  iconsax_plus: ^1.0.0
+  intl: ^0.20.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.16.1
+  freezed: ^4.0.2
+
+flutter:
+  generate: true
+  assets:
+    - assets/months/

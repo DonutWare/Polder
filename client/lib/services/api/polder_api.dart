@@ -36,6 +36,7 @@ import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 import "package:polder/services/api/pending_uploads.dart";
 import "package:polder/services/api/sharing_mappers.dart";
 import "package:polder/services/api/wire_mappers.dart";
+import "package:polder_calendar/polder_calendar.dart" as cal;
 
 class ByteRange {
   const ByteRange(this.offset, this.length);
@@ -539,6 +540,77 @@ class PolderApi {
   Future<List<CalendarSummary>> calendars() async => [
     for (final calendar in (await _service.listCalendars()).body!) calendar.toModel(),
   ];
+
+  Future<List<cal.CalendarInfo>> calendarInfos(String sourceId) async => [
+    for (final calendar in (await _service.listCalendars()).body!) calendar.toInfo(sourceId),
+  ];
+
+  Future<List<cal.CalendarEvent>> calendarEvents(
+    String sourceId,
+    DateTimeRange range, {
+    List<int>? calendarIds,
+  }) async => [
+    for (final event in (await _service.listCalendarEvents(
+      from: range.start.toUtc(),
+      to: range.end.toUtc(),
+      calendarIds: calendarIds,
+    )).body!)
+      event.toModel(sourceId),
+  ];
+
+  Future<cal.CalendarEventDetails> calendarEvent(cal.EventRef ref) async => (await _service.getCalendarEvent(
+    calendarID: int.parse(ref.calendar.calendarId),
+    eventID: int.parse(ref.eventId),
+  )).body!.toModel(ref.calendar.sourceId);
+
+  Future<cal.CalendarEvent> createCalendarEvent(cal.CalendarRef calendar, cal.EventDraft draft) async =>
+      (await _service.createCalendarEvent(
+        calendarID: int.parse(calendar.calendarId),
+        body: draft.toWire(),
+      )).body!.toModel(calendar.sourceId).series;
+
+  Future<cal.CalendarEvent> updateCalendarEvent(
+    cal.CalendarEvent event,
+    cal.EventDraft draft,
+    cal.RecurrenceScope scope,
+  ) async => (await _service.updateCalendarEvent(
+    calendarID: int.parse(event.calendar.calendarId),
+    eventID: int.parse(event.ref.eventId),
+    scope: switch (scope) {
+      cal.RecurrenceScope.thisEvent => wire.ApiV1CalendarsCalendarIDEventsEventIDPutScope.$this,
+      cal.RecurrenceScope.following => wire.ApiV1CalendarsCalendarIDEventsEventIDPutScope.following,
+      cal.RecurrenceScope.all => wire.ApiV1CalendarsCalendarIDEventsEventIDPutScope.all,
+    },
+    recurrenceId: event.ref.recurrenceId,
+    ifMatch: event.etag,
+    body: draft.toWire(),
+  )).body!.toModel(event.calendar.sourceId).series;
+
+  Future<void> deleteCalendarEvent(cal.CalendarEvent event, cal.RecurrenceScope scope) => _service.deleteCalendarEvent(
+    calendarID: int.parse(event.calendar.calendarId),
+    eventID: int.parse(event.ref.eventId),
+    scope: switch (scope) {
+      cal.RecurrenceScope.thisEvent => wire.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope.$this,
+      cal.RecurrenceScope.following => wire.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope.following,
+      cal.RecurrenceScope.all => wire.ApiV1CalendarsCalendarIDEventsEventIDDeleteScope.all,
+    },
+    recurrenceId: event.ref.recurrenceId,
+    ifMatch: event.etag,
+  );
+
+  Future<cal.CalendarEvent> moveCalendarEvent(cal.CalendarEvent event, cal.CalendarRef target) async =>
+      (await _service.moveCalendarEvent(
+        calendarID: int.parse(event.calendar.calendarId),
+        eventID: int.parse(event.ref.eventId),
+        body: wire.MoveEventInputBody(calendarId: int.parse(target.calendarId)),
+      )).body!.toModel(target.sourceId).series;
+
+  Future<void> respondToCalendarEvent(cal.CalendarEvent event, cal.AttendeeStatus status) =>
+      _service.respondToCalendarEvent(
+        calendarID: int.parse(event.calendar.calendarId),
+        eventID: int.parse(event.ref.eventId),
+        body: wire.RsvpEventInputBody(status: status.toWire(), recurrenceId: event.ref.recurrenceId),
+      );
 
   Future<List<CalendarFeed>> calendarFeeds(int calendarId) async => [
     for (final feed in (await _service.listCalendarFeeds(calendarID: calendarId)).body!) feed.toModel(),

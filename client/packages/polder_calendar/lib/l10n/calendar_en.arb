@@ -1,0 +1,217 @@
+{
+	"@@locale": "en",
+	"viewSchedule": "Schedule",
+	"viewDay": "Day",
+	"viewThreeDays": "3 days",
+	"viewWeek": "Week",
+	"viewMonth": "Month",
+	"today": "Today",
+	"previousPeriod": "Previous",
+	"nextPeriod": "Next",
+	"allDay": "All day",
+	"calendars": "Calendars",
+	"noEvents": "No events",
+	"moreEvents": "{count} more",
+	"@moreEvents": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"untitledEvent": "(No title)",
+	"busy": "Busy",
+	"loadFailed": "Couldn't load events",
+	"retry": "Retry",
+	"weekHeader": "Week {week}, {range}",
+	"@weekHeader": {
+		"placeholders": {
+			"week": {
+				"type": "int"
+			},
+			"range": {
+				"type": "String"
+			}
+		}
+	},
+	"nothingPlanned": "Nothing planned",
+	"showMonth": "Show month",
+	"newEvent": "New event",
+	"editEvent": "Edit event",
+	"addTitle": "Add title",
+	"save": "Save",
+	"cancel": "Cancel",
+	"close": "Close",
+	"edit": "Edit",
+	"delete": "Delete",
+	"deleteEventTitle": "Delete event?",
+	"deleteEventMessage": "\"{title}\" will be removed from the calendar.",
+	"@deleteEventMessage": {
+		"placeholders": {
+			"title": {
+				"type": "String"
+			}
+		}
+	},
+	"editRecurringTitle": "Edit recurring event",
+	"deleteRecurringTitle": "Delete recurring event",
+	"scopeThisEvent": "This event",
+	"scopeFollowing": "This and following events",
+	"scopeAll": "All events",
+	"ok": "OK",
+	"addLocation": "Add location",
+	"addDescription": "Add description",
+	"addNotification": "Add notification",
+	"removeNotification": "Remove notification",
+	"calendar": "Calendar",
+	"color": "Color",
+	"calendarColor": "Calendar color",
+	"repeatNone": "Does not repeat",
+	"repeatWeekdays": "Every weekday (Monday to Friday)",
+	"repeatCustom": "Custom",
+	"ruleDaily": "{interval, plural, =1{Every day} other{Every {interval} days}}",
+	"@ruleDaily": {
+		"placeholders": {
+			"interval": {
+				"type": "int"
+			}
+		}
+	},
+	"ruleWeekly": "{interval, plural, =1{Every week} other{Every {interval} weeks}}",
+	"@ruleWeekly": {
+		"placeholders": {
+			"interval": {
+				"type": "int"
+			}
+		}
+	},
+	"ruleMonthly": "{interval, plural, =1{Every month} other{Every {interval} months}}",
+	"@ruleMonthly": {
+		"placeholders": {
+			"interval": {
+				"type": "int"
+			}
+		}
+	},
+	"ruleYearly": "{interval, plural, =1{Every year} other{Every {interval} years}}",
+	"@ruleYearly": {
+		"placeholders": {
+			"interval": {
+				"type": "int"
+			}
+		}
+	},
+	"ruleOn": "{rule} on {when}",
+	"@ruleOn": {
+		"placeholders": {
+			"rule": {
+				"type": "String"
+			},
+			"when": {
+				"type": "String"
+			}
+		}
+	},
+	"monthDay": "day {day}",
+	"@monthDay": {
+		"placeholders": {
+			"day": {
+				"type": "int"
+			}
+		}
+	},
+	"ruleCount": "{rule}, {count, plural, =1{once} other{{count} times}}",
+	"@ruleCount": {
+		"placeholders": {
+			"rule": {
+				"type": "String"
+			},
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"ruleUntil": "{rule}, until {date}",
+	"@ruleUntil": {
+		"placeholders": {
+			"rule": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"reminderAtStart": "At start of event",
+	"reminderMinutes": "{count, plural, =1{1 minute before} other{{count} minutes before}}",
+	"@reminderMinutes": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"reminderHours": "{count, plural, =1{1 hour before} other{{count} hours before}}",
+	"@reminderHours": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"reminderDays": "{count, plural, =1{1 day before} other{{count} days before}}",
+	"@reminderDays": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"reminderWeeks": "{count, plural, =1{1 week before} other{{count} weeks before}}",
+	"@reminderWeeks": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"reminderOnDay": "On the day at {time}",
+	"@reminderOnDay": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"reminderDaysBefore": "{count, plural, =1{The day before at {time}} other{{count} days before at {time}}}",
+	"@reminderDaysBefore": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"reminderAt": "At {time}",
+	"@reminderAt": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"guests": "{count, plural, =1{1 guest} other{{count} guests}}",
+	"@guests": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"organizer": "Organizer",
+	"saveFailed": "Couldn't save the event",
+	"deleteFailed": "Couldn't delete the event",
+	"noWritableCalendar": "There's no calendar you can add events to"
+}

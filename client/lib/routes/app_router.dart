@@ -20,6 +20,8 @@ import "package:polder/screens/browser/browser_stack.dart";
 import "package:polder/screens/login/login_screen.dart";
 import "package:polder/screens/notes/cooking/cooking_screen.dart";
 import "package:polder/screens/notes/notes_screen.dart";
+import "package:polder/screens/calendar/calendar_screen.dart";
+import "package:polder_calendar/polder_calendar.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/viewer/document_editor_screen.dart";
@@ -115,6 +117,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           _tab(
             path: AppRoutes.notes,
             page: (state) => UpScope(child: NotesScreen(notePath: state.uri.queryParameters[AppRoutes.pathParameter])),
+          ),
+          _tab(
+            path: AppRoutes.calendar,
+            page: (state) => UpScope(
+              child: CalendarScreen(
+                mode: switch (state.uri.queryParameters[AppRoutes.viewParameter]) {
+                  null => null,
+                  final slug => CalendarViewMode.fromSlug(slug),
+                },
+                date: DateTime.tryParse(state.uri.queryParameters[AppRoutes.dateParameter] ?? ""),
+              ),
+            ),
           ),
           _tab(
             path: AppRoutes.sync,
