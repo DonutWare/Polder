@@ -8,7 +8,7 @@ abstract final class AppLocationLink {
   static Uri uriFor(String location) => Uri(scheme: "polder", host: host, queryParameters: {_pathParameter: location});
 
   static String? locationOf(Uri uri) {
-    if (!ShareLinkTarget.schemes.contains(uri.scheme) || uri.host != host) return null;
+    if (!ShareLinkTarget.isAppUri(uri, host: host)) return null;
     return AppRoutes.safeReturn(uri.queryParameters[_pathParameter]);
   }
 }

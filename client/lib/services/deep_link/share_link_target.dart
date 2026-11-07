@@ -14,8 +14,10 @@ class ShareLinkTarget {
   final String serverUrl;
   final String code;
 
+  static bool isAppUri(Uri uri, {required String host}) => schemes.contains(uri.scheme) && uri.host == host;
+
   static ShareLinkTarget? parse(Uri uri) {
-    if (!schemes.contains(uri.scheme) || uri.host != "share") return null;
+    if (!isAppUri(uri, host: "share")) return null;
     final server = uri.queryParameters["server"];
     final code = uri.queryParameters["code"];
     if (server == null || server.trim().isEmpty || code == null || !_code.hasMatch(code)) return null;

@@ -7,3 +7,24 @@ Terminal=false
 Categories=Utility;
 Comment=Files, sync and auto-upload for a self-hosted Polder server
 MimeType=x-scheme-handler/polder;
+Actions=new-event;new-note;new-checklist;search;
+
+[Desktop Action new-event]
+Name=New event
+Name[nl]=Nieuwe afspraak
+Exec=polder polder://shortcut/new-event
+
+[Desktop Action new-note]
+Name=New note
+Name[nl]=Nieuwe notitie
+Exec=polder polder://shortcut/new-note
+
+[Desktop Action new-checklist]
+Name=New checklist
+Name[nl]=Nieuwe checklist
+Exec=polder polder://shortcut/new-checklist
+
+[Desktop Action search]
+Name=Search
+Name[nl]=Zoeken
+Exec=polder polder://shortcut/search

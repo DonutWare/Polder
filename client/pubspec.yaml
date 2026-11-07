@@ -70,6 +70,7 @@ dependencies:
   cryptography: ^2.9.0
   flutter_local_notifications: ^23.0.0
   timezone: ^0.11.2
+  quick_actions: ^1.1.1
 dependency_overrides:
   media_kit:
     git:

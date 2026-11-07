@@ -10,10 +10,13 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/providers/desktop/tray_status_provider.dart";
+import "package:polder/providers/service_providers.dart";
+import "package:polder/providers/shortcuts/app_shortcut_runner.dart";
 import "package:polder/providers/sync/sync_paused_provider.dart";
 import "package:polder/providers/update/update_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/services/shortcuts/app_shortcut.dart";
 import "package:polder/util/byte_format.dart";
 import "package:polder/util/flavor.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
@@ -26,6 +29,13 @@ Future<void> initializeDesktopWindow() async {
   if (!_isDesktop) return;
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
+}
+
+Future<void> showDesktopWindow() async {
+  if (!_isDesktop) return;
+  if (Platform.isMacOS) await windowManager.setSkipTaskbar(false);
+  await windowManager.show();
+  await windowManager.focus();
 }
 
 class DesktopTray extends ConsumerStatefulWidget {
@@ -49,6 +59,8 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
   tray.MenuItem? _speedItem;
   tray.MenuItem? _openItem;
   tray.MenuItem? _syncedItem;
+  tray.MenuItem? _newItem;
+  final Map<AppShortcut, tray.MenuItem> _shortcutItems = {};
   tray.MenuItem? _pauseItem;
   tray.MenuItem? _updateItem;
   tray.MenuItem? _quitItem;
@@ -153,6 +165,14 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     _syncedItem!
       ..label = l10n.trayOpenSyncedFolders
       ..isEnabled = view.signedIn;
+    _newItem!
+      ..label = l10n.trayNew
+      ..isEnabled = view.signedIn;
+    for (final MapEntry(key: shortcut, value: item) in _shortcutItems.entries) {
+      item
+        ..label = shortcut.groupedLabel(context)
+        ..isEnabled = view.signedIn;
+    }
     _pauseItem!
       ..label = view.paused ? l10n.resumeSync : l10n.pauseSync
       ..isEnabled = view.signedIn;
@@ -180,7 +200,9 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       )
       ..addListener((event) {
         if (!Platform.isWindows) return;
-        if (event is tray.TrayIconClickedEvent || event is tray.TrayIconDoubleClickedEvent) Timer.run(_showWindow);
+        if (event is tray.TrayIconClickedEvent || event is tray.TrayIconDoubleClickedEvent) {
+          Timer.run(showDesktopWindow);
+        }
       })
       ..setVisible(true);
     _buildMenu(icon);
@@ -200,12 +222,28 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       return item;
     }
 
+    tray.MenuItem shortcutItem(AppShortcut shortcut) =>
+        _shortcutItems[shortcut] = item(() => unawaited(ref.read(appShortcutRunnerProvider).run(shortcut)));
+
+    final canScan = ref.read(documentScannerServiceProvider).isSupported;
+    final newMenu = tray.Menu.create()!;
+    for (final shortcut in AppShortcut.inGroup(AppShortcutGroup.create, canScan: canScan)) {
+      newMenu.addItem(shortcutItem(shortcut));
+    }
+    _newItem = tray.MenuItem.createWithLabelAndType("", tray.MenuItemType.submenu)!..submenu = newMenu;
+
     _speedItem = item(null);
     final menu = _menu = tray.Menu.create()!
       ..addItem(_statusItem = item(null))
       ..addSeparator()
-      ..addItem(_openItem = item(_showWindow))
+      ..addItem(_openItem = item(showDesktopWindow))
       ..addItem(_syncedItem = item(_openSyncedFolders))
+      ..addSeparator()
+      ..addItem(_newItem);
+    for (final shortcut in AppShortcut.inGroup(AppShortcutGroup.find, canScan: canScan)) {
+      menu.addItem(shortcutItem(shortcut));
+    }
+    menu
       ..addSeparator()
       ..addItem(_pauseItem = item(_togglePause))
       ..addSeparator();
@@ -298,12 +336,6 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     unawaited(_appChannel.invokeMethod("setSyncing", syncing));
   }
 
-  Future<void> _showWindow() async {
-    if (Platform.isMacOS) await windowManager.setSkipTaskbar(false);
-    await windowManager.show();
-    await windowManager.focus();
-  }
-
   Future<void> _hideWindow() async {
     await windowManager.hide();
     if (Platform.isMacOS) await windowManager.setSkipTaskbar(true);
@@ -311,7 +343,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
 
   Future<void> _openSyncedFolders() async {
     ref.read(routerProvider).go(AppRoutes.sync);
-    await _showWindow();
+    await showDesktopWindow();
   }
 
   Future<void> _togglePause() async {
@@ -339,7 +371,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
   }
 
   Future<bool> _confirmQuit() async {
-    await _showWindow();
+    await showDesktopWindow();
     final context = ref.read(routerProvider).routerDelegate.navigatorKey.currentContext;
     if (context == null || !context.mounted) return true;
     final l10n = AppLocalizations.of(context);

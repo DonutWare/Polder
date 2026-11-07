@@ -5,7 +5,6 @@ import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
-import "package:polder/models/scan_session.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
@@ -43,7 +42,7 @@ class BrowserAddButton extends ConsumerWidget {
             FabMenuItem(
               icon: IconsaxPlusLinear.scan,
               label: context.localized.scanDocument,
-              onPressed: () => _scan(context, ref),
+              onPressed: () => scanInto(context, path),
             ),
           FabMenuItem(
             icon: IconsaxPlusLinear.folder_add,
@@ -89,16 +88,6 @@ class BrowserAddButton extends ConsumerWidget {
     NewDocumentKind.presentation => context.localized.newPresentation,
     NewDocumentKind.pdf => context.localized.newPdf,
   };
-
-  Future<void> _scan(BuildContext context, WidgetRef ref) async {
-    final pages = await scanDocument(context, ref);
-    if (pages != null && context.mounted) {
-      await context.push(
-        AppRoutes.scan,
-        extra: ScanRequest(directory: path, pages: pages),
-      );
-    }
-  }
 
   Future<void> _createFolder(BuildContext context, WidgetRef ref) async {
     final name = await promptFolderName(context);

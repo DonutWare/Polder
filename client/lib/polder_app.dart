@@ -13,6 +13,7 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";
 import "package:polder/widgets/layout/window_titlebar.dart";
+import "package:polder/widgets/shortcuts/launcher_shortcuts.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_calendar/polder_calendar.dart";
 
@@ -54,8 +55,10 @@ class _PolderAppState extends ConsumerState<PolderApp> {
       localizationsDelegates: [...AppLocalizations.localizationsDelegates, CalendarLocalizations.delegate],
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (_, child) => AdaptiveLayoutBuilder(
-        child: (_) => DesktopTray(
-          child: WindowTitlebar(child: MouseNavigation(child: child!)),
+        child: (_) => LauncherShortcuts(
+          child: DesktopTray(
+            child: WindowTitlebar(child: MouseNavigation(child: child!)),
+          ),
         ),
       ),
       routerConfig: ref.watch(routerProvider),

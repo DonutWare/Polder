@@ -3,6 +3,7 @@ import "dart:io";
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/scan_session.dart";
@@ -10,6 +11,7 @@ import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/browser/document_scan_provider.dart";
 import "package:polder/providers/service_providers.dart";
+import "package:polder/routes/app_routes.dart";
 import "package:polder/services/transfer/document_scanner_service.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/action_feedback.dart";
@@ -18,12 +20,13 @@ import "package:polder/widgets/shared/escape_cancels_drag.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 
-Future<List<String>?> scanDocument(BuildContext context, WidgetRef ref) async {
+Future<List<String>?> scanDocument(BuildContext context) async {
+  final container = ProviderScope.containerOf(context, listen: false);
   final messenger = ScaffoldMessenger.maybeOf(context);
   final localizations = context.localized;
   try {
-    final seed = ref.read(appearanceProvider).seedWith(ref.read(brandingProvider).accent);
-    return await ref
+    final seed = container.read(appearanceProvider).seedWith(container.read(brandingProvider).accent);
+    return await container
         .read(documentScannerServiceProvider)
         .scan(
           accent: (
@@ -39,6 +42,16 @@ Future<List<String>?> scanDocument(BuildContext context, WidgetRef ref) async {
     };
     messenger?.showSnackBar(SnackBar(content: Text(message)));
     return null;
+  }
+}
+
+Future<void> scanInto(BuildContext context, String directory) async {
+  final pages = await scanDocument(context);
+  if (pages != null && context.mounted) {
+    await context.push(
+      AppRoutes.scan,
+      extra: ScanRequest(directory: directory, pages: pages),
+    );
   }
 }
 
@@ -166,7 +179,7 @@ class _ScanReviewScreenState extends ConsumerState<ScanReviewScreen> {
   }
 
   Future<void> _addPages() async {
-    final pages = await scanDocument(context, ref);
+    final pages = await scanDocument(context);
     if (pages != null && mounted) _session.addPages(pages);
   }
 
