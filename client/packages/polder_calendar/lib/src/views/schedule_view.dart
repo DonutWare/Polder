@@ -114,7 +114,7 @@ class _Section extends ConsumerWidget {
     final colors = ref.watch(calendarColorsProvider);
     final weekStart = firstDayOfWeek(context);
     final today = DateTime.now().dateOnly;
-    final rows = <Widget>[if (banner) _MonthBanner(month: range.start, empty: events.isEmpty)];
+    final rows = <Widget>[if (banner) _MonthBanner(month: range.start, empty: _monthIsEmpty(ref))];
     DateTime? shownWeek;
     for (final day in range.days) {
       final dayEvents = [
@@ -140,6 +140,11 @@ class _Section extends ConsumerWidget {
       );
     }
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: rows);
+  }
+
+  bool _monthIsEmpty(WidgetRef ref) {
+    final month = VisibleRange(range.start, range.start.addMonths(1));
+    return ref.watch(rangeEventsProvider(month)).value?.isEmpty ?? false;
   }
 }
 
