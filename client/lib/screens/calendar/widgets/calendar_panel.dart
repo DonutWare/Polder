@@ -12,6 +12,7 @@ Future<T?> showCalendarPanel<T>(
   if (AdaptiveLayout.isPhone(context)) {
     return showModalBottomSheet<T>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,

@@ -85,6 +85,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   Future<void> _openAgendas(CalendarViewMode mode, DateTime anchor) => showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     showDragHandle: true,
     useSafeArea: true,

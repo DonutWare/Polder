@@ -28,6 +28,7 @@ Future<void> openEntry(BuildContext context, FileEntry entry, {List<FileEntry>? 
   if (!context.mounted) return;
   await showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     showDragHandle: true,
     builder: (_) => FileDetailsSheet(entry: entry),
   );

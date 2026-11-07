@@ -138,6 +138,7 @@ class _SpaceEntryTile extends ConsumerWidget {
 
 Future<void> showSpaceFileSheet(BuildContext context, FileSpace space, FileEntry entry) => showModalBottomSheet<void>(
   context: context,
+  useRootNavigator: true,
   showDragHandle: true,
   isScrollControlled: true,
   builder: (_) => SpaceFileSheet(space: space, entry: entry, dismissOnDownload: true),

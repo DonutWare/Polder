@@ -23,6 +23,7 @@ Future<void> showSharePanel(BuildContext context, SharedFile file) {
   if (AdaptiveLayout.isPhone(context)) {
     return showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => DraggableScrollableSheet(

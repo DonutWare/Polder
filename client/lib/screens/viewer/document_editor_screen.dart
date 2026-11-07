@@ -274,6 +274,7 @@ class _DocumentEditorScreenState extends ConsumerState<DocumentEditorScreen> {
                 onPressed: () => _overEditor(
                   () => showModalBottomSheet<void>(
                     context: context,
+                    useRootNavigator: true,
                     showDragHandle: true,
                     builder: (_) => FileDetailsSheet(entry: _entry, onShowHistory: _showHistory),
                   ),

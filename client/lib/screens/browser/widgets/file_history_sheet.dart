@@ -32,6 +32,7 @@ Future<void> showFileHistory(
   VersionRestorer? onRestore,
 }) => showModalBottomSheet<void>(
   context: context,
+  useRootNavigator: true,
   showDragHandle: true,
   isScrollControlled: true,
   builder: (_) => FileHistorySheet(entry: entry, onView: onView, onRestore: onRestore),

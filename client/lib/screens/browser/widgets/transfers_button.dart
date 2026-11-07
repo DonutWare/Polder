@@ -22,8 +22,12 @@ class TransfersButton extends ConsumerWidget {
         label: Text("$running"),
         child: const Icon(IconsaxPlusLinear.arrow_swap),
       ),
-      onPressed: () =>
-          showModalBottomSheet<void>(context: context, showDragHandle: true, builder: (_) => const TransfersSheet()),
+      onPressed: () => showModalBottomSheet<void>(
+        context: context,
+        useRootNavigator: true,
+        showDragHandle: true,
+        builder: (_) => const TransfersSheet(),
+      ),
     );
   }
 }

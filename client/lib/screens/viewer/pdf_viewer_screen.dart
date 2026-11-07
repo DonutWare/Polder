@@ -56,6 +56,7 @@ class _PdfViewerScreenState extends ConsumerState<PdfViewerScreen> {
               icon: const Icon(IconsaxPlusLinear.info_circle),
               onPressed: () => showModalBottomSheet<void>(
                 context: context,
+                useRootNavigator: true,
                 showDragHandle: true,
                 builder: (_) => FileDetailsSheet(entry: widget.entry),
               ),

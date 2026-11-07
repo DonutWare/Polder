@@ -249,6 +249,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     if (entry == null) return;
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       showDragHandle: true,
       isScrollControlled: true,
       builder: (sheetContext) => SizedBox(

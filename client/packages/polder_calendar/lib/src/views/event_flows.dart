@@ -19,37 +19,49 @@ import "package:polder_calendar/src/views/event_editor.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
 import "package:polder_calendar/src/views/event_transform.dart";
 
-enum _DetailsAction { edit, delete }
-
 bool _compact(BuildContext context) => MediaQuery.sizeOf(context).width < 600;
 
 Future<void> openCalendarEvent(BuildContext context, CalendarEvent event) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final color = event.colorIn(context, container.read(calendarColorsProvider));
   final compact = _compact(context);
-  final action = await Navigator.of(context, rootNavigator: true).push(
-    EventTransformRoute<_DetailsAction>(
+  final toDelete = await Navigator.of(context, rootNavigator: true).push(
+    EventTransformRoute<CalendarEvent>(
       color: color,
       compact: compact,
       origin: EventOrigin.take(event),
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      builder: (context) => EventDetails(
-        event: event,
-        handle: compact,
-        onEdit: () => Navigator.of(context).pop(_DetailsAction.edit),
-        onDelete: () => Navigator.of(context).pop(_DetailsAction.delete),
-        onClose: compact ? null : () => Navigator.of(context).pop(),
-      ),
+      builder: (context) => _LiveEventDetails(initial: event),
     ),
   );
-  if (!context.mounted) return;
-  switch (action) {
-    case _DetailsAction.edit:
-      await editCalendarEvent(context, event);
-    case _DetailsAction.delete:
-      await deleteCalendarEvent(context, event);
-    case null:
+  if (toDelete == null || !context.mounted) return;
+  await deleteCalendarEvent(context, toDelete);
+}
+
+class _LiveEventDetails extends StatefulWidget {
+  const _LiveEventDetails({required this.initial});
+
+  final CalendarEvent initial;
+
+  @override
+  State<_LiveEventDetails> createState() => _LiveEventDetailsState();
+}
+
+class _LiveEventDetailsState extends State<_LiveEventDetails> {
+  late var _event = widget.initial;
+
+  Future<void> _edit() async {
+    final updated = await editCalendarEvent(context, _event);
+    if (updated != null && mounted) setState(() => _event = updated);
   }
+
+  @override
+  Widget build(BuildContext context) => EventDetails(
+    event: _event,
+    onEdit: _edit,
+    onDelete: () => Navigator.of(context).pop(_event),
+    onClose: () => Navigator.of(context).pop(),
+  );
 }
 
 Future<void> createCalendarEvent(BuildContext context, {DateTime? start, DateTime? day, bool allDay = false}) async {
@@ -80,7 +92,7 @@ Future<void> createCalendarEvent(BuildContext context, {DateTime? start, DateTim
   await _run(context, strings.saveFailed, actions.create(edited.calendar, edited.draft));
 }
 
-Future<void> editCalendarEvent(BuildContext context, CalendarEvent event) async {
+Future<CalendarEvent?> editCalendarEvent(BuildContext context, CalendarEvent event) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final strings = CalendarLocalizations.of(context);
   final actions = container.read(calendarActionsProvider);
@@ -88,7 +100,7 @@ Future<void> editCalendarEvent(BuildContext context, CalendarEvent event) async 
     for (final calendar in actions.writableCalendars(await _calendars(container)))
       if (calendar.ref.sourceId == event.calendar.sourceId) calendar,
   ];
-  if (!context.mounted) return;
+  if (!context.mounted) return null;
   final edited = await _openEditor(
     context,
     draft: EventDraft.fromEvent(event),
@@ -96,7 +108,7 @@ Future<void> editCalendarEvent(BuildContext context, CalendarEvent event) async 
     calendars: calendars,
     canChangeCalendar: !event.recurring && actions.capabilitiesOf(event.calendar).moveBetweenCalendars,
   );
-  if (edited == null || !context.mounted) return;
+  if (edited == null || !context.mounted) return null;
   final scope = await _scopeFor(
     context,
     event,
@@ -104,9 +116,30 @@ Future<void> editCalendarEvent(BuildContext context, CalendarEvent event) async 
     title: strings.editRecurringTitle,
     allowThisEvent: edited.draft.rrule == event.rrule,
   );
-  if (scope == null || !context.mounted) return;
-  await _run(context, strings.saveFailed, actions.update(event, edited.draft, scope, moveTo: edited.calendar));
+  if (scope == null || !context.mounted) return null;
+  final updated = await _run(
+    context,
+    strings.saveFailed,
+    actions.update(event, edited.draft, scope, moveTo: edited.calendar),
+  );
+  if (updated == null) return null;
+  return _seriesWide(event, scope) ? _applied(event, edited.draft, updated.etag) : updated;
 }
+
+bool _seriesWide(CalendarEvent event, RecurrenceScope scope) =>
+    scope == RecurrenceScope.all && event.ref.recurrenceId != null;
+
+CalendarEvent _applied(CalendarEvent occurrence, EventDraft draft, String etag) => occurrence.copyWith(
+  etag: etag,
+  summary: draft.summary,
+  start: draft.start,
+  end: draft.end,
+  allDay: draft.allDay,
+  description: draft.description,
+  location: draft.location,
+  rrule: draft.rrule,
+  reminders: draft.reminders,
+);
 
 Future<void> deleteCalendarEvent(BuildContext context, CalendarEvent event) async {
   final strings = CalendarLocalizations.of(context);
@@ -189,12 +222,13 @@ Future<EditedEvent?> _openEditor(
   );
 }
 
-Future<void> _run(BuildContext context, String failure, Future<Object?> action) async {
+Future<T?> _run<T>(BuildContext context, String failure, Future<T> action) async {
   final messenger = ScaffoldMessenger.maybeOf(context);
   try {
-    await action;
+    return await action;
   } on Object {
     messenger?.showSnackBar(SnackBar(content: Text(failure)));
+    return null;
   }
 }
 

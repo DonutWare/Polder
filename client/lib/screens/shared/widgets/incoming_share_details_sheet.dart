@@ -15,6 +15,7 @@ import "package:polder/widgets/sharing/share_labels.dart";
 
 Future<void> showIncomingShareDetails(BuildContext context, IncomingShare share) => showModalBottomSheet<void>(
   context: context,
+  useRootNavigator: true,
   showDragHandle: true,
   isScrollControlled: true,
   builder: (_) => _IncomingShareDetailsSheet(share: share),

@@ -11,10 +11,9 @@ import "package:polder_calendar/src/views/calendar_style.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
 
 class EventDetails extends ConsumerWidget {
-  const EventDetails({required this.event, this.onEdit, this.onDelete, this.onClose, this.handle = false, super.key});
+  const EventDetails({required this.event, this.onEdit, this.onDelete, this.onClose, super.key});
 
   final CalendarEvent event;
-  final bool handle;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onClose;
@@ -52,18 +51,6 @@ class EventDetails extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (handle)
-                    Center(
-                      child: Container(
-                        width: 32,
-                        height: 4,
-                        margin: const EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
                   Row(
                     children: [
                       if (onClose != null)

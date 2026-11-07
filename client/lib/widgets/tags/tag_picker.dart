@@ -16,6 +16,7 @@ Future<void> showTagPicker(BuildContext context, List<FileEntry> entries) {
   if (AdaptiveLayout.isPhone(context)) {
     return showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (sheetContext) => Padding(
