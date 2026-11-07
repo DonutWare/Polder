@@ -13,10 +13,12 @@ import "package:polder/widgets/layout/app_page.dart";
 import "package:polder_calendar/polder_calendar.dart";
 
 class CalendarScreen extends ConsumerStatefulWidget {
-  const CalendarScreen({this.mode, this.date, super.key});
+  const CalendarScreen({this.mode, this.date, this.event, this.occurrence, super.key});
 
   final CalendarViewMode? mode;
   final DateTime? date;
+  final String? event;
+  final String? occurrence;
 
   @override
   ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
@@ -26,6 +28,50 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   static const _sidebarWidth = 300.0;
 
   var _monthOpen = false;
+  String? _openedEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    _openRequestedEvent();
+  }
+
+  @override
+  void didUpdateWidget(CalendarScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _openRequestedEvent();
+  }
+
+  void _openRequestedEvent() {
+    final requested = widget.event;
+    if (requested == null || requested == _openedEvent) return;
+    _openedEvent = requested;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openEvent(requested, widget.occurrence));
+  }
+
+  Future<void> _openEvent(String requested, String? occurrence) async {
+    final source = ref.read(polderCalendarSourceProvider);
+    final parts = requested.split("/");
+    if (source == null || parts.length != 2) return;
+    final [calendarId, eventId] = parts;
+    final calendar = CalendarRef(sourceId: source.id, calendarId: calendarId);
+    final day = (widget.date ?? DateTime.now()).dateOnly;
+    final CalendarEvent? event;
+    try {
+      final events = await source.events(
+        DateTimeRange(start: day.subtract(const Duration(days: 1)), end: day.add(const Duration(days: 2))),
+        calendars: {calendar},
+      );
+      event =
+          events.where((event) => event.ref.eventId == eventId && event.ref.recurrenceId == occurrence).firstOrNull ??
+          (await source.event(EventRef(calendar: calendar, eventId: eventId))).series;
+    } on Exception {
+      return;
+    }
+    if (!mounted) return;
+    context.go(AppRoutes.calendarAt(widget.mode ?? CalendarViewMode.day, day));
+    await openCalendarEvent(context, event);
+  }
 
   void _navigate(CalendarViewMode mode, DateTime anchor) {
     ref.read(calendarViewModeProvider.notifier).select(mode);

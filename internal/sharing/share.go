@@ -87,7 +87,8 @@ type IncomingShare struct {
 	Note        string            `json:"note"`
 	Entry       files.Entry       `json:"entry" doc:"The shared item; its path is / because paths inside a share start at the shared item"`
 	CreatedAt   time.Time         `json:"createdAt"`
-	MountPath   string            `json:"mountPath" doc:"Where the item sits in the user's files; it opens there even while shares are hidden from the files root"`
+	MountPath   string            `json:"mountPath" doc:"Where the item sits in the user's files; it opens there even while shares are hidden from the files root; empty while pending"`
+	State       ShareState        `json:"state" doc:"Pending until the user accepts it; pending shares can be browsed but do not appear in the user's files"`
 }
 
 type NewShare struct {

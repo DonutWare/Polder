@@ -3373,6 +3373,63 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<NotificationPage>> _listNotifications({
+    int? after,
+    int? limit,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'The logged-in user\'s notifications after a cursor, oldest first',
+      operationId: 'listNotifications',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notifications"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/notifications');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'after': after,
+      'limit': limit,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<NotificationPage, NotificationPage>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _markNotificationsRead({
+    required MarkNotificationsReadInputBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Mark the logged-in user\'s notifications as read up to one',
+      operationId: 'markNotificationsRead',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notifications"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/notifications/read');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<EditorCapabilities>> _getOfficeCapabilities({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -3912,6 +3969,54 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       tag: swaggerMetaData,
     );
     return client.send<List<IncomingShare>, IncomingShare>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _acceptShare({
+    required int? shareID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Accept a share so it appears in the logged-in user\'s files',
+      operationId: 'acceptShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/incoming/${shareID}/accept');
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _declineShare({
+    required int? shareID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Decline a share; it no longer appears for the logged-in user',
+      operationId: 'declineShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/shares/incoming/${shareID}/decline');
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
   }
 
   @override

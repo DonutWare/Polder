@@ -1592,28 +1592,6 @@
 	"updatesDownload": "Download",
 	"updatesReleaseNotes": "Release notes",
 	"aboutNightly": "Nightly build",
-	"calendarReminder": "Reminder: {summary} at {time}",
-	"@calendarReminder": {
-		"placeholders": {
-			"summary": {
-				"type": "String"
-			},
-			"time": {
-				"type": "String"
-			}
-		}
-	},
-	"calendarReminderAllDay": "Reminder: {summary} on {date}",
-	"@calendarReminderAllDay": {
-		"placeholders": {
-			"summary": {
-				"type": "String"
-			},
-			"date": {
-				"type": "String"
-			}
-		}
-	},
 	"calendarImported": "Imported",
 	"calendarNoImported": "Add calendars from other services, such as Google Calendar, Outlook or iCloud.",
 	"calendarNew": "New calendar",
@@ -1683,5 +1661,59 @@
 	"calendarImportFailedSome": "{count, plural, =1{1 event could not be imported} other{{count} events could not be imported}}",
 	"@calendarImportFailedSome": {"placeholders": {"count": {"type": "int"}}},
 	"calendarFeedLanguage": "Language of the calendars",
-	"calendarFeedLanguageHint": "Google translates calendar names and most holidays; some event names stay in English."
+	"calendarFeedLanguageHint": "Google translates calendar names and most holidays; some event names stay in English.",
+	"notifications": "Notifications",
+	"notificationsHint": "Shares, reminders and uploads",
+	"notificationsEnable": "Show notifications",
+	"notificationsEnableHint": "On this device",
+	"notificationsWebHint": "Your browser shows them while Polder is open in a tab",
+	"notificationsBlocked": "Notifications are blocked. Allow them for Polder in your system or browser settings.",
+	"notificationsNotAllowed": "Notifications are on, but this device hasn't allowed Polder to show them yet.",
+	"notificationsAllow": "Allow",
+	"notificationsOpenSettings": "Open settings",
+	"notificationsReminderOff": "Calendar reminder notifications are off, so you won't get these.",
+	"notificationsTurnOn": "Turn on",
+	"notificationsAbout": "What to notify about",
+	"notificationsShares": "New shares",
+	"notificationsSharesHint": "When someone shares a file or folder with you, with buttons to accept or decline",
+	"notificationsCalendar": "Calendar reminders",
+	"notificationsCalendarHint": "At the reminder times set on each event; turn calendars on or off from their menu in the calendar",
+	"notificationsUploadProgress": "Upload progress",
+	"notificationsUploadProgressHint": "One notification that keeps updating while auto upload runs",
+	"notificationsUploadSummary": "Upload results",
+	"notificationsUploadSummaryHint": "How much was uploaded, and anything that failed",
+	"notificationsUploadCheck": "Checking for new photos",
+	"notificationsUploadCheckHint": "A quiet notification while auto upload looks for new photos and videos",
+	"notificationsReliability": "Reliability",
+	"notificationsBattery": "Run in the background",
+	"notificationsBatteryHint": "Stops the system from delaying reminders, shares and uploads to save battery",
+	"notificationsAllowed": "Allowed",
+	"notificationChannelUploads": "Uploads",
+	"notificationChannelCalendar": "Calendar reminders",
+	"notificationChannelSharing": "Shares",
+	"notificationShareTitle": "{owner} shared {name} with you",
+	"@notificationShareTitle": {"placeholders": {"owner": {"type": "String"}, "name": {"type": "String"}}},
+	"notificationShareGroupTitle": "{owner} shared {name} with {group}",
+	"@notificationShareGroupTitle": {"placeholders": {"owner": {"type": "String"}, "name": {"type": "String"}, "group": {"type": "String"}}},
+	"notificationFederatedShareBody": "From {server}",
+	"@notificationFederatedShareBody": {"placeholders": {"server": {"type": "String"}}},
+	"notificationUploadingTitle": "Uploading {done} of {total}",
+	"@notificationUploadingTitle": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+	"notificationUploadDone": "{count, plural, =1{1 file uploaded} other{{count} files uploaded}}",
+	"@notificationUploadDone": {"placeholders": {"count": {"type": "int"}}},
+	"notificationUploadFailed": "{count, plural, =1{1 file could not be uploaded} other{{count} files could not be uploaded}}",
+	"@notificationUploadFailed": {"placeholders": {"count": {"type": "int"}}},
+	"notificationUploadFailedBody": "Open auto upload to see what went wrong",
+	"notificationUploadChecking": "Checking for new photos and videos",
+	"notificationReminderAt": "{time}",
+	"@notificationReminderAt": {"placeholders": {"time": {"type": "String"}}},
+	"notificationReminderAllDay": "All day",
+	"calendarRemindersOn": "Turn reminders on",
+	"calendarRemindersOff": "Turn reminders off",
+	"sharedWaiting": "Waiting for you",
+	"sharedWaitingHint": "Accept to add these to your files",
+	"shareAccepted": "{name} is now in your files",
+	"@shareAccepted": {"placeholders": {"name": {"type": "String"}}},
+	"shareDeclined": "Declined {name}",
+	"@shareDeclined": {"placeholders": {"name": {"type": "String"}}}
 }

@@ -27,6 +27,7 @@ import (
 	"polder-server/internal/links"
 	"polder-server/internal/logging"
 	"polder-server/internal/mail"
+	"polder-server/internal/notifications"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
 	"polder-server/internal/recipes"
@@ -75,6 +76,7 @@ type App struct {
 	calendar  *calendar.Service
 
 	federation         *federation.Service
+	notifications      *notifications.Service
 	trashPurgeRequests chan struct{}
 	background         sync.WaitGroup
 }
@@ -211,6 +213,9 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		return nil, err
 	}
 	fileService.OnMutation(federationService.FileMutation)
+	notificationService := notifications.NewService(db, activityHub)
+	sharingService.UseNotifier(notificationService)
+	federationService.UseNotifier(notificationService)
 	officeService.UseShares(sharingService, federationService)
 	linkPreviews := linkpreview.New(linkpreview.Options{})
 	calendarService := calendar.NewService(db, userStore, groupService, activityHub, calendar.Options{
@@ -251,6 +256,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Sharing:                sharingService,
 		WebDAV:                 webdav.NewHandler(fileService),
 		Federation:             federationService,
+		Notifications:          notificationService,
 		WebDAVAllowInsecure:    cfg.WebDAVAllowInsecure,
 		RequestTrashPurge:      func() { requestWork(trashPurgeRequests) },
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
@@ -277,6 +283,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		calendar:  calendarService,
 
 		federation:         federationService,
+		notifications:      notificationService,
 		trashPurgeRequests: trashPurgeRequests,
 	}, nil
 }
@@ -324,6 +331,7 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 		repeatOnRequest(ctx, calendar.SubscriptionCheckInterval(), a.calendar.RefreshRequests(), "refresh calendar subscriptions", a.calendar.RefreshDueSubscriptions)
 	})
 	a.background.Go(func() { repeat(ctx, calendarPruneInterval, "prune calendar history", a.calendar.PruneChanges) })
+	a.background.Go(func() { repeat(ctx, notifications.PruneInterval, "prune notifications", a.notifications.Prune) })
 	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
 	a.background.Go(func() {
 		repeatOnRequest(ctx, trashPurgeInterval, a.trashPurgeRequests, "purge expired trash", func(ctx context.Context) error {

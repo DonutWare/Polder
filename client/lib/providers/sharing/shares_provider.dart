@@ -31,6 +31,17 @@ class IncomingSharesNotifier extends AsyncNotifier<List<IncomingShare>> with Gua
     state = AsyncData([...?state.value?.where((existing) => existing.id != share.id)]);
     invalidateShares(ref.invalidate);
   }
+
+  Future<void> accept(IncomingShare share) async {
+    await ref.read(polderApiProvider).acceptShare(share.id);
+    invalidateShares(ref.invalidate);
+  }
+
+  Future<void> decline(IncomingShare share) async {
+    await ref.read(polderApiProvider).declineShare(share.id);
+    state = AsyncData([...?state.value?.where((existing) => existing.id != share.id)]);
+    invalidateShares(ref.invalidate);
+  }
 }
 
 final incomingShareProvider = Provider.autoDispose.family<IncomingShare?, int>(

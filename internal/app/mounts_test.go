@@ -31,8 +31,8 @@ func TestSharesAppearInRecipientFiles(t *testing.T) {
 		alice.put("/Project/plan.txt", 0, []byte("draft"), http.StatusOK, nil)
 		alice.put("/notes.md", 0, []byte("# Notes"), http.StatusOK, nil)
 		bob.put("/Project/mine.txt", 0, []byte("bob's"), http.StatusOK, nil)
-		alice.share(alice.stat("/Project").ID, "user", bob.me(), "write")
-		alice.share(alice.stat("/notes.md").ID, "user", bob.me(), "read")
+		bob.accept(alice.share(alice.stat("/Project").ID, "user", bob.me(), "write").ID)
+		bob.accept(alice.share(alice.stat("/notes.md").ID, "user", bob.me(), "read").ID)
 		if project, _ := entryNamed(alice.list("/"), "Project"); !project.Shared || alice.stat("/notes.md").Shared != true {
 			t.Fatalf("what alice shares is marked for her: %+v", project)
 		}
@@ -94,7 +94,7 @@ func TestHiddenSharesStillOpenByPath(t *testing.T) {
 		alice := server.createUser(admin, "alice", 0)
 		bob := server.createUser(admin, "bob", 0)
 		alice.put("/Shared/a.txt", 0, []byte("a"), http.StatusOK, nil)
-		alice.share(alice.stat("/Shared").ID, "user", bob.me(), "read")
+		bob.accept(alice.share(alice.stat("/Shared").ID, "user", bob.me(), "read").ID)
 
 		var settings struct {
 			ShowInFiles bool `json:"showInFiles"`

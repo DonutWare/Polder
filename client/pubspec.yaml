@@ -68,7 +68,8 @@ dependencies:
   polder_calendar:
     path: packages/polder_calendar
   cryptography: ^2.9.0
-
+  flutter_local_notifications: ^23.0.0
+  timezone: ^0.11.2
 dependency_overrides:
   media_kit:
     git:

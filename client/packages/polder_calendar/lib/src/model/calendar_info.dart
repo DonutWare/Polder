@@ -18,6 +18,7 @@ abstract class CalendarInfo with _$CalendarInfo {
     Color? color,
     required CalendarAccess access,
     @Default(false) bool hidden,
+    @Default(true) bool notify,
     @Default(false) bool isDefault,
     @Default(false) bool subscription,
     String? ownerName,

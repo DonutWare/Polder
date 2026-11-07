@@ -78,7 +78,9 @@ class _SectionList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localized = context.localized;
-    final incoming = ref.watch(incomingSharesProvider).value?.length;
+    final incomingShares = ref.watch(incomingSharesProvider).value;
+    final waiting = incomingShares?.where((share) => share.pending).length ?? 0;
+    final incoming = waiting > 0 ? waiting : incomingShares?.length;
     final outgoing = ref.watch(outgoingSharesProvider(null)).value?.map((share) => share.file.id).toSet().length;
     final links = ref.watch(shareLinksProvider(null)).value?.length;
     final federation = ref.watch(federationStatusProvider).value?.enabled ?? false;
@@ -171,12 +173,30 @@ class _IncomingPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => AsyncValueView<List<IncomingShare>>(
     value: ref.watch(incomingSharesProvider),
     onRetry: () => ref.invalidate(incomingSharesProvider),
-    data: (shares) => _SectionPage(
-      title: context.localized.sharedWithMe,
-      onRefresh: ref.read(incomingSharesProvider.notifier).refresh,
-      empty: MessageView(icon: IconsaxPlusLinear.share, message: context.localized.noIncomingShares),
-      children: [for (final share in shares) _IncomingShareTile(share: share)],
-    ),
+    data: (shares) {
+      final pending = [
+        for (final share in shares)
+          if (share.pending) share,
+      ];
+      return _SectionPage(
+        title: context.localized.sharedWithMe,
+        onRefresh: ref.read(incomingSharesProvider.notifier).refresh,
+        empty: MessageView(icon: IconsaxPlusLinear.share, message: context.localized.noIncomingShares),
+        children: [
+          if (pending.isNotEmpty) ...[
+            ListTile(
+              contentPadding: const EdgeInsetsDirectional.only(start: 12, end: 4),
+              title: Text(context.localized.sharedWaiting, style: Theme.of(context).textTheme.titleSmall),
+              subtitle: Text(context.localized.sharedWaitingHint),
+            ),
+            for (final share in pending) _IncomingShareTile(share: share),
+            const Divider(height: 24),
+          ],
+          for (final share in shares)
+            if (!share.pending) _IncomingShareTile(share: share),
+        ],
+      );
+    },
   );
 }
 
@@ -205,11 +225,43 @@ class _IncomingShareTile extends ConsumerWidget {
         mountPath: share.mountPath,
       ),
       onLongPress: () => showIncomingShareDetails(context, share),
-      trailing: IconButton(
-        tooltip: localized.details,
-        icon: const Icon(IconsaxPlusLinear.more),
-        onPressed: () => showIncomingShareDetails(context, share),
-      ),
+      trailing: share.pending
+          ? _PendingShareButtons(share: share)
+          : IconButton(
+              tooltip: localized.details,
+              icon: const Icon(IconsaxPlusLinear.more),
+              onPressed: () => showIncomingShareDetails(context, share),
+            ),
+    );
+  }
+}
+
+class _PendingShareButtons extends ConsumerWidget {
+  const _PendingShareButtons({required this.share});
+
+  final IncomingShare share;
+
+  Future<void> _respond(BuildContext context, Future<void> response, String done) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (await context.runWithFeedback(response)) messenger?.showSnackBar(SnackBar(content: Text(done)));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    final notifier = ref.read(incomingSharesProvider.notifier);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextButton(
+          onPressed: () => _respond(context, notifier.decline(share), localized.shareDeclined(share.entry.name)),
+          child: Text(localized.decline),
+        ),
+        FilledButton.tonal(
+          onPressed: () => _respond(context, notifier.accept(share), localized.shareAccepted(share.entry.name)),
+          child: Text(localized.accept),
+        ),
+      ],
     );
   }
 }

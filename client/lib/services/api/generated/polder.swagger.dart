@@ -3414,6 +3414,57 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///The logged-in user's notifications after a cursor, oldest first
+  ///@param after Cursor from the previous page; 0 starts from the oldest kept, -1 returns nothing and only the latest cursor
+  ///@param limit Maximum number of notifications to return; the server caps it
+  Future<chopper.Response<NotificationPage>> listNotifications({int? after, int? limit}) {
+    generatedMapping.putIfAbsent(NotificationPage, () => NotificationPage.fromJsonFactory);
+
+    return _listNotifications(after: after, limit: limit);
+  }
+
+  ///The logged-in user's notifications after a cursor, oldest first
+  ///@param after Cursor from the previous page; 0 starts from the oldest kept, -1 returns nothing and only the latest cursor
+  ///@param limit Maximum number of notifications to return; the server caps it
+  @GET(path: '/api/v1/notifications')
+  Future<chopper.Response<NotificationPage>> _listNotifications({
+    @Query('after') int? after,
+    @Query('limit') int? limit,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'The logged-in user\'s notifications after a cursor, oldest first',
+      operationId: 'listNotifications',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notifications"],
+      deprecated: false,
+    ),
+  });
+
+  ///Mark the logged-in user's notifications as read up to one
+  Future<chopper.Response> markNotificationsRead({required MarkNotificationsReadInputBody? body}) {
+    return _markNotificationsRead(body: body);
+  }
+
+  ///Mark the logged-in user's notifications as read up to one
+  @POST(path: '/api/v1/notifications/read', optionalBody: true)
+  Future<chopper.Response> _markNotificationsRead({
+    @Body() required MarkNotificationsReadInputBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Mark the logged-in user\'s notifications as read up to one',
+      operationId: 'markNotificationsRead',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["notifications"],
+      deprecated: false,
+    ),
+  });
+
   ///Which files the document editor can open
   Future<chopper.Response<EditorCapabilities>> getOfficeCapabilities() {
     generatedMapping.putIfAbsent(EditorCapabilities, () => EditorCapabilities.fromJsonFactory);
@@ -3988,6 +4039,54 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       description: '',
       summary: 'What others share with the logged-in user, directly or through a group',
       operationId: 'listIncomingShares',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  });
+
+  ///Accept a share so it appears in the logged-in user's files
+  ///@param shareID
+  Future<chopper.Response> acceptShare({required int? shareID}) {
+    return _acceptShare(shareID: shareID);
+  }
+
+  ///Accept a share so it appears in the logged-in user's files
+  ///@param shareID
+  @POST(path: '/api/v1/shares/incoming/{shareID}/accept', optionalBody: true)
+  Future<chopper.Response> _acceptShare({
+    @Path('shareID') required int? shareID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Accept a share so it appears in the logged-in user\'s files',
+      operationId: 'acceptShare',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["shares"],
+      deprecated: false,
+    ),
+  });
+
+  ///Decline a share; it no longer appears for the logged-in user
+  ///@param shareID
+  Future<chopper.Response> declineShare({required int? shareID}) {
+    return _declineShare(shareID: shareID);
+  }
+
+  ///Decline a share; it no longer appears for the logged-in user
+  ///@param shareID
+  @POST(path: '/api/v1/shares/incoming/{shareID}/decline', optionalBody: true)
+  Future<chopper.Response> _declineShare({
+    @Path('shareID') required int? shareID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Decline a share; it no longer appears for the logged-in user',
+      operationId: 'declineShare',
       consumes: [],
       produces: [],
       security: ["bearer"],

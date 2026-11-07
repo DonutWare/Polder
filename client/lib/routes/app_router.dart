@@ -127,6 +127,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                   final slug => CalendarViewMode.fromSlug(slug),
                 },
                 date: DateTime.tryParse(state.uri.queryParameters[AppRoutes.dateParameter] ?? ""),
+                event: state.uri.queryParameters[AppRoutes.eventParameter],
+                occurrence: state.uri.queryParameters[AppRoutes.occurrenceParameter],
               ),
             ),
           ),

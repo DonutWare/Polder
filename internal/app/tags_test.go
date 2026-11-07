@@ -213,7 +213,7 @@ func TestTagsInSharesArePersonal(t *testing.T) {
 		alice.put("/Project/brief.pdf", 0, []byte("pdf"), http.StatusOK, nil)
 		alice.put("/Project/notes.md", 0, []byte("Kickoff #work #later\n"), http.StatusOK, nil)
 		alice.waitForTag("work", 1)
-		alice.share(alice.stat("/Project").ID, "user", bob.me(), "read")
+		bob.accept(alice.share(alice.stat("/Project").ID, "user", bob.me(), "read").ID)
 		bob.mustJSON(http.MethodPost, "/tags", map[string]string{"name": "work"}, http.StatusCreated, nil)
 		bobWork, _ := bob.tagNamed("work")
 

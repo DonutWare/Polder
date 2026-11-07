@@ -33,6 +33,7 @@ type incomingShare struct {
 	Note        string          `json:"note"`
 	Entry       fileEntry       `json:"entry"`
 	MountPath   string          `json:"mountPath"`
+	State       string          `json:"state"`
 }
 
 type listing struct {
@@ -69,6 +70,16 @@ func (c *client) shareWith(body map[string]any, kind string, recipientID int64, 
 	}
 	c.mustJSON(http.MethodPost, "/shares", body, expectedStatus, target)
 	return share
+}
+
+func (c *client) accept(shareID int64) {
+	c.server.t.Helper()
+	c.mustJSON(http.MethodPost, fmt.Sprintf("/shares/incoming/%d/accept", shareID), nil, http.StatusNoContent, nil)
+}
+
+func (c *client) decline(shareID int64) {
+	c.server.t.Helper()
+	c.mustJSON(http.MethodPost, fmt.Sprintf("/shares/incoming/%d/decline", shareID), nil, http.StatusNoContent, nil)
 }
 
 func (c *client) incoming() []incomingShare {

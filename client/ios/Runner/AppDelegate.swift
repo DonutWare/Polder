@@ -1,6 +1,9 @@
 import Flutter
 import UIKit
+import UserNotifications
 import VisionKit
+import flutter_local_notifications
+import workmanager_apple
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -10,6 +13,17 @@ import VisionKit
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    UNUserNotificationCenter.current().delegate = self
+    FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
+    WorkmanagerPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
+    for identifier in ["org.knaapen.polder.autoUpload", "org.knaapen.polder.notifications"] {
+      WorkmanagerPlugin.registerPeriodicTask(withIdentifier: identifier, earliestBeginInSeconds: NSNumber(value: 15 * 60))
+    }
+    WorkmanagerPlugin.registerLaunchHandlers()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

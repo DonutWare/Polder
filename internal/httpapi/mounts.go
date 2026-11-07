@@ -128,7 +128,9 @@ func (a *API) incomingMounts(ctx context.Context, user users.User) ([]incomingMo
 	}
 	candidates := make([]incomingMount, 0, len(incoming))
 	for _, share := range incoming {
-		candidates = append(candidates, incomingMount{name: share.Entry.Name, mount: localMount(share)})
+		if share.State == sharing.StateAccepted {
+			candidates = append(candidates, incomingMount{name: share.Entry.Name, mount: localMount(share)})
+		}
 	}
 	if a.federation == nil || !a.federation.Enabled(ctx) {
 		return candidates, nil

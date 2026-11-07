@@ -6,6 +6,8 @@ import "package:polder_calendar/polder_calendar.dart";
 class PolderCalendarSource implements CalendarSource {
   PolderCalendarSource(this._api, {required this.id, required this.label, required this.changes});
 
+  static String idFor(String accountId) => "polder:$accountId";
+
   final PolderApi _api;
 
   @override

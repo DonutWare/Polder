@@ -3259,6 +3259,7 @@ class EventMessage {
     this.dirs,
     this.entry,
     this.message,
+    this.notification,
     this.reminder,
     this.status,
     this.transfer,
@@ -3283,6 +3284,8 @@ class EventMessage {
   final LogEntry? entry;
   @JsonKey(name: 'message', includeIfNull: false)
   final String? message;
+  @JsonKey(name: 'notification', includeIfNull: false)
+  final Notification? notification;
   @JsonKey(name: 'reminder', includeIfNull: false)
   final CalendarReminder? reminder;
   @JsonKey(
@@ -3313,6 +3316,8 @@ class EventMessage {
             (identical(other.dirs, dirs) || const DeepCollectionEquality().equals(other.dirs, dirs)) &&
             (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
             (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.notification, notification) ||
+                const DeepCollectionEquality().equals(other.notification, notification)) &&
             (identical(other.reminder, reminder) || const DeepCollectionEquality().equals(other.reminder, reminder)) &&
             (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
             (identical(other.transfer, transfer) || const DeepCollectionEquality().equals(other.transfer, transfer)) &&
@@ -3330,6 +3335,7 @@ class EventMessage {
       const DeepCollectionEquality().hash(dirs) ^
       const DeepCollectionEquality().hash(entry) ^
       const DeepCollectionEquality().hash(message) ^
+      const DeepCollectionEquality().hash(notification) ^
       const DeepCollectionEquality().hash(reminder) ^
       const DeepCollectionEquality().hash(status) ^
       const DeepCollectionEquality().hash(transfer) ^
@@ -3347,6 +3353,7 @@ extension $EventMessageExtension on EventMessage {
     List<String>? dirs,
     LogEntry? entry,
     String? message,
+    Notification? notification,
     CalendarReminder? reminder,
     enums.EventMessageStatus? status,
     LiveTransfer? transfer,
@@ -3361,6 +3368,7 @@ extension $EventMessageExtension on EventMessage {
       dirs: dirs ?? this.dirs,
       entry: entry ?? this.entry,
       message: message ?? this.message,
+      notification: notification ?? this.notification,
       reminder: reminder ?? this.reminder,
       status: status ?? this.status,
       transfer: transfer ?? this.transfer,
@@ -3377,6 +3385,7 @@ extension $EventMessageExtension on EventMessage {
     Wrapped<List<String>?>? dirs,
     Wrapped<LogEntry?>? entry,
     Wrapped<String?>? message,
+    Wrapped<Notification?>? notification,
     Wrapped<CalendarReminder?>? reminder,
     Wrapped<enums.EventMessageStatus?>? status,
     Wrapped<LiveTransfer?>? transfer,
@@ -3391,6 +3400,7 @@ extension $EventMessageExtension on EventMessage {
       dirs: (dirs != null ? dirs.value : this.dirs),
       entry: (entry != null ? entry.value : this.entry),
       message: (message != null ? message.value : this.message),
+      notification: (notification != null ? notification.value : this.notification),
       reminder: (reminder != null ? reminder.value : this.reminder),
       status: (status != null ? status.value : this.status),
       transfer: (transfer != null ? transfer.value : this.transfer),
@@ -4588,6 +4598,7 @@ class IncomingShare {
     required this.note,
     required this.owner,
     required this.permissions,
+    required this.state,
   });
 
   factory IncomingShare.fromJson(Map<String, dynamic> json) => _$IncomingShareFromJson(json);
@@ -4615,6 +4626,8 @@ class IncomingShare {
   final UserSummary owner;
   @JsonKey(name: 'permissions', includeIfNull: false)
   final SharePermissions permissions;
+  @JsonKey(name: 'state', includeIfNull: false, toJson: incomingShareStateToJson, fromJson: incomingShareStateFromJson)
+  final enums.IncomingShareState state;
   static const fromJsonFactory = _$IncomingShareFromJson;
 
   @override
@@ -4634,7 +4647,8 @@ class IncomingShare {
             (identical(other.note, note) || const DeepCollectionEquality().equals(other.note, note)) &&
             (identical(other.owner, owner) || const DeepCollectionEquality().equals(other.owner, owner)) &&
             (identical(other.permissions, permissions) ||
-                const DeepCollectionEquality().equals(other.permissions, permissions)));
+                const DeepCollectionEquality().equals(other.permissions, permissions)) &&
+            (identical(other.state, state) || const DeepCollectionEquality().equals(other.state, state)));
   }
 
   @override
@@ -4649,6 +4663,7 @@ class IncomingShare {
       const DeepCollectionEquality().hash(note) ^
       const DeepCollectionEquality().hash(owner) ^
       const DeepCollectionEquality().hash(permissions) ^
+      const DeepCollectionEquality().hash(state) ^
       runtimeType.hashCode;
 }
 
@@ -4664,6 +4679,7 @@ extension $IncomingShareExtension on IncomingShare {
     String? note,
     UserSummary? owner,
     SharePermissions? permissions,
+    enums.IncomingShareState? state,
   }) {
     return IncomingShare(
       createdAt: createdAt ?? this.createdAt,
@@ -4676,6 +4692,7 @@ extension $IncomingShareExtension on IncomingShare {
       note: note ?? this.note,
       owner: owner ?? this.owner,
       permissions: permissions ?? this.permissions,
+      state: state ?? this.state,
     );
   }
 
@@ -4690,6 +4707,7 @@ extension $IncomingShareExtension on IncomingShare {
     Wrapped<String>? note,
     Wrapped<UserSummary>? owner,
     Wrapped<SharePermissions>? permissions,
+    Wrapped<enums.IncomingShareState>? state,
   }) {
     return IncomingShare(
       createdAt: (createdAt != null ? createdAt.value : this.createdAt),
@@ -4702,6 +4720,7 @@ extension $IncomingShareExtension on IncomingShare {
       note: (note != null ? note.value : this.note),
       owner: (owner != null ? owner.value : this.owner),
       permissions: (permissions != null ? permissions.value : this.permissions),
+      state: (state != null ? state.value : this.state),
     );
   }
 }
@@ -5963,6 +5982,41 @@ extension $ManifestExtension on Manifest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class MarkNotificationsReadInputBody {
+  const MarkNotificationsReadInputBody({required this.upTo});
+
+  factory MarkNotificationsReadInputBody.fromJson(Map<String, dynamic> json) =>
+      _$MarkNotificationsReadInputBodyFromJson(json);
+
+  static const toJsonFactory = _$MarkNotificationsReadInputBodyToJson;
+  Map<String, dynamic> toJson() => _$MarkNotificationsReadInputBodyToJson(this);
+
+  @JsonKey(name: 'upTo', includeIfNull: false)
+  final int upTo;
+  static const fromJsonFactory = _$MarkNotificationsReadInputBodyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is MarkNotificationsReadInputBody &&
+            (identical(other.upTo, upTo) || const DeepCollectionEquality().equals(other.upTo, upTo)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(upTo) ^ runtimeType.hashCode;
+}
+
+extension $MarkNotificationsReadInputBodyExtension on MarkNotificationsReadInputBody {
+  MarkNotificationsReadInputBody copyWith({int? upTo}) {
+    return MarkNotificationsReadInputBody(upTo: upTo ?? this.upTo);
+  }
+
+  MarkNotificationsReadInputBody copyWithWrapped({Wrapped<int>? upTo}) {
+    return MarkNotificationsReadInputBody(upTo: (upTo != null ? upTo.value : this.upTo));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Match {
   const Match({required this.entry, this.nameMatches, required this.score, this.snippet, this.snippetMatches});
 
@@ -7171,6 +7225,134 @@ extension $NotesSettingsExtension on NotesSettings {
 
   NotesSettings copyWithWrapped({Wrapped<String?>? path}) {
     return NotesSettings(path: (path != null ? path.value : this.path));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Notification {
+  const Notification({required this.createdAt, required this.id, required this.kind, required this.read, this.share});
+
+  factory Notification.fromJson(Map<String, dynamic> json) => _$NotificationFromJson(json);
+
+  static const toJsonFactory = _$NotificationToJson;
+  Map<String, dynamic> toJson() => _$NotificationToJson(this);
+
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: notificationKindToJson, fromJson: notificationKindFromJson)
+  final enums.NotificationKind kind;
+  @JsonKey(name: 'read', includeIfNull: false)
+  final bool read;
+  @JsonKey(name: 'share', includeIfNull: false)
+  final ShareNotice? share;
+  static const fromJsonFactory = _$NotificationFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Notification &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.read, read) || const DeepCollectionEquality().equals(other.read, read)) &&
+            (identical(other.share, share) || const DeepCollectionEquality().equals(other.share, share)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(read) ^
+      const DeepCollectionEquality().hash(share) ^
+      runtimeType.hashCode;
+}
+
+extension $NotificationExtension on Notification {
+  Notification copyWith({DateTime? createdAt, int? id, enums.NotificationKind? kind, bool? read, ShareNotice? share}) {
+    return Notification(
+      createdAt: createdAt ?? this.createdAt,
+      id: id ?? this.id,
+      kind: kind ?? this.kind,
+      read: read ?? this.read,
+      share: share ?? this.share,
+    );
+  }
+
+  Notification copyWithWrapped({
+    Wrapped<DateTime>? createdAt,
+    Wrapped<int>? id,
+    Wrapped<enums.NotificationKind>? kind,
+    Wrapped<bool>? read,
+    Wrapped<ShareNotice?>? share,
+  }) {
+    return Notification(
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      id: (id != null ? id.value : this.id),
+      kind: (kind != null ? kind.value : this.kind),
+      read: (read != null ? read.value : this.read),
+      share: (share != null ? share.value : this.share),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NotificationPage {
+  const NotificationPage({required this.cursor, required this.hasMore, this.notifications});
+
+  factory NotificationPage.fromJson(Map<String, dynamic> json) => _$NotificationPageFromJson(json);
+
+  static const toJsonFactory = _$NotificationPageToJson;
+  Map<String, dynamic> toJson() => _$NotificationPageToJson(this);
+
+  @JsonKey(name: 'cursor', includeIfNull: false)
+  final int cursor;
+  @JsonKey(name: 'hasMore', includeIfNull: false)
+  final bool hasMore;
+  @JsonKey(name: 'notifications', includeIfNull: false, defaultValue: <Notification>[])
+  final List<Notification>? notifications;
+  static const fromJsonFactory = _$NotificationPageFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NotificationPage &&
+            (identical(other.cursor, cursor) || const DeepCollectionEquality().equals(other.cursor, cursor)) &&
+            (identical(other.hasMore, hasMore) || const DeepCollectionEquality().equals(other.hasMore, hasMore)) &&
+            (identical(other.notifications, notifications) ||
+                const DeepCollectionEquality().equals(other.notifications, notifications)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(cursor) ^
+      const DeepCollectionEquality().hash(hasMore) ^
+      const DeepCollectionEquality().hash(notifications) ^
+      runtimeType.hashCode;
+}
+
+extension $NotificationPageExtension on NotificationPage {
+  NotificationPage copyWith({int? cursor, bool? hasMore, List<Notification>? notifications}) {
+    return NotificationPage(
+      cursor: cursor ?? this.cursor,
+      hasMore: hasMore ?? this.hasMore,
+      notifications: notifications ?? this.notifications,
+    );
+  }
+
+  NotificationPage copyWithWrapped({
+    Wrapped<int>? cursor,
+    Wrapped<bool>? hasMore,
+    Wrapped<List<Notification>?>? notifications,
+  }) {
+    return NotificationPage(
+      cursor: (cursor != null ? cursor.value : this.cursor),
+      hasMore: (hasMore != null ? hasMore.value : this.hasMore),
+      notifications: (notifications != null ? notifications.value : this.notifications),
+    );
   }
 }
 
@@ -9741,6 +9923,116 @@ extension $ShareLinkExtension on ShareLink {
       hasPassword: (hasPassword != null ? hasPassword.value : this.hasPassword),
       id: (id != null ? id.value : this.id),
       permissions: (permissions != null ? permissions.value : this.permissions),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ShareNotice {
+  const ShareNotice({
+    this.group,
+    required this.isDir,
+    required this.name,
+    this.note,
+    required this.owner,
+    required this.ownerName,
+    this.server,
+    required this.shareId,
+  });
+
+  factory ShareNotice.fromJson(Map<String, dynamic> json) => _$ShareNoticeFromJson(json);
+
+  static const toJsonFactory = _$ShareNoticeToJson;
+  Map<String, dynamic> toJson() => _$ShareNoticeToJson(this);
+
+  @JsonKey(name: 'group', includeIfNull: false)
+  final String? group;
+  @JsonKey(name: 'isDir', includeIfNull: false)
+  final bool isDir;
+  @JsonKey(name: 'name', includeIfNull: false)
+  final String name;
+  @JsonKey(name: 'note', includeIfNull: false)
+  final String? note;
+  @JsonKey(name: 'owner', includeIfNull: false)
+  final String owner;
+  @JsonKey(name: 'ownerName', includeIfNull: false)
+  final String ownerName;
+  @JsonKey(name: 'server', includeIfNull: false)
+  final String? server;
+  @JsonKey(name: 'shareId', includeIfNull: false)
+  final int shareId;
+  static const fromJsonFactory = _$ShareNoticeFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ShareNotice &&
+            (identical(other.group, group) || const DeepCollectionEquality().equals(other.group, group)) &&
+            (identical(other.isDir, isDir) || const DeepCollectionEquality().equals(other.isDir, isDir)) &&
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.note, note) || const DeepCollectionEquality().equals(other.note, note)) &&
+            (identical(other.owner, owner) || const DeepCollectionEquality().equals(other.owner, owner)) &&
+            (identical(other.ownerName, ownerName) ||
+                const DeepCollectionEquality().equals(other.ownerName, ownerName)) &&
+            (identical(other.server, server) || const DeepCollectionEquality().equals(other.server, server)) &&
+            (identical(other.shareId, shareId) || const DeepCollectionEquality().equals(other.shareId, shareId)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(group) ^
+      const DeepCollectionEquality().hash(isDir) ^
+      const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(note) ^
+      const DeepCollectionEquality().hash(owner) ^
+      const DeepCollectionEquality().hash(ownerName) ^
+      const DeepCollectionEquality().hash(server) ^
+      const DeepCollectionEquality().hash(shareId) ^
+      runtimeType.hashCode;
+}
+
+extension $ShareNoticeExtension on ShareNotice {
+  ShareNotice copyWith({
+    String? group,
+    bool? isDir,
+    String? name,
+    String? note,
+    String? owner,
+    String? ownerName,
+    String? server,
+    int? shareId,
+  }) {
+    return ShareNotice(
+      group: group ?? this.group,
+      isDir: isDir ?? this.isDir,
+      name: name ?? this.name,
+      note: note ?? this.note,
+      owner: owner ?? this.owner,
+      ownerName: ownerName ?? this.ownerName,
+      server: server ?? this.server,
+      shareId: shareId ?? this.shareId,
+    );
+  }
+
+  ShareNotice copyWithWrapped({
+    Wrapped<String?>? group,
+    Wrapped<bool>? isDir,
+    Wrapped<String>? name,
+    Wrapped<String?>? note,
+    Wrapped<String>? owner,
+    Wrapped<String>? ownerName,
+    Wrapped<String?>? server,
+    Wrapped<int>? shareId,
+  }) {
+    return ShareNotice(
+      group: (group != null ? group.value : this.group),
+      isDir: (isDir != null ? isDir.value : this.isDir),
+      name: (name != null ? name.value : this.name),
+      note: (note != null ? note.value : this.note),
+      owner: (owner != null ? owner.value : this.owner),
+      ownerName: (ownerName != null ? ownerName.value : this.ownerName),
+      server: (server != null ? server.value : this.server),
+      shareId: (shareId != null ? shareId.value : this.shareId),
     );
   }
 }
@@ -12538,6 +12830,67 @@ List<enums.IncomingFederatedShareState>? incomingFederatedShareStateNullableList
   return incomingFederatedShareState.map((e) => incomingFederatedShareStateFromJson(e.toString())).toList();
 }
 
+String? incomingShareStateNullableToJson(enums.IncomingShareState? incomingShareState) {
+  return incomingShareState?.value;
+}
+
+String? incomingShareStateToJson(enums.IncomingShareState incomingShareState) {
+  return incomingShareState.value;
+}
+
+enums.IncomingShareState incomingShareStateFromJson(
+  Object? incomingShareState, [
+  enums.IncomingShareState? defaultValue,
+]) {
+  return enums.IncomingShareState.values.firstWhereOrNull((e) => e.value == incomingShareState) ??
+      defaultValue ??
+      enums.IncomingShareState.swaggerGeneratedUnknown;
+}
+
+enums.IncomingShareState? incomingShareStateNullableFromJson(
+  Object? incomingShareState, [
+  enums.IncomingShareState? defaultValue,
+]) {
+  if (incomingShareState == null) {
+    return null;
+  }
+  return enums.IncomingShareState.values.firstWhereOrNull((e) => e.value == incomingShareState) ?? defaultValue;
+}
+
+String incomingShareStateExplodedListToJson(List<enums.IncomingShareState>? incomingShareState) {
+  return incomingShareState?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> incomingShareStateListToJson(List<enums.IncomingShareState>? incomingShareState) {
+  if (incomingShareState == null) {
+    return [];
+  }
+
+  return incomingShareState.map((e) => e.value!).toList();
+}
+
+List<enums.IncomingShareState> incomingShareStateListFromJson(
+  List? incomingShareState, [
+  List<enums.IncomingShareState>? defaultValue,
+]) {
+  if (incomingShareState == null) {
+    return defaultValue ?? [];
+  }
+
+  return incomingShareState.map((e) => incomingShareStateFromJson(e.toString())).toList();
+}
+
+List<enums.IncomingShareState>? incomingShareStateNullableListFromJson(
+  List? incomingShareState, [
+  List<enums.IncomingShareState>? defaultValue,
+]) {
+  if (incomingShareState == null) {
+    return defaultValue;
+  }
+
+  return incomingShareState.map((e) => incomingShareStateFromJson(e.toString())).toList();
+}
+
 String? liveTransferDirectionNullableToJson(enums.LiveTransferDirection? liveTransferDirection) {
   return liveTransferDirection?.value;
 }
@@ -13081,6 +13434,64 @@ List<enums.NewUserRole>? newUserRoleNullableListFromJson(List? newUserRole, [Lis
   }
 
   return newUserRole.map((e) => newUserRoleFromJson(e.toString())).toList();
+}
+
+String? notificationKindNullableToJson(enums.NotificationKind? notificationKind) {
+  return notificationKind?.value;
+}
+
+String? notificationKindToJson(enums.NotificationKind notificationKind) {
+  return notificationKind.value;
+}
+
+enums.NotificationKind notificationKindFromJson(Object? notificationKind, [enums.NotificationKind? defaultValue]) {
+  return enums.NotificationKind.values.firstWhereOrNull((e) => e.value == notificationKind) ??
+      defaultValue ??
+      enums.NotificationKind.swaggerGeneratedUnknown;
+}
+
+enums.NotificationKind? notificationKindNullableFromJson(
+  Object? notificationKind, [
+  enums.NotificationKind? defaultValue,
+]) {
+  if (notificationKind == null) {
+    return null;
+  }
+  return enums.NotificationKind.values.firstWhereOrNull((e) => e.value == notificationKind) ?? defaultValue;
+}
+
+String notificationKindExplodedListToJson(List<enums.NotificationKind>? notificationKind) {
+  return notificationKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> notificationKindListToJson(List<enums.NotificationKind>? notificationKind) {
+  if (notificationKind == null) {
+    return [];
+  }
+
+  return notificationKind.map((e) => e.value!).toList();
+}
+
+List<enums.NotificationKind> notificationKindListFromJson(
+  List? notificationKind, [
+  List<enums.NotificationKind>? defaultValue,
+]) {
+  if (notificationKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return notificationKind.map((e) => notificationKindFromJson(e.toString())).toList();
+}
+
+List<enums.NotificationKind>? notificationKindNullableListFromJson(
+  List? notificationKind, [
+  List<enums.NotificationKind>? defaultValue,
+]) {
+  if (notificationKind == null) {
+    return defaultValue;
+  }
+
+  return notificationKind.map((e) => notificationKindFromJson(e.toString())).toList();
 }
 
 String? outgoingShareStateNullableToJson(enums.OutgoingShareState? outgoingShareState) {

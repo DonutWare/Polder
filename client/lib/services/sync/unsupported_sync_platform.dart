@@ -43,4 +43,7 @@ class UnsupportedSyncPlatform implements SyncPlatform {
 
   @override
   Future<void> scheduleAutoUpload(AutoUploadSettings settings) async {}
+
+  @override
+  Future<void> scheduleNotificationChecks({required bool enabled}) async {}
 }

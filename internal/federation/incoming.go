@@ -12,6 +12,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
 	"polder-server/internal/database"
 	"polder-server/internal/sharing"
@@ -237,9 +238,10 @@ func (s *Service) receiveShare(ctx context.Context, server Server, payload incom
 		senderCloudID: sender.String(), senderDisplayName: truncate(cleanProvider(payload.SenderDisplayName), maxRemoteDisplayName),
 		name: name, isDir: payload.ResourceType == resourceFolder, webdavURI: webdavURI, secretHash: hashSecret(secret)}
 	row.secretSealed = s.box.seal(secret, row.sealContext())
-	if err := s.insertIncoming(ctx, row); err != nil {
+	if row.id, err = s.insertIncoming(ctx, row); err != nil {
 		return receivedShare{}, err
 	}
+	s.notifyReceived(ctx, server, row)
 	logger.Info("received a federated share", "user", recipient.Username, "owner", row.ownerCloudID, "name", name)
 	return receivedShare{recipient: recipient}, nil
 }
@@ -307,18 +309,36 @@ func (s *Service) checkPendingLimit(ctx context.Context, userID int64) error {
 	return nil
 }
 
-func (s *Service) insertIncoming(ctx context.Context, row incomingRow) error {
+func (s *Service) insertIncoming(ctx context.Context, row incomingRow) (int64, error) {
 	now := s.now().Unix()
-	_, err := s.db.ExecContext(ctx,
+	var id int64
+	err := s.db.QueryRowContext(ctx,
 		`INSERT INTO federated_shares_in (user_id, server_id, provider_id, owner_cloud_id, owner_display_name, sender_cloud_id, sender_display_name,
 		 name, is_dir, webdav_uri, secret_sealed, secret_hash, permissions, state, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 1, $13, $14, $14)`,
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 1, $13, $14, $14) RETURNING id`,
 		row.userID, row.serverID, row.providerID, row.ownerCloudID, row.ownerName, row.senderCloudID, row.senderDisplayName,
-		row.name, row.isDir, row.webdavURI, row.secretSealed, row.secretHash, StatePending, now)
+		row.name, row.isDir, row.webdavURI, row.secretSealed, row.secretHash, StatePending, now).Scan(&id)
 	if database.IsUniqueViolation(err) {
-		return ocmFailure(http.StatusBadRequest, "this share already exists")
+		return 0, ocmFailure(http.StatusBadRequest, "this share already exists")
 	}
-	return err
+	return id, err
+}
+
+type ShareNotifier interface {
+	FederatedShareReceived(ctx context.Context, userID int64, notice activity.ShareNotice)
+}
+
+func (s *Service) UseNotifier(notifier ShareNotifier) {
+	s.notifier = notifier
+}
+
+func (s *Service) notifyReceived(ctx context.Context, server Server, row incomingRow) {
+	if s.notifier == nil {
+		return
+	}
+	s.notifier.FederatedShareReceived(ctx, row.userID, activity.ShareNotice{
+		ShareID: row.id, OwnerName: row.ownerName, Owner: row.ownerCloudID, Name: row.name, IsDir: row.isDir, Server: server.host(),
+	})
 }
 
 func (s *Service) Incoming(ctx context.Context, user users.User) ([]IncomingFederatedShare, error) {

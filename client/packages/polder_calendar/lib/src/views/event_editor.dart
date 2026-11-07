@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:intl/intl.dart";
 
@@ -9,6 +10,7 @@ import "package:polder_calendar/src/model/calendar_info.dart";
 import "package:polder_calendar/src/model/calendar_ref.dart";
 import "package:polder_calendar/src/model/event_draft.dart";
 import "package:polder_calendar/src/rrule/recurrence_rule.dart";
+import "package:polder_calendar/src/state/calendar_providers.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 import "package:polder_calendar/src/views/calendar_style.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
@@ -289,6 +291,13 @@ class _EventEditorState extends State<EventEditor> {
               ),
             ],
           ),
+          if (_reminders.isNotEmpty)
+            Consumer(
+              builder: (context, ref, _) => switch (ref.watch(calendarReminderNoticeProvider)) {
+                final notice? => Padding(padding: const EdgeInsets.only(bottom: 10), child: notice),
+                null => const SizedBox.shrink(),
+              },
+            ),
           _Section(
             children: [
               for (final (index, reminder) in _reminders.indexed)

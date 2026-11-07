@@ -9,9 +9,11 @@ import "package:polder_calendar/src/source/calendar_source.dart";
 import "package:polder_calendar/src/state/calendar_actions.dart";
 import "package:polder_calendar/src/time/calendar_view_mode.dart";
 import "package:polder_calendar/src/time/date_math.dart";
-import "package:flutter/material.dart" show DateTimeRange;
+import "package:flutter/material.dart" show DateTimeRange, Widget;
 
 final calendarSourcesProvider = Provider<List<CalendarSource>>((ref) => const []);
+
+final calendarReminderNoticeProvider = Provider<Widget?>((ref) => null);
 
 final calendarSourceProvider = Provider.family<CalendarSource?, String>(
   (ref, sourceId) => ref.watch(calendarSourcesProvider).where((source) => source.id == sourceId).firstOrNull,

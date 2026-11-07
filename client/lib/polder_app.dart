@@ -6,6 +6,7 @@ import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/deep_link/deep_link_provider.dart";
+import "package:polder/providers/notifications/notification_coordinator.dart";
 import "package:polder/providers/desktop/finder_location_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/theme/app_theme.dart";
@@ -44,6 +45,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
     final branding = ref.watch(brandingProvider);
     final seed = appearance.seedWith(branding.accent);
     ref.watch(deepLinkHandlerProvider);
+    ref.watch(notificationCoordinatorProvider);
     return MaterialApp.router(
       onGenerateTitle: (context) => branding.nameOr(AppLocalizations.of(context).appTitle),
       theme: AppTheme.build(seed, Brightness.light),

@@ -54,6 +54,7 @@ extension CalendarToInfo on wire.Calendar {
       _ => cal.CalendarAccess.read,
     },
     hidden: hidden,
+    notify: notify,
     isDefault: isDefault,
     subscription: kind == wire.CalendarKind.subscription,
     ownerName: owner?.displayName,

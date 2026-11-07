@@ -26,6 +26,7 @@ import (
 	"polder-server/internal/linkpreview"
 	"polder-server/internal/links"
 	"polder-server/internal/logging"
+	"polder-server/internal/notifications"
 	"polder-server/internal/office"
 	"polder-server/internal/preview"
 	"polder-server/internal/recipes"
@@ -40,32 +41,33 @@ import (
 )
 
 type API struct {
-	auth         *auth.Service
-	sessions     *auth.Sessions
-	users        *users.Service
-	files        *files.Service
-	settings     *settings.Store
-	images       *settings.Images
-	avatars      *settings.Avatars
-	sync         *syncing.Service
-	previews     *preview.Worker
-	activity     *activity.Hub
-	search       *search.Service
-	extract      *extract.Worker
-	logs         *logging.Files
-	office       *office.Service
-	versions     *versions.Worker
-	links        *links.Graph
-	tags         *tags.Service
-	calendar     *calendar.Service
-	caldav       *caldav.Handler
-	linkPreviews *linkpreview.Service
-	recipes      *recipes.Service
-	groups       *groups.Service
-	sharing      *sharing.Service
-	webdav       *webdav.Handler
-	federation   *federation.Service
-	limiter      *failedAttemptLimiter
+	auth          *auth.Service
+	sessions      *auth.Sessions
+	users         *users.Service
+	files         *files.Service
+	settings      *settings.Store
+	images        *settings.Images
+	avatars       *settings.Avatars
+	sync          *syncing.Service
+	previews      *preview.Worker
+	activity      *activity.Hub
+	search        *search.Service
+	extract       *extract.Worker
+	logs          *logging.Files
+	office        *office.Service
+	versions      *versions.Worker
+	links         *links.Graph
+	tags          *tags.Service
+	calendar      *calendar.Service
+	caldav        *caldav.Handler
+	linkPreviews  *linkpreview.Service
+	recipes       *recipes.Service
+	groups        *groups.Service
+	sharing       *sharing.Service
+	webdav        *webdav.Handler
+	federation    *federation.Service
+	notifications *notifications.Service
+	limiter       *failedAttemptLimiter
 
 	federationLimiter *failedAttemptLimiter
 
@@ -105,6 +107,7 @@ type Dependencies struct {
 	Sharing                *sharing.Service
 	WebDAV                 *webdav.Handler
 	Federation             *federation.Service
+	Notifications          *notifications.Service
 	WebDAVAllowInsecure    bool
 	RequestTrashPurge      func()
 	LoginAttemptsPerMinute int
@@ -115,32 +118,33 @@ type Dependencies struct {
 
 func NewRouter(deps Dependencies) http.Handler {
 	api := &API{
-		auth:         deps.Auth,
-		sessions:     deps.Sessions,
-		users:        deps.Users,
-		files:        deps.Files,
-		settings:     deps.Settings,
-		images:       deps.Images,
-		avatars:      deps.Avatars,
-		sync:         deps.Sync,
-		previews:     deps.Previews,
-		activity:     deps.Activity,
-		search:       deps.Search,
-		extract:      deps.Extractor,
-		logs:         deps.Logs,
-		office:       deps.Office,
-		versions:     deps.Versions,
-		links:        deps.Links,
-		tags:         deps.Tags,
-		calendar:     deps.Calendar,
-		caldav:       deps.CalDAV,
-		linkPreviews: deps.LinkPreviews,
-		recipes:      deps.Recipes,
-		groups:       deps.Groups,
-		sharing:      deps.Sharing,
-		webdav:       deps.WebDAV,
-		federation:   deps.Federation,
-		limiter:      newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+		auth:          deps.Auth,
+		sessions:      deps.Sessions,
+		users:         deps.Users,
+		files:         deps.Files,
+		settings:      deps.Settings,
+		images:        deps.Images,
+		avatars:       deps.Avatars,
+		sync:          deps.Sync,
+		previews:      deps.Previews,
+		activity:      deps.Activity,
+		search:        deps.Search,
+		extract:       deps.Extractor,
+		logs:          deps.Logs,
+		office:        deps.Office,
+		versions:      deps.Versions,
+		links:         deps.Links,
+		tags:          deps.Tags,
+		calendar:      deps.Calendar,
+		caldav:        deps.CalDAV,
+		linkPreviews:  deps.LinkPreviews,
+		recipes:       deps.Recipes,
+		groups:        deps.Groups,
+		sharing:       deps.Sharing,
+		webdav:        deps.WebDAV,
+		federation:    deps.Federation,
+		notifications: deps.Notifications,
+		limiter:       newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 
 		federationLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute * federationLimitFactor),
 
@@ -361,6 +365,10 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodGet, "/shares/settings", "getShareDisplaySettings", "Whether shares appear in the logged-in user's files", a.getShareDisplaySettings)
 	register(user, http.MethodPut, "/shares/settings", "setShareDisplaySettings", "Show or hide shares at the root of the logged-in user's files", a.setShareDisplaySettings)
 	register(user, http.MethodGet, "/shares/incoming", "listIncomingShares", "What others share with the logged-in user, directly or through a group", a.listIncomingShares)
+	register(user, http.MethodPost, "/shares/incoming/{shareID}/accept", "acceptShare", "Accept a share so it appears in the logged-in user's files", a.acceptShare)
+	register(user, http.MethodPost, "/shares/incoming/{shareID}/decline", "declineShare", "Decline a share; it no longer appears for the logged-in user", a.declineShare)
+	register(user, http.MethodGet, "/notifications", "listNotifications", "The logged-in user's notifications after a cursor, oldest first", a.listNotifications)
+	register(user, http.MethodPost, "/notifications/read", "markNotificationsRead", "Mark the logged-in user's notifications as read up to one", a.markNotificationsRead)
 	register(user, http.MethodPost, "/shares", "createShare", "Share a file or folder with a user or group", a.createShare, created)
 	register(user, http.MethodPatch, "/shares/{shareID}", "updateShare", "Change what a share's recipients may do", a.updateShare)
 	register(user, http.MethodDelete, "/shares/{shareID}", "deleteShare", "Stop sharing; recipients of a direct share may also remove it", a.deleteShare)

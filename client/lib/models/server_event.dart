@@ -2,6 +2,7 @@ import "package:freezed_annotation/freezed_annotation.dart";
 
 import "package:polder/models/activity.dart";
 import "package:polder/models/calendar_reminder.dart";
+import "package:polder/models/notifications/feed_notification.dart";
 
 part "server_event.freezed.dart";
 
@@ -24,6 +25,8 @@ sealed class ServerEvent with _$ServerEvent {
   const factory ServerEvent.calendarChanged(int userId, int calendarId) = CalendarChangedEvent;
 
   const factory ServerEvent.calendarReminder(int userId, CalendarReminder reminder) = CalendarReminderEvent;
+
+  const factory ServerEvent.notification(int userId, FeedNotification notification) = NotificationEvent;
 
   const factory ServerEvent.error(String code, String message) = ServerErrorEvent;
 

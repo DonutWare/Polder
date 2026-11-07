@@ -100,6 +100,7 @@ extension IncomingShareToModel on wire.IncomingShare {
     note: note,
     entry: entry.toModel(),
     mountPath: mountPath,
+    pending: state == wire.IncomingShareState.pending,
   );
 }
 

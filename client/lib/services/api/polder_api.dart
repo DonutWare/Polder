@@ -18,6 +18,7 @@ import "package:polder/models/file_version.dart";
 import "package:polder/models/group.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
+import "package:polder/models/notifications/feed_notification.dart";
 import "package:polder/models/search.dart";
 import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
@@ -33,6 +34,7 @@ import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/calendar_mappers.dart";
 import "package:polder/services/api/federation_mappers.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
+import "package:polder/services/api/notification_mappers.dart";
 import "package:polder/services/api/pending_uploads.dart";
 import "package:polder/services/api/sharing_mappers.dart";
 import "package:polder/services/api/wire_mappers.dart";
@@ -489,6 +491,16 @@ class PolderApi {
     for (final share in (await _service.listIncomingShares()).body!) share.toModel(),
   ];
 
+  Future<void> acceptShare(int id) => _service.acceptShare(shareID: id);
+
+  Future<void> declineShare(int id) => _service.declineShare(shareID: id);
+
+  Future<FeedPage> notifications({int after = 0, int? limit}) async =>
+      (await _service.listNotifications(after: after, limit: limit)).body!.toModel();
+
+  Future<void> markNotificationsRead(int upTo) =>
+      _service.markNotificationsRead(body: wire.MarkNotificationsReadInputBody(upTo: upTo));
+
   Future<OutgoingShare> share({
     required int fileId,
     required ShareTarget recipient,
@@ -617,16 +629,23 @@ class PolderApi {
         body: wire.NewCalendar(name: name, color: color == null ? null : hexColor(color)),
       )).body!.toInfo(sourceId);
 
-  Future<void> updateCalendar(int calendarId, {String? name, Color? color, bool? hidden, int? refreshSeconds}) =>
-      _service.updateCalendar(
-        calendarID: calendarId,
-        body: wire.CalendarChange(
-          name: name,
-          color: color == null ? null : hexColor(color),
-          hidden: hidden,
-          refreshSeconds: refreshSeconds,
-        ),
-      );
+  Future<void> updateCalendar(
+    int calendarId, {
+    String? name,
+    Color? color,
+    bool? hidden,
+    bool? notify,
+    int? refreshSeconds,
+  }) => _service.updateCalendar(
+    calendarID: calendarId,
+    body: wire.CalendarChange(
+      name: name,
+      color: color == null ? null : hexColor(color),
+      hidden: hidden,
+      notify: notify,
+      refreshSeconds: refreshSeconds,
+    ),
+  );
 
   Future<void> deleteCalendar(int calendarId) => _service.deleteCalendar(calendarID: calendarId);
 

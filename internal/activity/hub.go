@@ -40,6 +40,7 @@ const (
 	EventFilesChanged     EventType = "files.changed"
 	EventCalendarChanged  EventType = "calendar.changed"
 	EventCalendarReminder EventType = "calendar.reminder"
+	EventNotification     EventType = "notification.created"
 )
 
 type Event struct {
@@ -51,6 +52,7 @@ type Event struct {
 	Dirs     []string          `json:"dirs,omitempty"`
 	Calendar *CalendarUpdate   `json:"calendar,omitempty"`
 	Reminder *CalendarReminder `json:"reminder,omitempty"`
+	Notice   *Notification     `json:"notification,omitempty"`
 }
 
 type LiveTransfer struct {

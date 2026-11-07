@@ -115,7 +115,7 @@ class CalendarAgendaLists extends ConsumerWidget {
   }
 }
 
-enum _AgendaAction { edit, share, importFile, makeDefault, sync, remove }
+enum _AgendaAction { edit, share, importFile, reminders, makeDefault, sync, remove }
 
 class _AgendaTile extends ConsumerStatefulWidget {
   const _AgendaTile({required this.calendar});
@@ -153,6 +153,11 @@ class _AgendaTileState extends ConsumerState<_AgendaTile> {
       if (!calendar.shared) iconMenuItem(_AgendaAction.share, IconsaxPlusLinear.people, localized.share),
       if (calendar.writable)
         iconMenuItem(_AgendaAction.importFile, IconsaxPlusLinear.document_upload, localized.calendarImportInto),
+      iconMenuItem(
+        _AgendaAction.reminders,
+        calendar.notify ? IconsaxPlusLinear.notification_bing : IconsaxPlusLinear.notification,
+        calendar.notify ? localized.calendarRemindersOff : localized.calendarRemindersOn,
+      ),
       if (calendar.subscription && !calendar.shared)
         iconMenuItem(_AgendaAction.sync, IconsaxPlusLinear.refresh, localized.calendarSyncNow),
       if (!calendar.shared && !calendar.subscription && !calendar.isDefault)
@@ -177,6 +182,8 @@ class _AgendaTileState extends ConsumerState<_AgendaTile> {
         await showAgendaShareSheet(context, calendar);
       case _AgendaAction.importFile:
         await _import();
+      case _AgendaAction.reminders:
+        await context.runWithFeedback(_agendas.setNotify(calendar, !calendar.notify));
       case _AgendaAction.makeDefault:
         await context.runWithFeedback(_agendas.makeDefault(calendar));
       case _AgendaAction.sync:

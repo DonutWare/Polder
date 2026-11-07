@@ -229,7 +229,9 @@ enum EventMessageType {
   @JsonValue('calendar.changed')
   calendarChanged('calendar.changed'),
   @JsonValue('calendar.reminder')
-  calendarReminder('calendar.reminder');
+  calendarReminder('calendar.reminder'),
+  @JsonValue('notification.created')
+  notificationCreated('notification.created');
 
   final String? value;
 
@@ -294,6 +296,20 @@ enum IncomingFederatedShareState {
   final String? value;
 
   const IncomingFederatedShareState(this.value);
+}
+
+enum IncomingShareState {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('pending')
+  pending('pending'),
+  @JsonValue('accepted')
+  accepted('accepted');
+
+  final String? value;
+
+  const IncomingShareState(this.value);
 }
 
 enum LiveTransferDirection {
@@ -464,6 +480,20 @@ enum NewUserRole {
   final String? value;
 
   const NewUserRole(this.value);
+}
+
+enum NotificationKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('share.received')
+  shareReceived('share.received'),
+  @JsonValue('federated_share.received')
+  federatedShareReceived('federated_share.received');
+
+  final String? value;
+
+  const NotificationKind(this.value);
 }
 
 enum OutgoingShareState {

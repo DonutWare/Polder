@@ -44,6 +44,11 @@ class FakeSyncPlatform implements SyncPlatform {
   @override
   Future<bool> containsFiles(String localPath) async => hasFiles;
 
+  final notificationChecks = <bool>[];
+
   @override
   Future<void> scheduleAutoUpload(AutoUploadSettings settings) async => scheduled.add(settings);
+
+  @override
+  Future<void> scheduleNotificationChecks({required bool enabled}) async => notificationChecks.add(enabled);
 }

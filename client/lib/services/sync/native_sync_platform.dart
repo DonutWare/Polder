@@ -3,7 +3,7 @@ import "dart:io";
 import "package:drift_flutter/drift_flutter.dart";
 import "package:polder/models/sync/auto_upload_settings.dart";
 import "package:polder/services/api/polder_api.dart";
-import "package:polder/services/background/auto_upload_scheduler.dart";
+import "package:polder/services/background/background_scheduler.dart";
 import "package:polder/services/sync/drift/drift_sync_state_store.dart";
 import "package:polder/services/sync/drift/sync_database.dart";
 import "package:polder/services/sync/folder_watcher.dart";
@@ -17,7 +17,7 @@ import "package:permission_handler/permission_handler.dart";
 
 SyncPlatform createSyncPlatform() => const NativeSyncPlatform();
 
-Future<void> initializeBackgroundSync() => AutoUploadScheduler.initialize();
+Future<void> initializeBackgroundSync() => BackgroundScheduler.initialize();
 
 class NativeSyncPlatform implements SyncPlatform {
   const NativeSyncPlatform();
@@ -72,5 +72,9 @@ class NativeSyncPlatform implements SyncPlatform {
   }
 
   @override
-  Future<void> scheduleAutoUpload(AutoUploadSettings settings) => AutoUploadScheduler.schedule(settings);
+  Future<void> scheduleAutoUpload(AutoUploadSettings settings) => BackgroundScheduler.scheduleAutoUpload(settings);
+
+  @override
+  Future<void> scheduleNotificationChecks({required bool enabled}) =>
+      BackgroundScheduler.scheduleNotificationChecks(enabled: enabled);
 }

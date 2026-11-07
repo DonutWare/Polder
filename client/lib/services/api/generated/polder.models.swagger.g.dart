@@ -687,6 +687,9 @@ EventMessage _$EventMessageFromJson(Map<String, dynamic> json) => EventMessage(
   dirs: (json['dirs'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   entry: json['entry'] == null ? null : LogEntry.fromJson(json['entry'] as Map<String, dynamic>),
   message: json['message'] as String?,
+  notification: json['notification'] == null
+      ? null
+      : Notification.fromJson(json['notification'] as Map<String, dynamic>),
   reminder: json['reminder'] == null ? null : CalendarReminder.fromJson(json['reminder'] as Map<String, dynamic>),
   status: eventMessageStatusNullableFromJson(json['status']),
   transfer: json['transfer'] == null ? null : LiveTransfer.fromJson(json['transfer'] as Map<String, dynamic>),
@@ -704,6 +707,7 @@ Map<String, dynamic> _$EventMessageToJson(EventMessage instance) => <String, dyn
   'dirs': ?instance.dirs,
   'entry': ?instance.entry?.toJson(),
   'message': ?instance.message,
+  'notification': ?instance.notification?.toJson(),
   'reminder': ?instance.reminder?.toJson(),
   'status': ?eventMessageStatusNullableToJson(instance.status),
   'transfer': ?instance.transfer?.toJson(),
@@ -966,6 +970,7 @@ IncomingShare _$IncomingShareFromJson(Map<String, dynamic> json) => IncomingShar
   note: json['note'] as String,
   owner: UserSummary.fromJson(json['owner'] as Map<String, dynamic>),
   permissions: SharePermissions.fromJson(json['permissions'] as Map<String, dynamic>),
+  state: incomingShareStateFromJson(json['state']),
 );
 
 Map<String, dynamic> _$IncomingShareToJson(IncomingShare instance) => <String, dynamic>{
@@ -979,6 +984,7 @@ Map<String, dynamic> _$IncomingShareToJson(IncomingShare instance) => <String, d
   'note': instance.note,
   'owner': instance.owner.toJson(),
   'permissions': instance.permissions.toJson(),
+  'state': ?incomingShareStateToJson(instance.state),
 };
 
 Invite _$InviteFromJson(Map<String, dynamic> json) => Invite(
@@ -1252,6 +1258,12 @@ Map<String, dynamic> _$ManifestToJson(Manifest instance) => <String, dynamic>{
   'size': instance.size,
 };
 
+MarkNotificationsReadInputBody _$MarkNotificationsReadInputBodyFromJson(Map<String, dynamic> json) =>
+    MarkNotificationsReadInputBody(upTo: (json['upTo'] as num).toInt());
+
+Map<String, dynamic> _$MarkNotificationsReadInputBodyToJson(MarkNotificationsReadInputBody instance) =>
+    <String, dynamic>{'upTo': instance.upTo};
+
 Match _$MatchFromJson(Map<String, dynamic> json) => Match(
   entry: Entry.fromJson(json['entry'] as Map<String, dynamic>),
   nameMatches:
@@ -1501,6 +1513,38 @@ Map<String, dynamic> _$NotesListingToJson(NotesListing instance) => <String, dyn
 NotesSettings _$NotesSettingsFromJson(Map<String, dynamic> json) => NotesSettings(path: json['path'] as String?);
 
 Map<String, dynamic> _$NotesSettingsToJson(NotesSettings instance) => <String, dynamic>{'path': ?instance.path};
+
+Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  id: (json['id'] as num).toInt(),
+  kind: notificationKindFromJson(json['kind']),
+  read: json['read'] as bool,
+  share: json['share'] == null ? null : ShareNotice.fromJson(json['share'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$NotificationToJson(Notification instance) => <String, dynamic>{
+  'createdAt': instance.createdAt.toIso8601String(),
+  'id': instance.id,
+  'kind': ?notificationKindToJson(instance.kind),
+  'read': instance.read,
+  'share': ?instance.share?.toJson(),
+};
+
+NotificationPage _$NotificationPageFromJson(Map<String, dynamic> json) => NotificationPage(
+  cursor: (json['cursor'] as num).toInt(),
+  hasMore: json['hasMore'] as bool,
+  notifications:
+      (json['notifications'] as List<dynamic>?)
+          ?.map((e) => Notification.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
+);
+
+Map<String, dynamic> _$NotificationPageToJson(NotificationPage instance) => <String, dynamic>{
+  'cursor': instance.cursor,
+  'hasMore': instance.hasMore,
+  'notifications': ?instance.notifications?.map((e) => e.toJson()).toList(),
+};
 
 OfficeSessionRequest _$OfficeSessionRequestFromJson(Map<String, dynamic> json) => OfficeSessionRequest(
   origin: json['origin'] as String,
@@ -2021,6 +2065,28 @@ Map<String, dynamic> _$ShareLinkToJson(ShareLink instance) => <String, dynamic>{
   'hasPassword': instance.hasPassword,
   'id': instance.id,
   'permissions': instance.permissions.toJson(),
+};
+
+ShareNotice _$ShareNoticeFromJson(Map<String, dynamic> json) => ShareNotice(
+  group: json['group'] as String?,
+  isDir: json['isDir'] as bool,
+  name: json['name'] as String,
+  note: json['note'] as String?,
+  owner: json['owner'] as String,
+  ownerName: json['ownerName'] as String,
+  server: json['server'] as String?,
+  shareId: (json['shareId'] as num).toInt(),
+);
+
+Map<String, dynamic> _$ShareNoticeToJson(ShareNotice instance) => <String, dynamic>{
+  'group': ?instance.group,
+  'isDir': instance.isDir,
+  'name': instance.name,
+  'note': ?instance.note,
+  'owner': instance.owner,
+  'ownerName': instance.ownerName,
+  'server': ?instance.server,
+  'shareId': instance.shareId,
 };
 
 SharePermissions _$SharePermissionsFromJson(Map<String, dynamic> json) =>

@@ -5,6 +5,7 @@ import "package:polder/models/admin_user_requests.dart";
 import "package:polder/models/api_error.dart";
 import "package:polder/models/branding.dart";
 import "package:polder/models/calendar_reminder.dart";
+import "package:polder/services/api/notification_mappers.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
@@ -501,6 +502,10 @@ extension EventMessageToModel on wire.EventMessage {
       calendar == null ? null : ServerEvent.calendarChanged(userId, calendar!.calendarId),
     wire.EventMessageType.calendarReminder =>
       reminder == null ? null : ServerEvent.calendarReminder(userId, reminder!.toModel()),
+    wire.EventMessageType.notificationCreated => switch (notification?.toModel()) {
+      final notification? => ServerEvent.notification(userId, notification),
+      null => null,
+    },
   };
 
   ServerEvent? _transfer(TransferPhase phase) =>

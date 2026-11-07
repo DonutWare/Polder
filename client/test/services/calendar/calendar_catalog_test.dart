@@ -15,7 +15,8 @@ void main() {
 
   test("recognises a feed the server stored in its own escaping", () {
     final offered = CalendarCatalog.weekNumbers("en");
-    const stored = "https://calendar.google.com/calendar/ical/e_2_en%23weeknum@group.v.calendar.google.com/public/basic.ics";
+    const stored =
+        "https://calendar.google.com/calendar/ical/e_2_en%23weeknum@group.v.calendar.google.com/public/basic.ics";
 
     expect(CalendarCatalog.normalized(stored), CalendarCatalog.normalized(offered));
     expect(CalendarCatalog.normalized("webcal://example.com/a.ics"), "https://example.com/a.ics");

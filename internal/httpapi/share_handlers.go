@@ -199,3 +199,11 @@ func (a *API) deleteShareFile(ctx context.Context, input *shareDeleteInput) (*st
 	}
 	return nil, a.spaceDelete(ctx, access, input.Path, input.BaseRev)
 }
+
+func (a *API) acceptShare(ctx context.Context, input *sharePath) (*struct{}, error) {
+	return nil, a.sharing.Accept(ctx, currentUser(ctx), input.ShareID)
+}
+
+func (a *API) declineShare(ctx context.Context, input *sharePath) (*struct{}, error) {
+	return nil, a.sharing.Decline(ctx, currentUser(ctx), input.ShareID)
+}

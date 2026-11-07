@@ -44,6 +44,7 @@ type Service struct {
 	now        func() time.Time
 	resolver   resolver
 	outboxWake chan struct{}
+	notifier   ShareNotifier
 }
 
 func New(db *sql.DB, fileService *files.Service, userStore *users.Store, settingsStore *settings.Store, options Options) (*Service, error) {

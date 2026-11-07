@@ -43,6 +43,8 @@ abstract final class AppRoutes {
   static const fromParameter = "from";
   static const viewParameter = "view";
   static const dateParameter = "date";
+  static const eventParameter = "event";
+  static const occurrenceParameter = "occurrence";
 
   static String filesAt(String path, {String? select}) =>
       Uri(path: files, queryParameters: {pathParameter: path, selectParameter: ?select}).toString();
@@ -52,6 +54,16 @@ abstract final class AppRoutes {
   static String calendarAt(CalendarViewMode mode, DateTime date) => Uri(
     path: calendar,
     queryParameters: {viewParameter: mode.slug, dateParameter: DateFormat("yyyy-MM-dd").format(date)},
+  ).toString();
+
+  static String calendarEventAt(EventRef ref, DateTime start) => Uri(
+    path: calendar,
+    queryParameters: {
+      viewParameter: CalendarViewMode.day.slug,
+      dateParameter: DateFormat("yyyy-MM-dd").format(start),
+      eventParameter: "${ref.calendar.calendarId}/${ref.eventId}",
+      occurrenceParameter: ?ref.recurrenceId,
+    },
   ).toString();
 
   static String cookAt(String path) => Uri(path: cook, queryParameters: {pathParameter: path}).toString();
@@ -165,6 +177,7 @@ enum SharedSection {
 
 enum SettingsPage {
   general,
+  notifications,
   account,
   about;
 

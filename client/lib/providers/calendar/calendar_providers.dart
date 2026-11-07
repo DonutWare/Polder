@@ -4,7 +4,6 @@ import "dart:ui";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/calendar.dart";
-import "package:polder/models/calendar_reminder.dart";
 import "package:polder/models/server_event.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/account_provider.dart";
@@ -15,6 +14,7 @@ import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/calendar/polder_calendar_source.dart";
 import "package:polder/services/storage/preferences_store.dart";
 import "package:polder/util/guarded_refresh.dart";
+import "package:polder/widgets/notifications/notification_notices.dart";
 import "package:polder_calendar/polder_calendar.dart" as cal;
 
 final calendarsProvider = FutureProvider.autoDispose<List<CalendarSummary>>(
@@ -50,7 +50,7 @@ class CalendarFeedsNotifier extends AsyncNotifier<List<CalendarFeed>> with Guard
 final polderCalendarSourceProvider = Provider<PolderCalendarSource?>((ref) {
   final accountId = ref.watch(currentAccountProvider.select((account) => account?.id));
   if (accountId == null) return null;
-  final sourceId = "polder:$accountId";
+  final sourceId = PolderCalendarSource.idFor(accountId);
   final events = ref.watch(eventsClientProvider)?.events ?? const Stream<ServerEvent>.empty();
   return PolderCalendarSource(
     ref.watch(polderApiProvider),
@@ -68,6 +68,10 @@ final polderCalendarSourcesOverride = cal.calendarSourcesProvider.overrideWith((
   final source = ref.watch(polderCalendarSourceProvider);
   return [?source];
 });
+
+final calendarReminderNoticeOverride = cal.calendarReminderNoticeProvider.overrideWithValue(
+  const CalendarReminderNotice(),
+);
 
 final calendarAgendasProvider = Provider<CalendarAgendas>(CalendarAgendas.new);
 
@@ -94,6 +98,9 @@ class CalendarAgendas {
 
   Future<void> edit(cal.CalendarInfo calendar, {String? name, Color? color}) =>
       _changing(() => _api.updateCalendar(_id(calendar), name: name, color: color));
+
+  Future<void> setNotify(cal.CalendarInfo calendar, bool notify) =>
+      _changing(() => _api.updateCalendar(_id(calendar), notify: notify));
 
   Future<void> makeDefault(cal.CalendarInfo calendar) => _changing(() => _api.setDefaultCalendar(_id(calendar)));
 
@@ -180,13 +187,6 @@ class CalendarSidebarSections extends Notifier<Set<String>> {
     await _preferences.writeJson(_key, {"sections": state.toList()});
   }
 }
-
-final calendarRemindersProvider = StreamProvider<CalendarReminder>((ref) {
-  final events = ref.watch(eventsClientProvider)?.events ?? const Stream<ServerEvent>.empty();
-  return events
-      .where((event) => event is CalendarReminderEvent)
-      .map((event) => (event as CalendarReminderEvent).reminder);
-});
 
 final calendarViewModeProvider = NotifierProvider<CalendarViewModeNotifier, cal.CalendarViewMode?>(
   CalendarViewModeNotifier.new,

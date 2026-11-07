@@ -1497,7 +1497,7 @@ $SharePermissionsCopyWith<$Res> get permissions {
 /// @nodoc
 mixin _$IncomingShare {
 
- int get id; ShareTarget get owner; bool get direct; List<ShareTarget> get groups; SharePermissions get permissions; DateTime? get expiresAt; String get note; FileEntry get entry; String get mountPath;
+ int get id; ShareTarget get owner; bool get direct; List<ShareTarget> get groups; SharePermissions get permissions; DateTime? get expiresAt; String get note; FileEntry get entry; String get mountPath; bool get pending;
 /// Create a copy of IncomingShare
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1509,20 +1509,20 @@ $IncomingShareCopyWith<IncomingShare> get copyWith => _$IncomingShareCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as IncomingShare;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IncomingShare&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.owner, _this.owner) || other.owner == _this.owner)&&(identical(other.direct, _this.direct) || other.direct == _this.direct)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&(identical(other.permissions, _this.permissions) || other.permissions == _this.permissions)&&(identical(other.expiresAt, _this.expiresAt) || other.expiresAt == _this.expiresAt)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.entry, _this.entry) || other.entry == _this.entry)&&(identical(other.mountPath, _this.mountPath) || other.mountPath == _this.mountPath));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IncomingShare&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.owner, _this.owner) || other.owner == _this.owner)&&(identical(other.direct, _this.direct) || other.direct == _this.direct)&&const DeepCollectionEquality().equals(other.groups, _this.groups)&&(identical(other.permissions, _this.permissions) || other.permissions == _this.permissions)&&(identical(other.expiresAt, _this.expiresAt) || other.expiresAt == _this.expiresAt)&&(identical(other.note, _this.note) || other.note == _this.note)&&(identical(other.entry, _this.entry) || other.entry == _this.entry)&&(identical(other.mountPath, _this.mountPath) || other.mountPath == _this.mountPath)&&(identical(other.pending, _this.pending) || other.pending == _this.pending));
 }
 
 
 @override
 int get hashCode {
   final _this = this as IncomingShare;
-  return Object.hash(runtimeType,_this.id,_this.owner,_this.direct,const DeepCollectionEquality().hash(_this.groups),_this.permissions,_this.expiresAt,_this.note,_this.entry,_this.mountPath);
+  return Object.hash(runtimeType,_this.id,_this.owner,_this.direct,const DeepCollectionEquality().hash(_this.groups),_this.permissions,_this.expiresAt,_this.note,_this.entry,_this.mountPath,_this.pending);
 }
 
 @override
 String toString() {
   final _this = this as IncomingShare;
-  return 'IncomingShare(id: ${_this.id}, owner: ${_this.owner}, direct: ${_this.direct}, groups: ${_this.groups}, permissions: ${_this.permissions}, expiresAt: ${_this.expiresAt}, note: ${_this.note}, entry: ${_this.entry}, mountPath: ${_this.mountPath})';
+  return 'IncomingShare(id: ${_this.id}, owner: ${_this.owner}, direct: ${_this.direct}, groups: ${_this.groups}, permissions: ${_this.permissions}, expiresAt: ${_this.expiresAt}, note: ${_this.note}, entry: ${_this.entry}, mountPath: ${_this.mountPath}, pending: ${_this.pending})';
 }
 
 
@@ -1533,7 +1533,7 @@ abstract mixin class $IncomingShareCopyWith<$Res>  {
   factory $IncomingShareCopyWith(IncomingShare value, $Res Function(IncomingShare) _then) = _$IncomingShareCopyWithImpl;
 @useResult
 $Res call({
- int id, ShareTarget owner, bool direct, List<ShareTarget> groups, SharePermissions permissions, DateTime? expiresAt, String note, FileEntry entry, String mountPath
+ int id, ShareTarget owner, bool direct, List<ShareTarget> groups, SharePermissions permissions, DateTime? expiresAt, String note, FileEntry entry, String mountPath, bool pending
 });
 
 
@@ -1550,7 +1550,7 @@ class _$IncomingShareCopyWithImpl<$Res>
 
 /// Create a copy of IncomingShare
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? owner = null,Object? direct = null,Object? groups = null,Object? permissions = null,Object? expiresAt = freezed,Object? note = null,Object? entry = null,Object? mountPath = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? owner = null,Object? direct = null,Object? groups = null,Object? permissions = null,Object? expiresAt = freezed,Object? note = null,Object? entry = null,Object? mountPath = null,Object? pending = null,}) {
   return _then(IncomingShare(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,owner: null == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
@@ -1561,7 +1561,8 @@ as SharePermissions,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresA
 as DateTime?,note: null == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String,entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
 as FileEntry,mountPath: null == mountPath ? _self.mountPath : mountPath // ignore: cast_nullable_to_non_nullable
-as String,
+as String,pending: null == pending ? _self.pending : pending // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of IncomingShare
@@ -1673,10 +1674,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  ShareTarget owner,  bool direct,  List<ShareTarget> groups,  SharePermissions permissions,  DateTime? expiresAt,  String note,  FileEntry entry,  String mountPath)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  ShareTarget owner,  bool direct,  List<ShareTarget> groups,  SharePermissions permissions,  DateTime? expiresAt,  String note,  FileEntry entry,  String mountPath,  bool pending)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IncomingShare() when $default != null:
-return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions,_that.expiresAt,_that.note,_that.entry,_that.mountPath);case _:
+return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions,_that.expiresAt,_that.note,_that.entry,_that.mountPath,_that.pending);case _:
   return orElse();
 
 }
@@ -1694,10 +1695,10 @@ return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  ShareTarget owner,  bool direct,  List<ShareTarget> groups,  SharePermissions permissions,  DateTime? expiresAt,  String note,  FileEntry entry,  String mountPath)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  ShareTarget owner,  bool direct,  List<ShareTarget> groups,  SharePermissions permissions,  DateTime? expiresAt,  String note,  FileEntry entry,  String mountPath,  bool pending)  $default,) {final _that = this;
 switch (_that) {
 case _IncomingShare():
-return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions,_that.expiresAt,_that.note,_that.entry,_that.mountPath);case _:
+return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions,_that.expiresAt,_that.note,_that.entry,_that.mountPath,_that.pending);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1714,10 +1715,10 @@ return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  ShareTarget owner,  bool direct,  List<ShareTarget> groups,  SharePermissions permissions,  DateTime? expiresAt,  String note,  FileEntry entry,  String mountPath)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  ShareTarget owner,  bool direct,  List<ShareTarget> groups,  SharePermissions permissions,  DateTime? expiresAt,  String note,  FileEntry entry,  String mountPath,  bool pending)?  $default,) {final _that = this;
 switch (_that) {
 case _IncomingShare() when $default != null:
-return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions,_that.expiresAt,_that.note,_that.entry,_that.mountPath);case _:
+return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions,_that.expiresAt,_that.note,_that.entry,_that.mountPath,_that.pending);case _:
   return null;
 
 }
@@ -1729,7 +1730,7 @@ return $default(_that.id,_that.owner,_that.direct,_that.groups,_that.permissions
 
 
 class _IncomingShare implements IncomingShare {
-  const _IncomingShare({required this.id, required this.owner, this.direct = false,  List<ShareTarget> groups = const <ShareTarget>[], required this.permissions, this.expiresAt, this.note = "", required this.entry, this.mountPath = ""}): _groups = groups;
+  const _IncomingShare({required this.id, required this.owner, this.direct = false,  List<ShareTarget> groups = const <ShareTarget>[], required this.permissions, this.expiresAt, this.note = "", required this.entry, this.mountPath = "", this.pending = false}): _groups = groups;
   
 
 @override final  int id;
@@ -1747,6 +1748,7 @@ class _IncomingShare implements IncomingShare {
 @override@JsonKey() final  String note;
 @override final  FileEntry entry;
 @override@JsonKey() final  String mountPath;
+@override@JsonKey() final  bool pending;
 
 /// Create a copy of IncomingShare
 /// with the given fields replaced by the non-null parameter values.
@@ -1758,18 +1760,18 @@ _$IncomingShareCopyWith<_IncomingShare> get copyWith => __$IncomingShareCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IncomingShare&&(identical(other.id, id) || other.id == id)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.direct, direct) || other.direct == direct)&&const DeepCollectionEquality().equals(other.groups, _groups)&&(identical(other.permissions, permissions) || other.permissions == permissions)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.note, note) || other.note == note)&&(identical(other.entry, entry) || other.entry == entry)&&(identical(other.mountPath, mountPath) || other.mountPath == mountPath));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IncomingShare&&(identical(other.id, id) || other.id == id)&&(identical(other.owner, owner) || other.owner == owner)&&(identical(other.direct, direct) || other.direct == direct)&&const DeepCollectionEquality().equals(other.groups, _groups)&&(identical(other.permissions, permissions) || other.permissions == permissions)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.note, note) || other.note == note)&&(identical(other.entry, entry) || other.entry == entry)&&(identical(other.mountPath, mountPath) || other.mountPath == mountPath)&&(identical(other.pending, pending) || other.pending == pending));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,owner,direct,const DeepCollectionEquality().hash(_groups),permissions,expiresAt,note,entry,mountPath);
+    return Object.hash(runtimeType,id,owner,direct,const DeepCollectionEquality().hash(_groups),permissions,expiresAt,note,entry,mountPath,pending);
 }
 
 @override
 String toString() {
-    return 'IncomingShare(id: $id, owner: $owner, direct: $direct, groups: $groups, permissions: $permissions, expiresAt: $expiresAt, note: $note, entry: $entry, mountPath: $mountPath)';
+    return 'IncomingShare(id: $id, owner: $owner, direct: $direct, groups: $groups, permissions: $permissions, expiresAt: $expiresAt, note: $note, entry: $entry, mountPath: $mountPath, pending: $pending)';
 }
 
 
@@ -1780,7 +1782,7 @@ abstract mixin class _$IncomingShareCopyWith<$Res> implements $IncomingShareCopy
   factory _$IncomingShareCopyWith(_IncomingShare value, $Res Function(_IncomingShare) _then) = __$IncomingShareCopyWithImpl;
 @override @useResult
 $Res call({
- int id, ShareTarget owner, bool direct, List<ShareTarget> groups, SharePermissions permissions, DateTime? expiresAt, String note, FileEntry entry, String mountPath
+ int id, ShareTarget owner, bool direct, List<ShareTarget> groups, SharePermissions permissions, DateTime? expiresAt, String note, FileEntry entry, String mountPath, bool pending
 });
 
 
@@ -1797,7 +1799,7 @@ class __$IncomingShareCopyWithImpl<$Res>
 
 /// Create a copy of IncomingShare
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? owner = null,Object? direct = null,Object? groups = null,Object? permissions = null,Object? expiresAt = freezed,Object? note = null,Object? entry = null,Object? mountPath = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? owner = null,Object? direct = null,Object? groups = null,Object? permissions = null,Object? expiresAt = freezed,Object? note = null,Object? entry = null,Object? mountPath = null,Object? pending = null,}) {
   return _then(_IncomingShare(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,owner: null == owner ? _self.owner : owner // ignore: cast_nullable_to_non_nullable
@@ -1808,7 +1810,8 @@ as SharePermissions,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresA
 as DateTime?,note: null == note ? _self.note : note // ignore: cast_nullable_to_non_nullable
 as String,entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
 as FileEntry,mountPath: null == mountPath ? _self.mountPath : mountPath // ignore: cast_nullable_to_non_nullable
-as String,
+as String,pending: null == pending ? _self.pending : pending // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

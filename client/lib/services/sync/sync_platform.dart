@@ -27,4 +27,6 @@ abstract interface class SyncPlatform {
   Future<bool> containsFiles(String localPath);
 
   Future<void> scheduleAutoUpload(AutoUploadSettings settings);
+
+  Future<void> scheduleNotificationChecks({required bool enabled});
 }

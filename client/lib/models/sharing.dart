@@ -98,6 +98,7 @@ abstract class IncomingShare with _$IncomingShare {
     @Default("") String note,
     required FileEntry entry,
     @Default("") String mountPath,
+    @Default(false) bool pending,
   }) = _IncomingShare;
 }
 

@@ -427,7 +427,8 @@ func TestOfficeEditsFilesInsideShares(t *testing.T) {
 	alice.put("/Docs/report.docx", 0, []byte("draft"), http.StatusOK, nil)
 	docs := alice.stat("/Docs").ID
 	bobShare := alice.share(docs, "user", bob.me(), "write")
-	alice.share(docs, "user", carol.me(), "read")
+	bob.accept(bobShare.ID)
+	carol.accept(alice.share(docs, "user", carol.me(), "read").ID)
 
 	session := bob.startOfficeSession("/Docs/report.docx", http.StatusCreated)
 	response, info := server.wopi(session, http.MethodGet, "", nil, nil)

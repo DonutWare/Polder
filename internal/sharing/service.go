@@ -23,12 +23,13 @@ type PasswordHasher interface {
 }
 
 type Service struct {
-	db     *sql.DB
-	files  *files.Service
-	users  *users.Store
-	groups *groups.Service
-	hasher PasswordHasher
-	tokens linkTokens
+	db       *sql.DB
+	files    *files.Service
+	users    *users.Store
+	groups   *groups.Service
+	hasher   PasswordHasher
+	tokens   linkTokens
+	notifier ShareNotifier
 }
 
 func NewService(db *sql.DB, fileService *files.Service, userStore *users.Store, groupService *groups.Service, hasher PasswordHasher, linkKey []byte) *Service {
@@ -66,6 +67,8 @@ func (s *Service) Share(ctx context.Context, owner users.User, request NewShare)
 	if err != nil {
 		return Share{}, err
 	}
+	row.ID = id
+	s.notifyRecipients(ctx, owner, row, entry.Name, entry.IsDir)
 	return s.describedShare(ctx, owner, id)
 }
 
@@ -245,15 +248,23 @@ func (s *Service) Incoming(ctx context.Context, user users.User) ([]IncomingShar
 	if err != nil {
 		return nil, err
 	}
+	responses, err := s.responsesOf(ctx, user.ID, rows)
+	if err != nil {
+		return nil, err
+	}
 	lookup := recipientNames{service: s, ctx: ctx}
 	list := []IncomingShare{}
 	for _, item := range s.reachedItems(ctx, user, rows) {
+		state := item.state(responses)
+		if state == StateDeclined {
+			continue
+		}
 		access := item.access()
 		_, direct := item.direct()
 		list = append(list, IncomingShare{
 			ID: item.primary().row.ID, Owner: access.Owner.Summary(), Direct: direct, Groups: item.groups(&lookup),
 			Permissions: access.Permissions(), ExpiresAt: access.ExpiresAt, Note: item.note(),
-			Entry: access.Relative(access.Root), CreatedAt: item.createdAt(),
+			Entry: access.Relative(access.Root), CreatedAt: item.createdAt(), State: state,
 		})
 	}
 	return list, nil
