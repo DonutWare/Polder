@@ -137,13 +137,19 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       actions: [
         CalendarPeriodButtons(mode: mode, anchor: anchor, onNavigate: _navigate, showArrows: !phone),
-        CalendarViewMenu(mode: mode, compact: phone, onSelected: (mode) => _navigate(mode, anchor)),
-        if (single)
-          IconButton(
-            tooltip: context.localized.calendarManage,
-            icon: const Icon(IconsaxPlusLinear.setting_2),
-            onPressed: _openAgendas,
-          ),
+        CalendarViewMenu(
+          mode: mode,
+          compact: phone,
+          onSelected: (mode) => _navigate(mode, anchor),
+          actions: [
+            if (single)
+              CalendarMenuAction(
+                icon: IconsaxPlusLinear.setting_2,
+                label: context.localized.calendarManage,
+                onSelected: _openAgendas,
+              ),
+          ],
+        ),
       ],
       body: SafeArea(
         child: Column(

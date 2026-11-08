@@ -49,8 +49,49 @@ class CalendarTitle extends StatelessWidget {
         child: child,
       ),
     ),
-    child: Text(_text(context), key: ValueKey(_text(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
+    child: FittedBox(
+      key: ValueKey(_text(context)),
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerStart,
+      child: Text(_text(context), maxLines: 1),
+    ),
   );
+}
+
+class CalendarMenuAction {
+  const CalendarMenuAction({required this.icon, required this.label, required this.onSelected});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onSelected;
+}
+
+class TodayIcon extends StatelessWidget {
+  const TodayIcon({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = IconTheme.of(context);
+    final color = icon.color ?? Theme.of(context).colorScheme.onSurfaceVariant;
+    final size = icon.size ?? 24;
+    return SizedBox.square(
+      dimension: size,
+      child: Padding(
+        padding: EdgeInsets.all(size / 12),
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: CalendarStyle.squircle(size / 4, side: BorderSide(color: color, width: 1.5)),
+          ),
+          child: Center(
+            child: Text(
+              "${DateTime.now().day}",
+              style: TextStyle(color: color, fontSize: size * 0.45, fontWeight: FontWeight.w700, height: 1),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 IconData viewModeIcon(CalendarViewMode mode) => switch (mode) {
@@ -62,11 +103,18 @@ IconData viewModeIcon(CalendarViewMode mode) => switch (mode) {
 };
 
 class CalendarViewMenu extends StatelessWidget {
-  const CalendarViewMenu({required this.mode, required this.onSelected, this.compact = false, super.key});
+  const CalendarViewMenu({
+    required this.mode,
+    required this.onSelected,
+    this.compact = false,
+    this.actions = const [],
+    super.key,
+  });
 
   final CalendarViewMode mode;
   final ValueChanged<CalendarViewMode> onSelected;
   final bool compact;
+  final List<CalendarMenuAction> actions;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +129,12 @@ class CalendarViewMenu extends StatelessWidget {
           PopupMenuItem(
             value: option,
             child: Row(spacing: 12, children: [Icon(viewModeIcon(option), size: 20), Text(option.label(strings))]),
+          ),
+        if (actions.isNotEmpty) const PopupMenuDivider(),
+        for (final action in actions)
+          PopupMenuItem(
+            onTap: action.onSelected,
+            child: Row(spacing: 12, children: [Icon(action.icon, size: 20), Text(action.label)]),
           ),
       ],
       child: compact
@@ -133,7 +187,7 @@ class CalendarPeriodButtons extends ConsumerWidget {
       children: [
         IconButton(
           tooltip: strings.today,
-          icon: const Icon(IconsaxPlusLinear.calendar_tick),
+          icon: const TodayIcon(),
           onPressed: () {
             ref.read(calendarFocusProvider.notifier).request();
             onNavigate(mode, DateTime.now().dateOnly);
