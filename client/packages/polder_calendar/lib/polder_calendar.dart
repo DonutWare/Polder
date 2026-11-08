@@ -10,6 +10,7 @@ export "package:polder_calendar/src/source/calendar_source.dart";
 export "package:polder_calendar/src/state/calendar_actions.dart";
 export "package:polder_calendar/src/state/calendar_providers.dart";
 export "package:polder_calendar/src/time/calendar_view_mode.dart";
+export "package:polder_calendar/src/time/date_labels.dart";
 export "package:polder_calendar/src/time/date_math.dart";
 export "package:polder_calendar/src/views/calendar_chrome.dart";
 export "package:polder_calendar/src/views/calendar_color_picker.dart";

@@ -169,7 +169,7 @@ class _FeedTile extends ConsumerWidget {
       if (feed.name.isNotEmpty) mode,
       lastUsed == null
           ? localized.appPasswordNeverUsed
-          : localized.subscriptionLinkLastUsed(DateFormat.yMMMd().add_Hm().format(lastUsed)),
+          : localized.subscriptionLinkLastUsed(DateFormat.yMMMd(context.localeName).add_Hm().format(lastUsed)),
     ];
     return ListTile(
       leading: Icon(feed.mode == CalendarFeedMode.busy ? IconsaxPlusLinear.eye_slash : IconsaxPlusLinear.eye),

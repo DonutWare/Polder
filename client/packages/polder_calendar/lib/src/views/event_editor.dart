@@ -11,6 +11,7 @@ import "package:polder_calendar/src/model/calendar_ref.dart";
 import "package:polder_calendar/src/model/event_draft.dart";
 import "package:polder_calendar/src/rrule/recurrence_rule.dart";
 import "package:polder_calendar/src/state/calendar_providers.dart";
+import "package:polder_calendar/src/time/date_labels.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 import "package:polder_calendar/src/views/calendar_style.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
@@ -253,13 +254,13 @@ class _EventEditorState extends State<EventEditor> {
                 onChanged: _setAllDay,
               ),
               _DateTimeRow(
-                date: dateFormat.format(_start),
+                date: dateFormat.formatStandalone(_start),
                 time: _allDay ? null : formatTime(context, _start),
                 onDate: () => _pickDate(_start, (date) => _setStart(_withDate(_start, date))),
                 onTime: () => _pickTime(_start, _setStart),
               ),
               _DateTimeRow(
-                date: dateFormat.format(shownEnd),
+                date: dateFormat.formatStandalone(shownEnd),
                 time: _allDay ? null : formatTime(context, _end),
                 onDate: () =>
                     _pickDate(shownEnd, (date) => _setEnd(_allDay ? date.dateOnly.nextDay : _withDate(_end, date))),

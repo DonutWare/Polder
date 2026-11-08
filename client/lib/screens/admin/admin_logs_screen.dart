@@ -20,6 +20,7 @@ import "package:polder/widgets/shared/error_view.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/widgets/shared/nav_group.dart";
 import "package:polder/widgets/shared/tag.dart";
+import "package:polder_calendar/polder_calendar.dart";
 
 const _monospace = TextStyle(fontFamily: "monospace", fontFamilyFallback: ["Menlo", "Consolas", "Courier New"]);
 
@@ -246,7 +247,7 @@ class _DownloadButton extends ConsumerWidget {
                 PopupMenuItem(
                   value: file,
                   child: Text(
-                    "${DateFormat.yMMMEd(context.localeName).format(file.day)}  ·  "
+                    "${DateFormat.yMMMEd(context.localeName).formatStandalone(file.day)}  ·  "
                     "${ByteFormat.format(file.size, locale: context.localeName)}",
                   ),
                 ),
@@ -341,7 +342,7 @@ class _DayHeader extends StatelessWidget {
     final label = switch (today.difference(day).inDays) {
       0 => context.localized.today,
       1 => context.localized.yesterday,
-      _ => DateFormat.yMMMMEEEEd(context.localeName).format(day),
+      _ => DateFormat.yMMMMEEEEd(context.localeName).formatStandalone(day),
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),

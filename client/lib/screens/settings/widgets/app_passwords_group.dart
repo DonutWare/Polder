@@ -108,7 +108,10 @@ class _AppPasswordTile extends ConsumerWidget {
       if (password.readOnly) localized.appPasswordReadOnly,
       lastUsed == null
           ? localized.appPasswordNeverUsed
-          : localized.appPasswordLastUsed(DateFormat.yMMMd().add_Hm().format(lastUsed), password.lastUsedAddress),
+          : localized.appPasswordLastUsed(
+              DateFormat.yMMMd(context.localeName).add_Hm().format(lastUsed),
+              password.lastUsedAddress,
+            ),
     ];
     return ListTile(
       leading: Icon(password.readOnly ? IconsaxPlusLinear.eye : IconsaxPlusLinear.key),

@@ -10,6 +10,7 @@ import "package:polder_calendar/src/model/calendar_ref.dart";
 import "package:polder_calendar/src/rrule/recurrence_rule.dart";
 import "package:polder_calendar/src/state/calendar_providers.dart";
 import "package:polder_calendar/src/time/calendar_view_mode.dart";
+import "package:polder_calendar/src/time/date_labels.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 
 typedef CalendarNavigate = void Function(CalendarViewMode mode, DateTime anchor);
@@ -71,7 +72,9 @@ int firstDayOfWeek(BuildContext context) => MaterialLocalizations.of(context).fi
 
 bool isToday(DateTime day) => day.isSameDay(DateTime.now());
 
-String describeWhen(BuildContext context, CalendarEvent event) {
+String describeWhen(BuildContext context, CalendarEvent event) => capitalizeFirst(_whenLabel(context, event));
+
+String _whenLabel(BuildContext context, CalendarEvent event) {
   final locale = localeTag(context);
   final day = DateFormat.MMMMEEEEd(locale);
   if (event.allDay) {

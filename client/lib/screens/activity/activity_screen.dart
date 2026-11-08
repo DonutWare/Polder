@@ -22,6 +22,7 @@ import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/widgets/shared/nav_group.dart";
 import "package:polder/widgets/shared/section_header.dart";
 import "package:polder/widgets/shared/tag.dart";
+import "package:polder_calendar/polder_calendar.dart";
 
 class ActivityScreen extends ConsumerWidget {
   const ActivityScreen({super.key});
@@ -133,7 +134,7 @@ class _DayHeader extends StatelessWidget {
     final label = switch (today.difference(day).inDays) {
       0 => context.localized.today,
       1 => context.localized.yesterday,
-      _ => DateFormat.yMMMMEEEEd(context.localeName).format(day),
+      _ => DateFormat.yMMMMEEEEd(context.localeName).formatStandalone(day),
     };
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),

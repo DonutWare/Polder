@@ -8,6 +8,7 @@ import "package:polder_calendar/l10n/generated/calendar_localizations.dart";
 import "package:polder_calendar/src/model/calendar_event.dart";
 import "package:polder_calendar/src/state/calendar_providers.dart";
 import "package:polder_calendar/src/time/calendar_view_mode.dart";
+import "package:polder_calendar/src/time/date_labels.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 import "package:polder_calendar/src/views/calendar_style.dart";
 import "package:polder_calendar/src/views/event_tiles.dart";
@@ -265,7 +266,7 @@ class _MonthBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        DateFormat.yMMMM(localeTag(context)).format(month),
+                        DateFormat.yMMMM(localeTag(context)).formatStandalone(month),
                         style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white, shadows: shadow),
                       ),
                       if (empty)
@@ -380,7 +381,7 @@ class _DateLabel extends StatelessWidget {
             child: Center(child: Text("${day.day}", style: numberStyle)),
           );
     final weekday = Text(
-      (wide ? DateFormat.EEEE(locale) : DateFormat.E(locale)).format(day),
+      (wide ? DateFormat.EEEE(locale) : DateFormat.E(locale)).formatStandalone(day),
       style: theme.textTheme.labelMedium?.copyWith(color: accent, fontWeight: FontWeight.w600),
     );
     return InkWell(
@@ -399,7 +400,7 @@ class _DateLabel extends StatelessWidget {
                       children: [
                         weekday,
                         Text(
-                          DateFormat.yMMM(locale).format(day),
+                          DateFormat.yMMM(locale).formatStandalone(day),
                           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                         ),
                       ],

@@ -9,6 +9,7 @@ import "package:intl/intl.dart";
 import "package:polder_calendar/l10n/generated/calendar_localizations.dart";
 import "package:polder_calendar/src/state/calendar_providers.dart";
 import "package:polder_calendar/src/time/calendar_view_mode.dart";
+import "package:polder_calendar/src/time/date_labels.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 import "package:polder_calendar/src/views/calendar_style.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
@@ -19,7 +20,9 @@ class CalendarTitle extends StatelessWidget {
   final CalendarViewMode mode;
   final DateTime anchor;
 
-  String _text(BuildContext context) {
+  String _text(BuildContext context) => capitalizeFirst(_rangeLabel(context));
+
+  String _rangeLabel(BuildContext context) {
     final locale = localeTag(context);
     if (mode == CalendarViewMode.day) return DateFormat.yMMMMd(locale).format(anchor);
     if (!mode.isTimeGrid) return _month(anchor, locale);
@@ -229,7 +232,7 @@ class _MiniMonthState extends ConsumerState<MiniMonth> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(start: 8),
-                  child: Text(DateFormat.yMMMM(locale).format(_month), style: theme.textTheme.titleMedium),
+                  child: Text(DateFormat.yMMMM(locale).formatStandalone(_month), style: theme.textTheme.titleMedium),
                 ),
               ),
               IconButton(
