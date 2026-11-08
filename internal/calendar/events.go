@@ -237,15 +237,24 @@ func describeComponent(c Calendar, object Object, resource *Resource, component 
 			event.RecurrenceID, event.Override = recurrenceIDValue(value), true
 		}
 	}
-	if rule := component.Props.Get(ical.PropRecurrenceRule); rule != nil {
-		event.RRule = rule.Value
-	}
+	event.RRule = seriesRule(resource, component)
 	event.ExceptionDates = exceptionDates(resource, component)
 	event.Categories = categories(component)
 	event.Organizer = organizerPerson(component, own)
 	event.Attendees = attendeesOf(component, own)
 	event.Alarms = alarmsOf(resource, component)
 	return event
+}
+
+func seriesRule(resource *Resource, component *ical.Component) string {
+	rule := component.Props.Get(ical.PropRecurrenceRule)
+	if rule == nil && component.Props.Get(ical.PropRecurrenceID) != nil && resource.Master != nil {
+		rule = resource.Master.Props.Get(ical.PropRecurrenceRule)
+	}
+	if rule == nil {
+		return ""
+	}
+	return rule.Value
 }
 
 func exceptionDates(resource *Resource, component *ical.Component) []string {
@@ -419,7 +428,7 @@ func (s *Service) UpdateEvent(ctx context.Context, viewer users.User, calendarID
 	case ScopeFollowing:
 		return s.splitSeries(ctx, viewer, c, object, resource, previous, change, owner)
 	default:
-		err = applyInput(resource.Primary(), change.Input, owner, resource.Master != nil)
+		err = editSeries(resource, change, owner)
 	}
 	if err != nil {
 		return EventDetails{}, err
@@ -440,6 +449,57 @@ func effectiveScope(resource *Resource, scope EditScope, recurrenceID string) Ed
 		return ScopeAll
 	}
 	return scope
+}
+
+var seriesTextProps = []string{ical.PropSummary, ical.PropDescription, ical.PropLocation, ical.PropURL}
+
+func editSeries(resource *Resource, change EventChange, owner users.User) error {
+	primary := resource.Primary()
+	before := textValues(primary)
+	edited := resource.editedOverride(change.RecurrenceID)
+	if err := applyInput(primary, change.Input, owner, resource.Master != nil); err != nil {
+		return err
+	}
+	if resource.Master == nil {
+		return nil
+	}
+	if !resource.Recurring() {
+		resource.dropOverrides()
+		return nil
+	}
+	after := textValues(primary)
+	for _, override := range resource.Overrides {
+		followSeries(override, before, after, override == edited)
+	}
+	return nil
+}
+
+func textValues(component *ical.Component) map[string]string {
+	values := make(map[string]string, len(seriesTextProps))
+	for _, name := range seriesTextProps {
+		values[name] = propText(component, name)
+	}
+	return values
+}
+
+func followSeries(override *ical.Component, before, after map[string]string, edited bool) {
+	changed := false
+	for _, name := range seriesTextProps {
+		current := propText(override, name)
+		if current == after[name] || (!edited && current != before[name]) {
+			continue
+		}
+		if name == ical.PropURL {
+			setRaw(override, name, after[name])
+		} else {
+			setText(override, name, after[name])
+		}
+		changed = true
+	}
+	if changed {
+		override.Props.SetDateTime(ical.PropLastModified, time.Now().UTC())
+		bumpSequence(override)
+	}
 }
 
 func (s *Service) editOccurrence(resource *Resource, change EventChange, owner users.User) error {

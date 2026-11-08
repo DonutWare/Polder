@@ -168,6 +168,49 @@ func TestCalendarEventsRepeatAndChangePerOccurrence(t *testing.T) {
 	})
 }
 
+func TestCalendarSeriesEditsFromAnOverriddenOccurrence(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		admin := server.setupAdmin()
+		alice := server.createUser(admin, "alice", 0)
+		personal := alice.defaultCalendar()
+		rule := "FREQ=WEEKLY;BYDAY=MO;COUNT=4"
+		standup := alice.createEvent(personal.ID, map[string]any{
+			"summary": "Standup", "start": "2030-03-04T09:00:00Z", "end": "2030-03-04T09:15:00Z", "rrule": rule,
+		})
+		from, to := time.Date(2030, 3, 1, 0, 0, 0, 0, time.UTC), time.Date(2030, 5, 1, 0, 0, 0, 0, time.UTC)
+		weekly := alice.occurrences(from, to)
+		editPath := func(scope, recurrenceID string) string {
+			return fmt.Sprintf("/calendars/%d/events/%d?scope=%s&recurrenceId=%s", personal.ID, standup.ID, scope, recurrenceID)
+		}
+		alice.mustJSON(http.MethodPut, editPath("this", weekly[1].RecurrenceID), map[string]any{
+			"summary": "Standup", "start": "2030-03-11T10:00:00Z", "end": "2030-03-11T10:15:00Z",
+		}, http.StatusOK, nil)
+		alice.mustJSON(http.MethodPut, editPath("this", weekly[2].RecurrenceID), map[string]any{
+			"summary": "Retro", "start": "2030-03-18T09:00:00Z", "end": "2030-03-18T09:15:00Z",
+		}, http.StatusOK, nil)
+
+		moved := alice.occurrences(from, to)[1]
+		if !moved.Override || moved.RRule != rule {
+			t.Fatalf("an overridden occurrence reports the series rule, got %+v", moved)
+		}
+
+		alice.mustJSON(http.MethodPut, editPath("all", moved.RecurrenceID), map[string]any{
+			"summary": "Daily sync", "start": "2030-03-04T09:00:00Z", "end": "2030-03-04T09:15:00Z", "rrule": moved.RRule,
+		}, http.StatusOK, nil)
+		renamed := alice.occurrences(from, to)
+		if got := summaries(renamed); got != "Daily sync@03-04T09:00,Daily sync@03-11T10:00,Retro@03-18T09:00,Daily sync@03-25T09:00" {
+			t.Fatalf("renaming the series from an override: %s", got)
+		}
+
+		alice.mustJSON(http.MethodPut, editPath("all", renamed[1].RecurrenceID), map[string]any{
+			"summary": "Once", "start": "2030-03-04T09:00:00Z", "end": "2030-03-04T09:15:00Z",
+		}, http.StatusOK, nil)
+		if got := summaries(alice.occurrences(from, to)); got != "Once@03-04T09:00" {
+			t.Fatalf("ending the repeat leaves no stray occurrences: %s", got)
+		}
+	})
+}
+
 func TestCalendarImportAllDayEvents(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		admin := server.setupAdmin()

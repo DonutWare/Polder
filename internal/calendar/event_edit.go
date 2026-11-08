@@ -315,6 +315,23 @@ func (r *Resource) override(instant dateTime) *ical.Component {
 	return nil
 }
 
+func (r *Resource) editedOverride(recurrenceID string) *ical.Component {
+	if recurrenceID == "" {
+		return nil
+	}
+	instant, err := r.instantFrom(strings.TrimSpace(recurrenceID))
+	if err != nil {
+		return nil
+	}
+	return r.override(instant)
+}
+
+func (r *Resource) dropOverrides() {
+	for _, override := range append([]*ical.Component(nil), r.Overrides...) {
+		r.removeComponent(override)
+	}
+}
+
 func (r *Resource) instanceProp(name string, instant time.Time) *ical.Prop {
 	startProp := r.Master.Props.Get(ical.PropDateTimeStart)
 	start, _ := r.zones.dateTime(startProp)
