@@ -585,6 +585,9 @@ extension QueryFilterToModel on wire.QueryFilter {
       wire.QueryFilterKey.modified => SearchKey.modified,
       wire.QueryFilterKey.size => SearchKey.size,
       wire.QueryFilterKey.tag => SearchKey.tag,
+      wire.QueryFilterKey.calendar => SearchKey.calendar,
+      wire.QueryFilterKey.repeats => SearchKey.repeats,
+      wire.QueryFilterKey.when => SearchKey.when,
       wire.QueryFilterKey.swaggerGeneratedUnknown => null,
     };
     final searchOp = switch (op) {

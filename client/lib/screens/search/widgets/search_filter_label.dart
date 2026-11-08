@@ -8,6 +8,9 @@ extension SearchKeyLabel on SearchKey {
     SearchKey.modified => l.searchFieldModified,
     SearchKey.size => l.searchFieldSize,
     SearchKey.tag => l.searchFieldTag,
+    SearchKey.calendar => l.searchFieldCalendar,
+    SearchKey.repeats => l.searchFieldRepeats,
+    SearchKey.when => l.searchFieldWhen,
   };
 }
 
@@ -27,6 +30,8 @@ String searchOpLabel(AppLocalizations l, SearchKey key, SearchOp op) {
 final _relative = RegExp(r"^(\d+)([dwmy])$");
 
 String searchValueLabel(AppLocalizations l, SearchKey key, String value) {
+  if (key == SearchKey.repeats) return _repeatLabel(l, value);
+  if (key == SearchKey.when) return _whenLabel(l, value);
   if (key != SearchKey.modified) return value;
   if (value == "today") return l.searchPresetToday;
   if (value == "yesterday") return l.searchPresetYesterday;
@@ -40,3 +45,20 @@ String searchValueLabel(AppLocalizations l, SearchKey key, String value) {
     _ => l.searchYearsAgo(count),
   };
 }
+
+String _repeatLabel(AppLocalizations l, String value) => switch (value) {
+  "yes" => l.searchRepeatYes,
+  "no" => l.searchRepeatNo,
+  "daily" => l.searchRepeatDaily,
+  "weekly" => l.searchRepeatWeekly,
+  "monthly" => l.searchRepeatMonthly,
+  "yearly" => l.searchRepeatYearly,
+  _ => value,
+};
+
+String _whenLabel(AppLocalizations l, String value) => switch (value) {
+  "upcoming" => l.searchWhenUpcoming,
+  "past" => l.searchWhenPast,
+  "today" => l.searchPresetToday,
+  _ => value,
+};

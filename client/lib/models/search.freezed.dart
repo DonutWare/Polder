@@ -1990,6 +1990,576 @@ as List<SearchSuggestion>,
 }
 
 /// @nodoc
+mixin _$EventSearchHit {
+
+ CalendarEvent get event; bool get upcoming; List<TextRange> get summaryMatches;
+/// Create a copy of EventSearchHit
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$EventSearchHitCopyWith<EventSearchHit> get copyWith => _$EventSearchHitCopyWithImpl<EventSearchHit>(this as EventSearchHit, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as EventSearchHit;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EventSearchHit&&(identical(other.event, _this.event) || other.event == _this.event)&&(identical(other.upcoming, _this.upcoming) || other.upcoming == _this.upcoming)&&const DeepCollectionEquality().equals(other.summaryMatches, _this.summaryMatches));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as EventSearchHit;
+  return Object.hash(runtimeType,_this.event,_this.upcoming,const DeepCollectionEquality().hash(_this.summaryMatches));
+}
+
+@override
+String toString() {
+  final _this = this as EventSearchHit;
+  return 'EventSearchHit(event: ${_this.event}, upcoming: ${_this.upcoming}, summaryMatches: ${_this.summaryMatches})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $EventSearchHitCopyWith<$Res>  {
+  factory $EventSearchHitCopyWith(EventSearchHit value, $Res Function(EventSearchHit) _then) = _$EventSearchHitCopyWithImpl;
+@useResult
+$Res call({
+ CalendarEvent event, bool upcoming, List<TextRange> summaryMatches
+});
+
+
+$CalendarEventCopyWith<$Res> get event;
+
+}
+/// @nodoc
+class _$EventSearchHitCopyWithImpl<$Res>
+    implements $EventSearchHitCopyWith<$Res> {
+  _$EventSearchHitCopyWithImpl(this._self, this._then);
+
+  final EventSearchHit _self;
+  final $Res Function(EventSearchHit) _then;
+
+/// Create a copy of EventSearchHit
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? event = null,Object? upcoming = null,Object? summaryMatches = null,}) {
+  return _then(EventSearchHit(
+event: null == event ? _self.event : event // ignore: cast_nullable_to_non_nullable
+as CalendarEvent,upcoming: null == upcoming ? _self.upcoming : upcoming // ignore: cast_nullable_to_non_nullable
+as bool,summaryMatches: null == summaryMatches ? _self.summaryMatches : summaryMatches // ignore: cast_nullable_to_non_nullable
+as List<TextRange>,
+  ));
+}
+/// Create a copy of EventSearchHit
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CalendarEventCopyWith<$Res> get event {
+  
+  return $CalendarEventCopyWith<$Res>(_self.event, (value) {
+    return _then(_self.copyWith(event: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [EventSearchHit].
+extension EventSearchHitPatterns on EventSearchHit {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _EventSearchHit value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _EventSearchHit() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _EventSearchHit value)  $default,){
+final _that = this;
+switch (_that) {
+case _EventSearchHit():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _EventSearchHit value)?  $default,){
+final _that = this;
+switch (_that) {
+case _EventSearchHit() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CalendarEvent event,  bool upcoming,  List<TextRange> summaryMatches)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _EventSearchHit() when $default != null:
+return $default(_that.event,_that.upcoming,_that.summaryMatches);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CalendarEvent event,  bool upcoming,  List<TextRange> summaryMatches)  $default,) {final _that = this;
+switch (_that) {
+case _EventSearchHit():
+return $default(_that.event,_that.upcoming,_that.summaryMatches);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CalendarEvent event,  bool upcoming,  List<TextRange> summaryMatches)?  $default,) {final _that = this;
+switch (_that) {
+case _EventSearchHit() when $default != null:
+return $default(_that.event,_that.upcoming,_that.summaryMatches);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _EventSearchHit implements EventSearchHit {
+  const _EventSearchHit({required this.event, this.upcoming = false,  List<TextRange> summaryMatches = const <TextRange>[]}): _summaryMatches = summaryMatches;
+  
+
+@override final  CalendarEvent event;
+@override@JsonKey() final  bool upcoming;
+ final  List<TextRange> _summaryMatches;
+@override@JsonKey() List<TextRange> get summaryMatches {
+  if (_summaryMatches is EqualUnmodifiableListView) return _summaryMatches;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_summaryMatches);
+}
+
+
+/// Create a copy of EventSearchHit
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EventSearchHitCopyWith<_EventSearchHit> get copyWith => __$EventSearchHitCopyWithImpl<_EventSearchHit>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EventSearchHit&&(identical(other.event, event) || other.event == event)&&(identical(other.upcoming, upcoming) || other.upcoming == upcoming)&&const DeepCollectionEquality().equals(other.summaryMatches, _summaryMatches));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,event,upcoming,const DeepCollectionEquality().hash(_summaryMatches));
+}
+
+@override
+String toString() {
+    return 'EventSearchHit(event: $event, upcoming: $upcoming, summaryMatches: $summaryMatches)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EventSearchHitCopyWith<$Res> implements $EventSearchHitCopyWith<$Res> {
+  factory _$EventSearchHitCopyWith(_EventSearchHit value, $Res Function(_EventSearchHit) _then) = __$EventSearchHitCopyWithImpl;
+@override @useResult
+$Res call({
+ CalendarEvent event, bool upcoming, List<TextRange> summaryMatches
+});
+
+
+@override $CalendarEventCopyWith<$Res> get event;
+
+}
+/// @nodoc
+class __$EventSearchHitCopyWithImpl<$Res>
+    implements _$EventSearchHitCopyWith<$Res> {
+  __$EventSearchHitCopyWithImpl(this._self, this._then);
+
+  final _EventSearchHit _self;
+  final $Res Function(_EventSearchHit) _then;
+
+/// Create a copy of EventSearchHit
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? event = null,Object? upcoming = null,Object? summaryMatches = null,}) {
+  return _then(_EventSearchHit(
+event: null == event ? _self.event : event // ignore: cast_nullable_to_non_nullable
+as CalendarEvent,upcoming: null == upcoming ? _self.upcoming : upcoming // ignore: cast_nullable_to_non_nullable
+as bool,summaryMatches: null == summaryMatches ? _self._summaryMatches : summaryMatches // ignore: cast_nullable_to_non_nullable
+as List<TextRange>,
+  ));
+}
+
+/// Create a copy of EventSearchHit
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CalendarEventCopyWith<$Res> get event {
+  
+  return $CalendarEventCopyWith<$Res>(_self.event, (value) {
+    return _then(_self.copyWith(event: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$EventSearchResults {
+
+ String get query; int get total; List<EventSearchHit> get hits;
+/// Create a copy of EventSearchResults
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$EventSearchResultsCopyWith<EventSearchResults> get copyWith => _$EventSearchResultsCopyWithImpl<EventSearchResults>(this as EventSearchResults, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as EventSearchResults;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EventSearchResults&&(identical(other.query, _this.query) || other.query == _this.query)&&(identical(other.total, _this.total) || other.total == _this.total)&&const DeepCollectionEquality().equals(other.hits, _this.hits));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as EventSearchResults;
+  return Object.hash(runtimeType,_this.query,_this.total,const DeepCollectionEquality().hash(_this.hits));
+}
+
+@override
+String toString() {
+  final _this = this as EventSearchResults;
+  return 'EventSearchResults(query: ${_this.query}, total: ${_this.total}, hits: ${_this.hits})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $EventSearchResultsCopyWith<$Res>  {
+  factory $EventSearchResultsCopyWith(EventSearchResults value, $Res Function(EventSearchResults) _then) = _$EventSearchResultsCopyWithImpl;
+@useResult
+$Res call({
+ String query, int total, List<EventSearchHit> hits
+});
+
+
+
+
+}
+/// @nodoc
+class _$EventSearchResultsCopyWithImpl<$Res>
+    implements $EventSearchResultsCopyWith<$Res> {
+  _$EventSearchResultsCopyWithImpl(this._self, this._then);
+
+  final EventSearchResults _self;
+  final $Res Function(EventSearchResults) _then;
+
+/// Create a copy of EventSearchResults
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? query = null,Object? total = null,Object? hits = null,}) {
+  return _then(EventSearchResults(
+query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,hits: null == hits ? _self.hits : hits // ignore: cast_nullable_to_non_nullable
+as List<EventSearchHit>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [EventSearchResults].
+extension EventSearchResultsPatterns on EventSearchResults {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _EventSearchResults value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _EventSearchResults() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _EventSearchResults value)  $default,){
+final _that = this;
+switch (_that) {
+case _EventSearchResults():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _EventSearchResults value)?  $default,){
+final _that = this;
+switch (_that) {
+case _EventSearchResults() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String query,  int total,  List<EventSearchHit> hits)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _EventSearchResults() when $default != null:
+return $default(_that.query,_that.total,_that.hits);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String query,  int total,  List<EventSearchHit> hits)  $default,) {final _that = this;
+switch (_that) {
+case _EventSearchResults():
+return $default(_that.query,_that.total,_that.hits);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String query,  int total,  List<EventSearchHit> hits)?  $default,) {final _that = this;
+switch (_that) {
+case _EventSearchResults() when $default != null:
+return $default(_that.query,_that.total,_that.hits);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _EventSearchResults extends EventSearchResults {
+  const _EventSearchResults({required this.query, this.total = 0,  List<EventSearchHit> hits = const <EventSearchHit>[]}): _hits = hits,super._();
+  
+
+@override final  String query;
+@override@JsonKey() final  int total;
+ final  List<EventSearchHit> _hits;
+@override@JsonKey() List<EventSearchHit> get hits {
+  if (_hits is EqualUnmodifiableListView) return _hits;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_hits);
+}
+
+
+/// Create a copy of EventSearchResults
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EventSearchResultsCopyWith<_EventSearchResults> get copyWith => __$EventSearchResultsCopyWithImpl<_EventSearchResults>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EventSearchResults&&(identical(other.query, query) || other.query == query)&&(identical(other.total, total) || other.total == total)&&const DeepCollectionEquality().equals(other.hits, _hits));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,query,total,const DeepCollectionEquality().hash(_hits));
+}
+
+@override
+String toString() {
+    return 'EventSearchResults(query: $query, total: $total, hits: $hits)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EventSearchResultsCopyWith<$Res> implements $EventSearchResultsCopyWith<$Res> {
+  factory _$EventSearchResultsCopyWith(_EventSearchResults value, $Res Function(_EventSearchResults) _then) = __$EventSearchResultsCopyWithImpl;
+@override @useResult
+$Res call({
+ String query, int total, List<EventSearchHit> hits
+});
+
+
+
+
+}
+/// @nodoc
+class __$EventSearchResultsCopyWithImpl<$Res>
+    implements _$EventSearchResultsCopyWith<$Res> {
+  __$EventSearchResultsCopyWithImpl(this._self, this._then);
+
+  final _EventSearchResults _self;
+  final $Res Function(_EventSearchResults) _then;
+
+/// Create a copy of EventSearchResults
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? query = null,Object? total = null,Object? hits = null,}) {
+  return _then(_EventSearchResults(
+query: null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as int,hits: null == hits ? _self._hits : hits // ignore: cast_nullable_to_non_nullable
+as List<EventSearchHit>,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$TextExtractionStatus {
 
  int get pending; OcrState get ocr; String? get ocrProblem;

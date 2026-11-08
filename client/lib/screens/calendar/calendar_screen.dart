@@ -72,7 +72,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       return;
     }
     if (!mounted) return;
-    context.go(AppRoutes.calendarAt(widget.mode ?? CalendarViewMode.day, day));
+    context.go(AppRoutes.calendarAt(_currentMode(), day));
     await openCalendarEvent(context, event);
   }
 
@@ -81,6 +81,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     ref.read(calendarViewModeProvider.notifier).select(mode);
     context.go(AppRoutes.calendarAt(mode, anchor));
   }
+
+  CalendarViewMode _currentMode() =>
+      widget.mode ??
+      ref.read(calendarViewModeProvider) ??
+      (AdaptiveLayout.isPhone(context) ? CalendarViewMode.schedule : CalendarViewMode.week);
 
   CalendarViewMode _mode(bool phone) =>
       widget.mode ?? ref.watch(calendarViewModeProvider) ?? (phone ? CalendarViewMode.schedule : CalendarViewMode.week);

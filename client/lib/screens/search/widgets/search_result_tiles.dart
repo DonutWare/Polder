@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/search.dart";
@@ -10,6 +11,7 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/icon_badge.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_calendar/polder_calendar.dart" as cal;
 
 class SearchHitTile extends StatelessWidget {
   const SearchHitTile({
@@ -82,6 +84,72 @@ class SearchHitTile extends StatelessWidget {
       onTap: onOpen,
     );
   }
+}
+
+class EventSearchHitTile extends ConsumerWidget {
+  const EventSearchHitTile({required this.hit, required this.selected, required this.onOpen, super.key});
+
+  final EventSearchHit hit;
+  final bool selected;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.localized;
+    final theme = Theme.of(context);
+    final event = hit.event;
+    final color = event.colorIn(context, ref.watch(cal.calendarColorsProvider));
+    final muted = theme.colorScheme.onSurfaceVariant;
+    final location = event.location?.trim() ?? "";
+    final when = [
+      cal.describeWhen(context, event),
+      if (event.start.year != DateTime.now().year) "${event.start.year}",
+      if (location.isNotEmpty) location,
+    ].join(" · ");
+    return ListTile(
+      selected: selected,
+      selectedTileColor: theme.colorScheme.secondaryContainer.withValues(alpha: 0.6),
+      selectedColor: theme.colorScheme.onSurface,
+      shape: const StadiumBorder(),
+      leading: _EventBadge(color: color, faded: !hit.upcoming),
+      title: Row(
+        spacing: 8,
+        children: [
+          Flexible(
+            child: HighlightedText(
+              text: event.titleFor(cal.CalendarLocalizations.of(context)),
+              ranges: hit.summaryMatches,
+              style: hit.upcoming ? null : TextStyle(color: muted),
+            ),
+          ),
+          if (event.recurring) Icon(IconsaxPlusLinear.repeat, size: 16, color: muted),
+          if (!hit.upcoming) Text(l.searchEventPast, style: theme.textTheme.labelSmall?.copyWith(color: muted)),
+        ],
+      ),
+      subtitle: Text(when, maxLines: 1, overflow: TextOverflow.ellipsis),
+      trailing: Icon(IconsaxPlusLinear.calendar_1, size: 18, color: muted, semanticLabel: l.searchOpenInCalendar),
+      onTap: onOpen,
+    );
+  }
+}
+
+class _EventBadge extends StatelessWidget {
+  const _EventBadge({required this.color, required this.faded});
+
+  final Color color;
+  final bool faded;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 40,
+    height: 40,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: color.withValues(alpha: faded ? 0.08 : 0.16),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Icon(IconsaxPlusBold.calendar_1, size: 20, color: faded ? color.withValues(alpha: 0.5) : color),
+  );
 }
 
 class DestinationTile extends StatelessWidget {

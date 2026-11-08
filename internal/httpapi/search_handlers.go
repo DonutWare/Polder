@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 
+	"polder-server/internal/calendar"
 	"polder-server/internal/extract"
 	"polder-server/internal/files"
 	"polder-server/internal/search"
@@ -20,7 +21,16 @@ const searchDescription = "Free text matches names fuzzily: substrings, abbrevia
 	"- `tag` (also `tags`): the user's tags, such as `tag=work`; `#work` is short for `tag=work` and `-#work` excludes it\n\n" +
 	"Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. " +
 	"Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. " +
-	"A relative date is a moment: `modified>7d` is newer than a week ago."
+	"A relative date is a moment: `modified>7d` is newer than a week ago.\n\n" +
+	"`type=event` leaves files out and searches only calendar events, which `/search/events` returns."
+
+const eventSearchDescription = "Finds calendar events by their summary, location, categories and description, with the same query " +
+	"syntax as `/search`. A repeating event is listed once, at its next occurrence, or at its last one when the series is over. " +
+	"Upcoming events come first, soonest first, then past events, most recent first. Event filters:\n\n" +
+	"- `type=event` (also `is:event`): only events; any file-only filter (`ext`, `in`, `modified`, `size`, `tag`) leaves events out\n" +
+	"- `calendar` (also `cal`): a calendar name or ID, such as `calendar=Work`; hidden calendars are searched only when named\n" +
+	"- `repeats` (also `repeat`, `recurring`): `yes`, `no`, `daily`, `weekly`, `monthly` or `yearly`\n" +
+	"- `when`: `upcoming`, `past`, `today`, or a date such as `2024-06` to pick the occurrence in that period"
 
 type searchInput struct {
 	Query  string `query:"q" doc:"What to look for; see the operation description for filters"`
@@ -49,6 +59,14 @@ func (a *API) searchFiles(ctx context.Context, input *searchInput) (*jsonBody[se
 		response.Results[i].Entry = entries[i]
 	}
 	return respond(response), nil
+}
+
+func (a *API) searchEvents(ctx context.Context, input *searchInput) (*jsonBody[calendar.EventResults], error) {
+	results, err := a.calendar.SearchEvents(ctx, currentUser(ctx), input.Query, input.Limit, input.Offset)
+	if err != nil {
+		return nil, err
+	}
+	return respond(results), nil
 }
 
 func (a *API) suggestSearch(ctx context.Context, input *suggestInput) (*jsonBody[search.Suggestions], error) {

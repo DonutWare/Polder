@@ -178,6 +178,24 @@ class PolderApi {
   Future<SearchResults> search(String query, {int limit = 50, int offset = 0}) async =>
       (await _service.searchFiles(q: query, limit: limit, offset: offset)).body!.toModel();
 
+  Future<EventSearchResults> searchEvents(String sourceId, String query, {int limit = 50, int offset = 0}) async {
+    final body = (await _service.searchEvents(q: query, limit: limit, offset: offset)).body!;
+    return EventSearchResults(
+      query: body.query,
+      total: body.total,
+      hits: [
+        for (final match in body.results ?? <wire.EventMatch>[])
+          EventSearchHit(
+            event: match.event.toModel(sourceId),
+            upcoming: match.upcoming,
+            summaryMatches: [
+              for (final span in match.summaryMatches ?? <wire.TextSpan>[]) TextRange(start: span.start, end: span.end),
+            ],
+          ),
+      ],
+    );
+  }
+
   Future<SearchSuggestions> suggestSearch(String query, int cursor) async =>
       (await _service.suggestSearch(q: query, cursor: cursor)).body!.toModel();
 

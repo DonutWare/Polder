@@ -97,3 +97,32 @@ func TestKindOf(t *testing.T) {
 		t.Error("kind should be the top-level MIME type, or folder for directories")
 	}
 }
+
+func TestEventFilters(t *testing.T) {
+	now := time.Date(2026, 10, 6, 12, 0, 0, 0, time.Local)
+	tests := []struct {
+		query         string
+		files, events bool
+		warnings      int
+	}{
+		{query: "standup", files: true, events: true},
+		{query: "type=event", files: false, events: true},
+		{query: "is:events", files: false, events: true},
+		{query: "type=note,event", files: true, events: true},
+		{query: "type=note", files: true, events: false},
+		{query: "type!=event", files: true, events: false},
+		{query: "repeats=weekly", files: false, events: true},
+		{query: "cal:\"My Work\"", files: false, events: true},
+		{query: "when=upcoming", files: false, events: true},
+		{query: "when=2026-11", files: false, events: true},
+		{query: "tag=work", files: true, events: false},
+		{query: "repeats=sometimes", files: true, events: true, warnings: 1},
+		{query: "when>today", files: true, events: true, warnings: 1},
+	}
+	for _, test := range tests {
+		parsed := Parse(test.query, now)
+		if parsed.WantsFiles() != test.files || parsed.WantsEvents() != test.events || len(parsed.Warnings) != test.warnings {
+			t.Errorf("%q: files %v events %v warnings %+v", test.query, parsed.WantsFiles(), parsed.WantsEvents(), parsed.Warnings)
+		}
+	}
+}

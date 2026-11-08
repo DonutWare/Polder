@@ -57,7 +57,7 @@ func (s *Service) Search(ctx context.Context, owner users.User, raw string, limi
 	parsed := Parse(raw, time.Now())
 	response := Results{Query: raw, Results: []Match{}, Filters: parsed.Filters, Warnings: parsed.Warnings,
 		Facets: Facets{Types: []FacetCount{}, Exts: []FacetCount{}}}
-	if !parsed.HasTerms() && len(parsed.Filters) == 0 {
+	if parsed.IsEmpty() || !parsed.WantsFiles() {
 		return response, nil
 	}
 	if err := s.Sync(ctx, owner.ID); err != nil {

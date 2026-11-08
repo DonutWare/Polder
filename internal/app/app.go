@@ -229,6 +229,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 			From: cfg.SMTPFrom, Security: cfg.SMTPSecurity,
 		}),
 	})
+	searchService.UseCalendars(calendarService)
 	handler := httpapi.NewRouter(httpapi.Dependencies{
 		Auth:                   authService,
 		Sessions:               sessions,

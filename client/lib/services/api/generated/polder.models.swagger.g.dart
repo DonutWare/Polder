@@ -681,6 +681,20 @@ Map<String, dynamic> _$EventInputToJson(EventInput instance) => <String, dynamic
   'url': ?instance.url,
 };
 
+EventMatch _$EventMatchFromJson(Map<String, dynamic> json) => EventMatch(
+  event: Event.fromJson(json['event'] as Map<String, dynamic>),
+  summaryMatches:
+      (json['summaryMatches'] as List<dynamic>?)?.map((e) => TextSpan.fromJson(e as Map<String, dynamic>)).toList() ??
+      [],
+  upcoming: json['upcoming'] as bool,
+);
+
+Map<String, dynamic> _$EventMatchToJson(EventMatch instance) => <String, dynamic>{
+  'event': instance.event.toJson(),
+  'summaryMatches': ?instance.summaryMatches?.map((e) => e.toJson()).toList(),
+  'upcoming': instance.upcoming,
+};
+
 EventMessage _$EventMessageFromJson(Map<String, dynamic> json) => EventMessage(
   calendar: json['calendar'] == null ? null : CalendarUpdate.fromJson(json['calendar'] as Map<String, dynamic>),
   code: json['code'] as String?,
@@ -715,6 +729,19 @@ Map<String, dynamic> _$EventMessageToJson(EventMessage instance) => <String, dyn
   'type': ?eventMessageTypeToJson(instance.type),
   'user': ?instance.user?.toJson(),
   'userId': instance.userId,
+};
+
+EventResults _$EventResultsFromJson(Map<String, dynamic> json) => EventResults(
+  query: json['query'] as String,
+  results:
+      (json['results'] as List<dynamic>?)?.map((e) => EventMatch.fromJson(e as Map<String, dynamic>)).toList() ?? [],
+  total: (json['total'] as num).toInt(),
+);
+
+Map<String, dynamic> _$EventResultsToJson(EventResults instance) => <String, dynamic>{
+  'query': instance.query,
+  'results': ?instance.results?.map((e) => e.toJson()).toList(),
+  'total': instance.total,
 };
 
 ExtractionStatus _$ExtractionStatusFromJson(Map<String, dynamic> json) => ExtractionStatus(

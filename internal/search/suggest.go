@@ -134,6 +134,9 @@ func (s *Service) suggestValues(ctx context.Context, owner users.User, key Key, 
 		if strings.HasPrefix(kindFile, fragment) {
 			kinds = append(kinds, Suggestion{Kind: SuggestValue, Value: kindFile, Insert: kindFile})
 		}
+		if strings.HasPrefix(KindEvent, fragment) {
+			kinds = append(kinds, Suggestion{Kind: SuggestValue, Value: KindEvent, Insert: KindEvent})
+		}
 		if strings.HasPrefix(kindNote, fragment) {
 			notesFolder, err := s.users.NotesPath(ctx, owner.ID)
 			if err != nil {
@@ -165,6 +168,12 @@ func (s *Service) suggestValues(ctx context.Context, owner users.User, key Key, 
 		return prefixed([]string{"1mb", "10mb", "100mb", "1gb"}, fragment), nil
 	case KeyTag:
 		return s.tagValues(ctx, owner, strings.TrimPrefix(fragment, "#"), "")
+	case KeyRepeats:
+		return prefixed(RepeatValues, fragment), nil
+	case KeyWhen:
+		return prefixed(WhenValues, fragment), nil
+	case KeyCalendar:
+		return s.calendarValues(ctx, owner, fragment)
 	}
 	return nil, nil
 }
@@ -192,6 +201,30 @@ func (s *Service) tagValues(ctx context.Context, owner users.User, fragment, pre
 		return strings.HasPrefix(suggestions[i].Value, fragment) && !strings.HasPrefix(suggestions[j].Value, fragment)
 	})
 	return suggestions, nil
+}
+
+func (s *Service) calendarValues(ctx context.Context, owner users.User, fragment string) ([]Suggestion, error) {
+	if s.calendars == nil {
+		return nil, nil
+	}
+	names, err := s.calendars.CalendarNames(ctx, owner)
+	if err != nil {
+		return nil, err
+	}
+	var suggestions []Suggestion
+	for _, name := range names {
+		if strings.Contains(strings.ToLower(name), fragment) {
+			suggestions = append(suggestions, Suggestion{Kind: SuggestValue, Value: strings.ToLower(name), Insert: quoteValue(name)})
+		}
+	}
+	return suggestions, nil
+}
+
+func quoteValue(value string) string {
+	if strings.ContainsAny(value, " ,\"") {
+		return `"` + value + `"`
+	}
+	return value
 }
 
 func prefixed(values []string, fragment string) []Suggestion {
@@ -276,11 +309,7 @@ func (s *Service) folderValues(ctx context.Context, owner users.User, fragment s
 	sort.Slice(matches, func(i, j int) bool { return matches[i].score > matches[j].score })
 	suggestions := make([]Suggestion, 0, len(matches))
 	for _, match := range matches {
-		insert := match.path
-		if strings.ContainsAny(insert, " ,\"") {
-			insert = `"` + insert + `"`
-		}
-		suggestions = append(suggestions, Suggestion{Kind: SuggestValue, Value: match.path, Insert: insert})
+		suggestions = append(suggestions, Suggestion{Kind: SuggestValue, Value: match.path, Insert: quoteValue(match.path)})
 	}
 	return suggestions, nil
 }

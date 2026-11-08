@@ -1470,6 +1470,32 @@
         ],
         "type": "object"
       },
+      "EventMatch": {
+        "additionalProperties": false,
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Event"
+          },
+          "summaryMatches": {
+            "description": "Ranges of the summary that matched the query, in UTF-16 code units",
+            "items": {
+              "$ref": "#/components/schemas/TextSpan"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "upcoming": {
+            "description": "Whether the shown occurrence has not ended yet; a repeating event shows its next occurrence, or its last one when the series is over",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "event",
+          "upcoming",
+          "summaryMatches"
+        ],
+        "type": "object"
+      },
       "EventMessage": {
         "additionalProperties": false,
         "properties": {
@@ -1543,6 +1569,31 @@
         "required": [
           "type",
           "userId"
+        ],
+        "type": "object"
+      },
+      "EventResults": {
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/EventMatch"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "total",
+          "results"
         ],
         "type": "object"
       },
@@ -3528,7 +3579,10 @@
               "in",
               "modified",
               "size",
-              "tag"
+              "tag",
+              "calendar",
+              "repeats",
+              "when"
             ],
             "type": "string"
           },
@@ -14009,7 +14063,7 @@
     },
     "/api/v1/search": {
       "get": {
-        "description": "Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Filters narrow the results; they have the form `key\u003cop\u003evalues`:\n\n- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`\n- `ext`: extensions only\n- `in`: a folder and everything below it, such as `in=\"/My Docs\"`\n- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`\n- `size`: such as `10mb`, `500kb`, `1.5gb`\n- `tag` (also `tags`): the user's tags, such as `tag=work`; `#work` is short for `tag=work` and `-#work` excludes it\n\nOperators are `=` or `:` (is), `!=` or a leading `-` (is not), and `\u003e`, `\u003e=`, `\u003c`, `\u003c=` for modified and size. Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified\u003e7d` is newer than a week ago.",
+        "description": "Free text matches names fuzzily: substrings, abbreviations such as `invq3` for invoice_q3.pdf, and small typos. It also matches the text inside files when the server reads it, including text recognised in images and scans; every word must appear, and quotes match a phrase. Name matches come first. Filters narrow the results; they have the form `key\u003cop\u003evalues`:\n\n- `type` (also `kind`, `is`): `folder`, `file`, a top-level MIME type (`image`, `video`, `text`…), an extension, a MIME subtype or a whole MIME type, such as `type=image,pdf,md` or `type=application/zip`\n- `ext`: extensions only\n- `in`: a folder and everything below it, such as `in=\"/My Docs\"`\n- `modified` (also `date`): `2024`, `2024-06`, `2024-06-15`, `today`, `yesterday`, or a relative `7d`, `2w`, `3m`, `1y`\n- `size`: such as `10mb`, `500kb`, `1.5gb`\n- `tag` (also `tags`): the user's tags, such as `tag=work`; `#work` is short for `tag=work` and `-#work` excludes it\n\nOperators are `=` or `:` (is), `!=` or a leading `-` (is not), and `\u003e`, `\u003e=`, `\u003c`, `\u003c=` for modified and size. Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified\u003e7d` is newer than a week ago.\n\n`type=event` leaves files out and searches only calendar events, which `/search/events` returns.",
         "operationId": "searchFiles",
         "parameters": [
           {
@@ -14084,6 +14138,88 @@
           }
         ],
         "summary": "Find files and folders by name, text inside them, type, date and size",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/api/v1/search/events": {
+      "get": {
+        "description": "Finds calendar events by their summary, location, categories and description, with the same query syntax as `/search`. A repeating event is listed once, at its next occurrence, or at its last one when the series is over. Upcoming events come first, soonest first, then past events, most recent first. Event filters:\n\n- `type=event` (also `is:event`): only events; any file-only filter (`ext`, `in`, `modified`, `size`, `tag`) leaves events out\n- `calendar` (also `cal`): a calendar name or ID, such as `calendar=Work`; hidden calendars are searched only when named\n- `repeats` (also `repeat`, `recurring`): `yes`, `no`, `daily`, `weekly`, `monthly` or `yearly`\n- `when`: `upcoming`, `past`, `today`, or a date such as `2024-06` to pick the occurrence in that period",
+        "operationId": "searchEvents",
+        "parameters": [
+          {
+            "description": "What to look for; see the operation description for filters",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "What to look for; see the operation description for filters",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "format": "int64",
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResults"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Find calendar events by text, calendar, repetition and date",
         "tags": [
           "search"
         ]

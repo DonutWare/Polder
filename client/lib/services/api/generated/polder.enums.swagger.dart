@@ -525,7 +525,13 @@ enum QueryFilterKey {
   @JsonValue('size')
   size('size'),
   @JsonValue('tag')
-  tag('tag');
+  tag('tag'),
+  @JsonValue('calendar')
+  calendar('calendar'),
+  @JsonValue('repeats')
+  repeats('repeats'),
+  @JsonValue('when')
+  when('when');
 
   final String? value;
 

@@ -61,6 +61,50 @@ Map<String, dynamic> _results(String query) => {
   "warnings": <Object>[],
 };
 
+Map<String, dynamic> _eventResults(String query) => {
+  "query": query,
+  "total": query.contains("event") || query.contains("standup") ? 1 : 0,
+  "results": [
+    if (query.contains("event") || query.contains("standup"))
+      {
+        "event": {
+          "id": 7,
+          "calendarId": 3,
+          "uid": "uid-7",
+          "etag": "\"e1\"",
+          "summary": "Team standup",
+          "start": "2026-11-09T09:00:00Z",
+          "end": "2026-11-09T09:15:00Z",
+          "allDay": false,
+          "recurring": true,
+          "recurrenceId": "20261109T090000Z",
+          "rrule": "FREQ=WEEKLY",
+          "override": false,
+          "sequence": 0,
+          "showAs": "busy",
+          "status": "CONFIRMED",
+          "busyOnly": false,
+          "updatedAt": "2026-11-01T00:00:00Z",
+        },
+        "upcoming": true,
+        "summaryMatches": query.contains("standup")
+            ? [
+                {"start": 5, "end": 12},
+              ]
+            : <Object>[],
+      },
+  ],
+};
+
+Map<String, dynamic> _noFiles(String query) => {
+  "query": query,
+  "total": 0,
+  "results": <Object>[],
+  "filters": <Object>[],
+  "facets": {"types": <Object>[], "exts": <Object>[]},
+  "warnings": <Object>[],
+};
+
 void main() {
   late ProviderHarness harness;
   late List<FileEntry> opened;
@@ -76,7 +120,12 @@ void main() {
       httpClient: ScriptedClient(
         (request) async => switch (request.path) {
           "/auth/me" => jsonResponse(200, userJson(role: "admin")),
+          "/search" when (request.query["q"] ?? "").contains("event") => jsonResponse(
+            200,
+            _noFiles(request.query["q"]!),
+          ),
           "/search" => jsonResponse(200, _results(request.query["q"] ?? "")),
+          "/search/events" => jsonResponse(200, _eventResults(request.query["q"] ?? "")),
           "/search/suggest" => jsonResponse(200, {"start": 0, "end": 0, "suggestions": <Object>[]}),
           _ => jsonResponse(404, {
             "error": {"code": "not_found", "message": "nope"},
@@ -141,5 +190,33 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(opened.single.path, "/Finance/invoice_q3.pdf");
+  });
+
+  testWidgets("events show above files and open on their day in the calendar", (tester) async {
+    await pumpSearch(tester, initialQuery: "standup");
+
+    expect(find.text("1 event"), findsOneWidget);
+    expect(find.text("1 file"), findsOneWidget);
+    expect(tester.getTopLeft(find.text("1 event")).dy, lessThan(tester.getTopLeft(find.text("1 file")).dy));
+
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+    expect(visited.single, startsWith("/calendar?date=2026-11-09&event=3%2F7"));
+    expect(visited.single, contains("occurrence=20261109T090000Z"));
+  });
+
+  testWidgets("an event search offers event filters and toggles them", (tester) async {
+    await pumpSearch(tester, initialQuery: "type=event ");
+
+    expect(find.text("1 event"), findsOneWidget);
+    expect(find.text("Team standup", findRichText: true), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilterChip, "repeats=no"));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, "type=event repeats=no ");
+
+    await tester.tap(find.widgetWithText(FilterChip, "repeats=no"));
+    await tester.pumpAndSettle();
+    expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, "type=event ");
   });
 }

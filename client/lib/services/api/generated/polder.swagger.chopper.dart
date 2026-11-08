@@ -3794,7 +3794,9 @@ final class _$Polder extends Polder {
 - `size`: such as `10mb`, `500kb`, `1.5gb`
 - `tag` (also `tags`): the user\'s tags, such as `tag=work`; `#work` is short for `tag=work` and `-#work` excludes it
 
-Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified>7d` is newer than a week ago.''',
+Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<`, `<=` for modified and size. Commas separate alternatives, separate filters must all hold, and `modified=a..b` or `size=a..b` is a range. A relative date is a moment: `modified>7d` is newer than a week ago.
+
+`type=event` leaves files out and searches only calendar events, which `/search/events` returns.''',
       summary: 'Find files and folders by name, text inside them, type, date and size',
       operationId: 'searchFiles',
       consumes: [],
@@ -3818,6 +3820,43 @@ Operators are `=` or `:` (is), `!=` or a leading `-` (is not), and `>`, `>=`, `<
       tag: swaggerMetaData,
     );
     return client.send<Results, Results>($request);
+  }
+
+  @override
+  Future<Response<EventResults>> _searchEvents({
+    String? q,
+    int? limit,
+    int? offset,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '''Finds calendar events by their summary, location, categories and description, with the same query syntax as `/search`. A repeating event is listed once, at its next occurrence, or at its last one when the series is over. Upcoming events come first, soonest first, then past events, most recent first. Event filters:
+
+- `type=event` (also `is:event`): only events; any file-only filter (`ext`, `in`, `modified`, `size`, `tag`) leaves events out
+- `calendar` (also `cal`): a calendar name or ID, such as `calendar=Work`; hidden calendars are searched only when named
+- `repeats` (also `repeat`, `recurring`): `yes`, `no`, `daily`, `weekly`, `monthly` or `yearly`
+- `when`: `upcoming`, `past`, `today`, or a date such as `2024-06` to pick the occurrence in that period''',
+      summary: 'Find calendar events by text, calendar, repetition and date',
+      operationId: 'searchEvents',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["search"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/search/events');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'q': q,
+      'limit': limit,
+      'offset': offset,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<EventResults, EventResults>($request);
   }
 
   @override

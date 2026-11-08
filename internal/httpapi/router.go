@@ -292,6 +292,8 @@ func (a *API) routes(api huma.API) {
 
 	register(user, http.MethodGet, "/search", "searchFiles", "Find files and folders by name, text inside them, type, date and size", a.searchFiles,
 		withDescription(searchDescription))
+	register(user, http.MethodGet, "/search/events", "searchEvents", "Find calendar events by text, calendar, repetition and date", a.searchEvents,
+		withDescription(eventSearchDescription))
 	register(user, http.MethodGet, "/search/suggest", "suggestSearch", "Complete the search filter under the cursor", a.suggestSearch)
 
 	register(user, http.MethodGet, "/tags", "listTags", "The logged-in user's tags with how many items carry each", a.listTags)

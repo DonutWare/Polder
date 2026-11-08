@@ -10,6 +10,7 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/models/search.dart";
 import "package:polder/providers/search/app_destinations_provider.dart";
 import "package:polder/providers/search/search_provider.dart";
+import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/search/widgets/search_filter_builder.dart";
 import "package:polder/screens/search/widgets/outline_progress.dart";
 import "package:polder/screens/search/widgets/search_query_controller.dart";
@@ -23,7 +24,16 @@ import "package:polder/widgets/shared/message_view.dart";
 const _debounce = Duration(milliseconds: 150);
 const _maxDestinations = 4;
 const _tileExtent = 64.0;
-const _exampleFilters = ["type=note", "type=image", "type=pdf", "modified>7d", "size>100mb", "type=folder"];
+const _exampleFilters = [
+  "type=note",
+  "type=event",
+  "type=image",
+  "type=pdf",
+  "modified>7d",
+  "size>100mb",
+  "type=folder",
+];
+const _eventFilters = ["repeats=no", "repeats=yes", "when=upcoming", "when=past", "when=today"];
 
 class SearchView extends ConsumerStatefulWidget {
   const SearchView({
@@ -59,6 +69,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
   late String _query = widget.initialQuery.trim();
   late ({String query, int cursor}) _suggestFor = (query: widget.initialQuery, cursor: widget.initialQuery.length);
   SearchResults? _shown;
+  EventSearchResults? _shownEvents;
   int _selected = 0;
 
   @override
@@ -102,6 +113,18 @@ class _SearchViewState extends ConsumerState<SearchView> {
     }
   }
 
+  void _toggleFilter(String filter) {
+    final tokens = tokenizeSearch(_controller.text);
+    final existing = tokens.where((token) => token.text.toLowerCase() == filter).firstOrNull;
+    if (existing != null) {
+      final (text, _) = replaceSearchRange(_controller.text, existing.range, "");
+      final next = text.isEmpty ? text : "$text ";
+      return _setText(next, next.length);
+    }
+    final text = appendSearchFilter(_controller.text, filter);
+    _setText(text, text.length);
+  }
+
   void _setText(String text, int caret) {
     _controller.value = TextEditingValue(
       text: text,
@@ -116,11 +139,13 @@ class _SearchViewState extends ConsumerState<SearchView> {
   }
 
   Future<void> _addFilter() async {
-    final filter = await showSearchFilterBuilder(context);
+    final filter = await showSearchFilterBuilder(context, events: searchesEvents(_controller.text));
     if (filter == null || !mounted) return;
     final text = appendSearchFilter(_controller.text, formatSearchFilter(filter));
     _setText(text, text.length);
   }
+
+  void _openEvent(EventSearchHit hit) => widget.onGo(AppRoutes.calendarEventAt(hit.event.ref, hit.event.start));
 
   void _moveSelection(int delta, int count) {
     if (count == 0) return;
@@ -141,9 +166,15 @@ class _SearchViewState extends ConsumerState<SearchView> {
   Widget build(BuildContext context) {
     final l = context.localized;
     final results = _query.isEmpty ? null : ref.watch(searchResultsProvider(_query));
+    final eventResults = _query.isEmpty ? null : ref.watch(eventSearchResultsProvider(_query));
     if (results?.value case final current?) _shown = current;
-    if (_query.isEmpty) _shown = null;
+    if (eventResults?.value case final current?) _shownEvents = current;
+    if (_query.isEmpty) {
+      _shown = null;
+      _shownEvents = null;
+    }
     final shown = _shown;
+    final shownEvents = _shownEvents;
     final upToDate = shown != null && shown.query == _controller.text.trim();
     final warnings = upToDate ? [for (final warning in shown.warnings) warning.range] : const <TextRange>[];
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -155,17 +186,23 @@ class _SearchViewState extends ConsumerState<SearchView> {
         ? const <DestinationMatch>[]
         : matchDestinations(ref.watch(appDestinationsProvider), l, freeText).take(_maxDestinations).toList();
     final hits = shown?.hits ?? const <SearchHit>[];
-    final count = destinations.length + hits.length;
+    final eventHits = shownEvents?.hits ?? const <EventSearchHit>[];
+    final count = destinations.length + eventHits.length + hits.length;
     if (_selected >= count) _selected = count == 0 ? 0 : count - 1;
 
     void openSelected() {
       if (_selected < destinations.length) return widget.onGo(destinations[_selected].destination.route);
-      final index = _selected - destinations.length;
+      final eventIndex = _selected - destinations.length;
+      if (eventIndex < eventHits.length) return _openEvent(eventHits[eventIndex]);
+      final index = eventIndex - eventHits.length;
       if (index < hits.length) widget.onOpenEntry(hits[index].entry);
     }
 
     final suggestions = _controller.text.isEmpty ? null : ref.watch(searchSuggestionsProvider(_suggestFor)).value;
     final visibleSuggestions = suggestions?.suggestions ?? const <SearchSuggestion>[];
+    final eventChips = visibleSuggestions.isEmpty && searchesEvents(_controller.text);
+    final activeFilters = {for (final token in tokenizeSearch(_controller.text)) token.text.toLowerCase()};
+    final failure = results?.error ?? eventResults?.error;
 
     return CallbackShortcuts(
       bindings: {
@@ -186,7 +223,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
               leading: widget.leading,
               onSubmitted: openSelected,
               onAddFilter: _addFilter,
-              loading: _typing || (results?.isLoading ?? false),
+              loading: _typing || (results?.isLoading ?? false) || (eventResults?.isLoading ?? false),
             ),
           ),
           if (visibleSuggestions.isNotEmpty)
@@ -200,18 +237,31 @@ class _SearchViewState extends ConsumerState<SearchView> {
                   ),
               ],
             ),
+          if (eventChips)
+            _ChipStrip(
+              children: [
+                for (final filter in _eventFilters)
+                  FilterChip(
+                    label: Text(filter),
+                    selected: activeFilters.contains(filter),
+                    onSelected: (_) => _toggleFilter(filter),
+                  ),
+              ],
+            ),
           const SizedBox(height: 4),
           Expanded(
-            child: switch ((results, shown)) {
+            child: switch ((results, shown ?? shownEvents)) {
               (null, _) => _SearchHints(
                 onFilter: (filter) {
                   final text = appendSearchFilter(_controller.text, filter);
                   _setText(text, text.length);
                 },
               ),
-              (AsyncError(:final error), null) => ErrorView(
-                error: error,
-                onRetry: () => ref.invalidate(searchResultsProvider(_query)),
+              _ when count == 0 && failure != null => ErrorView(
+                error: failure,
+                onRetry: () => ref
+                  ..invalidate(searchResultsProvider(_query))
+                  ..invalidate(eventSearchResultsProvider(_query)),
               ),
               (_, null) when destinations.isEmpty => const SizedBox.shrink(),
               _ when count == 0 => MessageView(icon: IconsaxPlusLinear.search_status, message: l.searchNoResults),
@@ -228,12 +278,29 @@ class _SearchViewState extends ConsumerState<SearchView> {
                         onOpen: () => widget.onGo(match.destination.route),
                       ),
                   ],
+                  if (eventHits.isNotEmpty) ...[
+                    _SectionHeader(text: l.searchEventsCount(shownEvents!.total)),
+                    for (final (i, hit) in eventHits.indexed)
+                      EventSearchHitTile(
+                        hit: hit,
+                        selected: destinations.length + i == _selected,
+                        onOpen: () => _openEvent(hit),
+                      ),
+                    if (shownEvents.hasMore)
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: TextButton(
+                          onPressed: () => ref.read(eventSearchResultsProvider(_query).notifier).loadMore(),
+                          child: Text(l.searchMoreEvents),
+                        ),
+                      ),
+                  ],
                   if (hits.isNotEmpty) ...[
                     _SectionHeader(text: l.searchFilesCount(shown!.total)),
                     for (final (i, hit) in hits.indexed)
                       SearchHitTile(
                         hit: hit,
-                        selected: destinations.length + i == _selected,
+                        selected: destinations.length + eventHits.length + i == _selected,
                         onOpen: () => widget.onOpenEntry(hit.entry),
                         onShowInFolder: () => widget.onShowInFolder(hit.entry),
                       ),

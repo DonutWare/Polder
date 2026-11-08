@@ -12,16 +12,22 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_calendar/polder_calendar.dart" as cal;
 
-Future<SearchFilter?> showSearchFilterBuilder(BuildContext context) =>
-    showDialog<SearchFilter>(context: context, builder: (_) => const SearchFilterBuilder());
+Future<SearchFilter?> showSearchFilterBuilder(BuildContext context, {bool events = false}) => showDialog<SearchFilter>(
+  context: context,
+  builder: (_) => SearchFilterBuilder(events: events),
+);
 
-const _typeKeys = [SearchKey.type, SearchKey.tag, SearchKey.modified, SearchKey.size, SearchKey.folder];
+const _fileKeys = [SearchKey.type, SearchKey.tag, SearchKey.modified, SearchKey.size, SearchKey.folder];
+const _eventKeys = [SearchKey.type, SearchKey.calendar, SearchKey.repeats, SearchKey.when];
 const _relativePresets = ["today", "yesterday", "7d", "30d", "1y"];
 const _sizePresets = ["1mb", "10mb", "100mb", "1gb"];
 
 class SearchFilterBuilder extends ConsumerStatefulWidget {
-  const SearchFilterBuilder({super.key});
+  const SearchFilterBuilder({this.events = false, super.key});
+
+  final bool events;
 
   @override
   ConsumerState<SearchFilterBuilder> createState() => _SearchFilterBuilderState();
@@ -40,7 +46,13 @@ class _SearchFilterBuilderState extends ConsumerState<SearchFilterBuilder> {
   }
 
   List<SearchOp> get _ops => switch (_key) {
-    SearchKey.type || SearchKey.ext || SearchKey.folder || SearchKey.tag => const [SearchOp.equals, SearchOp.notEquals],
+    SearchKey.type ||
+    SearchKey.ext ||
+    SearchKey.folder ||
+    SearchKey.tag ||
+    SearchKey.calendar ||
+    SearchKey.repeats => const [SearchOp.equals, SearchOp.notEquals],
+    SearchKey.when => const [SearchOp.equals],
     SearchKey.modified => const [SearchOp.greater, SearchOp.less, SearchOp.equals, SearchOp.between],
     SearchKey.size => const [SearchOp.greater, SearchOp.less, SearchOp.between],
   };
@@ -104,7 +116,10 @@ class _SearchFilterBuilderState extends ConsumerState<SearchFilterBuilder> {
             children: [
               SegmentedButton<SearchKey>(
                 showSelectedIcon: false,
-                segments: [for (final key in _typeKeys) ButtonSegment(value: key, label: Text(key.label(l)))],
+                segments: [
+                  for (final key in widget.events ? _eventKeys : _fileKeys)
+                    ButtonSegment(value: key, label: Text(key.label(l))),
+                ],
                 selected: {_key},
                 onSelectionChanged: (selection) => _selectKey(selection.single),
               ),
@@ -237,6 +252,39 @@ class _SearchFilterBuilderState extends ConsumerState<SearchFilterBuilder> {
                   label: Text("#${tag.name}"),
                   selected: _values.contains(tag.key),
                   onSelected: (_) => _toggle(tag.key),
+                ),
+            ],
+          ),
+        ];
+      case SearchKey.calendar:
+        final calendars = ref.watch(cal.calendarListProvider).value ?? const <cal.CalendarInfo>[];
+        return [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final calendar in calendars.where((calendar) => calendar.access != cal.CalendarAccess.freeBusy))
+                FilterChip(
+                  avatar: TagDot(color: calendar.color ?? Theme.of(context).colorScheme.primary),
+                  label: Text(calendar.name),
+                  selected: _values.contains(calendar.name.toLowerCase()),
+                  onSelected: (_) => _toggle(calendar.name.toLowerCase()),
+                ),
+            ],
+          ),
+        ];
+      case SearchKey.repeats || SearchKey.when:
+        final options = _key == SearchKey.repeats ? searchRepeatValues : searchWhenValues;
+        return [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final option in options)
+                FilterChip(
+                  label: Text(searchValueLabel(l, _key, option)),
+                  selected: _values.contains(option),
+                  onSelected: (_) => _toggle(option),
                 ),
             ],
           ),

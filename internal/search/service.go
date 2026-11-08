@@ -35,6 +35,7 @@ type Service struct {
 	settings   *settings.Store
 	texts      TextSource
 	tagged     TaggedFiles
+	calendars  CalendarNames
 	dir        string
 	databaseID string
 
@@ -42,6 +43,14 @@ type Service struct {
 	index    *index
 	lastSync time.Time
 	pokes    chan int64
+}
+
+type CalendarNames interface {
+	CalendarNames(ctx context.Context, viewer users.User) ([]string, error)
+}
+
+func (s *Service) UseCalendars(calendars CalendarNames) {
+	s.calendars = calendars
 }
 
 type TaggedFiles interface {

@@ -133,7 +133,7 @@ class _SearchShortcutState extends State<SearchShortcut> {
       return false;
     }
     if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? true)) return false;
-    openSearch(context);
+    openSearch(context, initialQuery: searchScopeFor(GoRouter.of(context).routerDelegate.currentConfiguration.uri));
     return true;
   }
 
@@ -141,7 +141,21 @@ class _SearchShortcutState extends State<SearchShortcut> {
   Widget build(BuildContext context) => widget.child;
 }
 
-// Searching from inside a folder starts out limited to that folder.
+String searchScopeFor(Uri uri) {
+  if (uri.path == AppRoutes.calendar) {
+    return appendSearchFilter(
+      "",
+      formatSearchFilter(const SearchFilter(key: SearchKey.type, op: SearchOp.equals, values: [searchEventType])),
+    );
+  }
+  final folder = uri.path == AppRoutes.files ? uri.queryParameters[AppRoutes.pathParameter] : null;
+  if (folder == null || folder == RemotePath.root) return "";
+  return appendSearchFilter(
+    "",
+    formatSearchFilter(SearchFilter(key: SearchKey.folder, op: SearchOp.equals, values: [folder])),
+  );
+}
+
 class SearchButton extends StatelessWidget {
   const SearchButton({super.key});
 
@@ -151,17 +165,7 @@ class SearchButton extends StatelessWidget {
     return IconButton(
       tooltip: context.localized.searchTooltip(apple ? "⌘K" : "Ctrl+K"),
       icon: const Icon(IconsaxPlusLinear.search_normal_1),
-      onPressed: () {
-        final uri = GoRouterState.of(context).uri;
-        final folder = uri.path == AppRoutes.files ? uri.queryParameters[AppRoutes.pathParameter] : null;
-        final scope = folder == null || folder == RemotePath.root
-            ? ""
-            : appendSearchFilter(
-                "",
-                formatSearchFilter(SearchFilter(key: SearchKey.folder, op: SearchOp.equals, values: [folder])),
-              );
-        openSearch(context, initialQuery: scope);
-      },
+      onPressed: () => openSearch(context, initialQuery: searchScopeFor(GoRouterState.of(context).uri)),
     );
   }
 }

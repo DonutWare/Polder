@@ -26,6 +26,20 @@ void main() {
     });
   });
 
+  group("searchesEvents", () {
+    test("spots an event type filter among other values", () {
+      expect(searchesEvents("type=event "), isTrue);
+      expect(searchesEvents("standup is:events"), isTrue);
+      expect(searchesEvents("type=note,event"), isTrue);
+      expect(searchesEvents("eventful type=pdf"), isFalse);
+      expect(searchesEvents("type=eventual"), isFalse);
+    });
+
+    test("event keys count as filters", () {
+      expect(tokenizeSearch("cal:Work repeats=no when=past").every((token) => token.isFilter), isTrue);
+    });
+  });
+
   group("formatSearchFilter", () {
     test("writes each operator", () {
       String format(SearchKey key, SearchOp op, List<String> values) =>

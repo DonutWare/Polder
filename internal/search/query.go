@@ -5,6 +5,7 @@ import (
 	"math"
 	"path"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -42,14 +43,25 @@ const (
 	KeyModified Key = "modified"
 	KeySize     Key = "size"
 	KeyTag      Key = "tag"
+	KeyCalendar Key = "calendar"
+	KeyRepeats  Key = "repeats"
+	KeyWhen     Key = "when"
+)
+
+const KindEvent = "event"
+
+var (
+	RepeatValues = []string{"yes", "no", "daily", "weekly", "monthly", "yearly"}
+	WhenValues   = []string{"upcoming", "past", "today"}
 )
 
 func (Key) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
-	s.Enum = []any{string(KeyType), string(KeyExt), string(KeyIn), string(KeyModified), string(KeySize), string(KeyTag)}
+	s.Enum = []any{string(KeyType), string(KeyExt), string(KeyIn), string(KeyModified), string(KeySize), string(KeyTag),
+		string(KeyCalendar), string(KeyRepeats), string(KeyWhen)}
 	return s
 }
 
-var Keys = []Key{KeyType, KeyExt, KeyIn, KeyModified, KeySize, KeyTag}
+var Keys = []Key{KeyType, KeyExt, KeyIn, KeyModified, KeySize, KeyTag, KeyCalendar, KeyRepeats, KeyWhen}
 
 var keyAliases = map[string]Key{
 	"type": KeyType, "kind": KeyType, "is": KeyType,
@@ -58,6 +70,9 @@ var keyAliases = map[string]Key{
 	"modified": KeyModified, "date": KeyModified, "mtime": KeyModified,
 	"size": KeySize,
 	"tag":  KeyTag, "tags": KeyTag,
+	"calendar": KeyCalendar, "cal": KeyCalendar,
+	"repeats": KeyRepeats, "repeat": KeyRepeats, "recurring": KeyRepeats,
+	"when": KeyWhen,
 }
 
 // Longest operators first so "!=" is not read as "!" followed by "=".
@@ -119,6 +134,68 @@ func Parse(raw string, now time.Time) Query {
 }
 
 func (q Query) HasTerms() bool { return len(q.Terms) > 0 }
+
+func (q Query) IsEmpty() bool { return !q.HasTerms() && len(q.Filters) == 0 }
+
+func (q Query) Now() time.Time { return q.now }
+
+func IsEventKind(value string) bool {
+	return value == KindEvent || value == KindEvent+"s"
+}
+
+func (q Query) WantsFiles() bool {
+	for _, filter := range q.Filters {
+		switch filter.Key {
+		case KeyCalendar, KeyRepeats, KeyWhen:
+			return false
+		case KeyType:
+			if filter.Op == OpIs && !slices.ContainsFunc(filter.Values, func(value string) bool { return !IsEventKind(value) }) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func (q Query) WantsEvents() bool {
+	for _, filter := range q.Filters {
+		switch filter.Key {
+		case KeyExt, KeyIn, KeyModified, KeySize, KeyTag:
+			return false
+		case KeyType:
+			mentionsEvent := slices.ContainsFunc(filter.Values, IsEventKind)
+			if filter.Op == OpIs && !mentionsEvent || filter.Op == OpIsNot && mentionsEvent {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func (q Query) FiltersFor(key Key) []QueryFilter {
+	var matching []QueryFilter
+	for _, filter := range q.Filters {
+		if filter.Key == key {
+			matching = append(matching, filter)
+		}
+	}
+	return matching
+}
+
+type Period struct {
+	Start, End time.Time
+}
+
+func (q Query) WhenPeriod(value string) (Period, bool) {
+	if slices.Contains(WhenValues, value) && value != "today" {
+		return Period{}, false
+	}
+	found, err := parseDate(value, q.now)
+	if err != nil {
+		return Period{}, false
+	}
+	return Period{Start: found.start, End: found.end}, true
+}
 
 func tokenize(raw string) []token {
 	var tokens []token
@@ -270,6 +347,37 @@ func normalize(filter *QueryFilter, values []string, now time.Time) string {
 				return fmt.Sprintf("%q is not a tag name", value)
 			}
 			filter.Values = append(filter.Values, tags.Key(name))
+		}
+	case KeyCalendar:
+		if !equality {
+			return "calendar only supports = and !="
+		}
+		for _, value := range values {
+			filter.Values = append(filter.Values, strings.ToLower(value))
+		}
+	case KeyRepeats:
+		if !equality {
+			return "repeats only supports = and !="
+		}
+		for _, value := range values {
+			value = strings.ToLower(value)
+			if !slices.Contains(RepeatValues, value) {
+				return fmt.Sprintf("%q is not a repeat, use %s", value, strings.Join(RepeatValues, ", "))
+			}
+			filter.Values = append(filter.Values, value)
+		}
+	case KeyWhen:
+		if filter.Op != OpIs {
+			return "when only supports ="
+		}
+		for _, value := range values {
+			value = strings.ToLower(value)
+			if !slices.Contains(WhenValues, value) {
+				if _, err := parseDate(value, now); err != nil {
+					return fmt.Sprintf("%q is not a moment, use upcoming, past, today or a date such as 2024-06", value)
+				}
+			}
+			filter.Values = append(filter.Values, value)
 		}
 	case KeyModified, KeySize:
 		parse := func(value string) error {

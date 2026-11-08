@@ -59,7 +59,6 @@ abstract final class AppRoutes {
   static String calendarEventAt(EventRef ref, DateTime start) => Uri(
     path: calendar,
     queryParameters: {
-      viewParameter: CalendarViewMode.day.slug,
       dateParameter: DateFormat("yyyy-MM-dd").format(start),
       eventParameter: "${ref.calendar.calendarId}/${ref.eventId}",
       occurrenceParameter: ?ref.recurrenceId,

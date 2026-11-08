@@ -3,10 +3,17 @@ import "package:flutter/widgets.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder_calendar/polder_calendar.dart";
 
 part "search.freezed.dart";
 
-enum SearchKey { type, ext, folder, modified, size, tag }
+enum SearchKey { type, ext, folder, modified, size, tag, calendar, repeats, when }
+
+const searchEventType = "event";
+
+const searchRepeatValues = ["yes", "no", "daily", "weekly", "monthly", "yearly"];
+
+const searchWhenValues = ["upcoming", "past", "today"];
 
 enum SearchOp { equals, notEquals, greater, greaterOrEqual, less, lessOrEqual, between }
 
@@ -74,6 +81,28 @@ abstract class SearchSuggestions with _$SearchSuggestions {
     @Default(TextRange.empty) TextRange range,
     @Default(<SearchSuggestion>[]) List<SearchSuggestion> suggestions,
   }) = _SearchSuggestions;
+}
+
+@freezed
+abstract class EventSearchHit with _$EventSearchHit {
+  const factory EventSearchHit({
+    required CalendarEvent event,
+    @Default(false) bool upcoming,
+    @Default(<TextRange>[]) List<TextRange> summaryMatches,
+  }) = _EventSearchHit;
+}
+
+@freezed
+abstract class EventSearchResults with _$EventSearchResults {
+  const EventSearchResults._();
+
+  const factory EventSearchResults({
+    required String query,
+    @Default(0) int total,
+    @Default(<EventSearchHit>[]) List<EventSearchHit> hits,
+  }) = _EventSearchResults;
+
+  bool get hasMore => hits.length < total;
 }
 
 enum OcrState { off, ready, unavailable }

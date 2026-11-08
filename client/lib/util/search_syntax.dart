@@ -20,6 +20,12 @@ const searchKeyAliases = {
   "size": SearchKey.size,
   "tag": SearchKey.tag,
   "tags": SearchKey.tag,
+  "calendar": SearchKey.calendar,
+  "cal": SearchKey.calendar,
+  "repeats": SearchKey.repeats,
+  "repeat": SearchKey.repeats,
+  "recurring": SearchKey.repeats,
+  "when": SearchKey.when,
 };
 
 const _operators = ["!=", ">=", "<=", ":", "=", ">", "<"];
@@ -89,7 +95,14 @@ String searchKeyText(SearchKey key) => switch (key) {
   SearchKey.modified => "modified",
   SearchKey.size => "size",
   SearchKey.tag => "tag",
+  SearchKey.calendar => "calendar",
+  SearchKey.repeats => "repeats",
+  SearchKey.when => "when",
 };
+
+final _eventType = RegExp(r"(^|\s)(type|kind|is)[=:]([^\s]*,)?events?(,[^\s]*)?(?=\s|$)", caseSensitive: false);
+
+bool searchesEvents(String query) => _eventType.hasMatch(query);
 
 String formatSearchFilter(SearchFilter filter) {
   final values = filter.values.map(quoteSearchValue).toList();

@@ -3252,6 +3252,63 @@ extension $EventInputExtension on EventInput {
 }
 
 @JsonSerializable(explicitToJson: true)
+class EventMatch {
+  const EventMatch({required this.event, this.summaryMatches, required this.upcoming});
+
+  factory EventMatch.fromJson(Map<String, dynamic> json) => _$EventMatchFromJson(json);
+
+  static const toJsonFactory = _$EventMatchToJson;
+  Map<String, dynamic> toJson() => _$EventMatchToJson(this);
+
+  @JsonKey(name: 'event', includeIfNull: false)
+  final Event event;
+  @JsonKey(name: 'summaryMatches', includeIfNull: false, defaultValue: <TextSpan>[])
+  final List<TextSpan>? summaryMatches;
+  @JsonKey(name: 'upcoming', includeIfNull: false)
+  final bool upcoming;
+  static const fromJsonFactory = _$EventMatchFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is EventMatch &&
+            (identical(other.event, event) || const DeepCollectionEquality().equals(other.event, event)) &&
+            (identical(other.summaryMatches, summaryMatches) ||
+                const DeepCollectionEquality().equals(other.summaryMatches, summaryMatches)) &&
+            (identical(other.upcoming, upcoming) || const DeepCollectionEquality().equals(other.upcoming, upcoming)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(event) ^
+      const DeepCollectionEquality().hash(summaryMatches) ^
+      const DeepCollectionEquality().hash(upcoming) ^
+      runtimeType.hashCode;
+}
+
+extension $EventMatchExtension on EventMatch {
+  EventMatch copyWith({Event? event, List<TextSpan>? summaryMatches, bool? upcoming}) {
+    return EventMatch(
+      event: event ?? this.event,
+      summaryMatches: summaryMatches ?? this.summaryMatches,
+      upcoming: upcoming ?? this.upcoming,
+    );
+  }
+
+  EventMatch copyWithWrapped({
+    Wrapped<Event>? event,
+    Wrapped<List<TextSpan>?>? summaryMatches,
+    Wrapped<bool>? upcoming,
+  }) {
+    return EventMatch(
+      event: (event != null ? event.value : this.event),
+      summaryMatches: (summaryMatches != null ? summaryMatches.value : this.summaryMatches),
+      upcoming: (upcoming != null ? upcoming.value : this.upcoming),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class EventMessage {
   const EventMessage({
     this.calendar,
@@ -3408,6 +3465,54 @@ extension $EventMessageExtension on EventMessage {
       type: (type != null ? type.value : this.type),
       user: (user != null ? user.value : this.user),
       userId: (userId != null ? userId.value : this.userId),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class EventResults {
+  const EventResults({required this.query, this.results, required this.total});
+
+  factory EventResults.fromJson(Map<String, dynamic> json) => _$EventResultsFromJson(json);
+
+  static const toJsonFactory = _$EventResultsToJson;
+  Map<String, dynamic> toJson() => _$EventResultsToJson(this);
+
+  @JsonKey(name: 'query', includeIfNull: false)
+  final String query;
+  @JsonKey(name: 'results', includeIfNull: false, defaultValue: <EventMatch>[])
+  final List<EventMatch>? results;
+  @JsonKey(name: 'total', includeIfNull: false)
+  final int total;
+  static const fromJsonFactory = _$EventResultsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is EventResults &&
+            (identical(other.query, query) || const DeepCollectionEquality().equals(other.query, query)) &&
+            (identical(other.results, results) || const DeepCollectionEquality().equals(other.results, results)) &&
+            (identical(other.total, total) || const DeepCollectionEquality().equals(other.total, total)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(query) ^
+      const DeepCollectionEquality().hash(results) ^
+      const DeepCollectionEquality().hash(total) ^
+      runtimeType.hashCode;
+}
+
+extension $EventResultsExtension on EventResults {
+  EventResults copyWith({String? query, List<EventMatch>? results, int? total}) {
+    return EventResults(query: query ?? this.query, results: results ?? this.results, total: total ?? this.total);
+  }
+
+  EventResults copyWithWrapped({Wrapped<String>? query, Wrapped<List<EventMatch>?>? results, Wrapped<int>? total}) {
+    return EventResults(
+      query: (query != null ? query.value : this.query),
+      results: (results != null ? results.value : this.results),
+      total: (total != null ? total.value : this.total),
     );
   }
 }
