@@ -16,7 +16,14 @@ import "package:polder_calendar/src/views/event_presentation.dart";
 import "package:polder_calendar/src/views/load_state.dart";
 
 class ScheduleView extends ConsumerStatefulWidget {
-  const ScheduleView({required this.anchor, this.onEventTap, this.onDayTap, this.padding, super.key});
+  const ScheduleView({
+    required this.anchor,
+    this.onEventTap,
+    this.onDayTap,
+    this.onVisibleMonthChanged,
+    this.padding,
+    super.key,
+  });
 
   static const _wideWidth = 600.0;
   static const _center = ValueKey("schedule-center");
@@ -24,6 +31,7 @@ class ScheduleView extends ConsumerStatefulWidget {
   final DateTime anchor;
   final EventTap? onEventTap;
   final ValueChanged<DateTime>? onDayTap;
+  final ValueChanged<DateTime>? onVisibleMonthChanged;
   final EdgeInsets? padding;
 
   @override
@@ -32,13 +40,46 @@ class ScheduleView extends ConsumerStatefulWidget {
 
 class _ScheduleViewState extends ConsumerState<ScheduleView> {
   final _scroll = ScrollController();
+  final _sections = <BuildContext, DateTime>{};
+  DateTime? _visibleMonth;
 
   DateTime get anchor => widget.anchor;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_reportVisibleMonth);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportVisibleMonth());
+  }
 
   @override
   void dispose() {
     _scroll.dispose();
     super.dispose();
+  }
+
+  void _register(BuildContext section, DateTime month) => _sections[section] = month;
+
+  void _unregister(BuildContext section) => _sections.remove(section);
+
+  void _reportVisibleMonth() {
+    final report = widget.onVisibleMonthChanged;
+    final viewport = context.findRenderObject();
+    if (report == null || !mounted || viewport is! RenderBox || !viewport.hasSize) return;
+    final month = _monthAtTop(viewport);
+    if (month == null || month == _visibleMonth) return;
+    _visibleMonth = month;
+    report(month);
+  }
+
+  DateTime? _monthAtTop(RenderBox viewport) {
+    for (final MapEntry(key: section, value: month) in _sections.entries) {
+      final box = section.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+      final top = box.localToGlobal(Offset.zero, ancestor: viewport).dy;
+      if (top <= 1 && top + box.size.height > 1) return month;
+    }
+    return null;
   }
 
   void _focus() {
@@ -66,8 +107,12 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= ScheduleView._wideWidth;
         final horizontal = EdgeInsets.only(left: padding?.left ?? 0, right: padding?.right ?? 0);
-        Widget section(VisibleRange range, {bool leading = false}) =>
-            _Section(range: range, wide: wide, leading: leading, onEventTap: onEventTap, onDayTap: onDayTap);
+        Widget section(VisibleRange range, {bool leading = false}) => _TrackedSection(
+          month: range.start.firstOfMonth,
+          onMount: _register,
+          onUnmount: _unregister,
+          child: _Section(range: range, wide: wide, leading: leading, onEventTap: onEventTap, onDayTap: onDayTap),
+        );
         return CustomScrollView(
           controller: _scroll,
           center: ScheduleView._center,
@@ -86,6 +131,41 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
       },
     );
   }
+}
+
+class _TrackedSection extends StatefulWidget {
+  const _TrackedSection({required this.month, required this.onMount, required this.onUnmount, required this.child});
+
+  final DateTime month;
+  final void Function(BuildContext section, DateTime month) onMount;
+  final ValueChanged<BuildContext> onUnmount;
+  final Widget child;
+
+  @override
+  State<_TrackedSection> createState() => _TrackedSectionState();
+}
+
+class _TrackedSectionState extends State<_TrackedSection> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onMount(context, widget.month);
+  }
+
+  @override
+  void didUpdateWidget(_TrackedSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.month != widget.month) widget.onMount(context, widget.month);
+  }
+
+  @override
+  void dispose() {
+    widget.onUnmount(context);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _Section extends ConsumerWidget {

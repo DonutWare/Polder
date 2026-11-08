@@ -15,6 +15,7 @@ class CalendarView extends StatelessWidget {
     this.onEventTap,
     this.onDayTap,
     this.onCreate,
+    this.onVisibleMonthChanged,
     this.padding,
     super.key,
   });
@@ -25,6 +26,7 @@ class CalendarView extends StatelessWidget {
   final EventTap? onEventTap;
   final ValueChanged<DateTime>? onDayTap;
   final ValueChanged<DateTime>? onCreate;
+  final ValueChanged<DateTime>? onVisibleMonthChanged;
   final EdgeInsets? padding;
 
   void _openDay(DateTime day) => onNavigate(CalendarViewMode.day, day);
@@ -49,6 +51,7 @@ class CalendarView extends StatelessWidget {
         padding: padding,
         onEventTap: onEventTap,
         onDayTap: onDayTap ?? _openDay,
+        onVisibleMonthChanged: onVisibleMonthChanged,
       );
     }
     return Padding(

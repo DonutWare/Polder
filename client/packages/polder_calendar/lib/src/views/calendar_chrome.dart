@@ -157,6 +157,8 @@ class MiniMonth extends ConsumerStatefulWidget {
   const MiniMonth({
     required this.selected,
     required this.onSelect,
+    this.initialMonth,
+    this.onMonthChanged,
     this.showHeader = true,
     this.showWeekNumbers = false,
     super.key,
@@ -164,6 +166,8 @@ class MiniMonth extends ConsumerStatefulWidget {
 
   final DateTime selected;
   final ValueChanged<DateTime> onSelect;
+  final DateTime? initialMonth;
+  final ValueChanged<DateTime>? onMonthChanged;
   final bool showHeader;
   final bool showWeekNumbers;
 
@@ -172,7 +176,7 @@ class MiniMonth extends ConsumerStatefulWidget {
 }
 
 class _MiniMonthState extends ConsumerState<MiniMonth> {
-  late DateTime _month = widget.selected.firstOfMonth;
+  late DateTime _month = (widget.initialMonth ?? widget.selected).firstOfMonth;
   var _direction = 1;
 
   @override
@@ -185,10 +189,13 @@ class _MiniMonthState extends ConsumerState<MiniMonth> {
     }
   }
 
-  void _shift(int months) => setState(() {
-    _direction = months.sign;
-    _month = _month.addMonths(months);
-  });
+  void _shift(int months) {
+    setState(() {
+      _direction = months.sign;
+      _month = _month.addMonths(months);
+    });
+    widget.onMonthChanged?.call(_month);
+  }
 
   void _swiped(DragEndDetails details) {
     final velocity = details.primaryVelocity ?? 0;

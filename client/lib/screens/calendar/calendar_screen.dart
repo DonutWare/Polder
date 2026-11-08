@@ -28,6 +28,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   static const _sidebarWidth = 300.0;
 
   var _monthOpen = false;
+  DateTime? _scrolledMonth;
+  DateTime? _pickerMonth;
   String? _openedEvent;
 
   @override
@@ -39,6 +41,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   @override
   void didUpdateWidget(CalendarScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.date != widget.date || oldWidget.mode != widget.mode) _scrolledMonth = null;
     _openRequestedEvent();
   }
 
@@ -74,6 +77,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   void _navigate(CalendarViewMode mode, DateTime anchor) {
+    if (_monthOpen) setState(() => _pickerMonth = anchor.firstOfMonth);
     ref.read(calendarViewModeProvider.notifier).select(mode);
     context.go(AppRoutes.calendarAt(mode, anchor));
   }
@@ -81,9 +85,22 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   CalendarViewMode _mode(bool phone) =>
       widget.mode ?? ref.watch(calendarViewModeProvider) ?? (phone ? CalendarViewMode.schedule : CalendarViewMode.week);
 
-  void _toggleMonth() => setState(() => _monthOpen = !_monthOpen);
+  void _toggleMonth(DateTime shownMonth) => setState(() {
+    _monthOpen = !_monthOpen;
+    _pickerMonth = _monthOpen ? shownMonth.firstOfMonth : null;
+  });
 
-  Future<void> _openAgendas(CalendarViewMode mode, DateTime anchor) => showModalBottomSheet<void>(
+  void _showScrolledMonth(DateTime month) => setState(() => _scrolledMonth = month);
+
+  void _showPickerMonth(DateTime month) => setState(() => _pickerMonth = month);
+
+  Widget _title(CalendarViewMode mode, DateTime anchor) {
+    final picked = _pickerMonth;
+    if (_monthOpen && picked != null) return CalendarTitle(mode: CalendarViewMode.month, anchor: picked);
+    return CalendarTitle(mode: mode, anchor: _scrolledMonth ?? anchor);
+  }
+
+  Future<void> _openAgendas() => showModalBottomSheet<void>(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
@@ -93,14 +110,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       expand: false,
       initialChildSize: 0.75,
       maxChildSize: 0.95,
-      builder: (sheet, controller) => CalendarSidebar(
-        anchor: anchor,
+      builder: (sheet, controller) => ListView(
         controller: controller,
         padding: const EdgeInsets.only(left: 4, right: 4, bottom: 24),
-        onSelectDay: (day) {
-          Navigator.pop(sheet);
-          _navigate(mode, day);
-        },
+        children: const [CalendarAgendaLists()],
       ),
     ),
   );
@@ -111,11 +124,12 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final single = AdaptiveLayout.isSingle(context);
     final mode = _mode(phone);
     final anchor = (widget.date ?? DateTime.now()).dateOnly;
-    final title = CalendarTitle(mode: mode, anchor: anchor);
+    final title = _title(mode, anchor);
+    final shownMonth = _scrolledMonth ?? anchor;
     final strings = CalendarLocalizations.of(context);
 
     final page = AppPage(
-      title: single ? _MonthToggle(open: _monthOpen, onToggle: _toggleMonth, child: title) : title,
+      title: single ? _MonthToggle(open: _monthOpen, onToggle: () => _toggleMonth(shownMonth), child: title) : title,
       floatingActionButton: FloatingActionButton(
         tooltip: strings.newEvent,
         onPressed: () => createCalendarEvent(context, day: anchor),
@@ -127,8 +141,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         if (single)
           IconButton(
             tooltip: context.localized.calendarManage,
-            icon: const Icon(IconsaxPlusLinear.calendar_2),
-            onPressed: () => _openAgendas(mode, anchor),
+            icon: const Icon(IconsaxPlusLinear.setting_2),
+            onPressed: _openAgendas,
           ),
       ],
       body: SafeArea(
@@ -147,6 +161,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                           padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
                           child: MiniMonth(
                             selected: anchor,
+                            initialMonth: _pickerMonth,
+                            onMonthChanged: _showPickerMonth,
                             showHeader: false,
                             showWeekNumbers: true,
                             onSelect: (day) => _navigate(mode, day),
@@ -163,6 +179,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 onEventTap: (event) => openCalendarEvent(context, event),
                 onDayTap: (day) => createCalendarEvent(context, day: day),
                 onCreate: (start) => createCalendarEvent(context, start: start),
+                onVisibleMonthChanged: _showScrolledMonth,
               ),
             ),
           ],
