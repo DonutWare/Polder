@@ -23,6 +23,9 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.generate-token.outputs.token }}
 
+      - name: Merge Develop Into Main
+        run: git merge --ff-only origin/develop
+
       - name: Extract Version
         id: version
         run: |
@@ -38,7 +41,7 @@ jobs:
             echo "is_new_version=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Tag
+      - name: Push Main And Tag
         if: steps.version.outputs.is_new_version == 'true'
         run: |
           git config user.name "Fladder Bot"
@@ -46,4 +49,4 @@ jobs:
 
           VERSION="v${{ steps.version.outputs.version }}"
           git tag "$VERSION"
-          git push origin "$VERSION"
+          git push --atomic origin main "$VERSION"
