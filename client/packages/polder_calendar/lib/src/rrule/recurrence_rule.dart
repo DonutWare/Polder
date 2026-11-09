@@ -33,6 +33,7 @@ class RecurrenceRule {
     this.interval = 1,
     this.weekdays = const {},
     this.monthDay,
+    this.weekdayPosition,
     this.count,
     this.until,
   });
@@ -45,6 +46,7 @@ class RecurrenceRule {
   final int interval;
   final Set<int> weekdays;
   final int? monthDay;
+  final int? weekdayPosition;
   final int? count;
   final DateTime? until;
 
@@ -65,12 +67,14 @@ class RecurrenceRule {
     };
     if (frequency == null) return null;
     final interval = int.tryParse(parts.remove("INTERVAL") ?? "1");
-    final days = parts.remove("BYDAY")?.split(",").map(_dayCodes.indexOf).toList() ?? const [];
+    final byDay = parts.remove("BYDAY")?.split(",").map(_parseDay).toList() ?? const [];
     final monthDay = parts.remove("BYMONTHDAY");
     final count = parts.remove("COUNT");
     final until = parts.remove("UNTIL");
     parts.remove("WKST");
-    if (parts.isNotEmpty || interval == null || interval < 1 || days.contains(-1)) return null;
+    if (parts.isNotEmpty || interval == null || interval < 1 || byDay.contains(null)) return null;
+    final positions = byDay.map((day) => day!.position).nonNulls.toList();
+    if (positions.isNotEmpty && (frequency != RecurrenceFrequency.monthly || byDay.length != 1)) return null;
     if (monthDay != null && (int.tryParse(monthDay) ?? 0) <= 0) return null;
     if (count != null && int.tryParse(count) == null) return null;
     final untilDate = until == null ? null : _parseUntil(until);
@@ -78,11 +82,21 @@ class RecurrenceRule {
     return RecurrenceRule(
       frequency,
       interval: interval,
-      weekdays: {for (final day in days) day + 1},
+      weekdays: {for (final day in byDay) day!.weekday},
       monthDay: monthDay == null ? null : int.parse(monthDay),
+      weekdayPosition: positions.firstOrNull,
       count: count == null ? null : int.parse(count),
       until: untilDate,
     );
+  }
+
+  static ({int weekday, int? position})? _parseDay(String value) {
+    final match = RegExp(r"^([+-]?\d)?([A-Z]{2})$").firstMatch(value);
+    final index = match == null ? -1 : _dayCodes.indexOf(match.group(2)!);
+    if (index < 0) return null;
+    final position = match!.group(1) == null ? null : int.parse(match.group(1)!);
+    if (position == 0) return null;
+    return (weekday: index + 1, position: position);
   }
 
   static DateTime? _parseUntil(String value) {
@@ -100,7 +114,7 @@ class RecurrenceRule {
     return [
       "FREQ=${frequency.name.toUpperCase()}",
       if (interval != 1) "INTERVAL=$interval",
-      if (days.isNotEmpty) "BYDAY=${days.map((day) => _dayCodes[day - 1]).join(",")}",
+      if (days.isNotEmpty) "BYDAY=${days.map((day) => "${weekdayPosition ?? ""}${_dayCodes[day - 1]}").join(",")}",
       if (monthDay != null) "BYMONTHDAY=$monthDay",
       if (count != null) "COUNT=$count",
       if (until case final until?) "UNTIL=${_encodeUntil(until.toUtc())}",
@@ -118,6 +132,7 @@ class RecurrenceRule {
       interval == other.interval &&
       setEquals(_effectiveDays(start), other._effectiveDays(start)) &&
       _effectiveMonthDay(start) == other._effectiveMonthDay(start) &&
+      weekdayPosition == other.weekdayPosition &&
       count == other.count &&
       until == other.until;
 

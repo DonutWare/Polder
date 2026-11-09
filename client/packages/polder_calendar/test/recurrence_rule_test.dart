@@ -14,10 +14,26 @@ void main() {
   });
 
   test("rejects rules the editor cannot represent", () {
-    expect(RecurrenceRule.tryParse("FREQ=MONTHLY;BYDAY=1MO"), isNull);
+    expect(RecurrenceRule.tryParse("FREQ=WEEKLY;BYDAY=1MO"), isNull);
+    expect(RecurrenceRule.tryParse("FREQ=MONTHLY;BYDAY=1MO,2TU"), isNull);
+    expect(RecurrenceRule.tryParse("FREQ=MONTHLY;BYDAY=0MO"), isNull);
     expect(RecurrenceRule.tryParse("FREQ=HOURLY"), isNull);
     expect(RecurrenceRule.tryParse("FREQ=DAILY;BYHOUR=9"), isNull);
     expect(RecurrenceRule.tryParse(""), isNull);
+  });
+
+  test("round-trips monthly rules on an ordinal weekday", () {
+    final first = RecurrenceRule.tryParse("FREQ=MONTHLY;INTERVAL=2;BYDAY=1WE;COUNT=13")!;
+    expect(first.weekdays, {DateTime.wednesday});
+    expect(first.weekdayPosition, 1);
+    expect(first.encode(), "FREQ=MONTHLY;INTERVAL=2;BYDAY=1WE;COUNT=13");
+    const last = RecurrenceRule(RecurrenceFrequency.monthly, weekdays: {DateTime.friday}, weekdayPosition: -1);
+    expect(last.encode(), "FREQ=MONTHLY;BYDAY=-1FR");
+    expect(RecurrenceRule.tryParse("FREQ=MONTHLY;BYDAY=+2TU")!.weekdayPosition, 2);
+  });
+
+  test("ordinal weekday rules never match presets", () {
+    expect(RepeatOption.matching(RecurrenceRule.tryParse("FREQ=MONTHLY;BYDAY=1WE")!, wednesday), isNull);
   });
 
   test("matches presets against the start date", () {

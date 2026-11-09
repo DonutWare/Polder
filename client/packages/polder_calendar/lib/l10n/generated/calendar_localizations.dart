@@ -356,6 +356,102 @@ abstract class CalendarLocalizations {
   /// **'Custom'**
   String get repeatCustom;
 
+  /// No description provided for @repeatCustomOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom…'**
+  String get repeatCustomOption;
+
+  /// No description provided for @customRepeatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom recurrence'**
+  String get customRepeatTitle;
+
+  /// No description provided for @repeatEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat every'**
+  String get repeatEvery;
+
+  /// No description provided for @unitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{day} other{days}}'**
+  String unitDays(int count);
+
+  /// No description provided for @unitWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{week} other{weeks}}'**
+  String unitWeeks(int count);
+
+  /// No description provided for @unitMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{month} other{months}}'**
+  String unitMonths(int count);
+
+  /// No description provided for @unitYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{year} other{years}}'**
+  String unitYears(int count);
+
+  /// No description provided for @repeatOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat on'**
+  String get repeatOn;
+
+  /// No description provided for @monthlyOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly on {when}'**
+  String monthlyOn(String when);
+
+  /// No description provided for @nthWeekday.
+  ///
+  /// In en, this message translates to:
+  /// **'{position, select, first{the first} second{the second} third{the third} fourth{the fourth} fifth{the fifth} other{the last}} {weekday}'**
+  String nthWeekday(String position, String weekday);
+
+  /// No description provided for @ends.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get ends;
+
+  /// No description provided for @endsNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get endsNever;
+
+  /// No description provided for @endsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get endsOn;
+
+  /// No description provided for @endsAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get endsAfter;
+
+  /// No description provided for @occurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{occurrence} other{occurrences}}'**
+  String occurrences(int count);
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
   /// No description provided for @ruleDaily.
   ///
   /// In en, this message translates to:

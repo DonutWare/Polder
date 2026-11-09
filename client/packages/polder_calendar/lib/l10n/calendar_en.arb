@@ -68,6 +68,74 @@
 	"repeatNone": "Does not repeat",
 	"repeatWeekdays": "Every weekday (Monday to Friday)",
 	"repeatCustom": "Custom",
+	"repeatCustomOption": "Custom…",
+	"customRepeatTitle": "Custom recurrence",
+	"repeatEvery": "Repeat every",
+	"unitDays": "{count, plural, =1{day} other{days}}",
+	"@unitDays": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"unitWeeks": "{count, plural, =1{week} other{weeks}}",
+	"@unitWeeks": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"unitMonths": "{count, plural, =1{month} other{months}}",
+	"@unitMonths": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"unitYears": "{count, plural, =1{year} other{years}}",
+	"@unitYears": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"repeatOn": "Repeat on",
+	"monthlyOn": "Monthly on {when}",
+	"@monthlyOn": {
+		"placeholders": {
+			"when": {
+				"type": "String"
+			}
+		}
+	},
+	"nthWeekday": "{position, select, first{the first} second{the second} third{the third} fourth{the fourth} fifth{the fifth} other{the last}} {weekday}",
+	"@nthWeekday": {
+		"placeholders": {
+			"position": {
+				"type": "String"
+			},
+			"weekday": {
+				"type": "String"
+			}
+		}
+	},
+	"ends": "Ends",
+	"endsNever": "Never",
+	"endsOn": "On",
+	"endsAfter": "After",
+	"occurrences": "{count, plural, =1{occurrence} other{occurrences}}",
+	"@occurrences": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"done": "Done",
 	"ruleDaily": "{interval, plural, =1{Every day} other{Every {interval} days}}",
 	"@ruleDaily": {
 		"placeholders": {

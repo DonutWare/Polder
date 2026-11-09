@@ -148,6 +148,81 @@ class CalendarLocalizationsEn extends CalendarLocalizations {
   String get repeatCustom => 'Custom';
 
   @override
+  String get repeatCustomOption => 'Custom…';
+
+  @override
+  String get customRepeatTitle => 'Custom recurrence';
+
+  @override
+  String get repeatEvery => 'Repeat every';
+
+  @override
+  String unitDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'days', one: 'day');
+    return '$_temp0';
+  }
+
+  @override
+  String unitWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'weeks', one: 'week');
+    return '$_temp0';
+  }
+
+  @override
+  String unitMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'months', one: 'month');
+    return '$_temp0';
+  }
+
+  @override
+  String unitYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'years', one: 'year');
+    return '$_temp0';
+  }
+
+  @override
+  String get repeatOn => 'Repeat on';
+
+  @override
+  String monthlyOn(String when) {
+    return 'Monthly on $when';
+  }
+
+  @override
+  String nthWeekday(String position, String weekday) {
+    String _temp0 = intl.Intl.selectLogic(position, {
+      'first': 'the first',
+      'second': 'the second',
+      'third': 'the third',
+      'fourth': 'the fourth',
+      'fifth': 'the fifth',
+      'other': 'the last',
+    });
+    return '$_temp0 $weekday';
+  }
+
+  @override
+  String get ends => 'Ends';
+
+  @override
+  String get endsNever => 'Never';
+
+  @override
+  String get endsOn => 'On';
+
+  @override
+  String get endsAfter => 'After';
+
+  @override
+  String occurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'occurrences', one: 'occurrence');
+    return '$_temp0';
+  }
+
+  @override
+  String get done => 'Done';
+
+  @override
   String ruleDaily(int interval) {
     String _temp0 = intl.Intl.pluralLogic(
       interval,

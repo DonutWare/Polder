@@ -135,6 +135,13 @@ func (s *scanSummary) add(changes []ScanChange) {
 	s.sample = append(s.sample, changes[:min(room, len(changes))]...)
 }
 
+func alreadyIndexed(known, scanned Entry) bool {
+	if known.IsDir || scanned.IsDir {
+		return known.IsDir == scanned.IsDir
+	}
+	return known.Hash == scanned.Hash && known.Size == scanned.Size && known.Mtime.Equal(scanned.Mtime)
+}
+
 func differs(known Entry, item diskItem) bool {
 	if known.IsDir != item.isDir {
 		return true
@@ -378,6 +385,9 @@ func (s *Service) applyScannedEntry(ctx context.Context, tx *sql.Tx, owner users
 	known, found, err := findEntry(ctx, tx, owner.ID, entry.Path)
 	if err != nil {
 		return "", err
+	}
+	if found && alreadyIndexed(known, entry) {
+		return "", nil
 	}
 	if found && known.IsDir != entry.IsDir {
 		if err := s.removeTree(ctx, tx, owner, entry.Path); err != nil {

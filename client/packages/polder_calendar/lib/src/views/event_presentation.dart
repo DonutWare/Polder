@@ -109,6 +109,12 @@ String describeRepeat(BuildContext context, String? rrule, DateTime start) {
       (rule.weekdays.isEmpty ? [start.weekday] : (rule.weekdays.toList()..sort()))
           .map((day) => weekday.format(start.addDays(day - start.weekday)))
           .join(", "),
+    RecurrenceFrequency.monthly when rule.weekdayPosition != null && rule.weekdays.length == 1 => describeNthWeekday(
+      context,
+      rule.weekdayPosition!,
+      rule.weekdays.single,
+      start,
+    ),
     RecurrenceFrequency.monthly when rule.weekdays.isEmpty => strings.monthDay(rule.monthDay ?? start.day),
     RecurrenceFrequency.yearly => DateFormat.MMMMd(locale).format(start),
     _ => null,
@@ -117,6 +123,19 @@ String describeRepeat(BuildContext context, String? rrule, DateTime start) {
   if (rule.count case final count?) text = strings.ruleCount(text, count);
   if (rule.until case final until?) text = strings.ruleUntil(text, DateFormat.yMMMd(locale).format(until));
   return text;
+}
+
+String describeNthWeekday(BuildContext context, int position, int weekday, DateTime start) {
+  final name = DateFormat.EEEE(localeTag(context)).format(start.addDays(weekday - start.weekday));
+  final key = switch (position) {
+    1 => "first",
+    2 => "second",
+    3 => "third",
+    4 => "fourth",
+    5 => "fifth",
+    _ => "last",
+  };
+  return CalendarLocalizations.of(context).nthWeekday(key, name);
 }
 
 String describeReminder(BuildContext context, EventReminder reminder, {required bool allDay}) {

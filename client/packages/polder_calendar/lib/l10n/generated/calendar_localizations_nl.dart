@@ -148,6 +148,81 @@ class CalendarLocalizationsNl extends CalendarLocalizations {
   String get repeatCustom => 'Aangepast';
 
   @override
+  String get repeatCustomOption => 'Aangepast…';
+
+  @override
+  String get customRepeatTitle => 'Herhalingen aanpassen';
+
+  @override
+  String get repeatEvery => 'Herhaal elke';
+
+  @override
+  String unitDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'dagen', one: 'dag');
+    return '$_temp0';
+  }
+
+  @override
+  String unitWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'weken', one: 'week');
+    return '$_temp0';
+  }
+
+  @override
+  String unitMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'maanden', one: 'maand');
+    return '$_temp0';
+  }
+
+  @override
+  String unitYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'jaar', one: 'jaar');
+    return '$_temp0';
+  }
+
+  @override
+  String get repeatOn => 'Herhalen op';
+
+  @override
+  String monthlyOn(String when) {
+    return 'Maandelijks op $when';
+  }
+
+  @override
+  String nthWeekday(String position, String weekday) {
+    String _temp0 = intl.Intl.selectLogic(position, {
+      'first': 'de eerste',
+      'second': 'de tweede',
+      'third': 'de derde',
+      'fourth': 'de vierde',
+      'fifth': 'de vijfde',
+      'other': 'de laatste',
+    });
+    return '$_temp0 $weekday';
+  }
+
+  @override
+  String get ends => 'Eindigt';
+
+  @override
+  String get endsNever => 'Nooit';
+
+  @override
+  String get endsOn => 'Op';
+
+  @override
+  String get endsAfter => 'Na';
+
+  @override
+  String occurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'keer', one: 'keer');
+    return '$_temp0';
+  }
+
+  @override
+  String get done => 'Klaar';
+
+  @override
   String ruleDaily(int interval) {
     String _temp0 = intl.Intl.pluralLogic(interval, locale: localeName, other: 'Elke $interval dagen', one: 'Elke dag');
     return '$_temp0';

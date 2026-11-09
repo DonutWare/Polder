@@ -15,10 +15,11 @@ import "package:polder_calendar/src/time/date_labels.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 import "package:polder_calendar/src/views/calendar_style.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
+import "package:polder_calendar/src/views/recurrence_dialog.dart";
 
 typedef EditedEvent = ({CalendarRef calendar, EventDraft draft});
 
-enum _RepeatChoice { none, custom }
+enum _RepeatChoice { none, unsupported, custom }
 
 class EventEditor extends StatefulWidget {
   const EventEditor({
@@ -57,8 +58,25 @@ class _EventEditorState extends State<EventEditor> {
 
   Object _initialRepeat() {
     final rule = RecurrenceRule.tryParse(widget.draft.rrule);
-    if (rule != null) return RepeatOption.matching(rule, widget.draft.start) ?? _RepeatChoice.custom;
-    return (widget.draft.rrule?.trim().isEmpty ?? true) ? _RepeatChoice.none : _RepeatChoice.custom;
+    if (rule != null) return _choiceFor(rule, widget.draft.start);
+    return (widget.draft.rrule?.trim().isEmpty ?? true) ? _RepeatChoice.none : _RepeatChoice.unsupported;
+  }
+
+  Object _choiceFor(RecurrenceRule rule, DateTime start) => RepeatOption.matching(rule, start) ?? rule;
+
+  RecurrenceRule _seedRule() => switch (_repeat) {
+    final RecurrenceRule rule => rule,
+    final RepeatOption option => option.ruleFor(_start),
+    _ => RepeatOption.weekly.ruleFor(_start),
+  };
+
+  Future<void> _editCustomRepeat() async {
+    final rule = await showRecurrenceDialog(context, initial: _seedRule(), start: _start);
+    if (rule == null || !mounted) return;
+    setState(() {
+      _repeat = _choiceFor(rule, _start);
+      _repeatTouched = true;
+    });
   }
 
   @override
@@ -72,7 +90,8 @@ class _EventEditorState extends State<EventEditor> {
   String? _rrule() => switch (_repeat) {
     _ when !_repeatTouched => widget.draft.rrule,
     final RepeatOption option => option.ruleFor(_start).encode(),
-    _RepeatChoice.custom => widget.draft.rrule,
+    final RecurrenceRule rule => rule.encode(),
+    _RepeatChoice.unsupported => widget.draft.rrule,
     _ => null,
   };
 
@@ -136,11 +155,12 @@ class _EventEditorState extends State<EventEditor> {
 
   Future<void> _pickRepeat() async {
     final strings = CalendarLocalizations.of(context);
-    final choices = <Object>[
+    final choices = <Object>{
       _RepeatChoice.none,
       ...RepeatOption.values,
-      if (_initialRepeat() == _RepeatChoice.custom) _RepeatChoice.custom,
-    ];
+      if (_initialRepeat() case final initial when initial is! RepeatOption && initial != _RepeatChoice.none) initial,
+      if (_repeat is RecurrenceRule) _repeat,
+    };
     final picked = await showDialog<Object>(
       context: context,
       builder: (context) => SimpleDialog(
@@ -153,12 +173,19 @@ class _EventEditorState extends State<EventEditor> {
               children: [
                 for (final choice in choices)
                   RadioListTile<Object>(value: choice, title: Text(_repeatLabel(choice, strings))),
+                ListTile(
+                  contentPadding: const EdgeInsetsDirectional.only(start: 24, end: 24),
+                  leading: const Icon(IconsaxPlusLinear.calendar_edit),
+                  title: Text(strings.repeatCustomOption),
+                  onTap: () => Navigator.of(context).pop(_RepeatChoice.custom),
+                ),
               ],
             ),
           ),
         ],
       ),
     );
+    if (picked == _RepeatChoice.custom) return _editCustomRepeat();
     if (picked == null || picked == _repeat) return;
     setState(() {
       _repeat = picked;
@@ -168,7 +195,8 @@ class _EventEditorState extends State<EventEditor> {
 
   String _repeatLabel(Object choice, CalendarLocalizations strings) => switch (choice) {
     final RepeatOption option => describeRepeat(context, option.ruleFor(_start).encode(), _start),
-    _RepeatChoice.custom => describeRepeat(context, widget.draft.rrule, _start),
+    final RecurrenceRule rule => describeRepeat(context, rule.encode(), _start),
+    _RepeatChoice.unsupported => describeRepeat(context, widget.draft.rrule, _start),
     _ => strings.repeatNone,
   };
 

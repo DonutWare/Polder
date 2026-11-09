@@ -5,6 +5,8 @@ linters:
     - errorlint
     - sqlclosecheck
   settings:
+    staticcheck:
+      checks: ["SA*"]
     errcheck:
       exclude-functions:
         - (*database/sql.DB).Close
