@@ -431,6 +431,19 @@ class _ScheduleTile extends StatelessWidget {
     return "${from ?? ""} – ${until ?? ""}".trim();
   }
 
+  static const _minHeight = 48.0;
+  static const _maxHeight = 168.0;
+  static const _pixelsPerHour = 32.0;
+
+  double _heightForDuration() {
+    if (event.allDay) return 0;
+    final from = event.start.isBefore(day) ? day : event.start;
+    final until = event.end.isAfter(day.nextDay) ? day.nextDay : event.end;
+    if (from == day && until == day.nextDay) return 0;
+    final hours = until.difference(from).inMinutes / 60;
+    return (40 + hours * _pixelsPerHour).clamp(_minHeight, _maxHeight);
+  }
+
   double _timeColumnWidth(BuildContext context) {
     final widest = DateTime(2000, 1, 1, 23, 58);
     final labels = [
@@ -483,28 +496,34 @@ class _ScheduleTile extends StatelessWidget {
           accent: 4,
           declined: isDeclined(event),
           onTap: onTap == null ? null : () => onTap!(event),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-            child: IconTheme.merge(
-              data: IconThemeData(color: theme.colorScheme.onSurfaceVariant),
-              child: wide
-                  ? Row(
-                      spacing: 12,
-                      children: [
-                        SizedBox(width: _timeColumnWidth(context), child: details.first),
-                        Expanded(flex: 3, child: title),
-                        if (location.isNotEmpty) Flexible(flex: 2, child: details[1]),
-                        if (event.recurring) details.last,
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 4,
-                      children: [
-                        title,
-                        Wrap(spacing: 12, runSpacing: 2, children: details),
-                      ],
-                    ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: _heightForDuration()),
+            child: Align(
+              alignment: AlignmentDirectional.topStart,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                child: IconTheme.merge(
+                  data: IconThemeData(color: theme.colorScheme.onSurfaceVariant),
+                  child: wide
+                      ? Row(
+                          spacing: 12,
+                          children: [
+                            SizedBox(width: _timeColumnWidth(context), child: details.first),
+                            Expanded(flex: 3, child: title),
+                            if (location.isNotEmpty) Flexible(flex: 2, child: details[1]),
+                            if (event.recurring) details.last,
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 4,
+                          children: [
+                            title,
+                            Wrap(spacing: 12, runSpacing: 2, children: details),
+                          ],
+                        ),
+                ),
+              ),
             ),
           ),
         ),
