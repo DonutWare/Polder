@@ -114,7 +114,7 @@ func (s *Service) writeBudget(ctx context.Context, q querier, owner users.User, 
 
 func (s *Service) stage(directory string, content io.Reader, budget int64) (stagedFile, error) {
 	if err := storage.MakeDirs(directory); err != nil {
-		return stagedFile{}, apperr.Invalid("cannot create parent directory: %v", err)
+		return stagedFile{}, fmt.Errorf("create parent directory: %w", err)
 	}
 	temp, err := s.disk.CreateTempFile(directory)
 	if err != nil {

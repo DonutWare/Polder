@@ -2,10 +2,12 @@ import "dart:typed_data";
 
 import "package:flutter_test/flutter_test.dart";
 
+import "package:polder/models/offline_models.dart";
 import "package:polder/models/transfer.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
 
@@ -50,5 +52,24 @@ void main() {
 
     expect(only().status, TransferStatus.done);
     expect(server.contentOf("/a.bin"), Uint8List(200));
+  });
+
+  test("an upload the server cannot store is kept on the device and sent once it can", () async {
+    server.failWrites = (status: 507, code: "storage_full");
+
+    await transfers().upload("/", BytesPickedFile("a.bin", Uint8List.fromList([1, 2, 3])));
+
+    expect(harness.container.read(transfersProvider), isEmpty);
+    final files = await harness.container.read(offlineFilesProvider.future);
+    expect((await files.file("/a.bin"))!.state, OfflineFileState.pending);
+
+    await files.push();
+    expect((await files.file("/a.bin"))!.error!.kind, OutboxErrorKind.storageFull);
+
+    server.failWrites = null;
+    await files.retryNow();
+    await files.push();
+    expect(server.contentOf("/a.bin"), Uint8List.fromList([1, 2, 3]));
+    expect(await files.file("/a.bin"), isNull);
   });
 }

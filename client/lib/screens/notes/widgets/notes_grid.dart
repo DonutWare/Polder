@@ -9,6 +9,7 @@ import "package:polder/providers/notes/note_preview_provider.dart";
 import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
@@ -347,7 +348,12 @@ class _CardImage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final targets = NoteTargets(notePath: notePath, byId: const {});
     return Image(
-      image: noteImage(ref.watch(polderApiProvider), targets, destination),
+      image: noteImage(
+        ref.watch(polderApiProvider),
+        targets,
+        destination,
+        offline: ref.watch(offlineFilesProvider).value,
+      ),
       width: double.infinity,
       fit: BoxFit.cover,
       gaplessPlayback: true,

@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/screens/notes/cooking/cooking_timer_bar.dart";
 import "package:polder/screens/notes/editor/note_embeds.dart";
@@ -204,7 +205,12 @@ class _RecipeImage extends ConsumerWidget {
     child: ClipRRect(
       borderRadius: const BorderRadius.all(Radius.circular(12)),
       child: Image(
-        image: noteImage(ref.watch(polderApiProvider), NoteTargets(notePath: notePath, byId: const {}), destination),
+        image: noteImage(
+          ref.watch(polderApiProvider),
+          NoteTargets(notePath: notePath, byId: const {}),
+          destination,
+          offline: ref.watch(offlineFilesProvider).value,
+        ),
         fit: BoxFit.cover,
         width: double.infinity,
         errorBuilder: (_, _, _) => const SizedBox.shrink(),

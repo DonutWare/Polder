@@ -3096,6 +3096,7 @@ class EventInput {
     this.status,
     required this.summary,
     this.timezone,
+    this.uid,
     this.url,
   });
 
@@ -3135,6 +3136,8 @@ class EventInput {
   final String summary;
   @JsonKey(name: 'timezone', includeIfNull: false)
   final String? timezone;
+  @JsonKey(name: 'uid', includeIfNull: false)
+  final String? uid;
   @JsonKey(name: 'url', includeIfNull: false)
   final String? url;
   static const fromJsonFactory = _$EventInputFromJson;
@@ -3159,6 +3162,7 @@ class EventInput {
             (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
             (identical(other.summary, summary) || const DeepCollectionEquality().equals(other.summary, summary)) &&
             (identical(other.timezone, timezone) || const DeepCollectionEquality().equals(other.timezone, timezone)) &&
+            (identical(other.uid, uid) || const DeepCollectionEquality().equals(other.uid, uid)) &&
             (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
   }
 
@@ -3177,6 +3181,7 @@ class EventInput {
       const DeepCollectionEquality().hash(status) ^
       const DeepCollectionEquality().hash(summary) ^
       const DeepCollectionEquality().hash(timezone) ^
+      const DeepCollectionEquality().hash(uid) ^
       const DeepCollectionEquality().hash(url) ^
       runtimeType.hashCode;
 }
@@ -3196,6 +3201,7 @@ extension $EventInputExtension on EventInput {
     String? status,
     String? summary,
     String? timezone,
+    String? uid,
     String? url,
   }) {
     return EventInput(
@@ -3212,6 +3218,7 @@ extension $EventInputExtension on EventInput {
       status: status ?? this.status,
       summary: summary ?? this.summary,
       timezone: timezone ?? this.timezone,
+      uid: uid ?? this.uid,
       url: url ?? this.url,
     );
   }
@@ -3230,6 +3237,7 @@ extension $EventInputExtension on EventInput {
     Wrapped<String?>? status,
     Wrapped<String>? summary,
     Wrapped<String?>? timezone,
+    Wrapped<String?>? uid,
     Wrapped<String?>? url,
   }) {
     return EventInput(
@@ -3246,6 +3254,7 @@ extension $EventInputExtension on EventInput {
       status: (status != null ? status.value : this.status),
       summary: (summary != null ? summary.value : this.summary),
       timezone: (timezone != null ? timezone.value : this.timezone),
+      uid: (uid != null ? uid.value : this.uid),
       url: (url != null ? url.value : this.url),
     );
   }
@@ -4232,7 +4241,7 @@ extension $GroupSummaryExtension on GroupSummary {
 
 @JsonSerializable(explicitToJson: true)
 class HealthStatus {
-  const HealthStatus({required this.status});
+  const HealthStatus({required this.status, this.storage});
 
   factory HealthStatus.fromJson(Map<String, dynamic> json) => _$HealthStatusFromJson(json);
 
@@ -4241,26 +4250,38 @@ class HealthStatus {
 
   @JsonKey(name: 'status', includeIfNull: false)
   final String status;
+  @JsonKey(
+    name: 'storage',
+    includeIfNull: false,
+    toJson: healthStatusStorageNullableToJson,
+    fromJson: healthStatusStorageNullableFromJson,
+  )
+  final enums.HealthStatusStorage? storage;
   static const fromJsonFactory = _$HealthStatusFromJson;
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is HealthStatus &&
-            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)));
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.storage, storage) || const DeepCollectionEquality().equals(other.storage, storage)));
   }
 
   @override
-  int get hashCode => const DeepCollectionEquality().hash(status) ^ runtimeType.hashCode;
+  int get hashCode =>
+      const DeepCollectionEquality().hash(status) ^ const DeepCollectionEquality().hash(storage) ^ runtimeType.hashCode;
 }
 
 extension $HealthStatusExtension on HealthStatus {
-  HealthStatus copyWith({String? status}) {
-    return HealthStatus(status: status ?? this.status);
+  HealthStatus copyWith({String? status, enums.HealthStatusStorage? storage}) {
+    return HealthStatus(status: status ?? this.status, storage: storage ?? this.storage);
   }
 
-  HealthStatus copyWithWrapped({Wrapped<String>? status}) {
-    return HealthStatus(status: (status != null ? status.value : this.status));
+  HealthStatus copyWithWrapped({Wrapped<String>? status, Wrapped<enums.HealthStatusStorage?>? storage}) {
+    return HealthStatus(
+      status: (status != null ? status.value : this.status),
+      storage: (storage != null ? storage.value : this.storage),
+    );
   }
 }
 
@@ -12867,6 +12888,67 @@ List<enums.GroupMyRole>? groupMyRoleNullableListFromJson(List? groupMyRole, [Lis
   }
 
   return groupMyRole.map((e) => groupMyRoleFromJson(e.toString())).toList();
+}
+
+String? healthStatusStorageNullableToJson(enums.HealthStatusStorage? healthStatusStorage) {
+  return healthStatusStorage?.value;
+}
+
+String? healthStatusStorageToJson(enums.HealthStatusStorage healthStatusStorage) {
+  return healthStatusStorage.value;
+}
+
+enums.HealthStatusStorage healthStatusStorageFromJson(
+  Object? healthStatusStorage, [
+  enums.HealthStatusStorage? defaultValue,
+]) {
+  return enums.HealthStatusStorage.values.firstWhereOrNull((e) => e.value == healthStatusStorage) ??
+      defaultValue ??
+      enums.HealthStatusStorage.swaggerGeneratedUnknown;
+}
+
+enums.HealthStatusStorage? healthStatusStorageNullableFromJson(
+  Object? healthStatusStorage, [
+  enums.HealthStatusStorage? defaultValue,
+]) {
+  if (healthStatusStorage == null) {
+    return null;
+  }
+  return enums.HealthStatusStorage.values.firstWhereOrNull((e) => e.value == healthStatusStorage) ?? defaultValue;
+}
+
+String healthStatusStorageExplodedListToJson(List<enums.HealthStatusStorage>? healthStatusStorage) {
+  return healthStatusStorage?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> healthStatusStorageListToJson(List<enums.HealthStatusStorage>? healthStatusStorage) {
+  if (healthStatusStorage == null) {
+    return [];
+  }
+
+  return healthStatusStorage.map((e) => e.value!).toList();
+}
+
+List<enums.HealthStatusStorage> healthStatusStorageListFromJson(
+  List? healthStatusStorage, [
+  List<enums.HealthStatusStorage>? defaultValue,
+]) {
+  if (healthStatusStorage == null) {
+    return defaultValue ?? [];
+  }
+
+  return healthStatusStorage.map((e) => healthStatusStorageFromJson(e.toString())).toList();
+}
+
+List<enums.HealthStatusStorage>? healthStatusStorageNullableListFromJson(
+  List? healthStatusStorage, [
+  List<enums.HealthStatusStorage>? defaultValue,
+]) {
+  if (healthStatusStorage == null) {
+    return defaultValue;
+  }
+
+  return healthStatusStorage.map((e) => healthStatusStorageFromJson(e.toString())).toList();
 }
 
 String? incomingFederatedShareStateNullableToJson(enums.IncomingFederatedShareState? incomingFederatedShareState) {

@@ -1,8 +1,7 @@
 import "package:flutter/widgets.dart";
-
 import "package:flutter_riverpod/misc.dart";
-
 import "package:polder/l10n/generated/app_localizations.dart";
+import "package:polder/models/offline_models.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/sync/sync_exceptions.dart";
 import "package:polder/util/localization_helper.dart";
@@ -16,7 +15,9 @@ extension ErrorLocalization on AppLocalizations {
   };
 
   String _summaryOf(Object? error) => switch (error) {
+    NetworkException(timedOut: true) => errorTimedOut,
     NetworkException() => errorNetwork,
+    StorageFullException() => errorStorageFull,
     UnauthorizedException() => errorUnauthorized,
     ForbiddenException() => errorForbidden,
     NotFoundException() => errorNotFound,
@@ -55,4 +56,41 @@ extension ErrorLocalization on AppLocalizations {
 
 extension ContextErrorLocalization on BuildContext {
   String describeError(Object? error) => localized.describeError(error);
+}
+
+extension SyncErrorHint on BuildContext {
+  String syncExplanation(Object? error) =>
+      {syncProblem(error), syncHint(error)}.where((line) => line.isNotEmpty).join("\n");
+
+  String syncHint(Object? error) => switch (error) {
+    OutboxError(:final kind) => switch (kind) {
+      OutboxErrorKind.unreachable || OutboxErrorKind.timedOut => localized.hintUnreachable,
+      OutboxErrorKind.storageFull || OutboxErrorKind.serverDidNotStore => localized.hintStorageFull,
+      OutboxErrorKind.serverError => localized.hintServerError,
+      OutboxErrorKind.quota => localized.hintQuota,
+      OutboxErrorKind.conflict => localized.hintConflict,
+      OutboxErrorKind.forbidden || OutboxErrorKind.notFound || OutboxErrorKind.rejected => localized.hintRejected,
+      OutboxErrorKind.deviceFull => localized.hintDeviceFull,
+    },
+    _ => "",
+  };
+
+  String syncProblem(Object? error) => switch (error) {
+    OutboxError(:final kind, :final message) => [
+      switch (kind) {
+        OutboxErrorKind.unreachable => localized.errorNetwork,
+        OutboxErrorKind.timedOut => localized.errorTimedOut,
+        OutboxErrorKind.storageFull || OutboxErrorKind.serverDidNotStore => localized.errorStorageFull,
+        OutboxErrorKind.serverError => localized.errorServer("5xx"),
+        OutboxErrorKind.quota => localized.errorQuotaExceeded,
+        OutboxErrorKind.conflict => localized.errorConflict,
+        OutboxErrorKind.forbidden => localized.errorForbidden,
+        OutboxErrorKind.notFound => localized.errorNotFound,
+        OutboxErrorKind.rejected => localized.errorInvalidRequest,
+        OutboxErrorKind.deviceFull => localized.errorDeviceFull,
+      },
+      if (message.isNotEmpty) message,
+    ].join("\n"),
+    _ => describeError(error),
+  };
 }

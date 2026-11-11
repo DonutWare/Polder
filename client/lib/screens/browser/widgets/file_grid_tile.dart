@@ -7,6 +7,7 @@ import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/browser/widgets/offline_mark.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/theme/app_theme.dart";
@@ -110,6 +111,7 @@ class FileGridTile extends StatelessWidget {
                     padding: const EdgeInsetsDirectional.only(start: 6),
                     child: EntryTagDots(entry: entry),
                   ),
+                  OfflineMark(path: entry.path),
                   if (entry.sharedByYou)
                     Padding(
                       padding: EdgeInsetsDirectional.only(end: onMenu == null ? 10 : 0),

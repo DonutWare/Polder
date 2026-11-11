@@ -1,10 +1,13 @@
 import "dart:convert";
 
 import "package:fake_async/fake_async.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
 
+import "package:polder/models/offline_models.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/notes/note_document_provider.dart";
+import "package:polder/providers/offline/offline_sync_provider.dart";
 import "package:polder/services/storage/preferences_store.dart";
 
 import "../support/fake_server.dart";
@@ -24,33 +27,47 @@ void main() {
 
   String onServer(String path) => utf8.decode(server.nodes[path]!.bytes);
 
-  void withNote(void Function(FakeAsync async, ProviderHarness harness, NoteDocumentNotifier note) body) {
+  const settle = Duration(seconds: 2);
+
+  void withHarness(void Function(FakeAsync async, ProviderHarness harness) body) {
     fakeAsync((async) {
       final harness = ProviderHarness(httpClient: SignedInServer(server), account: account, preferences: preferences);
       harness.container.read(accountProvider.future);
-      async.flushMicrotasks();
-      final subscription = harness.container.listen(noteDocumentProvider(notePath), (_, _) {});
-      async.flushMicrotasks();
-      body(async, harness, harness.container.read(noteDocumentProvider(notePath).notifier));
-      subscription.close();
-      async.elapse(const Duration(seconds: 1));
+      final sync = harness.container.listen(offlineSyncProvider, (_, _) {});
+      async.elapse(const Duration(milliseconds: 10));
+      body(async, harness);
+      async.elapse(settle);
+      sync.close();
       harness.dispose();
+      async.elapse(settle);
     });
   }
+
+  ProviderSubscription<AsyncValue<NoteDocument>> open(FakeAsync async, ProviderHarness harness) {
+    final subscription = harness.container.listen(noteDocumentProvider(notePath), (_, _) {});
+    async.elapse(const Duration(milliseconds: 10));
+    return subscription;
+  }
+
+  NoteDocumentNotifier noteOf(ProviderHarness harness) =>
+      harness.container.read(noteDocumentProvider(notePath).notifier);
 
   NoteDocument documentOf(ProviderHarness harness) =>
       harness.container.read(noteDocumentProvider(notePath)).requireValue;
 
-  test("edits reach the server at the checkpoint, not while typing", () {
-    withNote((async, harness, note) {
-      note.edit("# Plan\n\nFirst idea\n");
+  test("edits are saved on the device right after typing and then reach the server", () {
+    withHarness((async, harness) {
+      final note = open(async, harness);
+      noteOf(harness).edit("# Plan\n\nFirst idea\n");
       expect(documentOf(harness).state, NoteSaveState.unsaved);
-      async.elapse(const Duration(minutes: 4));
-      expect(onServer(notePath), "# Plan\n");
 
-      async.elapse(const Duration(minutes: 1));
+      async.elapse(NoteDocumentNotifier.saveDelay);
+      expect(documentOf(harness).dirty, isFalse);
+
+      async.elapse(settle);
       expect(onServer(notePath), "# Plan\n\nFirst idea\n");
       expect(documentOf(harness).state, NoteSaveState.saved);
+      note.close();
     });
   });
 
@@ -60,75 +77,103 @@ void main() {
     server
       ..putFile(notePath, utf8.encode("See [Old](Old.md?fileId=$id) and [the plan](Old.md?fileId=$id)\n"))
       ..movePath("/Notes/Old.md", "/Notes/Roadmap.md");
-    withNote((async, harness, note) {
-      async.flushMicrotasks();
+    withHarness((async, harness) {
+      final note = open(async, harness);
+      async.elapse(settle);
       expect(documentOf(harness).state, NoteSaveState.saved);
+      note.close();
     });
     expect(onServer(notePath), "See [Roadmap](Roadmap.md?fileId=$id) and [the plan](Roadmap.md?fileId=$id)\n");
   });
 
-  test("unsaved edits are kept when the server only updated links in the note", () {
-    server.putFile("/Notes/Old.md", utf8.encode("# Old\n"));
-    final id = server.idOf("/Notes/Old.md");
-    server.putFile(notePath, utf8.encode("See [Old](Old.md?fileId=$id)\n"));
-    withNote((async, harness, note) {
-      async.flushMicrotasks();
-      note.edit("See [Old](Old.md?fileId=$id)\n\nMy new line\n");
-      server
-        ..movePath("/Notes/Old.md", "/Notes/Roadmap.md")
-        ..putFile(notePath, utf8.encode("See [Roadmap](Roadmap.md?fileId=$id)\n"));
-      note.save();
-      async.flushMicrotasks();
-      expect(documentOf(harness).state, NoteSaveState.saved);
+  test("closing the note keeps what was typed and sends it to the server", () {
+    withHarness((async, harness) {
+      open(async, harness);
+      noteOf(harness).edit("# Plan\n\nWritten before closing\n");
+      harness.container.invalidate(noteDocumentProvider(notePath));
     });
-    expect(onServer(notePath), "See [Roadmap](Roadmap.md?fileId=$id)\n\nMy new line\n");
-  });
-
-  test("closing the note saves it", () {
-    withNote((async, harness, note) => note.edit("# Plan\n\nWritten before closing\n"));
     expect(onServer(notePath), "# Plan\n\nWritten before closing\n");
   });
 
-  test("unsaved text is kept as a draft and offered when the note opens again", () {
-    server.failNextPut = true;
-    withNote((async, harness, note) {
-      note.edit("# Plan\n\nNot on the server yet\n");
-      async.elapse(NoteDocumentNotifier.draftDelay);
-    });
-    expect(onServer(notePath), "# Plan\n");
+  test("edits made while the server is unreachable stay on the device and are reopened from it", () {
+    withHarness((async, harness) {
+      var note = open(async, harness);
+      server.unreachable = true;
+      noteOf(harness).edit("# Plan\n\nWritten offline\n");
+      async.elapse(settle);
 
-    withNote((async, harness, note) {
-      final draft = documentOf(harness).draft;
-      expect(draft?.text, "# Plan\n\nNot on the server yet\n");
-      note.recoverDraft();
+      expect(documentOf(harness).state, NoteSaveState.failed);
+      expect((documentOf(harness).saveError! as OutboxError).kind, OutboxErrorKind.unreachable);
+      note.close();
+      async.elapse(settle);
+
+      note = open(async, harness);
+      expect(documentOf(harness).text, "# Plan\n\nWritten offline\n");
+      expect(onServer(notePath), "# Plan\n");
+
+      server.unreachable = false;
+      noteOf(harness).retrySync();
+      async.elapse(settle);
+      expect(onServer(notePath), "# Plan\n\nWritten offline\n");
+      expect(documentOf(harness).state, NoteSaveState.saved);
+      note.close();
+    });
+  });
+
+  test("a server that cannot store the note keeps it on the device and says why", () {
+    withHarness((async, harness) {
+      final note = open(async, harness);
+      server.failWrites = (status: 507, code: "storage_full");
+      noteOf(harness).edit("# Plan\n\nDisk is full\n");
+      async.elapse(settle);
+
+      expect(documentOf(harness).state, NoteSaveState.failed);
+      expect((documentOf(harness).saveError! as OutboxError).kind, OutboxErrorKind.storageFull);
+      expect(documentOf(harness).text, "# Plan\n\nDisk is full\n");
+      note.close();
+    });
+  });
+
+  test("a draft kept by an earlier version is still offered when the note opens", () {
+    preferences.writeJson("noteDraft:${server.idOf(notePath)}", {
+      "text": "# Plan\n\nNot on the server yet\n",
+      "baseHash": "",
+      "updatedAt": DateTime.utc(2026).toIso8601String(),
+    });
+    withHarness((async, harness) {
+      final note = open(async, harness);
+      expect(documentOf(harness).draft?.text, "# Plan\n\nNot on the server yet\n");
+      noteOf(harness).recoverDraft();
       expect(documentOf(harness).text, "# Plan\n\nNot on the server yet\n");
       expect(documentOf(harness).draft, isNull);
+      note.close();
     });
   });
 
   test("a change made elsewhere is a conflict the user resolves", () {
-    withNote((async, harness, note) {
-      note.edit("# Plan\n\nMine\n");
+    withHarness((async, harness) {
+      final note = open(async, harness);
       server.putFile(notePath, utf8.encode("# Plan\n\nTheirs\n"));
-      note.save();
-      async.flushMicrotasks();
+      noteOf(harness).edit("# Plan\n\nMine\n");
+      async.elapse(settle);
       expect(documentOf(harness).state, NoteSaveState.conflict);
 
-      note.takeTheirs();
-      async.flushMicrotasks();
+      noteOf(harness).takeTheirs();
+      async.elapse(settle);
       expect(documentOf(harness).text, "# Plan\n\nTheirs\n");
       expect(documentOf(harness).dirty, isFalse);
+      expect(onServer(notePath), "# Plan\n\nTheirs\n");
+      note.close();
     });
   });
 
-  test("a note renamed while open saves to its new name", () {
-    withNote((async, harness, note) {
-      note.edit("# Plan\n\nAfter the rename\n");
+  test("an edit to a note renamed elsewhere reaches it under its new name", () {
+    withHarness((async, harness) {
+      final note = open(async, harness);
       server.movePath(notePath, "/Notes/Renamed.md");
-      note.save();
-      async.flushMicrotasks();
-      expect(documentOf(harness).state, NoteSaveState.saved);
-      expect(documentOf(harness).entry.path, "/Notes/Renamed.md");
+      noteOf(harness).edit("# Plan\n\nAfter the rename\n");
+      async.elapse(settle);
+      note.close();
     });
     expect(onServer("/Notes/Renamed.md"), "# Plan\n\nAfter the rename\n");
   });

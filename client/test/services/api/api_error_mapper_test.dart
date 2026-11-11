@@ -39,6 +39,11 @@ void main() {
     expect(ApiErrorMapper.fromResponse(500, null), isA<ServerException>());
   });
 
+  test("tells a full server disk apart from a full quota on the same status", () {
+    expect(ApiErrorMapper.fromResponse(507, error("storage_full")), isA<StorageFullException>());
+    expect(ApiErrorMapper.fromResponse(507, null), isA<QuotaExceededException>());
+  });
+
   test("keeps the server message", () {
     expect(ApiErrorMapper.fromResponse(403, error("forbidden")).serverMessage, "forbidden");
   });

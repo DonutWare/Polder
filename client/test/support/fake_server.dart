@@ -67,6 +67,10 @@ class FakePolderServer extends http.BaseClient {
   int rangeBytesServed = 0;
   int chunkBytesReceived = 0;
   bool failNextPut = false;
+  bool unreachable = false;
+  List<Map<String, Object>> tags = [];
+  ({int status, String code})? failWrites;
+  bool corruptWrites = false;
   final _ids = <String, int>{};
 
   int idOf(String path) => _ids.putIfAbsent(path, () => _ids.length + 1);
@@ -100,8 +104,12 @@ class FakePolderServer extends http.BaseClient {
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final uri = request.url;
     final route = uri.path.replaceFirst("/api/v1", "");
+    if (unreachable) throw http.ClientException("Connection refused", uri);
     requests.add("${request.method} $route");
     try {
+      if (failWrites case (:final status, :final code) when request.method != "GET") {
+        throw _HttpError(status, code);
+      }
       final streamed = _streamedBatch(request.method, route);
       if (streamed != null) return await _receiveStream(streamed, request.finalize());
       final body = await request.finalize().toBytes();
@@ -133,6 +141,7 @@ class FakePolderServer extends http.BaseClient {
       ("POST", "/files/resolve") => _resolve(_decode(body)),
       ("DELETE", "/files") => _delete(query),
       ("GET", "/link-previews") => _linkPreview(query["url"]!),
+      ("GET", "/tags") => _json(200, tags),
       ("GET", "/sync/changes") => _changes(int.parse(query["cursor"] ?? "0")),
       ("GET", "/sync/manifest") => _manifest(query["path"]!),
       ("POST", "/sync/batches") => _createBatch(_decode(body)),
@@ -183,7 +192,8 @@ class FakePolderServer extends http.BaseClient {
     final path = query["path"]!;
     _checkBaseRev(path, int.parse(query["baseRev"] ?? "0"));
     wholeBytesReceived += body.length;
-    putFile(path, body, mtime: DateTime.tryParse(query["mtime"] ?? ""));
+    final kept = corruptWrites ? body.sublist(0, body.length ~/ 2) : body;
+    putFile(path, kept, mtime: DateTime.tryParse(query["mtime"] ?? ""));
     return _json(200, _entry(path));
   }
 

@@ -45,6 +45,7 @@ var statusByKind = map[apperr.Kind]int{
 	apperr.KindPrecondition:  http.StatusPreconditionFailed,
 	apperr.KindRateLimited:   http.StatusTooManyRequests,
 	apperr.KindUnavailable:   http.StatusServiceUnavailable,
+	apperr.KindStorageFull:   http.StatusInsufficientStorage,
 }
 
 func StatusAndMessage(err error) (int, string) {
@@ -57,6 +58,9 @@ func StatusAndMessage(err error) (int, string) {
 		if code, known := statusByKind[appErr.Kind]; known {
 			return code, appErr.Message
 		}
+	}
+	if full, ok := apperr.FromNoSpace(err); ok {
+		return statusByKind[full.Kind], full.Message
 	}
 	return http.StatusInternalServerError, err.Error()
 }

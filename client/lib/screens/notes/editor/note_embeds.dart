@@ -7,11 +7,14 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_space.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/browser/widgets/file_type_icon.dart";
 import "package:polder/screens/notes/editor/note_image_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/offline/offline_files.dart";
 import "package:polder/services/notes/note_link.dart";
 import "package:polder/services/notes/note_markdown.dart";
 import "package:polder/services/sharing/file_space_api.dart";
@@ -43,14 +46,23 @@ const notePreviewSize = 512;
 
 const notePreviewRadius = BorderRadius.all(Radius.circular(6));
 
-ImageProvider noteImage(PolderApi api, NoteTargets targets, String destination) {
+ImageProvider noteImage(PolderApi api, NoteTargets targets, String destination, {OfflineFiles? offline}) {
   final uri = Uri.tryParse(destination);
   if (uri != null && (uri.scheme == "http" || uri.scheme == "https")) return NetworkImage(destination);
   final link = targets.parse(destination);
   final known = link == null ? null : targets.knownTarget(link);
   return NoteImageProvider(
     identity: "${targets.notePath}|$destination|${known?.rev}",
-    load: () => _imageBytes(api, link, known),
+    load: () async {
+      try {
+        return await _imageBytes(api, link, known);
+      } on NetworkException {
+        final path = known?.path ?? link?.path;
+        final local = path == null || isVideoDestination(destination) ? null : await offline?.read(path);
+        if (local == null) rethrow;
+        return local;
+      }
+    },
   );
 }
 
@@ -133,7 +145,12 @@ class NoteImage extends ConsumerWidget {
               child: Image(
                 image: switch (targets.space) {
                   final space? => spaceNoteImage(ref.watch(fileSpaceApiProvider(space)), targets, destination),
-                  null => noteImage(ref.watch(polderApiProvider), targets, destination),
+                  null => noteImage(
+                    ref.watch(polderApiProvider),
+                    targets,
+                    destination,
+                    offline: ref.watch(offlineFilesProvider).value,
+                  ),
                 },
                 gaplessPlayback: true,
                 frameBuilder: (context, child, frame, loadedSynchronously) => frame == null && !loadedSynchronously

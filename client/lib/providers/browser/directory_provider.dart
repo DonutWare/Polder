@@ -4,9 +4,11 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/util/guarded_refresh.dart";
 import "package:polder/util/remote_path.dart";
@@ -39,7 +41,22 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> with GuardedRefr
     if (await refreshWith(() => _fetch(_api)) case final listing?) _followIndexing(listing);
   }
 
-  Future<DirectoryListing> _fetch(PolderApi api) => api.list(path);
+  Future<DirectoryListing> _fetch(PolderApi api) async {
+    try {
+      return await api.list(path);
+    } on NetworkException {
+      final cached = await _cachedListing();
+      if (cached == null) rethrow;
+      return cached;
+    }
+  }
+
+  Future<DirectoryListing?> _cachedListing() async {
+    final files = await ref.read(offlineFilesProvider.future);
+    final children = await files.children(path);
+    if (children.isEmpty && !await files.availableOffline(path)) return null;
+    return DirectoryListing(path: path, entries: [for (final child in children) child.entry]);
+  }
 
   void _followIndexing(DirectoryListing listing) {
     _indexingTimer?.cancel();

@@ -100,6 +100,7 @@ type EventDetails struct {
 }
 
 type EventInput struct {
+	UID         string          `json:"uid,omitempty" required:"false" maxLength:"255" doc:"Client-chosen UID for a new event; creating again with the same UID returns the existing event"`
 	Summary     string          `json:"summary" maxLength:"1024"`
 	Description string          `json:"description,omitempty" required:"false" maxLength:"65536"`
 	Location    string          `json:"location,omitempty" required:"false" maxLength:"1024"`
@@ -378,7 +379,13 @@ func (s *Service) CreateEvent(ctx context.Context, viewer users.User, calendarID
 	if err != nil {
 		return EventDetails{}, err
 	}
-	uid := randomHex(16) + "@polder"
+	uid, err := newEventUID(input.UID)
+	if err != nil {
+		return EventDetails{}, err
+	}
+	if existing, found, err := s.eventWithUID(ctx, c, uid, viewer); found || err != nil {
+		return existing, err
+	}
 	event := ical.NewComponent(ical.CompEvent)
 	event.Props.SetText(ical.PropUID, uid)
 	event.Props.SetDateTime(ical.PropCreated, s.now().UTC())
@@ -402,6 +409,31 @@ func (s *Service) CreateEvent(ctx context.Context, viewer users.User, calendarID
 		return EventDetails{}, err
 	}
 	return describeDetails(c, object, resource, addressesOf(viewer)), nil
+}
+
+func newEventUID(requested string) (string, error) {
+	if requested == "" {
+		return randomHex(16) + "@polder", nil
+	}
+	if strings.ContainsAny(requested, "\r\n") || strings.TrimSpace(requested) != requested {
+		return "", apperr.Invalid("the event UID may not contain line breaks or surrounding spaces")
+	}
+	return requested, nil
+}
+
+func (s *Service) eventWithUID(ctx context.Context, c Calendar, uid string, viewer users.User) (EventDetails, bool, error) {
+	object, err := s.store.ObjectByUID(ctx, c.ID, uid)
+	if apperr.Is(err, apperr.KindNotFound) {
+		return EventDetails{}, false, nil
+	}
+	if err != nil {
+		return EventDetails{}, false, err
+	}
+	resource, err := Parse(object.Data, c.Location())
+	if err != nil {
+		return EventDetails{}, false, err
+	}
+	return describeDetails(c, object, resource, addressesOf(viewer)), true, nil
 }
 
 func (s *Service) UpdateEvent(ctx context.Context, viewer users.User, calendarID, eventID int64, change EventChange) (EventDetails, error) {

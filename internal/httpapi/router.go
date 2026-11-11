@@ -78,6 +78,8 @@ type API struct {
 	archiveSlots chan struct{}
 
 	requestTrashPurge func()
+
+	storage *storageProbe
 }
 
 type Dependencies struct {
@@ -155,6 +157,8 @@ func NewRouter(deps Dependencies) http.Handler {
 		archiveSlots: make(chan struct{}, maxConcurrentArchives),
 
 		requestTrashPurge: deps.RequestTrashPurge,
+
+		storage: newStorageProbe(diskProbe(deps.Files)),
 	}
 
 	router := chi.NewRouter()
@@ -536,12 +540,4 @@ func endpointNotFound(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotFound)
 	_ = json.NewEncoder(w).Encode(fromAppError(apperr.NotFound("no such endpoint")))
-}
-
-type healthStatus struct {
-	Status string `json:"status" example:"ok"`
-}
-
-func (a *API) health(context.Context, *struct{}) (*jsonBody[healthStatus], error) {
-	return respond(healthStatus{Status: "ok"}), nil
 }

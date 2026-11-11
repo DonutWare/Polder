@@ -1,22 +1,26 @@
 import "dart:async";
 import "dart:convert";
+import "dart:typed_data";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/models/offline_models.dart";
+import "package:polder/models/sync/conflict.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
+import "package:polder/providers/offline/offline_sync_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
-import "package:polder/providers/realtime/files_changed_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/notes/note_drafts.dart";
 import "package:polder/services/notes/note_link.dart";
+import "package:polder/services/offline/offline_files.dart";
 import "package:polder/util/remote_path.dart";
 
-enum NoteSaveState { saved, unsaved, saving, conflict, failed }
+enum NoteSaveState { saved, unsaved, saving, pending, conflict, failed }
 
 class NoteDocument {
   const NoteDocument({
@@ -72,50 +76,106 @@ final noteDocumentProvider = AsyncNotifierProvider.autoDispose.family<NoteDocume
 class NoteDocumentNotifier extends AsyncNotifier<NoteDocument> {
   NoteDocumentNotifier(this.path);
 
-  static const checkpointInterval = Duration(minutes: 5);
-  static const draftDelay = Duration(seconds: 2);
+  static const saveDelay = Duration(milliseconds: 800);
 
   final String path;
   late PolderApi _api;
+  late OfflineFiles _files;
   late NoteDrafts _drafts;
-  Timer? _checkpoint;
-  Timer? _draftTimer;
+  Timer? _saveTimer;
   Future<void>? _saving;
   NoteDocument? _latest;
+  String? _shownHash;
 
   NoteDocument get _document => state.requireValue;
 
   @override
   Future<NoteDocument> build() async {
     _api = ref.watch(polderApiProvider);
+    _files = await ref.watch(offlineFilesProvider.future);
     _drafts = NoteDrafts(ref.read(preferencesStoreProvider));
     ref.onDispose(_close);
     listenSelf((_, next) => _latest = next.value ?? _latest);
-    ref.listen(filesChangedProvider, (_, next) {
-      final dirs = next.value;
-      if (dirs != null && state.hasValue && dirs.contains(RemotePath.parent(_document.entry.path))) {
-        unawaited(checkRemote());
-      }
-    });
+    final subscription = _files.changes.listen((_) => unawaited(_followStore()));
+    ref.onDispose(subscription.cancel);
 
-    final entry = await _api.stat(path);
-    final (text, editable) = _decode(await _api.downloadBytes(entry.path));
-    final draft = await _drafts.read(entry);
+    final row = await _load();
+    final bytes = await _files.read(row.path) ?? Uint8List(0);
+    final (text, editable) = _decode(bytes);
+    _shownHash = row.localHash;
+    final draft = await _drafts.read(row.entry);
     unawaited(Future(_followLinkedFiles));
-    return NoteDocument(
-      entry: entry,
-      text: text,
-      savedText: text,
-      editable: editable,
-      draft: draft != null && draft.text != text ? draft : null,
+    return _withSyncState(
+      NoteDocument(
+        entry: row.entry,
+        text: text,
+        savedText: text,
+        editable: editable,
+        draft: draft != null && draft.text != text ? draft : null,
+      ),
+      row,
     );
+  }
+
+  Future<OfflineFile> _load() async {
+    final cached = await _files.file(path);
+    final trusted = cached != null && (cached.unsynced || await _files.availableOffline(path));
+    if (trusted && cached.hasCurrentContent) return cached;
+    try {
+      return await _files.fetch(path);
+    } on ApiException {
+      if (cached != null && cached.localHash != null) return cached;
+      rethrow;
+    }
+  }
+
+  NoteDocument _withSyncState(NoteDocument document, OfflineFile row) {
+    final syncState = switch (row.state) {
+      OfflineFileState.synced => NoteSaveState.saved,
+      OfflineFileState.pending => NoteSaveState.pending,
+      OfflineFileState.failed => NoteSaveState.failed,
+      OfflineFileState.conflict => NoteSaveState.conflict,
+    };
+    final keepsLocalState = document.state == NoteSaveState.unsaved || document.state == NoteSaveState.saving;
+    return document.copyWith(
+      entry: document.entry.path == row.path ? row.entry : document.entry,
+      state: keepsLocalState && syncState != NoteSaveState.conflict ? document.state : syncState,
+      conflict: () => row.conflict?.server,
+      saveError: row.error,
+    );
+  }
+
+  Future<void> _followStore() async {
+    final document = state.value;
+    if (document == null || !ref.mounted) return;
+    final row = await _files.file(document.entry.path);
+    if (row == null || !ref.mounted) return;
+    final latest = state.requireValue;
+    if (row.hasCurrentContent && row.localHash != _shownHash && !latest.dirty && _saving == null) {
+      final (text, _) = _decode(await _files.read(row.path) ?? Uint8List(0));
+      if (!ref.mounted) return;
+      final current = state.requireValue;
+      if (current.dirty || _saving != null) {
+        state = AsyncData(_withSyncState(current, row));
+        return;
+      }
+      _shownHash = row.localHash;
+      state = AsyncData(_withSyncState(current.copyWith(text: text, savedText: text), row));
+      return;
+    }
+    state = AsyncData(_withSyncState(latest, row));
   }
 
   Future<void> _followLinkedFiles() async {
     final document = state.value;
     if (document == null || !document.editable || document.dirty || document.draft != null) return;
     if (document.state == NoteSaveState.conflict || _saving != null) return;
-    final updated = await _updateLinks(document.text, document.entry.path);
+    final String updated;
+    try {
+      updated = await _updateLinks(document.text, document.entry.path);
+    } on ApiException {
+      return;
+    }
     if (!ref.mounted || updated == document.text) return;
     final current = state.value;
     if (current == null || current.text != document.text || current.dirty) return;
@@ -139,87 +199,42 @@ class NoteDocumentNotifier extends AsyncNotifier<NoteDocument> {
 
   void _apply(NoteDocument next) {
     final dirty = next.text != next.savedText;
+    final conflicted = next.state == NoteSaveState.conflict;
     state = AsyncData(
-      next.copyWith(
-        state: next.state == NoteSaveState.conflict
-            ? NoteSaveState.conflict
-            : (dirty ? NoteSaveState.unsaved : NoteSaveState.saved),
-      ),
+      next.copyWith(state: conflicted ? NoteSaveState.conflict : (dirty ? NoteSaveState.unsaved : next.state)),
     );
-    if (dirty) {
-      _checkpoint ??= Timer(checkpointInterval, () => unawaited(save()));
-      _draftTimer?.cancel();
-      _draftTimer = Timer(draftDelay, () => unawaited(_writeDraft()));
-    } else {
-      _checkpoint?.cancel();
-      _checkpoint = null;
-      _draftTimer?.cancel();
-      unawaited(_drafts.remove(next.entry));
-    }
-  }
-
-  Future<void> _writeDraft() async {
-    final document = state.value;
-    if (document == null || !document.dirty) return;
-    await _drafts.write(document.entry, document.text);
+    _saveTimer?.cancel();
+    if (dirty) _saveTimer = Timer(saveDelay, () => unawaited(save()));
   }
 
   Future<void> save() => _saving ??= _save().whenComplete(() => _saving = null);
 
   Future<void> _save() async {
-    _checkpoint?.cancel();
-    _checkpoint = null;
-    var document = state.value;
-    if (document == null || !document.dirty || document.state == NoteSaveState.conflict) return;
-    state = AsyncData(document.copyWith(state: NoteSaveState.saving));
+    _saveTimer?.cancel();
+    final document = state.value;
+    if (document == null || !document.dirty) return;
+    if (document.state != NoteSaveState.conflict) state = AsyncData(document.copyWith(state: NoteSaveState.saving));
     try {
-      final relinked = await _updateLinks(document.text, document.entry.path);
-      if (!ref.mounted) return;
-      if (relinked != document.text) {
-        _apply(state.requireValue.copyWith(text: relinked));
-        document = state.requireValue;
-      }
-      final saved = await _write(document.entry, document.text, savedText: document.savedText);
+      final row = await _files.write(document.entry.path, Uint8List.fromList(utf8.encode(document.text)));
+      _shownHash = row.localHash;
+      unawaited(_drafts.remove(document.entry));
       if (!ref.mounted) return;
       final current = state.requireValue;
+      final next = current.copyWith(savedText: document.text, state: NoteSaveState.pending);
       state = AsyncData(
-        current.copyWith(
-          entry: saved,
-          savedText: document.text,
-          state: current.text == document.text ? NoteSaveState.saved : NoteSaveState.unsaved,
-        ),
+        current.text == document.text ? _withSyncState(next, row) : next.copyWith(state: NoteSaveState.unsaved),
       );
-      if (current.text == document.text) await _drafts.remove(saved);
-      _refreshAround(saved);
-    } on ConflictException catch (error) {
-      if (!ref.mounted) return;
-      state = AsyncData(state.requireValue.copyWith(state: NoteSaveState.conflict, conflict: () => error.current));
+      if (current.text != document.text) _saveTimer = Timer(saveDelay, () => unawaited(save()));
+      _refreshAround(row.entry);
     } on Object catch (error) {
       if (!ref.mounted) return;
       state = AsyncData(state.requireValue.copyWith(state: NoteSaveState.failed, saveError: error));
-      _checkpoint ??= Timer(checkpointInterval, () => unawaited(save()));
     }
   }
 
-  Future<FileEntry> _write(FileEntry entry, String text, {required String savedText}) async {
-    try {
-      return await _put(entry.path, text, entry.rev);
-    } on ConflictException catch (error) {
-      final current = error.current ?? (await _api.filesById([entry.id])).firstOrNull;
-      if (current == null) rethrow;
-      if (current.hash != entry.hash && !await _onlyLinksChanged(current, savedText)) rethrow;
-      return _put(current.path, text, current.rev);
-    }
-  }
-
-  Future<bool> _onlyLinksChanged(FileEntry current, String savedText) async {
-    final theirs = utf8.decode(await _api.downloadBytes(current.path), allowMalformed: true);
-    return theirs == await _updateLinks(savedText, current.path);
-  }
-
-  Future<FileEntry> _put(String path, String text, int baseRev) {
-    final bytes = utf8.encode(text);
-    return _api.putContent(path, Stream.value(bytes), length: bytes.length, baseRev: baseRev);
+  Future<void> retrySync() async {
+    await save();
+    await ref.read(offlineSyncProvider.notifier).retryNow();
   }
 
   Future<String> _updateLinks(String text, String notePath) async {
@@ -235,59 +250,49 @@ class NoteDocumentNotifier extends AsyncNotifier<NoteDocument> {
     ref.invalidate(fileLinksProvider);
     final parent = RemotePath.parent(saved.path);
     if (ref.exists(directoryProvider(parent))) unawaited(ref.read(directoryProvider(parent).notifier).refresh());
-    if (ref.exists(notesTreeProvider(parent))) unawaited(ref.read(notesTreeProvider(parent).notifier).refresh());
   }
 
   Future<void> checkRemote() async {
     final document = state.value;
-    if (document == null || _saving != null) return;
-    final FileEntry current;
-    try {
-      current = (await _api.filesById([document.entry.id])).firstOrNull ?? await _api.stat(document.entry.path);
-    } on ApiException {
-      return;
-    }
-    if (!ref.mounted) return;
-    final latest = state.requireValue;
-    if (current.hash != latest.entry.hash) {
-      if (!latest.dirty) await _reloadFrom(current);
-    } else if (current.path != latest.entry.path) {
-      state = AsyncData(latest.copyWith(entry: current));
-    }
+    if (document == null || _saving != null || document.dirty) return;
+    if (await _tryFetch(document.entry.path) == null) return;
+    await _followStore();
   }
 
-  Future<void> _reloadFrom(FileEntry current) async {
-    final (text, _) = _decode(await _api.downloadBytes(current.path));
-    if (!ref.mounted) return;
-    _apply(
-      state.requireValue.copyWith(
-        entry: current,
-        text: text,
-        savedText: text,
-        state: NoteSaveState.saved,
-        conflict: () => null,
-      ),
-    );
+  Future<OfflineFile?> _tryFetch(String path) async {
+    try {
+      return await _files.fetch(path);
+    } on ApiException {
+      return null;
+    }
   }
 
   Future<void> takeTheirs() async {
-    final document = state.requireValue;
-    final current = document.conflict ?? await _api.stat(document.entry.path);
-    if (ref.mounted) await _reloadFrom(current);
+    final path = _document.entry.path;
+    await _files.resolve(path, ConflictResolution.keepServer);
+    await _reloadFromServer(path);
   }
 
   Future<void> keepMine() async {
-    final document = state.requireValue;
-    final target = document.conflict ?? document.entry;
-    state = AsyncData(document.copyWith(state: NoteSaveState.unsaved, entry: target, conflict: () => null));
+    final path = _document.entry.path;
     await save();
+    await _files.resolve(path, ConflictResolution.keepMine);
+    await _followStore();
   }
 
-  Future<FileEntry> saveMineAsCopy(String name) async {
-    final document = state.requireValue;
-    final copy = await _put(RemotePath.join(RemotePath.parent(document.entry.path), name), document.text, 0);
-    if (ref.mounted) await takeTheirs();
-    return copy;
+  Future<void> saveMineAsCopy(String name) async {
+    final path = _document.entry.path;
+    await save();
+    await _files.resolve(path, ConflictResolution.keepBoth, copyPath: RemotePath.join(RemotePath.parent(path), name));
+    await _reloadFromServer(path);
+  }
+
+  Future<void> _reloadFromServer(String path) async {
+    await _tryFetch(path);
+    if (!ref.mounted) return;
+    _shownHash = null;
+    state = AsyncData(_document.copyWith(savedText: _document.text));
+    await _followStore();
   }
 
   void recoverDraft() {
@@ -304,26 +309,13 @@ class NoteDocumentNotifier extends AsyncNotifier<NoteDocument> {
   }
 
   void _close() {
-    _checkpoint?.cancel();
-    _draftTimer?.cancel();
+    _saveTimer?.cancel();
     final document = _latest;
-    if (document == null || !document.dirty || document.state == NoteSaveState.conflict) return;
-    final drafts = _drafts;
-    final entry = document.entry;
-    final text = document.text;
-    final savedText = document.savedText;
-    unawaited(() async {
-      await drafts.write(entry, text);
-      if (await _reachesServer(entry, text, savedText)) await drafts.remove(entry);
-    }());
-  }
-
-  Future<bool> _reachesServer(FileEntry entry, String text, String savedText) async {
-    try {
-      await _write(entry, text, savedText: savedText);
-      return true;
-    } on ApiException {
-      return false;
-    }
+    if (document == null || !document.dirty) return;
+    unawaited(
+      _files
+          .write(document.entry.path, Uint8List.fromList(utf8.encode(document.text)))
+          .then((_) {}, onError: (Object _) {}),
+    );
   }
 }

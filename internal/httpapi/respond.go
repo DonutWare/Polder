@@ -46,6 +46,7 @@ var statusByKind = map[apperr.Kind]int{
 	apperr.KindPrecondition:  http.StatusPreconditionFailed,
 	apperr.KindRateLimited:   http.StatusTooManyRequests,
 	apperr.KindUnavailable:   http.StatusServiceUnavailable,
+	apperr.KindStorageFull:   http.StatusInsufficientStorage,
 }
 
 // kindByStatus names errors that Huma raises itself, such as failed request validation.
@@ -75,6 +76,9 @@ func newError(ctx huma.Context, status int, message string, errs ...error) huma.
 	if status >= http.StatusInternalServerError {
 		cause := errors.Join(errs...)
 		logFailure(ctx, cause)
+		if full, ok := apperr.FromNoSpace(cause); ok {
+			return fromAppError(full)
+		}
 		return &errorResponse{status: http.StatusInternalServerError, Detail: errorDetail{Code: "internal", Message: internalMessage(message, cause)}}
 	}
 	if status == http.StatusUnprocessableEntity {

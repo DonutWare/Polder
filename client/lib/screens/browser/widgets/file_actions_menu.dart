@@ -9,6 +9,7 @@ import "package:polder/models/sharing.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/offline/offline_availability_provider.dart";
 import "package:polder/providers/trash/trash_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/routes/app_routes.dart";
@@ -25,7 +26,22 @@ import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/sharing/share_panel.dart";
 import "package:polder/widgets/tags/tag_picker.dart";
 
-enum FileAction { open, edit, download, share, shareDetails, history, wallpaper, rename, tags, copy, move, delete }
+enum FileAction {
+  open,
+  edit,
+  download,
+  keepOffline,
+  removeFromDevice,
+  share,
+  shareDetails,
+  history,
+  wallpaper,
+  rename,
+  tags,
+  copy,
+  move,
+  delete,
+}
 
 abstract final class FileActions {
   static RelativeRect menuPositionAt(BuildContext context, Offset globalPosition) {
@@ -54,6 +70,7 @@ abstract final class FileActions {
       if (single != null) FileAction.open,
       if (single != null && (ref.read(editorCapabilitiesProvider).value?.canOpen(single) ?? false)) FileAction.edit,
       if (entries.any((entry) => !entry.isDir)) FileAction.download,
+      if (single != null && !inShare) ?_offlineAction(ref, single.path),
       if (single != null && !inShare) FileAction.share,
       if (single?.mount != null) FileAction.shareDetails,
       if (single != null && !single.isDir && !inShare) FileAction.history,
@@ -66,10 +83,19 @@ abstract final class FileActions {
     ];
   }
 
+  static FileAction? _offlineAction(WidgetRef ref, String path) =>
+      switch (ref.read(offlineStatusProvider(path)).origin) {
+        OfflineOrigin.none || OfflineOrigin.excluded => FileAction.keepOffline,
+        OfflineOrigin.user => FileAction.removeFromDevice,
+        OfflineOrigin.notes => null,
+      };
+
   static IconData iconOf(FileAction action) => switch (action) {
     FileAction.open => IconsaxPlusLinear.export_3,
     FileAction.edit => IconsaxPlusLinear.edit,
     FileAction.download => IconsaxPlusLinear.document_download,
+    FileAction.keepOffline => IconsaxPlusLinear.mobile,
+    FileAction.removeFromDevice => IconsaxPlusLinear.mobile_programming,
     FileAction.share => IconsaxPlusLinear.share,
     FileAction.shareDetails => IconsaxPlusLinear.people,
     FileAction.history => IconsaxPlusLinear.clock,
@@ -85,6 +111,8 @@ abstract final class FileActions {
     FileAction.open => context.localized.open,
     FileAction.edit => context.localized.editorOpen,
     FileAction.download => context.localized.download,
+    FileAction.keepOffline => context.localized.keepOffline,
+    FileAction.removeFromDevice => context.localized.removeFromDevice,
     FileAction.share => context.localized.share,
     FileAction.shareDetails => context.localized.shareDetailsTitle,
     FileAction.history => context.localized.versionHistory,
@@ -141,6 +169,10 @@ abstract final class FileActions {
         for (final entry in entries.where((entry) => !entry.isDir)) {
           await transfers.download(entry);
         }
+      case FileAction.keepOffline:
+        await context.runWithFeedback(ref.read(offlinePinsProvider.notifier).makeAvailableOffline(single!.path));
+      case FileAction.removeFromDevice:
+        await context.runWithFeedback(ref.read(offlinePinsProvider.notifier).removeFromDevice(single!.path));
       case FileAction.share:
         await showSharePanel(context, SharedFile.of(single!));
       case FileAction.shareDetails:

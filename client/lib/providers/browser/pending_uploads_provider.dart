@@ -5,6 +5,7 @@ import "package:polder/models/file_entry.dart";
 import "package:polder/models/transfer.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder/providers/offline/offline_changes_provider.dart";
 import "package:polder/providers/sync/sync_activity_provider.dart";
 import "package:polder/providers/sync/sync_paused_provider.dart";
 import "package:polder/services/sync/sync_activity.dart";
@@ -78,6 +79,12 @@ final pendingUploadsProvider = Provider.autoDispose.family<List<PendingUpload>, 
           total: transfer.total > 0 ? transfer.total : null,
           rate: transfer.rate,
         ),
+    for (final change in ref.watch(offlineChangesProvider))
+      if (change.group != OfflineChangeGroup.calendar &&
+          change.kind == OfflineChangeKind.edited &&
+          RemotePath.parent(change.key) == path &&
+          !syncingPaths.contains(change.key))
+        PendingUpload(path: change.key, bytes: 0, phase: LocalSyncPhase.waiting),
     for (final transfer in ref.watch(uploadsIntoDirectoryProvider(path)))
       if (!ownIds.contains(transfer.clientId) && !syncingPaths.contains(transfer.path))
         PendingUpload(path: transfer.path, bytes: transfer.bytes, total: transfer.total, rate: transfer.rate),

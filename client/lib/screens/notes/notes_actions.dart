@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:typed_data";
 
 import "package:flutter/material.dart";
 
@@ -12,6 +13,8 @@ import "package:polder/providers/notes/last_note_provider.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
 import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
+import "package:polder/providers/offline/offline_sync_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/routes/app_routes.dart";
@@ -19,6 +22,7 @@ import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
 import "package:polder/screens/notes/widgets/recipe_dialog.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/offline/offline_files.dart";
 import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/services/notes/note_recipe.dart";
 import "package:polder/util/action_feedback.dart";
@@ -97,7 +101,11 @@ abstract final class NotesActions {
     if (view is! TaggedNotes) return;
     final names = [for (final id in view.tagIds) ?tags[id]?.name];
     if (names.isEmpty) return;
-    await container.read(tagsProvider.notifier).assign([created.path], names);
+    try {
+      await container.read(tagsProvider.notifier).assign([created.path], names);
+    } on ApiException {
+      return;
+    }
   }
 
   static Future<void> addRecipeInNotesFolder(BuildContext context) async {
@@ -118,14 +126,28 @@ abstract final class NotesActions {
     required String content,
   }) async {
     final api = container.read(polderApiProvider);
-    final fileName = uniqueName(name, noteExtension, await namesIn(api, folder));
+    final offline = await offlineFor(container.read(offlineFilesProvider.future), folder);
+    final fileName = uniqueName(name, noteExtension, await namesIn(api, folder, offline: offline));
+    final path = RemotePath.join(folder, fileName);
     final bytes = utf8.encode(content);
-    final created = await api.putContent(RemotePath.join(folder, fileName), Stream.value(bytes), length: bytes.length);
+    final FileEntry created;
+    if (offline != null) {
+      created = (await offline.write(path, Uint8List.fromList(bytes))).entry;
+      await container.read(offlineSyncProvider.notifier).pushNow();
+    } else {
+      created = await api.putContent(path, Stream.value(bytes), length: bytes.length);
+    }
     _refresh(container, folder);
     return created;
   }
 
-  static Future<Set<String>> namesIn(PolderApi api, String folder) async {
+  static Future<OfflineFiles?> offlineFor(Future<OfflineFiles> files, String path) async {
+    final offline = await files;
+    return await offline.availableOffline(path) ? offline : null;
+  }
+
+  static Future<Set<String>> namesIn(PolderApi api, String folder, {OfflineFiles? offline}) async {
+    if (offline != null) return {for (final file in await offline.children(folder)) file.entry.name};
     try {
       return {for (final entry in (await api.list(folder)).entries) entry.name};
     } on NotFoundException {
@@ -133,8 +155,12 @@ abstract final class NotesActions {
     }
   }
 
-  static Future<NoteTreeNode> nodeFor(PolderApi api, FileEntry page) async {
+  static Future<NoteTreeNode> nodeFor(PolderApi api, FileEntry page, {OfflineFiles? offline}) async {
     final node = NoteTreeNode(page: page);
+    if (offline != null) {
+      final folder = await offline.file(node.childrenPath);
+      return NoteTreeNode(page: page, folder: folder != null && folder.isDir ? folder.entry : null);
+    }
     try {
       final folder = await api.stat(node.childrenPath);
       return NoteTreeNode(page: page, folder: folder.isDir ? folder : null);
@@ -228,13 +254,25 @@ abstract final class NotesActions {
   }
 
   static Future<void> _moveNode(ProviderContainer container, NoteTreeNode node, String destination, String name) async {
-    final api = container.read(polderApiProvider);
-    final page = node.page;
-    if (page != null) {
-      await api.move(from: page.path, to: RemotePath.join(destination, "$name.${_extension(page)}"), baseRev: page.rev);
+    final offline = await offlineFor(container.read(offlineFilesProvider.future), node.path);
+    if (offline != null && await offline.availableOffline(destination)) {
+      if (node.page case final page?) {
+        await offline.move(page.path, RemotePath.join(destination, "$name.${_extension(page)}"));
+      }
+      if (node.folder case final folder?) await offline.move(folder.path, RemotePath.join(destination, name));
+    } else {
+      final api = container.read(polderApiProvider);
+      final page = node.page;
+      if (page != null) {
+        await api.move(
+          from: page.path,
+          to: RemotePath.join(destination, "$name.${_extension(page)}"),
+          baseRev: page.rev,
+        );
+      }
+      final folder = node.folder;
+      if (folder != null) await api.move(from: folder.path, to: RemotePath.join(destination, name));
     }
-    final folder = node.folder;
-    if (folder != null) await api.move(from: folder.path, to: RemotePath.join(destination, name));
     _refresh(container, RemotePath.parent(node.path));
     _refresh(container, destination);
   }
@@ -274,9 +312,15 @@ abstract final class NotesActions {
   }
 
   static Future<void> _deleteNode(ProviderContainer container, NoteTreeNode node) async {
-    final api = container.read(polderApiProvider);
-    if (node.folder case final folder?) await api.delete(folder.path);
-    if (node.page case final page?) await api.delete(page.path);
+    final offline = await offlineFor(container.read(offlineFilesProvider.future), node.path);
+    if (offline != null) {
+      if (node.folder case final folder?) await offline.delete(folder.path);
+      if (node.page case final page?) await offline.delete(page.path);
+    } else {
+      final api = container.read(polderApiProvider);
+      if (node.folder case final folder?) await api.delete(folder.path);
+      if (node.page case final page?) await api.delete(page.path);
+    }
     _forgetLastNoteIn(container, node);
     _refresh(container, RemotePath.parent(node.path));
   }

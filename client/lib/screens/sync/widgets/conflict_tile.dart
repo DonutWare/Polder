@@ -20,7 +20,7 @@ class ConflictTile extends ConsumerWidget {
     final resolving = ref.watch(conflictQueueProvider.select((queue) => queue.isResolving(conflict)));
     return ListTile(
       leading: IconBadge(icon: IconsaxPlusLinear.document_copy, color: AppColors.of(context).warning),
-      title: Text(conflict.relativePath, overflow: TextOverflow.ellipsis),
+      title: Text(conflict.fromCalendar ? conflict.name : conflict.relativePath, overflow: TextOverflow.ellipsis),
       subtitle: ConflictKindText(kind: conflict.kind),
       trailing: resolving
           ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))

@@ -71,6 +71,9 @@ dependencies:
   flutter_local_notifications: ^23.0.0
   timezone: ^0.11.2
   quick_actions: ^1.1.1
+  mime: ^2.1.0
+  uuid: ^4.6.0
+  background_downloader: ^9.6.4
 dependency_overrides:
   media_kit:
     git:

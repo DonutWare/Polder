@@ -39,6 +39,17 @@ signing in). It calls the generated service and converts its types to the app's 
 `lib/services/api/wire_mappers.dart`. When the API changes in a way the app depends on, those conversions
 stop compiling, so the client can't drift from the server unnoticed.
 
+### Offline storage
+
+Notes, pinned files, queued uploads and calendar events are kept in a per-account drift database
+(`lib/services/offline/`). Every change is written there first and sent to the server afterwards, so nothing is
+lost while the server is unreachable or unable to store it.
+
+On the web the database runs in a worker. `web/sqlite3.wasm` and `web/drift_worker.js` must match the `sqlite3`
+and `drift` versions in `pubspec.lock`. After upgrading either package, download the matching files from the
+[sqlite3.dart](https://github.com/simolus3/sqlite3.dart/releases) and
+[drift](https://github.com/simolus3/drift/releases) releases.
+
 ## Tests
 
 ```sh

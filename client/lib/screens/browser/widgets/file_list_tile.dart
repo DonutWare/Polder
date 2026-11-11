@@ -8,6 +8,7 @@ import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_metadata_text.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder/screens/browser/widgets/offline_mark.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
@@ -71,17 +72,22 @@ class FileListTile extends StatelessWidget {
             FolderSyncTag(direction: direction),
           ],
         ),
-        _ => FileMetadataText(entry: entry),
+        _ => Row(
+          spacing: 8,
+          children: [
+            Flexible(child: FileMetadataText(entry: entry)),
+            OfflineDownloadTag(path: entry.path),
+          ],
+        ),
       },
-      trailing: !entry.sharedByYou && onMenu == null
-          ? null
-          : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (entry.sharedByYou) const SharedByYouMark(),
-                if (onMenu != null) FileActionsButton(onPressed: onMenu),
-              ],
-            ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          OfflineMark(path: entry.path),
+          if (entry.sharedByYou) const SharedByYouMark(),
+          if (onMenu != null) FileActionsButton(onPressed: onMenu),
+        ],
+      ),
       onTap: interaction.onTap,
     );
     return upload == null ? tile : PendingHighlight(child: tile);

@@ -1,3 +1,6 @@
+import "dart:async";
+import "dart:convert";
+
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -5,9 +8,13 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/user_tag.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/realtime/files_changed_provider.dart";
 import "package:polder/providers/tags/tags_provider.dart";
+import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/notes/note_tags.dart";
+import "package:polder/services/offline/offline_files.dart";
 import "package:polder/util/ref_cache.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/search_syntax.dart";
@@ -66,8 +73,53 @@ final notesIndexProvider = FutureProvider.autoDispose<List<FileEntry>>((ref) asy
   ref.listen(filesChangedProvider, (_, _) => ref.invalidateSelf());
   final root = await ref.watch(notesFolderProvider.future);
   if (root == null) return const [];
-  return _notesIn(ref, root);
+  try {
+    return await _notesIn(ref, root);
+  } on NetworkException {
+    final files = await ref.read(offlineFilesProvider.future);
+    if (!await files.availableOffline(root)) rethrow;
+    _rebuildOnLocalChanges(ref, files);
+    return _localNotes(files, root, ref.read(tagsByKeyProvider));
+  }
 });
+
+void _rebuildOnLocalChanges(Ref ref, OfflineFiles files) {
+  Timer? pending;
+  final subscription = files.changes.listen((_) {
+    pending?.cancel();
+    pending = Timer(const Duration(seconds: 1), ref.invalidateSelf);
+  });
+  ref.onDispose(() {
+    pending?.cancel();
+    unawaited(subscription.cancel());
+  });
+}
+
+Future<List<FileEntry>> _localNotes(OfflineFiles files, String root, Map<String, UserTag> tagsByKey) async {
+  final notes = <FileEntry>[];
+  for (final row in await files.tree(root)) {
+    if (row.isDir || !row.entry.isMarkdown) continue;
+    final bytes = await files.read(row.path);
+    if (bytes == null) {
+      notes.add(row.entry);
+      continue;
+    }
+    final names = readNoteTags(utf8.decode(bytes, allowMalformed: true));
+    notes.add(
+      row.entry.copyWith(
+        tagIds: [for (final name in names) ?tagsByKey[tagKey(name)]?.id],
+        otherTags: [
+          for (final name in names)
+            if (!tagsByKey.containsKey(tagKey(name))) name,
+        ],
+      ),
+    );
+  }
+  return _sorted(notes);
+}
+
+List<FileEntry> _sorted(List<FileEntry> notes) =>
+    notes..sort((a, b) => noteTitleOf(a).toLowerCase().compareTo(noteTitleOf(b).toLowerCase()));
 
 typedef NotesTagCounts = ({int total, int untagged, Map<int, int> byTag});
 
@@ -111,10 +163,10 @@ Future<List<FileEntry>> _notesIn(Ref ref, String root) async {
     found.addAll(page.hits.map((hit) => hit.entry));
     if (page.hits.length < _pageSize) break;
   }
-  return [
+  return _sorted([
     for (final entry in found)
       if (!entry.isDir && RemotePath.isWithin(entry.path, root)) entry,
-  ]..sort((a, b) => noteTitleOf(a).toLowerCase().compareTo(noteTitleOf(b).toLowerCase()));
+  ]);
 }
 
 String notesFolderQuery(String root) => "type=md in=${quoteSearchValue(root)}";

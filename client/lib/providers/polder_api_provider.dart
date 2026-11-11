@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/account.dart";
 import "package:polder/models/token_pair.dart";
 import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/connection/server_connection_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/services/api/api_client_factory.dart";
 import "package:polder/services/api/auth_session.dart";
@@ -23,6 +24,9 @@ final polderApiProvider = Provider<PolderApi>((ref) {
       session: session,
       deviceName: ref.watch(deviceNameProvider),
       httpClient: ref.watch(httpClientProvider),
+      onReachability: ({required reachable}) {
+        if (ref.mounted) ref.read(serverConnectionProvider.notifier).report(reachable: reachable);
+      },
     ),
   );
 });

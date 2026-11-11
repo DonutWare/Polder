@@ -20,6 +20,7 @@ import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
 import "package:polder/models/notifications/feed_notification.dart";
 import "package:polder/models/search.dart";
+import "package:polder/models/server_connection.dart";
 import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
 import "package:polder/models/server_settings.dart";
@@ -54,7 +55,9 @@ class PolderApi {
 
   final wire.Polder _service;
 
-  Future<bool> healthz() async => (await _service.health()).body?.status == "ok";
+  Future<bool> healthz() async => (await health()).healthy;
+
+  Future<ServerHealth> health() async => (await _service.health()).body!.toModel();
 
   Future<Branding> branding() async => (await _service.getBranding()).body!.toModel();
 
@@ -232,6 +235,8 @@ class PolderApi {
 
   Future<Uint8List> downloadBytes(String path, {void Function(int received, int total)? onProgress}) async =>
       _collect(await _service.downloadFile(path: path), onProgress);
+
+  Future<Stream<List<int>>> downloadStream(String path) async => (await _service.downloadFile(path: path)).body!;
 
   Future<Uint8List> _collect(
     chopper.Response<Stream<List<int>>> response,
@@ -593,10 +598,10 @@ class PolderApi {
     eventID: int.parse(ref.eventId),
   )).body!.toModel(ref.calendar.sourceId);
 
-  Future<cal.CalendarEvent> createCalendarEvent(cal.CalendarRef calendar, cal.EventDraft draft) async =>
+  Future<cal.CalendarEvent> createCalendarEvent(cal.CalendarRef calendar, cal.EventDraft draft, {String? uid}) async =>
       (await _service.createCalendarEvent(
         calendarID: int.parse(calendar.calendarId),
-        body: draft.toWire(),
+        body: draft.toWire().copyWith(uid: uid),
       )).body!.toModel(calendar.sourceId).series;
 
   Future<cal.CalendarEvent> updateCalendarEvent(

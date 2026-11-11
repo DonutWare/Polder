@@ -13,6 +13,7 @@ import "package:polder/screens/activity/widgets/activity_presentation.dart";
 import "package:polder/screens/activity/widgets/activity_scope_button.dart";
 import "package:polder/screens/activity/widgets/activity_tile.dart";
 import "package:polder/screens/activity/widgets/live_transfers_card.dart";
+import "package:polder/screens/sync/widgets/conflicts_banner.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
@@ -70,6 +71,7 @@ class ActivityScreen extends ConsumerWidget {
                 padding: inset + const EdgeInsets.only(top: 8, bottom: 96),
                 sliver: SliverMainAxisGroup(
                   slivers: [
+                    const SliverToBoxAdapter(child: ConflictsBanner()),
                     const LiveTransfersSliver(),
                     SliverList.builder(
                       itemCount: rows.length + (hasMore ? 1 : 0),

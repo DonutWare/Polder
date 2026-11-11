@@ -284,6 +284,22 @@ enum GroupMyRole {
   const GroupMyRole(this.value);
 }
 
+enum HealthStatusStorage {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('ok')
+  ok('ok'),
+  @JsonValue('full')
+  full('full'),
+  @JsonValue('readonly')
+  readonly('readonly');
+
+  final String? value;
+
+  const HealthStatusStorage(this.value);
+}
+
 enum IncomingFederatedShareState {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

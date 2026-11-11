@@ -24,7 +24,17 @@ abstract class Conflict with _$Conflict {
 
   factory Conflict.fromJson(Map<String, dynamic> json) => _$ConflictFromJson(json);
 
+  static const offlineRoot = "offline";
+
   String get id => "$syncRootId:$relativePath";
+
+  static const calendarRoot = "calendar";
+
+  bool get fromOffline => syncRootId == offlineRoot;
+
+  bool get fromCalendar => syncRootId == calendarRoot;
+
+  int? get calendarEntryId => fromCalendar ? int.tryParse(relativePath.split("/").first) : null;
 
   String get name => relativePath.split("/").last;
 

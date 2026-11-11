@@ -7,15 +7,27 @@ import "package:polder/services/api/generated/polder.swagger.dart";
 import "package:polder/services/api/http_client.dart";
 import "package:polder/services/api/polder_converter.dart";
 import "package:polder/services/api/pending_uploads.dart";
+import "package:polder/services/api/stall_guard_client.dart";
 
 abstract final class ApiClientFactory {
-  static Polder create(String serverUrl, {AuthSession? session, String? deviceName, http.Client? httpClient}) {
+  static Polder create(
+    String serverUrl, {
+    AuthSession? session,
+    String? deviceName,
+    http.Client? httpClient,
+    ReachabilityListener? onReachability,
+  }) {
     final uploads = PendingUploads();
-    final client = UploadingClient(httpClient ?? createHttpClient(), uploads);
+    final client = UploadingClient(StallGuardClient(httpClient ?? createHttpClient()), uploads);
+    final errors = ApiErrorInterceptor(onReachability: onReachability);
     final auth = session == null
         ? null
-        : AuthInterceptor(session: session, deviceName: deviceName, refreshApi: _service(serverUrl, client, uploads));
-    return _service(serverUrl, client, uploads, auth);
+        : AuthInterceptor(
+            session: session,
+            deviceName: deviceName,
+            refreshApi: _service(serverUrl, client, uploads, errors),
+          );
+    return _service(serverUrl, client, uploads, errors, auth);
   }
 
   static String normalizeServerUrl(String input) {
@@ -23,12 +35,17 @@ abstract final class ApiClientFactory {
     return trimmed.contains("://") ? trimmed : "https://$trimmed";
   }
 
-  static Polder _service(String serverUrl, http.Client client, PendingUploads uploads, [AuthInterceptor? auth]) =>
-      Polder.create(
-        baseUrl: Uri.parse(serverUrl),
-        httpClient: client,
-        converter: PolderConverter(uploads),
-        authenticator: auth,
-        interceptors: [const ApiErrorInterceptor(), ?auth],
-      );
+  static Polder _service(
+    String serverUrl,
+    http.Client client,
+    PendingUploads uploads,
+    ApiErrorInterceptor errors, [
+    AuthInterceptor? auth,
+  ]) => Polder.create(
+    baseUrl: Uri.parse(serverUrl),
+    httpClient: client,
+    converter: PolderConverter(uploads),
+    authenticator: auth,
+    interceptors: [errors, ?auth],
+  );
 }

@@ -4,9 +4,11 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/note_item.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/realtime/files_changed_provider.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/offline/offline_files.dart";
 import "package:polder/util/guarded_refresh.dart";
 import "package:polder/util/remote_path.dart";
 
@@ -62,12 +64,59 @@ class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> with GuardedR
         timers.add(Timer(delay, refresh));
       }
     });
-    return _fetch(ref.watch(polderApiProvider));
+    final files = await ref.watch(offlineFilesProvider.future);
+    Timer? localRefresh;
+    final subscription = files.changes.listen((_) {
+      localRefresh?.cancel();
+      localRefresh = Timer(localRefreshDelay, () async {
+        if (await files.availableOffline(path)) await refresh();
+      });
+    });
+    ref.onDispose(() {
+      localRefresh?.cancel();
+      unawaited(subscription.cancel());
+    });
+    return _fetch(ref.watch(polderApiProvider), files);
   }
 
-  Future<void> refresh() => refreshWith(() => _fetch(ref.read(polderApiProvider)), keepOnError: true);
+  static const localRefreshDelay = Duration(milliseconds: 150);
 
-  Future<NotesFolderContents> _fetch(PolderApi api) async => arrange(await api.listNotes(path));
+  Future<void> refresh() async {
+    final files = await ref.read(offlineFilesProvider.future);
+    if (!ref.mounted) return;
+    await refreshWith(() => _fetch(ref.read(polderApiProvider), files), keepOnError: true);
+  }
+
+  Future<NotesFolderContents> _fetch(PolderApi api, OfflineFiles files) async {
+    if (await files.availableOffline(path)) return arrange(await localItems(files, path));
+    return arrange(await api.listNotes(path));
+  }
+
+  static Future<List<NoteItem>> localItems(OfflineFiles files, String folder) async {
+    final inside = <String, ({bool notes, bool readme})>{};
+    for (final row in await files.tree(folder)) {
+      if (!row.entry.isMarkdown) continue;
+      final relative = RemotePath.relativeTo(row.path, folder);
+      final slash = relative?.indexOf("/") ?? -1;
+      if (relative == null || slash < 0) continue;
+      final child = relative.substring(0, slash);
+      final known = inside[child] ?? (notes: false, readme: false);
+      inside[child] = _isReadme(relative.substring(slash + 1))
+          ? (notes: known.notes, readme: true)
+          : (notes: true, readme: known.readme);
+    }
+    return [
+      for (final row in await files.children(folder))
+        if (row.isDir || row.entry.isMarkdown)
+          NoteItem(
+            entry: row.entry,
+            hasNotes: inside[row.entry.name]?.notes ?? false,
+            hasReadme: inside[row.entry.name]?.readme ?? false,
+          ),
+    ];
+  }
+
+  static bool _isReadme(String notePath) => RemotePath.withoutExtension(notePath).toLowerCase() == "readme";
 
   static NotesFolderContents arrange(List<NoteItem> items) {
     final pages = <String, NoteItem>{};

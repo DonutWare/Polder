@@ -55,10 +55,15 @@ class UnavailableException extends ApiException {
   const UnavailableException({super.error, super.statusCode});
 }
 
+class StorageFullException extends ApiException {
+  const StorageFullException({super.error, super.statusCode});
+}
+
 class NetworkException extends ApiException {
-  const NetworkException({this.reason = "", super.error});
+  const NetworkException({this.reason = "", this.timedOut = false, super.error});
 
   final String reason;
+  final bool timedOut;
 }
 
 class ServerException extends ApiException {

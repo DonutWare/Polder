@@ -17,6 +17,7 @@ import "package:polder/models/link_preview.dart";
 import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
 import "package:polder/models/search.dart";
+import "package:polder/models/server_connection.dart";
 import "package:polder/models/server_event.dart";
 import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
@@ -649,5 +650,17 @@ extension LinksResponseToModel on wire.LinksResponse {
     incoming: [
       for (final link in incoming ?? <wire.Incoming>[]) IncomingLink(title: link.title, source: link.source.toModel()),
     ],
+  );
+}
+
+extension HealthStatusToModel on wire.HealthStatus {
+  ServerHealth toModel() => (
+    healthy: status == "ok",
+    storage: switch (storage) {
+      wire.HealthStatusStorage.ok => ServerStorage.ok,
+      wire.HealthStatusStorage.full => ServerStorage.full,
+      wire.HealthStatusStorage.readonly => ServerStorage.readOnly,
+      _ => ServerStorage.unknown,
+    },
   );
 }

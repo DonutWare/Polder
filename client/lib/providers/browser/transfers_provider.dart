@@ -10,12 +10,15 @@ import "package:polder/models/transfer.dart";
 import "package:polder/models/trash.dart";
 import "package:polder/models/user.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/connection/server_connection_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/providers/sync/sync_scheduler_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/offline/outbox_errors.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/throughput_meter.dart";
@@ -42,8 +45,9 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
   Future<void> upload(String directory, PickedFile file) async {
     final length = await file.length() ?? 0;
     final remotePath = RemotePath.join(directory, file.name);
+    if (ref.read(serverConnectionProvider).isOffline) return _queue(remotePath, file);
     final transfer = _start(file.name, TransferDirection.upload, length, remotePath: remotePath);
-    await _track(transfer, () async {
+    await _track(transfer, onRetryable: () => _queue(remotePath, file), () async {
       await _ensureRoomFor(length);
       await ref
           .read(polderApiProvider)
@@ -175,7 +179,12 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
     return transfer;
   }
 
-  Future<void> _track(Transfer transfer, Future<void> Function() work) async {
+  Future<void> _queue(String remotePath, PickedFile file) async {
+    final files = await ref.read(offlineFilesProvider.future);
+    await files.queueUpload(remotePath, file.openRead());
+  }
+
+  Future<void> _track(Transfer transfer, Future<void> Function() work, {Future<void> Function()? onRetryable}) async {
     try {
       await work();
       _replace(
@@ -183,6 +192,14 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
         (current) => current.copyWith(status: TransferStatus.done, transferred: current.total, rate: 0),
       );
     } on ApiException catch (error) {
+      if (onRetryable != null && OutboxErrors.kindOf(error).retries) {
+        state = [
+          for (final current in state)
+            if (current.id != transfer.id) current,
+        ];
+        await onRetryable();
+        return;
+      }
       _replace(transfer.id, (current) => current.copyWith(status: TransferStatus.failed, error: error, rate: 0));
     } finally {
       _sinceProgress.remove(transfer.id);

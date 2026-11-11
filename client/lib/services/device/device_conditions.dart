@@ -5,6 +5,10 @@ abstract interface class DeviceConditions {
   Future<bool> isOnUnmeteredNetwork();
 
   Future<bool> isCharging();
+
+  Future<bool> hasNetwork();
+
+  Stream<bool> networkChanges();
 }
 
 class PlatformDeviceConditions implements DeviceConditions {
@@ -23,4 +27,13 @@ class PlatformDeviceConditions implements DeviceConditions {
 
   @override
   Future<bool> isCharging() async => _powered.contains(await _battery.batteryState);
+
+  @override
+  Future<bool> hasNetwork() async => _isConnected(await _connectivity.checkConnectivity());
+
+  @override
+  Stream<bool> networkChanges() => _connectivity.onConnectivityChanged.map(_isConnected).distinct();
+
+  static bool _isConnected(List<ConnectivityResult> results) =>
+      results.any((result) => result != ConnectivityResult.none);
 }

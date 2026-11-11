@@ -41,7 +41,7 @@ class ConflictDialog extends ConsumerWidget {
           spacing: 16,
           children: [
             ConflictKindText(kind: conflict.kind),
-            ConflictDetails(conflict: conflict),
+            if (!conflict.fromCalendar) ConflictDetails(conflict: conflict),
             const ApplyToAllCheckbox(),
           ],
         ),

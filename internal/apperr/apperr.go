@@ -18,6 +18,7 @@ const (
 	KindPrecondition  Kind = "precondition_failed"
 	KindRateLimited   Kind = "rate_limited"
 	KindUnavailable   Kind = "unavailable"
+	KindStorageFull   Kind = "storage_full"
 )
 
 type Error struct {
@@ -46,6 +47,9 @@ func Unavailable(format string, args ...any) *Error {
 }
 func QuotaExceeded(format string, args ...any) *Error {
 	return New(KindQuotaExceeded, format, args...)
+}
+func StorageFull(format string, args ...any) *Error {
+	return New(KindStorageFull, format, args...)
 }
 
 func Conflict(current any, format string, args ...any) *Error {

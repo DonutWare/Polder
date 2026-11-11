@@ -9,6 +9,7 @@ import "package:polder/providers/activity/now_groups_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/providers/realtime/events_provider.dart";
 import "package:polder/providers/sync/sync_status_provider.dart";
+import "package:polder/screens/activity/widgets/offline_changes_section.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/screens/sync/widgets/pause_sync_button.dart";
 import "package:polder/services/realtime/events_client.dart";
@@ -90,6 +91,8 @@ class LiveTransfersSliver extends ConsumerWidget {
                 ],
               ),
             ),
+            const SliverToBoxAdapter(child: OfflineChangesSection()),
+            const SliverToBoxAdapter(child: OfflineDownloadFailures()),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(20, 0, 20, rows.isEmpty ? 0 : 20),
               sliver: SliverList.builder(

@@ -1459,6 +1459,11 @@
             "description": "IANA timezone to plan the event in; UTC when empty",
             "type": "string"
           },
+          "uid": {
+            "description": "Client-chosen UID for a new event; creating again with the same UID returns the existing event",
+            "maxLength": 255,
+            "type": "string"
+          },
           "url": {
             "maxLength": 2048,
             "type": "string"
@@ -1920,6 +1925,15 @@
         "properties": {
           "status": {
             "example": "ok",
+            "type": "string"
+          },
+          "storage": {
+            "description": "Whether the server can currently store data",
+            "enum": [
+              "ok",
+              "full",
+              "readonly"
+            ],
             "type": "string"
           }
         },

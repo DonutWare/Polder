@@ -661,6 +661,7 @@ EventInput _$EventInputFromJson(Map<String, dynamic> json) => EventInput(
   status: json['status'] as String?,
   summary: json['summary'] as String,
   timezone: json['timezone'] as String?,
+  uid: json['uid'] as String?,
   url: json['url'] as String?,
 );
 
@@ -678,6 +679,7 @@ Map<String, dynamic> _$EventInputToJson(EventInput instance) => <String, dynamic
   'status': ?instance.status,
   'summary': instance.summary,
   'timezone': ?instance.timezone,
+  'uid': ?instance.uid,
   'url': ?instance.url,
 };
 
@@ -894,9 +896,13 @@ Map<String, dynamic> _$GroupSummaryToJson(GroupSummary instance) => <String, dyn
   'name': instance.name,
 };
 
-HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) => HealthStatus(status: json['status'] as String);
+HealthStatus _$HealthStatusFromJson(Map<String, dynamic> json) =>
+    HealthStatus(status: json['status'] as String, storage: healthStatusStorageNullableFromJson(json['storage']));
 
-Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) => <String, dynamic>{'status': instance.status};
+Map<String, dynamic> _$HealthStatusToJson(HealthStatus instance) => <String, dynamic>{
+  'status': instance.status,
+  'storage': ?healthStatusStorageNullableToJson(instance.storage),
+};
 
 ImageInfo _$ImageInfoFromJson(Map<String, dynamic> json) =>
     ImageInfo(contentType: json['contentType'] as String, id: json['id'] as String);

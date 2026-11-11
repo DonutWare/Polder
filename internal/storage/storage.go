@@ -198,3 +198,15 @@ func WriteFileAtomically(absolutePath string, content []byte) error {
 func MakeDirs(absolutePath string) error {
 	return os.MkdirAll(absolutePath, dirPermissions)
 }
+
+func (d *Disk) ProbeWritable() error {
+	probe, err := os.CreateTemp(d.UploadsDir(), tempFilePrefix+"probe-*")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(probe.Name())
+	_, writeErr := probe.Write(make([]byte, 4096))
+	syncErr := probe.Sync()
+	closeErr := probe.Close()
+	return errors.Join(writeErr, syncErr, closeErr)
+}

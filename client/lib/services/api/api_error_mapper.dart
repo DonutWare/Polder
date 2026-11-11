@@ -7,9 +7,14 @@ import "package:http/http.dart" as http;
 import "package:polder/models/api_error.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/stall_guard_client.dart";
+
+typedef ReachabilityListener = void Function({required bool reachable});
 
 class ApiErrorInterceptor implements Interceptor {
-  const ApiErrorInterceptor();
+  const ApiErrorInterceptor({this.onReachability});
+
+  final ReachabilityListener? onReachability;
 
   @override
   Future<Response<BodyType>> intercept<BodyType>(Chain<BodyType> chain) async {
@@ -17,8 +22,12 @@ class ApiErrorInterceptor implements Interceptor {
     try {
       response = await chain.proceed(chain.request);
     } on http.ClientException catch (error) {
-      throw NetworkException(reason: error.message);
+      if (error is! http.RequestAbortedException) {
+        onReachability?.call(reachable: false);
+      }
+      throw NetworkException(reason: error.message, timedOut: error is ServerStalledException);
     }
+    onReachability?.call(reachable: !const {502, 503, 504}.contains(response.statusCode));
     if (response.isSuccessful) return response;
     throw ApiErrorMapper.fromResponse(response.statusCode, await ApiErrorMapper._decodeBody(response));
   }
@@ -34,6 +43,7 @@ abstract final class ApiErrorMapper {
     return switch ((statusCode, error?.code)) {
       (_, "conflict") => ConflictException(current: current, error: error, statusCode: statusCode),
       (_, "already_exists") => AlreadyExistsException(error: error, statusCode: statusCode),
+      (_, "storage_full") => StorageFullException(error: error, statusCode: statusCode),
       (_, "quota_exceeded") || (507, _) => QuotaExceededException(error: error, statusCode: statusCode),
       (_, "invalid_request") || (400, _) => InvalidRequestException(error: error, statusCode: statusCode),
       (_, "unauthorized") || (401, _) => UnauthorizedException(error: error, statusCode: statusCode),

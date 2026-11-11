@@ -14,6 +14,7 @@ import "package:polder/providers/app/navigation_history_provider.dart";
 import "package:polder/providers/notes/file_links_provider.dart";
 import "package:polder/providers/notes/note_document_provider.dart";
 import "package:polder/providers/notes/renamed_note_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/providers/versions/file_versions_provider.dart";
@@ -196,16 +197,16 @@ class _NotePaneState extends ConsumerState<NotePane> {
     final folder = RemotePath.join(RemotePath.parent(document.entry.path), attachmentsFolder);
     await context.runWithFeedback(
       Future(() async {
-        final taken = await NotesActions.namesIn(api, folder);
+        final offline = await NotesActions.offlineFor(ref.read(offlineFilesProvider.future), folder);
+        final taken = await NotesActions.namesIn(api, folder, offline: offline);
         for (final file in files) {
           final name = uniqueFileName(file.name, taken);
           taken.add(name);
-          final uploaded = await api.putContent(
-            RemotePath.join(folder, name),
-            file.openRead(),
-            length: await file.length() ?? 0,
-          );
-          if (mounted) _insertLinkTo(uploaded, document.entry.path);
+          final path = RemotePath.join(folder, name);
+          final attached = offline == null
+              ? await api.putContent(path, file.openRead(), length: await file.length() ?? 0)
+              : (await offline.queueUpload(path, file.openRead())).entry;
+          if (mounted) _insertLinkTo(attached, document.entry.path);
         }
       }),
     );
@@ -245,7 +246,8 @@ class _NotePaneState extends ConsumerState<NotePane> {
   Future<void> _rename(NoteDocument document) async {
     await _notifier.save();
     if (!mounted) return;
-    final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry);
+    final offline = await NotesActions.offlineFor(ref.read(offlineFilesProvider.future), document.entry.path);
+    final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry, offline: offline);
     if (!mounted) return;
     final renamed = await NotesActions.rename(context, node);
     if (renamed != null && mounted) _follow(renamed);
@@ -253,7 +255,8 @@ class _NotePaneState extends ConsumerState<NotePane> {
 
   Future<void> _delete(NoteDocument document) async {
     final navigation = ref.read(navigationHistoryProvider.notifier);
-    final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry);
+    final offline = await NotesActions.offlineFor(ref.read(offlineFilesProvider.future), document.entry.path);
+    final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry, offline: offline);
     if (!mounted) return;
     final deleted = await NotesActions.delete(context, node);
     if (deleted) navigation.replace(AppRoutes.notes);
@@ -271,7 +274,8 @@ class _NotePaneState extends ConsumerState<NotePane> {
         final extension = RemotePath.extension(document.entry.name);
         await context.runWithFeedback(
           Future(() async {
-            final taken = await NotesActions.namesIn(ref.read(polderApiProvider), folder);
+            final offline = await NotesActions.offlineFor(ref.read(offlineFilesProvider.future), folder);
+            final taken = await NotesActions.namesIn(ref.read(polderApiProvider), folder, offline: offline);
             await _notifier.saveMineAsCopy(uniqueName(base, extension, taken));
           }),
         );
@@ -351,7 +355,12 @@ class _NotePaneState extends ConsumerState<NotePane> {
           ],
         ),
         actions: [
-          _SaveStatus(state: document.state, error: document.saveError, onSave: _notifier.save),
+          _SaveStatus(
+            state: document.state,
+            error: document.saveError,
+            onSave: _notifier.save,
+            onSync: _notifier.retrySync,
+          ),
           if (recipe)
             IconButton(
               tooltip: localized.recipeStartCooking,
@@ -474,7 +483,12 @@ class _NotePaneState extends ConsumerState<NotePane> {
                         padding: padding,
                         onLink: openLink,
                         onDropFiles: (files) => _upload(document, files.map(XFilePickedFile.new).toList()),
-                        imageFor: (destination) => noteImage(ref.read(polderApiProvider), targets, destination),
+                        imageFor: (destination) => noteImage(
+                          ref.read(polderApiProvider),
+                          targets,
+                          destination,
+                          offline: ref.read(offlineFilesProvider).value,
+                        ),
                       );
                     },
                   ),
@@ -589,24 +603,26 @@ enum _NoteMenu { checkboxes, history, showInFiles, rename, delete }
 enum _ConflictChoice { theirs, mine, copy }
 
 class _SaveStatus extends StatelessWidget {
-  const _SaveStatus({required this.state, required this.error, required this.onSave});
+  const _SaveStatus({required this.state, required this.error, required this.onSave, required this.onSync});
 
   final NoteSaveState state;
   final Object? error;
   final Future<void> Function() onSave;
+  final Future<void> Function() onSync;
 
   @override
   Widget build(BuildContext context) {
     final localized = context.localized;
     final colors = Theme.of(context).colorScheme;
     final (icon, tooltip, color) = switch (state) {
-      NoteSaveState.saved => (IconsaxPlusLinear.cloud_add, localized.noteSaved, colors.onSurfaceVariant),
+      NoteSaveState.saved => (IconsaxPlusLinear.cloud_add, localized.noteSynced, colors.onSurfaceVariant),
       NoteSaveState.unsaved => (IconsaxPlusLinear.cloud_change, localized.noteUnsaved, colors.primary),
       NoteSaveState.saving => (IconsaxPlusLinear.cloud_change, localized.noteSaving, colors.onSurfaceVariant),
+      NoteSaveState.pending => (IconsaxPlusLinear.mobile, localized.noteSavedOnDevice, colors.primary),
       NoteSaveState.conflict => (IconsaxPlusLinear.cloud_cross, localized.noteConflict, colors.error),
       NoteSaveState.failed => (
-        IconsaxPlusLinear.cloud_cross,
-        "${localized.noteSaveFailed}\n${localized.describeError(error)}",
+        IconsaxPlusLinear.cloud_remove,
+        "${localized.noteNotSynced}\n${context.syncExplanation(error)}",
         colors.error,
       ),
     };
@@ -619,7 +635,11 @@ class _SaveStatus extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       icon: Icon(icon, color: color),
-      onPressed: state == NoteSaveState.unsaved || state == NoteSaveState.failed ? onSave : null,
+      onPressed: switch (state) {
+        NoteSaveState.unsaved => onSave,
+        NoteSaveState.pending || NoteSaveState.failed => onSync,
+        _ => null,
+      },
     );
   }
 }

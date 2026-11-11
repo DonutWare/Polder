@@ -3,6 +3,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
 
 import "../support/fake_server.dart";
@@ -30,6 +31,26 @@ void main() {
 
   test("lists directories first, then files by name", () async {
     expect(await names(), ["Photos", "b.txt"]);
+  });
+
+  test("a folder kept offline is listed from the device while the server is unreachable", () async {
+    final files = await harness.container.read(offlineFilesProvider.future);
+    await files.makeAvailableOffline("/Photos");
+    await files.pull();
+    await files.mirror();
+    await files.whenDownloadsSettle();
+    server.unreachable = true;
+
+    final listing = await harness.container.read(directoryProvider("/Photos").future);
+
+    expect(listing.entries.map((entry) => entry.name), ["p.jpg"]);
+    expect(await files.read("/Photos/p.jpg"), "p".codeUnits);
+  });
+
+  test("a folder never kept offline still reports that the server is unreachable", () async {
+    server.unreachable = true;
+
+    expect(harness.container.read(directoryProvider("/Photos").future), throwsA(isA<NetworkException>()));
   });
 
   test("creating, renaming and deleting refresh the listing", () async {

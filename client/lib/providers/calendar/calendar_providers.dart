@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:typed_data";
 import "dart:ui";
 
@@ -7,10 +8,14 @@ import "package:polder/models/calendar.dart";
 import "package:polder/models/server_event.dart";
 import "package:polder/models/sharing.dart";
 import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/offline/offline_storage_provider.dart";
+import "package:polder/providers/offline/offline_sync_provider.dart";
+import "package:polder/services/offline/offline_files.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/realtime/events_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/calendar/offline_calendar_source.dart";
 import "package:polder/services/calendar/polder_calendar_source.dart";
 import "package:polder/services/storage/preferences_store.dart";
 import "package:polder/util/guarded_refresh.dart";
@@ -64,8 +69,21 @@ final polderCalendarSourceProvider = Provider<PolderCalendarSource?>((ref) {
   );
 });
 
+final offlineCalendarSourceProvider = Provider<OfflineCalendarSource?>((ref) {
+  final remote = ref.watch(polderCalendarSourceProvider);
+  if (remote == null) return null;
+  final source = OfflineCalendarSource(
+    remote: remote,
+    api: ref.watch(polderApiProvider),
+    store: ref.watch(offlineStoreProvider.future),
+    onQueued: () => ref.read(offlineSyncProvider.notifier).request(OfflineWork.push),
+  );
+  ref.onDispose(() => unawaited(source.dispose()));
+  return source;
+});
+
 final polderCalendarSourcesOverride = cal.calendarSourcesProvider.overrideWith((ref) {
-  final source = ref.watch(polderCalendarSourceProvider);
+  final source = ref.watch(offlineCalendarSourceProvider);
   return [?source];
 });
 
