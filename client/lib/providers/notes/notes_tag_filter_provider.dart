@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:convert";
 
 import "package:flutter/material.dart";
 
@@ -13,7 +12,6 @@ import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/realtime/files_changed_provider.dart";
 import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
-import "package:polder/services/notes/note_tags.dart";
 import "package:polder/services/offline/offline_files.dart";
 import "package:polder/util/ref_cache.dart";
 import "package:polder/util/remote_path.dart";
@@ -79,7 +77,7 @@ final notesIndexProvider = FutureProvider.autoDispose<List<FileEntry>>((ref) asy
     final files = await ref.read(offlineFilesProvider.future);
     if (!await files.availableOffline(root)) rethrow;
     _rebuildOnLocalChanges(ref, files);
-    return _localNotes(files, root, ref.read(tagsByKeyProvider));
+    return _localNotes(files, root);
   }
 });
 
@@ -95,27 +93,12 @@ void _rebuildOnLocalChanges(Ref ref, OfflineFiles files) {
   });
 }
 
-Future<List<FileEntry>> _localNotes(OfflineFiles files, String root, Map<String, UserTag> tagsByKey) async {
-  final notes = <FileEntry>[];
-  for (final row in await files.tree(root)) {
-    if (row.isDir || !row.entry.isMarkdown) continue;
-    final bytes = await files.read(row.path);
-    if (bytes == null) {
-      notes.add(row.entry);
-      continue;
-    }
-    final names = readNoteTags(utf8.decode(bytes, allowMalformed: true));
-    notes.add(
-      row.entry.copyWith(
-        tagIds: [for (final name in names) ?tagsByKey[tagKey(name)]?.id],
-        otherTags: [
-          for (final name in names)
-            if (!tagsByKey.containsKey(tagKey(name))) name,
-        ],
-      ),
-    );
-  }
-  return _sorted(notes);
+Future<List<FileEntry>> _localNotes(OfflineFiles files, String root) async {
+  final notes = [
+    for (final row in await files.tree(root))
+      if (!row.isDir && row.entry.isMarkdown) row,
+  ];
+  return _sorted([for (final row in await files.withNoteTags(notes)) row.entry]);
 }
 
 List<FileEntry> _sorted(List<FileEntry> notes) =>

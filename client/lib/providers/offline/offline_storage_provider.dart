@@ -7,13 +7,13 @@ import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/offline/offline_sync_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
+import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/offline/content_downloader.dart";
-
 import "package:polder/services/offline/offline_files.dart";
 import "package:polder/services/offline/offline_storage.dart";
-
 import "package:polder/services/offline/offline_store.dart";
+import "package:polder/services/offline/offline_tags.dart";
 
 final offlineStorageOpenerProvider = Provider<Future<OfflineStorage> Function(String accountId)>(
   (ref) => openOfflineStorage,
@@ -98,6 +98,18 @@ final offlineFilesProvider = FutureProvider<OfflineFiles>((ref) async {
     await downloader.dispose();
   });
   return files;
+});
+
+final offlineTagsProvider = FutureProvider<OfflineTags>((ref) async {
+  final tags = OfflineTags(
+    api: ref.watch(polderApiProvider),
+    store: await ref.watch(offlineStoreProvider.future),
+    files: await ref.watch(offlineFilesProvider.future),
+    nextColor: nextTagColor,
+    onQueued: () => ref.read(offlineSyncProvider.notifier).request(OfflineWork.push),
+  );
+  ref.onDispose(() => unawaited(tags.dispose()));
+  return tags;
 });
 
 class _DownloadRequests {

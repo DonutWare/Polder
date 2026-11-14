@@ -72,7 +72,16 @@ func (s *Service) Update(ctx context.Context, viewer users.User, id int64, chang
 	if err := validate(name, color); err != nil {
 		return UserTag{}, err
 	}
-	if err := s.store.Update(ctx, viewer.ID, id, name, color); err != nil {
+	target, err := s.renameTarget(ctx, viewer, current, name)
+	if err != nil {
+		return UserTag{}, err
+	}
+	if target == id {
+		err = s.store.Update(ctx, viewer.ID, id, name, color)
+	} else {
+		err = s.store.Merge(ctx, viewer.ID, id, target, name, color)
+	}
+	if err != nil {
 		return UserTag{}, err
 	}
 	if name != current.Name {
@@ -80,7 +89,21 @@ func (s *Service) Update(ctx context.Context, viewer users.User, id int64, chang
 			return RenameTag(source, Key(current.Name), name)
 		})
 	}
-	return s.store.ByID(ctx, viewer.ID, id)
+	return s.store.ByID(ctx, viewer.ID, target)
+}
+
+func (s *Service) renameTarget(ctx context.Context, viewer users.User, current UserTag, name string) (int64, error) {
+	if Key(name) == Key(current.Name) {
+		return current.ID, nil
+	}
+	existing, err := s.store.ByKeys(ctx, viewer.ID, []string{Key(name)})
+	if err != nil {
+		return 0, err
+	}
+	if tag, ok := existing[Key(name)]; ok {
+		return tag.ID, nil
+	}
+	return current.ID, nil
 }
 
 func (s *Service) Delete(ctx context.Context, viewer users.User, id int64) error {

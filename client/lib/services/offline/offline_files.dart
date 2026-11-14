@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert";
 import "dart:math";
 import "dart:typed_data";
 
@@ -8,8 +9,10 @@ import "package:polder/models/change.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/offline_models.dart";
 import "package:polder/models/sync/conflict.dart";
+import "package:polder/models/user_tag.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/services/api/polder_api.dart";
+import "package:polder/services/notes/note_tags.dart";
 import "package:polder/services/offline/content_downloader.dart";
 import "package:polder/services/offline/content_store.dart";
 import "package:polder/services/offline/offline_store.dart";
@@ -66,6 +69,7 @@ class OfflineFiles {
   final _failed = <String, DownloadFailure>{};
   final _cancelled = <String>{};
   final _downloadsChanged = StreamController<void>.broadcast();
+  final _written = StreamController<({String path, Uint8List bytes})>.broadcast();
   DateTime? _collectedAt;
   late final StreamSubscription<ContentDownloadEvent> _downloadEvents = _downloader.events.listen(_onDownloadEvent);
 
@@ -79,11 +83,42 @@ class OfflineFiles {
 
   Map<String, DownloadFailure> get failedDownloads => Map.unmodifiable(_failed);
 
-  Future<OfflineFile?> file(String path) => _store.file(path);
+  Future<OfflineFile?> file(String path) async {
+    final row = await _store.file(path);
+    return row == null ? null : (await withNoteTags([row])).single;
+  }
 
-  Future<List<OfflineFile>> children(String path) => _store.children(path);
+  Future<List<OfflineFile>> children(String path) async => withNoteTags(await _store.children(path));
 
-  Future<List<OfflineFile>> filesWithIds(Iterable<int> ids) => _store.filesWithIds(ids);
+  Future<List<OfflineFile>> filesWithIds(Iterable<int> ids) async => withNoteTags(await _store.filesWithIds(ids));
+
+  Future<List<OfflineFile>> withNoteTags(List<OfflineFile> rows) async {
+    if (!rows.any(_isNote)) return rows;
+    final pins = await _store.pins();
+    final known = {for (final tag in await _store.cachedTags() ?? const <UserTag>[]) tag.key: tag.id};
+    return [for (final row in rows) await _taggedFromContent(row, pins, known)];
+  }
+
+  static bool _isNote(OfflineFile row) =>
+      !row.isDir && (row.entry.isMarkdown || RemotePath.extension(row.path).toLowerCase() == noteExtension);
+
+  Future<OfflineFile> _taggedFromContent(OfflineFile row, List<OfflinePin> pins, Map<String, int> known) async {
+    final hash = row.localHash;
+    if (!_isNote(row) || hash == null) return row;
+    if (pins.governing(row.path)?.kind != OfflinePinKind.notes) return row;
+    final bytes = await _content.read(hash);
+    if (bytes == null) return row;
+    final names = readNoteTags(utf8.decode(bytes, allowMalformed: true));
+    return row.copyWith(
+      entry: row.entry.copyWith(
+        tagIds: [for (final name in names) ?known[tagKey(name)]],
+        otherTags: [
+          for (final name in names)
+            if (!known.containsKey(tagKey(name))) name,
+        ],
+      ),
+    );
+  }
 
   Future<List<OfflineFile>> tree(String path) => _store.tree(path);
 
@@ -121,8 +156,12 @@ class OfflineFiles {
 
   Future<OfflineFile> write(String path, Uint8List bytes, {DateTime? mtime}) async {
     final hash = _remember(await _content.write(bytes));
-    return _queued(_lock.run(() => _recordWrite(path, hash, bytes.length, mtime, transient: false)));
+    final row = await _queued(_lock.run(() => _recordWrite(path, hash, bytes.length, mtime, transient: false)));
+    if (!_written.isClosed) _written.add((path: path, bytes: bytes));
+    return row;
   }
+
+  Stream<({String path, Uint8List bytes})> get written => _written.stream;
 
   Future<OfflineFile> queueUpload(String path, Stream<List<int>> bytes, {DateTime? mtime}) async {
     final hash = _remember(await _content.writeStream(bytes));
@@ -364,6 +403,7 @@ class OfflineFiles {
   Future<void> dispose() async {
     await _downloadEvents.cancel();
     await _downloadsChanged.close();
+    await _written.close();
   }
 
   Future<T> _queued<T>(Future<T> work) async {

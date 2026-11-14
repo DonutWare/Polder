@@ -1,9 +1,12 @@
 import "dart:async";
 import "dart:convert";
 
+import "dart:ui";
+
 import "package:drift/drift.dart";
 
 import "package:polder/models/offline_models.dart";
+import "package:polder/models/user_tag.dart";
 import "package:polder/services/offline/offline_database.dart";
 import "package:polder/util/remote_path.dart";
 
@@ -18,6 +21,7 @@ class OfflineStore {
   var _changedInBatch = false;
 
   static const _cursorKey = "files.cursor";
+  static const _tagsKey = "tags.cache";
 
   Stream<void> get changes => _changes.stream;
 
@@ -152,6 +156,27 @@ class OfflineStore {
   Future<int?> cursor() async => int.tryParse(await meta(_cursorKey) ?? "");
 
   Future<void> saveCursor(int? cursor) => saveMeta(_cursorKey, cursor?.toString());
+
+  Future<List<UserTag>?> cachedTags() async {
+    final raw = await meta(_tagsKey);
+    if (raw == null) return null;
+    return [
+      for (final json in (jsonDecode(raw) as List<dynamic>).cast<Map<String, dynamic>>())
+        UserTag(
+          id: json["id"] as int,
+          name: json["name"] as String,
+          color: Color(json["color"] as int),
+          count: json["count"] as int? ?? 0,
+        ),
+    ];
+  }
+
+  Future<void> saveCachedTags(List<UserTag> tags) => saveMeta(
+    _tagsKey,
+    jsonEncode([
+      for (final tag in tags) {"id": tag.id, "name": tag.name, "color": tag.color.toARGB32(), "count": tag.count},
+    ]),
+  );
 
   Future<String?> meta(String key) async {
     final row = await db

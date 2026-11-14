@@ -20,6 +20,21 @@ String appendNoteTag(String text, String name) {
   return "$trimmed\n\n#$name\n";
 }
 
+String renameNoteTag(String text, String from, String to) {
+  final key = tagKey(from);
+  final spans = _tagSpans(text).where((span) => tagKey(span.name) == key).toList();
+  if (spans.isEmpty) return text;
+  final renamed = StringBuffer();
+  var position = 0;
+  for (final span in spans) {
+    renamed
+      ..write(text.substring(position, span.start))
+      ..write("#$to");
+    position = span.end;
+  }
+  return (renamed..write(text.substring(position))).toString();
+}
+
 String removeNoteTag(String text, String name) {
   final key = tagKey(name);
   final spans = _tagSpans(text).where((span) => tagKey(span.name) == key).toList();

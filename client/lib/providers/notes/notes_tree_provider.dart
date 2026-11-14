@@ -7,6 +7,7 @@ import "package:polder/models/note_item.dart";
 import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/realtime/files_changed_provider.dart";
+import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/offline/offline_files.dart";
 import "package:polder/util/guarded_refresh.dart";
@@ -66,16 +67,19 @@ class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> with GuardedR
     });
     final files = await ref.watch(offlineFilesProvider.future);
     Timer? localRefresh;
-    final subscription = files.changes.listen((_) {
+    void refreshIfLocal() {
       localRefresh?.cancel();
       localRefresh = Timer(localRefreshDelay, () async {
         if (await files.availableOffline(path)) await refresh();
       });
-    });
+    }
+
+    final subscription = files.changes.listen((_) => refreshIfLocal());
     ref.onDispose(() {
       localRefresh?.cancel();
       unawaited(subscription.cancel());
     });
+    ref.listen(tagsByKeyProvider, (_, _) => refreshIfLocal());
     return _fetch(ref.watch(polderApiProvider), files);
   }
 

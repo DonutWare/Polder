@@ -205,6 +205,34 @@ func TestTagsWrittenInNotes(t *testing.T) {
 	})
 }
 
+func TestRenamingOntoAnExistingTagMergesThem(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		alice.put("/report.pdf", 0, []byte("pdf"), http.StatusOK, nil)
+		alice.put("/plan.md", 0, []byte("Plan #todo\n"), http.StatusOK, nil)
+		alice.put("/later.md", 0, []byte("Later #tasks\n"), http.StatusOK, nil)
+		alice.assignTags([]string{"/report.pdf"}, "todo")
+		todo := alice.waitForTag("todo", 2)
+		alice.waitForTag("tasks", 1)
+
+		var merged userTag
+		alice.mustJSON(http.MethodPatch, fmt.Sprintf("/tags/%d", todo.ID), map[string]string{"name": "tasks", "color": "#00ff00"}, http.StatusOK, &merged)
+		if merged.Name != "tasks" || merged.Color != "#00ff00" {
+			t.Fatalf("merged %+v", merged)
+		}
+		if _, found := alice.tagNamed("todo"); found {
+			t.Fatal("the renamed tag is merged away")
+		}
+		if got := alice.text("/plan.md"); got != "Plan #tasks\n" {
+			t.Fatalf("merging rewrites the note: %q", got)
+		}
+		alice.waitForTag("tasks", 3)
+		if file := alice.stat("/report.pdf"); !slices.Equal(file.TagIDs, []int64{merged.ID}) {
+			t.Fatalf("the file moved to the merged tag: %+v", file)
+		}
+	})
+}
+
 func TestTagsInSharesArePersonal(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		admin := server.setupAdmin()

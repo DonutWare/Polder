@@ -140,6 +140,31 @@ func (s *Store) Update(ctx context.Context, userID, id int64, name, color string
 	return err
 }
 
+func (s *Store) Merge(ctx context.Context, userID, fromID, intoID int64, name, color string) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	if _, err := tx.ExecContext(ctx,
+		`INSERT INTO file_tags (user_id, file_id, tag_id) SELECT user_id, file_id, $1 FROM file_tags
+		 WHERE user_id = $2 AND tag_id = $3 ON CONFLICT DO NOTHING`, intoID, userID, fromID); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `DELETE FROM file_tags WHERE user_id = $1 AND tag_id = $2`, userID, fromID); err != nil {
+		return err
+	}
+	if err := database.RequireAffected(notFound())(tx.ExecContext(ctx,
+		`DELETE FROM tags WHERE user_id = $1 AND id = $2`, userID, fromID)); err != nil {
+		return err
+	}
+	if err := database.RequireAffected(notFound())(tx.ExecContext(ctx,
+		`UPDATE tags SET name = $1, color = $2 WHERE user_id = $3 AND id = $4`, name, color, userID, intoID)); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 func (s *Store) Delete(ctx context.Context, userID, id int64) error {
 	return database.RequireAffected(notFound())(s.db.ExecContext(ctx, `DELETE FROM tags WHERE user_id = $1 AND id = $2`, userID, id))
 }

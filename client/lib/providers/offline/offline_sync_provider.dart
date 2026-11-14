@@ -81,8 +81,9 @@ class OfflineSyncNotifier extends Notifier<void> {
   Future<DateTime?> _push() async {
     final files = await ref.read(offlineFilesProvider.future);
     final filesRetry = await files.push();
+    final tagsRetry = await (await ref.read(offlineTagsProvider.future)).push();
     final calendarRetry = await ref.read(offlineCalendarSourceProvider)?.push();
-    return _earliest(filesRetry, calendarRetry);
+    return _earliest(_earliest(filesRetry, tagsRetry), calendarRetry);
   }
 
   Future<DateTime?> _pull() async {

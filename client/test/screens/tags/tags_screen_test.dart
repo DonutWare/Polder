@@ -2,10 +2,12 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/offline/offline_sync_provider.dart";
 import "package:polder/screens/tags/tags_screen.dart";
 
 import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";
+import "../../support/queued_tags.dart";
 import "../../support/scripted_client.dart";
 
 Map<String, Object?> _tag(int id, String name, int count) => {
@@ -41,6 +43,7 @@ void main() {
     );
     harness = ProviderHarness(httpClient: client, account: testAccount());
     await harness.container.read(accountProvider.future);
+    harness.container.listen(offlineSyncProvider, (_, _) {});
   });
 
   tearDown(() => harness.dispose());
@@ -55,6 +58,7 @@ void main() {
     expect(find.textContaining("2 tags are not on any item"), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, "Delete"));
     await tester.pumpAndSettle();
+    await sendQueuedTags(tester, harness);
 
     expect(client.requests.where((request) => request.path == "/tags/unused"), hasLength(1));
     expect(find.text("#work"), findsOneWidget);

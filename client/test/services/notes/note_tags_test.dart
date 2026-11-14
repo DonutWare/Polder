@@ -20,4 +20,12 @@ void main() {
     expect(removeNoteTag("Text\n\n#home\n", "home"), "Text\n");
     expect(removeNoteTag("Text\n", "home"), "Text\n");
   });
+
+  test("renaming a tag replaces every mention in prose but not in code", () {
+    expect(
+      renameNoteTag("Plan #Work and `#work`.\n\n#work #urgent\n", "work", "job"),
+      "Plan #job and `#work`.\n\n#job #urgent\n",
+    );
+    expect(renameNoteTag("Nothing here\n", "work", "job"), "Nothing here\n");
+  });
 }

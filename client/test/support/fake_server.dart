@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:convert";
+import "dart:math";
 import "dart:typed_data";
 
 import "package:crypto/crypto.dart";
@@ -142,6 +143,14 @@ class FakePolderServer extends http.BaseClient {
       ("DELETE", "/files") => _delete(query),
       ("GET", "/link-previews") => _linkPreview(query["url"]!),
       ("GET", "/tags") => _json(200, tags),
+      ("POST", "/tags") => _createTag(_decode(body)),
+      ("POST", "/tags/assign") || ("POST", "/tags/unassign") => _assignTags(route, _decode(body)),
+      ("PATCH", _) when segments.length == 2 && segments[0] == "tags" => _updateTag(
+        int.parse(segments[1]),
+        _decode(body),
+      ),
+      ("DELETE", "/tags/unused") => _deleteUnusedTags(),
+      ("DELETE", _) when segments.length == 2 && segments[0] == "tags" => _deleteTag(int.parse(segments[1])),
       ("GET", "/sync/changes") => _changes(int.parse(query["cursor"] ?? "0")),
       ("GET", "/sync/manifest") => _manifest(query["path"]!),
       ("POST", "/sync/batches") => _createBatch(_decode(body)),
@@ -150,6 +159,76 @@ class FakePolderServer extends http.BaseClient {
       ("DELETE", _) when segments.length == 3 && segments[1] == "batches" => _abortBatch(segments[2]),
       _ => throw const _HttpError(404, "not_found"),
     };
+  }
+
+  final tagChanges = <String>[];
+
+  Map<String, Object>? _tagNamed(String name) =>
+      tags.where((tag) => (tag["name"] as String).toLowerCase() == name.toLowerCase()).firstOrNull;
+
+  Map<String, Object> _addTag(String name, String? color) {
+    final tag = <String, Object>{
+      "id": tags.fold(0, (highest, tag) => max(highest, tag["id"] as int)) + 1,
+      "name": name,
+      "color": (color ?? "#8d8d8d").toLowerCase(),
+      "count": 0,
+    };
+    tags = [...tags, tag];
+    return tag;
+  }
+
+  http.StreamedResponse _createTag(Map<String, dynamic> body) {
+    final name = body["name"] as String;
+    tagChanges.add("create $name");
+    if (_tagNamed(name) != null) throw const _HttpError(409, "already_exists");
+    return _json(201, _addTag(name, body["color"] as String?));
+  }
+
+  http.StreamedResponse _updateTag(int id, Map<String, dynamic> body) {
+    final current = tags.where((tag) => tag["id"] == id).firstOrNull;
+    if (current == null) throw const _HttpError(404, "not_found");
+    final name = body["name"] as String? ?? current["name"] as String;
+    final color = (body["color"] as String?)?.toLowerCase() ?? current["color"] as String;
+    tagChanges.add("update ${current["name"]} -> $name $color");
+    final target = _tagNamed(name);
+    final kept = target != null && target["id"] != id ? target : current;
+    final updated = {...kept, "name": name, "color": color};
+    tags = [
+      for (final tag in tags)
+        if (tag["id"] == kept["id"]) updated else if (tag["id"] != id) tag,
+    ];
+    return _json(200, updated);
+  }
+
+  http.StreamedResponse _deleteTag(int id) {
+    final current = tags.where((tag) => tag["id"] == id).firstOrNull;
+    if (current == null) throw const _HttpError(404, "not_found");
+    tagChanges.add("delete ${current["name"]}");
+    tags = [...tags.where((tag) => tag["id"] != id)];
+    return bytesResponse(204, Uint8List(0));
+  }
+
+  http.StreamedResponse _deleteUnusedTags() {
+    final unused = [...tags.where((tag) => tag["count"] == 0).map((tag) => tag["name"])];
+    tagChanges.add("delete unused ${unused.join(",")}");
+    tags = [...tags.where((tag) => tag["count"] != 0)];
+    return _json(200, {"removed": unused.length});
+  }
+
+  http.StreamedResponse _assignTags(String route, Map<String, dynamic> body) {
+    final paths = (body["paths"] as List).cast<String>();
+    final names = (body["names"] as List).cast<String>();
+    tagChanges.add("${route.split("/").last} ${paths.join(",")} ${names.join(",")}");
+    if (route.endsWith("assign") && !route.endsWith("unassign")) {
+      for (final name in names) {
+        if (_tagNamed(name) == null) _addTag(name, null);
+      }
+    }
+    return _json(200, {
+      "results": [
+        for (final path in paths) {"path": path},
+      ],
+    });
   }
 
   http.StreamedResponse _linkPreview(String url) {

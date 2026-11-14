@@ -3,10 +3,12 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/offline/offline_sync_provider.dart";
 import "package:polder/widgets/tags/tag_picker.dart";
 
 import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";
+import "../../support/queued_tags.dart";
 import "../../support/scripted_client.dart";
 
 Map<String, Object?> _tag(int id, String name, int count) => {
@@ -44,6 +46,7 @@ void main() {
     );
     harness = ProviderHarness(httpClient: client, account: testAccount());
     await harness.container.read(accountProvider.future);
+    harness.container.listen(offlineSyncProvider, (_, _) {});
   });
 
   tearDown(() => harness.dispose());
@@ -79,6 +82,7 @@ void main() {
 
     await tester.tap(find.text("#work"));
     await tester.pumpAndSettle();
+    await sendQueuedTags(tester, harness);
     final assign = client.requests.lastWhere((request) => request.path == "/tags/assign");
     expect(assign.data, {
       "paths": ["/Photos/beach.jpg", "/Photos/hike.jpg"],
@@ -93,6 +97,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.text("Create #garden"));
     await tester.pumpAndSettle();
+    await sendQueuedTags(tester, harness);
     expect(client.requests.any((request) => request.method == "POST" && request.path == "/tags"), isTrue);
     final assign = client.requests.lastWhere((request) => request.path == "/tags/assign");
     expect((assign.data! as Map)["names"], ["garden"]);
