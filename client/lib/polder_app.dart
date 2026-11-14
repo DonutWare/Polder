@@ -45,7 +45,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
 
   void _onResume() {
     ref.read(appearanceProvider.notifier).refreshSystemAccent();
-    if (ref.read(currentAccountProvider) == null) return;
+    if (ref.read(currentAccountProvider) == null || ref.read(sessionEndedProvider)) return;
     unawaited(ref.read(serverConnectionProvider.notifier).check());
     ref.read(offlineSyncProvider.notifier).kickAll();
   }
@@ -59,6 +59,14 @@ class _PolderAppState extends ConsumerState<PolderApp> {
       ..invalidate(calendarListProvider)
       ..invalidate(directoryProvider)
       ..invalidate(notesTreeProvider);
+  }
+
+  void _onSessionEnded(bool? wasEnded, bool ended) {
+    if (!ended && wasEnded == true && ref.read(currentAccountProvider) != null) {
+      _recoverFromOffline();
+      unawaited(ref.read(serverConnectionProvider.notifier).check());
+      ref.read(offlineSyncProvider.notifier).kickAll();
+    }
   }
 
   @override
@@ -76,6 +84,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
     ref.watch(deepLinkHandlerProvider);
     ref.watch(notificationCoordinatorProvider);
     ref.watch(offlineSyncProvider);
+    ref.listen(sessionEndedProvider, _onSessionEnded);
     ref.listen(serverConnectionProvider.select((connection) => connection.isOnline), (wasOnline, isOnline) {
       if (isOnline && wasOnline == false) _recoverFromOffline();
     });

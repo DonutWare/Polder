@@ -35,6 +35,7 @@ class CredentialsStep extends ConsumerWidget {
           TextFormField(
             key: usernameFieldKey,
             initialValue: state.username,
+            readOnly: state.reauthenticating,
             autofillHints: const [AutofillHints.username],
             decoration: InputDecoration(
               labelText: context.localized.username,
@@ -50,6 +51,7 @@ class CredentialsStep extends ConsumerWidget {
           PasswordField(
             key: passwordFieldKey,
             label: context.localized.password,
+            autofocus: state.reauthenticating,
             autofillHints: [creatingAdmin ? AutofillHints.newPassword : AutofillHints.password],
             textInputAction: creatingAdmin ? TextInputAction.next : TextInputAction.done,
             helperText: creatingAdmin

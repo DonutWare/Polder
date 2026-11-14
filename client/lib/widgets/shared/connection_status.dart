@@ -8,12 +8,15 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/server_connection.dart";
 import "package:polder/providers/connection/server_connection_provider.dart";
 import "package:polder/providers/offline/offline_changes_provider.dart";
+import "package:polder/providers/account_provider.dart";
+import "package:polder/screens/settings/widgets/sign_out.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 
-enum ConnectionProblem { noNetwork, serverUnreachable, serverFull, serverReadOnly }
+enum ConnectionProblem { sessionEnded, noNetwork, serverUnreachable, serverFull, serverReadOnly }
 
 final connectionProblemProvider = Provider<ConnectionProblem?>((ref) {
+  if (ref.watch(sessionEndedProvider)) return ConnectionProblem.sessionEnded;
   final connection = ref.watch(serverConnectionProvider);
   if (connection.isOffline) {
     return connection.cause == OfflineCause.noNetwork
@@ -30,13 +33,17 @@ final connectionProblemProvider = Provider<ConnectionProblem?>((ref) {
 extension ConnectionProblemDisplay on ConnectionProblem {
   bool get isOffline => this == ConnectionProblem.noNetwork || this == ConnectionProblem.serverUnreachable;
 
+  bool get keepsChangesOnDevice => isOffline || this == ConnectionProblem.sessionEnded;
+
   IconData get icon => switch (this) {
+    ConnectionProblem.sessionEnded => IconsaxPlusLinear.lock,
     ConnectionProblem.noNetwork => IconsaxPlusLinear.wifi_square,
     ConnectionProblem.serverUnreachable => IconsaxPlusLinear.cloud_cross,
     ConnectionProblem.serverFull || ConnectionProblem.serverReadOnly => IconsaxPlusLinear.danger,
   };
 
   String message(BuildContext context) => switch (this) {
+    ConnectionProblem.sessionEnded => context.localized.sessionEndedStatus,
     ConnectionProblem.noNetwork => context.localized.connectionNoNetwork,
     ConnectionProblem.serverUnreachable => context.localized.connectionServerUnreachable,
     ConnectionProblem.serverFull => context.localized.connectionServerFull,
@@ -71,8 +78,8 @@ class ConnectionStatusTile extends ConsumerWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final pending = ref.watch(offlineChangesProvider.select((changes) => changes.length));
-    return Container(
-      margin: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+    final tile = Container(
+      margin: EdgeInsets.fromLTRB(4, 0, 4, problem == ConnectionProblem.sessionEnded ? 6 : 8),
       padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
       decoration: ShapeDecoration(color: colors.errorContainer, shape: squircle(AppRadius.inset + 4)),
       child: Row(
@@ -96,7 +103,7 @@ class ConnectionStatusTile extends ConsumerWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                if (problem.isOffline)
+                if (problem.keepsChangesOnDevice)
                   Text(
                     context.localized.changesSavedOnDevice(pending),
                     style: theme.textTheme.bodySmall?.copyWith(color: colors.onErrorContainer.withValues(alpha: 0.8)),
@@ -105,17 +112,60 @@ class ConnectionStatusTile extends ConsumerWidget {
             ),
           ),
           if (problem.isOffline)
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: colors.error,
-                foregroundColor: colors.onError,
-                visualDensity: VisualDensity.compact,
-              ),
+            _TileButton(
+              label: context.localized.retry,
               onPressed: () => unawaited(ref.read(serverConnectionProvider.notifier).check()),
-              child: Text(context.localized.retry),
             ),
         ],
       ),
+    );
+    if (problem != ConnectionProblem.sessionEnded) return tile;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        tile,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+          child: Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => unawaited(confirmSignOut(context, ref)),
+                  child: Text(context.localized.signOut),
+                ),
+              ),
+              Expanded(
+                child: _TileButton(
+                  label: context.localized.sessionEndedSignIn,
+                  onPressed: ref.read(continueOfflineProvider.notifier).signInAgain,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TileButton extends StatelessWidget {
+  const _TileButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: colors.error,
+        foregroundColor: colors.onError,
+        visualDensity: VisualDensity.compact,
+      ),
+      onPressed: onPressed,
+      child: Text(label),
     );
   }
 }

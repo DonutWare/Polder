@@ -7,5 +7,5 @@ abstract interface class AuthSession {
 
   Future<void> storeTokens(TokenPair tokens);
 
-  Future<void> expire();
+  Future<void> endSession();
 }

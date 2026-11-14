@@ -40,19 +40,19 @@ class AccountAuthSession implements AuthSession {
   AccountNotifier get _account => _ref.read(accountProvider.notifier);
 
   @override
-  String? get accessToken => _signedIn(_ref.read(accountProvider).value)?.accessToken;
+  String? get accessToken => _signedIn(_ref.read(accountProvider).value)?.usableAccessToken;
 
   @override
   Future<String?> readRefreshToken() async {
     final stored = await _ref.read(credentialsStoreProvider).load();
-    return _signedIn(stored)?.refreshToken;
+    return _signedIn(stored)?.usableRefreshToken;
   }
 
   @override
   Future<void> storeTokens(TokenPair tokens) => _account.storeTokens(accountId, tokens);
 
   @override
-  Future<void> expire() => _account.expire(accountId);
+  Future<void> endSession() => _account.endSession(accountId);
 
   Account? _signedIn(Account? account) => account?.id == accountId ? account : null;
 }

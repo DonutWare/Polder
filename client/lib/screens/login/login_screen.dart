@@ -9,6 +9,7 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/login/widgets/credentials_step.dart";
 import "package:polder/screens/login/widgets/login_backdrop.dart";
 import "package:polder/screens/login/widgets/login_header.dart";
+import "package:polder/screens/login/widgets/session_ended_notice.dart";
 import "package:polder/screens/login/widgets/server_step.dart";
 import "package:polder/widgets/shared/loading_indicator.dart";
 
@@ -47,6 +48,7 @@ class LoginScreen extends ConsumerWidget {
                         spacing: 28,
                         children: [
                           const LoginHeader(),
+                          if (state.reauthenticating) const SessionEndedNotice(),
                           if (probing)
                             const Padding(padding: EdgeInsets.only(bottom: 16), child: LoadingIndicator())
                           else
@@ -55,6 +57,7 @@ class LoginScreen extends ConsumerWidget {
                               LoginStep.credentials => const CredentialsStep(creatingAdmin: false),
                               LoginStep.setup => const CredentialsStep(creatingAdmin: true),
                             },
+                          if (state.reauthenticating) const SessionEndedActions(),
                         ],
                       ),
                     ),

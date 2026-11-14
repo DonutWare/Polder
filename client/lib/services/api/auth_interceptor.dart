@@ -47,21 +47,33 @@ class AuthInterceptor extends Authenticator implements Interceptor {
     return _inFlight.refresh ??= _refresh().whenComplete(() => _inFlight.refresh = null);
   }
 
-  Future<String?> _refresh() async {
+  Future<String?> _refresh({String? rejected}) async {
     final refreshToken = await _session.readRefreshToken();
     if (refreshToken == null) return null;
+    if (refreshToken == rejected) return _endSession();
     try {
-      final response = await _refreshApi.refresh(
-        body: wire.RefreshRequest(refreshToken: refreshToken, deviceName: _deviceName),
-      );
-      final tokens = response.body!.toModel();
-      await _session.storeTokens(tokens);
-      return tokens.accessToken;
+      return await _exchange(refreshToken);
     } on ApiException catch (error) {
-      if (const {400, 401, 403}.contains(error.statusCode)) await _session.expire();
-      return null;
+      if (!_rejectsSession(error)) rethrow;
+      return _refresh(rejected: refreshToken);
     }
   }
+
+  Future<String> _exchange(String refreshToken) async {
+    final response = await _refreshApi.refresh(
+      body: wire.RefreshRequest(refreshToken: refreshToken, deviceName: _deviceName),
+    );
+    final tokens = response.body!.toModel();
+    await _session.storeTokens(tokens);
+    return tokens.accessToken;
+  }
+
+  Future<String?> _endSession() async {
+    await _session.endSession();
+    return null;
+  }
+
+  static bool _rejectsSession(ApiException error) => error is UnauthorizedException || error is ForbiddenException;
 }
 
 class _InFlightRefresh {

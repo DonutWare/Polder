@@ -42,17 +42,20 @@ import "package:polder/util/remote_path.dart";
 final routerProvider = Provider<GoRouter>((ref) {
   final account = ValueNotifier<AsyncValue<Account?>>(ref.read(accountProvider));
   final isAdmin = ValueNotifier<bool>(ref.read(isAdminProvider));
+  final continueOffline = ValueNotifier<bool>(ref.read(continueOfflineProvider));
   var lastBrowsedPath = RemotePath.root;
   ref.listen(accountProvider, (previous, next) {
     if (previous?.value?.id != next.value?.id) lastBrowsedPath = RemotePath.root;
     account.value = next;
   });
   ref.listen(isAdminProvider, (_, next) => isAdmin.value = next);
+  ref.listen(continueOfflineProvider, (_, next) => continueOffline.value = next);
   final router = GoRouter(
     initialLocation: AppRoutes.files,
     extraCodec: const RouteExtraCodec(),
-    refreshListenable: Listenable.merge([account, isAdmin]),
-    redirect: (_, state) => AppRedirect.resolve(account.value, state.uri, isAdmin: isAdmin.value),
+    refreshListenable: Listenable.merge([account, isAdmin, continueOffline]),
+    redirect: (_, state) =>
+        AppRedirect.resolve(account.value, state.uri, isAdmin: isAdmin.value, continueOffline: continueOffline.value),
     routes: [
       _route(path: AppRoutes.login, page: (_) => const LoginScreen()),
       _route(
@@ -244,10 +247,18 @@ final routerProvider = Provider<GoRouter>((ref) {
 });
 
 abstract final class AppRedirect {
-  static String? resolve(AsyncValue<Account?> account, Uri location, {bool isAdmin = false}) {
+  static String? resolve(
+    AsyncValue<Account?> account,
+    Uri location, {
+    bool isAdmin = false,
+    bool continueOffline = false,
+  }) {
     if (account.isLoading && !account.hasValue) return null;
     if (AppRoutes.isPublic(location.path)) return null;
-    final signedIn = account.value != null;
+    final signedIn = switch (account.value) {
+      null => false,
+      final current => !current.sessionEnded || continueOffline,
+    };
     final atLogin = location.path == AppRoutes.login;
     if (!signedIn && !atLogin) return AppRoutes.loginFrom(location);
     if (signedIn && atLogin) {

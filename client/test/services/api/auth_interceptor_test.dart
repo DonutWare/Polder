@@ -29,7 +29,7 @@ class FakeSession implements AuthSession {
   }
 
   @override
-  Future<void> expire() async => expired = true;
+  Future<void> endSession() async => expired = true;
 }
 
 void main() {
@@ -38,6 +38,8 @@ void main() {
   late FakeSession session;
   late int refreshCalls;
   late bool refreshSucceeds;
+  late Object? refreshFailure;
+  late void Function()? beforeRefreshAnswers;
   late ScriptedClient client;
   late PolderApi api;
 
@@ -45,6 +47,10 @@ void main() {
     if (request.path.endsWith("/auth/refresh")) {
       refreshCalls++;
       await Future<void>.delayed(const Duration(milliseconds: 20));
+      beforeRefreshAnswers?.call();
+      if (refreshFailure case final failure?) throw failure;
+      final presented = (request.data! as Map<String, dynamic>)["refreshToken"];
+      if (presented == "refresh-elsewhere") return jsonResponse(200, tokenJson(validToken, "refresh-3"));
       if (!refreshSucceeds) {
         return jsonResponse(401, {
           "error": {"code": "unauthorized", "message": "revoked"},
@@ -66,6 +72,8 @@ void main() {
     session = FakeSession(accessToken: "access-1", refreshToken: "refresh-1");
     refreshCalls = 0;
     refreshSucceeds = true;
+    refreshFailure = null;
+    beforeRefreshAnswers = null;
     client = ScriptedClient(handle);
     api = PolderApi(
       ApiClientFactory.create("https://cloud.test", session: session, deviceName: "Laptop", httpClient: client),
@@ -106,6 +114,41 @@ void main() {
 
     expect(session.expired, isTrue);
     expect(refreshCalls, 1);
+  });
+
+  test("a rejected refresh retries with a token another process stored meanwhile", () async {
+    refreshSucceeds = false;
+    beforeRefreshAnswers = () => session.refreshToken = "refresh-elsewhere";
+
+    final user = await api.me();
+
+    expect(user.username, "alice");
+    expect(session.expired, isFalse);
+    expect(session.refreshToken, "refresh-3");
+    expect(refreshCalls, 2);
+  });
+
+  test("an unreachable server keeps the session and surfaces a network error", () async {
+    refreshFailure = http.ClientException("connection refused");
+
+    await expectLater(api.me(), throwsA(isA<NetworkException>()));
+
+    expect(session.expired, isFalse);
+    expect(session.refreshToken, "refresh-1");
+  });
+
+  test("a failing server keeps the session and surfaces the server error", () async {
+    client = ScriptedClient((request) async {
+      if (request.path.endsWith("/auth/refresh")) return jsonResponse(500, {});
+      return handle(request);
+    });
+    api = PolderApi(
+      ApiClientFactory.create("https://cloud.test", session: session, deviceName: "Laptop", httpClient: client),
+    );
+
+    await expectLater(api.me(), throwsA(isA<ServerException>()));
+
+    expect(session.expired, isFalse);
   });
 
   test("anonymous endpoints never trigger a refresh", () async {

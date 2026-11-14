@@ -31,12 +31,34 @@ func TestLoginRefreshRotationAndLogout(t *testing.T) {
 		var first tokenPair
 		server.anonymous().mustJSON(http.MethodPost, "/auth/login", map[string]string{"username": "admin", "password": "adminpass1", "deviceName": "test"}, http.StatusOK, &first)
 
-		var second tokenPair
-		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": first.RefreshToken}, http.StatusOK, &second)
-		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": first.RefreshToken}, http.StatusUnauthorized, nil)
+		second := server.refresh(first.RefreshToken, http.StatusOK)
+		third := server.refresh(second.RefreshToken, http.StatusOK)
+		server.refresh(first.RefreshToken, http.StatusUnauthorized)
 
-		server.anonymous().mustJSON(http.MethodPost, "/auth/logout", map[string]string{"refreshToken": second.RefreshToken}, http.StatusNoContent, nil)
-		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": second.RefreshToken}, http.StatusUnauthorized, nil)
+		server.anonymous().mustJSON(http.MethodPost, "/auth/logout", map[string]string{"refreshToken": third.RefreshToken}, http.StatusNoContent, nil)
+		server.refresh(third.RefreshToken, http.StatusUnauthorized)
+	})
+}
+
+func TestRefreshSurvivesALostResponse(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		first := server.setupAdminTokens()
+		server.refresh(first.RefreshToken, http.StatusOK)
+
+		retried := server.refresh(first.RefreshToken, http.StatusOK)
+		server.refresh(retried.RefreshToken, http.StatusOK)
+		server.refresh(first.RefreshToken, http.StatusUnauthorized)
+	})
+}
+
+func TestConcurrentRefreshesKeepEveryIssuedTokenUsable(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		first := server.setupAdminTokens()
+		winner := server.refresh(first.RefreshToken, http.StatusOK)
+		loser := server.refresh(first.RefreshToken, http.StatusOK)
+
+		server.refresh(winner.RefreshToken, http.StatusOK)
+		server.refresh(loser.RefreshToken, http.StatusOK)
 	})
 }
 
@@ -85,4 +107,21 @@ func TestUsersChangeTheirOwnPassword(t *testing.T) {
 		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": current.RefreshToken}, http.StatusOK, nil)
 		server.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": other.RefreshToken}, http.StatusUnauthorized, nil)
 	})
+}
+
+func (s *testServer) setupAdminTokens() tokenPair {
+	s.setupAdmin()
+	var tokens tokenPair
+	s.anonymous().mustJSON(http.MethodPost, "/auth/login", map[string]string{"username": "admin", "password": "adminpass1", "deviceName": "test"}, http.StatusOK, &tokens)
+	return tokens
+}
+
+func (s *testServer) refresh(refreshToken string, expectedStatus int) tokenPair {
+	var tokens tokenPair
+	var target any = &tokens
+	if expectedStatus != http.StatusOK {
+		target = nil
+	}
+	s.anonymous().mustJSON(http.MethodPost, "/auth/refresh", map[string]string{"refreshToken": refreshToken}, expectedStatus, target)
+	return tokens
 }

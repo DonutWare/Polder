@@ -11,6 +11,7 @@ _Account _$AccountFromJson(Map<String, dynamic> json) => _Account(
   accessToken: json['accessToken'] as String,
   refreshToken: json['refreshToken'] as String,
   user: User.fromJson(json['user'] as Map<String, dynamic>),
+  sessionEnded: json['sessionEnded'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$AccountToJson(_Account instance) => <String, dynamic>{
@@ -18,4 +19,5 @@ Map<String, dynamic> _$AccountToJson(_Account instance) => <String, dynamic>{
   'accessToken': instance.accessToken,
   'refreshToken': instance.refreshToken,
   'user': instance.user.toJson(),
+  'sessionEnded': instance.sessionEnded,
 };

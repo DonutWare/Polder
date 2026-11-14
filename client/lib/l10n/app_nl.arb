@@ -1049,5 +1049,10 @@
 	"offlineDownloadsFailedSummary": "{count, plural, =1{1 bestand kon niet offline beschikbaar worden gemaakt} other{{count} bestanden konden niet offline beschikbaar worden gemaakt}}",
 	"waitingForOffline": "Wacht op downloaden voor offline gebruik",
 	"downloadingForOffline": "Downloaden voor offline gebruik, {percent}%",
-	"downloadingFilesForOffline": "Downloaden voor offline gebruik, {done} van {total} bestanden"
+	"downloadingFilesForOffline": "Downloaden voor offline gebruik, {done} van {total} bestanden",
+	"sessionEndedTitle": "Opnieuw inloggen",
+	"sessionEndedMessage": "Je sessie op dit apparaat is beëindigd. Log opnieuw in om verder te synchroniseren. Er gaat niets verloren op dit apparaat.",
+	"sessionEndedStatus": "Sessie beëindigd",
+	"sessionEndedSignIn": "Inloggen",
+	"continueOffline": "Offline verdergaan"
 }

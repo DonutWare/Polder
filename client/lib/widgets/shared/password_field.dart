@@ -16,6 +16,7 @@ class PasswordField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.enabled = true,
+    this.autofocus = false,
     super.key,
   });
 
@@ -29,6 +30,7 @@ class PasswordField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final bool enabled;
+  final bool autofocus;
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -44,6 +46,7 @@ class _PasswordFieldState extends State<PasswordField> {
       controller: widget.controller,
       initialValue: widget.initialValue,
       enabled: widget.enabled,
+      autofocus: widget.autofocus,
       obscureText: !_visible,
       autocorrect: false,
       enableSuggestions: false,

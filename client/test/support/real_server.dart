@@ -41,7 +41,7 @@ class MemoryAuthSession implements AuthSession {
   Future<void> storeTokens(TokenPair tokens) async => this.tokens = tokens;
 
   @override
-  Future<void> expire() async => tokens = null;
+  Future<void> endSession() async => tokens = null;
 }
 
 /// Counts delta-transfer traffic so tests can assert that only changed chunks move.

@@ -13,7 +13,8 @@ final eventsClientProvider = Provider<EventsClient?>((ref) {
   final connect = ref.watch(webSocketConnectorProvider);
   final accountId = ref.watch(currentAccountProvider.select((account) => account?.id));
   final serverUrl = ref.watch(currentAccountProvider.select((account) => account?.serverUrl));
-  if (connect == null || accountId == null || serverUrl == null) return null;
+  final sessionEnded = ref.watch(currentAccountProvider.select((account) => account?.sessionEnded ?? false));
+  if (connect == null || accountId == null || serverUrl == null || sessionEnded) return null;
 
   final client = EventsClient(
     endpoint: EventsClient.endpointFor(serverUrl),
@@ -26,7 +27,7 @@ final eventsClientProvider = Provider<EventsClient?>((ref) {
           return null;
         }
       }
-      return ref.read(currentAccountProvider)?.accessToken;
+      return ref.read(currentAccountProvider)?.usableAccessToken;
     },
   );
   ref.listen(currentAccountProvider.select((account) => account?.accessToken), (previous, next) {

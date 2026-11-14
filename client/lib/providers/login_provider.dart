@@ -18,10 +18,26 @@ final loginProvider = NotifierProvider.autoDispose<LoginNotifier, LoginState>(Lo
 class LoginNotifier extends Notifier<LoginState> {
   @override
   LoginState build() {
+    final ended = ref.read(currentAccountProvider);
+    if (ended != null && ended.sessionEnded) return _reauthenticate(ended);
     final hosted = ref.read(hostedServerUrlProvider);
     if (hosted == null) return const LoginState();
     Future.microtask(_connectToHostedServer);
     return LoginState(serverUrl: ApiClientFactory.normalizeServerUrl(hosted), probingHostedServer: true);
+  }
+
+  LoginState _reauthenticate(Account account) {
+    ref.listen(currentAccountProvider.select((account) => account == null), (_, signedOut) {
+      if (signedOut) ref.invalidateSelf();
+    });
+    Future.microtask(() => ref.read(brandingProvider.notifier).load(account.serverUrl));
+    return LoginState(
+      step: LoginStep.credentials,
+      serverUrl: account.serverUrl,
+      username: account.user.username,
+      serverLocked: true,
+      reauthenticating: true,
+    );
   }
 
   /// Falls back to asking for a server when the page's own origin isn't a Polder server

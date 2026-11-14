@@ -11,7 +11,7 @@ class BackgroundSession {
 
   static Future<BackgroundSession?> open(CredentialsStore credentials) async {
     final account = await credentials.load();
-    if (account == null) return null;
+    if (account == null || account.sessionEnded) return null;
     final deviceName = await DeviceName.resolve();
     final session = StoredAuthSession(store: credentials, accountId: account.id, accessToken: account.accessToken);
     final api = PolderApi(ApiClientFactory.create(account.serverUrl, session: session, deviceName: deviceName));

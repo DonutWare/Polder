@@ -13,6 +13,24 @@ final accountProvider = AsyncNotifierProvider<AccountNotifier, Account?>(Account
 
 final currentAccountProvider = Provider<Account?>((ref) => ref.watch(accountProvider).value);
 
+final sessionEndedProvider = Provider<bool>(
+  (ref) => ref.watch(currentAccountProvider.select((account) => account?.sessionEnded ?? false)),
+);
+
+final continueOfflineProvider = NotifierProvider<ContinueOfflineNotifier, bool>(ContinueOfflineNotifier.new);
+
+class ContinueOfflineNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    ref.watch(sessionEndedProvider);
+    return false;
+  }
+
+  void continueOffline() => state = ref.read(sessionEndedProvider);
+
+  void signInAgain() => state = false;
+}
+
 class AccountNotifier extends AsyncNotifier<Account?> {
   CredentialsStore get _store => ref.read(credentialsStoreProvider);
 
@@ -26,27 +44,29 @@ class AccountNotifier extends AsyncNotifier<Account?> {
     await _store.save(account);
   }
 
-  /// Stores refreshed tokens, unless [accountId] has been signed out in the meantime.
-  Future<void> storeTokens(String accountId, TokenPair tokens) async {
-    final account = state.value ?? await future;
-    if (account?.id == accountId) await signIn(account!.withTokens(tokens));
+  Future<void> storeTokens(String accountId, TokenPair tokens) =>
+      _updateStored((account) => account.id == accountId ? account.withTokens(tokens) : null);
+
+  Future<void> storeUser(User user) => _updateStored(
+    (account) => account.user.id == user.id && account.user != user ? account.copyWith(user: user) : null,
+  );
+
+  Future<void> _updateStored(Account? Function(Account account) change) async {
+    final current = state.value ?? await future;
+    final stored = await _store.load();
+    final base = stored?.id == current?.id ? stored : null;
+    final updated = base == null ? null : change(base);
+    if (updated == null || state.value?.id != updated.id) return;
+    state = AsyncData(updated);
+    await _store.save(updated);
   }
 
-  Future<void> storeUser(User user) async {
-    final account = state.value ?? await future;
-    if (account != null && account.user.id == user.id && account.user != user) {
-      await signIn(account.copyWith(user: user));
-    }
-  }
-
-  /// Forgets [accountId] without telling the server, for a session the server already ended.
-  Future<void> expire(String accountId) async {
-    if ((state.value ?? await future)?.id == accountId) await _clear();
-  }
+  Future<void> endSession(String accountId) =>
+      _updateStored((account) => account.id == accountId && !account.sessionEnded ? account.endSession() : null);
 
   Future<void> signOut() async {
     final account = state.value ?? await future;
-    if (account != null) await _revokeQuietly(account);
+    if (account != null && !account.sessionEnded) await _revokeQuietly(account);
     await _clear();
   }
 

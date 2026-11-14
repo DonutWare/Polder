@@ -1786,5 +1786,10 @@
 	"downloadingForOffline": "Downloading for offline use, {percent}%",
 	"@downloadingForOffline": {"placeholders": {"percent": {"type": "int"}}},
 	"downloadingFilesForOffline": "Downloading for offline use, {done} of {total} files",
-	"@downloadingFilesForOffline": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}}
+	"@downloadingFilesForOffline": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+	"sessionEndedTitle": "Sign in again",
+	"sessionEndedMessage": "Your session on this device has ended. Sign in again to keep syncing. Nothing on this device is lost.",
+	"sessionEndedStatus": "Session ended",
+	"sessionEndedSignIn": "Sign in",
+	"continueOffline": "Continue offline"
 }

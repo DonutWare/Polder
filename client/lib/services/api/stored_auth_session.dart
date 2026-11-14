@@ -14,7 +14,7 @@ class StoredAuthSession implements AuthSession {
   String? get accessToken => _accessToken;
 
   @override
-  Future<String?> readRefreshToken() async => (await _signedIn())?.refreshToken;
+  Future<String?> readRefreshToken() async => (await _signedIn())?.usableRefreshToken;
 
   @override
   Future<void> storeTokens(TokenPair tokens) async {
@@ -24,7 +24,11 @@ class StoredAuthSession implements AuthSession {
   }
 
   @override
-  Future<void> expire() async => _accessToken = null;
+  Future<void> endSession() async {
+    _accessToken = null;
+    final account = await _signedIn();
+    if (account != null && !account.sessionEnded) await _store.save(account.endSession());
+  }
 
   Future<Account?> _signedIn() async {
     final account = await _store.load();

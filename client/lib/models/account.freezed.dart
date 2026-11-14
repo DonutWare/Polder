@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Account {
 
- String get serverUrl; String get accessToken; String get refreshToken; User get user;
+ String get serverUrl; String get accessToken; String get refreshToken; User get user; bool get sessionEnded;
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $AccountCopyWith<Account> get copyWith => _$AccountCopyWithImpl<Account>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as Account;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Account&&(identical(other.serverUrl, _this.serverUrl) || other.serverUrl == _this.serverUrl)&&(identical(other.accessToken, _this.accessToken) || other.accessToken == _this.accessToken)&&(identical(other.refreshToken, _this.refreshToken) || other.refreshToken == _this.refreshToken)&&(identical(other.user, _this.user) || other.user == _this.user));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Account&&(identical(other.serverUrl, _this.serverUrl) || other.serverUrl == _this.serverUrl)&&(identical(other.accessToken, _this.accessToken) || other.accessToken == _this.accessToken)&&(identical(other.refreshToken, _this.refreshToken) || other.refreshToken == _this.refreshToken)&&(identical(other.user, _this.user) || other.user == _this.user)&&(identical(other.sessionEnded, _this.sessionEnded) || other.sessionEnded == _this.sessionEnded));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Account;
-  return Object.hash(runtimeType,_this.serverUrl,_this.accessToken,_this.refreshToken,_this.user);
+  return Object.hash(runtimeType,_this.serverUrl,_this.accessToken,_this.refreshToken,_this.user,_this.sessionEnded);
 }
 
 @override
 String toString() {
   final _this = this as Account;
-  return 'Account(serverUrl: ${_this.serverUrl}, accessToken: ${_this.accessToken}, refreshToken: ${_this.refreshToken}, user: ${_this.user})';
+  return 'Account(serverUrl: ${_this.serverUrl}, accessToken: ${_this.accessToken}, refreshToken: ${_this.refreshToken}, user: ${_this.user}, sessionEnded: ${_this.sessionEnded})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $AccountCopyWith<$Res>  {
   factory $AccountCopyWith(Account value, $Res Function(Account) _then) = _$AccountCopyWithImpl;
 @useResult
 $Res call({
- String serverUrl, String accessToken, String refreshToken, User user
+ String serverUrl, String accessToken, String refreshToken, User user, bool sessionEnded
 });
 
 
@@ -71,13 +71,14 @@ class _$AccountCopyWithImpl<$Res>
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? serverUrl = null,Object? accessToken = null,Object? refreshToken = null,Object? user = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? serverUrl = null,Object? accessToken = null,Object? refreshToken = null,Object? user = null,Object? sessionEnded = null,}) {
   return _then(Account(
 serverUrl: null == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
 as String,accessToken: null == accessToken ? _self.accessToken : accessToken // ignore: cast_nullable_to_non_nullable
 as String,refreshToken: null == refreshToken ? _self.refreshToken : refreshToken // ignore: cast_nullable_to_non_nullable
 as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as User,
+as User,sessionEnded: null == sessionEnded ? _self.sessionEnded : sessionEnded // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of Account
@@ -171,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String serverUrl,  String accessToken,  String refreshToken,  User user)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String serverUrl,  String accessToken,  String refreshToken,  User user,  bool sessionEnded)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Account() when $default != null:
-return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user);case _:
+return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user,_that.sessionEnded);case _:
   return orElse();
 
 }
@@ -192,10 +193,10 @@ return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user)
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String serverUrl,  String accessToken,  String refreshToken,  User user)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String serverUrl,  String accessToken,  String refreshToken,  User user,  bool sessionEnded)  $default,) {final _that = this;
 switch (_that) {
 case _Account():
-return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user);case _:
+return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user,_that.sessionEnded);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +213,10 @@ return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user)
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String serverUrl,  String accessToken,  String refreshToken,  User user)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String serverUrl,  String accessToken,  String refreshToken,  User user,  bool sessionEnded)?  $default,) {final _that = this;
 switch (_that) {
 case _Account() when $default != null:
-return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user);case _:
+return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user,_that.sessionEnded);case _:
   return null;
 
 }
@@ -227,13 +228,14 @@ return $default(_that.serverUrl,_that.accessToken,_that.refreshToken,_that.user)
 @JsonSerializable()
 
 class _Account extends Account {
-  const _Account({required this.serverUrl, required this.accessToken, required this.refreshToken, required this.user}): super._();
+  const _Account({required this.serverUrl, required this.accessToken, required this.refreshToken, required this.user, this.sessionEnded = false}): super._();
   factory _Account.fromJson(Map<String, dynamic> json) => _$AccountFromJson(json);
 
 @override final  String serverUrl;
 @override final  String accessToken;
 @override final  String refreshToken;
 @override final  User user;
+@override@JsonKey() final  bool sessionEnded;
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
@@ -248,18 +250,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Account&&(identical(other.serverUrl, serverUrl) || other.serverUrl == serverUrl)&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.user, user) || other.user == user));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Account&&(identical(other.serverUrl, serverUrl) || other.serverUrl == serverUrl)&&(identical(other.accessToken, accessToken) || other.accessToken == accessToken)&&(identical(other.refreshToken, refreshToken) || other.refreshToken == refreshToken)&&(identical(other.user, user) || other.user == user)&&(identical(other.sessionEnded, sessionEnded) || other.sessionEnded == sessionEnded));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,serverUrl,accessToken,refreshToken,user);
+    return Object.hash(runtimeType,serverUrl,accessToken,refreshToken,user,sessionEnded);
 }
 
 @override
 String toString() {
-    return 'Account(serverUrl: $serverUrl, accessToken: $accessToken, refreshToken: $refreshToken, user: $user)';
+    return 'Account(serverUrl: $serverUrl, accessToken: $accessToken, refreshToken: $refreshToken, user: $user, sessionEnded: $sessionEnded)';
 }
 
 
@@ -270,7 +272,7 @@ abstract mixin class _$AccountCopyWith<$Res> implements $AccountCopyWith<$Res> {
   factory _$AccountCopyWith(_Account value, $Res Function(_Account) _then) = __$AccountCopyWithImpl;
 @override @useResult
 $Res call({
- String serverUrl, String accessToken, String refreshToken, User user
+ String serverUrl, String accessToken, String refreshToken, User user, bool sessionEnded
 });
 
 
@@ -287,13 +289,14 @@ class __$AccountCopyWithImpl<$Res>
 
 /// Create a copy of Account
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? serverUrl = null,Object? accessToken = null,Object? refreshToken = null,Object? user = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? serverUrl = null,Object? accessToken = null,Object? refreshToken = null,Object? user = null,Object? sessionEnded = null,}) {
   return _then(_Account(
 serverUrl: null == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
 as String,accessToken: null == accessToken ? _self.accessToken : accessToken // ignore: cast_nullable_to_non_nullable
 as String,refreshToken: null == refreshToken ? _self.refreshToken : refreshToken // ignore: cast_nullable_to_non_nullable
 as String,user: null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as User,
+as User,sessionEnded: null == sessionEnded ? _self.sessionEnded : sessionEnded // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -15,6 +15,7 @@ abstract class Account with _$Account {
     required String accessToken,
     required String refreshToken,
     required User user,
+    @Default(false) bool sessionEnded,
   }) = _Account;
 
   factory Account.fromTokens({required String serverUrl, required TokenPair tokens}) => Account(
@@ -33,6 +34,16 @@ abstract class Account with _$Account {
     return "${user.username}@${authority.isEmpty ? serverUrl : authority}";
   }
 
-  Account withTokens(TokenPair tokens) =>
-      copyWith(accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, user: tokens.user);
+  Account withTokens(TokenPair tokens) => copyWith(
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    user: tokens.user,
+    sessionEnded: false,
+  );
+
+  Account endSession() => copyWith(accessToken: "", refreshToken: "", sessionEnded: true);
+
+  String? get usableAccessToken => sessionEnded ? null : accessToken;
+
+  String? get usableRefreshToken => sessionEnded ? null : refreshToken;
 }

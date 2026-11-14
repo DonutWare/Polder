@@ -11,8 +11,10 @@ import "../support/provider_harness.dart";
 void main() {
   AsyncValue<Account?> signedIn(UserRole role) => AsyncData(testAccount(role: role));
 
-  String? resolve(AsyncValue<Account?> account, String location, {bool isAdmin = false}) =>
-      AppRedirect.resolve(account, Uri.parse(location), isAdmin: isAdmin);
+  String? resolve(AsyncValue<Account?> account, String location, {bool isAdmin = false, bool offline = false}) =>
+      AppRedirect.resolve(account, Uri.parse(location), isAdmin: isAdmin, continueOffline: offline);
+
+  AsyncValue<Account?> ended() => AsyncData(testAccount().endSession());
 
   test("signed-out users go to login and come back afterwards", () {
     expect(resolve(const AsyncData(null), AppRoutes.files), AppRoutes.login);
@@ -36,6 +38,18 @@ void main() {
     expect(AppRoutes.safeReturn("https://evil.example.com"), isNull);
     expect(AppRoutes.safeReturn(AppRoutes.login), isNull);
     expect(AppRoutes.safeReturn(AppRoutes.trash), AppRoutes.trash);
+  });
+
+  test("an ended session goes to login and returns afterwards", () {
+    final redirect = resolve(ended(), AppRoutes.trash)!;
+    expect(Uri.parse(redirect).path, AppRoutes.login);
+    expect(resolve(ended(), redirect), isNull);
+    expect(resolve(signedIn(UserRole.user), redirect), AppRoutes.trash);
+  });
+
+  test("an ended session can keep using the app offline", () {
+    expect(resolve(ended(), AppRoutes.trash, offline: true), isNull);
+    expect(resolve(ended(), AppRoutes.login, offline: true), AppRoutes.files);
   });
 
   test("signed-in users skip login", () {
