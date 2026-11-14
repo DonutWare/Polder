@@ -5,6 +5,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/user.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/theme/app_theme.dart";
+import "package:polder/widgets/shared/connection_status.dart";
 import "package:polder/widgets/shared/server_icon.dart";
 
 class UserAvatar extends StatelessWidget {
@@ -65,10 +66,11 @@ class SignedInAvatar extends ConsumerWidget {
 }
 
 class AccountIdentity extends ConsumerWidget {
-  const AccountIdentity({this.avatarSize = 36, this.trailing, super.key});
+  const AccountIdentity({this.avatarSize = 36, this.trailing, this.badged = false, super.key});
 
   final double avatarSize;
   final Widget? trailing;
+  final bool badged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,7 +80,12 @@ class AccountIdentity extends ConsumerWidget {
     return Row(
       spacing: 12,
       children: [
-        UserAvatar(user: account.user, serverUrl: account.serverUrl, size: avatarSize),
+        if (badged)
+          ConnectionBadge(
+            child: UserAvatar(user: account.user, serverUrl: account.serverUrl, size: avatarSize),
+          )
+        else
+          UserAvatar(user: account.user, serverUrl: account.serverUrl, size: avatarSize),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -134,13 +134,8 @@ abstract final class AppRoutes {
     };
   }
 
-  static bool isTab(String location) => [
-    files,
-    shared,
-    notes,
-    calendar,
-    sync,
-  ].any((root) => location == root || location.startsWith(RegExp("$root[/?]")));
+  static bool isTab(String location) =>
+      [files, shared, notes, calendar].any((root) => location == root || location.startsWith(RegExp("$root[/?]")));
 
   static bool isTabRoot(Uri location, {required bool single}) {
     final up = upFrom(location, single: single);

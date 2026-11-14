@@ -52,16 +52,17 @@ class AppShell extends ConsumerWidget {
               AppRoutes.isTabRoot(router.state.uri, single: AdaptiveLayout.isSingle(context)),
           child: NavigationShell(
             showNavigation: AppRoutes.isTab(top.toString()) || !AdaptiveLayout.isSingle(context),
-            items: [
-              for (final destination in destinations)
-                destination.item(
-                  context,
-                  badge: destination == ShellDestination.sync && conflicts > 0 ? "$conflicts" : null,
-                ),
-            ],
+            items: [for (final destination in destinations) destination.item(context)],
             launchers: [
               for (final destination in stacked)
-                destination.item(context, badge: destination == ShellDestination.activity ? activity : null),
+                destination.item(
+                  context,
+                  badge: switch (destination) {
+                    ShellDestination.activity => activity,
+                    ShellDestination.sync when conflicts > 0 => "$conflicts",
+                    _ => null,
+                  },
+                ),
             ],
             selectedIndex: destinations.indexWhere(showsDestination),
             selectedLauncher: stacked.indexWhere(showsDestination),

@@ -132,7 +132,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ),
           ),
-          _tab(
+          _route(
             path: AppRoutes.sync,
             page: (_) => const UpScope(child: SyncFoldersScreen()),
             routes: [

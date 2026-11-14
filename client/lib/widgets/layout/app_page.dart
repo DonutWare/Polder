@@ -1,13 +1,14 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/util/localization_helper.dart";
+import "package:polder/widgets/shared/connection_status.dart";
+import "package:polder/widgets/shared/user_avatar.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/dual_pane.dart";
 import "package:polder/widgets/shared/app_bar_fade.dart";
@@ -74,7 +75,7 @@ class MoreOptionsButton extends ConsumerWidget {
     final uploading = ref.watch(activityBadgeProvider) != null;
     return IconButton(
       tooltip: context.localized.moreOptions,
-      icon: Badge(isLabelVisible: uploading, child: const Icon(IconsaxPlusLinear.menu)),
+      icon: ConnectionBadge(fallback: uploading, child: const SignedInAvatar(size: 32)),
       onPressed: () => SideSheetDrawer.of(context).open(),
     );
   }

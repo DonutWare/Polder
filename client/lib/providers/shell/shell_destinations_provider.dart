@@ -22,16 +22,9 @@ enum ShellDestination {
   final String route;
 }
 
-final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
-  final platform = ref.watch(syncPlatformProvider);
-  return [
-    ShellDestination.files,
-    ShellDestination.shared,
-    ShellDestination.notes,
-    ShellDestination.calendar,
-    if (platform.supportsFolderSync) ShellDestination.sync,
-  ];
-});
+final shellDestinationsProvider = Provider<List<ShellDestination>>(
+  (_) => const [ShellDestination.files, ShellDestination.shared, ShellDestination.notes, ShellDestination.calendar],
+);
 
 final stackedDestinationsProvider = Provider<List<ShellDestination>>((ref) {
   final platform = ref.watch(syncPlatformProvider);
@@ -41,6 +34,7 @@ final stackedDestinationsProvider = Provider<List<ShellDestination>>((ref) {
     ShellDestination.groups,
     ShellDestination.tags,
     ShellDestination.trash,
+    if (platform.supportsFolderSync) ShellDestination.sync,
     ShellDestination.settings,
   ];
 });

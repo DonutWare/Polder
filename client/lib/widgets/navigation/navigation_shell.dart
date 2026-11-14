@@ -5,6 +5,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/shared/connection_status.dart";
 import "package:polder/widgets/shared/user_avatar.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 
@@ -234,6 +235,7 @@ class _Sidebar extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(10),
                     child: AccountIdentity(
+                      badged: true,
                       trailing: Icon(IconsaxPlusLinear.arrow_swap, size: 16, color: cs.onSurfaceVariant),
                     ),
                   ),
@@ -292,7 +294,10 @@ class _AvatarButton extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => SideSheetDrawer.of(context).open(),
-        child: const Padding(padding: EdgeInsets.all(6), child: SignedInAvatar(size: 40)),
+        child: const Padding(
+          padding: EdgeInsets.all(6),
+          child: ConnectionBadge(child: SignedInAvatar(size: 40)),
+        ),
       ),
     ),
   );

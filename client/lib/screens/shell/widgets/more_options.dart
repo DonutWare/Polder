@@ -9,12 +9,14 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
+import "package:polder/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/settings/widgets/sign_out.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
+import "package:polder/widgets/shared/connection_status.dart";
 import "package:polder/widgets/shared/quota_bar.dart";
 import "package:polder/widgets/shared/user_avatar.dart";
 
@@ -32,6 +34,7 @@ class MoreOptions extends ConsumerWidget {
     final localized = context.localized;
 
     final activity = ref.watch(activityBadgeProvider);
+    final conflicts = ref.watch(conflictQueueProvider.select((queue) => queue.conflicts.length));
 
     void open(String location) {
       SideSheetDrawer.of(context).dismiss();
@@ -60,6 +63,7 @@ class MoreOptions extends ConsumerWidget {
             ],
           ),
         ),
+        const ConnectionStatusTile(),
         const SizedBox(height: 4),
         if (isAdmin)
           ListTile(
@@ -78,9 +82,11 @@ class MoreOptions extends ConsumerWidget {
           ListTile(
             leading: Icon(destination.icon),
             title: Text(destination.label(context)),
-            trailing: destination == ShellDestination.activity && activity != null
-                ? Badge(label: Text(activity))
-                : null,
+            trailing: switch (destination) {
+              ShellDestination.activity when activity != null => Badge(label: Text(activity)),
+              ShellDestination.sync when conflicts > 0 => Badge(label: Text("$conflicts")),
+              _ => null,
+            },
             onTap: () => open(destination.route),
           ),
         if (account != null) ...[

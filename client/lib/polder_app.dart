@@ -18,7 +18,6 @@ import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/deep_link/deep_link_provider.dart";
 import "package:polder/providers/notifications/notification_coordinator.dart";
 import "package:polder/providers/desktop/finder_location_provider.dart";
-import "package:polder/widgets/shared/connection_banner.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
@@ -98,9 +97,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
           : AdaptiveLayoutBuilder(
               child: (_) => LauncherShortcuts(
                 child: DesktopTray(
-                  child: WindowTitlebar(
-                    child: ConnectionBanner(child: MouseNavigation(child: child!)),
-                  ),
+                  child: WindowTitlebar(child: MouseNavigation(child: child!)),
                 ),
               ),
             ),

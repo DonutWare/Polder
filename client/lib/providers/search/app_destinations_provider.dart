@@ -31,7 +31,7 @@ class DestinationMatch {
 }
 
 final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
-  final shell = ref.watch(shellDestinationsProvider);
+  final stacked = ref.watch(stackedDestinationsProvider);
   final platform = ref.watch(syncPlatformProvider);
   final isAdmin = ref.watch(isAdminProvider);
   return [
@@ -71,7 +71,7 @@ final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
       label: (l) => l.navActivity,
       keywords: (l) => l.searchKeywordsActivity,
     ),
-    if (shell.contains(ShellDestination.sync)) ...[
+    if (stacked.contains(ShellDestination.sync)) ...[
       AppDestination(
         route: AppRoutes.sync,
         icon: IconsaxPlusLinear.refresh_2,
