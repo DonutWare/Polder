@@ -147,7 +147,7 @@ class GroupPage extends ConsumerWidget {
     );
     if (!confirmed || !context.mounted) return;
     final left = await context.runWithFeedback(ref.read(groupProvider(groupId).notifier).leave(me));
-    if (left && context.mounted) goWithin(context, AppRoutes.groupsScope(scope: scope));
+    if (left && context.mounted) goWithin(context, AppRoutes.groupsScope(scope: scope), replacing: true);
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref, Group group) async {
@@ -160,7 +160,7 @@ class GroupPage extends ConsumerWidget {
     );
     if (!confirmed || !context.mounted) return;
     final deleted = await context.runWithFeedback(ref.read(groupProvider(groupId).notifier).delete());
-    if (deleted && context.mounted) goWithin(context, AppRoutes.groupsScope(scope: scope));
+    if (deleted && context.mounted) goWithin(context, AppRoutes.groupsScope(scope: scope), replacing: true);
   }
 }
 

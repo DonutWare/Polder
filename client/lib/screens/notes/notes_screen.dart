@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -29,6 +31,7 @@ import "package:polder/models/user_tag.dart";
 import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/providers/tags/tags_provider.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder/routes/up_scope.dart";
 
 class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({this.notePath, super.key});
@@ -212,7 +215,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           leading: IconButton(
             tooltip: context.localized.navNotes,
             icon: const Icon(IconsaxPlusLinear.arrow_left),
-            onPressed: () => _closeNote(AppRoutes.notes),
+            onPressed: () => unawaited(UpScope.navigateUp(context)),
           ),
           onToggleLinks: () => _showLinksSheet(notePath),
         ),

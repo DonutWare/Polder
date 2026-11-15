@@ -17,6 +17,7 @@ import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/search_syntax.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder/routes/up_scope.dart";
 
 bool _paletteOpen = false;
 
@@ -84,7 +85,7 @@ class SearchScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void close() => context.canPop() ? context.pop() : context.go(AppRoutes.files);
+    void close() => context.canPop() ? context.pop() : unawaited(UpScope.navigateUp(context));
     return Scaffold(
       body: SafeArea(
         bottom: false,

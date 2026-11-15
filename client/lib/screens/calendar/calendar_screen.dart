@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:go_router/go_router.dart";
+import "package:polder/routes/up_scope.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/calendar/calendar_providers.dart";
 import "package:polder/routes/app_routes.dart";
@@ -72,14 +72,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       return;
     }
     if (!mounted) return;
-    context.go(AppRoutes.calendarAt(_currentMode(), day));
+    goWithin(context, AppRoutes.calendarAt(_currentMode(), day), replacing: true);
     await openCalendarEvent(context, event);
   }
 
   void _navigate(CalendarViewMode mode, DateTime anchor) {
     if (_monthOpen) setState(() => _pickerMonth = anchor.firstOfMonth);
     ref.read(calendarViewModeProvider.notifier).select(mode);
-    context.go(AppRoutes.calendarAt(mode, anchor));
+    goWithin(context, AppRoutes.calendarAt(mode, anchor), replacing: true);
   }
 
   CalendarViewMode _currentMode() =>

@@ -26,6 +26,7 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
 import "package:polder/widgets/desktop/desktop_window_title.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";
+import "package:polder/widgets/navigation/navigation_history_scope.dart";
 import "package:polder/widgets/layout/window_titlebar.dart";
 import "package:polder/widgets/shortcuts/launcher_shortcuts.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
@@ -120,7 +121,9 @@ class _PolderAppState extends ConsumerState<PolderApp> {
                 title: titleIn(context),
                 child: LauncherShortcuts(
                   child: DesktopTray(
-                    child: WindowTitlebar(child: MouseNavigation(child: child!)),
+                    child: WindowTitlebar(
+                      child: MouseNavigation(child: NavigationHistoryScope(child: child!)),
+                    ),
                   ),
                 ),
               ),

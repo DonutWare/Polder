@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:polder/routes/history_back.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_mount.dart";
 import "package:polder/providers/browser/directory_provider.dart";
@@ -77,7 +78,9 @@ class _MountDetailsSheet extends ConsumerWidget {
     final left = await outer.runWithFeedback(_leaveMount(ref, mount));
     if (!left || !outer.mounted) return;
     final browsing = GoRouter.of(outer).state.uri.queryParameters[AppRoutes.pathParameter];
-    if (browsing != null && mount.contains(browsing)) outer.go(AppRoutes.filesAt(RemotePath.root));
+    if (browsing != null && mount.contains(browsing)) {
+      HistoryBack.replaceWith(outer, AppRoutes.filesAt(RemotePath.root));
+    }
   }
 
   Future<void> _leaveMount(WidgetRef ref, FileMount mount) async {

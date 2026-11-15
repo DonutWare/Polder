@@ -83,6 +83,10 @@ class NavigationHistoryNotifier extends Notifier<NavigationHistory> {
     }
   }
 
+  void retreat() {
+    if (!goBackInBrowser()) _go(state.index - 1);
+  }
+
   void forward() {
     if (!goForwardInBrowser()) _go(state.index + 1);
   }

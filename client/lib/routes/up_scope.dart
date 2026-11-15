@@ -8,6 +8,7 @@ import "package:flutter/services.dart";
 import "package:go_router/go_router.dart";
 
 import "package:polder/routes/app_routes.dart";
+import "package:polder/routes/history_back.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/widgets/navigation/intercept_back.dart";
 
@@ -34,6 +35,7 @@ class _UpScopeState extends State<UpScope> with _BackHandler, SingleTickerProvid
 
   late final _gesture = AnimationController(vsync: this, duration: _commitDuration);
   String? _up;
+  String? _previous;
   String? _location;
   SwipeEdge _edge = SwipeEdge.left;
   bool _active = true;
@@ -87,26 +89,31 @@ class _UpScopeState extends State<UpScope> with _BackHandler, SingleTickerProvid
 
   @override
   void handleCommitBackGesture() {
-    final up = _up;
     unawaited(
       _gesture.animateTo(1).then((_) {
         if (!mounted) return;
-        if (up != null) context.go(up);
+        _goUp();
         _gesture.value = 0;
       }),
     );
+  }
+
+  void _goUp() {
+    if (_previous != null) return HistoryBack.goBack(context);
+    if (_up case final up?) context.go(up);
   }
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri;
     _location = location.toString();
-    final up = _up = AppRoutes.upFrom(location, single: AdaptiveLayout.isSingle(context));
+    final previous = _previous = HistoryBack.previousFrom(context, location: _location);
+    final up = _up = previous ?? AppRoutes.upFrom(location, single: AdaptiveLayout.isSingle(context));
     return PopScope(
       canPop: up == null || Navigator.of(context).canPop(),
       onPopInvokedWithResult: (didPop, _) {
         if (didPop || _childHandledBack()) return;
-        if (up != null) context.go(up);
+        _goUp();
       },
       child: _GestureGate(
         child: _BackScope(
@@ -178,7 +185,10 @@ class _PageStackState extends State<PageStack> with _BackHandler {
   final _navigator = GlobalKey<NavigatorState>();
   _BackHandler? _parent;
 
-  bool get _canPop => _navigator.currentState?.canPop() ?? false;
+  String? _previous;
+  bool _leavesStack = false;
+
+  bool get _canPop => !_leavesStack && (_navigator.currentState?.canPop() ?? false);
 
   @override
   void didChangeDependencies() {
@@ -207,6 +217,7 @@ class _PageStackState extends State<PageStack> with _BackHandler {
   void _onDidRemovePage(Page<Object?> page) {
     final pages = widget.pages;
     if (pages.length < 2 || page.key != pages.last.pageKey) return;
+    if (_previous != null) return HistoryBack.goBack(context);
     final beneath = pages[pages.length - 2].location;
     final onPop = widget.onPop;
     onPop == null ? goWithin(context, beneath) : onPop(beneath);
@@ -215,8 +226,11 @@ class _PageStackState extends State<PageStack> with _BackHandler {
   @override
   Widget build(BuildContext context) {
     final pages = widget.pages;
+    final stacked = pages.length > 1;
+    final previous = _previous = stacked ? HistoryBack.previousFrom(context) : null;
+    final leaves = _leavesStack = previous != null && previous != pages[pages.length - 2].location;
     return PopScope(
-      canPop: pages.length < 2,
+      canPop: !stacked,
       child: _BackScope(
         handler: this,
         child: Navigator(
@@ -225,6 +239,10 @@ class _PageStackState extends State<PageStack> with _BackHandler {
             for (final (i, page) in pages.indexed)
               MaterialPage<void>(
                 key: page.pageKey,
+                canPop: !leaves || i < pages.length - 1,
+                onPopInvoked: (didPop, _) {
+                  if (!didPop && leaves) HistoryBack.goBack(context);
+                },
                 child: i == pages.length - 1 ? _GestureGate(child: page.child) : page.child,
               ),
           ],
@@ -235,10 +253,12 @@ class _PageStackState extends State<PageStack> with _BackHandler {
   }
 }
 
-void goWithin(BuildContext context, String location) {
+void goWithin(BuildContext context, String location, {bool replacing = false}) {
   final configuration = GoRouter.of(context).routerDelegate.currentConfiguration;
   if (configuration.last is ImperativeRouteMatch) {
     context.replace(location);
+  } else if (replacing) {
+    HistoryBack.replaceWith(context, location);
   } else {
     context.go(location);
   }

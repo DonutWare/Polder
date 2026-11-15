@@ -1,7 +1,8 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
-import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/browser/browser_selection_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
@@ -17,6 +18,7 @@ import "package:polder/screens/browser/widgets/view_mode_button.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/app_page.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder/routes/up_scope.dart";
 
 class BrowserScreen extends ConsumerWidget {
   const BrowserScreen({required this.path, this.select, super.key});
@@ -27,7 +29,6 @@ class BrowserScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routes = BrowserRoutes.of(context);
-    final parentRoute = routes.parentRoute(path);
     final mount = ref.watch(directoryProvider(path)).value?.mount;
     final canAdd = mount == null || mount.permissions.create;
     final selection = ref.watch(browserSelectionProvider(path));
@@ -51,7 +52,7 @@ class BrowserScreen extends ConsumerWidget {
                 )
               : routes.exitRoute == null
               ? null
-              : BackButton(onPressed: () => context.go(parentRoute!)),
+              : BackButton(onPressed: () => unawaited(UpScope.navigateUp(context))),
           title: selecting
               ? Text(material.selectedRowCountTitle(selection.length))
               : routes.isRoot(path)

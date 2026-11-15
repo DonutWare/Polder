@@ -30,6 +30,7 @@ import "package:polder/widgets/shared/error_view.dart";
 import "package:polder/widgets/shared/loading_button.dart";
 import "package:polder/widgets/shared/message_view.dart";
 import "package:polder/widgets/shared/password_field.dart";
+import "package:polder/routes/history_back.dart";
 
 class PublicShareScreen extends ConsumerWidget {
   const PublicShareScreen({required this.code, required this.path, this.server, super.key});
@@ -134,12 +135,13 @@ class _Contents extends ConsumerWidget {
     }
     if (!root.isDir) return _SingleFile(space: space, entry: root, owner: info.owner);
     final atRoot = path == RemotePath.root;
+    final previous = HistoryBack.previousFrom(context);
     return PopScope(
-      canPop: atRoot,
+      canPop: atRoot && previous == null,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && !atRoot) {
-          context.go(AppRoutes.publicShareAt(space.code, server: server, path: RemotePath.parent(path)));
-        }
+        if (didPop) return;
+        if (previous != null) return HistoryBack.goBack(context);
+        context.go(AppRoutes.publicShareAt(space.code, server: server, path: RemotePath.parent(path)));
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

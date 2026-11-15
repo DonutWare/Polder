@@ -8,6 +8,7 @@ import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
 import "package:polder/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/routes/history_back.dart";
 import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
@@ -36,7 +37,10 @@ class AppShell extends ConsumerWidget {
     final router = GoRouter.of(context);
     final top = router.state.uri;
     final location = top.path;
-    final canExit = !router.canPop() && AppRoutes.upFrom(top, single: true) == null;
+    final canExit =
+        !router.canPop() &&
+        AppRoutes.upFrom(top, single: true) == null &&
+        HistoryBack.previousFrom(context, location: top.toString()) == null;
     bool showsDestination(ShellDestination destination) =>
         location == destination.route || location.startsWith("${destination.route}/");
     return ListenableBuilder(
