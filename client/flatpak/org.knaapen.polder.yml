@@ -1,0 +1,173 @@
+app-id: org.knaapen.polder
+runtime: org.gnome.Platform
+runtime-version: "51"
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.llvm22
+command: polder
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --filesystem=xdg-run/pipewire-0:ro
+  - --device=dri
+  - --filesystem=home
+  - --talk-name=org.freedesktop.secrets
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.PowerManagement
+  - --talk-name=org.freedesktop.ScreenSaver
+  - --talk-name=org.freedesktop.portal.*
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --system-talk-name=org.freedesktop.NetworkManager
+  - --system-talk-name=org.freedesktop.UPower
+build-options:
+  cflags: -g0
+  cxxflags: -g0
+  no-debuginfo: true
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - "*.a"
+  - "*.la"
+modules:
+  - name: libwpe
+    buildsystem: meson
+    sources:
+      - type: archive
+        url: https://wpewebkit.org/releases/libwpe-1.16.3.tar.xz
+        sha256: c880fa8d607b2aa6eadde7d6d6302b1396ebc38368fe2332fa20e193c7ee1420
+
+  - name: wpebackend-fdo
+    buildsystem: meson
+    sources:
+      - type: archive
+        url: https://wpewebkit.org/releases/wpebackend-fdo-1.16.1.tar.xz
+        sha256: 544ae14012f8e7e426b8cb522eb0aaaac831ad7c35601d1cf31d37670e0ebb3b
+
+  - name: unifdef
+    buildsystem: simple
+    build-options:
+      cflags: -std=gnu17
+    build-commands:
+      - make prefix=/app install
+    cleanup:
+      - "*"
+    sources:
+      - type: archive
+        url: https://dotat.at/prog/unifdef/unifdef-2.12.tar.xz
+        sha256: 43ce0f02ecdcdc723b2475575563ddb192e988c886d368260bc0a63aee3ac400
+
+  - name: wpewebkit
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DPORT=WPE
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_DOCUMENTATION=OFF
+      - -DENABLE_INTROSPECTION=OFF
+      - -DENABLE_MINIBROWSER=OFF
+      - -DENABLE_WEBDRIVER=OFF
+      - -DENABLE_BUBBLEWRAP_SANDBOX=OFF
+      - -DENABLE_SPEECH_SYNTHESIS=OFF
+      - -DENABLE_JOURNALD_LOG=OFF
+      - -DENABLE_MEDIA_STREAM=OFF
+      - -DENABLE_WEB_RTC=OFF
+      - -DENABLE_WPE_QT_API=OFF
+      - -DENABLE_WPE_PLATFORM_DRM=OFF
+      - -DUSE_LIBBACKTRACE=OFF
+      - -DUSE_SYSPROF_CAPTURE=OFF
+      - -DUSE_JPEGXL=OFF
+      - -DUSE_AVIF=OFF
+    sources:
+      - type: archive
+        url: https://wpewebkit.org/releases/wpewebkit-2.52.6.tar.xz
+        sha256: b2bafef2751625b7fdf530f230ff0f542ff0eeba3590c3a989d931b2a55c858e
+
+  - name: libass
+    buildsystem: autotools
+    config-opts:
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://github.com/libass/libass/releases/download/0.17.5/libass-0.17.5.tar.xz
+        sha256: 2dca25c0e0c837ddf00b52011b3f82cac1e4ddd3ad018227806b0c2288864acc
+
+  - name: libplacebo
+    buildsystem: meson
+    config-opts:
+      - -Dvulkan=disabled
+      - -Dshaderc=disabled
+      - -Dglslang=disabled
+      - -Dopengl=enabled
+      - -Ddemos=false
+      - -Dtests=false
+    sources:
+      - type: git
+        url: https://code.videolan.org/videolan/libplacebo.git
+        tag: v7.387.0
+        commit: 275f7dea27924cdd34ab2e6c20e448b6bc4fab65
+
+  - name: mpv
+    buildsystem: meson
+    config-opts:
+      - -Dlibmpv=true
+      - -Dcplayer=false
+      - -Dbuild-date=false
+      - -Dmanpage-build=disabled
+      - -Dhtml-build=disabled
+      - -Dpdf-build=disabled
+      - -Dlua=disabled
+      - -Djavascript=disabled
+      - -Dvulkan=disabled
+      - -Dvaapi=enabled
+      - -Dpulse=enabled
+      - -Dalsa=enabled
+      - -Duchardet=enabled
+    sources:
+      - type: archive
+        url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.42.0.tar.gz
+        sha256: bcfebbfa2b65a6d88dc97ea18117831072373e38b5785a2afb874ed4df5070dd
+    modules:
+      - name: uchardet
+        buildsystem: cmake-ninja
+        config-opts:
+          - -DCMAKE_BUILD_TYPE=Release
+          - -DCMAKE_INSTALL_LIBDIR=lib
+          - -DBUILD_BINARY=OFF
+          - -DBUILD_STATIC=OFF
+        sources:
+          - type: archive
+            url: https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz
+            sha256: e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0
+
+  - name: zenity
+    buildsystem: meson
+    sources:
+      - type: git
+        url: https://gitlab.gnome.org/GNOME/zenity.git
+        tag: 4.2.2
+        commit: c0f30c18e55b6a0cf5c2deb1c7449debb79027dc
+
+  - name: polder
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/llvm22/bin
+      prepend-ld-library-path: /usr/lib/sdk/llvm22/lib
+      build-args:
+        - --share=network
+    build-commands:
+      - sh flatpak/build-polder.sh
+    sources:
+      - type: dir
+        path: ..
+        skip:
+          - build
+          - .dart_tool
+          - .flutter-sdk
+          - .pub-cache
+          - flatpak/.flatpak-builder
+          - flatpak/build-dir

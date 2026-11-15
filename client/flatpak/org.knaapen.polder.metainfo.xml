@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.knaapen.polder</id>
+  <name>Polder</name>
+  <summary>Files, sync and auto-upload for a self-hosted Polder server</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <developer id="org.knaapen">
+    <name>DonutWare</name>
+  </developer>
+  <description>
+    <p>Polder is the client for a self-hosted Polder server: browse and sync files, keep notes and checklists, and manage your calendar.</p>
+  </description>
+  <launchable type="desktop-id">org.knaapen.polder.desktop</launchable>
+  <url type="homepage">https://github.com/DonutWare/Polder</url>
+  <url type="bugtracker">https://github.com/DonutWare/Polder/issues</url>
+  <content_rating type="oars-1.1"/>
+</component>
