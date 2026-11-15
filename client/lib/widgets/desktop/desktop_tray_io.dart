@@ -31,6 +31,10 @@ Future<void> initializeDesktopWindow() async {
   await windowManager.setPreventClose(true);
 }
 
+Future<void> setDesktopWindowTitle(String title) async {
+  if (_isDesktop) await windowManager.setTitle(title);
+}
+
 Future<void> showDesktopWindow() async {
   if (!_isDesktop) return;
   if (Platform.isMacOS) await windowManager.setSkipTaskbar(false);

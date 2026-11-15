@@ -1,11 +1,14 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/providers/account_provider.dart";
+import "package:polder/providers/app/app_location_provider.dart";
+import "package:polder/providers/app/browser_favicon_provider.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/connection/server_connection_provider.dart";
@@ -21,10 +24,12 @@ import "package:polder/providers/desktop/finder_location_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder/widgets/desktop/desktop_window_title.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";
 import "package:polder/widgets/layout/window_titlebar.dart";
 import "package:polder/widgets/shortcuts/launcher_shortcuts.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder/util/app_title.dart";
 import "package:polder_calendar/polder_calendar.dart";
 
 class PolderApp extends ConsumerStatefulWidget {
@@ -81,9 +86,16 @@ class _PolderAppState extends ConsumerState<PolderApp> {
     final appearance = ref.watch(appearanceProvider);
     final branding = ref.watch(brandingProvider);
     final seed = appearance.seedWith(branding.accent);
+    final location = ref.watch(appLocationProvider);
+    String titleIn(BuildContext context) {
+      final localized = AppLocalizations.of(context);
+      return appTitle(location, branding.nameOr(localized.appTitle), localized);
+    }
+
     ref.watch(deepLinkHandlerProvider);
     ref.watch(notificationCoordinatorProvider);
     ref.watch(offlineSyncProvider);
+    if (kIsWeb) ref.watch(browserFaviconProvider);
     ref.listen(sessionEndedProvider, _onSessionEnded);
     ref.listen(serverConnectionProvider.select((connection) => connection.isOnline), (wasOnline, isOnline) {
       if (isOnline && wasOnline == false) _recoverFromOffline();
@@ -95,7 +107,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
     }
     final restoringAccount = ref.watch(accountProvider.select((account) => account.isLoading && !account.hasValue));
     return MaterialApp.router(
-      onGenerateTitle: (context) => branding.nameOr(AppLocalizations.of(context).appTitle),
+      onGenerateTitle: titleIn,
       theme: AppTheme.build(seed, Brightness.light),
       darkTheme: AppTheme.build(seed, Brightness.dark),
       themeMode: appearance.mode,
@@ -104,9 +116,12 @@ class _PolderAppState extends ConsumerState<PolderApp> {
       builder: (context, child) => restoringAccount
           ? ColoredBox(color: Theme.of(context).colorScheme.surface)
           : AdaptiveLayoutBuilder(
-              child: (_) => LauncherShortcuts(
-                child: DesktopTray(
-                  child: WindowTitlebar(child: MouseNavigation(child: child!)),
+              child: (_) => DesktopWindowTitle(
+                title: titleIn(context),
+                child: LauncherShortcuts(
+                  child: DesktopTray(
+                    child: WindowTitlebar(child: MouseNavigation(child: child!)),
+                  ),
                 ),
               ),
             ),
