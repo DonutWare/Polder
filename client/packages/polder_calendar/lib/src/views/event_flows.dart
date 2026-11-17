@@ -64,7 +64,13 @@ class _LiveEventDetailsState extends State<_LiveEventDetails> {
   );
 }
 
-Future<void> createCalendarEvent(BuildContext context, {DateTime? start, DateTime? day, bool allDay = false}) async {
+Future<void> createCalendarEvent(
+  BuildContext context, {
+  DateTime? start,
+  DateTime? day,
+  bool allDay = false,
+  EventDraft Function(EventDraft suggested)? prefill,
+}) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final strings = CalendarLocalizations.of(context);
   final actions = container.read(calendarActionsProvider);
@@ -75,18 +81,19 @@ Future<void> createCalendarEvent(BuildContext context, {DateTime? start, DateTim
   final shownDay = (day ?? DateTime.now()).dateOnly;
   final dayEvents = container.read(rangeEventsProvider(VisibleRange(shownDay, shownDay.nextDay))).value ?? const [];
   final from = start ?? suggestedStart(shownDay, dayEvents);
+  final suggested = EventDraft(
+    summary: "",
+    allDay: allDay,
+    start: allDay ? from.dateOnly : from,
+    end: allDay ? from.dateOnly.nextDay : from.add(const Duration(hours: 1)),
+    reminders: allDay ? const [] : const [EventReminder(offsetMinutes: -10)],
+  );
   final edited = await _openEditor(
     context,
     isNew: true,
     calendar: calendar.ref,
     calendars: calendars,
-    draft: EventDraft(
-      summary: "",
-      allDay: allDay,
-      start: allDay ? from.dateOnly : from,
-      end: allDay ? from.dateOnly.nextDay : from.add(const Duration(hours: 1)),
-      reminders: allDay ? const [] : const [EventReminder(offsetMinutes: -10)],
-    ),
+    draft: prefill?.call(suggested) ?? suggested,
   );
   if (edited == null || !context.mounted) return;
   await _run(context, strings.saveFailed, actions.create(edited.calendar, edited.draft));

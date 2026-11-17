@@ -21,18 +21,20 @@ class AppShortcutRunner {
   final Ref _ref;
   var _running = false;
 
-  Future<void> run(AppShortcut shortcut) async {
+  Future<void> run(AppShortcut shortcut) => perform(_locationFor(shortcut), (context) => _perform(context, shortcut));
+
+  Future<void> perform(String? location, Future<void> Function(BuildContext context) action) async {
     if (_running) return;
     _running = true;
     try {
       await showDesktopWindow();
       if (await _ref.read(accountProvider.future) == null) return;
       final router = _ref.read(routerProvider);
-      if (_locationFor(shortcut) case final location?) router.go(location);
+      if (location != null) router.go(location);
       await WidgetsBinding.instance.endOfFrame;
       final context = router.routerDelegate.navigatorKey.currentContext;
       if (context == null || !context.mounted) return;
-      await _perform(context, shortcut);
+      await action(context);
     } finally {
       _running = false;
     }

@@ -11,6 +11,7 @@ import "package:polder/providers/app/app_location_provider.dart";
 import "package:polder/providers/app/browser_favicon_provider.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/calendar/calendar_insert_provider.dart";
 import "package:polder/providers/calendar/week_layout_provider.dart";
 import "package:polder/providers/connection/server_connection_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
@@ -96,6 +97,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
     }
 
     ref.watch(deepLinkHandlerProvider);
+    ref.watch(calendarInsertHandlerProvider);
     ref.watch(notificationCoordinatorProvider);
     ref.watch(offlineSyncProvider);
     if (kIsWeb) ref.watch(browserFaviconProvider);
