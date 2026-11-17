@@ -141,7 +141,10 @@ class _Contents extends ConsumerWidget {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (previous != null) return HistoryBack.goBack(context);
-        context.go(AppRoutes.publicShareAt(space.code, server: server, path: RemotePath.parent(path)));
+        HistoryBack.replaceWith(
+          context,
+          AppRoutes.publicShareAt(space.code, server: server, path: RemotePath.parent(path)),
+        );
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

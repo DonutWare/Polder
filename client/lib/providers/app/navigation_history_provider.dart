@@ -44,14 +44,16 @@ final navigationHistoryProvider = NotifierProvider<NavigationHistoryNotifier, Na
 
 class NavigationHistoryNotifier extends Notifier<NavigationHistory> {
   GoRouter get _router => ref.read(routerProvider);
+  var _replacing = false;
 
   @override
   NavigationHistory build() {
     final delegate = ref.watch(routerProvider).routerDelegate;
     void record() {
       final configuration = delegate.currentConfiguration;
+      final replace = _replacing;
       scheduleMicrotask(() {
-        if (ref.mounted) _record(configuration);
+        if (ref.mounted) _record(configuration, replace: replace);
       });
     }
 
@@ -63,16 +65,20 @@ class NavigationHistoryNotifier extends Notifier<NavigationHistory> {
         : const NavigationHistory().visit(_location(configuration));
   }
 
-  void _record(RouteMatchList configuration) {
+  void _record(RouteMatchList configuration, {bool replace = false}) {
     if (configuration.isEmpty || configuration.last is ImperativeRouteMatch) return;
-    state = state.visit(_location(configuration), followAdjacent: kIsWeb);
+    state = state.visit(_location(configuration), followAdjacent: kIsWeb && !replace, replace: replace);
   }
 
   static String _location(RouteMatchList configuration) => configuration.uri.toString();
 
   void replace(String location) {
-    state = state.visit(location, replace: true);
-    _router.go(location);
+    _replacing = true;
+    try {
+      _router.go(location);
+    } finally {
+      _replacing = false;
+    }
   }
 
   Future<void> back() async {

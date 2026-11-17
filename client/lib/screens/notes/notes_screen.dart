@@ -155,7 +155,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   void _closeNote(String location) {
     ref.read(lastNoteProvider.notifier).set(null);
-    context.go(location);
+    goWithin(context, location, replacing: true);
   }
 
   Widget _notes(BuildContext context, String? root) {

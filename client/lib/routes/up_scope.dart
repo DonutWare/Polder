@@ -100,7 +100,7 @@ class _UpScopeState extends State<UpScope> with _BackHandler, SingleTickerProvid
 
   void _goUp() {
     if (_previous != null) return HistoryBack.goBack(context);
-    if (_up case final up?) context.go(up);
+    if (_up case final up?) goWithin(context, up, replacing: true);
   }
 
   @override
@@ -220,7 +220,7 @@ class _PageStackState extends State<PageStack> with _BackHandler {
     if (_previous != null) return HistoryBack.goBack(context);
     final beneath = pages[pages.length - 2].location;
     final onPop = widget.onPop;
-    onPop == null ? goWithin(context, beneath) : onPop(beneath);
+    onPop == null ? goWithin(context, beneath, replacing: true) : onPop(beneath);
   }
 
   @override

@@ -22,6 +22,9 @@ void main() {
           routes: [
             GoRoute(
               path: AppRoutes.files,
+              redirect: (_, state) => state.uri.queryParameters.containsKey(AppRoutes.pathParameter)
+                  ? null
+                  : AppRoutes.filesAt(RemotePath.root),
               builder: (_, state) => UpScope(
                 child: _FolderStack(path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root),
               ),
@@ -57,6 +60,17 @@ void main() {
   Future<void> systemBack(WidgetTester tester) async {
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
+  }
+
+  Future<bool> backLeavesApp(WidgetTester tester) async {
+    var left = false;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == "SystemNavigator.pop") left = true;
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    await systemBack(tester);
+    return left;
   }
 
   Future<void> sendGesture(String method, [Object? arguments]) =>
@@ -143,6 +157,52 @@ void main() {
     await systemBack(tester);
 
     expect(location(), AppRoutes.notes);
+  });
+
+  testWidgets("a tab opened directly goes up to files and then leaves the app", (tester) async {
+    await pumpApp(tester, AppRoutes.notes);
+
+    expect(await backLeavesApp(tester), isFalse);
+    expect(location(), AppRoutes.filesAt(RemotePath.root));
+
+    expect(await backLeavesApp(tester), isTrue);
+  });
+
+  testWidgets("a note opened directly climbs to files and then leaves the app", (tester) async {
+    await pumpApp(tester, AppRoutes.noteAt("/note.md"));
+
+    expect(await backLeavesApp(tester), isFalse);
+    expect(location(), AppRoutes.notes);
+
+    expect(await backLeavesApp(tester), isFalse);
+    expect(location(), AppRoutes.filesAt(RemotePath.root));
+
+    expect(await backLeavesApp(tester), isTrue);
+  });
+
+  testWidgets("a nested folder opened directly climbs to the root and then leaves the app", (tester) async {
+    await pumpApp(tester, AppRoutes.filesAt("/a/b"));
+
+    expect(await backLeavesApp(tester), isFalse);
+    expect(location(), AppRoutes.filesAt("/a"));
+
+    expect(await backLeavesApp(tester), isFalse);
+    expect(location(), AppRoutes.filesAt(RemotePath.root));
+
+    expect(await backLeavesApp(tester), isTrue);
+  });
+
+  testWidgets("going up after retracing a visit leaves the app instead of bouncing back", (tester) async {
+    await pumpApp(tester, AppRoutes.notes);
+    await go(tester, AppRoutes.filesAt("/a"));
+
+    expect(await backLeavesApp(tester), isFalse);
+    expect(location(), AppRoutes.notes);
+
+    expect(await backLeavesApp(tester), isFalse);
+    expect(location(), AppRoutes.filesAt(RemotePath.root));
+
+    expect(await backLeavesApp(tester), isTrue);
   });
 }
 
