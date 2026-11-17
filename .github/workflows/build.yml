@@ -385,14 +385,60 @@ jobs:
             client/Polder_x86_64.AppImage.zsync
 
   build-linux-flatpak:
+    runs-on: ubuntu-latest
     if: needs.fetch-info.outputs.build_type == 'release' || needs.fetch-info.outputs.build_type == 'nightly'
     needs: [fetch-info]
-    uses: ./.github/workflows/flatpak.yml
-    secrets: inherit
-    with:
-      build_number: ${{ github.run_number }}
-      channel: ${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }}
-      optional: ${{ needs.fetch-info.outputs.build_type == 'nightly' }}
+    timeout-minutes: 120
+    continue-on-error: ${{ needs.fetch-info.outputs.build_type == 'nightly' }}
+    outputs:
+      built: ${{ steps.result.outputs.built }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      options: --privileged
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Restore flatpak-builder cache
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .flatpak-builder
+          key: flatpak-gnome51-${{ hashFiles('client/flatpak/org.knaapen.polder.yml') }}
+          restore-keys: flatpak-gnome51-
+
+      - name: Write build settings
+        run: |
+          cat > client/flatpak/build.env <<EOF
+          BUILD_NUMBER=${{ github.run_number }}
+          POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }}
+          POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+          EOF
+
+      - name: Build Flatpak
+        run: |
+          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder --repo=repo --disable-rofiles-fuse --install-deps-from=flathub \
+            --force-clean --ccache build-dir client/flatpak/org.knaapen.polder.yml
+          flatpak build-bundle repo Polder.flatpak org.knaapen.polder \
+            --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Save flatpak-builder cache
+        if: always() && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .flatpak-builder
+          key: flatpak-gnome51-${{ hashFiles('client/flatpak/org.knaapen.polder.yml') }}
+
+      - name: Archive Linux Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: polder-linux-flatpak
+          path: Polder.flatpak
+
+      - name: Report result
+        id: result
+        run: echo "built=true" >> "$GITHUB_OUTPUT"
 
   build-web:
     runs-on: ubuntu-latest
@@ -495,7 +541,17 @@ jobs:
       - build-web
       - build-docker
     runs-on: ubuntu-latest
-    if: needs.fetch-info.outputs.build_type == 'release' || needs.fetch-info.outputs.build_type == 'nightly'
+    if: >-
+      !cancelled()
+      && (needs.fetch-info.outputs.build_type == 'release' || needs.fetch-info.outputs.build_type == 'nightly')
+      && needs.build-android.result == 'success'
+      && needs.build-windows.result == 'success'
+      && needs.build-ios.result == 'success'
+      && needs.build-macos.result == 'success'
+      && needs.build-linux.result == 'success'
+      && needs.build-web.result == 'success'
+      && needs.build-docker.result == 'success'
+      && (needs.build-linux-flatpak.result == 'success' || needs.fetch-info.outputs.build_type == 'nightly')
     permissions:
       contents: write
     steps:
