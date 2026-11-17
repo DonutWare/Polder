@@ -161,6 +161,7 @@ class _DayHeaders extends StatelessWidget {
                         weekday.format(day).toUpperCase(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: isToday(day) ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                          fontWeight: isToday(day) ? FontWeight.w800 : null,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -193,7 +194,7 @@ class DayNumber extends StatelessWidget {
         size: size,
         child: Text(
           "${day.day}",
-          style: base.copyWith(color: colors.primary, fontWeight: FontWeight.w700),
+          style: base.copyWith(color: colors.onPrimary, fontWeight: FontWeight.w700),
         ),
       );
     }

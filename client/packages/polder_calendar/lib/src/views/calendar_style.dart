@@ -17,7 +17,7 @@ class CalendarStyle extends ThemeExtension<CalendarStyle> {
       panel: dark ? scheme.surfaceContainer : scheme.surfaceContainerLowest,
       inset: dark ? scheme.surfaceContainerHigh : scheme.surfaceContainerLow,
       border: scheme.outlineVariant.withValues(alpha: dark ? 0.35 : 0.5),
-      weekend: scheme.primary.withValues(alpha: dark ? 0.07 : 0.05),
+      weekend: dark ? scheme.surfaceContainerHigh : scheme.surfaceContainerLow,
     );
   }
 
@@ -100,14 +100,14 @@ class TodayBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final colors = Theme.of(context).colorScheme;
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: ShapeDecoration(color: CalendarStyle.tint(context, primary), shape: const CircleBorder()),
+      decoration: ShapeDecoration(color: colors.primary, shape: const CircleBorder()),
       child: DefaultTextStyle.merge(
-        style: TextStyle(color: primary, fontWeight: FontWeight.w700),
+        style: TextStyle(color: colors.onPrimary, fontWeight: FontWeight.w700),
         child: child,
       ),
     );

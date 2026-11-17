@@ -373,7 +373,7 @@ class _DateLabel extends StatelessWidget {
     final number = today
         ? TodayBadge(
             size: 44,
-            child: Text("${day.day}", style: numberStyle?.copyWith(color: theme.colorScheme.primary)),
+            child: Text("${day.day}", style: numberStyle?.copyWith(color: theme.colorScheme.onPrimary)),
           )
         : SizedBox(
             width: 44,
