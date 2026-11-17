@@ -385,38 +385,14 @@ jobs:
             client/Polder_x86_64.AppImage.zsync
 
   build-linux-flatpak:
-    runs-on: ubuntu-latest
     if: needs.fetch-info.outputs.build_type == 'release' || needs.fetch-info.outputs.build_type == 'nightly'
     needs: [fetch-info]
-    timeout-minutes: 360
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
-      options: --privileged
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.1
-
-      - name: Write build settings
-        run: |
-          cat > client/flatpak/build.env <<EOF
-          BUILD_NUMBER=${{ github.run_number }}
-          POLDER_CHANNEL=${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }}
-          POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
-          EOF
-
-      - name: Build Flatpak
-        uses: flathub-infra/flatpak-github-actions/flatpak-builder@933e9e8ca36e85046ebca8e211f0785c6becac40
-        with:
-          manifest-path: client/flatpak/org.knaapen.polder.yml
-          bundle: Polder.flatpak
-          cache-key: flatpak-builder-${{ hashFiles('client/flatpak/org.knaapen.polder.yml') }}
-          upload-artifact: false
-
-      - name: Archive Linux Flatpak artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: polder-linux-flatpak
-          path: Polder.flatpak
+    uses: ./.github/workflows/flatpak.yml
+    secrets: inherit
+    with:
+      build_number: ${{ github.run_number }}
+      channel: ${{ needs.fetch-info.outputs.build_type == 'release' && 'stable' || needs.fetch-info.outputs.build_type }}
+      optional: ${{ needs.fetch-info.outputs.build_type == 'nightly' }}
 
   build-web:
     runs-on: ubuntu-latest
@@ -686,12 +662,14 @@ jobs:
           mv polder-linux-appimage/Polder_x86_64.AppImage.zsync Polder-Linux-${{ steps.version.outputs.version }}.AppImage.zsync
 
       - name: Download Artifacts Linux Flatpak
+        if: needs.build-linux-flatpak.outputs.built == 'true'
         uses: actions/download-artifact@v4
         with:
           name: polder-linux-flatpak
           path: polder-linux-flatpak
 
       - name: Move Linux Flatpak
+        if: needs.build-linux-flatpak.outputs.built == 'true'
         run: mv polder-linux-flatpak/Polder.flatpak Polder-Linux-${{ steps.version.outputs.version }}.flatpak
 
       - name: Download Artifacts Web
@@ -744,7 +722,7 @@ jobs:
             Polder-Linux-${{ steps.version.outputs.version }}.zip
             Polder-Linux-${{ steps.version.outputs.version }}.AppImage
             Polder-Linux-${{ steps.version.outputs.version }}.AppImage.zsync
-            Polder-Linux-${{ steps.version.outputs.version }}.flatpak
+            ${{ needs.build-linux-flatpak.outputs.built == 'true' && format('Polder-Linux-{0}.flatpak', steps.version.outputs.version) || '' }}
             update.json
             update.json.sig
         env:

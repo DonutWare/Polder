@@ -1,0 +1,61 @@
+app-id: org.knaapen.polder.WpeWebKit
+runtime: org.gnome.Platform
+runtime-version: "51"
+sdk: org.gnome.Sdk
+build-options:
+  cflags: -g0
+  cxxflags: -g0
+  no-debuginfo: true
+modules:
+  - name: libwpe
+    buildsystem: meson
+    sources:
+      - type: archive
+        url: https://wpewebkit.org/releases/libwpe-1.16.3.tar.xz
+        sha256: c880fa8d607b2aa6eadde7d6d6302b1396ebc38368fe2332fa20e193c7ee1420
+
+  - name: wpebackend-fdo
+    buildsystem: meson
+    sources:
+      - type: archive
+        url: https://wpewebkit.org/releases/wpebackend-fdo-1.16.1.tar.xz
+        sha256: 544ae14012f8e7e426b8cb522eb0aaaac831ad7c35601d1cf31d37670e0ebb3b
+
+  - name: unifdef
+    buildsystem: simple
+    build-options:
+      cflags: -std=gnu17
+    build-commands:
+      - make prefix=/app install
+    cleanup:
+      - "*"
+    sources:
+      - type: archive
+        url: https://dotat.at/prog/unifdef/unifdef-2.12.tar.xz
+        sha256: 43ce0f02ecdcdc723b2475575563ddb192e988c886d368260bc0a63aee3ac400
+
+  - name: wpewebkit
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DPORT=WPE
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_DOCUMENTATION=OFF
+      - -DENABLE_INTROSPECTION=OFF
+      - -DENABLE_MINIBROWSER=OFF
+      - -DENABLE_WEBDRIVER=OFF
+      - -DENABLE_BUBBLEWRAP_SANDBOX=OFF
+      - -DENABLE_SPEECH_SYNTHESIS=OFF
+      - -DENABLE_JOURNALD_LOG=OFF
+      - -DENABLE_MEDIA_STREAM=OFF
+      - -DENABLE_WEB_RTC=OFF
+      - -DENABLE_WPE_QT_API=OFF
+      - -DENABLE_WPE_PLATFORM_DRM=OFF
+      - -DUSE_LIBBACKTRACE=OFF
+      - -DUSE_SYSPROF_CAPTURE=OFF
+      - -DUSE_JPEGXL=OFF
+      - -DUSE_AVIF=OFF
+    sources:
+      - type: archive
+        url: https://wpewebkit.org/releases/wpewebkit-2.52.6.tar.xz
+        sha256: b2bafef2751625b7fdf530f230ff0f542ff0eeba3590c3a989d931b2a55c858e

@@ -1,0 +1,110 @@
+name: Prebuild Flatpak WPE WebKit
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - client/flatpak/wpewebkit/**
+      - .github/workflows/flatpak-wpewebkit.yml
+  workflow_dispatch:
+
+env:
+  MANIFEST: client/flatpak/wpewebkit/org.knaapen.polder.WpeWebKit.yml
+  RUNTIME: gnome51
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      asset: ${{ steps.release.outputs.asset }}
+      exists: ${{ steps.release.outputs.exists }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Look up release
+        id: release
+        run: |
+          VERSION=$(sed -n 's|.*/wpewebkit-\([0-9.]*\)\.tar\.xz|\1|p' "$MANIFEST")
+          TAG="flatpak-wpewebkit-$VERSION-$RUNTIME"
+          ASSET="wpewebkit-$VERSION-$RUNTIME-x86_64.tar.xz"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+          if gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null | grep -qx "$ASSET"; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "$TAG already has $ASSET; nothing to build."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  build:
+    needs: [check]
+    if: needs.check.outputs.exists != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      options: --privileged
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Build WPE WebKit
+        run: |
+          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder --disable-rofiles-fuse --install-deps-from=flathub \
+            --build-only --force-clean --ccache build-dir "$MANIFEST"
+
+      - name: Package
+        run: |
+          rm -rf build-dir/files/bin/unifdef build-dir/files/share/man build-dir/files/share/doc
+          tar -C build-dir -cJf "${{ needs.check.outputs.asset }}" files
+          sha256sum "${{ needs.check.outputs.asset }}" | tee "${{ needs.check.outputs.asset }}.sha256"
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: wpewebkit
+          path: |
+            ${{ needs.check.outputs.asset }}
+            ${{ needs.check.outputs.asset }}.sha256
+
+  publish:
+    needs: [check, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download package
+        uses: actions/download-artifact@v4
+        with:
+          name: wpewebkit
+
+      - name: Publish release
+        run: |
+          TAG="${{ needs.check.outputs.tag }}"
+          ASSET="${{ needs.check.outputs.asset }}"
+          SHA=$(cut -d' ' -f1 "$ASSET.sha256")
+          NOTES="Prebuilt WPE WebKit for the Polder Flatpak (GNOME 51 SDK). sha256: \`$SHA\`"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber
+            gh release edit "$TAG" --notes "$NOTES"
+          else
+            gh release create "$TAG" "$ASSET" --target "${{ github.sha }}" --prerelease --latest=false \
+              --title "Flatpak WPE WebKit ($TAG)" --notes "$NOTES"
+          fi
+          {
+            echo "### $ASSET"
+            echo "Set this in client/flatpak/org.knaapen.polder.yml:"
+            echo '```yaml'
+            echo "sha256: $SHA"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
