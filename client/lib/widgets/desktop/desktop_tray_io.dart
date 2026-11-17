@@ -62,7 +62,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
   tray.MenuItem? _statusItem;
   tray.MenuItem? _speedItem;
   tray.MenuItem? _openItem;
-  tray.MenuItem? _syncedItem;
+  final Map<String, tray.MenuItem> _routeItems = {};
   tray.MenuItem? _newItem;
   final Map<AppShortcut, tray.MenuItem> _shortcutItems = {};
   tray.MenuItem? _pauseItem;
@@ -166,9 +166,11 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     _speedItem!.label = view.speed;
     _showSpeed(view.speed != null);
     _openItem!.label = l10n.trayOpenApp;
-    _syncedItem!
-      ..label = l10n.trayOpenSyncedFolders
-      ..isEnabled = view.signedIn;
+    for (final MapEntry(key: route, value: item) in _routeItems.entries) {
+      item
+        ..label = _routeLabel(route, l10n)
+        ..isEnabled = view.signedIn;
+    }
     _newItem!
       ..label = l10n.trayNew
       ..isEnabled = view.signedIn;
@@ -240,8 +242,11 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     final menu = _menu = tray.Menu.create()!
       ..addItem(_statusItem = item(null))
       ..addSeparator()
-      ..addItem(_openItem = item(showDesktopWindow))
-      ..addItem(_syncedItem = item(_openSyncedFolders))
+      ..addItem(_openItem = item(showDesktopWindow));
+    for (final route in _trayRoutes) {
+      menu.addItem(_routeItems[route] = item(() => unawaited(_openRoute(route))));
+    }
+    menu
       ..addSeparator()
       ..addItem(_newItem);
     for (final shortcut in AppShortcut.inGroup(AppShortcutGroup.find, canScan: canScan)) {
@@ -345,8 +350,17 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     if (Platform.isMacOS) await windowManager.setSkipTaskbar(true);
   }
 
-  Future<void> _openSyncedFolders() async {
-    ref.read(routerProvider).go(AppRoutes.sync);
+  static const _trayRoutes = [AppRoutes.sync, AppRoutes.files, AppRoutes.calendar, AppRoutes.notes];
+
+  static String _routeLabel(String route, AppLocalizations l10n) => switch (route) {
+    AppRoutes.files => l10n.trayOpenFiles,
+    AppRoutes.calendar => l10n.trayOpenCalendar,
+    AppRoutes.notes => l10n.trayOpenNotes,
+    _ => l10n.trayOpenSyncedFolders,
+  };
+
+  Future<void> _openRoute(String route) async {
+    ref.read(routerProvider).go(route);
     await showDesktopWindow();
   }
 
