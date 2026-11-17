@@ -119,7 +119,8 @@ class _WeekRow extends StatelessWidget {
       tieBreak: (a, b) => a.spansDays == b.spansDays ? a.start.compareTo(b.start) : (a.spansDays ? -1 : 1),
     );
     final strings = CalendarLocalizations.of(context);
-    final lines = CalendarStyle.of(context).border;
+    final style = CalendarStyle.of(context);
+    final lines = style.border;
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth / 7;
@@ -135,6 +136,7 @@ class _WeekRow extends StatelessWidget {
                   Expanded(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
+                        color: isWeekend(context, day) ? style.weekend : null,
                         border: Border(
                           top: BorderSide(color: lines),
                           left: day == days.first ? BorderSide.none : BorderSide(color: lines),

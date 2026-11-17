@@ -11,6 +11,7 @@ import "package:polder/providers/app/app_location_provider.dart";
 import "package:polder/providers/app/browser_favicon_provider.dart";
 import "package:polder/providers/appearance/appearance_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/calendar/week_layout_provider.dart";
 import "package:polder/providers/connection/server_connection_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
@@ -88,6 +89,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
     final branding = ref.watch(brandingProvider);
     final seed = appearance.seedWith(branding.accent);
     final location = ref.watch(appLocationProvider);
+    final weekLayout = ref.watch(weekLayoutProvider);
     String titleIn(BuildContext context) {
       final localized = AppLocalizations.of(context);
       return appTitle(location, branding.nameOr(localized.appTitle), localized);
@@ -122,7 +124,11 @@ class _PolderAppState extends ConsumerState<PolderApp> {
                 child: LauncherShortcuts(
                   child: DesktopTray(
                     child: WindowTitlebar(
-                      child: MouseNavigation(child: NavigationHistoryScope(child: child!)),
+                      child: MouseNavigation(
+                        child: NavigationHistoryScope(
+                          child: WeekLayoutScope(layout: weekLayout, child: child!),
+                        ),
+                      ),
                     ),
                   ),
                 ),

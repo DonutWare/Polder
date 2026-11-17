@@ -2,7 +2,13 @@ import "package:flutter/material.dart";
 
 @immutable
 class CalendarStyle extends ThemeExtension<CalendarStyle> {
-  const CalendarStyle({required this.canvas, required this.panel, required this.inset, required this.border});
+  const CalendarStyle({
+    required this.canvas,
+    required this.panel,
+    required this.inset,
+    required this.border,
+    required this.weekend,
+  });
 
   factory CalendarStyle.fromScheme(ColorScheme scheme) {
     final dark = scheme.brightness == Brightness.dark;
@@ -11,6 +17,7 @@ class CalendarStyle extends ThemeExtension<CalendarStyle> {
       panel: dark ? scheme.surfaceContainer : scheme.surfaceContainerLowest,
       inset: dark ? scheme.surfaceContainerHigh : scheme.surfaceContainerLow,
       border: scheme.outlineVariant.withValues(alpha: dark ? 0.35 : 0.5),
+      weekend: scheme.primary.withValues(alpha: dark ? 0.07 : 0.05),
     );
   }
 
@@ -23,6 +30,7 @@ class CalendarStyle extends ThemeExtension<CalendarStyle> {
   final Color panel;
   final Color inset;
   final Color border;
+  final Color weekend;
 
   static CalendarStyle of(BuildContext context) {
     final theme = Theme.of(context);
@@ -38,11 +46,12 @@ class CalendarStyle extends ThemeExtension<CalendarStyle> {
   static BorderSide tintedSide(Color color) => BorderSide(color: color.withValues(alpha: 0.35));
 
   @override
-  CalendarStyle copyWith({Color? canvas, Color? panel, Color? inset, Color? border}) => CalendarStyle(
+  CalendarStyle copyWith({Color? canvas, Color? panel, Color? inset, Color? border, Color? weekend}) => CalendarStyle(
     canvas: canvas ?? this.canvas,
     panel: panel ?? this.panel,
     inset: inset ?? this.inset,
     border: border ?? this.border,
+    weekend: weekend ?? this.weekend,
   );
 
   @override
@@ -53,6 +62,7 @@ class CalendarStyle extends ThemeExtension<CalendarStyle> {
       panel: Color.lerp(panel, other.panel, t)!,
       inset: Color.lerp(inset, other.inset, t)!,
       border: Color.lerp(border, other.border, t)!,
+      weekend: Color.lerp(weekend, other.weekend, t)!,
     );
   }
 }

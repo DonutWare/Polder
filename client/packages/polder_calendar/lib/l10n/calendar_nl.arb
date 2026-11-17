@@ -13,6 +13,7 @@
 	"noEvents": "Geen afspraken",
 	"moreEvents": "Nog {count}",
 	"untitledEvent": "(Geen titel)",
+	"dayOfSpan": "Dag {day}/{total}",
 	"busy": "Bezet",
 	"loadFailed": "Afspraken laden mislukt",
 	"retry": "Opnieuw",

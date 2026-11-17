@@ -12,6 +12,7 @@ import "package:polder_calendar/src/state/calendar_providers.dart";
 import "package:polder_calendar/src/time/calendar_view_mode.dart";
 import "package:polder_calendar/src/time/date_labels.dart";
 import "package:polder_calendar/src/time/date_math.dart";
+import "package:polder_calendar/src/time/week_layout.dart";
 
 typedef CalendarNavigate = void Function(CalendarViewMode mode, DateTime anchor);
 
@@ -33,6 +34,11 @@ extension EventPresentation on CalendarEvent {
     final endDay = end.dateOnly;
     return end == endDay && end.isAfter(start) ? endDay.addDays(-1) : endDay;
   }
+
+  int get dayCount => daysBetween(firstDay, lastDay) + 1;
+
+  String? spanLabelOn(DateTime day, CalendarLocalizations strings) =>
+      dayCount > 1 ? strings.dayOfSpan(daysBetween(firstDay, day) + 1, dayCount) : null;
 
   bool occursOn(DateTime day) => start.isBefore(day.nextDay) && (end.isAfter(day) || start == end && start == day);
 
@@ -68,7 +74,9 @@ String formatTime(BuildContext context, DateTime time) => MaterialLocalizations.
 
 String localeTag(BuildContext context) => Localizations.localeOf(context).toLanguageTag();
 
-int firstDayOfWeek(BuildContext context) => MaterialLocalizations.of(context).firstDayOfWeekIndex;
+int firstDayOfWeek(BuildContext context) => WeekLayoutScope.of(context).firstDay;
+
+bool isWeekend(BuildContext context, DateTime day) => WeekLayoutScope.of(context).isWeekend(day);
 
 bool isToday(DateTime day) => day.isSameDay(DateTime.now());
 

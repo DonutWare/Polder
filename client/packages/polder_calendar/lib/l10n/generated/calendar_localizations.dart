@@ -170,6 +170,12 @@ abstract class CalendarLocalizations {
   /// **'(No title)'**
   String get untitledEvent;
 
+  /// No description provided for @dayOfSpan.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {day}/{total}'**
+  String dayOfSpan(int day, int total);
+
   /// No description provided for @busy.
   ///
   /// In en, this message translates to:

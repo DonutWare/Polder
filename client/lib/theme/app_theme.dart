@@ -249,7 +249,8 @@ abstract final class AppTheme {
       canvasColor: colors.canvas,
       extensions: [
         colors,
-        CalendarStyle(canvas: colors.canvas, panel: colors.panel, inset: colors.inset, border: colors.border),
+        CalendarStyle.fromScheme(cs)
+            .copyWith(canvas: colors.canvas, panel: colors.panel, inset: colors.inset, border: colors.border),
       ],
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {

@@ -5,6 +5,7 @@ import "package:polder/routes/up_scope.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/calendar/calendar_providers.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/screens/calendar/widgets/calendar_settings.dart";
 import "package:polder/screens/calendar/widgets/calendar_sidebar.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
@@ -153,6 +154,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 label: context.localized.calendarManage,
                 onSelected: _openAgendas,
               ),
+            CalendarMenuAction(
+              icon: IconsaxPlusLinear.setting_4,
+              label: context.localized.calendarSettings,
+              onSelected: () => showCalendarSettings(context),
+            ),
           ],
         ),
       ],

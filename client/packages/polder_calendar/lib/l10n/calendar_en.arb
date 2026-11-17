@@ -20,6 +20,17 @@
 		}
 	},
 	"untitledEvent": "(No title)",
+	"dayOfSpan": "Day {day}/{total}",
+	"@dayOfSpan": {
+		"placeholders": {
+			"day": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
 	"busy": "Busy",
 	"loadFailed": "Couldn't load events",
 	"retry": "Retry",

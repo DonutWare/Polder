@@ -472,8 +472,18 @@ class _ScheduleTile extends StatelessWidget {
     final theme = Theme.of(context);
     final location = event.location?.trim() ?? "";
     final time = _time(context) ?? strings.allDay;
-    final title = Text(
-      event.titleFor(strings),
+    final spanLabel = event.spanLabelOn(day, strings);
+    final title = Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: event.titleFor(strings)),
+          if (spanLabel != null)
+            TextSpan(
+              text: "  $spanLabel",
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.normal),
+            ),
+        ],
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.titleSmall?.copyWith(decoration: isDeclined(event) ? TextDecoration.lineThrough : null),

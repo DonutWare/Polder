@@ -1791,5 +1791,15 @@
 	"sessionEndedMessage": "Your session on this device has ended. Sign in again to keep syncing. Nothing on this device is lost.",
 	"sessionEndedStatus": "Session ended",
 	"sessionEndedSignIn": "Sign in",
-	"continueOffline": "Continue offline"
+	"continueOffline": "Continue offline",
+	"firstDayOfWeek": "First day of the week",
+	"firstDayOfWeekRegional": "Regional default ({day})",
+	"@firstDayOfWeekRegional": {
+		"placeholders": {
+			"day": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarSettings": "Calendar settings"
 }

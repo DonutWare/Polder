@@ -1054,5 +1054,8 @@
 	"sessionEndedMessage": "Je sessie op dit apparaat is beëindigd. Log opnieuw in om verder te synchroniseren. Er gaat niets verloren op dit apparaat.",
 	"sessionEndedStatus": "Sessie beëindigd",
 	"sessionEndedSignIn": "Inloggen",
-	"continueOffline": "Offline verdergaan"
+	"continueOffline": "Offline verdergaan",
+	"firstDayOfWeek": "Eerste dag van de week",
+	"firstDayOfWeekRegional": "Regionale standaard ({day})",
+	"calendarSettings": "Agenda-instellingen"
 }

@@ -51,6 +51,11 @@ class CalendarLocalizationsNl extends CalendarLocalizations {
   String get untitledEvent => '(Geen titel)';
 
   @override
+  String dayOfSpan(int day, int total) {
+    return 'Dag $day/$total';
+  }
+
+  @override
   String get busy => 'Bezet';
 
   @override

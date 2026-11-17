@@ -9,6 +9,7 @@ import "package:polder/screens/calendar/widgets/agenda_dialog.dart";
 import "package:polder/screens/calendar/widgets/agenda_share_sheet.dart";
 import "package:polder/screens/calendar/widgets/calendar_files.dart";
 import "package:polder/screens/calendar/widgets/external_calendar_dialog.dart";
+import "package:polder/screens/calendar/widgets/calendar_settings.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/localization_helper.dart";
@@ -44,6 +45,15 @@ class CalendarSidebar extends StatelessWidget {
         ),
       ),
       const CalendarAgendaLists(),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: ListTile(
+          leading: const Icon(IconsaxPlusLinear.setting_2),
+          title: Text(context.localized.calendarSettings),
+          shape: CalendarStyle.squircle(CalendarStyle.controlRadius),
+          onTap: () => showCalendarSettings(context),
+        ),
+      ),
     ],
   );
 }

@@ -340,12 +340,14 @@ class _DayColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final lines = CalendarStyle.of(context).border;
+    final style = CalendarStyle.of(context);
+    final lines = style.border;
     final placed = layoutTimedSlots([
       for (final event in events) TimedSlot(event, event.startMinuteOn(day), event.endMinuteOn(day)),
     ]);
     return DecoratedBox(
       decoration: BoxDecoration(
+        color: isWeekend(context, day) ? style.weekend : null,
         border: BorderDirectional(start: BorderSide(color: lines)),
       ),
       child: LayoutBuilder(
