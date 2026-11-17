@@ -32,7 +32,7 @@
 				<data android:scheme="${deepLinkScheme}" android:host="open" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".CalendarInsertActivity" android:exported="true" android:taskAffinity="" android:excludeFromRecents="true" android:noHistory="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">
+		<activity android:name=".IntentForwardActivity" android:exported="true" android:taskAffinity="" android:excludeFromRecents="true" android:noHistory="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">
 			<intent-filter>
 				<action android:name="android.intent.action.INSERT" />
 				<category android:name="android.intent.category.DEFAULT" />
@@ -42,6 +42,16 @@
 				<action android:name="android.intent.action.EDIT" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.item/event" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.SEND" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="*/*" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.SEND_MULTIPLE" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="*/*" />
 			</intent-filter>
 		</activity>
 		<!-- Don't delete the meta-data below.

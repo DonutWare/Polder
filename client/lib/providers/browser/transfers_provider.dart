@@ -73,6 +73,7 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
   static bool _fits(User user, int length) => !user.hasQuota || user.usedBytes + length <= user.quotaBytes;
 
   Future<void> ensureFolder(String path) async {
+    if (path == RemotePath.root) return;
     try {
       await ref.read(polderApiProvider).mkdir(path);
     } on AlreadyExistsException {

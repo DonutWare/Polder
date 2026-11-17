@@ -566,6 +566,15 @@
 	"type": "Type",
 	"unit": "Unit",
 	"uploadFiles": "Upload files",
+	"uploadHere": "Upload here",
+	"uploadSharedFiles": "{count, plural, =1{Upload shared file} other{Upload {count} shared files}}",
+	"@uploadSharedFiles": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"username": "Username",
 	"users": "Users",
 	"usersCount": "{count, plural, =1{1 user} other{{count} users}}",

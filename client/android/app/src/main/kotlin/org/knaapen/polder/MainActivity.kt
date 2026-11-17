@@ -1,6 +1,7 @@
 package org.knaapen.polder
 
 import android.content.Intent
+import android.net.Uri
 import android.provider.CalendarContract
 import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
@@ -8,38 +9,57 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
+import java.util.concurrent.Executors
 
 class WallpaperFileProvider : FileProvider()
 
 class MainActivity : FlutterActivity() {
-    private var calendarInsertChannel: MethodChannel? = null
-    private var pendingCalendarInsert: Map<String, Any?>? = null
+    private val copies = Executors.newSingleThreadExecutor()
+    private var intentChannels: List<PendingIntentChannel> = emptyList()
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "polder/wallpaper")
+        val messenger = flutterEngine.dartExecutor.binaryMessenger
+        MethodChannel(messenger, "polder/wallpaper")
             .setMethodCallHandler { call, result ->
                 if (call.method == "set") openSetAsChooser(call, result) else result.notImplemented()
             }
-        pendingCalendarInsert = calendarInsertFrom(intent)
-        calendarInsertChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "polder/calendar_insert")
-            .apply {
-                setMethodCallHandler { call, result ->
-                    if (call.method != "takePending") return@setMethodCallHandler result.notImplemented()
-                    result.success(pendingCalendarInsert)
-                    pendingCalendarInsert = null
-                }
-            }
+        intentChannels = listOf(
+            PendingIntentChannel(messenger, "polder/calendar_insert", "insert", intent, ::calendarInsertFrom),
+            PendingIntentChannel(
+                messenger,
+                "polder/share",
+                "share",
+                intent,
+                { SharedContent.from(this, it) },
+                { call, result -> if (call.method == "copy") copySharedFile(call, result) else result.notImplemented() },
+            ),
+        )
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        val insert = calendarInsertFrom(intent) ?: return
-        calendarInsertChannel?.invokeMethod("insert", insert)
+        intentChannels.forEach { it.deliver(intent) }
     }
 
-    private fun calendarInsertFrom(intent: Intent?): Map<String, Any?>? {
-        if (intent == null || !isCalendarInsert(intent)) return null
+    override fun onDestroy() {
+        copies.shutdown()
+        super.onDestroy()
+    }
+
+    private fun copySharedFile(call: MethodCall, result: MethodChannel.Result) {
+        val uri = call.argument<String>("uri")?.let(Uri::parse)
+            ?: return result.error("share", "No file to copy", null)
+        copies.execute {
+            val copied = runCatching { SharedContent.copyToCache(this, uri) }
+            runOnUiThread {
+                copied.fold({ result.success(it) }, { result.error("share", it.message, null) })
+            }
+        }
+    }
+
+    private fun calendarInsertFrom(intent: Intent): Map<String, Any?>? {
+        if (!isCalendarInsert(intent)) return null
         return mapOf(
             "title" to intent.getStringExtra(CalendarContract.Events.TITLE),
             "description" to intent.getStringExtra(CalendarContract.Events.DESCRIPTION),

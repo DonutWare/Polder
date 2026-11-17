@@ -274,6 +274,8 @@
 	"type": "Type",
 	"unit": "Eenheid",
 	"uploadFiles": "Bestanden uploaden",
+	"uploadHere": "Hier uploaden",
+	"uploadSharedFiles": "{count, plural, =1{Gedeeld bestand uploaden} other{{count} gedeelde bestanden uploaden}}",
 	"username": "Gebruikersnaam",
 	"users": "Gebruikers",
 	"usersCount": "{count, plural, =1{1 gebruiker} other{{count} gebruikers}}",
