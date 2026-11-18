@@ -18,6 +18,7 @@ import "package:polder_calendar/src/views/calendar_style.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
 import "package:polder_calendar/src/views/event_tiles.dart";
 import "package:polder_calendar/src/views/load_state.dart";
+import "package:polder_calendar/src/views/scroll_nudges.dart";
 
 class TimeGridView extends ConsumerStatefulWidget {
   const TimeGridView({
@@ -27,6 +28,7 @@ class TimeGridView extends ConsumerStatefulWidget {
     this.onDayTap,
     this.onMoreTap,
     this.onSlotTap,
+    this.nudges,
     super.key,
   });
 
@@ -38,6 +40,7 @@ class TimeGridView extends ConsumerStatefulWidget {
   final ValueChanged<DateTime>? onDayTap;
   final ValueChanged<DateTime>? onMoreTap;
   final ValueChanged<DateTime>? onSlotTap;
+  final ScrollNudges? nudges;
 
   @override
   ConsumerState<TimeGridView> createState() => _TimeGridViewState();
@@ -54,14 +57,26 @@ class _TimeGridViewState extends ConsumerState<TimeGridView> {
     final startHour = widget.range.contains(_now) ? math.max(0, _now.hour - 1) : 8;
     _scroll = ScrollController(initialScrollOffset: startHour * widget.hourHeight);
     _clock = Timer.periodic(const Duration(minutes: 1), (_) => setState(() => _now = DateTime.now()));
+    widget.nudges?.addListener(_nudged);
+  }
+
+  @override
+  void didUpdateWidget(TimeGridView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.nudges == widget.nudges) return;
+    oldWidget.nudges?.removeListener(_nudged);
+    widget.nudges?.addListener(_nudged);
   }
 
   @override
   void dispose() {
+    widget.nudges?.removeListener(_nudged);
     _clock.cancel();
     _scroll.dispose();
     super.dispose();
   }
+
+  void _nudged() => _scroll.nudgeBy(widget.nudges!.distance);
 
   void _focus() {
     if (!_scroll.hasClients || !widget.range.contains(DateTime.now())) return;

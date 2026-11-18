@@ -197,6 +197,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 onDayTap: (day) => createCalendarEvent(context, day: day),
                 onCreate: (start) => createCalendarEvent(context, start: start),
                 onVisibleMonthChanged: _showScrolledMonth,
+                autofocus: AdaptiveLayout.inputDeviceOf(context) != InputDevice.dPad,
               ),
             ),
           ],

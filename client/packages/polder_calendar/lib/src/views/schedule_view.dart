@@ -15,6 +15,7 @@ import "package:polder_calendar/src/views/event_tiles.dart";
 import "package:polder_calendar/src/views/month_art.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
 import "package:polder_calendar/src/views/load_state.dart";
+import "package:polder_calendar/src/views/scroll_nudges.dart";
 
 class ScheduleView extends ConsumerStatefulWidget {
   const ScheduleView({
@@ -23,6 +24,7 @@ class ScheduleView extends ConsumerStatefulWidget {
     this.onDayTap,
     this.onVisibleMonthChanged,
     this.padding,
+    this.nudges,
     super.key,
   });
 
@@ -34,6 +36,7 @@ class ScheduleView extends ConsumerStatefulWidget {
   final ValueChanged<DateTime>? onDayTap;
   final ValueChanged<DateTime>? onVisibleMonthChanged;
   final EdgeInsets? padding;
+  final ScrollNudges? nudges;
 
   @override
   ConsumerState<ScheduleView> createState() => _ScheduleViewState();
@@ -51,13 +54,25 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
     super.initState();
     _scroll.addListener(_reportVisibleMonth);
     WidgetsBinding.instance.addPostFrameCallback((_) => _reportVisibleMonth());
+    widget.nudges?.addListener(_nudged);
+  }
+
+  @override
+  void didUpdateWidget(ScheduleView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.nudges == widget.nudges) return;
+    oldWidget.nudges?.removeListener(_nudged);
+    widget.nudges?.addListener(_nudged);
   }
 
   @override
   void dispose() {
+    widget.nudges?.removeListener(_nudged);
     _scroll.dispose();
     super.dispose();
   }
+
+  void _nudged() => _scroll.nudgeBy(widget.nudges!.distance);
 
   void _register(BuildContext section, DateTime month) => _sections[section] = month;
 

@@ -1,13 +1,15 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 
 import "package:polder_calendar/src/time/calendar_view_mode.dart";
 import "package:polder_calendar/src/time/date_math.dart";
 import "package:polder_calendar/src/views/event_presentation.dart";
 import "package:polder_calendar/src/views/month_view.dart";
 import "package:polder_calendar/src/views/schedule_view.dart";
+import "package:polder_calendar/src/views/scroll_nudges.dart";
 import "package:polder_calendar/src/views/time_grid_view.dart";
 
-class CalendarView extends StatelessWidget {
+class CalendarView extends StatefulWidget {
   const CalendarView({
     required this.mode,
     required this.anchor,
@@ -17,6 +19,7 @@ class CalendarView extends StatelessWidget {
     this.onCreate,
     this.onVisibleMonthChanged,
     this.padding,
+    this.autofocus = false,
     super.key,
   });
 
@@ -28,42 +31,105 @@ class CalendarView extends StatelessWidget {
   final ValueChanged<DateTime>? onCreate;
   final ValueChanged<DateTime>? onVisibleMonthChanged;
   final EdgeInsets? padding;
-
-  void _openDay(DateTime day) => onNavigate(CalendarViewMode.day, day);
+  final bool autofocus;
 
   @override
-  Widget build(BuildContext context) => AnimatedSwitcher(
-    duration: const Duration(milliseconds: 280),
-    switchInCurve: Curves.easeOutCubic,
-    switchOutCurve: Curves.easeInCubic,
-    transitionBuilder: (child, animation) => FadeTransition(
-      opacity: animation,
-      child: ScaleTransition(scale: Tween(begin: 0.97, end: 1.0).animate(animation), child: child),
+  State<CalendarView> createState() => _CalendarViewState();
+}
+
+class _CalendarViewState extends State<CalendarView> {
+  static const _keyScrollDistance = 48.0;
+
+  final _focus = FocusNode(debugLabel: "CalendarView", skipTraversal: true);
+  final _nudges = ScrollNudges();
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    _nudges.dispose();
+    super.dispose();
+  }
+
+  void _openDay(DateTime day) => widget.onNavigate(CalendarViewMode.day, day);
+
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+    if (_modifierPressed()) return KeyEventResult.ignored;
+    final forward = Directionality.of(context) == TextDirection.ltr ? 1 : -1;
+    final handled = switch (event.logicalKey) {
+      LogicalKeyboardKey.arrowLeft => _page(-forward),
+      LogicalKeyboardKey.arrowRight => _page(forward),
+      LogicalKeyboardKey.arrowUp => _scroll(-_keyScrollDistance),
+      LogicalKeyboardKey.arrowDown => _scroll(_keyScrollDistance),
+      _ => false,
+    };
+    return handled ? KeyEventResult.handled : KeyEventResult.ignored;
+  }
+
+  bool _modifierPressed() {
+    final keyboard = HardwareKeyboard.instance;
+    return keyboard.isMetaPressed || keyboard.isControlPressed || keyboard.isAltPressed || keyboard.isShiftPressed;
+  }
+
+  bool _page(int steps) {
+    if (widget.mode == CalendarViewMode.schedule) return false;
+    widget.onNavigate(widget.mode, shiftAnchor(widget.mode, widget.anchor, steps));
+    return true;
+  }
+
+  bool _scroll(double distance) {
+    if (widget.mode == CalendarViewMode.month) return false;
+    _nudges.nudge(distance);
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) => Focus(
+    focusNode: _focus,
+    autofocus: widget.autofocus,
+    onKeyEvent: _onKey,
+    child: Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _focus.requestFocus(),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 280),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: Tween(begin: 0.97, end: 1.0).animate(animation), child: child),
+        ),
+        child: KeyedSubtree(
+          key: ValueKey(widget.mode == CalendarViewMode.schedule ? widget.anchor : widget.mode),
+          child: _view(),
+        ),
+      ),
     ),
-    child: KeyedSubtree(key: ValueKey(mode == CalendarViewMode.schedule ? anchor : mode), child: _view()),
   );
 
   Widget _view() {
-    if (mode == CalendarViewMode.schedule) {
+    if (widget.mode == CalendarViewMode.schedule) {
       return ScheduleView(
-        key: ValueKey(anchor),
-        anchor: anchor,
-        padding: padding,
-        onEventTap: onEventTap,
-        onDayTap: onDayTap ?? _openDay,
-        onVisibleMonthChanged: onVisibleMonthChanged,
+        key: ValueKey(widget.anchor),
+        anchor: widget.anchor,
+        padding: widget.padding,
+        nudges: _nudges,
+        onEventTap: widget.onEventTap,
+        onDayTap: widget.onDayTap ?? _openDay,
+        onVisibleMonthChanged: widget.onVisibleMonthChanged,
       );
     }
     return Padding(
-      padding: padding ?? EdgeInsets.zero,
+      padding: widget.padding ?? EdgeInsets.zero,
       child: _PagedView(
-        key: ValueKey(mode),
-        mode: mode,
-        anchor: anchor,
-        onNavigate: onNavigate,
-        onEventTap: onEventTap,
-        onCreate: onCreate,
-        onDayTap: onDayTap ?? _openDay,
+        key: ValueKey(widget.mode),
+        mode: widget.mode,
+        anchor: widget.anchor,
+        nudges: _nudges,
+        onNavigate: widget.onNavigate,
+        onEventTap: widget.onEventTap,
+        onCreate: widget.onCreate,
+        onDayTap: widget.onDayTap ?? _openDay,
         onMoreTap: _openDay,
       ),
     );
@@ -77,6 +143,7 @@ class _PagedView extends StatefulWidget {
     required this.onNavigate,
     required this.onDayTap,
     required this.onMoreTap,
+    required this.nudges,
     this.onEventTap,
     this.onCreate,
     super.key,
@@ -87,6 +154,7 @@ class _PagedView extends StatefulWidget {
   final CalendarNavigate onNavigate;
   final ValueChanged<DateTime> onDayTap;
   final ValueChanged<DateTime> onMoreTap;
+  final ScrollNudges nudges;
   final EventTap? onEventTap;
   final ValueChanged<DateTime>? onCreate;
 
@@ -145,7 +213,7 @@ class _PagedViewState extends State<_PagedView> {
 
   void _changed(int page) {
     if (_moving > 0) return;
-    _page = page;
+    setState(() => _page = page);
     widget.onNavigate(widget.mode, _anchorAt(page));
   }
 
@@ -173,6 +241,7 @@ class _PagedViewState extends State<_PagedView> {
                 onDayTap: widget.onDayTap,
                 onMoreTap: widget.onMoreTap,
                 onSlotTap: widget.onCreate,
+                nudges: page == _page ? widget.nudges : null,
               );
       },
     );

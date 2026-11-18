@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
 
@@ -114,6 +115,7 @@ void main() {
                 onEventTap: (event) => openCalendarEvent(context, event),
                 onDayTap: createOnDayTap ? (day) => createCalendarEvent(context, day: day) : null,
                 onCreate: (start) => createCalendarEvent(context, start: start),
+                autofocus: true,
               ),
             ),
           ),
@@ -122,6 +124,12 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  ScrollPosition visibleGridScroll(WidgetTester tester) => tester
+      .state<ScrollableState>(
+        find.descendant(of: find.byType(SingleChildScrollView).hitTestable(), matching: find.byType(Scrollable)),
+      )
+      .position;
 
   for (final mode in [CalendarViewMode.day, CalendarViewMode.threeDays, CalendarViewMode.week]) {
     testWidgets("${mode.name} shows timed and all-day events", (tester) async {
@@ -189,6 +197,44 @@ void main() {
     await tester.fling(find.byType(PageView), const Offset(-800, 0), 2000);
     await tester.pumpAndSettle();
     expect(await navigated.future, DateTime(2026, 11, 11));
+  });
+
+  for (final (mode, next) in [
+    (CalendarViewMode.day, DateTime(2026, 11, 5)),
+    (CalendarViewMode.week, DateTime(2026, 11, 11)),
+    (CalendarViewMode.month, DateTime(2026, 12, 4)),
+  ]) {
+    testWidgets("arrow keys page through ${mode.name}", (tester) async {
+      final navigated = <DateTime>[];
+      await pump(tester, mode, onNavigate: (_, day) => navigated.add(day));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(navigated, [next, shiftAnchor(mode, anchor, -1)]);
+    });
+  }
+
+  testWidgets("arrow keys scroll the time grid", (tester) async {
+    await pump(tester, CalendarViewMode.week);
+    visibleGridScroll(tester).jumpTo(0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    final scrolled = visibleGridScroll(tester).pixels;
+    expect(scrolled, greaterThan(0));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(visibleGridScroll(tester).pixels, lessThan(scrolled));
+  });
+
+  testWidgets("arrow keys scroll the schedule but do not page it", (tester) async {
+    final navigated = <DateTime>[];
+    await pump(tester, CalendarViewMode.schedule, onNavigate: (_, day) => navigated.add(day));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(tester.state<ScrollableState>(find.byType(Scrollable).first).position.pixels, greaterThan(0));
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    expect(navigated, isEmpty);
   });
 
   group("editing", () {
