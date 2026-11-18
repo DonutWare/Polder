@@ -30,6 +30,15 @@
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
+  <script>
+    (function () {
+      var base = new URL(document.baseURI).pathname.replace(/\/$/, "");
+      var path = location.pathname.slice(base.length);
+      var icons = { "/notes": "favicon-notes.png", "/cook": "favicon-notes.png", "/calendar": "favicon-calendar.png" };
+      var icon = icons[path];
+      if (icon) document.querySelector('link[rel="icon"]').setAttribute("href", icon);
+    })();
+  </script>
 
   <title>Polder</title>
   <style>
