@@ -1,11 +1,13 @@
 import Cocoa
 import FlutterMacOS
+import window_manager
 
 class MainFlutterWindow: NSWindow {
   private var titlebarChannel: FlutterMethodChannel?
   private var appChannel: FlutterMethodChannel?
   private var wallpaperChannel: FlutterMethodChannel?
   private var finderLocation: FinderLocation?
+  private var launchAtLogin: LaunchAtLogin?
   private var isSyncing = false
   private var quitConfirmed = false
 
@@ -70,6 +72,7 @@ class MainFlutterWindow: NSWindow {
     }
     wallpaperChannel = wallpaper
     finderLocation = FinderLocation(messenger: flutterViewController.engine.binaryMessenger)
+    launchAtLogin = LaunchAtLogin(messenger: flutterViewController.engine.binaryMessenger)
 
     NotificationCenter.default.addObserver(
       forName: NSWindow.willEnterFullScreenNotification, object: self, queue: .main
@@ -91,6 +94,11 @@ class MainFlutterWindow: NSWindow {
     if quitConfirmed || !isSyncing { return .terminateNow }
     appChannel?.invokeMethod("quitRequested", arguments: nil)
     return .terminateCancel
+  }
+
+  override func order(_ place: NSWindow.OrderingMode, relativeTo otherWin: Int) {
+    super.order(place, relativeTo: otherWin)
+    hiddenWindowAtLaunch()
   }
 
   func reveal() {

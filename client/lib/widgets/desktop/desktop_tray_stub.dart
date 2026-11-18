@@ -1,6 +1,6 @@
 import "package:flutter/widgets.dart";
 
-Future<void> initializeDesktopWindow() async {}
+Future<void> initializeDesktopWindow(List<String> arguments) async {}
 
 Future<void> setDesktopWindowTitle(String title) async {}
 

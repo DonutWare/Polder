@@ -16,19 +16,33 @@ import "package:polder/providers/sync/sync_paused_provider.dart";
 import "package:polder/providers/update/update_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/services/desktop/launch_at_login.dart";
 import "package:polder/services/shortcuts/app_shortcut.dart";
+import "package:polder/services/storage/preferences_store.dart";
 import "package:polder/util/byte_format.dart";
 import "package:polder/util/flavor.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:tray_manager/tray_manager.dart" as tray;
 import "package:window_manager/window_manager.dart";
 
-final _isDesktop = desktopIntegrationsEnabled && (Platform.isMacOS || Platform.isWindows || Platform.isLinux);
+final _isDesktopPlatform = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+final _isDesktop = desktopIntegrationsEnabled && _isDesktopPlatform;
 
-Future<void> initializeDesktopWindow() async {
-  if (!_isDesktop) return;
+Future<void> initializeDesktopWindow(List<String> arguments) async {
+  if (!_isDesktopPlatform) return;
   await windowManager.ensureInitialized();
-  await windowManager.setPreventClose(true);
+  if (_isDesktop) await windowManager.setPreventClose(true);
+  if (await _startsMinimized(arguments)) {
+    if (Platform.isMacOS) await windowManager.setSkipTaskbar(true);
+    return;
+  }
+  unawaited(WidgetsBinding.instance.waitUntilFirstFrameRasterized.then((_) => windowManager.show()));
+}
+
+Future<bool> _startsMinimized(List<String> arguments) async {
+  final launchAtLogin = _isDesktop ? createLaunchAtLogin() : null;
+  if (launchAtLogin == null || !await launchAtLogin.launchedAtLogin(arguments)) return false;
+  return LaunchMinimizedPreference(SharedPreferencesStore()).read();
 }
 
 Future<void> setDesktopWindowTitle(String title) async {

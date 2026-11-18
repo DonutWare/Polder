@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:http/http.dart" as http;
 import "package:web_socket_channel/web_socket_channel.dart";
 
+import "package:polder/services/desktop/launch_at_login.dart";
 import "package:polder/services/device/device_conditions.dart";
 import "package:polder/services/mount/finder_location.dart";
 import "package:polder/services/realtime/events_client.dart";
@@ -28,6 +29,10 @@ final finderLocationProvider = Provider<FinderLocation?>(
   (ref) => desktopIntegrationsEnabled && !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS
       ? const ChannelFinderLocation()
       : null,
+);
+
+final launchAtLoginProvider = Provider<LaunchAtLogin?>(
+  (ref) => desktopIntegrationsEnabled && !kIsWeb ? createLaunchAtLogin() : null,
 );
 
 final deviceNameProvider = Provider<String>((ref) => throw UnimplementedError("Resolved in main"));

@@ -18,13 +18,13 @@ import "package:polder/util/device_name.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
 import "package:polder/widgets/shared/polder_logo.dart";
 
-Future<void> main() async {
+Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   usePathUrlStrategy();
   if (kIsWeb) await BrowserContextMenu.disableContextMenu();
   await initializeBackgroundSync();
-  await initializeDesktopWindow();
+  await initializeDesktopWindow(arguments);
   unawaited(precachePolderIcon());
   final deviceName = await DeviceName.resolve();
   final notifications = await PluginNotificationService.initialize(onBackgroundResponse: notificationActionDispatcher);
