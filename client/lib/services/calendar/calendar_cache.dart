@@ -86,34 +86,44 @@ class CalendarCache {
     variables: [Variable.withString(seriesKeyOf(ref))],
   );
 
-  Future<void> replaceFromServer(DateTimeRange range, List<CalendarEvent> events, {Set<String>? calendarIds}) =>
-      _db.transaction(() async {
-        for (final cached in await overlapping(range, calendarIds: calendarIds)) {
-          if (cached.state == CachedEventState.synced) await remove(cached.key);
-        }
-        final local = {
-          for (final cached in await overlapping(range, calendarIds: calendarIds))
-            if (cached.state != CachedEventState.synced) CalendarCache.seriesKeyOf(cached.event.ref),
-        };
-        for (final event in events) {
-          if (!local.contains(seriesKeyOf(event.ref))) await save(event, CachedEventState.synced);
-        }
-        if (calendarIds == null) await _markFetched(range);
-      });
-
-  Future<bool> covers(DateTimeRange range) async {
-    final fetched = {
-      for (final row in await _db.customSelect("SELECT month FROM calendar_months").get()) row.read<String>("month"),
+  Future<void> replaceFromServer(
+    DateTimeRange range,
+    List<CalendarEvent> events, {
+    required DateTime fetchedAt,
+    Set<String>? calendarIds,
+  }) => _db.transaction(() async {
+    for (final cached in await overlapping(range, calendarIds: calendarIds)) {
+      if (cached.state == CachedEventState.synced) await remove(cached.key);
+    }
+    final local = {
+      for (final cached in await overlapping(range, calendarIds: calendarIds))
+        if (cached.state != CachedEventState.synced) CalendarCache.seriesKeyOf(cached.event.ref),
     };
-    return _monthsIn(range).every(fetched.contains);
+    for (final event in events) {
+      if (!local.contains(seriesKeyOf(event.ref))) await save(event, CachedEventState.synced);
+    }
+    if (calendarIds == null) await _markFetched(range, fetchedAt);
+  });
+
+  Future<({DateTime oldest, DateTime newest})?> fetched(DateTimeRange range) async {
+    final fetched = {
+      for (final row in await _db.customSelect("SELECT month, fetched_ms FROM calendar_months").get())
+        row.read<String>("month"): row.read<int>("fetched_ms"),
+    };
+    final times = [for (final month in _monthsIn(range)) fetched[month]];
+    if (times.isEmpty || times.contains(null)) return null;
+    final sorted = times.nonNulls.toList()..sort();
+    return (
+      oldest: DateTime.fromMillisecondsSinceEpoch(sorted.first),
+      newest: DateTime.fromMillisecondsSinceEpoch(sorted.last),
+    );
   }
 
-  Future<void> _markFetched(DateTimeRange range) async {
-    final now = DateTime.now().millisecondsSinceEpoch;
+  Future<void> _markFetched(DateTimeRange range, DateTime fetchedAt) async {
     for (final month in _monthsIn(range)) {
       await _db.customInsert(
         "INSERT OR REPLACE INTO calendar_months (month, fetched_ms) VALUES (?, ?)",
-        variables: [Variable.withString(month), Variable.withInt(now)],
+        variables: [Variable.withString(month), Variable.withInt(_ms(fetchedAt))],
       );
     }
   }

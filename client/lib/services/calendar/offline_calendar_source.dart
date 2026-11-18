@@ -17,13 +17,14 @@ import "package:polder_calendar/polder_calendar.dart";
 
 enum CalendarChangeType { create, update, delete, move, respond }
 
-class OfflineCalendarSource implements CalendarSource {
+class OfflineCalendarSource implements LiveCalendarSource {
   OfflineCalendarSource({
     required this._remote,
     required this._api,
     required Future<OfflineStore> store,
     this._onQueued,
     this._clock = DateTime.now,
+    this._prefetchNearbyOnly = false,
   }) : _storeFuture = store;
 
   final PolderCalendarSource _remote;
@@ -31,6 +32,7 @@ class OfflineCalendarSource implements CalendarSource {
   final Future<OfflineStore> _storeFuture;
   final void Function()? _onQueued;
   final DateTime Function() _clock;
+  final bool _prefetchNearbyOnly;
   final _lock = AsyncLock();
   final _localChanges = StreamController<CalendarRef>.broadcast();
   final _inFlight = <int>{};
@@ -40,6 +42,9 @@ class OfflineCalendarSource implements CalendarSource {
   static const _prefetchKey = "calendar.prefetched";
   static const _createdKey = "calendar.created.";
   static const prefetchEvery = Duration(hours: 6);
+  static const freshFor = Duration(minutes: 2);
+
+  DateTime? _remoteChangedAt;
 
   @override
   String get id => _remote.id;
@@ -51,7 +56,8 @@ class OfflineCalendarSource implements CalendarSource {
   CalendarCapabilities get capabilities => _remote.capabilities;
 
   @override
-  Stream<CalendarRef> get changes => StreamGroupMerge.merge(_remote.changes, _localChanges.stream);
+  Stream<CalendarRef> get changes =>
+      StreamGroupMerge.merge(_remote.changes.map(_markRemoteChange), _localChanges.stream);
 
   Future<OfflineStore> get _store => _storeFuture;
 
@@ -63,17 +69,25 @@ class OfflineCalendarSource implements CalendarSource {
   Future<List<CalendarInfo>> calendars() async {
     final store = await _store;
     try {
-      final calendars = await _remote.calendars();
-      await store.saveMeta(_calendarsKey, jsonEncode([for (final calendar in calendars) CalendarCodec.info(calendar)]));
-      return calendars;
+      return await _fetchCalendars(store);
     } on ApiException catch (error) {
       if (!_offlineError(error)) rethrow;
       final cached = await store.meta(_calendarsKey);
       if (cached == null) rethrow;
-      return [
-        for (final json in (jsonDecode(cached) as List<dynamic>).cast<Map<String, dynamic>>())
-          CalendarCodec.infoFrom(json),
-      ];
+      return _decodeCalendars(cached);
+    }
+  }
+
+  @override
+  Stream<List<CalendarInfo>> watchCalendars() async* {
+    final store = await _store;
+    final cached = await store.meta(_calendarsKey);
+    if (cached != null) yield _decodeCalendars(cached);
+    try {
+      final fresh = await _fetchCalendars(store);
+      if (cached == null || cached != _encodeCalendars(fresh)) yield fresh;
+    } on ApiException catch (error) {
+      if (cached == null || !_offlineError(error)) rethrow;
     }
   }
 
@@ -82,15 +96,28 @@ class OfflineCalendarSource implements CalendarSource {
     final cache = await _cache;
     final ids = calendars == null ? null : {for (final calendar in calendars) calendar.calendarId};
     try {
-      final fresh = await _remote.events(range, calendars: calendars);
-      await _lock.run(() => cache.replaceFromServer(range, fresh, calendarIds: ids));
+      await _fetchInto(cache, range, calendars: calendars);
     } on ApiException catch (error) {
-      if (!_offlineError(error) || !await cache.covers(range)) rethrow;
+      if (!_offlineError(error) || await cache.fetched(range) == null) rethrow;
     }
-    return [
-      for (final cached in await cache.overlapping(range, calendarIds: ids))
-        if (cached.state != CachedEventState.deleted) cached.event,
-    ]..sort((a, b) => a.start.compareTo(b.start));
+    return _visible(cache, range, ids);
+  }
+
+  @override
+  Stream<List<CalendarEvent>> watchEvents(DateTimeRange range) async* {
+    final cache = await _cache;
+    final fetched = await cache.fetched(range);
+    if (fetched != null) {
+      yield await _visible(cache, range, null);
+      if (!_isStale(fetched.oldest)) return;
+    }
+    try {
+      await _fetchInto(cache, range);
+    } on ApiException catch (error) {
+      if (fetched == null || !_offlineError(error)) rethrow;
+      return;
+    }
+    yield await _visible(cache, range, null);
   }
 
   @override
@@ -207,7 +234,17 @@ class OfflineCalendarSource implements CalendarSource {
   }, event.calendar);
 
   @override
-  Future<void> setHidden(CalendarRef calendar, bool hidden) => _remote.setHidden(calendar, hidden);
+  Future<void> setHidden(CalendarRef calendar, bool hidden) async {
+    await _remote.setHidden(calendar, hidden);
+    _remoteChangedAt = _clock();
+    final store = await _store;
+    final cached = await store.meta(_calendarsKey);
+    if (cached == null) return;
+    final updated = [
+      for (final info in _decodeCalendars(cached)) info.ref == calendar ? info.copyWith(hidden: hidden) : info,
+    ];
+    await store.saveMeta(_calendarsKey, _encodeCalendars(updated));
+  }
 
   Future<DateTime?> push() async {
     final store = await _store;
@@ -246,13 +283,21 @@ class OfflineCalendarSource implements CalendarSource {
     final last = DateTime.tryParse(await store.meta(_prefetchKey) ?? "");
     final now = _clock();
     if (last != null && now.difference(last) < prefetchEvery) return;
-    final start = DateTime(now.year, now.month - 1);
-    final middle = DateTime(now.year, now.month + 6);
-    final end = DateTime(now.year, now.month + 12);
     await calendars();
-    await events(DateTimeRange(start: start, end: middle));
-    await events(DateTimeRange(start: middle, end: end));
+    for (final range in _prefetchRanges(now)) {
+      await events(range);
+    }
     await store.saveMeta(_prefetchKey, now.toIso8601String());
+  }
+
+  List<DateTimeRange> _prefetchRanges(DateTime now) {
+    final start = DateTime(now.year, now.month - 1);
+    if (_prefetchNearbyOnly) return [DateTimeRange(start: start, end: DateTime(now.year, now.month + 2))];
+    final middle = DateTime(now.year, now.month + 6);
+    return [
+      DateTimeRange(start: start, end: middle),
+      DateTimeRange(start: middle, end: DateTime(now.year, now.month + 12)),
+    ];
   }
 
   Future<void> retryNow() => _lock.run(() async {
@@ -314,6 +359,46 @@ class OfflineCalendarSource implements CalendarSource {
   }
 
   Future<void> dispose() => _localChanges.close();
+
+  CalendarRef _markRemoteChange(CalendarRef calendar) {
+    _remoteChangedAt = _clock();
+    return calendar;
+  }
+
+  bool _isStale(DateTime fetchedAt) {
+    if (_clock().difference(fetchedAt) > freshFor) return true;
+    final changed = _remoteChangedAt;
+    return changed != null && !fetchedAt.isAfter(changed);
+  }
+
+  Future<void> _fetchInto(CalendarCache cache, DateTimeRange range, {Set<CalendarRef>? calendars}) async {
+    final startedAt = _clock();
+    final fresh = await _remote.events(range, calendars: calendars);
+    final ids = calendars == null ? null : {for (final calendar in calendars) calendar.calendarId};
+    await _lock.run(() async {
+      final newer = (await cache.fetched(range))?.newest.isAfter(startedAt) ?? false;
+      if (ids == null && newer) return;
+      await cache.replaceFromServer(range, fresh, fetchedAt: startedAt, calendarIds: ids);
+    });
+  }
+
+  Future<List<CalendarInfo>> _fetchCalendars(OfflineStore store) async {
+    final calendars = await _remote.calendars();
+    await store.saveMeta(_calendarsKey, _encodeCalendars(calendars));
+    return calendars;
+  }
+
+  static String _encodeCalendars(List<CalendarInfo> calendars) =>
+      jsonEncode([for (final calendar in calendars) CalendarCodec.info(calendar)]);
+
+  static List<CalendarInfo> _decodeCalendars(String cached) => [
+    for (final json in (jsonDecode(cached) as List<dynamic>).cast<Map<String, dynamic>>()) CalendarCodec.infoFrom(json),
+  ];
+
+  static Future<List<CalendarEvent>> _visible(CalendarCache cache, DateTimeRange range, Set<String>? ids) async => [
+    for (final cached in await cache.overlapping(range, calendarIds: ids))
+      if (cached.state != CachedEventState.deleted) cached.event,
+  ]..sort((a, b) => a.start.compareTo(b.start));
 
   Future<T> _queue<T>(Future<T> Function() change, CalendarRef calendar) async {
     final result = await _lock.run(change);

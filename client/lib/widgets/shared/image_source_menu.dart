@@ -10,6 +10,7 @@ import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/service_providers.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/remote_image_picker_dialog.dart";
+import "package:polder/services/api/polder_api.dart";
 
 enum ImageSource { device, files }
 
@@ -34,7 +35,10 @@ Future<List<ImageLoader>> pickImages(
     case ImageSource.files:
       final entries = await showRemoteImagePicker(context, multiple: multiple);
       final api = ref.read(polderApiProvider);
-      return [for (final entry in entries ?? const <FileEntry>[]) () => api.downloadBytes(entry.path)];
+      return [
+        for (final entry in entries ?? const <FileEntry>[])
+          () => api.downloadBytes(entry.path, purpose: DownloadPurpose.view),
+      ];
   }
 }
 

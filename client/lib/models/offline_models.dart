@@ -109,9 +109,9 @@ extension OfflinePins on Iterable<OfflinePin> {
 
   bool mirrors(String path) => any((pin) => pin.mirrors && pin.covers(path));
 
-  bool wantsContent(String path, int size) => switch (governing(path)?.kind) {
+  bool wantsContent(String path, int size, {bool notesOnDemand = false}) => switch (governing(path)?.kind) {
     OfflinePinKind.user => true,
-    OfflinePinKind.notes => size <= OfflinePin.notesContentLimit,
+    OfflinePinKind.notes => !notesOnDemand && size <= OfflinePin.notesContentLimit,
     _ => false,
   };
 

@@ -162,7 +162,7 @@ func NewRouter(deps Dependencies) http.Handler {
 	}
 
 	router := chi.NewRouter()
-	router.Use(forwardedClient(deps.TrustedProxies), logRequests, recoverPanics)
+	router.Use(forwardedClient(deps.TrustedProxies), logRequests, recoverPanics, compressJSON)
 	// Set before mounting so the API subrouter inherits it.
 	router.NotFound(endpointNotFound)
 	api.register(humachi.New(router, apiConfig()))

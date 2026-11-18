@@ -7,6 +7,7 @@ import "package:polder/models/file_space.dart";
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
+import "package:polder/services/api/polder_api.dart";
 
 typedef MediaSource = ({Uri url, Map<String, String> headers});
 
@@ -16,12 +17,8 @@ Future<MediaSource> resolveMediaSource(WidgetRef ref, FileEntry entry, {FileSpac
   await ref.read(polderApiProvider).stat(entry.path);
   final account = ref.read(currentAccountProvider);
   if (account == null) throw StateError("No account is signed in");
-  final server = Uri.parse(account.serverUrl);
   return (
-    url: server.replace(
-      path: "${server.path.replaceAll(RegExp(r"/+$"), "")}/api/v1/files/content",
-      queryParameters: {"path": entry.path},
-    ),
+    url: DownloadPurpose.view.contentUrl(account.serverUrl, entry.path),
     headers: {"Authorization": "Bearer ${account.accessToken}"},
   );
 }

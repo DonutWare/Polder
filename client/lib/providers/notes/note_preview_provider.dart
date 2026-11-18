@@ -5,9 +5,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/offline/offline_storage_provider.dart";
-import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
 import "package:polder/services/notes/note_preview.dart";
+import "package:polder/services/offline/offline_files.dart";
 import "package:polder/util/ref_cache.dart";
 
 typedef NotePreviewKey = ({String path, String hash});
@@ -20,13 +21,13 @@ final notePreviewProvider = FutureProvider.autoDispose.family<NotePreview, NoteP
   final local = await files.read(key.path);
   final row = await files.file(key.path);
   final current = local != null && row != null && (row.unsynced || row.localHash == key.hash);
-  final bytes = current ? local : await _download(ref, key.path, fallback: local);
+  final bytes = current ? local : await _download(files, key.path, fallback: local);
   return NotePreview.of(utf8.decode(bytes, allowMalformed: true));
 });
 
-Future<Uint8List> _download(Ref ref, String path, {Uint8List? fallback}) async {
+Future<Uint8List> _download(OfflineFiles files, String path, {Uint8List? fallback}) async {
   try {
-    return await ref.read(polderApiProvider).downloadBytes(path);
+    return await files.download(path, purpose: DownloadPurpose.view);
   } on NetworkException {
     if (fallback != null) return fallback;
     rethrow;

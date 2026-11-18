@@ -121,7 +121,7 @@ func (a *API) spaceDownload(ctx context.Context, access sharing.Access, relative
 		ContentType: entry.Mime,
 		NoSniff:     "nosniff",
 		Policy:      sandboxPolicy,
-		Body:        a.serveFile(ctx, access.Owner, file, entry, ranged),
+		Body:        a.serveFile(ctx, access.Owner, file, entry, ranged, true),
 	}
 	if asAttachment {
 		output.ContentDisposition = attachment(entry.Name)

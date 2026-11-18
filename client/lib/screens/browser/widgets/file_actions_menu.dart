@@ -25,6 +25,7 @@ import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/sharing/share_panel.dart";
 import "package:polder/widgets/tags/tag_picker.dart";
+import "package:polder/services/api/polder_api.dart";
 
 enum FileAction {
   open,
@@ -199,7 +200,9 @@ abstract final class FileActions {
     final api = ref.read(polderApiProvider);
     final title = context.localized.setAs;
     final done = await context.runWithFeedback(
-      api.downloadBytes(entry.path).then((bytes) => Wallpaper.set(bytes, name: entry.name, chooserTitle: title)),
+      api
+          .downloadBytes(entry.path, purpose: DownloadPurpose.view)
+          .then((bytes) => Wallpaper.set(bytes, name: entry.name, chooserTitle: title)),
     );
     if (done && !Wallpaper.opensChooser && context.mounted) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(context.localized.wallpaperSet)));

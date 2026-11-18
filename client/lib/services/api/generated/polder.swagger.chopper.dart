@@ -2447,6 +2447,7 @@ final class _$Polder extends Polder {
     String? range,
     String? ifMatch,
     String? ifNoneMatch,
+    String? purpose,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
       summary: 'Download a file; supports Range and conditional requests',
@@ -2459,7 +2460,10 @@ final class _$Polder extends Polder {
     ),
   }) {
     final Uri $url = Uri.parse('/api/v1/files/content');
-    final Map<String, dynamic> $params = <String, dynamic>{'path': path};
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'path': path,
+      'purpose': purpose,
+    };
     final Map<String, String> $headers = {
       if (range != null) 'Range': range,
       if (ifMatch != null) 'If-Match': ifMatch,

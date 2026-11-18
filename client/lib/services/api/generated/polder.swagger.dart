@@ -2475,17 +2475,20 @@ abstract class Polder extends ChopperService {
   ///@param Range Byte range to send, such as bytes=0-1023
   ///@param If-Match Fail with 412 unless the file still has this ETag
   ///@param If-None-Match Answer 304 if the file still has this ETag
+  ///@param purpose Why the content is fetched: only download is recorded as activity, view and cache are not
   Future<chopper.Response<Stream<List<int>>>> downloadFile({
     String? path,
     String? range,
     String? ifMatch,
     String? ifNoneMatch,
+    enums.ApiV1FilesContentGetPurpose? purpose,
   }) {
     return _downloadFile(
       path: path,
       range: range?.toString(),
       ifMatch: ifMatch?.toString(),
       ifNoneMatch: ifNoneMatch?.toString(),
+      purpose: purpose?.value?.toString(),
     );
   }
 
@@ -2494,12 +2497,14 @@ abstract class Polder extends ChopperService {
   ///@param Range Byte range to send, such as bytes=0-1023
   ///@param If-Match Fail with 412 unless the file still has this ETag
   ///@param If-None-Match Answer 304 if the file still has this ETag
+  ///@param purpose Why the content is fetched: only download is recorded as activity, view and cache are not
   @GET(path: '/api/v1/files/content')
   Future<chopper.Response<Stream<List<int>>>> _downloadFile({
     @Query('path') String? path,
     @Header('Range') String? range,
     @Header('If-Match') String? ifMatch,
     @Header('If-None-Match') String? ifNoneMatch,
+    @Query('purpose') String? purpose,
     @chopper.Tag()
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',

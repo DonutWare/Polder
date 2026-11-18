@@ -53,10 +53,21 @@ class OfflineStore {
     return row == null ? null : _fileFromRow(row);
   }
 
-  Future<List<OfflineFile>> children(String parent) => _files("SELECT json FROM files WHERE parent = ? AND path != ?", [
-    Variable.withString(parent),
-    Variable.withString(parent),
-  ]);
+  Future<List<OfflineFile>> children(String parent) async {
+    final rows = await db
+        .customSelect(
+          "SELECT f.json, CASE WHEN f.is_dir = 1 THEN "
+          "(SELECT coalesce(sum(c.size), 0) FROM files c "
+          "WHERE c.is_dir = 0 AND c.path > f.path || '/' AND c.path < f.path || '0') END AS folder_size "
+          "FROM files f WHERE f.parent = ? AND f.path != ?",
+          variables: [Variable.withString(parent), Variable.withString(parent)],
+        )
+        .get();
+    return [for (final row in rows) _withFolderSize(_fileFromRow(row), row.read<int?>("folder_size"))];
+  }
+
+  static OfflineFile _withFolderSize(OfflineFile file, int? folderSize) =>
+      folderSize == null || file.entry.size > 0 ? file : file.copyWith(entry: file.entry.copyWith(size: folderSize));
 
   Future<List<OfflineFile>> tree(String root) => root == RemotePath.root
       ? _files("SELECT json FROM files", const [])

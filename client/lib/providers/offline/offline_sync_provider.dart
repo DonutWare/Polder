@@ -16,14 +16,17 @@ final offlineSyncProvider = NotifierProvider<OfflineSyncNotifier, void>(OfflineS
 class OfflineSyncNotifier extends Notifier<void> {
   static const interval = Duration(minutes: 5);
   static const watchdog = Duration(minutes: 10);
+  static const startupDelay = Duration(seconds: 5);
 
   final _lanes = <OfflineWork, SyncLane>{};
+  DateTime? _backgroundAfter;
 
   @override
   void build() {
     final accountId = ref.watch(currentAccountProvider.select((account) => account?.id));
     _lanes.clear();
     if (accountId == null) return;
+    _backgroundAfter = DateTime.now().add(startupDelay);
     final conditions = ref.read(deviceConditionsProvider);
     Future<bool> hasNetwork() => conditions.hasNetwork();
     _lanes.addAll({
@@ -54,7 +57,7 @@ class OfflineSyncNotifier extends Notifier<void> {
     kickAll();
   }
 
-  void request(OfflineWork work) => _lanes[work]?.kick();
+  void request(OfflineWork work) => _lanes[work]?.kick(delay: _startupWait(work));
 
   void kick() {
     request(OfflineWork.push);
@@ -62,9 +65,16 @@ class OfflineSyncNotifier extends Notifier<void> {
   }
 
   void kickAll() {
-    for (final lane in _lanes.values) {
-      lane.kick();
+    for (final work in _lanes.keys) {
+      request(work);
     }
+  }
+
+  Duration? _startupWait(OfflineWork work) {
+    final after = _backgroundAfter;
+    if (work == OfflineWork.push || after == null) return null;
+    final remaining = after.difference(DateTime.now());
+    return remaining > Duration.zero ? remaining : null;
   }
 
   Future<void> pushNow() => _lanes[OfflineWork.push]?.run() ?? Future.value();

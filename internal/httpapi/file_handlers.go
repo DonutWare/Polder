@@ -54,6 +54,11 @@ type downloadInput struct {
 	Range       string `header:"Range" doc:"Byte range to send, such as bytes=0-1023"`
 	IfMatch     string `header:"If-Match" doc:"Fail with 412 unless the file still has this ETag"`
 	IfNoneMatch string `header:"If-None-Match" doc:"Answer 304 if the file still has this ETag"`
+	Purpose     string `query:"purpose" enum:"download,view,cache" default:"download" doc:"Why the content is fetched: only download is recorded as activity, view and cache are not"`
+}
+
+func (input *downloadInput) tracked() bool {
+	return input.Purpose == "" || input.Purpose == "download"
 }
 
 type uploadInput struct {
@@ -189,14 +194,18 @@ func (a *API) downloadFile(ctx context.Context, input *downloadInput) (*download
 		ETag:         revisionETag(entry.Rev),
 		Rev:          fmt.Sprint(entry.Rev),
 		ContentType:  entry.Mime,
-		Body:         a.serveFile(ctx, owner, file, entry, input.Range != ""),
+		Body:         a.serveFile(ctx, owner, file, entry, input.Range != "", input.tracked()),
 	}, nil
 }
 
-func (a *API) serveFile(ctx context.Context, owner users.User, file *os.File, entry files.Entry, ranged bool) func(huma.Context) {
+func (a *API) serveFile(ctx context.Context, owner users.User, file *os.File, entry files.Entry, ranged, tracked bool) func(huma.Context) {
 	return func(humaCtx huma.Context) {
 		defer file.Close()
 		r, w := humachi.Unwrap(humaCtx)
+		if !tracked {
+			http.ServeContent(w, r, entry.Name, entry.Mtime, file)
+			return
+		}
 		release := func() {}
 		metered := &meteredResponse{ResponseWriter: w, start: func() *activity.Transfer {
 			transfer := a.startDownload(ctx, owner, entry, ranged)

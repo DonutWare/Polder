@@ -780,6 +780,22 @@ enum ApiV1CalendarsCalendarIDEventsEventIDPutScope {
   const ApiV1CalendarsCalendarIDEventsEventIDPutScope(this.value);
 }
 
+enum ApiV1FilesContentGetPurpose {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('download')
+  download('download'),
+  @JsonValue('view')
+  view('view'),
+  @JsonValue('cache')
+  cache('cache');
+
+  final String? value;
+
+  const ApiV1FilesContentGetPurpose(this.value);
+}
+
 enum ApiV1FilesPreviewGetSize {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

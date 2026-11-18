@@ -309,7 +309,7 @@ func (a *API) downloadMounted(ctx context.Context, at mountedPath, input *downlo
 		ETag:         revisionETag(entry.Rev),
 		Rev:          fmt.Sprint(entry.Rev),
 		ContentType:  entry.Mime,
-		Body:         a.serveFile(ctx, access.Owner, file, entry, input.Range != ""),
+		Body:         a.serveFile(ctx, access.Owner, file, entry, input.Range != "", input.tracked()),
 	}, nil
 }
 

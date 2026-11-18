@@ -22,6 +22,7 @@ import "package:polder/services/offline/outbox_errors.dart";
 import "package:polder/services/transfer/file_picker_service.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/throughput_meter.dart";
+import "package:polder/services/api/polder_api.dart";
 
 final transfersProvider = NotifierProvider<TransfersNotifier, List<Transfer>>(TransfersNotifier.new);
 
@@ -88,7 +89,9 @@ class TransfersNotifier extends Notifier<List<Transfer>> {
       name: entry.name,
       size: entry.size,
       mime: entry.mime,
-      fetch: (onProgress) => ref.read(polderApiProvider).downloadBytes(entry.path, onProgress: onProgress),
+      fetch: (onProgress) => ref
+          .read(polderApiProvider)
+          .downloadBytes(entry.path, purpose: DownloadPurpose.download, onProgress: onProgress),
     ),
   };
 

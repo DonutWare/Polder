@@ -8,6 +8,7 @@ import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/sharing/file_space_providers.dart";
 import "package:polder/services/api/api_exceptions.dart";
+import "package:polder/services/api/polder_api.dart";
 
 final fileContentProvider = FutureProvider.autoDispose.family<Uint8List, (FileEntry, FileSpace?)>(
   (ref, request) => switch (request) {
@@ -21,7 +22,7 @@ Future<Uint8List> ownFileContent(Ref ref, FileEntry entry) async {
   final local = await files.readMatching(entry);
   if (local != null) return local;
   try {
-    return await ref.watch(polderApiProvider).downloadBytes(entry.path);
+    return await ref.watch(polderApiProvider).downloadBytes(entry.path, purpose: DownloadPurpose.view);
   } on NetworkException {
     final stale = await files.read(entry.path);
     if (stale != null) return stale;

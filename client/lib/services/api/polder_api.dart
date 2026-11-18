@@ -41,6 +41,26 @@ import "package:polder/services/api/sharing_mappers.dart";
 import "package:polder/services/api/wire_mappers.dart";
 import "package:polder_calendar/polder_calendar.dart" as cal;
 
+enum DownloadPurpose {
+  download(wire.ApiV1FilesContentGetPurpose.download),
+  view(wire.ApiV1FilesContentGetPurpose.view),
+  cache(wire.ApiV1FilesContentGetPurpose.cache);
+
+  const DownloadPurpose(this.parameter);
+
+  final wire.ApiV1FilesContentGetPurpose parameter;
+
+  String get query => parameter.value!;
+
+  Uri contentUrl(String serverUrl, String path) {
+    final server = Uri.parse(serverUrl);
+    return server.replace(
+      path: "${server.path.replaceAll(RegExp(r"/+$"), "")}/api/v1/files/content",
+      queryParameters: {"path": path, "purpose": query},
+    );
+  }
+}
+
 class ByteRange {
   const ByteRange(this.offset, this.length);
 
@@ -222,7 +242,7 @@ class PolderApi {
 
   Future<Uri> streamUrl(String path) async {
     final ticket = (await _service.createStreamTicket(body: wire.PathRequest(path: path))).body!.ticket;
-    return _apiUrl(["files", "content"], {"path": path, "ticket": ticket});
+    return _apiUrl(["files", "content"], {"path": path, "ticket": ticket, "purpose": DownloadPurpose.view.query});
   }
 
   Uri _apiUrl(List<String> segments, Map<String, String> query) {
@@ -233,10 +253,14 @@ class PolderApi {
     );
   }
 
-  Future<Uint8List> downloadBytes(String path, {void Function(int received, int total)? onProgress}) async =>
-      _collect(await _service.downloadFile(path: path), onProgress);
+  Future<Uint8List> downloadBytes(
+    String path, {
+    required DownloadPurpose purpose,
+    void Function(int received, int total)? onProgress,
+  }) async => _collect(await _service.downloadFile(path: path, purpose: purpose.parameter), onProgress);
 
-  Future<Stream<List<int>>> downloadStream(String path) async => (await _service.downloadFile(path: path)).body!;
+  Future<Stream<List<int>>> downloadStream(String path, {required DownloadPurpose purpose}) async =>
+      (await _service.downloadFile(path: path, purpose: purpose.parameter)).body!;
 
   Future<Uint8List> _collect(
     chopper.Response<Stream<List<int>>> response,

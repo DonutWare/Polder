@@ -90,7 +90,7 @@ Future<Uint8List> _imageBytes(PolderApi api, NoteLink? link, FileEntry? known) a
     if (preview != null) return preview;
   }
   if (!entry.isImage) throw StateError("the linked file has no preview");
-  return api.downloadBytes(entry.path);
+  return api.downloadBytes(entry.path, purpose: DownloadPurpose.view);
 }
 
 class NoteLinkIcon extends ConsumerWidget {

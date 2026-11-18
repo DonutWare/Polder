@@ -45,6 +45,7 @@ class OfflineFiles {
     ContentDownloader? downloader,
     void Function(OfflineWork work)? onWork,
     this._clock = DateTime.now,
+    this._notesOnDemand = false,
   }) : _api = api,
        _content = content,
        _onWork = onWork ?? _ignoreWork,
@@ -62,6 +63,7 @@ class OfflineFiles {
   final ContentDownloader _downloader;
   final void Function(OfflineWork work) _onWork;
   final DateTime Function() _clock;
+  final bool _notesOnDemand;
   final _lock = AsyncLock();
   final _inFlight = <int>{};
   final _freshHashes = <String, DateTime>{};
@@ -142,9 +144,15 @@ class OfflineFiles {
   Future<bool> availableOffline(String path) async =>
       (await _store.pins()).any((pin) => pin.mirrors && pin.populated && pin.covers(path));
 
+  Future<Uint8List> download(String path, {required DownloadPurpose purpose}) async {
+    final hash = await _downloadContent(path, purpose);
+    await _lock.run(() => _keepDownloaded(path, hash));
+    return (await _content.read(hash))!;
+  }
+
   Future<OfflineFile> fetch(String path) async {
     final entry = await _api.stat(path);
-    final hash = entry.isDir ? null : _remember(await _content.writeStream(await _api.downloadStream(path)));
+    final hash = entry.isDir ? null : await _downloadContent(path, DownloadPurpose.cache);
     return _lock.run(() async {
       final current = await _store.file(path);
       if (current != null && current.unsynced) return current;
@@ -412,6 +420,9 @@ class OfflineFiles {
     return result;
   }
 
+  Future<String> _downloadContent(String path, DownloadPurpose purpose) async =>
+      _remember(await _content.writeStream(await _api.downloadStream(path, purpose: purpose)));
+
   String _remember(String hash) {
     _freshHashes[hash] = _clock();
     return hash;
@@ -425,6 +436,7 @@ class OfflineFiles {
   }
 
   Future<void> _downloadNotes() async {
+    if (_notesOnDemand) return;
     final pins = await _store.pins();
     Object? failure;
     for (final pin in pins.ofKind(OfflinePinKind.notes)) {
@@ -435,7 +447,7 @@ class OfflineFiles {
       );
       for (final row in missing) {
         try {
-          final hash = _remember(await _content.writeStream(await _api.downloadStream(row.path)));
+          final hash = await _downloadContent(row.path, DownloadPurpose.cache);
           await _lock.run(() => _storeDownloaded(row.path, hash));
         } on Object catch (error) {
           failure ??= error;
@@ -493,7 +505,7 @@ class OfflineFiles {
     final wanted = <String>{};
     for (final path in queued) {
       final row = await _store.file(path);
-      if (row != null && !row.contentReady && pins.wantsContent(path, row.entry.size)) {
+      if (row != null && !row.contentReady && _wantsContent(pins, path, row.entry.size)) {
         wanted.add(path);
       } else {
         _cancelled.add(path);
@@ -559,10 +571,16 @@ class OfflineFiles {
     );
   }
 
+  Future<void> _keepDownloaded(String path, String hash) async {
+    final current = await _store.file(path);
+    if (current == null || current.unsynced || current.entry.hash != hash || current.localHash == hash) return;
+    await _store.saveFile(current.copyWith(localHash: hash));
+  }
+
   Future<bool> _storeDownloaded(String path, String hash) async {
     final current = await _store.file(path);
     if (current == null || current.unsynced) return true;
-    if (!(await _store.pins()).wantsContent(path, current.entry.size)) return true;
+    if (!_wantsContent(await _store.pins(), path, current.entry.size)) return true;
     if (current.entry.hash != hash) return false;
     await _store.saveFile(current.copyWith(localHash: hash));
     return true;
@@ -584,6 +602,9 @@ class OfflineFiles {
     _announceDownloads();
   }
 
+  bool _wantsContent(List<OfflinePin> pins, String path, int size) =>
+      pins.wantsContent(path, size, notesOnDemand: _notesOnDemand);
+
   void _announceDownloads() {
     if (!_downloadsChanged.isClosed) _downloadsChanged.add(null);
   }
@@ -595,7 +616,7 @@ class OfflineFiles {
         if (row.unsynced || (await _store.outboxFor(row.path)).isNotEmpty) continue;
         if (!pins.mirrors(row.path)) {
           await _store.deleteFile(row.path);
-        } else if (row.localHash != null && !pins.wantsContent(row.path, row.entry.size)) {
+        } else if (row.localHash != null && !_wantsContent(pins, row.path, row.entry.size)) {
           await _store.saveFile(row.copyWith(localHash: null));
         }
       }

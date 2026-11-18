@@ -1,6 +1,8 @@
 import "dart:async";
 import "dart:ui";
 
+import "package:flutter/foundation.dart";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/l10n/generated/app_localizations.dart";
@@ -92,6 +94,7 @@ final offlineFilesProvider = FutureProvider<OfflineFiles>((ref) async {
     content: storage.content,
     downloader: downloader,
     onWork: (work) => ref.read(offlineSyncProvider.notifier).request(work),
+    notesOnDemand: kIsWeb,
   );
   ref.onDispose(() async {
     await files.dispose();
@@ -126,7 +129,7 @@ class _DownloadRequests {
     final account = _ref.read(currentAccountProvider);
     if (account == null) throw StateError("No account is signed in");
     return (
-      url: Uri.parse("${account.serverUrl}/api/v1/files/content").replace(queryParameters: {"path": path}),
+      url: DownloadPurpose.cache.contentUrl(account.serverUrl, path),
       headers: {"Authorization": "Bearer ${account.accessToken}"},
     );
   }

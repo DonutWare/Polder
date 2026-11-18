@@ -47,6 +47,23 @@ void main() {
     expect(await files.read("/Photos/p.jpg"), "p".codeUnits);
   });
 
+  test("a folder kept offline is shown from the device first and then catches up with the server", () async {
+    final files = await harness.container.read(offlineFilesProvider.future);
+    await files.makeAvailableOffline("/Photos");
+    await files.pull();
+    await files.mirror();
+    await files.whenDownloadsSettle();
+    server.putFile("/Photos/new.jpg", "n".codeUnits);
+    harness.container.listen(directoryProvider("/Photos"), (_, _) {});
+
+    final first = await harness.container.read(directoryProvider("/Photos").future);
+    expect(first.entries.map((entry) => entry.name), ["p.jpg"]);
+
+    await pumpEventQueue();
+    final caughtUp = await harness.container.read(directoryProvider("/Photos").future);
+    expect(caughtUp.entries.map((entry) => entry.name), unorderedEquals(["p.jpg", "new.jpg"]));
+  });
+
   test("a folder never kept offline still reports that the server is unreachable", () async {
     server.unreachable = true;
 

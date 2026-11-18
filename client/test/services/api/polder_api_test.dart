@@ -157,7 +157,7 @@ void main() {
     final url = await api.streamUrl("/Films/harbour.mp4");
 
     expect(url.toString(), startsWith("https://cloud.test/api/v1/files/content?"));
-    expect(url.queryParameters, {"path": "/Films/harbour.mp4", "ticket": "t-1"});
+    expect(url.queryParameters, {"path": "/Films/harbour.mp4", "ticket": "t-1", "purpose": "view"});
     expect(client.requests.single.data, {"path": "/Films/harbour.mp4"});
   });
 }

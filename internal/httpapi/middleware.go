@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
@@ -230,4 +231,30 @@ func isTrusted(address netip.Addr, trusted []netip.Prefix) bool {
 		}
 	}
 	return false
+}
+
+var jsonCompressor = middleware.Compress(5, "application/json", "application/problem+json")
+
+func compressJSON(next http.Handler) http.Handler {
+	compressed := jsonCompressor(next)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !compressible(r) {
+			next.ServeHTTP(w, r)
+			return
+		}
+		compressed.ServeHTTP(w, r)
+	})
+}
+
+func compressible(r *http.Request) bool {
+	path := r.URL.Path
+	if !strings.HasPrefix(path, apiPrefix+"/") || path == apiPrefix+"/events" || r.Header.Get("Range") != "" {
+		return false
+	}
+	for _, suffix := range []string{"/content", "/archive", "/sync/downloads"} {
+		if strings.HasSuffix(path, suffix) {
+			return false
+		}
+	}
+	return !strings.HasPrefix(path, apiPrefix+"/admin/logs/files/")
 }

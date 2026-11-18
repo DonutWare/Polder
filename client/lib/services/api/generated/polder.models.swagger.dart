@@ -14662,6 +14662,72 @@ apiV1CalendarsCalendarIDEventsEventIDPutScopeNullableListFromJson(
       .toList();
 }
 
+String? apiV1FilesContentGetPurposeNullableToJson(enums.ApiV1FilesContentGetPurpose? apiV1FilesContentGetPurpose) {
+  return apiV1FilesContentGetPurpose?.value;
+}
+
+String? apiV1FilesContentGetPurposeToJson(enums.ApiV1FilesContentGetPurpose apiV1FilesContentGetPurpose) {
+  return apiV1FilesContentGetPurpose.value;
+}
+
+enums.ApiV1FilesContentGetPurpose apiV1FilesContentGetPurposeFromJson(
+  Object? apiV1FilesContentGetPurpose, [
+  enums.ApiV1FilesContentGetPurpose? defaultValue,
+]) {
+  return enums.ApiV1FilesContentGetPurpose.values.firstWhereOrNull((e) => e.value == apiV1FilesContentGetPurpose) ??
+      defaultValue ??
+      enums.ApiV1FilesContentGetPurpose.swaggerGeneratedUnknown;
+}
+
+enums.ApiV1FilesContentGetPurpose? apiV1FilesContentGetPurposeNullableFromJson(
+  Object? apiV1FilesContentGetPurpose, [
+  enums.ApiV1FilesContentGetPurpose? defaultValue,
+]) {
+  if (apiV1FilesContentGetPurpose == null) {
+    return null;
+  }
+  return enums.ApiV1FilesContentGetPurpose.values.firstWhereOrNull((e) => e.value == apiV1FilesContentGetPurpose) ??
+      defaultValue;
+}
+
+String apiV1FilesContentGetPurposeExplodedListToJson(
+  List<enums.ApiV1FilesContentGetPurpose>? apiV1FilesContentGetPurpose,
+) {
+  return apiV1FilesContentGetPurpose?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> apiV1FilesContentGetPurposeListToJson(
+  List<enums.ApiV1FilesContentGetPurpose>? apiV1FilesContentGetPurpose,
+) {
+  if (apiV1FilesContentGetPurpose == null) {
+    return [];
+  }
+
+  return apiV1FilesContentGetPurpose.map((e) => e.value!).toList();
+}
+
+List<enums.ApiV1FilesContentGetPurpose> apiV1FilesContentGetPurposeListFromJson(
+  List? apiV1FilesContentGetPurpose, [
+  List<enums.ApiV1FilesContentGetPurpose>? defaultValue,
+]) {
+  if (apiV1FilesContentGetPurpose == null) {
+    return defaultValue ?? [];
+  }
+
+  return apiV1FilesContentGetPurpose.map((e) => apiV1FilesContentGetPurposeFromJson(e.toString())).toList();
+}
+
+List<enums.ApiV1FilesContentGetPurpose>? apiV1FilesContentGetPurposeNullableListFromJson(
+  List? apiV1FilesContentGetPurpose, [
+  List<enums.ApiV1FilesContentGetPurpose>? defaultValue,
+]) {
+  if (apiV1FilesContentGetPurpose == null) {
+    return defaultValue;
+  }
+
+  return apiV1FilesContentGetPurpose.map((e) => apiV1FilesContentGetPurposeFromJson(e.toString())).toList();
+}
+
 int? apiV1FilesPreviewGetSizeNullableToJson(enums.ApiV1FilesPreviewGetSize? apiV1FilesPreviewGetSize) {
   return apiV1FilesPreviewGetSize?.value;
 }

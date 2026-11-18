@@ -144,48 +144,50 @@ func (s *Service) Events(ctx context.Context, viewer users.User, calendarIDs []i
 		return nil, err
 	}
 	own := addressesOf(viewer)
-	events := []Event{}
+	visible := map[int64]Calendar{}
+	ids := []int64{}
 	for _, c := range calendars {
 		if (len(calendarIDs) == 0 && c.Hidden) || (len(calendarIDs) > 0 && !slices.Contains(calendarIDs, c.ID)) {
 			continue
 		}
-		listed, err := s.calendarEvents(ctx, c, own, window)
-		if err != nil {
-			return nil, err
+		visible[c.ID] = c
+		ids = append(ids, c.ID)
+	}
+	objects, err := s.store.ObjectsInRange(ctx, ids, window)
+	if err != nil {
+		return nil, err
+	}
+	events := []Event{}
+	for _, object := range objects {
+		if c, found := visible[object.CalendarID]; found {
+			events = append(events, objectEvents(c, object, own, window)...)
 		}
-		events = append(events, listed...)
 	}
 	slices.SortStableFunc(events, func(a, b Event) int { return a.Start.Compare(b.Start) })
 	return events, nil
 }
 
-func (s *Service) calendarEvents(ctx context.Context, c Calendar, own addressSet, window TimeRange) ([]Event, error) {
-	objects, err := s.store.ObjectsInRange(ctx, []int64{c.ID}, window)
+func objectEvents(c Calendar, object Object, own addressSet, window TimeRange) []Event {
+	resource, err := Parse(object.Data, c.Location())
 	if err != nil {
-		return nil, err
+		return nil
+	}
+	occurrences, err := resource.Occurrences(window.Start, window.End)
+	if err != nil {
+		return nil
 	}
 	var events []Event
-	for _, object := range objects {
-		resource, err := Parse(object.Data, c.Location())
-		if err != nil {
-			continue
-		}
-		occurrences, err := resource.Occurrences(window.Start, window.End)
-		if err != nil {
-			continue
-		}
-		for _, occurrence := range occurrences {
-			event := describeOccurrence(c, object, resource, occurrence, own)
-			if !c.Access.CanReadEvents() {
-				if !blocksTime(occurrence.Component) {
-					continue
-				}
-				event = busyOnly(event)
+	for _, occurrence := range occurrences {
+		event := describeOccurrence(c, object, resource, occurrence, own)
+		if !c.Access.CanReadEvents() {
+			if !blocksTime(occurrence.Component) {
+				continue
 			}
-			events = append(events, event)
+			event = busyOnly(event)
 		}
+		events = append(events, event)
 	}
-	return events, nil
+	return events
 }
 
 func busyOnly(event Event) Event {

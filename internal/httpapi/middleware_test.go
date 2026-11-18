@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/netip"
+	"strings"
 	"testing"
 )
 
@@ -40,6 +41,40 @@ func TestForwardedClient(t *testing.T) {
 			handler.ServeHTTP(httptest.NewRecorder(), request)
 			if seen != c.want {
 				t.Fatalf("remote address = %q, want %q", seen, c.want)
+			}
+		})
+	}
+}
+
+func TestCompressJSON(t *testing.T) {
+	handler := compressJSON(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"items":[` + strings.Repeat(`{"name":"x"},`, 200) + `{}]}`))
+	}))
+	cases := []struct {
+		path    string
+		headers map[string]string
+		want    string
+	}{
+		{path: "/api/v1/calendars/events", want: "gzip"},
+		{path: "/api/v1/files/list", want: "gzip"},
+		{path: "/api/v1/files/content", want: ""},
+		{path: "/api/v1/shares/3/archive", want: ""},
+		{path: "/api/v1/events", want: ""},
+		{path: "/api/v1/files/list", headers: map[string]string{"Range": "bytes=0-9"}, want: ""},
+		{path: "/index.html", want: ""},
+	}
+	for _, c := range cases {
+		t.Run(c.path, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodGet, c.path, nil)
+			request.Header.Set("Accept-Encoding", "gzip")
+			for name, value := range c.headers {
+				request.Header.Set(name, value)
+			}
+			recorder := httptest.NewRecorder()
+			handler.ServeHTTP(recorder, request)
+			if got := recorder.Header().Get("Content-Encoding"); got != c.want {
+				t.Fatalf("Content-Encoding = %q, want %q", got, c.want)
 			}
 		})
 	}

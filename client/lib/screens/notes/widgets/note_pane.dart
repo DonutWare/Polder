@@ -149,15 +149,25 @@ class _NotePaneState extends ConsumerState<NotePane> {
       await openExternalLink(destination);
       return;
     }
-    final api = ref.read(polderApiProvider);
-    final byId = link.fileId == null ? null : (await api.filesById([link.fileId!])).firstOrNull;
-    final entry = byId ?? (link.path == null ? null : await ref.read(fileAtPathProvider(link.path!).future));
+    await context.runWithFeedback(_openLinkTarget(link, targets, source));
+  }
+
+  Future<void> _openLinkTarget(NoteLink link, NoteTargets targets, String source) async {
+    final entry = await _linkTarget(link, targets);
     if (!mounted) return;
     if (entry == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.localized.noteLinkMissing)));
       return;
     }
     await openEntry(context, entry, gallery: targets.mediaIn(source, opened: entry));
+  }
+
+  Future<FileEntry?> _linkTarget(NoteLink link, NoteTargets targets) async {
+    if (targets.knownTarget(link) case final known?) return known;
+    if (link.fileId case final id?) {
+      if ((await ref.read(filesByIdProvider(fileIdsKey([id])).future))[id] case final byId?) return byId;
+    }
+    return link.path == null ? null : ref.read(fileAtPathProvider(link.path!).future);
   }
 
   Future<void> _insertLink(NoteDocument document) async {

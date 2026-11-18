@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -158,6 +159,27 @@ func TestDownloadsAreLogged(t *testing.T) {
 		if kinds(page) != "download /movie.bin, download /movie.bin, upload /movie.bin, login " || *page.Entries[0].Bytes != 200 {
 			t.Fatalf("range reads should be one download of 200 bytes: %s %+v", kinds(page), page.Entries[0])
 		}
+	})
+}
+
+func TestViewingAndCachingAreNotLogged(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		alice.put("/note.md", 0, []byte("# hi"), http.StatusOK, nil)
+
+		for _, purpose := range []string{"view", "cache"} {
+			response := alice.request(http.MethodGet, "/files/content?purpose="+purpose+"&path="+url.QueryEscape("/note.md"), nil, nil)
+			if body := readBody(t, response); string(body) != "# hi" {
+				t.Fatalf("%s body = %q", purpose, body)
+			}
+		}
+		alice.download("/note.md", nil)
+		eventually(t, func() error {
+			if got := kinds(alice.activity("")); got != "download /note.md, upload /note.md, login " {
+				return fmt.Errorf("activity = %s", got)
+			}
+			return nil
+		})
 	})
 }
 

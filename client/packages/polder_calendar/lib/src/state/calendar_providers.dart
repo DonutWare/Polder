@@ -32,11 +32,13 @@ final calendarChangesProvider = StreamProvider<CalendarRef>((ref) {
   return controller.stream;
 });
 
-final calendarListProvider = FutureProvider.autoDispose<List<CalendarInfo>>((ref) async {
+final calendarListProvider = StreamProvider.autoDispose<List<CalendarInfo>>((ref) {
   ref.listen(calendarChangesProvider, (_, _) => ref.invalidateSelf());
   final sources = ref.watch(calendarSourcesProvider);
-  final lists = await Future.wait([for (final source in sources) source.calendars()]);
-  return [for (final list in lists) ...list];
+  return _latestOfAll([
+    for (final source in sources)
+      source is LiveCalendarSource ? source.watchCalendars() : Stream.fromFuture(source.calendars()),
+  ]);
 });
 
 final hiddenCalendarsProvider = NotifierProvider<HiddenCalendarsNotifier, Set<CalendarRef>>(
@@ -68,7 +70,7 @@ class HiddenCalendarsNotifier extends Notifier<Set<CalendarRef>> {
   }
 }
 
-final monthEventsProvider = FutureProvider.autoDispose.family<List<CalendarEvent>, DateTime>((ref, month) async {
+final monthEventsProvider = StreamProvider.autoDispose.family<List<CalendarEvent>, DateTime>((ref, month) {
   final link = ref.keepAlive();
   final timer = Timer(const Duration(minutes: 5), link.close);
   ref.onDispose(timer.cancel);
@@ -76,9 +78,39 @@ final monthEventsProvider = FutureProvider.autoDispose.family<List<CalendarEvent
 
   final sources = ref.watch(calendarSourcesProvider);
   final range = DateTimeRange(start: month, end: month.addMonths(1));
-  final lists = await Future.wait([for (final source in sources) source.events(range)]);
-  return [for (final list in lists) ...list];
+  return _latestOfAll([
+    for (final source in sources)
+      source is LiveCalendarSource ? source.watchEvents(range) : Stream.fromFuture(source.events(range)),
+  ]);
 });
+
+Stream<List<T>> _latestOfAll<T>(List<Stream<List<T>>> streams) {
+  if (streams.isEmpty) return Stream.value(const []);
+  if (streams.length == 1) return streams.single;
+  final latest = List<List<T>?>.filled(streams.length, null);
+  final controller = StreamController<List<T>>();
+  final subscriptions = <StreamSubscription<List<T>>>[];
+  var open = streams.length;
+  controller
+    ..onListen = () {
+      for (final (index, stream) in streams.indexed) {
+        subscriptions.add(
+          stream.listen(
+            (value) {
+              latest[index] = value;
+              if (latest.every((list) => list != null)) controller.add([for (final list in latest) ...?list]);
+            },
+            onError: controller.addError,
+            onDone: () {
+              if (--open == 0) unawaited(controller.close());
+            },
+          ),
+        );
+      }
+    }
+    ..onCancel = () => Future.wait([for (final subscription in subscriptions) subscription.cancel()]);
+  return controller.stream;
+}
 
 final rangeEventsProvider = Provider.autoDispose.family<AsyncValue<List<CalendarEvent>>, VisibleRange>((ref, range) {
   final leaving = ref.watch(calendarMotionProvider.select((motion) => motion.hiding));

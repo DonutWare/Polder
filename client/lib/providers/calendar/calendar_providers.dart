@@ -1,6 +1,7 @@
 import "dart:async";
-import "dart:typed_data";
 import "dart:ui";
+
+import "package:flutter/foundation.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -77,6 +78,7 @@ final offlineCalendarSourceProvider = Provider<OfflineCalendarSource?>((ref) {
     api: ref.watch(polderApiProvider),
     store: ref.watch(offlineStoreProvider.future),
     onQueued: () => ref.read(offlineSyncProvider.notifier).request(OfflineWork.push),
+    prefetchNearbyOnly: kIsWeb,
   );
   ref.onDispose(() => unawaited(source.dispose()));
   return source;

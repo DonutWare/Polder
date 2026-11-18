@@ -21,6 +21,7 @@ class _FakeCalendarServer {
   final events = <int, Map<String, dynamic>>{};
   final ifMatches = <String?>[];
   var unreachable = false;
+  var hidden = false;
   ({int status, String code})? failWrites;
   var _nextId = 100;
   var _etag = 0;
@@ -64,7 +65,7 @@ class _FakeCalendarServer {
     "order": 0,
     "kind": "local",
     "access": "owner",
-    "hidden": false,
+    "hidden": hidden,
     "notify": true,
     "isDefault": true,
     "createdAt": DateTime.utc(2026).toIso8601String(),
@@ -81,6 +82,7 @@ class _FakeCalendarServer {
     }
     return switch ((request.method, segments)) {
       ("GET", ["calendars"]) => jsonResponse(200, [calendar]),
+      ("PATCH", ["calendars", "3"]) => _change(request.data! as Map<String, dynamic>),
       ("GET", ["calendars", "events"]) => jsonResponse(200, events.values.toList()),
       ("POST", ["calendars", "3", "events"]) => _create(request.data! as Map<String, dynamic>),
       ("PUT", ["calendars", "3", "events", final id]) => _update(int.parse(id), request),
@@ -89,6 +91,11 @@ class _FakeCalendarServer {
         "error": {"code": "not_found", "message": "no route"},
       }),
     };
+  }
+
+  http.StreamedResponse _change(Map<String, dynamic> input) {
+    hidden = input["hidden"] as bool? ?? hidden;
+    return jsonResponse(200, calendar);
   }
 
   http.StreamedResponse _create(Map<String, dynamic> input) {
@@ -189,6 +196,135 @@ void main() {
     server.unreachable = true;
 
     expect(source.events(november), throwsA(anything));
+  });
+
+  group("watching a month", () {
+    late StreamController<CalendarRef> remoteChanges;
+    late OfflineCalendarSource live;
+    late DateTime now;
+    Completer<void>? holdNextAnswer;
+
+    Future<http.StreamedResponse> answer(RecordedRequest request) async {
+      final response = await server.handle(request);
+      final hold = holdNextAnswer;
+      holdNextAnswer = null;
+      await hold?.future;
+      return response;
+    }
+
+    setUp(() {
+      now = DateTime(2026, 11, 18, 9);
+      holdNextAnswer = null;
+      remoteChanges = StreamController<CalendarRef>.broadcast(sync: true);
+      final api = PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: ScriptedClient(answer)));
+      live = OfflineCalendarSource(
+        remote: PolderCalendarSource(api, id: "polder:alice", label: "alice", changes: remoteChanges.stream),
+        api: api,
+        store: Future.value(store),
+        clock: () => now,
+      );
+    });
+
+    tearDown(() async {
+      await live.dispose();
+      await remoteChanges.close();
+    });
+
+    Future<List<List<String>>> watched() async => [
+      for (final events in await live.watchEvents(november).toList()) [for (final event in events) event.summary],
+    ];
+
+    test("a month never seen is fetched from the server", () async {
+      server.add("Dentist", meeting);
+
+      expect(await watched(), [
+        ["Dentist"],
+      ]);
+    });
+
+    test("a cached month is shown first and then caught up with the server once it is stale", () async {
+      server.add("Dentist", meeting);
+      await watched();
+      server.add("Lunch", meeting.add(const Duration(hours: 2)));
+      now = now.add(OfflineCalendarSource.freshFor + const Duration(seconds: 1));
+
+      expect(await watched(), [
+        ["Dentist"],
+        ["Dentist", "Lunch"],
+      ]);
+    });
+
+    test("a recently fetched month is shown from the device without asking the server", () async {
+      server.add("Dentist", meeting);
+      await watched();
+      server.unreachable = true;
+
+      expect(await watched(), [
+        ["Dentist"],
+      ]);
+    });
+
+    test("a change announced by the server is fetched even when the month is fresh", () async {
+      server.add("Dentist", meeting);
+      await watched();
+      final subscription = live.changes.listen((_) {});
+      server.add("Lunch", meeting.add(const Duration(hours: 2)));
+      now = now.add(const Duration(seconds: 1));
+      remoteChanges.add(calendar);
+      await subscription.cancel();
+
+      expect(await watched(), [
+        ["Dentist"],
+        ["Dentist", "Lunch"],
+      ]);
+    });
+
+    test("a cached month stays shown while the server is unreachable", () async {
+      server.add("Dentist", meeting);
+      await watched();
+      now = now.add(const Duration(hours: 1));
+      server.unreachable = true;
+
+      expect(await watched(), [
+        ["Dentist"],
+      ]);
+    });
+
+    test("an answer that started before a newer one never replaces it", () async {
+      server.add("Dentist", meeting);
+      final slow = Completer<void>();
+      holdNextAnswer = slow;
+      final older = live.watchEvents(november).toList();
+      await pumpEventQueue();
+
+      server.add("Lunch", meeting.add(const Duration(hours: 2)));
+      now = now.add(const Duration(seconds: 1));
+      await watched();
+      slow.complete();
+      await older;
+
+      server.unreachable = true;
+      expect(await watched(), [
+        ["Dentist", "Lunch"],
+      ]);
+    });
+
+    test("hiding a calendar is remembered on the device straight away", () async {
+      await live.watchCalendars().toList();
+
+      await live.setHidden(calendar, true);
+      server.unreachable = true;
+
+      expect((await live.watchCalendars().toList()).single.single.hidden, isTrue);
+    });
+
+    test("the calendar list comes from the device first and only again when the server's differs", () async {
+      expect((await live.watchCalendars().toList()).length, 1);
+      expect((await live.watchCalendars().toList()).length, 1);
+
+      server.unreachable = true;
+      expect((await live.watchCalendars().toList()).single.single.name, "Personal");
+    });
   });
 
   test("an event created offline shows at once and is created once the server is back", () async {

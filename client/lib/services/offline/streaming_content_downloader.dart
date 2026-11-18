@@ -67,7 +67,7 @@ class StreamingContentDownloader implements ContentDownloader {
     var received = 0;
     var reported = 0;
     _emit(ContentDownloadProgress(file.path, received: 0, total: total));
-    final body = (await _api.downloadStream(file.path)).map((chunk) {
+    final body = (await _api.downloadStream(file.path, purpose: DownloadPurpose.cache)).map((chunk) {
       if (_cancelled.contains(file.path)) throw StateError("cancelled");
       received += chunk.length;
       if (received - reported >= reportEvery || received >= total) {

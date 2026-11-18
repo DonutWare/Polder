@@ -50,3 +50,9 @@ abstract interface class CalendarSource {
 
   Future<void> setHidden(CalendarRef calendar, bool hidden);
 }
+
+abstract interface class LiveCalendarSource implements CalendarSource {
+  Stream<List<CalendarInfo>> watchCalendars();
+
+  Stream<List<CalendarEvent>> watchEvents(DateTimeRange range);
+}

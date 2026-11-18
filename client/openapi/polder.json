@@ -10948,6 +10948,22 @@
               "description": "Answer 304 if the file still has this ETag",
               "type": "string"
             }
+          },
+          {
+            "description": "Why the content is fetched: only download is recorded as activity, view and cache are not",
+            "explode": false,
+            "in": "query",
+            "name": "purpose",
+            "schema": {
+              "default": "download",
+              "description": "Why the content is fetched: only download is recorded as activity, view and cache are not",
+              "enum": [
+                "download",
+                "view",
+                "cache"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {

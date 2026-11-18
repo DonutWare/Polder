@@ -111,6 +111,33 @@ void main() {
       expect(await files.file("/Notes/Trips"), isNull);
     });
 
+    test("notes loaded on demand are listed at once and their content is kept once shown", () async {
+      final db = OfflineDatabase(NativeDatabase.memory());
+      final onDemandStore = OfflineStore(db);
+      final onDemand = OfflineFiles(
+        api: PolderApi(ApiClientFactory.create("https://cloud.test", httpClient: server)),
+        store: onDemandStore,
+        content: DbContentStore(db),
+        clock: () => now,
+        notesOnDemand: true,
+      );
+      addTearDown(onDemandStore.close);
+      server.putFile("/Notes/Plan.md", utf8.encode("# Plan"));
+      server.putFile("/Notes/Trips/Rome.md", utf8.encode("# Rome"));
+      await onDemand.pinNotes("/Notes");
+
+      await onDemand.pull();
+      await onDemand.mirror();
+
+      expect((await onDemand.children("/Notes")).map((file) => file.entry.name), unorderedEquals(["Plan.md", "Trips"]));
+      expect(await onDemand.read("/Notes/Plan.md"), isNull);
+
+      expect(utf8.decode(await onDemand.download("/Notes/Plan.md", purpose: DownloadPurpose.view)), "# Plan");
+      server.unreachable = true;
+      expect(utf8.decode((await onDemand.read("/Notes/Plan.md"))!), "# Plan");
+      expect(await onDemand.read("/Notes/Trips/Rome.md"), isNull);
+    });
+
     test("choosing another notes folder forgets the old one", () async {
       server.putFile("/Notes/Plan.md", utf8.encode("# Plan"));
       await files.pinNotes("/Notes");
@@ -134,6 +161,17 @@ void main() {
 
       expect(await localText("/Photos/Trip/b.jpg"), "bb");
       expect(await files.counts("/Photos"), (files: 2, ready: 2, bytes: 3, readyBytes: 3));
+    });
+
+    test("folders listed offline show the size of the files inside them", () async {
+      server.putFile("/Photos/Trip/Day 2/c.jpg", utf8.encode("ccc"));
+      server.putFile("/Photos/Trip_old/d.jpg", utf8.encode("dddd"));
+      await files.makeAvailableOffline("/Photos");
+      await sync();
+
+      final sizes = {for (final child in await files.children("/Photos")) child.entry.name: child.entry.size};
+
+      expect(sizes, {"a.jpg": 1, "Trip": 5, "Trip_old": 4});
     });
 
     test("removing a folder from the device keeps it on the server", () async {

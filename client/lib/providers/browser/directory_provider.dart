@@ -32,18 +32,23 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> with GuardedRefr
   @override
   Future<DirectoryListing> build() async {
     ref.onDispose(() => _indexingTimer?.cancel());
-    final listing = await _fetch(ref.watch(polderApiProvider));
-    _followIndexing(listing);
-    return listing;
+    ref.watch(polderApiProvider);
+    return localFirst(local: _offlineListing, remote: _fetch);
   }
 
-  Future<void> refresh() async {
-    if (await refreshWith(() => _fetch(_api)) case final listing?) _followIndexing(listing);
+  Future<void> refresh() => refreshWith(_fetch);
+
+  Future<DirectoryListing?> _offlineListing() async {
+    final files = ref.read(offlineFilesProvider).value;
+    if (files == null || !await files.availableOffline(path)) return null;
+    return _cachedListing();
   }
 
-  Future<DirectoryListing> _fetch(PolderApi api) async {
+  Future<DirectoryListing> _fetch() async {
     try {
-      return await api.list(path);
+      final listing = await _api.list(path);
+      _followIndexing(listing);
+      return listing;
     } on NetworkException {
       final cached = await _cachedListing();
       if (cached == null) rethrow;

@@ -98,7 +98,7 @@ void main() {
       expect(dir.isDir, isTrue);
       expect((await api.list("/api")).entries.map((entry) => entry.name), unorderedEquals(["a.txt", "sub"]));
       expect((await api.stat("/api/a.txt")).hash, created.hash);
-      expect(String.fromCharCodes(await api.downloadBytes("/api/a.txt")), "hello");
+      expect(String.fromCharCodes(await api.downloadBytes("/api/a.txt", purpose: DownloadPurpose.download)), "hello");
       final range = await api.openContent("/api/a.txt", range: const ByteRange(1, 3), ifMatchRev: created.rev);
       expect(String.fromCharCodes(await range.expand((bytes) => bytes).toList()), "ell");
 
@@ -150,7 +150,10 @@ void main() {
 
       final kept = await api.restoreFromTrash(item.id, onConflict: RestoreMode.keepBoth);
       expect(kept.path, "/trash/notes (restored).txt");
-      expect(String.fromCharCodes(await api.downloadBytes("/trash/notes.txt")), "new");
+      expect(
+        String.fromCharCodes(await api.downloadBytes("/trash/notes.txt", purpose: DownloadPurpose.download)),
+        "new",
+      );
 
       await api.delete(kept.path);
       final trashed = (await api.listTrash()).items.firstWhere((item) => item.originalPath == kept.path);
@@ -188,7 +191,8 @@ void main() {
 
     File local(String relativePath) => File("${localRoot.path}/$relativePath");
 
-    Future<Uint8List> remote(String relativePath) => otherDevice.downloadBytes("${root.remotePath}/$relativePath");
+    Future<Uint8List> remote(String relativePath) =>
+        otherDevice.downloadBytes("${root.remotePath}/$relativePath", purpose: DownloadPurpose.download);
 
     Future<void> putRemote(String relativePath, List<int> bytes) => otherDevice.putContent(
       "${root.remotePath}/$relativePath",
