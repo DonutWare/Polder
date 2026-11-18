@@ -68,7 +68,6 @@ class DesktopTray extends ConsumerStatefulWidget {
 typedef _TrayView = ({String status, String? speed, bool paused, bool signedIn, IconData glyph, Color color});
 
 class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
-  static const _appChannel = MethodChannel("polder/app");
   static final _template = Platform.isMacOS;
 
   tray.TrayIcon? _icon;
@@ -88,19 +87,15 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
   Color _color = Colors.black;
   _TrayView? _shown;
   bool _speedShown = false;
-  bool? _reportedSyncing;
   bool _quitting = false;
+  AppLifecycleListener? _lifecycle;
 
   @override
   void initState() {
     super.initState();
     if (!_isDesktop) return;
     windowManager.addListener(this);
-    if (Platform.isMacOS) {
-      _appChannel.setMethodCallHandler((call) async {
-        if (call.method == "quitRequested") await _requestQuit();
-      });
-    }
+    _lifecycle = AppLifecycleListener(onExitRequested: _onExitRequested);
     ref.listenManual(trayStatusProvider, (_, _) => _apply());
     ref.listenManual(updateProvider, (previous, next) {
       _applyUpdate();
@@ -130,7 +125,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
   void dispose() {
     if (_isDesktop) {
       windowManager.removeListener(this);
-      if (Platform.isMacOS) _appChannel.setMethodCallHandler(null);
+      _lifecycle?.dispose();
       _icon?.dispose();
     }
     super.dispose();
@@ -169,7 +164,6 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       },
       color: _color,
     );
-    _reportSyncing(status.isSyncing);
     if (view == _shown) return;
     final previous = _shown;
     _shown = view;
@@ -353,10 +347,10 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
     return tray.Image.fromBase64("data:image/png;base64,${base64Encode(png.buffer.asUint8List())}");
   }
 
-  void _reportSyncing(bool syncing) {
-    if (!Platform.isMacOS || syncing == _reportedSyncing) return;
-    _reportedSyncing = syncing;
-    unawaited(_appChannel.invokeMethod("setSyncing", syncing));
+  Future<ui.AppExitResponse> _onExitRequested() async {
+    if (_quitting) return ui.AppExitResponse.exit;
+    await _hideWindow();
+    return ui.AppExitResponse.cancel;
   }
 
   Future<void> _hideWindow() async {
@@ -391,11 +385,7 @@ class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
       await ref.read(updateProvider.notifier).installBeforeQuit(relaunch: restart);
       _icon?.dispose();
       _icon = null;
-      if (Platform.isMacOS) {
-        await _appChannel.invokeMethod("quit");
-      } else {
-        await windowManager.destroy();
-      }
+      await ServicesBinding.instance.exitApplication(ui.AppExitType.required);
       return true;
     } finally {
       _quitting = false;

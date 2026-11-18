@@ -8,7 +8,11 @@ class AppDelegate: FlutterAppDelegate {
   }
 
   override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-    return (mainFlutterWindow as? MainFlutterWindow)?.shouldTerminate() ?? .terminateNow
+    return isSessionEnding ? .terminateNow : super.applicationShouldTerminate(sender)
+  }
+
+  private var isSessionEnding: Bool {
+    NSAppleEventManager.shared().currentAppleEvent?.attributeDescriptor(forKeyword: kAEQuitReason) != nil
   }
 
   override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
