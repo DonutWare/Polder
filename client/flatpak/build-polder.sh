@@ -7,6 +7,7 @@ POLDER_CHANNEL=dev
 POLDER_UPDATE_PUBLIC_KEY=
 [ -f flatpak/build.env ] && . flatpak/build.env
 
+export TAR_OPTIONS=--no-same-owner
 export FLUTTER_ROOT="$PWD/.flutter-sdk"
 export PUB_CACHE="$PWD/.pub-cache"
 export PATH="$FLUTTER_ROOT/bin:$PATH"
