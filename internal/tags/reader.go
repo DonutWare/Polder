@@ -89,7 +89,8 @@ func (s *Service) readPath(ctx context.Context, userID int64, cleanPath string) 
 
 func (s *Service) readNote(ctx context.Context, owner users.User, note files.Entry, source []byte) error {
 	names := ReadTags(source)
-	if err := s.store.ReplaceNoteTags(ctx, note.ID, note.Hash, names); err != nil {
+	current, err := s.store.ReplaceNoteTags(ctx, note.ID, note.Hash, names)
+	if err != nil || !current {
 		return err
 	}
 	return s.store.EnsureNames(ctx, owner.ID, names)

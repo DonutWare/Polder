@@ -270,35 +270,35 @@ func (s *Store) NotesWithTag(ctx context.Context, ownerID int64, key string) ([]
 		ownerID, key)
 }
 
-func (s *Store) ReplaceNoteTags(ctx context.Context, fileID int64, hash string, names []string) error {
+func (s *Store) ReplaceNoteTags(ctx context.Context, fileID int64, hash string, names []string) (bool, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer func() { _ = tx.Rollback() }()
 	var currentHash string
 	err = tx.QueryRowContext(ctx, `SELECT hash FROM files WHERE id = $1`, fileID).Scan(&currentHash)
 	if errors.Is(err, sql.ErrNoRows) || (err == nil && currentHash != hash) {
-		return nil
+		return false, nil
 	}
 	if err != nil {
-		return err
+		return false, err
 	}
 	if _, err := tx.ExecContext(ctx, `DELETE FROM note_tags WHERE file_id = $1`, fileID); err != nil {
-		return err
+		return false, err
 	}
 	for _, name := range names {
 		if _, err := tx.ExecContext(ctx, `INSERT INTO note_tags (file_id, name_key, name) VALUES ($1, $2, $3)`,
 			fileID, Key(name), name); err != nil {
-			return err
+			return false, err
 		}
 	}
 	if _, err := tx.ExecContext(ctx,
 		`INSERT INTO tag_sources (source_id, hash) VALUES ($1, $2) ON CONFLICT (source_id) DO UPDATE SET hash = excluded.hash`,
 		fileID, hash); err != nil {
-		return err
+		return false, err
 	}
-	return tx.Commit()
+	return true, tx.Commit()
 }
 
 func (s *Store) ForgetNote(ctx context.Context, fileID int64) error {
