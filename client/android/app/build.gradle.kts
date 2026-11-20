@@ -84,5 +84,7 @@ flutter {
 
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
+    implementation("com.google.android.gms:play-services-base:18.5.0")
+    implementation("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

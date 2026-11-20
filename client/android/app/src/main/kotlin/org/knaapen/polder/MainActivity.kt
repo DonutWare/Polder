@@ -25,6 +25,7 @@ class MainActivity : FlutterActivity() {
                 if (call.method == "set") openSetAsChooser(call, result) else result.notImplemented()
             }
         FilesLocationChannel(messenger, applicationContext)
+        DocumentScannerChannel(messenger, applicationContext)
         intentChannels = listOf(
             PendingIntentChannel(messenger, "polder/calendar_insert", "insert", intent, ::calendarInsertFrom),
             PendingIntentChannel(

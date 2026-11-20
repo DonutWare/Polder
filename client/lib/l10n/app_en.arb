@@ -782,6 +782,7 @@
 	"discardScanMessage": "The scanned pages won't be saved.",
 	"scanFailed": "Couldn't scan the document.",
 	"scanCameraDenied": "Allow camera access to scan documents.",
+	"scanCameraOpenSettings": "Open settings",
 	"pages": "Pages",
 	"details": "Details",
 	"sortBy": "Sort",

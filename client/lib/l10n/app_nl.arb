@@ -372,6 +372,7 @@
 	"discardScanMessage": "De gescande pagina's worden niet opgeslagen.",
 	"scanFailed": "Het document kon niet worden gescand.",
 	"scanCameraDenied": "Geef toegang tot de camera om documenten te scannen.",
+	"scanCameraOpenSettings": "Instellingen openen",
 	"pages": "Pagina's",
 	"details": "Details",
 	"sortBy": "Sorteren",

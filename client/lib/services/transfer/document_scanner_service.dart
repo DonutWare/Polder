@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/services.dart";
 
 import "package:cunning_document_scanner/cunning_document_scanner.dart";
+import "package:permission_handler/permission_handler.dart";
 
 enum DocumentScanFailure { cameraDenied, other }
 
@@ -33,6 +34,7 @@ class NativeDocumentScannerService implements DocumentScannerService {
   @override
   Future<List<String>?> scan({required ScannerAccent accent}) async {
     if (Platform.isIOS) await _setAccent(accent);
+    if (Platform.isAndroid) await _prepareAndroidScanner();
     try {
       return await CunningDocumentScanner.getPictures(
         scannerSource: ScannerSource.cameraAndGallery,
@@ -43,6 +45,21 @@ class NativeDocumentScannerService implements DocumentScannerService {
         error.code == "permission_denied" ? DocumentScanFailure.cameraDenied : DocumentScanFailure.other,
         reason: error.message,
       );
+    }
+  }
+
+  Future<void> _prepareAndroidScanner() async {
+    if (await _installGoogleScanner()) return;
+    if (!await Permission.camera.request().isGranted) {
+      throw const DocumentScanException(DocumentScanFailure.cameraDenied);
+    }
+  }
+
+  Future<bool> _installGoogleScanner() async {
+    try {
+      return await _channel.invokeMethod<bool>("prepare") ?? false;
+    } on PlatformException {
+      return false;
     }
   }
 
