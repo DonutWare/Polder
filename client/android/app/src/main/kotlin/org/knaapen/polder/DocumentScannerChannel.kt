@@ -7,14 +7,14 @@ import com.google.android.gms.common.moduleinstall.ModuleInstallClient
 import com.google.android.gms.common.moduleinstall.ModuleInstallRequest
 import com.google.android.gms.common.moduleinstall.ModuleInstallStatusUpdate
 import com.google.android.gms.common.moduleinstall.ModuleInstallStatusUpdate.InstallState
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanner
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 
-class DocumentScannerChannel(messenger: BinaryMessenger, context: Context) {
-    private val installer: ModuleInstallClient = ModuleInstall.getClient(context)
-    private val scanner = GmsDocumentScanning.getClient(GmsDocumentScannerOptions.Builder().build())
+class DocumentScannerChannel(messenger: BinaryMessenger, private val context: Context) {
+    private val installer: ModuleInstallClient by lazy { ModuleInstall.getClient(context) }
 
     init {
         MethodChannel(messenger, "polder/document_scanner").setMethodCallHandler { call, result ->
@@ -23,12 +23,14 @@ class DocumentScannerChannel(messenger: BinaryMessenger, context: Context) {
     }
 
     private fun prepare(reply: SingleReply) {
+        val scanner = runCatching { GmsDocumentScanning.getClient(GmsDocumentScannerOptions.Builder().build()) }
+            .getOrElse { return reply.send(false) }
         installer.areModulesAvailable(scanner)
-            .addOnSuccessListener { if (it.areModulesAvailable()) reply.send(true) else install(reply) }
+            .addOnSuccessListener { if (it.areModulesAvailable()) reply.send(true) else install(scanner, reply) }
             .addOnFailureListener { reply.send(false) }
     }
 
-    private fun install(reply: SingleReply) {
+    private fun install(scanner: GmsDocumentScanner, reply: SingleReply) {
         val listener = object : InstallStatusListener {
             override fun onInstallStatusUpdated(update: ModuleInstallStatusUpdate) {
                 val ready = when (update.installState) {
