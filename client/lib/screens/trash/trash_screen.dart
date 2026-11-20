@@ -33,7 +33,7 @@ class TrashScreen extends ConsumerWidget {
           IconButton(
             tooltip: context.localized.emptyTrash,
             icon: const Icon(IconsaxPlusLinear.trash),
-            onPressed: () => _confirmEmpty(context, notifier),
+            onPressed: () => _confirmEmpty(context, notifier, trash.value!.items.length),
           ),
       ],
       body: AsyncValueView<TrashListing>(
@@ -63,7 +63,7 @@ class TrashScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmEmpty(BuildContext context, TrashNotifier notifier) async {
+  Future<void> _confirmEmpty(BuildContext context, TrashNotifier notifier, int count) async {
     final confirmed = await showConfirmDialog(
       context,
       title: context.localized.emptyTrashTitle,
@@ -71,7 +71,8 @@ class TrashScreen extends ConsumerWidget {
       confirmLabel: context.localized.emptyTrash,
       destructive: true,
     );
-    if (confirmed && context.mounted) await context.runWithFeedback(notifier.empty());
+    if (!confirmed || !context.mounted) return;
+    await context.runWithFeedback(notifier.empty(label: context.localized.fileOperationItems(count)));
   }
 }
 

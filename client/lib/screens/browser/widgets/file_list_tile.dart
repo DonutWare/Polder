@@ -3,10 +3,12 @@ import "package:flutter/material.dart";
 import "package:polder/models/activity.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder/screens/browser/widgets/file_metadata_text.dart";
+import "package:polder/screens/browser/widgets/file_operation_widgets.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/screens/browser/widgets/offline_mark.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
@@ -14,7 +16,14 @@ import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
 
 class FileListTile extends StatelessWidget {
-  const FileListTile({required this.entry, required this.interaction, this.pending, this.syncing, super.key});
+  const FileListTile({
+    required this.entry,
+    required this.interaction,
+    this.pending,
+    this.syncing,
+    this.operation,
+    super.key,
+  });
 
   final FileEntry entry;
   final EntryInteraction interaction;
@@ -22,6 +31,8 @@ class FileListTile extends StatelessWidget {
   final PendingUpload? pending;
 
   final TransferDirectionKind? syncing;
+
+  final EntryOperation? operation;
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +71,16 @@ class FileListTile extends StatelessWidget {
           EntryTagChips(entry: entry),
         ],
       ),
-      subtitle: switch ((upload, syncing)) {
-        (final PendingUpload upload, _) => Padding(
+      subtitle: switch ((upload, syncing, operation)) {
+        (_, _, final EntryOperation operation) => Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: EntryOperationStatus(operation: operation),
+        ),
+        (final PendingUpload upload, _, _) => Padding(
           padding: const EdgeInsets.only(top: 4),
           child: PendingUploadStatus(upload: upload),
         ),
-        (_, final TransferDirectionKind direction) => Row(
+        (_, final TransferDirectionKind direction, _) => Row(
           spacing: 8,
           children: [
             Flexible(child: FileMetadataText(entry: entry)),
@@ -90,6 +105,14 @@ class FileListTile extends StatelessWidget {
       ),
       onTap: interaction.onTap,
     );
+    if (operation case final operation?) {
+      return BusyEntry(
+        operation: operation,
+        child: PendingHighlight(
+          child: Material(type: MaterialType.transparency, child: tile),
+        ),
+      );
+    }
     return upload == null ? tile : PendingHighlight(child: tile);
   }
 }

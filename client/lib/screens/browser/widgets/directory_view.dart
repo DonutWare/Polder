@@ -7,6 +7,7 @@ import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/browser/browser_view_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
+import "package:polder/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/file_drop_zone.dart";
 import "package:polder/screens/browser/widgets/file_grid_view.dart";
@@ -29,6 +30,8 @@ class DirectoryView extends ConsumerWidget {
     final notifier = ref.read(directoryProvider(path).notifier);
     final pending = ref.watch(pendingUploadsProvider(path));
     final busyFolders = ref.watch(busyFoldersProvider(path));
+    final busyEntries = ref.watch(entryOperationsProvider(path));
+    final arriving = ref.watch(arrivingItemsProvider(path));
     ref.watch(editorCapabilitiesProvider);
     return FileDropZone(
       path: path,
@@ -36,10 +39,14 @@ class DirectoryView extends ConsumerWidget {
         value: ref.watch(directoryProvider(path)),
         onRetry: notifier.refresh,
         data: (listing) {
-          final items = mergePendingUploads(
-            ref.watch(browserSortProvider).apply(listing.entries),
-            pending,
-            busyFolders: busyFolders,
+          final items = mergeFileOperations(
+            mergePendingUploads(
+              ref.watch(browserSortProvider).apply(listing.entries),
+              pending,
+              busyFolders: busyFolders,
+            ),
+            busy: busyEntries,
+            arriving: arriving,
           );
           final view = ReadableWidth(
             maxWidth: 1200,

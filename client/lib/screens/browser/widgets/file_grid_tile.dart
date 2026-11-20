@@ -3,9 +3,11 @@ import "package:flutter/material.dart";
 import "package:polder/models/activity.dart";
 
 import "package:polder/models/file_entry.dart";
+import "package:polder/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
+import "package:polder/screens/browser/widgets/file_operation_widgets.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/screens/browser/widgets/offline_mark.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
@@ -14,12 +16,20 @@ import "package:polder/theme/app_theme.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
 
 class FileGridTile extends StatelessWidget {
-  const FileGridTile({required this.entry, required this.interaction, this.pending, this.syncing, super.key});
+  const FileGridTile({
+    required this.entry,
+    required this.interaction,
+    this.pending,
+    this.syncing,
+    this.operation,
+    super.key,
+  });
 
   final FileEntry entry;
   final EntryInteraction interaction;
   final PendingUpload? pending;
   final TransferDirectionKind? syncing;
+  final EntryOperation? operation;
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +38,12 @@ class FileGridTile extends StatelessWidget {
     final selected = interaction.selected;
     final onIconTap = interaction.onIconTap;
     final onMenu = interaction.onMenu;
-    return Card(
+    final card = Card(
       margin: EdgeInsets.zero,
       color: selected ? colors.secondaryContainer : null,
       shape: squircle(
         AppRadius.inset + 4,
-        side: upload == null ? BorderSide.none : BorderSide(color: colors.primary, width: 1.5),
+        side: upload == null && operation == null ? BorderSide.none : BorderSide(color: colors.primary, width: 1.5),
       ),
       child: InkWell(
         onTap: interaction.onTap,
@@ -68,7 +78,23 @@ class FileGridTile extends StatelessWidget {
                             ),
                           ),
                         ),
-                      if (upload != null)
+                      if (operation case final operation?)
+                        Positioned(
+                          left: 8,
+                          right: 8,
+                          bottom: 8,
+                          child: DecoratedBox(
+                            decoration: ShapeDecoration(
+                              color: colors.surface.withValues(alpha: 0.9),
+                              shape: squircle(AppRadius.tag),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6),
+                              child: EntryOperationStatus(operation: operation),
+                            ),
+                          ),
+                        )
+                      else if (upload != null)
                         Positioned(
                           left: 8,
                           right: 8,
@@ -125,5 +151,7 @@ class FileGridTile extends StatelessWidget {
         ),
       ),
     );
+    if (operation case final operation?) return BusyEntry(operation: operation, child: card);
+    return card;
   }
 }

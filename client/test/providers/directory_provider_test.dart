@@ -1,5 +1,8 @@
+import "dart:async";
+
 import "package:fake_async/fake_async.dart";
 import "package:flutter_test/flutter_test.dart";
+import "package:http/http.dart" as http;
 
 import "package:polder/providers/account_provider.dart";
 import "package:polder/providers/browser/directory_provider.dart";
@@ -156,4 +159,44 @@ void main() {
     expect(server.contentOf("/Photos (copy)/p.jpg"), isNotNull);
     expect(server.contentOf("/Photos/b.txt"), "b".codeUnits);
   });
+
+  test("a move keeps going after the folder it started from is closed", () async {
+    server.putFile("/Photos/q.jpg", "q".codeUnits);
+    final gated = _GatedMoves(SignedInServer(server));
+    final gatedHarness = ProviderHarness(httpClient: gated, account: account);
+    addTearDown(gatedHarness.dispose);
+    final container = gatedHarness.container;
+    await container.read(accountProvider.future);
+    container.listen(directoryProvider("/"), (_, _) {});
+    await container.read(directoryProvider("/").future);
+    final photos = container.listen(directoryProvider("/Photos"), (_, _) {});
+    final listing = await container.read(directoryProvider("/Photos").future);
+
+    final moving = container.read(directoryProvider("/Photos").notifier).moveAllTo(listing.entries, "/");
+    photos.close();
+    await Future<void>.delayed(Duration.zero);
+    expect(container.exists(directoryProvider("/Photos")), isFalse);
+    gated.open();
+    await moving;
+
+    expect(server.contentOf("/p.jpg"), isNotNull);
+    expect(server.contentOf("/q.jpg"), isNotNull);
+    final destination = await container.read(directoryProvider("/").future);
+    expect(destination.entries.map((entry) => entry.name), containsAll(["p.jpg", "q.jpg"]));
+  });
+}
+
+class _GatedMoves extends http.BaseClient {
+  _GatedMoves(this._inner);
+
+  final http.Client _inner;
+  final _gate = Completer<void>();
+
+  void open() => _gate.complete();
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    if (request.url.path.endsWith("/files/move")) await _gate.future;
+    return _inner.send(request);
+  }
 }

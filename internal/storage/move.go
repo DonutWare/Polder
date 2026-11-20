@@ -10,16 +10,30 @@ import (
 	"syscall"
 )
 
+var ErrSourceLeftBehind = errors.New("copied across filesystems, but the source could not be removed")
+
 func Move(source, target string) error {
 	err := os.Rename(source, target)
 	if !errors.Is(err, syscall.EXDEV) {
+		return err
+	}
+	return moveAcrossFilesystems(source, target)
+}
+
+func moveAcrossFilesystems(source, target string) error {
+	if _, err := os.Lstat(target); err == nil {
+		return fmt.Errorf("copy across filesystems: %s: %w", target, fs.ErrExist)
+	} else if !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 	if err := copyTree(source, target); err != nil {
 		_ = os.RemoveAll(target)
 		return fmt.Errorf("copy across filesystems: %w", err)
 	}
-	return os.RemoveAll(source)
+	if err := os.RemoveAll(source); err != nil {
+		return fmt.Errorf("%w: %w", ErrSourceLeftBehind, err)
+	}
+	return nil
 }
 
 func copyTree(source, target string) error {

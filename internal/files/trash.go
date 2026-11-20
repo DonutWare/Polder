@@ -103,55 +103,89 @@ func (s *Service) ListTrash(ctx context.Context, owner users.User) ([]TrashItem,
 
 func noUndo() {}
 
+type trashPlan struct {
+	entry     Entry
+	size      int64
+	fileIDs   map[string]int64
+	storageID string
+}
+
 func (s *Service) moveToTrash(ctx context.Context, q querier, owner users.User, entry Entry) (int64, func(), error) {
-	absolute, err := s.disk.Resolve(owner.Username, entry.Path)
+	plan, err := s.planTrash(ctx, q, owner, entry)
 	if err != nil {
 		return 0, noUndo, err
 	}
-	size, err := treeSize(ctx, q, owner.ID, entry)
+	onDisk, err := s.moveIntoTrash(owner, plan)
 	if err != nil {
 		return 0, noUndo, err
 	}
-	storageID := storage.NewID()
-	err = s.disk.MoveToTrash(owner.Username, absolute, storageID, entry.Name)
-	if errors.Is(err, fs.ErrNotExist) {
+	if !onDisk {
 		return 0, noUndo, s.removeTree(ctx, q, owner, entry.Path)
 	}
+	trashID, err := s.recordTrash(ctx, q, owner, plan)
 	if err != nil {
-		return 0, noUndo, fmt.Errorf("move to trash: %w", err)
-	}
-	undo := func() {
-		_ = storage.Move(s.disk.TrashItemPath(owner.Username, storageID, entry.Name), absolute)
-		_ = s.disk.RemoveTrashItem(owner.Username, storageID)
-	}
-	deletedAt := time.Now().UTC()
-	trashID, err := insertTrashItem(ctx, q, owner.ID, entry, size, storageID, deletedAt)
-	if err != nil {
-		undo()
+		s.undoTrash(owner, plan)
 		return 0, noUndo, err
+	}
+	return trashID, func() { s.undoTrash(owner, plan) }, nil
+}
+
+func (s *Service) planTrash(ctx context.Context, q querier, owner users.User, entry Entry) (trashPlan, error) {
+	size, err := treeSize(ctx, q, owner.ID, entry)
+	if err != nil {
+		return trashPlan{}, err
 	}
 	fileIDs, err := treeFileIDs(ctx, q, owner.ID, entry)
 	if err != nil {
-		undo()
-		return 0, noUndo, err
+		return trashPlan{}, err
 	}
-	if err := s.writeTrashSidecar(owner.Username, storageID, trashSidecar{OriginalPath: entry.Path, DeletedAt: deletedAt, FileIDs: fileIDs}); err != nil {
-		undo()
-		return 0, noUndo, err
+	return trashPlan{entry: entry, size: size, fileIDs: fileIDs, storageID: storage.NewID()}, nil
+}
+
+func (s *Service) moveIntoTrash(owner users.User, plan trashPlan) (bool, error) {
+	absolute, err := s.disk.Resolve(owner.Username, plan.entry.Path)
+	if err != nil {
+		return false, err
 	}
-	if err := attachVersionsToTrash(ctx, q, owner.ID, entry, trashID); err != nil {
-		undo()
-		return 0, noUndo, err
+	err = keepLeftovers(s.disk.MoveToTrash(owner.Username, absolute, plan.storageID, plan.entry.Name), owner, plan.entry.Path)
+	if errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("move to trash: %w", err)
+	}
+	return true, nil
+}
+
+func (s *Service) undoTrash(owner users.User, plan trashPlan) {
+	absolute, err := s.disk.Resolve(owner.Username, plan.entry.Path)
+	if err != nil {
+		return
+	}
+	_ = storage.Move(s.disk.TrashItemPath(owner.Username, plan.storageID, plan.entry.Name), absolute)
+	_ = s.disk.RemoveTrashItem(owner.Username, plan.storageID)
+}
+
+func (s *Service) recordTrash(ctx context.Context, q querier, owner users.User, plan trashPlan) (int64, error) {
+	deletedAt := time.Now().UTC()
+	trashID, err := insertTrashItem(ctx, q, owner.ID, plan.entry, plan.size, plan.storageID, deletedAt)
+	if err != nil {
+		return 0, err
+	}
+	sidecar := trashSidecar{OriginalPath: plan.entry.Path, DeletedAt: deletedAt, FileIDs: plan.fileIDs}
+	if err := s.writeTrashSidecar(owner.Username, plan.storageID, sidecar); err != nil {
+		return 0, err
+	}
+	if err := attachVersionsToTrash(ctx, q, owner.ID, plan.entry, trashID); err != nil {
+		return 0, err
 	}
 	if err := s.relocateHistoriesOfTrashItem(ctx, q, owner, trashID); err != nil {
-		undo()
-		return 0, noUndo, err
+		return 0, err
 	}
-	if err := s.removeTree(ctx, q, owner, entry.Path); err != nil {
-		undo()
-		return 0, noUndo, err
+	if err := s.removeTree(ctx, q, owner, plan.entry.Path); err != nil {
+		return 0, err
 	}
-	return trashID, undo, nil
+	return trashID, nil
 }
 
 func insertTrashItem(ctx context.Context, q querier, userID int64, entry Entry, size int64, storageID string, deletedAt time.Time) (int64, error) {
@@ -193,35 +227,79 @@ func treeSize(ctx context.Context, q querier, userID int64, entry Entry) (int64,
 }
 
 func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int64, mode RestoreMode) (Entry, error) {
+	item, err := findTrashItem(ctx, s.db, owner.ID, id)
+	if err != nil {
+		return Entry{}, err
+	}
+	unlockPath := s.paths.lock(owner.ID, item.OriginalPath)
+	defer unlockPath()
+
+	if !s.claimTrash(item.storageID) {
+		return Entry{}, apperr.Conflict(nil, "%s is busy in the trash", item.Name)
+	}
+	defer s.releaseTrash(item.storageID)
+
+	target, err := s.prepareRestore(ctx, owner, id, mode)
+	if err != nil {
+		return Entry{}, err
+	}
+	ctx = context.WithoutCancel(ctx)
+	absolute, err := s.disk.Resolve(owner.Username, target)
+	if err != nil {
+		return Entry{}, err
+	}
+	source := s.disk.TrashItemPath(owner.Username, item.storageID, item.Name)
+	if err := keepLeftovers(storage.Move(source, absolute), owner, item.OriginalPath); err != nil {
+		return Entry{}, fmt.Errorf("restore from trash: %w", err)
+	}
+	restored, changedFiles, err := s.indexRestore(ctx, owner, item, target, absolute)
+	if err != nil {
+		if undoErr := storage.Move(absolute, source); undoErr != nil {
+			logger.Error("move back into the trash after failing to index the restore", "user", owner.Username, "item", item.ID, "error", undoErr)
+		}
+		return Entry{}, err
+	}
+	unlockPath()
+	if err := s.disk.RemoveTrashItem(owner.Username, item.storageID); err != nil {
+		logger.Warn("remove restored trash directory", "user", owner.Username, "error", err)
+	}
+	for _, changedPath := range changedFiles {
+		s.onContentChanged(owner.ID, changedPath)
+	}
+	if mode == RestoreOverwrite {
+		s.onContentRemoved()
+	}
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationRestore, Path: restored.Path, FromPath: item.OriginalPath, IsDir: restored.IsDir, Size: item.Size})
+	return restored, nil
+}
+
+func (s *Service) prepareRestore(ctx context.Context, owner users.User, id int64, mode RestoreMode) (string, error) {
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
+	var target string
+	undo := noUndo
+	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
+		item, err := findTrashItem(ctx, tx, owner.ID, id)
+		if err != nil {
+			return err
+		}
+		if target, undo, err = s.restoreTarget(ctx, tx, owner, item, mode); err != nil {
+			return err
+		}
+		return s.ensureParentDirectories(ctx, tx, owner, target)
+	})
+	if err != nil {
+		undo()
+	}
+	return target, err
+}
 
-	var item TrashItem
+func (s *Service) indexRestore(ctx context.Context, owner users.User, item TrashItem, target, absolute string) (Entry, []string, error) {
+	unlock := s.locks.lock(owner.ID)
+	defer unlock()
 	var restored Entry
 	var changedFiles []string
-	var undo []func()
 	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
-		var err error
-		if item, err = findTrashItem(ctx, tx, owner.ID, id); err != nil {
-			return err
-		}
-		target, undoOverwrite, err := s.restoreTarget(ctx, tx, owner, item, mode)
-		if err != nil {
-			return err
-		}
-		undo = append(undo, undoOverwrite)
-		if err := s.ensureParentDirectories(ctx, tx, owner, target); err != nil {
-			return err
-		}
-		absolute, err := s.disk.Resolve(owner.Username, target)
-		if err != nil {
-			return err
-		}
-		source := s.disk.TrashItemPath(owner.Username, item.storageID, item.Name)
-		if err := storage.Move(source, absolute); err != nil {
-			return fmt.Errorf("restore from trash: %w", err)
-		}
-		undo = append(undo, func() { _ = storage.Move(absolute, source) })
 		sidecar, err := s.readTrashSidecar(owner.Username, item.storageID)
 		if err != nil {
 			logger.Warn("read trash details, restored files get new ids", "item", item.ID, "error", err)
@@ -235,23 +313,7 @@ func (s *Service) RestoreFromTrash(ctx context.Context, owner users.User, id int
 		_, err = tx.ExecContext(ctx, `DELETE FROM trash WHERE id = $1`, item.ID)
 		return err
 	})
-	if err != nil {
-		for i := len(undo) - 1; i >= 0; i-- {
-			undo[i]()
-		}
-		return Entry{}, err
-	}
-	if err := s.disk.RemoveTrashItem(owner.Username, item.storageID); err != nil {
-		logger.Warn("remove restored trash directory", "user", owner.Username, "error", err)
-	}
-	for _, changedPath := range changedFiles {
-		s.onContentChanged(owner.ID, changedPath)
-	}
-	if mode == RestoreOverwrite {
-		s.onContentRemoved()
-	}
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationRestore, Path: restored.Path, FromPath: item.OriginalPath, IsDir: restored.IsDir, Size: item.Size})
-	return restored, nil
+	return restored, changedFiles, err
 }
 
 func (s *Service) restoreTarget(ctx context.Context, q querier, owner users.User, item TrashItem, mode RestoreMode) (string, func(), error) {
@@ -384,7 +446,11 @@ func (s *Service) DeleteFromTrash(ctx context.Context, owner users.User, id int6
 	if err != nil {
 		return err
 	}
-	removed, err := s.purge(ctx, owner, []TrashItem{item})
+	if !s.claimTrash(item.storageID) {
+		return apperr.Conflict(nil, "%s is busy in the trash", item.Name)
+	}
+	defer s.releaseTrash(item.storageID)
+	removed, err := s.purgeClaimed(ctx, owner, []TrashItem{item})
 	if err != nil {
 		return err
 	}
@@ -408,7 +474,9 @@ func (s *Service) EmptyTrash(ctx context.Context, owner users.User) error {
 	if err != nil {
 		return err
 	}
-	removed, err := s.purge(ctx, owner, items)
+	items = s.claimTrashItems(items)
+	defer s.releaseTrashItems(items)
+	removed, err := s.purgeClaimed(ctx, owner, items)
 	if err != nil || len(items) == 0 {
 		return err
 	}
@@ -421,7 +489,9 @@ func (s *Service) PurgeTrash(ctx context.Context, owner users.User, deletedBefor
 	if err != nil {
 		return 0, err
 	}
-	removed, err := s.purge(ctx, owner, items)
+	items = s.claimTrashItems(items)
+	defer s.releaseTrashItems(items)
+	removed, err := s.purgeClaimed(ctx, owner, items)
 	if err != nil || len(items) == 0 {
 		return len(items), err
 	}
@@ -438,6 +508,12 @@ func totalSize(items []TrashItem) int64 {
 }
 
 func (s *Service) purge(ctx context.Context, owner users.User, items []TrashItem) ([]int64, error) {
+	items = s.claimTrashItems(items)
+	defer s.releaseTrashItems(items)
+	return s.purgeClaimed(ctx, owner, items)
+}
+
+func (s *Service) purgeClaimed(ctx context.Context, owner users.User, items []TrashItem) ([]int64, error) {
 	if len(items) == 0 {
 		return nil, nil
 	}
@@ -546,7 +622,7 @@ func (s *Service) ReconcileTrash(ctx context.Context, owner users.User) (int, er
 				}
 				continue
 			}
-			if known[entry.Name()] || !isHex(entry.Name(), storageIDLength) {
+			if known[entry.Name()] || !isHex(entry.Name(), storageIDLength) || s.isTrashInFlight(entry.Name()) {
 				continue
 			}
 			added, err := s.recoverTrashItem(ctx, tx, owner, entry.Name())
@@ -560,6 +636,36 @@ func (s *Service) ReconcileTrash(ctx context.Context, owner users.User) (int, er
 		return nil
 	})
 	return recovered, err
+}
+
+func (s *Service) claimTrash(storageID string) bool {
+	_, taken := s.trashInFlight.LoadOrStore(storageID, true)
+	return !taken
+}
+
+func (s *Service) releaseTrash(storageID string) {
+	s.trashInFlight.Delete(storageID)
+}
+
+func (s *Service) claimTrashItems(items []TrashItem) []TrashItem {
+	claimed := make([]TrashItem, 0, len(items))
+	for _, item := range items {
+		if s.claimTrash(item.storageID) {
+			claimed = append(claimed, item)
+		}
+	}
+	return claimed
+}
+
+func (s *Service) releaseTrashItems(items []TrashItem) {
+	for _, item := range items {
+		s.releaseTrash(item.storageID)
+	}
+}
+
+func (s *Service) isTrashInFlight(storageID string) bool {
+	_, inFlight := s.trashInFlight.Load(storageID)
+	return inFlight
 }
 
 func (s *Service) recoverTrashItem(ctx context.Context, tx *sql.Tx, owner users.User, storageID string) (bool, error) {

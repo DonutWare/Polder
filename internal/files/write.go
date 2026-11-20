@@ -143,6 +143,8 @@ func (s *Service) stage(directory string, content io.Reader, budget int64) (stag
 }
 
 func (s *Service) commit(ctx context.Context, owner users.User, cleanPath, absolute string, staged stagedFile, request WriteRequest) (Entry, error) {
+	unlockPath := s.paths.lock(owner.ID, cleanPath)
+	defer unlockPath()
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
 

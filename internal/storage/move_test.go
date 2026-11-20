@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -73,5 +75,51 @@ func TestMoveRenamesWithinOneFilesystem(t *testing.T) {
 	}
 	if _, err := os.Stat(source); !os.IsNotExist(err) {
 		t.Errorf("source still present: %v", err)
+	}
+}
+
+func TestMoveAcrossFilesystemsLeavesAnExistingTargetAlone(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	target := filepath.Join(root, "target")
+	if err := os.WriteFile(source, []byte("new"), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(target, []byte("existing"), 0o640); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := moveAcrossFilesystems(source, target); !errors.Is(err, fs.ErrExist) {
+		t.Fatalf("moveAcrossFilesystems = %v, want an already-exists error", err)
+	}
+
+	for path, want := range map[string]string{source: "new", target: "existing"} {
+		content, err := os.ReadFile(path)
+		if err != nil || string(content) != want {
+			t.Errorf("%s = %q, %v; want %q", path, content, err, want)
+		}
+	}
+}
+
+func TestMoveAcrossFilesystemsMovesATree(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "source")
+	if err := os.MkdirAll(filepath.Join(source, "nested"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(source, "nested", "note.txt"), []byte("hello"), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	target := filepath.Join(root, "target")
+
+	if err := moveAcrossFilesystems(source, target); err != nil {
+		t.Fatalf("moveAcrossFilesystems: %v", err)
+	}
+
+	if _, err := os.Stat(source); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("source still exists: %v", err)
+	}
+	if content, err := os.ReadFile(filepath.Join(target, "nested", "note.txt")); err != nil || string(content) != "hello" {
+		t.Errorf("moved content = %q, %v", content, err)
 	}
 }

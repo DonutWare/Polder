@@ -3,6 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder/models/activity.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/transfer.dart";
+import "package:polder/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/providers/offline/offline_changes_provider.dart";
@@ -48,8 +49,8 @@ class PendingUpload {
 }
 
 class BrowserItem {
-  const BrowserItem({this.entry, this.pending, this.pendingFolder, this.syncing})
-    : assert(entry != null || pending != null || pendingFolder != null);
+  const BrowserItem({this.entry, this.pending, this.pendingFolder, this.syncing, this.operation, this.arriving})
+    : assert(entry != null || pending != null || pendingFolder != null || arriving != null);
 
   final FileEntry? entry;
   final PendingUpload? pending;
@@ -58,9 +59,16 @@ class BrowserItem {
 
   final TransferDirectionKind? syncing;
 
-  String get name => entry?.name ?? pending?.name ?? pendingFolder!;
+  final EntryOperation? operation;
 
-  bool get isDir => entry?.isDir ?? pendingFolder != null;
+  final ArrivingItem? arriving;
+
+  String get name => entry?.name ?? pending?.name ?? pendingFolder ?? arriving!.name;
+
+  bool get isDir => entry?.isDir ?? (pendingFolder != null || (arriving?.isDir ?? false));
+
+  BrowserItem withOperation(EntryOperation operation) =>
+      BrowserItem(entry: entry, pending: pending, pendingFolder: pendingFolder, syncing: syncing, operation: operation);
 }
 
 final pendingUploadsProvider = Provider.autoDispose.family<List<PendingUpload>, String>((ref, path) {
@@ -118,3 +126,39 @@ List<BrowserItem> mergePendingUploads(
   }
   return items;
 }
+
+List<BrowserItem> mergeFileOperations(
+  List<BrowserItem> items, {
+  required Map<String, EntryOperation> busy,
+  required List<ArrivingItem> arriving,
+}) {
+  if (busy.isEmpty && arriving.isEmpty) return items;
+  final merged = <BrowserItem>[];
+  for (final item in items) {
+    final operation = busy[item.name];
+    if (operation == null || item.entry == null) {
+      merged.add(item);
+    } else if (!_leaves(operation)) {
+      merged.add(item.withOperation(operation));
+    }
+  }
+  final present = {for (final item in merged) item.name};
+  for (final incoming in arriving) {
+    if (!present.add(incoming.name)) continue;
+    final key = incoming.name.toLowerCase();
+    final index = merged.indexWhere(
+      (item) => incoming.isDir
+          ? !item.isDir || item.name.toLowerCase().compareTo(key) > 0
+          : !item.isDir && item.name.toLowerCase().compareTo(key) > 0,
+    );
+    merged.insert(index == -1 ? merged.length : index, BrowserItem(arriving: incoming));
+  }
+  return merged;
+}
+
+bool _leaves(EntryOperation operation) =>
+    operation.state == FileOperationItemState.done &&
+    switch (operation.kind) {
+      FileOperationKind.move || FileOperationKind.delete || FileOperationKind.rename => true,
+      _ => false,
+    };

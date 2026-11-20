@@ -11,20 +11,37 @@ class StallGuardClient extends http.BaseClient {
   StallGuardClient(this._inner, {this.stallTimeout = defaultStallTimeout});
 
   static const defaultStallTimeout = Duration(seconds: 60);
+  static const fileOperationStallTimeout = Duration(hours: 6);
   static const finishingBytesPerSecond = 10 * 1024 * 1024;
 
   final http.Client _inner;
   final Duration stallTimeout;
 
+  static bool isFileOperation(http.BaseRequest request) {
+    final segments = request.url.pathSegments.where((segment) => segment.isNotEmpty).toList();
+    if (segments.isEmpty || segments.contains("calendars")) return false;
+    final last = segments.last;
+    final inTrash = segments.contains("trash");
+    return switch (request.method) {
+      "POST" => last == "move" || last == "copy" || (inTrash && last == "restore"),
+      "DELETE" => last == "files" || inTrash,
+      _ => false,
+    };
+  }
+
+  Duration _timeoutFor(http.BaseRequest request) =>
+      isFileOperation(request) && fileOperationStallTimeout > stallTimeout ? fileOperationStallTimeout : stallTimeout;
+
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final watchdog = _Watchdog(stallTimeout);
+    final timeout = _timeoutFor(request);
+    final watchdog = _Watchdog(timeout);
     try {
       final response = await _inner.send(_GuardedRequest(request, watchdog));
-      return _guardedResponse(request.url, response, watchdog);
+      return _guardedResponse(request.url, response, watchdog, timeout);
     } on http.RequestAbortedException {
       watchdog.stop();
-      if (watchdog.fired) throw ServerStalledException(request.url, stallTimeout);
+      if (watchdog.fired) throw ServerStalledException(request.url, timeout);
       rethrow;
     } catch (_) {
       watchdog.stop();
@@ -32,7 +49,12 @@ class StallGuardClient extends http.BaseClient {
     }
   }
 
-  http.StreamedResponse _guardedResponse(Uri url, http.StreamedResponse response, _Watchdog watchdog) {
+  http.StreamedResponse _guardedResponse(
+    Uri url,
+    http.StreamedResponse response,
+    _Watchdog watchdog,
+    Duration timeout,
+  ) {
     watchdog.touch();
     StreamSubscription<List<int>>? source;
     var finished = false;
@@ -45,7 +67,7 @@ class StallGuardClient extends http.BaseClient {
             body.add(chunk);
           },
           onError: (Object error, StackTrace stack) => body.addError(
-            error is http.RequestAbortedException && watchdog.fired ? ServerStalledException(url, stallTimeout) : error,
+            error is http.RequestAbortedException && watchdog.fired ? ServerStalledException(url, timeout) : error,
             stack,
           ),
           onDone: () {

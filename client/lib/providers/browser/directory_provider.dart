@@ -4,6 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/file_entry.dart";
+import "package:polder/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/offline/offline_storage_provider.dart";
 import "package:polder/providers/polder_api_provider.dart";
 import "package:polder/providers/current_user_provider.dart";
@@ -78,34 +79,69 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> with GuardedRefr
     return created;
   }
 
-  Future<void> rename(FileEntry entry, String newName) =>
-      _mutate(() => _api.move(from: entry.path, to: RemotePath.join(path, newName), baseRev: entry.rev));
+  FileOperationsNotifier get _operations => ref.read(fileOperationsProvider.notifier);
+
+  Future<void> rename(FileEntry entry, String newName) async {
+    if (_operations.isBusy(entry.path)) return;
+    await _mutate(
+      () => _operations.runSingle(
+        kind: FileOperationKind.rename,
+        item: FileOperationItem.of(entry, targetName: newName),
+        perform: () => _api.move(from: entry.path, to: RemotePath.join(path, newName), baseRev: entry.rev),
+      ),
+    );
+  }
 
   Future<void> moveTo(FileEntry entry, String destination) => moveAllTo([entry], destination);
 
   Future<void> moveAllTo(Iterable<FileEntry> entries, String destination) async {
+    final api = _api;
+    final container = ref.container;
+    final byPath = _idleByPath(entries);
+    if (byPath.isEmpty) return;
     try {
-      await _mutateEach(
-        entries,
-        (entry) => _api.move(from: entry.path, to: RemotePath.join(destination, entry.name), baseRev: entry.rev),
+      await _mutate(
+        () => _operations.run(
+          kind: FileOperationKind.move,
+          destination: destination,
+          items: [for (final entry in byPath.values) FileOperationItem.of(entry)],
+          onItemDone: (_) => unawaited(_refreshIfShown(container, destination)),
+          perform: (item) {
+            final entry = byPath[item.path]!;
+            return api.move(from: entry.path, to: RemotePath.join(destination, entry.name), baseRev: entry.rev);
+          },
+        ),
       );
     } finally {
-      if (ref.mounted) ref.invalidate(directoryProvider(destination));
+      container.invalidate(directoryProvider(destination));
     }
   }
 
   /// Copies [entries] into [destination]. One whose name is taken there is called "name (copy)" instead,
   /// numbered when that is taken too; [copySuffix] is the localized word for "copy".
   Future<void> copyAllTo(Iterable<FileEntry> entries, String destination, {required String copySuffix}) async {
+    final api = _api;
+    final operations = _operations;
+    final container = ref.container;
     try {
-      final taken = {for (final entry in (await _api.list(destination)).entries) entry.name};
-      await _mutateEach(entries, (entry) {
+      final taken = {for (final entry in (await api.list(destination)).entries) entry.name};
+      final items = <FileOperationItem>[];
+      for (final entry in entries) {
         final name = _freeName(entry, taken, copySuffix);
         taken.add(name);
-        return _api.copy(from: entry.path, to: RemotePath.join(destination, name));
-      });
+        items.add(FileOperationItem.of(entry, targetName: name));
+      }
+      await _mutate(
+        () => operations.run(
+          kind: FileOperationKind.copy,
+          destination: destination,
+          items: items,
+          onItemDone: (_) => unawaited(_refreshIfShown(container, destination)),
+          perform: (item) => api.copy(from: item.path, to: RemotePath.join(destination, item.targetName!)),
+        ),
+      );
     } finally {
-      if (ref.mounted && destination != path) ref.invalidate(directoryProvider(destination));
+      if (destination != path) container.invalidate(directoryProvider(destination));
     }
   }
 
@@ -122,33 +158,38 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> with GuardedRefr
 
   Future<void> delete(FileEntry entry) => deleteAll([entry]);
 
-  Future<void> deleteAll(Iterable<FileEntry> entries) =>
-      _mutateEach(entries, (entry) => _api.delete(entry.path, baseRev: entry.rev));
+  Future<void> deleteAll(Iterable<FileEntry> entries) {
+    final api = _api;
+    final byPath = _idleByPath(entries);
+    if (byPath.isEmpty) return Future.value();
+    return _mutate(
+      () => _operations.run(
+        kind: FileOperationKind.delete,
+        items: [for (final entry in byPath.values) FileOperationItem.of(entry)],
+        perform: (item) => api.delete(item.path, baseRev: byPath[item.path]!.rev),
+      ),
+    );
+  }
 
-  // One failing entry doesn't stop the others; the first failure is rethrown once all were tried.
-  Future<void> _mutateEach(Iterable<FileEntry> entries, Future<Object?> Function(FileEntry entry) action) =>
-      _mutate(() async {
-        (Object, StackTrace)? failure;
-        for (final entry in entries) {
-          try {
-            await action(entry);
-          } catch (error, stack) {
-            failure ??= (error, stack);
-          }
-        }
-        if (failure case (final error, final stack)) Error.throwWithStackTrace(error, stack);
-      });
+  Map<String, FileEntry> _idleByPath(Iterable<FileEntry> entries) => {
+    for (final entry in entries)
+      if (!_operations.isBusy(entry.path)) entry.path: entry,
+  };
+
+  static Future<void> _refreshIfShown(ProviderContainer container, String directory) async {
+    if (!container.exists(directoryProvider(directory))) return;
+    await container.read(directoryProvider(directory).notifier).refresh();
+  }
 
   // The listing is refreshed even when the action fails, since part of it may have gone through.
   Future<void> _mutate(Future<void> Function() action) async {
+    final container = ref.container;
     try {
       await action();
     } finally {
-      if (ref.mounted) {
-        ref.invalidate(currentUserProvider);
-        ref.read(syncSchedulerProvider)?.requestRun();
-        await refresh();
-      }
+      container.invalidate(currentUserProvider);
+      container.read(syncSchedulerProvider)?.requestRun();
+      await _refreshIfShown(container, path);
     }
   }
 }

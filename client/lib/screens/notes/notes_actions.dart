@@ -9,6 +9,7 @@ import "package:go_router/go_router.dart";
 import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/notes/last_note_provider.dart";
 import "package:polder/providers/notes/notes_folder_provider.dart";
 import "package:polder/providers/notes/notes_tag_filter_provider.dart";
@@ -211,12 +212,16 @@ abstract final class NotesActions {
     if (!canMoveAllInto(nodes, destination)) return moved;
     final container = ProviderScope.containerOf(context, listen: false);
     await context.runWithFeedback(
-      Future(() async {
-        for (final node in nodes) {
+      _trackNodes(
+        container,
+        kind: FileOperationKind.move,
+        nodes: nodes,
+        destination: destination,
+        perform: (node) async {
           await _moveNode(container, node, destination, node.name);
           moved[node] = _movedPath(node, destination, node.name);
-        }
-      }),
+        },
+      ),
     );
     return moved;
   }
@@ -237,9 +242,46 @@ abstract final class NotesActions {
     String name,
   ) async {
     final container = ProviderScope.containerOf(context, listen: false);
-    final moved = await context.runWithFeedback(_moveNode(container, node, destination, name));
+    final renaming = destination == RemotePath.parent(node.path);
+    final moved = await context.runWithFeedback(
+      _trackNodes(
+        container,
+        kind: renaming ? FileOperationKind.rename : FileOperationKind.move,
+        nodes: [node],
+        destination: renaming ? null : destination,
+        targetName: (node) => RemotePath.name(_movedPath(node, destination, name)),
+        perform: (node) => _moveNode(container, node, destination, name),
+      ),
+    );
     if (!moved) return null;
     return _movedPath(node, destination, name);
+  }
+
+  static Future<void> _trackNodes(
+    ProviderContainer container, {
+    required FileOperationKind kind,
+    required List<NoteTreeNode> nodes,
+    required Future<void> Function(NoteTreeNode node) perform,
+    String? destination,
+    String Function(NoteTreeNode node)? targetName,
+  }) {
+    final byPath = {for (final node in nodes) node.path: node};
+    return container
+        .read(fileOperationsProvider.notifier)
+        .run(
+          kind: kind,
+          destination: destination,
+          items: [
+            for (final node in byPath.values)
+              FileOperationItem(
+                path: node.path,
+                isDir: node.page == null,
+                label: node.name,
+                targetName: targetName?.call(node),
+              ),
+          ],
+          perform: (item) => perform(byPath[item.path]!),
+        );
   }
 
   static String? pathAfterMove(String? path, NoteTreeNode node, String movedTo) {
@@ -287,7 +329,15 @@ abstract final class NotesActions {
       destructive: true,
     );
     if (!confirmed || !context.mounted) return false;
-    return context.runWithFeedback(_deleteNode(ProviderScope.containerOf(context, listen: false), node));
+    final container = ProviderScope.containerOf(context, listen: false);
+    return context.runWithFeedback(
+      _trackNodes(
+        container,
+        kind: FileOperationKind.delete,
+        nodes: [node],
+        perform: (node) => _deleteNode(container, node),
+      ),
+    );
   }
 
   static Future<bool> deleteAll(BuildContext context, List<NoteTreeNode> nodes) async {
@@ -303,11 +353,12 @@ abstract final class NotesActions {
     if (!confirmed || !context.mounted) return false;
     final container = ProviderScope.containerOf(context, listen: false);
     return context.runWithFeedback(
-      Future(() async {
-        for (final node in nodes) {
-          await _deleteNode(container, node);
-        }
-      }),
+      _trackNodes(
+        container,
+        kind: FileOperationKind.delete,
+        nodes: nodes,
+        perform: (node) => _deleteNode(container, node),
+      ),
     );
   }
 

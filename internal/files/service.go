@@ -30,7 +30,9 @@ type Service struct {
 	db             *sql.DB
 	disk           *storage.Disk
 	locks          userLocks
+	paths          pathLocks
 	scanLocks      userLocks
+	trashInFlight  sync.Map
 	indexing       sync.Map
 	contentChanged []ContentChangedFunc
 	contentRemoved []func()
@@ -185,6 +187,8 @@ func (s *Service) Mkdir(ctx context.Context, owner users.User, rawPath string) (
 	if err != nil {
 		return Entry{}, err
 	}
+	unlockPath := s.paths.lock(owner.ID, cleanPath)
+	defer unlockPath()
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
 
@@ -256,29 +260,19 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 	if err != nil {
 		return err
 	}
-	unlock := sync.OnceFunc(s.locks.lock(owner.ID))
-	defer unlock()
+	unlockPath := s.paths.lock(owner.ID, cleanPath)
+	defer unlockPath()
 
-	undo := func() {}
-	var current Entry
-	var trashID int64
-	err = s.inTransaction(ctx, func(tx *sql.Tx) error {
-		var err error
-		current, err = s.existingEntry(ctx, tx, owner.ID, cleanPath)
-		if err != nil {
-			return err
-		}
-		if baseRev > 0 && current.Rev != baseRev {
-			return apperr.Conflict(current, "%s was changed after you last loaded it", cleanPath)
-		}
-		trashID, undo, err = s.moveToTrash(ctx, tx, owner, current)
-		return err
-	})
+	plan, err := s.planDelete(ctx, owner, cleanPath, baseRev)
 	if err != nil {
-		undo()
 		return err
 	}
-	unlock()
+	ctx = context.WithoutCancel(ctx)
+	trashID, err := s.trash(ctx, owner, plan)
+	if err != nil {
+		return err
+	}
+	unlockPath()
 	var removed []int64
 	if trashID != 0 && !s.keepsTrash(ctx, owner) {
 		if removed, err = s.purgeTrashItem(ctx, owner, trashID); err != nil {
@@ -286,8 +280,45 @@ func (s *Service) Delete(ctx context.Context, owner users.User, rawPath string, 
 		}
 	}
 	s.onContentRemoved()
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationDelete, Path: current.Path, IsDir: current.IsDir, Size: current.Size, RemovedFileIDs: removed})
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationDelete, Path: plan.entry.Path, IsDir: plan.entry.IsDir, Size: plan.entry.Size, RemovedFileIDs: removed})
 	return nil
+}
+
+func (s *Service) planDelete(ctx context.Context, owner users.User, cleanPath string, baseRev int64) (trashPlan, error) {
+	unlock := s.locks.lock(owner.ID)
+	defer unlock()
+	current, err := s.existingEntry(ctx, s.db, owner.ID, cleanPath)
+	if err != nil {
+		return trashPlan{}, err
+	}
+	if baseRev > 0 && current.Rev != baseRev {
+		return trashPlan{}, apperr.Conflict(current, "%s was changed after you last loaded it", cleanPath)
+	}
+	return s.planTrash(ctx, s.db, owner, current)
+}
+
+func (s *Service) trash(ctx context.Context, owner users.User, plan trashPlan) (int64, error) {
+	s.claimTrash(plan.storageID)
+	defer s.releaseTrash(plan.storageID)
+	onDisk, err := s.moveIntoTrash(owner, plan)
+	if err != nil {
+		return 0, err
+	}
+	unlock := s.locks.lock(owner.ID)
+	defer unlock()
+	var trashID int64
+	err = s.inTransaction(ctx, func(tx *sql.Tx) error {
+		if !onDisk {
+			return s.removeTree(ctx, tx, owner, plan.entry.Path)
+		}
+		var err error
+		trashID, err = s.recordTrash(ctx, tx, owner, plan)
+		return err
+	})
+	if err != nil && onDisk {
+		s.undoTrash(owner, plan)
+	}
+	return trashID, err
 }
 
 func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo string, baseRev int64) (Entry, error) {
@@ -302,11 +333,35 @@ func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo str
 	if storage.IsSameOrDescendant(to, from) {
 		return Entry{}, apperr.Invalid("cannot move %s into itself", from)
 	}
+	unlockPaths := s.paths.lock(owner.ID, from, to)
+	defer unlockPaths()
+
+	if err := s.prepareMove(ctx, owner, from, to, baseRev); err != nil {
+		return Entry{}, err
+	}
+	ctx = context.WithoutCancel(ctx)
+	if err := s.renameOnDisk(owner, from, to); err != nil {
+		return Entry{}, err
+	}
+	moved, err := s.indexMove(ctx, owner, from, to)
+	if err != nil {
+		if undoErr := s.renameOnDisk(owner, to, from); undoErr != nil {
+			logger.Error("move back after failing to index the move", "user", owner.Username, "from", from, "to", to, "error", undoErr)
+		}
+		return Entry{}, err
+	}
+	unlockPaths()
+	if !moved.IsDir {
+		s.onContentChanged(owner.ID, moved.Path)
+	}
+	s.notify(ctx, Mutation{Owner: owner, Kind: MutationMove, Path: moved.Path, FromPath: from, IsDir: moved.IsDir, Size: moved.Size})
+	return moved, nil
+}
+
+func (s *Service) prepareMove(ctx context.Context, owner users.User, from, to string, baseRev int64) error {
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
-
-	var moved Entry
-	err = s.inTransaction(ctx, func(tx *sql.Tx) error {
+	return s.inTransaction(ctx, func(tx *sql.Tx) error {
 		source, err := s.existingEntry(ctx, tx, owner.ID, from)
 		if err != nil {
 			return err
@@ -317,25 +372,22 @@ func (s *Service) Move(ctx context.Context, owner users.User, rawFrom, rawTo str
 		if err := s.requireAbsent(ctx, tx, owner.ID, to); err != nil {
 			return err
 		}
-		if err := s.ensureParentDirectories(ctx, tx, owner, to); err != nil {
-			return err
-		}
-		if err := s.renameOnDisk(owner, from, to); err != nil {
-			return err
-		}
+		return s.ensureParentDirectories(ctx, tx, owner, to)
+	})
+}
+
+func (s *Service) indexMove(ctx context.Context, owner users.User, from, to string) (Entry, error) {
+	unlock := s.locks.lock(owner.ID)
+	defer unlock()
+	var moved Entry
+	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
+		var err error
 		if moved, err = reindexMovedTree(ctx, tx, owner.ID, from, to); err != nil {
 			return err
 		}
 		return s.relocateHistoriesOfTree(ctx, tx, owner, to)
 	})
-	if err != nil {
-		return moved, err
-	}
-	if !moved.IsDir {
-		s.onContentChanged(owner.ID, moved.Path)
-	}
-	s.notify(ctx, Mutation{Owner: owner, Kind: MutationMove, Path: moved.Path, FromPath: from, IsDir: moved.IsDir, Size: moved.Size})
-	return moved, nil
+	return moved, err
 }
 
 func (s *Service) Copy(ctx context.Context, owner users.User, rawFrom, rawTo string) (Entry, error) {
@@ -401,9 +453,17 @@ func (s *Service) renameOnDisk(owner users.User, from, to string) error {
 	if err != nil {
 		return err
 	}
-	if err := storage.Move(absoluteFrom, absoluteTo); err != nil {
+	if err := keepLeftovers(storage.Move(absoluteFrom, absoluteTo), owner, from); err != nil {
 		return fmt.Errorf("rename: %w", err)
 	}
+	return nil
+}
+
+func keepLeftovers(err error, owner users.User, cleanPath string) error {
+	if !errors.Is(err, storage.ErrSourceLeftBehind) {
+		return err
+	}
+	logger.Warn("moved across drives, but part of the old copy could not be removed", "user", owner.Username, "path", cleanPath, "error", err)
 	return nil
 }
 

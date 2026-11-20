@@ -13,6 +13,7 @@ import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/screens/shell/sync_background_activator.dart";
+import "package:polder/screens/shell/widgets/file_operations_bar.dart";
 import "package:polder/screens/shell/widgets/more_options.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
@@ -81,7 +82,7 @@ class AppShell extends ConsumerWidget {
               unawaited(context.push(destination.route));
             },
             sidebarFooter: const QuotaBar(),
-            child: SearchShortcut(child: child),
+            child: FileOperationsOverlay(child: SearchShortcut(child: child)),
           ),
         ),
       ),

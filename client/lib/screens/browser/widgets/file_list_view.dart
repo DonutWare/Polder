@@ -4,6 +4,7 @@ import "package:polder/models/activity.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_drop_zone.dart";
+import "package:polder/screens/browser/widgets/file_operation_widgets.dart";
 import "package:polder/screens/browser/widgets/file_list_tile.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/screens/browser/widgets/selection_highlight.dart";
@@ -58,6 +59,7 @@ class _FileListViewState extends State<FileListView> {
         final item = widget.items[index];
         final entry = item.entry;
         final content = switch (item) {
+          BrowserItem(:final arriving?) => ArrivingListTile(item: arriving),
           BrowserItem(:final pendingFolder?, :final syncing) => PendingFolderListTile(
             name: pendingFolder,
             direction: syncing ?? TransferDirectionKind.upload,
@@ -66,11 +68,16 @@ class _FileListViewState extends State<FileListView> {
           _ => SelectableEntry(
             parentPath: widget.parentPath,
             entry: entry,
-            builder: (context, interaction) =>
-                FileListTile(entry: entry, interaction: interaction, pending: item.pending, syncing: item.syncing),
+            builder: (context, interaction) => FileListTile(
+              entry: entry,
+              interaction: interaction,
+              pending: item.pending,
+              syncing: item.syncing,
+              operation: item.operation,
+            ),
           ),
         };
-        final droppable = entry != null && entry.isDir
+        final droppable = entry != null && entry.isDir && item.operation == null
             ? FolderDropTarget(
                 folder: entry,
                 shape: (side) => GroupedTile.shapeFor(index, widget.items.length, side: side),

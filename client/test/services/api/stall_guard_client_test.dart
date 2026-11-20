@@ -138,4 +138,39 @@ void main() {
     expect(inner.lastRequest!.headers["x-test"], "yes");
     expect(response.body, "hello");
   });
+
+  test("a slow move is given far longer than other requests before it counts as stalled", () {
+    fakeAsync((async) {
+      final inner = _ScriptedClient((_) => Completer<http.StreamedResponse>().future);
+      final client = StallGuardClient(inner, stallTimeout: timeout);
+      Object? failure;
+      client
+          .send(http.Request("POST", Uri.parse("https://cloud.test/api/files/move")))
+          .then<void>((_) {}, onError: (Object error) => failure = error);
+
+      async.elapse(const Duration(minutes: 10));
+      expect(failure, isNull);
+      async.elapse(StallGuardClient.fileOperationStallTimeout);
+      expect(failure, isA<ServerStalledException>());
+    });
+  });
+
+  test("recognizes the requests that move, copy, delete or restore files", () {
+    bool fileOperation(String method, String path) =>
+        StallGuardClient.isFileOperation(http.Request(method, Uri.parse("https://cloud.test/api$path")));
+
+    expect(fileOperation("POST", "/files/move"), isTrue);
+    expect(fileOperation("POST", "/files/copy"), isTrue);
+    expect(fileOperation("DELETE", "/files?path=%2Fa"), isTrue);
+    expect(fileOperation("POST", "/shares/4/move"), isTrue);
+    expect(fileOperation("DELETE", "/shares/4/files?path=%2Fa"), isTrue);
+    expect(fileOperation("POST", "/trash/7/restore"), isTrue);
+    expect(fileOperation("DELETE", "/trash/7"), isTrue);
+    expect(fileOperation("DELETE", "/trash"), isTrue);
+
+    expect(fileOperation("GET", "/files?path=%2F"), isFalse);
+    expect(fileOperation("POST", "/calendars/1/events/5/move"), isFalse);
+    expect(fileOperation("DELETE", "/files/versions/3"), isFalse);
+    expect(fileOperation("PUT", "/files/content?path=%2Fa"), isFalse);
+  });
 }

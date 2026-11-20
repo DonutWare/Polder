@@ -5,6 +5,7 @@ import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_drop_zone.dart";
 import "package:polder/screens/browser/widgets/file_grid_tile.dart";
+import "package:polder/screens/browser/widgets/file_operation_widgets.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder/screens/browser/widgets/selection_highlight.dart";
 
@@ -79,6 +80,7 @@ class _FileGridViewState extends State<FileGridView> {
         itemBuilder: (context, index) {
           final item = widget.items[index];
           final entry = item.entry;
+          if (item.arriving case final arriving?) return ArrivingGridTile(key: ValueKey(item.name), item: arriving);
           if (item.pendingFolder case final folder?) {
             return PendingFolderGridTile(
               key: ValueKey(folder),
@@ -90,12 +92,19 @@ class _FileGridViewState extends State<FileGridView> {
           final selectable = SelectableEntry(
             parentPath: widget.parentPath,
             entry: entry,
-            builder: (context, interaction) =>
-                FileGridTile(entry: entry, interaction: interaction, pending: item.pending, syncing: item.syncing),
+            builder: (context, interaction) => FileGridTile(
+              entry: entry,
+              interaction: interaction,
+              pending: item.pending,
+              syncing: item.syncing,
+              operation: item.operation,
+            ),
           );
           final tile = KeyedSubtree(
             key: ValueKey(item.name),
-            child: entry.isDir ? FolderDropTarget(folder: entry, child: selectable) : selectable,
+            child: entry.isDir && item.operation == null
+                ? FolderDropTarget(folder: entry, child: selectable)
+                : selectable,
           );
           return item.name == widget.select
               ? SelectionHighlight(key: ValueKey("selected-${item.name}"), child: tile)

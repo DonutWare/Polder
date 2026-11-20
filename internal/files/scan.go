@@ -213,10 +213,25 @@ func (s *Service) applyRenames(ctx context.Context, owner users.User, indexed ma
 	if len(renames) == 0 {
 		return pending, nil
 	}
+	free, unlockPaths := s.paths.lockFree(owner.ID, renamedPaths(renames)...)
+	defer unlockPaths()
+	renames = renamesWithin(renames, free)
+	if len(renames) == 0 {
+		return pending, nil
+	}
 	unlock := s.locks.lock(owner.ID)
 	var moved []Entry
+	var applied []renamedFile
 	err := s.inTransaction(ctx, func(tx *sql.Tx) error {
+		moved, applied = moved[:0], applied[:0]
 		for _, rename := range renames {
+			stillRenamed, err := s.stillRenamed(ctx, tx, owner, rename)
+			if err != nil {
+				return err
+			}
+			if !stillRenamed {
+				continue
+			}
 			if err := s.ensureParentDirectories(ctx, tx, owner, rename.destination); err != nil {
 				return err
 			}
@@ -228,6 +243,7 @@ func (s *Service) applyRenames(ctx context.Context, owner users.User, indexed ma
 				return err
 			}
 			moved = append(moved, relocated)
+			applied = append(applied, rename)
 		}
 		return nil
 	})
@@ -236,10 +252,10 @@ func (s *Service) applyRenames(ctx context.Context, owner users.User, indexed ma
 		return pending, err
 	}
 	for i, relocated := range moved {
-		delete(indexed, renames[i].previous.Path)
+		delete(indexed, applied[i].previous.Path)
 		indexed[relocated.Path] = relocated
 		s.onContentChanged(owner.ID, relocated.Path)
-		s.notify(ctx, Mutation{Owner: owner, Kind: MutationMove, Path: relocated.Path, FromPath: renames[i].previous.Path, Size: relocated.Size})
+		s.notify(ctx, Mutation{Owner: owner, Kind: MutationMove, Path: relocated.Path, FromPath: applied[i].previous.Path, Size: relocated.Size})
 	}
 	remaining := pending[:0]
 	for _, item := range pending {
@@ -248,6 +264,43 @@ func (s *Service) applyRenames(ctx context.Context, owner users.User, indexed ma
 		}
 	}
 	return remaining, nil
+}
+
+func (s *Service) stillRenamed(ctx context.Context, q querier, owner users.User, rename renamedFile) (bool, error) {
+	if s.existsOnDisk(owner.Username, rename.previous.Path) || !s.existsOnDisk(owner.Username, rename.destination) {
+		return false, nil
+	}
+	current, found, err := findEntry(ctx, q, owner.ID, rename.previous.Path)
+	if err != nil || !found {
+		return false, err
+	}
+	if current.ID != rename.previous.ID {
+		return false, nil
+	}
+	_, taken, err := findEntry(ctx, q, owner.ID, rename.destination)
+	return !taken, err
+}
+
+func renamesWithin(renames []renamedFile, paths []string) []renamedFile {
+	allowed := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		allowed[path] = true
+	}
+	kept := renames[:0:0]
+	for _, rename := range renames {
+		if allowed[rename.previous.Path] && allowed[rename.destination] {
+			kept = append(kept, rename)
+		}
+	}
+	return kept
+}
+
+func renamedPaths(renames []renamedFile) []string {
+	paths := make([]string, 0, 2*len(renames))
+	for _, rename := range renames {
+		paths = append(paths, rename.previous.Path, rename.destination)
+	}
+	return paths
 }
 
 func (s *Service) findRenames(owner users.User, indexed map[string]Entry, onDisk map[string]diskItem, pending []diskItem) []renamedFile {
@@ -310,6 +363,11 @@ func topmostMissingPaths(indexed map[string]Entry, onDisk map[string]diskItem) [
 }
 
 func (s *Service) applyRemovals(ctx context.Context, owner users.User, removals []string) ([]ScanChange, error) {
+	removals, unlockPaths := s.paths.lockFree(owner.ID, removals...)
+	defer unlockPaths()
+	if len(removals) == 0 {
+		return nil, nil
+	}
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
 	var changes []ScanChange
@@ -346,6 +404,12 @@ func (s *Service) applyUpserts(ctx context.Context, owner users.User, upserts []
 	if len(upserts) == 0 {
 		return nil, nil
 	}
+	free, unlockPaths := s.paths.lockFree(owner.ID, entryPaths(upserts)...)
+	defer unlockPaths()
+	upserts = entriesWithin(upserts, free)
+	if len(upserts) == 0 {
+		return nil, nil
+	}
 	unlock := s.locks.lock(owner.ID)
 	defer unlock()
 	var changedFiles []string
@@ -376,6 +440,28 @@ func (s *Service) applyUpserts(ctx context.Context, owner users.User, upserts []
 		s.notify(ctx, Mutation{Owner: owner, Kind: MutationRescan, Path: "/", IsDir: true, Changes: changes})
 	}
 	return changes, nil
+}
+
+func entriesWithin(entries []Entry, paths []string) []Entry {
+	allowed := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		allowed[path] = true
+	}
+	kept := entries[:0:0]
+	for _, entry := range entries {
+		if allowed[entry.Path] {
+			kept = append(kept, entry)
+		}
+	}
+	return kept
+}
+
+func entryPaths(entries []Entry) []string {
+	paths := make([]string, len(entries))
+	for i, entry := range entries {
+		paths[i] = entry.Path
+	}
+	return paths
 }
 
 func (s *Service) applyScannedEntry(ctx context.Context, tx *sql.Tx, owner users.User, entry Entry) (ScanChangeType, error) {

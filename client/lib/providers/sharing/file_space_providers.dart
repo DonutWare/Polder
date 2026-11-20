@@ -3,6 +3,7 @@ import "dart:typed_data";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "package:polder/providers/browser/file_operations_provider.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
 import "package:polder/models/file_entry.dart";
@@ -68,10 +69,20 @@ class SpaceDirectoryNotifier extends AsyncNotifier<DirectoryListing> with Guarde
 
   Future<void> createFolder(String name) => _mutate(() => _api.mkdir(RemotePath.join(path, name)));
 
-  Future<void> rename(FileEntry entry, String newName) =>
-      _mutate(() => _api.move(from: entry.path, to: RemotePath.join(path, newName), baseRev: entry.rev));
+  Future<void> rename(FileEntry entry, String newName) => _mutate(
+    () => _track(
+      FileOperationKind.rename,
+      entry,
+      () => _api.move(from: entry.path, to: RemotePath.join(path, newName), baseRev: entry.rev),
+    ),
+  );
 
-  Future<void> delete(FileEntry entry) => _mutate(() => _api.delete(entry.path, baseRev: entry.rev));
+  Future<void> delete(FileEntry entry) =>
+      _mutate(() => _track(FileOperationKind.delete, entry, () => _api.delete(entry.path, baseRev: entry.rev)));
+
+  Future<void> _track(FileOperationKind kind, FileEntry entry, Future<Object?> Function() perform) => ref
+      .read(fileOperationsProvider.notifier)
+      .runSingle(kind: kind, item: FileOperationItem.of(entry), ownFiles: false, perform: perform);
 
   Future<void> _mutate(Future<Object?> Function() action) async {
     try {
