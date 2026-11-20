@@ -6,21 +6,19 @@ import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/models/file_entry.dart";
-import "package:polder/models/item_selection.dart";
 import "package:polder/providers/notes/note_selection_provider.dart";
+import "package:polder/providers/notes/notes_search_provider.dart";
 import "package:polder/providers/notes/notes_tree_provider.dart";
 import "package:polder/providers/notes/notes_view_provider.dart";
 import "package:polder/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder/screens/notes/widgets/notes_grid.dart";
 import "package:polder/screens/notes/widgets/notes_tag_filter.dart";
-import "package:polder/providers/tags/tags_provider.dart";
+import "package:polder/screens/notes/widgets/notes_tree.dart";
 import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder/util/localization_helper.dart";
-import "package:polder/util/modifier_keys.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/shared/async_value_view.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
 
 String notesLevel(WidgetRef ref, String root) {
   if (ref.watch(notesViewModeProvider) != NotesViewMode.grid) return root;
@@ -29,11 +27,18 @@ String notesLevel(WidgetRef ref, String root) {
 }
 
 class NotesSidebar extends ConsumerStatefulWidget {
-  const NotesSidebar({required this.root, required this.selectedPath, required this.onOpen, super.key});
+  const NotesSidebar({
+    required this.root,
+    required this.selectedPath,
+    required this.onOpen,
+    required this.searchFocus,
+    super.key,
+  });
 
   final String root;
   final String? selectedPath;
   final ValueChanged<FileEntry> onOpen;
+  final FocusNode searchFocus;
 
   @override
   ConsumerState<NotesSidebar> createState() => _NotesSidebarState();
@@ -50,86 +55,197 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
     super.dispose();
   }
 
+  bool get _grid => ref.watch(notesViewModeProvider) == NotesViewMode.grid;
+
   @override
-  Widget build(BuildContext context) => ref.watch(notesTagFilterProvider) is AllNotes ? _allNotes() : _taggedNotes();
-
-  Widget _taggedNotes() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Padding(
-        padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
-        child: const NotesViewChips(),
-      ),
-      Expanded(
-        child: MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
-          child: AsyncValueView<List<FileEntry>?>(
-            value: ref.watch(notesInViewProvider),
-            onRetry: () => ref.invalidate(notesIndexProvider),
-            data: (notes) => ref.watch(notesViewModeProvider) == NotesViewMode.grid
-                ? NotesGrid(
-                    folder: widget.root,
-                    nodes: [for (final note in notes ?? const <FileEntry>[]) NoteTreeNode(page: note)],
-                    selectedPath: widget.selectedPath,
-                    onOpen: widget.onOpen,
-                  )
-                : TaggedNotesList(
-                    root: widget.root,
-                    notes: notes ?? const [],
-                    selectedPath: widget.selectedPath,
-                    onOpen: widget.onOpen,
-                  ),
-          ),
-        ),
-      ),
-    ],
-  );
-
-  Widget _allNotes() {
-    if (ref.watch(notesViewModeProvider) == NotesViewMode.grid) {
-      return NotesGrid(folder: notesLevel(ref, widget.root), selectedPath: widget.selectedPath, onOpen: widget.onOpen);
-    }
-    return Focus(
-      focusNode: _focus,
-      onKeyEvent: _onKey,
-      child: Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: (_) => _focus.requestFocus(),
-        child: NoteDragAutoScroll(
-          controller: _scroll,
-          child: CustomScrollView(
-            controller: _scroll,
-            slivers: [
-              SliverPadding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8) + EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
-                sliver: SliverToBoxAdapter(
-                  child: _TreeLevel(
-                    path: widget.root,
-                    root: widget.root,
-                    depth: 0,
-                    selectedPath: widget.selectedPath,
-                    onOpen: widget.onOpen,
-                  ),
-                ),
-              ),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: _TopLevelDropZone(root: widget.root, selectedPath: widget.selectedPath),
-              ),
+  Widget build(BuildContext context) {
+    final searching = ref.watch(notesSearchQueryProvider).trim().isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              NotesSearchField(focusNode: widget.searchFocus),
+              const NotesViewChips(),
             ],
           ),
         ),
-      ),
+        Expanded(
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: switch ((searching, ref.watch(notesTagFilterProvider))) {
+              (true, _) => _searchResults(),
+              (false, AllNotes()) => _allNotes(),
+              _ => _taggedNotes(),
+            },
+          ),
+        ),
+      ],
     );
   }
+
+  Widget _flatNotes(List<FileEntry> notes) {
+    final sorted = sortNoteEntries(notes, ref.watch(notesSortProvider));
+    if (_grid) {
+      return NotesGrid(
+        folder: widget.root,
+        nodes: [for (final note in sorted) NoteTreeNode(page: note)],
+        selectedPath: widget.selectedPath,
+        onOpen: widget.onOpen,
+      );
+    }
+    return TaggedNotesList(root: widget.root, notes: sorted, selectedPath: widget.selectedPath, onOpen: widget.onOpen);
+  }
+
+  Widget _taggedNotes() => AsyncValueView<List<FileEntry>?>(
+    value: ref.watch(notesInViewProvider),
+    onRetry: () => ref.invalidate(notesIndexProvider),
+    data: (notes) => _flatNotes(notes ?? const []),
+  );
+
+  Widget _searchResults() => AsyncValueView<NotesSearchResults?>(
+    value: ref.watch(notesSearchResultsProvider),
+    onRetry: () => ref.invalidate(notesIndexProvider),
+    data: (results) => switch (results) {
+      null => const SizedBox.shrink(),
+      NotesSearchResults(:final notes) when notes.isEmpty => const _NoSearchMatches(),
+      final results when _grid || ref.watch(notesTagFilterProvider) is! AllNotes => _flatNotes(results.notes),
+      final results => _tree(filter: results.filter),
+    },
+  );
+
+  Widget _allNotes() {
+    if (_grid) {
+      return NotesGrid(folder: notesLevel(ref, widget.root), selectedPath: widget.selectedPath, onOpen: widget.onOpen);
+    }
+    return _tree();
+  }
+
+  Widget _tree({NotesTreeFilter? filter}) => Focus(
+    focusNode: _focus,
+    onKeyEvent: _onKey,
+    child: Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _focus.requestFocus(),
+      child: NoteDragAutoScroll(
+        controller: _scroll,
+        child: CustomScrollView(
+          controller: _scroll,
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              sliver: SliverToBoxAdapter(
+                child: NotesTree(
+                  root: widget.root,
+                  selectedPath: widget.selectedPath,
+                  onOpen: widget.onOpen,
+                  filter: filter,
+                ),
+              ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: _TopLevelDropZone(root: widget.root, selectedPath: widget.selectedPath),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape) return KeyEventResult.ignored;
     if (ref.read(noteSelectionProvider).isEmpty) return KeyEventResult.ignored;
     ref.read(noteSelectionProvider.notifier).clear();
     return KeyEventResult.handled;
+  }
+}
+
+class _NoSearchMatches extends StatelessWidget {
+  const _NoSearchMatches();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(16),
+    child: Text(
+      context.localized.notesSearchNoResults,
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+    ),
+  );
+}
+
+class NotesSearchField extends ConsumerStatefulWidget {
+  const NotesSearchField({required this.focusNode, super.key});
+
+  final FocusNode focusNode;
+
+  @override
+  ConsumerState<NotesSearchField> createState() => _NotesSearchFieldState();
+}
+
+class _NotesSearchFieldState extends ConsumerState<NotesSearchField> {
+  late final _controller = TextEditingController(text: ref.read(notesSearchQueryProvider));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _clear() {
+    _controller.clear();
+    ref.read(notesSearchQueryProvider.notifier).clear();
+    widget.focusNode.unfocus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(notesSearchQueryProvider, (_, query) {
+      if (query != _controller.text) _controller.text = query;
+    });
+    final colors = Theme.of(context).colorScheme;
+    final pointer = AdaptiveLayout.usesPointer(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+      child: CallbackShortcuts(
+        bindings: {const SingleActivator(LogicalKeyboardKey.escape): _clear},
+        child: TextField(
+          controller: _controller,
+          focusNode: widget.focusNode,
+          autocorrect: false,
+          enableSuggestions: false,
+          textInputAction: TextInputAction.search,
+          onChanged: ref.read(notesSearchQueryProvider.notifier).set,
+          style: pointer ? Theme.of(context).textTheme.bodyMedium : null,
+          decoration: InputDecoration(
+            isDense: true,
+            hintText: context.localized.notesSearchHint,
+            prefixIcon: Icon(IconsaxPlusLinear.search_normal_1, size: 18, color: colors.onSurfaceVariant),
+            suffixIcon: ListenableBuilder(
+              listenable: _controller,
+              builder: (context, _) => _controller.text.isEmpty
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      tooltip: context.localized.notesFilterClear,
+                      icon: const Icon(IconsaxPlusLinear.close_circle, size: 18),
+                      onPressed: _clear,
+                    ),
+            ),
+            filled: true,
+            fillColor: colors.onSurface.withValues(alpha: 0.05),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: pointer ? 8 : 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(pointer ? 8 : 12),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -221,8 +337,10 @@ class NotesTitle extends ConsumerWidget {
 }
 
 class NotesHeaderActions extends ConsumerWidget {
-  const NotesHeaderActions({this.onChangeFolder, super.key});
+  const NotesHeaderActions({required this.root, this.selectedPath, this.onChangeFolder, super.key});
 
+  final String root;
+  final String? selectedPath;
   final VoidCallback? onChangeFolder;
 
   @override
@@ -240,6 +358,7 @@ class NotesHeaderActions extends ConsumerWidget {
           onPressed: ref.read(notesViewModeProvider.notifier).toggle,
         ),
         NotesViewPicker(density: density),
+        NotesOptionsMenu(root: root, selectedPath: selectedPath, density: density),
         if (onChangeFolder != null)
           IconButton(
             tooltip: localized.notesChangeFolder,
@@ -252,339 +371,76 @@ class NotesHeaderActions extends ConsumerWidget {
   }
 }
 
-class _TreeLevel extends ConsumerWidget {
-  const _TreeLevel({
-    required this.path,
-    required this.root,
-    required this.depth,
-    required this.selectedPath,
-    required this.onOpen,
-    this.parentTint,
-  });
+enum _TreeAction { expandAll, collapseAll, reveal }
 
-  final String path;
+class NotesOptionsMenu extends ConsumerWidget {
+  const NotesOptionsMenu({required this.root, required this.selectedPath, required this.density, super.key});
+
   final String root;
-  final int depth;
   final String? selectedPath;
-  final ValueChanged<FileEntry> onOpen;
-  final Color? parentTint;
+  final VisualDensity density;
+
+  static Future<void> expandAll(WidgetRef ref, String root, {String? within}) async {
+    final expanded = ref.read(expandedNotesProvider.notifier);
+    final notes = await ref.read(notesIndexProvider.future);
+    expanded.expandAll({
+      for (final folder in allNoteFolders(root, notes))
+        if (within == null || folder == within || RemotePath.isWithin(folder, within)) folder,
+    });
+  }
+
+  static void reveal(WidgetRef ref, String root, String path) {
+    ref.read(notesSearchQueryProvider.notifier).clear();
+    ref.read(expandedNotesProvider.notifier).expandTo(root, path);
+    ref.read(notesRevealProvider.notifier).reveal(path);
+  }
+
+  void _choose(WidgetRef ref, Object choice) {
+    final sort = ref.read(notesSortProvider.notifier);
+    switch (choice) {
+      case final NotesSortField field:
+        unawaited(sort.select(field));
+      case final bool ascending:
+        unawaited(sort.setAscending(ascending));
+      case _TreeAction.expandAll:
+        unawaited(expandAll(ref, root));
+      case _TreeAction.collapseAll:
+        ref.read(expandedNotesProvider.notifier).collapseAll();
+      case _TreeAction.reveal:
+        reveal(ref, root, selectedPath!);
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final contents = ref.watch(notesTreeProvider(path));
-    if (depth > 0 && !contents.hasValue && !contents.hasError) return const SizedBox(width: double.infinity);
-    return AsyncValueView<NotesFolderContents>(
-      value: contents,
-      onRetry: () => ref.invalidate(notesTreeProvider(path)),
-      data: (contents) {
-        if (contents.nodes.isEmpty && depth == 0) {
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              context.localized.notesEmptyFolder,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-          );
-        }
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final node in contents.nodes)
-              _TreeNode(
-                key: ValueKey(node.path),
-                node: node,
-                root: root,
-                depth: depth,
-                selectedPath: selectedPath,
-                onOpen: onOpen,
-                parentTint: parentTint,
-              ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _TreeNode extends ConsumerStatefulWidget {
-  const _TreeNode({
-    required this.node,
-    required this.root,
-    required this.depth,
-    required this.selectedPath,
-    required this.onOpen,
-    this.parentTint,
-    super.key,
-  });
-
-  final NoteTreeNode node;
-  final String root;
-  final int depth;
-  final String? selectedPath;
-  final ValueChanged<FileEntry> onOpen;
-  final Color? parentTint;
-
-  @override
-  ConsumerState<_TreeNode> createState() => _TreeNodeState();
-}
-
-class _TreeNodeState extends ConsumerState<_TreeNode> {
-  static const _indent = 16.0;
-  static const _leading = 12.0;
-  static const _groupInset = 8.0;
-  static const _maxTintedDepth = 3;
-
-  Color? get _tint => noteTintOf(ref.watch(tagsByIdProvider), node.page ?? node.folder!);
-
-  bool get _showsMarker => widget.depth > 0 && _tint != null && _tint != widget.parentTint;
-
-  Color? _groupColor(ColorScheme colors) {
-    if (widget.depth >= _maxTintedDepth) return null;
-    return _tint?.withValues(alpha: 0.12) ?? colors.onSurface.withValues(alpha: 0.04);
-  }
-
-  NoteTreeNode get node => widget.node;
-
-  bool _isSelected(FileEntry? readme) {
-    final selected = widget.selectedPath;
-    return selected != null && (selected == node.page?.path || selected == readme?.path);
-  }
-
-  Future<void> _open() async {
-    final page = node.page;
-    if (page != null) {
-      widget.onOpen(page);
-      return;
-    }
-    final folder = node.folder!;
-    ref.read(expandedNotesProvider.notifier).expand(folder.path);
-    final readme = (await ref.read(notesTreeProvider(folder.path).future)).readme;
-    if (readme != null && mounted) widget.onOpen(readme);
-  }
-
-  NoteSelectionNotifier get _selection => ref.read(noteSelectionProvider.notifier);
-
-  NotesFolderContents? _contentsOf(String folder) =>
-      ref.exists(notesTreeProvider(folder)) ? ref.read(notesTreeProvider(folder)).value : null;
-
-  List<String> _visibleOrder() {
-    final expanded = ref.read(expandedNotesProvider);
-    return [
-      for (final visible in walkNoteTree(
-        widget.root,
-        contentsOf: _contentsOf,
-        descend: (candidate) => expanded.contains(candidate.childrenPath),
-      ))
-        visible.path,
-    ];
-  }
-
-  List<NoteTreeNode> _targets(ItemSelection? selection) {
-    if (selection == null || selection.length < 2) return [node];
-    final known = walkNoteTree(widget.root, contentsOf: _contentsOf, descend: (_) => true);
-    return outermostNotes([
-      for (final candidate in known)
-        if (selection.contains(candidate.path)) candidate,
-    ]);
-  }
-
-  void _includeOpenNote(List<String> order) {
-    final open = widget.selectedPath;
-    if (ref.read(noteSelectionProvider).isEmpty && open != null && open != node.path && order.contains(open)) {
-      _selection.only(open);
-    }
-  }
-
-  void _onTap() {
-    final selecting = ref.read(noteSelectionProvider).isNotEmpty;
-    if (AdaptiveLayout.usesPointer(context) && (shiftPressed || commandPressed)) {
-      final order = _visibleOrder();
-      _includeOpenNote(order);
-      shiftPressed ? _selection.extendTo(node.path, order) : _selection.toggle(node.path);
-      return;
-    }
-    if (!AdaptiveLayout.usesPointer(context) && selecting) return _selection.toggle(node.path);
-    _selection.clear();
-    unawaited(_open());
-  }
-
-  void _showMenu(Rect anchor) {
-    final selection = ref.read(noteSelectionProvider);
-    final inSelection = selection.contains(node.path);
-    if (!inSelection) _selection.clear();
-    NoteNodeActions.showMenuFor(
-      context,
-      ref,
-      nodes: _targets(inSelection ? selection : null),
-      anchor: anchor,
-      selectedPath: widget.selectedPath,
-      onSelect: AdaptiveLayout.usesPointer(context) ? null : () => _selection.toggle(node.path),
-    );
-  }
-
-  void _drop(NoteDrag drag) =>
-      NoteNodeActions.drop(context, ref, drag: drag, destination: node.childrenPath, selectedPath: widget.selectedPath);
-
-  @override
-  Widget build(BuildContext context) {
-    final folder = node.folder;
-    final expanded = folder != null && node.hasChildren && ref.watch(expandedNotesProvider).contains(folder.path);
-    if (folder != null && node.hasChildren) {
-      ref.watch(notesTreeProvider(folder.path).select((children) => children.hasValue));
-    }
-    final readme = folder == null || node.page != null ? null : ref.watch(notesTreeProvider(folder.path)).value?.readme;
-    final selection = ref.watch(
-      noteSelectionProvider.select((selection) => selection.contains(node.path) ? selection : null),
-    );
-
-    final row = NoteDropTarget(
-      destination: node.childrenPath,
-      onDrop: _drop,
-      onLinger: () => ref.read(expandedNotesProvider.notifier).expand(node.childrenPath),
-      builder: (context, active) => NoteDragSource(
-        nodes: _targets(selection),
-        onHold: _showMenu,
-        child: _row(
-          context,
-          selected: _isSelected(readme),
-          marked: selection != null,
-          expanded: expanded,
-          dropActive: active,
-          isSection: node.page == null && readme == null,
-        ),
-      ),
-    );
-    final colors = Theme.of(context).colorScheme;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
-      decoration: BoxDecoration(
-        color: expanded ? _groupColor(colors) : null,
-        borderRadius: BorderRadius.circular(AdaptiveLayout.usesPointer(context) ? 8 : 12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          row,
-          ClipRect(
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 160),
-              curve: Curves.easeOut,
-              alignment: Alignment.topCenter,
-              child: expanded
-                  ? Padding(
-                      padding: const EdgeInsets.fromLTRB(_groupInset, 0, _groupInset / 2, _groupInset / 2),
-                      child: _TreeLevel(
-                        path: folder.path,
-                        root: widget.root,
-                        depth: widget.depth + 1,
-                        selectedPath: widget.selectedPath,
-                        onOpen: widget.onOpen,
-                        parentTint: _tint ?? widget.parentTint,
-                      ),
-                    )
-                  : const SizedBox(width: double.infinity),
-            ),
+    final localized = context.localized;
+    final sort = ref.watch(notesSortProvider);
+    final tree = ref.watch(notesViewModeProvider) == NotesViewMode.tree;
+    return PopupMenuButton<Object>(
+      tooltip: localized.notesViewOptions,
+      icon: const Icon(IconsaxPlusLinear.sort),
+      style: IconButton.styleFrom(visualDensity: density),
+      onSelected: (choice) => _choose(ref, choice),
+      itemBuilder: (_) => [
+        for (final field in NotesSortField.values)
+          CheckedPopupMenuItem(
+            value: field,
+            checked: sort.field == field,
+            child: Text(switch (field) {
+              NotesSortField.name => localized.name,
+              NotesSortField.modified => localized.modified,
+            }),
           ),
+        const PopupMenuDivider(),
+        CheckedPopupMenuItem(value: true, checked: sort.ascending, child: Text(localized.sortAscending)),
+        CheckedPopupMenuItem(value: false, checked: !sort.ascending, child: Text(localized.sortDescending)),
+        if (tree) ...[
+          const PopupMenuDivider(),
+          PopupMenuItem(value: _TreeAction.expandAll, child: Text(localized.notesExpandAll)),
+          PopupMenuItem(value: _TreeAction.collapseAll, child: Text(localized.notesCollapseAll)),
+          if (selectedPath != null) PopupMenuItem(value: _TreeAction.reveal, child: Text(localized.notesRevealCurrent)),
         ],
-      ),
-    );
-  }
-
-  Widget _row(
-    BuildContext context, {
-    required bool selected,
-    required bool marked,
-    required bool expanded,
-    required bool dropActive,
-    required bool isSection,
-  }) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final pointer = AdaptiveLayout.usesPointer(context);
-    final height = NoteTargetSize.row(context);
-    final radius = BorderRadius.circular(pointer ? 8 : 12);
-    return GestureDetector(
-      onSecondaryTapUp: (details) => _showMenu(details.globalPosition & Size.zero),
-      child: Material(
-        color: switch ((dropActive, marked, selected)) {
-          (true, _, _) => colors.primaryContainer,
-          (_, true, _) => colors.primary.withValues(alpha: 0.16),
-          (_, _, true) => colors.secondaryContainer,
-          _ when widget.depth == 0 && !expanded => _tint?.withValues(alpha: 0.14) ?? Colors.transparent,
-          _ => Colors.transparent,
-        },
-        shape: RoundedRectangleBorder(
-          borderRadius: radius,
-          side: dropActive ? BorderSide(color: colors.primary, width: 2) : BorderSide.none,
-        ),
-        child: InkWell(
-          borderRadius: radius,
-          onTap: _onTap,
-          child: SizedBox(
-            height: height,
-            child: Row(
-              children: [
-                SizedBox(width: _leading + widget.depth * (_indent - _groupInset)),
-                if (_showsMarker) _TagMarker(color: _tint!),
-                Expanded(
-                  child: Text(
-                    node.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: (pointer ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge)?.copyWith(
-                      color: selected ? colors.onSecondaryContainer : (isSection ? colors.onSurfaceVariant : null),
-                      fontWeight: selected ? FontWeight.w600 : null,
-                    ),
-                  ),
-                ),
-                EntryTagDots(entry: node.page ?? node.folder!),
-                _disclosure(context, expanded: expanded, height: height),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TagMarker extends StatelessWidget {
-  const _TagMarker({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(right: 8),
-    child: Container(
-      width: 4,
-      height: 16,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
-    ),
-  );
-}
-
-extension on _TreeNodeState {
-  Widget _disclosure(BuildContext context, {required bool expanded, required double height}) {
-    final width = NoteTargetSize.button(context);
-    final folder = node.folder;
-    if (folder == null || !node.hasChildren) return const SizedBox(width: 12);
-    return Tooltip(
-      message: expanded ? context.localized.noteCollapse : context.localized.noteExpand,
-      child: InkResponse(
-        onTap: () => ref.read(expandedNotesProvider.notifier).toggle(folder.path),
-        radius: width / 2,
-        child: SizedBox(
-          width: width,
-          height: height,
-          child: AnimatedRotation(
-            turns: expanded ? 0.25 : 0,
-            duration: const Duration(milliseconds: 160),
-            curve: Curves.easeOut,
-            child: Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          ),
-        ),
-      ),
+      ],
     );
   }
 }

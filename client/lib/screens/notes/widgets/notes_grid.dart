@@ -74,7 +74,8 @@ class _NotesGridState extends ConsumerState<NotesGrid> {
             ),
           );
         }
-        return LayoutBuilder(builder: (context, constraints) => _masonry(contents.nodes, constraints.maxWidth));
+        final nodes = sortNoteNodes(contents.nodes, ref.watch(notesSortProvider));
+        return LayoutBuilder(builder: (context, constraints) => _masonry(nodes, constraints.maxWidth));
       },
     );
   }

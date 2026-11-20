@@ -15,4 +15,8 @@ void main() {
   test("search from elsewhere starts empty", () {
     expect(searchScopeFor(Uri.parse("/notes")), "");
   });
+
+  test("search from notes starts in the notes folder", () {
+    expect(searchScopeFor(Uri.parse("/notes?path=/Notes/Plan.md"), notesRoot: "/Notes"), "type=md in=/Notes ");
+  });
 }

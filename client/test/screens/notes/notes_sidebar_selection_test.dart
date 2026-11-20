@@ -53,11 +53,13 @@ void main() {
   tearDown(() => harness.dispose());
 
   Future<void> showTree(WidgetTester tester) async {
+    final searchFocus = FocusNode();
+    addTearDown(searchFocus.dispose);
     await tester.pumpWidget(
       localizedApp(
         harness.container,
         Scaffold(
-          body: NotesSidebar(root: "/Notes", selectedPath: null, onOpen: (_) {}),
+          body: NotesSidebar(root: "/Notes", selectedPath: null, onOpen: (_) {}, searchFocus: searchFocus),
         ),
       ),
     );

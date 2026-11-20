@@ -32,6 +32,13 @@ class ExpandedNotes extends Notifier<Set<String>> {
     if (!state.contains(path)) state = {...state, path};
   }
 
+  void expandAll(Set<String> folders) => state = {...state, ...folders};
+
+  void collapseAll() => state = const {};
+
+  void collapseWithin(String folder) =>
+      state = {...state.where((path) => path != folder && !RemotePath.isWithin(path, folder))};
+
   void expandTo(String root, String path) {
     final ancestors = [
       for (final ancestor in RemotePath.ancestry(RemotePath.parent(path)))

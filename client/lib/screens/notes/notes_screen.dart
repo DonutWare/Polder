@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
@@ -19,6 +20,7 @@ import "package:polder/screens/notes/notes_actions.dart";
 import "package:polder/screens/notes/widgets/links_panel.dart";
 import "package:polder/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder/screens/notes/widgets/note_pane.dart";
+import "package:polder/screens/notes/widgets/notes_family_panel.dart";
 import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
 import "package:polder/screens/notes/widgets/notes_sidebar.dart";
 import "package:polder/util/localization_helper.dart";
@@ -52,6 +54,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   var _askedForFolder = false;
   String? _panePath;
   Key? _paneKey;
+  final _searchFocus = FocusNode(debugLabel: "NotesSearch");
 
   Key _paneKeyFor(String notePath) {
     final renamed = ref.watch(renamedNoteProvider);
@@ -66,6 +69,12 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   void initState() {
     super.initState();
     _rememberOpenNote();
+  }
+
+  @override
+  void dispose() {
+    _searchFocus.dispose();
+    super.dispose();
   }
 
   @override
@@ -88,6 +97,19 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
   void _toggleSourceMode() => setState(() => _sourceMode = !_sourceMode);
 
   void _open(FileEntry entry) => context.go(AppRoutes.noteAt(entry.path));
+
+  void _openInFamily(String root, FileEntry entry) {
+    final holder = notesGridFolderFor(root, entry.path);
+    ref.read(notesGridFolderProvider.notifier).open(holder == root ? null : holder);
+    _open(entry);
+  }
+
+  void _focusSearch() {
+    final noteCovers =
+        widget.notePath != null &&
+        (ref.read(notesViewModeProvider) == NotesViewMode.grid || AdaptiveLayout.isSingle(context));
+    if (!noteCovers) _searchFocus.requestFocus();
+  }
 
   Future<void> _changeFolder() async {
     final current = ref.read(notesFolderProvider).value;
@@ -121,7 +143,13 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       onRetry: () => ref.invalidate(notesFolderProvider),
       data: (root) {
         if (root == null && widget.notePath == null) _askForFolderOnce();
-        return TagTapHandler(onTag: _filterOnTag, child: _notes(context, root));
+        return CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.keyF, meta: true): _focusSearch,
+            const SingleActivator(LogicalKeyboardKey.keyF, control: true): _focusSearch,
+          },
+          child: TagTapHandler(onTag: _filterOnTag, child: _notes(context, root)),
+        );
       },
     );
   }
@@ -134,8 +162,9 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     return true;
   }
 
-  Widget? _sidebar(String? root) =>
-      root == null ? null : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open);
+  Widget? _sidebar(String? root) => root == null
+      ? null
+      : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open, searchFocus: _searchFocus);
 
   void _createPage(String? root, {NewNoteKind kind = NewNoteKind.page}) {
     if (root == null) {
@@ -169,7 +198,9 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     _lastLinksEntry = entry;
     return DualPane(
       title: NotesTitle(root: root, selectedPath: notePath),
-      listActions: [if (root != null) NotesHeaderActions(onChangeFolder: _changeFolder)],
+      listActions: [
+        if (root != null) NotesHeaderActions(root: root, selectedPath: notePath, onChangeFolder: _changeFolder),
+      ],
       listLocation: AppRoutes.notes,
       maxListWidth: _listWidth,
       forceSingle: grid,
@@ -207,18 +238,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       ),
       detail: switch (notePath) {
         null => null,
-        final notePath when single => NotePane(
-          key: _paneKeyFor(notePath),
-          path: notePath,
-          sourceMode: _sourceMode,
-          onToggleSourceMode: _toggleSourceMode,
-          leading: IconButton(
-            tooltip: context.localized.navNotes,
-            icon: const Icon(IconsaxPlusLinear.arrow_left),
-            onPressed: () => unawaited(UpScope.navigateUp(context)),
-          ),
-          onToggleLinks: () => _showLinksSheet(notePath),
-        ),
+        final notePath when single => _singleNote(root, notePath, grid: grid),
         final notePath => SafeArea(
           key: _paneKeyFor(notePath),
           left: false,
@@ -244,6 +264,75 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               ),
             )
           : null,
+    );
+  }
+
+  Widget _singleNote(String? root, String notePath, {required bool grid}) {
+    final family = grid && root != null ? notesFamilyOf(ref.watch(notesTreeProvider(root)).value, notePath) : null;
+    final beside = family != null && !AdaptiveLayout.isSingle(context);
+    final pane = NotePane(
+      key: beside ? null : _paneKeyFor(notePath),
+      path: notePath,
+      sourceMode: _sourceMode,
+      onToggleSourceMode: _toggleSourceMode,
+      leading: IconButton(
+        tooltip: context.localized.navNotes,
+        icon: const Icon(IconsaxPlusLinear.arrow_left),
+        onPressed: () => unawaited(UpScope.navigateUp(context)),
+      ),
+      onToggleLinks: () => _showLinksSheet(notePath),
+      onShowFamily: family == null || beside ? null : () => _showFamilySheet(root!, family, notePath),
+    );
+    if (!beside) return pane;
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      key: ValueKey("family:${family.path}"),
+      color: colors.surface,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: _listWidth,
+            child: Material(
+              color: colors.surfaceContainerLow,
+              child: SafeArea(
+                right: false,
+                child: NotesFamilyPanel(
+                  root: root!,
+                  family: family,
+                  selectedPath: notePath,
+                  onOpen: (entry) => _openInFamily(root, entry),
+                ),
+              ),
+            ),
+          ),
+          const VerticalDivider(width: 1),
+          Expanded(
+            child: KeyedSubtree(key: _paneKeyFor(notePath), child: pane),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showFamilySheet(String root, NoteTreeNode family, String notePath) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SizedBox(
+        height: MediaQuery.sizeOf(sheetContext).height * 0.6,
+        child: NotesFamilyPanel(
+          root: root,
+          family: family,
+          selectedPath: notePath,
+          onOpen: (entry) {
+            Navigator.pop(sheetContext);
+            _openInFamily(root, entry);
+          },
+        ),
+      ),
     );
   }
 

@@ -167,3 +167,22 @@ List<NoteTreeNode> outermostNotes(Iterable<NoteTreeNode> nodes) => [
   for (final node in nodes)
     if (!nodes.any((other) => other != node && RemotePath.isWithin(node.path, other.childrenPath))) node,
 ];
+
+NoteTreeNode? notesFamilyOf(NotesFolderContents? top, String notePath) {
+  for (final node in top?.nodes ?? const <NoteTreeNode>[]) {
+    if (node.holds(notePath)) return node.hasChildren ? node : null;
+  }
+  return null;
+}
+
+String notesGridFolderFor(String root, String notePath) {
+  final parent = RemotePath.parent(notePath);
+  final readme = RemotePath.withoutExtension(RemotePath.name(notePath)).toLowerCase() == "readme";
+  return readme && parent != root ? RemotePath.parent(parent) : parent;
+}
+
+Set<String> allNoteFolders(String root, Iterable<FileEntry> notes) => {
+  for (final note in notes)
+    for (final folder in RemotePath.ancestry(RemotePath.parent(note.path)))
+      if (RemotePath.isWithin(folder, root)) folder,
+};

@@ -4,11 +4,14 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/search.dart";
+import "package:polder/providers/notes/notes_folder_provider.dart";
+import "package:polder/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/screens/search/search_view.dart";
@@ -134,7 +137,13 @@ class _SearchShortcutState extends State<SearchShortcut> {
       return false;
     }
     if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? true)) return false;
-    openSearch(context, initialQuery: searchScopeFor(GoRouter.of(context).routerDelegate.currentConfiguration.uri));
+    openSearch(
+      context,
+      initialQuery: searchScopeFor(
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri,
+        notesRoot: _notesRootOf(context),
+      ),
+    );
     return true;
   }
 
@@ -142,7 +151,13 @@ class _SearchShortcutState extends State<SearchShortcut> {
   Widget build(BuildContext context) => widget.child;
 }
 
-String searchScopeFor(Uri uri) {
+String? _notesRootOf(BuildContext context) =>
+    ProviderScope.containerOf(context, listen: false).read(notesFolderProvider).value;
+
+String searchScopeFor(Uri uri, {String? notesRoot}) {
+  if (uri.path == AppRoutes.notes) {
+    return notesRoot == null ? "" : appendSearchFilter("", notesFolderQuery(notesRoot));
+  }
   if (uri.path == AppRoutes.calendar) {
     return appendSearchFilter(
       "",
@@ -166,7 +181,10 @@ class SearchButton extends StatelessWidget {
     return IconButton(
       tooltip: context.localized.searchTooltip(apple ? "⌘K" : "Ctrl+K"),
       icon: const Icon(IconsaxPlusLinear.search_normal_1),
-      onPressed: () => openSearch(context, initialQuery: searchScopeFor(GoRouterState.of(context).uri)),
+      onPressed: () => openSearch(
+        context,
+        initialQuery: searchScopeFor(GoRouterState.of(context).uri, notesRoot: _notesRootOf(context)),
+      ),
     );
   }
 }

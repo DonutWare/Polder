@@ -30,6 +30,8 @@ import "package:polder/screens/notes/editor/note_toolbar.dart";
 import "package:polder/screens/notes/editor/source_editor.dart";
 import "package:polder/screens/notes/notes_actions.dart";
 import "package:polder/screens/notes/widgets/link_preview_card.dart";
+import "package:polder/screens/notes/widgets/note_breadcrumbs.dart";
+import "package:polder/screens/notes/widgets/note_subpages.dart";
 import "package:polder/services/notes/format_actions.dart";
 import "package:polder/services/notes/note_checklist.dart";
 import "package:polder/services/notes/note_link.dart";
@@ -58,6 +60,7 @@ class NotePane extends ConsumerStatefulWidget {
     this.leading,
     this.linksShown = false,
     this.onToggleLinks,
+    this.onShowFamily,
     super.key,
   });
 
@@ -67,6 +70,7 @@ class NotePane extends ConsumerStatefulWidget {
   final Widget? leading;
   final bool linksShown;
   final VoidCallback? onToggleLinks;
+  final VoidCallback? onShowFamily;
 
   @override
   ConsumerState<NotePane> createState() => _NotePaneState();
@@ -353,12 +357,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
                       child: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     ),
                   ),
-                  Text(
-                    RemotePath.parent(document.entry.path),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
-                  ),
+                  NoteBreadcrumbs(notePath: document.entry.path),
                 ],
               ),
             ),
@@ -376,6 +375,12 @@ class _NotePaneState extends ConsumerState<NotePane> {
               tooltip: localized.recipeStartCooking,
               icon: const Icon(IconsaxPlusLinear.cake),
               onPressed: () => context.push(AppRoutes.cookAt(document.entry.path)),
+            ),
+          if (widget.onShowFamily case final onShowFamily?)
+            IconButton(
+              tooltip: localized.notesShowFamilyTree,
+              icon: const Icon(IconsaxPlusLinear.hierarchy),
+              onPressed: onShowFamily,
             ),
           IconButton(
             tooltip: sourceMode ? localized.noteLivePreview : localized.noteSourceMode,
@@ -506,6 +511,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
               ),
             ),
             _NoteLinkPreviews(path: widget.path, contentWidth: _readableWidth),
+            NoteSubpages(path: widget.path, contentWidth: _readableWidth),
           ],
         ),
       ),

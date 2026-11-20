@@ -31,4 +31,20 @@ void main() {
 
     expect(await settled(second), NotesViewMode.grid);
   });
+
+  test("remembers the chosen sort across launches", () async {
+    final preferences = InMemoryPreferencesStore();
+    final first = ProviderHarness(preferences: preferences);
+    first.container.read(notesSortProvider);
+    await pumpEventQueue();
+    await first.container.read(notesSortProvider.notifier).select(NotesSortField.modified);
+    first.dispose();
+
+    final second = ProviderHarness(preferences: preferences);
+    addTearDown(second.dispose);
+    second.container.read(notesSortProvider);
+    await pumpEventQueue();
+
+    expect(second.container.read(notesSortProvider), const NotesSort(field: NotesSortField.modified, ascending: false));
+  });
 }
