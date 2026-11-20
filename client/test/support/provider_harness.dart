@@ -29,7 +29,7 @@ import "package:polder/services/storage/preferences_store.dart";
 
 import "fake_document_scanner.dart";
 import "fake_file_picker.dart";
-import "fake_finder_location.dart";
+import "fake_file_browser_location.dart";
 import "fake_sync_platform.dart";
 
 class FixedDeviceConditions implements DeviceConditions {
@@ -120,7 +120,7 @@ class ProviderHarness {
   final syncPlatform = FakeSyncPlatform();
   final filePicker = FakeFilePickerService();
   final documentScanner = FakeDocumentScannerService();
-  final finderLocation = FakeFinderLocation();
+  final fileBrowserLocation = FakeFileBrowserLocation();
   late final ProviderContainer container;
 
   List<Override> get overrides => [
@@ -132,7 +132,7 @@ class ProviderHarness {
     syncPlatformProvider.overrideWithValue(syncPlatform),
     filePickerServiceProvider.overrideWithValue(filePicker),
     documentScannerServiceProvider.overrideWithValue(documentScanner),
-    finderLocationProvider.overrideWithValue(finderLocation),
+    fileBrowserLocationProvider.overrideWithValue(fileBrowserLocation),
     hostedServerUrlProvider.overrideWithValue(hostedServerUrl),
     systemAccentReaderProvider.overrideWithValue(() async => systemAccent),
     webSocketConnectorProvider.overrideWithValue(webSocketConnector),

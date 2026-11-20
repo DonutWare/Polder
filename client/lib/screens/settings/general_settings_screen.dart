@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-import "package:polder/screens/settings/widgets/finder_settings_group.dart";
+import "package:polder/screens/settings/widgets/file_browser_settings_group.dart";
 import "package:polder/screens/settings/widgets/startup_settings_group.dart";
 import "package:polder/screens/settings/widgets/trash_settings_group.dart";
 import "package:polder/screens/settings/widgets/update_settings_group.dart";
@@ -21,7 +21,7 @@ class GeneralSettingsScreen extends StatelessWidget {
         padding: inset + const EdgeInsets.only(top: 8, bottom: 24),
         children: const [
           StartupSettingsGroup(),
-          FinderSettingsGroup(),
+          FileBrowserSettingsGroup(),
           UpdateSettingsGroup(),
           TrashSettingsGroup(),
           VersionSettingsGroup(),

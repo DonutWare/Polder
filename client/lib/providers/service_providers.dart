@@ -6,7 +6,7 @@ import "package:web_socket_channel/web_socket_channel.dart";
 
 import "package:polder/services/desktop/launch_at_login.dart";
 import "package:polder/services/device/device_conditions.dart";
-import "package:polder/services/mount/finder_location.dart";
+import "package:polder/services/mount/file_browser_location.dart";
 import "package:polder/services/realtime/events_client.dart";
 import "package:polder/services/storage/credentials_store.dart";
 import "package:polder/services/storage/preferences_store.dart";
@@ -25,11 +25,13 @@ final documentScannerServiceProvider = Provider<DocumentScannerService>((ref) =>
 
 final deviceConditionsProvider = Provider<DeviceConditions>((ref) => PlatformDeviceConditions());
 
-final finderLocationProvider = Provider<FinderLocation?>(
-  (ref) => desktopIntegrationsEnabled && !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS
-      ? const ChannelFinderLocation()
+final fileBrowserLocationProvider = Provider<FileBrowserLocation?>(
+  (ref) => !kIsWeb && (defaultTargetPlatform == TargetPlatform.android || _finderEnabled)
+      ? const ChannelFileBrowserLocation()
       : null,
 );
+
+bool get _finderEnabled => desktopIntegrationsEnabled && defaultTargetPlatform == TargetPlatform.macOS;
 
 final launchAtLoginProvider = Provider<LaunchAtLogin?>(
   (ref) => desktopIntegrationsEnabled && !kIsWeb ? createLaunchAtLogin() : null,

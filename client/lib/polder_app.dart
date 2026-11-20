@@ -22,7 +22,7 @@ import "package:polder/providers/offline/offline_sync_provider.dart";
 import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/deep_link/deep_link_provider.dart";
 import "package:polder/providers/notifications/notification_coordinator.dart";
-import "package:polder/providers/desktop/finder_location_provider.dart";
+import "package:polder/providers/file_browser/file_browser_location_provider.dart";
 import "package:polder/providers/sharing/share_target_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/theme/app_theme.dart";
@@ -86,7 +86,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(showInFinderProvider);
+    ref.watch(showInFileBrowserProvider);
     final appearance = ref.watch(appearanceProvider);
     final branding = ref.watch(brandingProvider);
     final seed = appearance.seedWith(branding.accent);

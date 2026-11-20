@@ -1,10 +1,10 @@
 import "package:polder/models/account.dart";
 import "package:polder/models/token_pair.dart";
-import "package:polder/services/mount/finder_location.dart";
+import "package:polder/services/mount/file_browser_location.dart";
 
-class FakeFinderLocation implements FinderLocation {
+class FakeFileBrowserLocation implements FileBrowserLocation {
   String? accountId;
-  FinderSession? session;
+  FileBrowserSession? session;
   int signals = 0;
 
   @override
@@ -14,7 +14,7 @@ class FakeFinderLocation implements FinderLocation {
   Future<String?> connectedAccount() async => accountId;
 
   @override
-  Future<FinderSession?> connect(Account account, TokenPair tokens, {required String deviceName}) async {
+  Future<FileBrowserSession?> connect(Account account, TokenPair tokens, {required String deviceName}) async {
     final replaced = session;
     accountId = account.id;
     session = (serverUrl: account.serverUrl, refreshToken: tokens.refreshToken);
@@ -22,7 +22,7 @@ class FakeFinderLocation implements FinderLocation {
   }
 
   @override
-  Future<FinderSession?> disconnect() async {
+  Future<FileBrowserSession?> disconnect() async {
     final removed = session;
     accountId = null;
     session = null;

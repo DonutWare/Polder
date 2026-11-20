@@ -4,16 +4,17 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:url_launcher/url_launcher.dart";
 
-import "package:polder/providers/desktop/finder_location_provider.dart";
+import "package:polder/providers/file_browser/file_browser_location_provider.dart";
 import "package:polder/providers/service_providers.dart";
+import "package:polder/services/mount/file_browser_location.dart";
 import "package:polder/theme/app_theme.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/confirm_dialog.dart";
 import "package:polder/widgets/shared/nav_group.dart";
 import "package:polder/widgets/shared/notice_tile.dart";
 
-class FinderSettingsGroup extends ConsumerWidget {
-  const FinderSettingsGroup({super.key});
+class FileBrowserSettingsGroup extends ConsumerWidget {
+  const FileBrowserSettingsGroup({super.key});
 
   static final _fileProviderSettings = Uri.parse(
     "x-apple.systempreferences:com.apple.ExtensionsPreferences?extensionPointIdentifier=com.apple.fileprovider-nonui",
@@ -21,17 +22,17 @@ class FinderSettingsGroup extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final shown = ref.watch(showInFinderProvider).value;
-    if (ref.watch(finderLocationProvider) == null || shown == null) return const SizedBox.shrink();
+    final shown = ref.watch(showInFileBrowserProvider).value;
+    if (ref.watch(fileBrowserLocationProvider) == null || shown == null) return const SizedBox.shrink();
     final localized = context.localized;
-    final turnedOffInSystem = shown && ref.watch(finderLocationEnabledProvider).value == false;
+    final turnedOffInSystem = shown && ref.watch(fileBrowserLocationEnabledProvider).value == false;
     return NavGroup(
-      title: "Finder",
+      title: fileBrowserName,
       children: [
         SwitchListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          title: Text(localized.showInFinder),
-          subtitle: Text(localized.showInFinderHint),
+          title: Text(usesFilesApp ? localized.showInFilesApp : localized.showInFinder),
+          subtitle: Text(usesFilesApp ? localized.showInFilesAppHint : localized.showInFinderHint),
           value: shown,
           onChanged: (value) => _setShown(context, ref, value),
         ),
@@ -56,13 +57,13 @@ class FinderSettingsGroup extends ConsumerWidget {
     if (!shown) {
       final confirmed = await showConfirmDialog(
         context,
-        title: context.localized.finderRemoveTitle,
-        message: context.localized.finderRemoveMessage,
+        title: usesFilesApp ? context.localized.filesAppRemoveTitle : context.localized.finderRemoveTitle,
+        message: usesFilesApp ? context.localized.filesAppRemoveMessage : context.localized.finderRemoveMessage,
         confirmLabel: context.localized.remove,
         destructive: true,
       );
       if (!confirmed) return;
     }
-    await ref.read(showInFinderProvider.notifier).setShown(shown);
+    await ref.read(showInFileBrowserProvider.notifier).setShown(shown);
   }
 }

@@ -8,7 +8,7 @@ final class FinderLocation {
   private var observer: NSObjectProtocol?
 
   init(messenger: FlutterBinaryMessenger) {
-    channel = FlutterMethodChannel(name: "polder/finder", binaryMessenger: messenger)
+    channel = FlutterMethodChannel(name: "polder/file_browser", binaryMessenger: messenger)
     channel.setMethodCallHandler { call, result in
       FinderLocation.handle(call) { value in DispatchQueue.main.async { result(value) } }
     }
