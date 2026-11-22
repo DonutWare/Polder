@@ -124,6 +124,54 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     ),
   );
 
+  Widget _body(BuildContext context, {required CalendarViewMode mode, required DateTime anchor, required bool single}) {
+    final scrollsUnderBar = mode == CalendarViewMode.schedule && !(single && _monthOpen);
+    final barInset = MediaQuery.paddingOf(context).top;
+    return SafeArea(
+      top: !scrollsUnderBar,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (single)
+            AnimatedSize(
+              duration: AppMotion.spatialDuration,
+              curve: AppMotion.spatial,
+              alignment: Alignment.topCenter,
+              child: _monthOpen
+                  ? Card(
+                      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+                        child: MiniMonth(
+                          selected: anchor,
+                          initialMonth: _pickerMonth,
+                          onMonthChanged: _showPickerMonth,
+                          showHeader: false,
+                          showWeekNumbers: true,
+                          onSelect: (day) => _navigate(mode, day),
+                        ),
+                      ),
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
+          Expanded(
+            child: CalendarView(
+              mode: mode,
+              anchor: anchor,
+              onNavigate: _navigate,
+              onEventTap: (event) => openCalendarEvent(context, event),
+              onDayTap: (day) => createCalendarEvent(context, day: day),
+              onCreate: (start) => createCalendarEvent(context, start: start),
+              onVisibleMonthChanged: _showScrolledMonth,
+              padding: EdgeInsets.only(top: scrollsUnderBar ? barInset : 0),
+              autofocus: AdaptiveLayout.inputDeviceOf(context) != InputDevice.dPad,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final phone = AdaptiveLayout.isPhone(context);
@@ -162,46 +210,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ],
         ),
       ],
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (single)
-              AnimatedSize(
-                duration: AppMotion.spatialDuration,
-                curve: AppMotion.spatial,
-                alignment: Alignment.topCenter,
-                child: _monthOpen
-                    ? Card(
-                        margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-                          child: MiniMonth(
-                            selected: anchor,
-                            initialMonth: _pickerMonth,
-                            onMonthChanged: _showPickerMonth,
-                            showHeader: false,
-                            showWeekNumbers: true,
-                            onSelect: (day) => _navigate(mode, day),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(width: double.infinity),
-              ),
-            Expanded(
-              child: CalendarView(
-                mode: mode,
-                anchor: anchor,
-                onNavigate: _navigate,
-                onEventTap: (event) => openCalendarEvent(context, event),
-                onDayTap: (day) => createCalendarEvent(context, day: day),
-                onCreate: (start) => createCalendarEvent(context, start: start),
-                onVisibleMonthChanged: _showScrolledMonth,
-                autofocus: AdaptiveLayout.inputDeviceOf(context) != InputDevice.dPad,
-              ),
-            ),
-          ],
-        ),
+      body: Builder(
+        builder: (context) => _body(context, mode: mode, anchor: anchor, single: single),
       ),
     );
     if (single) return page;

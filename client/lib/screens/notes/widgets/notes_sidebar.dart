@@ -1,6 +1,8 @@
 import "dart:async";
+import "dart:math" as math;
 
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
@@ -52,36 +54,65 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
   void dispose() {
     _scroll.dispose();
     _focus.dispose();
+    _scrolled.dispose();
     super.dispose();
   }
 
   bool get _grid => ref.watch(notesViewModeProvider) == NotesViewMode.grid;
 
+  final _scrolled = ValueNotifier<double>(0);
+  double _headerHeight = 0;
+
+  void _measuredHeader(Size size) {
+    if (size.height != _headerHeight) setState(() => _headerHeight = size.height);
+  }
+
+  bool _trackScroll(ScrollNotification notification) {
+    if (notification.depth == 0 && notification.metrics.axis == Axis.vertical) {
+      _scrolled.value = math.max(0, notification.metrics.pixels);
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final searching = ref.watch(notesSearchQueryProvider).trim().isNotEmpty;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final barInset = MediaQuery.paddingOf(context).top;
+    final content = switch ((searching, ref.watch(notesTagFilterProvider))) {
+      (true, _) => _searchResults(),
+      (false, AllNotes()) => _allNotes(),
+      _ => _taggedNotes(),
+    };
+    return Stack(
       children: [
-        Padding(
-          padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              NotesSearchField(focusNode: widget.searchFocus),
-              const NotesViewChips(),
-            ],
+        Positioned.fill(
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _trackScroll,
+            child: MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(padding: MediaQuery.paddingOf(context).copyWith(top: barInset + _headerHeight)),
+              child: content,
+            ),
           ),
         ),
-        Expanded(
-          child: MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: switch ((searching, ref.watch(notesTagFilterProvider))) {
-              (true, _) => _searchResults(),
-              (false, AllNotes()) => _allNotes(),
-              _ => _taggedNotes(),
-            },
+        Positioned(
+          top: barInset,
+          left: 0,
+          right: 0,
+          child: ValueListenableBuilder(
+            valueListenable: _scrolled,
+            builder: (context, scrolled, child) =>
+                Transform.translate(offset: Offset(0, -math.min(scrolled, barInset + _headerHeight)), child: child),
+            child: _MeasureSize(
+              onSize: _measuredHeader,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  NotesSearchField(focusNode: widget.searchFocus),
+                  const NotesViewChips(),
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -133,25 +164,27 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
       onPointerDown: (_) => _focus.requestFocus(),
       child: NoteDragAutoScroll(
         controller: _scroll,
-        child: CustomScrollView(
-          controller: _scroll,
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              sliver: SliverToBoxAdapter(
-                child: NotesTree(
-                  root: widget.root,
-                  selectedPath: widget.selectedPath,
-                  onOpen: widget.onOpen,
-                  filter: filter,
+        child: Builder(
+          builder: (context) => CustomScrollView(
+            controller: _scroll,
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(8, MediaQuery.paddingOf(context).top, 8, 0),
+                sliver: SliverToBoxAdapter(
+                  child: NotesTree(
+                    root: widget.root,
+                    selectedPath: widget.selectedPath,
+                    onOpen: widget.onOpen,
+                    filter: filter,
+                  ),
                 ),
               ),
-            ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: _TopLevelDropZone(root: widget.root, selectedPath: widget.selectedPath),
-            ),
-          ],
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _TopLevelDropZone(root: widget.root, selectedPath: widget.selectedPath),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -165,12 +198,40 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
   }
 }
 
+class _MeasureSize extends SingleChildRenderObjectWidget {
+  const _MeasureSize({required this.onSize, required super.child});
+
+  final ValueChanged<Size> onSize;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderMeasureSize(onSize);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderMeasureSize renderObject) => renderObject.onSize = onSize;
+}
+
+class _RenderMeasureSize extends RenderProxyBox {
+  _RenderMeasureSize(this.onSize);
+
+  ValueChanged<Size> onSize;
+  Size? _reported;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size == _reported) return;
+    _reported = size;
+    final measured = size;
+    WidgetsBinding.instance.addPostFrameCallback((_) => onSize(measured));
+  }
+}
+
 class _NoSearchMatches extends StatelessWidget {
   const _NoSearchMatches();
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(16) + EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
     child: Text(
       context.localized.notesSearchNoResults,
       style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
@@ -227,13 +288,20 @@ class _NotesSearchFieldState extends ConsumerState<NotesSearchField> {
             prefixIcon: Icon(IconsaxPlusLinear.search_normal_1, size: 18, color: colors.onSurfaceVariant),
             suffixIcon: ListenableBuilder(
               listenable: _controller,
-              builder: (context, _) => _controller.text.isEmpty
-                  ? const SizedBox.shrink()
-                  : IconButton(
+              builder: (context, _) => Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_controller.text.isNotEmpty)
+                    IconButton(
                       tooltip: context.localized.notesFilterClear,
+                      visualDensity: VisualDensity.compact,
                       icon: const Icon(IconsaxPlusLinear.close_circle, size: 18),
                       onPressed: _clear,
                     ),
+                  const NotesViewPicker(),
+                  const SizedBox(width: 4),
+                ],
+              ),
             ),
             filled: true,
             fillColor: colors.onSurface.withValues(alpha: 0.05),
@@ -357,7 +425,6 @@ class NotesHeaderActions extends ConsumerWidget {
           icon: Icon(grid ? IconsaxPlusLinear.row_vertical : IconsaxPlusLinear.element_3),
           onPressed: ref.read(notesViewModeProvider.notifier).toggle,
         ),
-        NotesViewPicker(density: density),
         NotesOptionsMenu(root: root, selectedPath: selectedPath, density: density),
         if (onChangeFolder != null)
           IconButton(

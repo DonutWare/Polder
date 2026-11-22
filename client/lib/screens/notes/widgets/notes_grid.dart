@@ -67,7 +67,7 @@ class _NotesGridState extends ConsumerState<NotesGrid> {
       data: (contents) {
         if (contents.nodes.isEmpty) {
           return Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16) + EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
             child: Text(
               context.localized.notesEmptyFolder,
               style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),

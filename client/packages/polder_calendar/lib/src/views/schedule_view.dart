@@ -93,7 +93,8 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
       final box = section.findRenderObject();
       if (box is! RenderBox || !box.attached || !box.hasSize) continue;
       final top = box.localToGlobal(Offset.zero, ancestor: viewport).dy;
-      if (top <= 1 && top + box.size.height > 1) return month;
+      final line = (widget.padding?.top ?? 0) + 1;
+      if (top <= line && top + box.size.height > line) return month;
     }
     return null;
   }
@@ -129,9 +130,11 @@ class _ScheduleViewState extends ConsumerState<ScheduleView> {
           onUnmount: _unregister,
           child: _Section(range: range, wide: wide, leading: leading, onEventTap: onEventTap, onDayTap: onDayTap),
         );
+        final top = padding?.top ?? 0;
         return CustomScrollView(
           controller: _scroll,
           center: ScheduleView._center,
+          anchor: constraints.maxHeight > 0 ? (top / constraints.maxHeight).clamp(0.0, 1.0) : 0,
           slivers: [
             SliverPadding(
               padding: horizontal,

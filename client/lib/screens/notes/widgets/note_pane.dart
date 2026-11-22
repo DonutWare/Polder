@@ -42,10 +42,12 @@ import "package:polder/util/action_feedback.dart";
 import "package:polder/util/api_error_localization.dart";
 import "package:polder/util/date_format_extension.dart";
 import "package:polder/util/external_link.dart";
+import "package:polder/l10n/generated/app_localizations.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
 import "package:polder/util/unique_name.dart";
 import "package:polder/widgets/layout/window_centered.dart";
+import "package:polder/widgets/shared/app_bar_fade.dart";
 import "package:polder/widgets/shared/centered_progress.dart";
 import "package:polder/widgets/shared/error_view.dart";
 import "package:polder/widgets/shared/file_link_picker_dialog.dart";
@@ -336,10 +338,11 @@ class _NotePaneState extends ConsumerState<NotePane> {
     final checklist = !sourceMode && NoteChecklist.isChecklist(controller.text);
     final recipe = !checklist && NoteRecipe.isRecipe(controller.text);
     final colors = Theme.of(context).colorScheme;
+    final banners = _banners(document, localized);
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: colors.surfaceContainerLow.withAlpha(125),
-        scrolledUnderElevation: 0,
+        flexibleSpace: const AppBarFade(),
         leading: widget.leading,
         titleSpacing: widget.leading == null ? null : 0,
         title: Row(
@@ -437,36 +440,10 @@ class _NotePaneState extends ConsumerState<NotePane> {
       body: _AboveNavigation(
         child: Column(
           children: [
-            if (!document.editable) _Banner(icon: Icons.lock_outline, message: localized.noteNotText),
-            if (document.draft case final draft?)
-              _Banner(
-                icon: Icons.restore,
-                message: draft.baseHash == document.entry.hash
-                    ? localized.noteDraftFound(draft.updatedAt.formatted(context))
-                    : localized.noteDraftFoundChanged(draft.updatedAt.formatted(context)),
-                actions: [
-                  TextButton(onPressed: _notifier.discardDraft, child: Text(localized.noteDiscardDraft)),
-                  FilledButton.tonal(onPressed: _notifier.recoverDraft, child: Text(localized.noteRecoverDraft)),
-                ],
-              ),
-            if (document.state == NoteSaveState.conflict)
-              _Banner(
-                icon: Icons.sync_problem,
-                message: localized.noteConflict,
-                actions: [
-                  TextButton(
-                    onPressed: () => _resolveConflict(document, _ConflictChoice.theirs),
-                    child: Text(localized.noteConflictTheirs),
-                  ),
-                  TextButton(
-                    onPressed: () => _resolveConflict(document, _ConflictChoice.copy),
-                    child: Text(localized.noteConflictCopy),
-                  ),
-                  FilledButton.tonal(
-                    onPressed: () => _resolveConflict(document, _ConflictChoice.mine),
-                    child: Text(localized.noteConflictMine),
-                  ),
-                ],
+            if (banners.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+                child: Column(children: banners),
               ),
             Expanded(
               child: Shortcuts(
@@ -484,7 +461,8 @@ class _NotePaneState extends ConsumerState<NotePane> {
                   child: WindowCentered(
                     contentWidth: _readableWidth,
                     builder: (context, gutters) {
-                      final padding = gutters.copyWith(top: 16, bottom: 24);
+                      final barInset = banners.isEmpty ? MediaQuery.paddingOf(context).top : 0.0;
+                      final padding = gutters.copyWith(top: barInset + 16, bottom: 24);
                       void openLink(String destination) =>
                           _openLink(destination, targets, _controller?.value.text ?? document.text);
                       if (readOnly && !sourceMode) {
@@ -517,6 +495,40 @@ class _NotePaneState extends ConsumerState<NotePane> {
       ),
     );
   }
+
+  List<Widget> _banners(NoteDocument document, AppLocalizations localized) => [
+    if (!document.editable) _Banner(icon: Icons.lock_outline, message: localized.noteNotText),
+    if (document.draft case final draft?)
+      _Banner(
+        icon: Icons.restore,
+        message: draft.baseHash == document.entry.hash
+            ? localized.noteDraftFound(draft.updatedAt.formatted(context))
+            : localized.noteDraftFoundChanged(draft.updatedAt.formatted(context)),
+        actions: [
+          TextButton(onPressed: _notifier.discardDraft, child: Text(localized.noteDiscardDraft)),
+          FilledButton.tonal(onPressed: _notifier.recoverDraft, child: Text(localized.noteRecoverDraft)),
+        ],
+      ),
+    if (document.state == NoteSaveState.conflict)
+      _Banner(
+        icon: Icons.sync_problem,
+        message: localized.noteConflict,
+        actions: [
+          TextButton(
+            onPressed: () => _resolveConflict(document, _ConflictChoice.theirs),
+            child: Text(localized.noteConflictTheirs),
+          ),
+          TextButton(
+            onPressed: () => _resolveConflict(document, _ConflictChoice.copy),
+            child: Text(localized.noteConflictCopy),
+          ),
+          FilledButton.tonal(
+            onPressed: () => _resolveConflict(document, _ConflictChoice.mine),
+            child: Text(localized.noteConflictMine),
+          ),
+        ],
+      ),
+  ];
 
   static const _readableWidth = 1200.0;
   static const _fadeDuration = Duration(milliseconds: 180);

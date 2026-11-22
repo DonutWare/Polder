@@ -13,9 +13,7 @@ import "package:polder/util/remote_path.dart";
 import "package:polder/widgets/tags/tag_chip.dart";
 
 class NotesViewPicker extends ConsumerStatefulWidget {
-  const NotesViewPicker({required this.density, super.key});
-
-  final VisualDensity density;
+  const NotesViewPicker({super.key});
 
   @override
   ConsumerState<NotesViewPicker> createState() => _NotesViewPickerState();
@@ -47,10 +45,10 @@ class _NotesViewPickerState extends ConsumerState<NotesViewPicker> {
       menuChildren: [_menuContents(context, view)],
       builder: (context, controller, _) => IconButton(
         tooltip: localized.notesFilterByTag,
-        visualDensity: widget.density,
+        visualDensity: VisualDensity.compact,
         isSelected: filtering,
-        icon: const Icon(IconsaxPlusLinear.filter),
-        selectedIcon: Icon(IconsaxPlusBold.filter, color: Theme.of(context).colorScheme.primary),
+        icon: const Icon(IconsaxPlusLinear.tag, size: 18),
+        selectedIcon: Icon(IconsaxPlusBold.tag, size: 18, color: Theme.of(context).colorScheme.primary),
         onPressed: () => controller.isOpen ? controller.close() : controller.open(),
       ),
     );
@@ -262,7 +260,7 @@ class TaggedNotesList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (notes.isEmpty) return const TaggedNotesEmpty();
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 96),
+      padding: EdgeInsets.fromLTRB(8, MediaQuery.paddingOf(context).top, 8, 96),
       itemCount: notes.length,
       itemBuilder: (context, index) => _TaggedNoteTile(
         key: ValueKey(notes[index].path),
@@ -280,7 +278,7 @@ class TaggedNotesEmpty extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Padding(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(16) + EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
     child: Text(
       ref.watch(notesTagFilterProvider) is UntaggedNotes
           ? context.localized.notesViewUntaggedEmpty
