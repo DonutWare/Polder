@@ -148,6 +148,9 @@ func (s *Service) moveIntoTrash(owner users.User, plan trashPlan) (bool, error) 
 		return false, err
 	}
 	err = keepLeftovers(s.disk.MoveToTrash(owner.Username, absolute, plan.storageID, plan.entry.Name), owner, plan.entry.Path)
+	if err != nil {
+		_ = s.disk.RemoveTrashItem(owner.Username, plan.storageID)
+	}
 	if errors.Is(err, fs.ErrNotExist) {
 		return false, nil
 	}
@@ -674,8 +677,14 @@ func (s *Service) recoverTrashItem(ctx context.Context, tx *sql.Tx, owner users.
 	if err != nil {
 		return false, err
 	}
-	if len(children) != 1 {
-		logger.Warn("skip trash folder that does not hold exactly one item", "user", owner.Username, "folder", storageID)
+	if len(children) == 0 {
+		logger.Info("remove empty trash folder", "user", owner.Username, "folder", storageID)
+		return false, s.disk.RemoveTrashItem(owner.Username, storageID)
+	}
+	if len(children) > 1 {
+		if _, warned := s.trashWarned.LoadOrStore(storageID, true); !warned {
+			logger.Warn("found an untracked trash folder with several items, so it cannot be restored to the trash list; inspect it and remove it by hand", "user", owner.Username, "path", directory, "items", len(children))
+		}
 		return false, nil
 	}
 	name := children[0].Name()

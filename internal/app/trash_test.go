@@ -4,11 +4,14 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	"image/png"
 	"io"
+	"io/fs"
 	"net/http"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -414,5 +417,28 @@ func TestTrashSurvivesLosingTheDatabase(t *testing.T) {
 	history := alice.versions("/Docs/plan.txt")
 	if len(history.Versions) != 1 || alice.versionContent(history.Versions[0].ID) != "draft" {
 		t.Fatalf("history should come back with the restored file: %+v", history.Versions)
+	}
+}
+
+func TestEmptyTrashFoldersAreRemovedOnRescan(t *testing.T) {
+	server := startServer(t, config.DriverSQLite, "")
+	alice := server.createUser(server.setupAdmin(), "alice", 0)
+	alice.put("/note.txt", 0, []byte("hi"), http.StatusOK, nil)
+	owner, err := server.app.Users.ByID(context.Background(), 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	empty := filepath.Join(server.app.Config.DataDir, ".polder", "trash", "alice", "e6e17561e702b24082a27c0ce3f8944c")
+	if err := os.MkdirAll(empty, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := server.app.Files.Rescan(context.Background(), owner); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(empty); !errors.Is(err, fs.ErrNotExist) {
+		t.Fatalf("empty trash folder should be removed, stat says %v", err)
+	}
+	if listing := alice.trash(); len(listing.Items) != 0 {
+		t.Fatalf("nothing should be recovered from an empty folder: %+v", listing.Items)
 	}
 }

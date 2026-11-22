@@ -33,6 +33,7 @@ type Service struct {
 	paths          pathLocks
 	scanLocks      userLocks
 	trashInFlight  sync.Map
+	trashWarned    sync.Map
 	indexing       sync.Map
 	contentChanged []ContentChangedFunc
 	contentRemoved []func()
