@@ -10,6 +10,7 @@ import "package:polder/models/calendar.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
+import "package:polder/models/email_preferences.dart";
 import "package:polder/models/federation.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_links.dart";
@@ -444,8 +445,20 @@ class PolderApi {
     int? versionsMaxAgeDays,
     int? versionsMaxPerFile,
     bool? federationEnabled,
+    String? smtpHost,
+    int? smtpPort,
+    String? smtpUsername,
+    String? smtpPassword,
+    String? smtpFrom,
+    MailSecurity? smtpSecurity,
   }) async => (await _service.updateServerSettings(
     body: wire.ServerSettingsChanges(
+      smtpHost: smtpHost,
+      smtpPort: smtpPort,
+      smtpUsername: smtpUsername,
+      smtpPassword: smtpPassword,
+      smtpFrom: smtpFrom,
+      smtpSecurity: smtpSecurity?.toWire(),
       federationEnabled: federationEnabled,
       versionsEnabled: versionsEnabled,
       versionsKeepAllHours: versionsKeepAllHours,
@@ -461,6 +474,26 @@ class PolderApi {
       welcomeMessage: welcomeMessage,
       accentColor: accentColor,
     ),
+  )).body!.toModel();
+
+  Future<void> sendTestEmail({String? to}) => _service.sendTestEmail(body: wire.TestEmailRequest(to: to));
+
+  Future<void> requestPasswordReset(String login) =>
+      _service.requestPasswordReset(body: wire.PasswordResetRequest(login: login));
+
+  Future<void> resetPasswordWithCode({required String login, required String code, required String password}) =>
+      _service.resetPasswordWithCode(
+        body: wire.PasswordResetCodeRequest(login: login, code: code, password: password),
+      );
+
+  Future<EmailPreferences> emailPreferences() async => (await _service.getEmailPreferences()).body!.toModel();
+
+  Future<EmailPreferences> setEmailPreferences({
+    required bool security,
+    required bool quota,
+    required bool shares,
+  }) async => (await _service.setEmailPreferences(
+    body: wire.Preferences(security: security, quota: quota, shares: shares),
   )).body!.toModel();
 
   Future<TextExtractionStatus> textExtractionStatus() async =>

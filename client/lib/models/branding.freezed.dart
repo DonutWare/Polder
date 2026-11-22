@@ -289,7 +289,7 @@ as String,
 /// @nodoc
 mixin _$Branding {
 
- String? get serverUrl; String get name; String get message;@ColorConverter() Color? get accent; ServerImage? get icon; List<ServerImage> get backgrounds;
+ String? get serverUrl; String get name; String get message;@ColorConverter() Color? get accent; ServerImage? get icon; List<ServerImage> get backgrounds; bool get passwordReset;
 /// Create a copy of Branding
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -303,20 +303,20 @@ $BrandingCopyWith<Branding> get copyWith => _$BrandingCopyWithImpl<Branding>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Branding;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Branding&&(identical(other.serverUrl, _this.serverUrl) || other.serverUrl == _this.serverUrl)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.message, _this.message) || other.message == _this.message)&&(identical(other.accent, _this.accent) || other.accent == _this.accent)&&(identical(other.icon, _this.icon) || other.icon == _this.icon)&&const DeepCollectionEquality().equals(other.backgrounds, _this.backgrounds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Branding&&(identical(other.serverUrl, _this.serverUrl) || other.serverUrl == _this.serverUrl)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.message, _this.message) || other.message == _this.message)&&(identical(other.accent, _this.accent) || other.accent == _this.accent)&&(identical(other.icon, _this.icon) || other.icon == _this.icon)&&const DeepCollectionEquality().equals(other.backgrounds, _this.backgrounds)&&(identical(other.passwordReset, _this.passwordReset) || other.passwordReset == _this.passwordReset));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Branding;
-  return Object.hash(runtimeType,_this.serverUrl,_this.name,_this.message,_this.accent,_this.icon,const DeepCollectionEquality().hash(_this.backgrounds));
+  return Object.hash(runtimeType,_this.serverUrl,_this.name,_this.message,_this.accent,_this.icon,const DeepCollectionEquality().hash(_this.backgrounds),_this.passwordReset);
 }
 
 @override
 String toString() {
   final _this = this as Branding;
-  return 'Branding(serverUrl: ${_this.serverUrl}, name: ${_this.name}, message: ${_this.message}, accent: ${_this.accent}, icon: ${_this.icon}, backgrounds: ${_this.backgrounds})';
+  return 'Branding(serverUrl: ${_this.serverUrl}, name: ${_this.name}, message: ${_this.message}, accent: ${_this.accent}, icon: ${_this.icon}, backgrounds: ${_this.backgrounds}, passwordReset: ${_this.passwordReset})';
 }
 
 
@@ -327,7 +327,7 @@ abstract mixin class $BrandingCopyWith<$Res>  {
   factory $BrandingCopyWith(Branding value, $Res Function(Branding) _then) = _$BrandingCopyWithImpl;
 @useResult
 $Res call({
- String? serverUrl, String name, String message,@ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds
+ String? serverUrl, String name, String message,@ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds, bool passwordReset
 });
 
 
@@ -344,7 +344,7 @@ class _$BrandingCopyWithImpl<$Res>
 
 /// Create a copy of Branding
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? serverUrl = freezed,Object? name = null,Object? message = null,Object? accent = freezed,Object? icon = freezed,Object? backgrounds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? serverUrl = freezed,Object? name = null,Object? message = null,Object? accent = freezed,Object? icon = freezed,Object? backgrounds = null,Object? passwordReset = null,}) {
   return _then(Branding(
 serverUrl: freezed == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -352,7 +352,8 @@ as String,message: null == message ? _self.message : message // ignore: cast_nul
 as String,accent: freezed == accent ? _self.accent : accent // ignore: cast_nullable_to_non_nullable
 as Color?,icon: freezed == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
 as ServerImage?,backgrounds: null == backgrounds ? _self.backgrounds : backgrounds // ignore: cast_nullable_to_non_nullable
-as List<ServerImage>,
+as List<ServerImage>,passwordReset: null == passwordReset ? _self.passwordReset : passwordReset // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of Branding
@@ -449,10 +450,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds,  bool passwordReset)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Branding() when $default != null:
-return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds);case _:
+return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds,_that.passwordReset);case _:
   return orElse();
 
 }
@@ -470,10 +471,10 @@ return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds,  bool passwordReset)  $default,) {final _that = this;
 switch (_that) {
 case _Branding():
-return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds);case _:
+return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds,_that.passwordReset);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -490,10 +491,10 @@ return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? serverUrl,  String name,  String message, @ColorConverter()  Color? accent,  ServerImage? icon,  List<ServerImage> backgrounds,  bool passwordReset)?  $default,) {final _that = this;
 switch (_that) {
 case _Branding() when $default != null:
-return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds);case _:
+return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon,_that.backgrounds,_that.passwordReset);case _:
   return null;
 
 }
@@ -505,7 +506,7 @@ return $default(_that.serverUrl,_that.name,_that.message,_that.accent,_that.icon
 @JsonSerializable()
 
 class _Branding extends Branding {
-  const _Branding({this.serverUrl, this.name = "", this.message = "", @ColorConverter() this.accent, this.icon,  List<ServerImage> backgrounds = const <ServerImage>[]}): _backgrounds = backgrounds,super._();
+  const _Branding({this.serverUrl, this.name = "", this.message = "", @ColorConverter() this.accent, this.icon,  List<ServerImage> backgrounds = const <ServerImage>[], this.passwordReset = false}): _backgrounds = backgrounds,super._();
   factory _Branding.fromJson(Map<String, dynamic> json) => _$BrandingFromJson(json);
 
 @override final  String? serverUrl;
@@ -520,6 +521,7 @@ class _Branding extends Branding {
   return EqualUnmodifiableListView(_backgrounds);
 }
 
+@override@JsonKey() final  bool passwordReset;
 
 /// Create a copy of Branding
 /// with the given fields replaced by the non-null parameter values.
@@ -534,18 +536,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Branding&&(identical(other.serverUrl, serverUrl) || other.serverUrl == serverUrl)&&(identical(other.name, name) || other.name == name)&&(identical(other.message, message) || other.message == message)&&(identical(other.accent, accent) || other.accent == accent)&&(identical(other.icon, icon) || other.icon == icon)&&const DeepCollectionEquality().equals(other.backgrounds, _backgrounds));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Branding&&(identical(other.serverUrl, serverUrl) || other.serverUrl == serverUrl)&&(identical(other.name, name) || other.name == name)&&(identical(other.message, message) || other.message == message)&&(identical(other.accent, accent) || other.accent == accent)&&(identical(other.icon, icon) || other.icon == icon)&&const DeepCollectionEquality().equals(other.backgrounds, _backgrounds)&&(identical(other.passwordReset, passwordReset) || other.passwordReset == passwordReset));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,serverUrl,name,message,accent,icon,const DeepCollectionEquality().hash(_backgrounds));
+    return Object.hash(runtimeType,serverUrl,name,message,accent,icon,const DeepCollectionEquality().hash(_backgrounds),passwordReset);
 }
 
 @override
 String toString() {
-    return 'Branding(serverUrl: $serverUrl, name: $name, message: $message, accent: $accent, icon: $icon, backgrounds: $backgrounds)';
+    return 'Branding(serverUrl: $serverUrl, name: $name, message: $message, accent: $accent, icon: $icon, backgrounds: $backgrounds, passwordReset: $passwordReset)';
 }
 
 
@@ -556,7 +558,7 @@ abstract mixin class _$BrandingCopyWith<$Res> implements $BrandingCopyWith<$Res>
   factory _$BrandingCopyWith(_Branding value, $Res Function(_Branding) _then) = __$BrandingCopyWithImpl;
 @override @useResult
 $Res call({
- String? serverUrl, String name, String message,@ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds
+ String? serverUrl, String name, String message,@ColorConverter() Color? accent, ServerImage? icon, List<ServerImage> backgrounds, bool passwordReset
 });
 
 
@@ -573,7 +575,7 @@ class __$BrandingCopyWithImpl<$Res>
 
 /// Create a copy of Branding
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? serverUrl = freezed,Object? name = null,Object? message = null,Object? accent = freezed,Object? icon = freezed,Object? backgrounds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? serverUrl = freezed,Object? name = null,Object? message = null,Object? accent = freezed,Object? icon = freezed,Object? backgrounds = null,Object? passwordReset = null,}) {
   return _then(_Branding(
 serverUrl: freezed == serverUrl ? _self.serverUrl : serverUrl // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -581,7 +583,8 @@ as String,message: null == message ? _self.message : message // ignore: cast_nul
 as String,accent: freezed == accent ? _self.accent : accent // ignore: cast_nullable_to_non_nullable
 as Color?,icon: freezed == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
 as ServerImage?,backgrounds: null == backgrounds ? _self._backgrounds : backgrounds // ignore: cast_nullable_to_non_nullable
-as List<ServerImage>,
+as List<ServerImage>,passwordReset: null == passwordReset ? _self.passwordReset : passwordReset // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -2,7 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
+import "package:polder/providers/branding/branding_provider.dart";
 import "package:polder/providers/login_provider.dart";
+import "package:polder/screens/login/widgets/forgot_password_dialog.dart";
 import "package:polder/screens/login/widgets/login_failure_text.dart";
 import "package:polder/screens/login/widgets/server_summary.dart";
 import "package:polder/util/credential_rules.dart";
@@ -17,6 +19,7 @@ class CredentialsStep extends ConsumerWidget {
   static const passwordFieldKey = Key("login.password");
   static const passwordConfirmationFieldKey = Key("login.passwordConfirmation");
   static const submitButtonKey = Key("login.submit");
+  static const forgotPasswordKey = Key("login.forgotPassword");
 
   final bool creatingAdmin;
 
@@ -25,6 +28,7 @@ class CredentialsStep extends ConsumerWidget {
     final state = ref.watch(loginProvider);
     final notifier = ref.read(loginProvider.notifier);
     final submit = creatingAdmin ? notifier.createAdmin : notifier.signIn;
+    final resetAvailable = ref.watch(brandingProvider.select((branding) => branding.passwordReset));
     return AutofillGroup(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -73,6 +77,20 @@ class CredentialsStep extends ConsumerWidget {
                   : context.localized.passwordsDoNotMatch,
               onChanged: notifier.setPasswordConfirmation,
               onSubmitted: (_) => state.canSubmitCredentials ? submit() : null,
+            ),
+          if (!creatingAdmin)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                key: forgotPasswordKey,
+                onPressed: () => showForgotPasswordDialog(
+                  context,
+                  serverUrl: state.serverUrl,
+                  login: state.username,
+                  resetAvailable: resetAvailable,
+                ),
+                child: Text(context.localized.forgotPassword),
+              ),
             ),
           const LoginFailureText(),
           LoadingButton(

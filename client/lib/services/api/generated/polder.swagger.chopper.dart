@@ -169,6 +169,55 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<EmailPreferences>> _getEmailPreferences({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Which emails the logged-in user gets',
+      operationId: 'getEmailPreferences',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/email-notifications');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<EmailPreferences, EmailPreferences>($request);
+  }
+
+  @override
+  Future<Response<EmailPreferences>> _setEmailPreferences({
+    required Preferences? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose which emails the logged-in user gets; password emails are always sent',
+      operationId: 'setEmailPreferences',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/email-notifications');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<EmailPreferences, EmailPreferences>($request);
+  }
+
+  @override
   Future<Response<dynamic>> _changePassword({
     required PasswordChange? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -612,6 +661,32 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<dynamic>> _sendTestEmail({
+    required TestEmailRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Send a test email with the current mail server settings',
+      operationId: 'sendTestEmail',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/mail/test');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<PreviewRegeneration>> _regeneratePreviews({
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
       description: '',
@@ -902,6 +977,58 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<User, User>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _requestPasswordReset({
+    required PasswordResetRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Email a code to choose a new password, if the account exists and has an email address',
+      operationId: 'requestPasswordReset',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/password-reset');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _resetPasswordWithCode({
+    required PasswordResetCodeRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose a new password with the code from a reset email',
+      operationId: 'resetPasswordWithCode',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/password-reset/code');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
   }
 
   @override

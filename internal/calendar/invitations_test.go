@@ -14,7 +14,7 @@ type capturingMailer struct {
 	sent []mail.Message
 }
 
-func (m *capturingMailer) Configured() bool { return true }
+func (m *capturingMailer) Configured(context.Context) bool { return true }
 
 func (m *capturingMailer) Send(_ context.Context, message mail.Message) error {
 	m.sent = append(m.sent, message)

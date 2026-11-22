@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>{{.Content.Subject}}</title>
+<style>
+  body { margin: 0; padding: 0; }
+  a { color: inherit; }
+  @media (prefers-color-scheme: dark) {
+    .page { background: #131314 !important; }
+    .card { background: #1E1E21 !important; }
+    .heading, .brand-name { color: #F3F0F4 !important; }
+    .text { color: #C9C6CC !important; }
+    .details { background: #26262A !important; }
+    .detail-label, .footer { color: #9A979E !important; }
+    .detail-value { color: #F3F0F4 !important; }
+    .divider { border-color: #2E2E33 !important; }
+    .code-box { background: #26262A !important; border-color: #34343A !important; }
+    .code-value { color: #F3F0F4 !important; }
+    .code-note { color: #9A979E !important; }
+  }
+  @media (max-width: 600px) {
+    .card-cell { padding: 28px 22px !important; }
+    .code-value { font-size: 28px !important; letter-spacing: 4px !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">{{.Content.Preheader}}</div>
+<table role="presentation" class="page" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F0F4;font-family:Rubik,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <tr>
+    <td align="center" style="padding:32px 12px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+        <tr>
+          <td style="padding:0 4px 18px 4px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                {{if .Brand.IconCID}}<td style="padding-right:12px;vertical-align:middle;"><img src="cid:{{.Brand.IconCID}}" width="36" height="36" alt="" style="display:block;width:36px;height:36px;border-radius:10px;"></td>{{end}}
+                <td class="brand-name" style="vertical-align:middle;font-size:18px;font-weight:600;color:#1B1B1F;">{{.Brand.Name}}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="card" style="background:#FFFFFF;border-radius:20px;overflow:hidden;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr><td style="height:6px;line-height:6px;font-size:0;background:{{.Brand.Accent}};">&nbsp;</td></tr>
+              <tr>
+                <td class="card-cell" style="padding:36px 40px;">
+                  <h1 class="heading" style="margin:0 0 18px 0;font-size:22px;line-height:1.3;font-weight:600;color:#1B1B1F;">{{.Content.Heading}}</h1>
+                  {{range .Content.Paragraphs}}<p class="text" style="margin:0 0 14px 0;font-size:15px;line-height:1.6;color:#46464F;">{{.}}</p>{{end}}
+                  {{with .Content.Details}}
+                  <table role="presentation" class="details" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 18px 0;background:#F6F4F8;border-radius:14px;">
+                    <tr><td style="padding:14px 18px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                        {{range .}}<tr>
+                          <td class="detail-label" style="padding:5px 12px 5px 0;font-size:13px;color:#77767F;white-space:nowrap;vertical-align:top;">{{.Label}}</td>
+                          <td class="detail-value" style="padding:5px 0;font-size:14px;color:#1B1B1F;word-break:break-word;">{{.Value}}</td>
+                        </tr>{{end}}
+                      </table>
+                    </td></tr>
+                  </table>
+                  {{end}}
+                  {{with .Content.Code}}
+                  <table role="presentation" class="code-box" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0 22px 0;background:#F6F4F8;border:1px solid #E7E3EA;border-radius:16px;">
+                    <tr><td align="center" style="padding:22px 16px 20px 16px;">
+                      <div style="font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:{{$.Brand.Accent}};">Your code</div>
+                      <div class="code-value" style="margin:10px 0 8px 0;font-family:'SF Mono',SFMono-Regular,Menlo,Consolas,'Roboto Mono','Liberation Mono',monospace;font-size:34px;line-height:1.2;font-weight:600;letter-spacing:6px;color:#1B1B1F;white-space:nowrap;user-select:all;-webkit-user-select:all;">{{.Value}}</div>
+                      {{with .Note}}<div class="code-note" style="font-size:13px;color:#77767F;">{{.}}</div>{{end}}
+                    </td></tr>
+                  </table>
+                  {{end}}
+                  {{with .Content.Action}}
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:10px 0 22px 0;">
+                    <tr>
+                      <td style="border-radius:999px;background:{{$.Brand.Accent}};">
+                        <a href="{{.URL}}" target="_blank" style="display:inline-block;padding:13px 28px;font-size:15px;font-weight:600;color:{{$.Brand.OnAccent}};text-decoration:none;border-radius:999px;">{{.Label}}</a>
+                      </td>
+                    </tr>
+                  </table>
+                  <p class="text" style="margin:0 0 14px 0;font-size:13px;line-height:1.5;color:#77767F;">If the button doesn't work, open this link:<br><a href="{{.URL}}" style="color:#46464F;word-break:break-all;">{{.URL}}</a></p>
+                  {{end}}
+                  {{range .Content.Closing}}<p class="text" style="margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#46464F;">{{.}}</p>{{end}}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="footer" style="padding:18px 8px 0 8px;font-size:12px;line-height:1.5;color:#77767F;text-align:center;">
+            {{with .Content.Footer}}{{.}}<br>{{end}}Sent by {{.Brand.Name}}{{with .Brand.PublicURL}} · <a href="{{.}}" style="color:#77767F;">{{$.Host}}</a>{{end}}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

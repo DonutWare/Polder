@@ -13,6 +13,7 @@ abstract class UserForm with _$UserForm {
   const factory UserForm({
     User? original,
     @Default("") String username,
+    @Default("") String email,
     @Default("") String password,
     @Default("") String passwordConfirmation,
     @Default(UserRole.user) UserRole role,
@@ -49,10 +50,17 @@ abstract class UserForm with _$UserForm {
 
   bool get isPasswordValid => password.isEmpty ? !isNew : CredentialRules.isValidPassword(password);
 
-  bool get isValid => isQuotaValid && passwordsMatch && isUsernameValid && isPasswordValid;
+  bool get isEmailValid => email.trim().isEmpty || CredentialRules.isValidEmail(email);
 
-  CreateUserRequest toCreateRequest() =>
-      CreateUserRequest(username: username.trim(), password: password, role: role, quotaBytes: quotaBytes);
+  bool get isValid => isQuotaValid && passwordsMatch && isUsernameValid && isPasswordValid && isEmailValid;
+
+  CreateUserRequest toCreateRequest() => CreateUserRequest(
+    username: username.trim(),
+    password: password,
+    role: role,
+    quotaBytes: quotaBytes,
+    email: email.trim(),
+  );
 
   UpdateUserRequest toUpdateRequest() {
     final user = original!;

@@ -65,6 +65,7 @@ type NewUser struct {
 	Password   string `json:"password"`
 	Role       Role   `json:"role"`
 	QuotaBytes int64  `json:"quotaBytes" required:"false" doc:"Storage limit in bytes; 0 or omitted is unlimited"`
+	Email      string `json:"email" required:"false" doc:"Where the welcome email and later emails go; the user can change it"`
 }
 
 type Changes struct {
@@ -84,7 +85,10 @@ func (n NewUser) validate() error {
 	if err := validateRole(n.Role); err != nil {
 		return err
 	}
-	return validateQuota(n.QuotaBytes)
+	if err := validateQuota(n.QuotaBytes); err != nil {
+		return err
+	}
+	return (&Profile{Email: n.Email}).normalize()
 }
 
 func (c Changes) validate() error {
@@ -104,6 +108,10 @@ func (c Changes) validate() error {
 		}
 	}
 	return nil
+}
+
+func ValidatePassword(password string) error {
+	return validatePassword(password)
 }
 
 func validatePassword(password string) error {

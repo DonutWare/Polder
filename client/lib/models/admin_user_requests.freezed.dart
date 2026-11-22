@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateUserRequest {
 
- String get username; String get password; UserRole get role; int get quotaBytes;
+ String get username; String get password; UserRole get role; int get quotaBytes; String get email;
 /// Create a copy of CreateUserRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $CreateUserRequestCopyWith<CreateUserRequest> get copyWith => _$CreateUserReques
 @override
 bool operator ==(Object other) {
   final _this = this as CreateUserRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateUserRequest&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateUserRequest&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.password, _this.password) || other.password == _this.password)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes)&&(identical(other.email, _this.email) || other.email == _this.email));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CreateUserRequest;
-  return Object.hash(runtimeType,_this.username,_this.password,_this.role,_this.quotaBytes);
+  return Object.hash(runtimeType,_this.username,_this.password,_this.role,_this.quotaBytes,_this.email);
 }
 
 @override
 String toString() {
   final _this = this as CreateUserRequest;
-  return 'CreateUserRequest(username: ${_this.username}, password: ${_this.password}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes})';
+  return 'CreateUserRequest(username: ${_this.username}, password: ${_this.password}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes}, email: ${_this.email})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $CreateUserRequestCopyWith<$Res>  {
   factory $CreateUserRequestCopyWith(CreateUserRequest value, $Res Function(CreateUserRequest) _then) = _$CreateUserRequestCopyWithImpl;
 @useResult
 $Res call({
- String username, String password, UserRole role, int quotaBytes
+ String username, String password, UserRole role, int quotaBytes, String email
 });
 
 
@@ -71,13 +71,14 @@ class _$CreateUserRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateUserRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? username = null,Object? password = null,Object? role = null,Object? quotaBytes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? username = null,Object? password = null,Object? role = null,Object? quotaBytes = null,Object? email = null,}) {
   return _then(CreateUserRequest(
 username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole,quotaBytes: null == quotaBytes ? _self.quotaBytes : quotaBytes // ignore: cast_nullable_to_non_nullable
-as int,
+as int,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -162,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String username,  String password,  UserRole role,  int quotaBytes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String username,  String password,  UserRole role,  int quotaBytes,  String email)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateUserRequest() when $default != null:
-return $default(_that.username,_that.password,_that.role,_that.quotaBytes);case _:
+return $default(_that.username,_that.password,_that.role,_that.quotaBytes,_that.email);case _:
   return orElse();
 
 }
@@ -183,10 +184,10 @@ return $default(_that.username,_that.password,_that.role,_that.quotaBytes);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String username,  String password,  UserRole role,  int quotaBytes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String username,  String password,  UserRole role,  int quotaBytes,  String email)  $default,) {final _that = this;
 switch (_that) {
 case _CreateUserRequest():
-return $default(_that.username,_that.password,_that.role,_that.quotaBytes);case _:
+return $default(_that.username,_that.password,_that.role,_that.quotaBytes,_that.email);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +204,10 @@ return $default(_that.username,_that.password,_that.role,_that.quotaBytes);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String username,  String password,  UserRole role,  int quotaBytes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String username,  String password,  UserRole role,  int quotaBytes,  String email)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateUserRequest() when $default != null:
-return $default(_that.username,_that.password,_that.role,_that.quotaBytes);case _:
+return $default(_that.username,_that.password,_that.role,_that.quotaBytes,_that.email);case _:
   return null;
 
 }
@@ -218,13 +219,14 @@ return $default(_that.username,_that.password,_that.role,_that.quotaBytes);case 
 @JsonSerializable()
 
 class _CreateUserRequest implements CreateUserRequest {
-  const _CreateUserRequest({required this.username, required this.password, required this.role, required this.quotaBytes});
+  const _CreateUserRequest({required this.username, required this.password, required this.role, required this.quotaBytes, this.email = ""});
   factory _CreateUserRequest.fromJson(Map<String, dynamic> json) => _$CreateUserRequestFromJson(json);
 
 @override final  String username;
 @override final  String password;
 @override final  UserRole role;
 @override final  int quotaBytes;
+@override@JsonKey() final  String email;
 
 /// Create a copy of CreateUserRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -239,18 +241,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateUserRequest&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateUserRequest&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes)&&(identical(other.email, email) || other.email == email));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,username,password,role,quotaBytes);
+    return Object.hash(runtimeType,username,password,role,quotaBytes,email);
 }
 
 @override
 String toString() {
-    return 'CreateUserRequest(username: $username, password: $password, role: $role, quotaBytes: $quotaBytes)';
+    return 'CreateUserRequest(username: $username, password: $password, role: $role, quotaBytes: $quotaBytes, email: $email)';
 }
 
 
@@ -261,7 +263,7 @@ abstract mixin class _$CreateUserRequestCopyWith<$Res> implements $CreateUserReq
   factory _$CreateUserRequestCopyWith(_CreateUserRequest value, $Res Function(_CreateUserRequest) _then) = __$CreateUserRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String username, String password, UserRole role, int quotaBytes
+ String username, String password, UserRole role, int quotaBytes, String email
 });
 
 
@@ -278,13 +280,14 @@ class __$CreateUserRequestCopyWithImpl<$Res>
 
 /// Create a copy of CreateUserRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? username = null,Object? password = null,Object? role = null,Object? quotaBytes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? username = null,Object? password = null,Object? role = null,Object? quotaBytes = null,Object? email = null,}) {
   return _then(_CreateUserRequest(
 username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole,quotaBytes: null == quotaBytes ? _self.quotaBytes : quotaBytes // ignore: cast_nullable_to_non_nullable
-as int,
+as int,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

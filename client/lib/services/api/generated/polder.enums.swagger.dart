@@ -638,6 +638,38 @@ enum RoleChangeRole {
   const RoleChangeRole(this.value);
 }
 
+enum ServerSettingsSmtpSecurity {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('starttls')
+  starttls('starttls'),
+  @JsonValue('tls')
+  tls('tls'),
+  @JsonValue('none')
+  none('none');
+
+  final String? value;
+
+  const ServerSettingsSmtpSecurity(this.value);
+}
+
+enum ServerSettingsChangesSmtpSecurity {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('starttls')
+  starttls('starttls'),
+  @JsonValue('tls')
+  tls('tls'),
+  @JsonValue('none')
+  none('none');
+
+  final String? value;
+
+  const ServerSettingsChangesSmtpSecurity(this.value);
+}
+
 enum SuggestionKind {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),

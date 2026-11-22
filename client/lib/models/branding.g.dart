@@ -23,6 +23,7 @@ _Branding _$BrandingFromJson(Map<String, dynamic> json) => _Branding(
   backgrounds:
       (json['backgrounds'] as List<dynamic>?)?.map((e) => ServerImage.fromJson(e as Map<String, dynamic>)).toList() ??
       const <ServerImage>[],
+  passwordReset: json['passwordReset'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$BrandingToJson(_Branding instance) => <String, dynamic>{
@@ -32,6 +33,7 @@ Map<String, dynamic> _$BrandingToJson(_Branding instance) => <String, dynamic>{
   'accent': ?_$JsonConverterToJson<int, Color>(instance.accent, const ColorConverter().toJson),
   'icon': ?instance.icon?.toJson(),
   'backgrounds': instance.backgrounds.map((e) => e.toJson()).toList(),
+  'passwordReset': instance.passwordReset,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>

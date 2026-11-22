@@ -209,7 +209,7 @@ func (s *Service) deliveryStatus(ctx context.Context, address string) string {
 	if _, internal := s.userByAddress(ctx, address); internal {
 		return statusDelivered
 	}
-	if strings.HasPrefix(normalizeAddress(address), mailtoPrefix) && s.options.Mailer != nil && s.options.Mailer.Configured() {
+	if strings.HasPrefix(normalizeAddress(address), mailtoPrefix) && s.options.Mailer != nil && s.options.Mailer.Configured(ctx) {
 		return statusSent
 	}
 	return statusUndeliverable

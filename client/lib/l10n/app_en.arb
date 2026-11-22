@@ -340,7 +340,13 @@
 	"searchFieldSize": "Size",
 	"searchFieldType": "Type",
 	"searchEventsCount": "{count, plural, =1{1 event} other{{count} events}}",
-	"@searchEventsCount": {"placeholders": {"count": {"type": "int"}}},
+	"@searchEventsCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"searchMoreEvents": "Show more events",
 	"searchFieldCalendar": "Calendar",
 	"searchFieldRepeats": "Repeats",
@@ -991,7 +997,13 @@
 	"noteListItem": "List item",
 	"noteRemoveItem": "Remove item",
 	"noteCheckedItems": "{count, plural, =1{1 checked item} other{{count} checked items}}",
-	"@noteCheckedItems": {"placeholders": {"count": {"type": "int"}}},
+	"@noteCheckedItems": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"noteShowCheckboxes": "Show checkboxes",
 	"noteHideCheckboxes": "Hide checkboxes",
 	"noteSubpages": "Subpages",
@@ -1406,11 +1418,26 @@
 	"appPasswordCopied": "App password copied",
 	"appPasswordNeverUsed": "Never used",
 	"appPasswordLastUsed": "Last used {date} from {address}",
-	"@appPasswordLastUsed": {"placeholders": {"date": {"type": "String"}, "address": {"type": "String"}}},
+	"@appPasswordLastUsed": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			},
+			"address": {
+				"type": "String"
+			}
+		}
+	},
 	"noAppPasswords": "No app passwords yet",
 	"revokeAppPassword": "Revoke",
 	"revokeAppPasswordTitle": "Revoke {name}?",
-	"@revokeAppPasswordTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@revokeAppPasswordTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"revokeAppPasswordMessage": "Apps using this password stop working at once.",
 	"webdavAddress": "WebDAV address",
 	"webdavAddressCopied": "WebDAV address copied",
@@ -1421,7 +1448,13 @@
 	"noCalendars": "No calendars yet",
 	"calendarAddressCopied": "Calendar address copied",
 	"calendarSharedBy": "Shared by {name}",
-	"@calendarSharedBy": {"placeholders": {"name": {"type": "String"}}},
+	"@calendarSharedBy": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarSubscribedFeed": "Subscribed feed",
 	"subscriptionLinks": "Subscription links",
 	"noSubscriptionLinks": "No subscription links yet",
@@ -1436,7 +1469,13 @@
 	"subscriptionLinkWebcal": "Link for calendar apps (webcal)",
 	"subscriptionLinkCopied": "Subscription link copied",
 	"subscriptionLinkLastUsed": "Last used {date}",
-	"@subscriptionLinkLastUsed": {"placeholders": {"date": {"type": "String"}}},
+	"@subscriptionLinkLastUsed": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
 	"revokeSubscriptionLink": "Revoke",
 	"revokeSubscriptionLinkTitle": "Revoke this subscription link?",
 	"revokeSubscriptionLinkMessage": "Apps subscribed with it stop getting updates at once.",
@@ -1452,13 +1491,31 @@
 	"noTrustedServers": "No trusted servers yet",
 	"noTrustedServersHint": "Add a server to share with its users",
 	"serverKey": "Key {fingerprint}",
-	"@serverKey": {"placeholders": {"fingerprint": {"type": "String"}}},
+	"@serverKey": {
+		"placeholders": {
+			"fingerprint": {
+				"type": "String"
+			}
+		}
+	},
 	"rediscoverServer": "Fetch key again",
 	"rediscoverServerTitle": "Fetch the key of {name} again?",
-	"@rediscoverServerTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@rediscoverServerTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"rediscoverServerMessage": "Only do this when the server's administrator tells you its key changed. The new key is trusted from now on.",
 	"removeTrustedServerTitle": "Stop trusting {name}?",
-	"@removeTrustedServerTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@removeTrustedServerTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"removeTrustedServerMessage": "Every share with this server ends.",
 	"federatedRecipients": "On other servers",
 	"federatedNotSharedYet": "Type a cloud ID, such as alice@cloud.example.com, to share with someone on another server",
@@ -1471,25 +1528,61 @@
 	"sharedFromOtherServers": "From other servers",
 	"noFederatedShares": "Nothing has been shared with you from other servers",
 	"declineFederatedTitle": "Decline {name}?",
-	"@declineFederatedTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@declineFederatedTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"removeFederatedTitle": "Remove {name}?",
-	"@removeFederatedTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@removeFederatedTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"removeFederatedMessage": "{owner} is told you no longer want this share.",
-	"@removeFederatedMessage": {"placeholders": {"owner": {"type": "String"}}},
+	"@removeFederatedMessage": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			}
+		}
+	},
 	"acceptInvite": "Accept invite",
 	"acceptInviteHint": "Enter the invite token and server address you received. You become each other's contacts and can share with each other.",
 	"inviteSomeone": "Invite someone",
 	"inviteToken": "Invite token",
 	"inviteCreatedTitle": "Invite created",
 	"inviteCreatedMessage": "Send the token and this server's address to the other person. They accept it on their own server before {date}.",
-	"@inviteCreatedMessage": {"placeholders": {"date": {"type": "String"}}},
+	"@inviteCreatedMessage": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
 	"inviteAccepted": "{name} is now a contact",
-	"@inviteAccepted": {"placeholders": {"name": {"type": "String"}}},
+	"@inviteAccepted": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"openInvite": "Open invite",
 	"openInvites": "Open invites",
 	"federationContacts": "Contacts on other servers",
 	"removeContactTitle": "Remove {name}?",
-	"@removeContactTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@removeContactTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"removeContactMessage": "Shares stay as they are; you can invite each other again later.",
 	"copied": "Copied",
 	"checkSenderAddress": "Check sender address",
@@ -1501,7 +1594,13 @@
 	"shareDetailsSharedOn": "Shared on",
 	"sharedWithYou": "Shared with you",
 	"leaveShareMessage": "It disappears from your files. {owner} can share it with you again.",
-	"@leaveShareMessage": {"placeholders": {"owner": {"type": "String"}}},
+	"@leaveShareMessage": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			}
+		}
+	},
 	"showSharesInFiles": "Show in Files",
 	"showSharesInFilesHint": "Shares appear among your own files. When off, open them from here.",
 	"sharedByYou": "Shared by you",
@@ -1511,7 +1610,13 @@
 	"regeneratePreviewsMessage": "Every file gets a new preview in the background. Until its new preview is ready, a file shows its icon.",
 	"regenerate": "Regenerate",
 	"previewsQueued": "{count, plural, =1{1 file queued for a new preview} other{{count} files queued for a new preview}}",
-	"@previewsQueued": {"placeholders": {"count": {"type": "int"}}},
+	"@previewsQueued": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"searchFieldTag": "Tag",
 	"tagsTitle": "Tags",
 	"tagsAction": "Tags…",
@@ -1519,24 +1624,60 @@
 	"tagInvalidName": "Use letters, digits, -, _ or / without spaces",
 	"tagsEmpty": "No tags yet. Type #name in a note, or add one from an item's menu.",
 	"tagCreate": "Create #{name}",
-	"@tagCreate": {"placeholders": {"name": {"type": "String"}}},
+	"@tagCreate": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"tagUsage": "{count, plural, =0{Not used} =1{1 item} other{{count} items}}",
-	"@tagUsage": {"placeholders": {"count": {"type": "int"}}},
+	"@tagUsage": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"tagEditTitle": "Edit tag",
 	"tagName": "Name",
 	"tagColor": "Color",
 	"tagDeleteTitle": "Delete #{name}?",
-	"@tagDeleteTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@tagDeleteTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"tagDeleteMessage": "{count, plural, =0{The tag is not used anywhere.} =1{It is removed from 1 item, including the text of your notes.} other{It is removed from {count} items, including the text of your notes.}}",
-	"@tagDeleteMessage": {"placeholders": {"count": {"type": "int"}}},
+	"@tagDeleteMessage": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"tagSuggestionCreate": "New tag",
 	"searchKeywordsTags": "labels, hashtags, colors, categories",
 	"tagsDeleteUnused": "Delete unused tags",
 	"tagsDeleteUnusedTitle": "Delete unused tags?",
 	"tagsDeleteUnusedMessage": "{count, plural, =1{1 tag is not on any item or in any of your notes. It will be deleted.} other{{count} tags are not on any item or in any of your notes. They will be deleted.}}",
-	"@tagsDeleteUnusedMessage": {"placeholders": {"count": {"type": "int"}}},
+	"@tagsDeleteUnusedMessage": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"tagsUnusedDeleted": "{count, plural, =0{No unused tags} =1{1 tag deleted} other{{count} tags deleted}}",
-	"@tagsUnusedDeleted": {"placeholders": {"count": {"type": "int"}}},
+	"@tagsUnusedDeleted": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"recipeImportLink": "Link to the recipe",
 	"recipeImportMessage": "The ingredients, steps and images are copied into a new note. You can tidy it up afterwards.",
 	"recipeImportAction": "Import",
@@ -1546,7 +1687,16 @@
 	"recipeFewerServings": "Fewer servings",
 	"recipeMoreServings": "More servings",
 	"recipeStepOf": "Step {current} of {total}",
-	"@recipeStepOf": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+	"@recipeStepOf": {
+		"placeholders": {
+			"current": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
 	"recipeYouNeed": "You'll need",
 	"recipePrevious": "Previous",
 	"recipeNext": "Next",
@@ -1554,16 +1704,34 @@
 	"recipeDone": "Done",
 	"recipeNoSteps": "This recipe has no steps yet.",
 	"recipeStartTimer": "Start a timer for {duration}",
-	"@recipeStartTimer": {"placeholders": {"duration": {"type": "String"}}},
+	"@recipeStartTimer": {
+		"placeholders": {
+			"duration": {
+				"type": "String"
+			}
+		}
+	},
 	"recipeStopTimer": "Stop timer",
 	"recipeTimerDone": "{label} is done",
-	"@recipeTimerDone": {"placeholders": {"label": {"type": "String"}}},
+	"@recipeTimerDone": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
 	"recipeImportFromLink": "Link",
 	"recipeImportFromPaste": "Paste",
 	"recipeImportPasteMessage": "Copy the recipe in your browser and paste it here. Select the text from the title to the last step, or copy the whole page source to get the images too.",
 	"recipeImportPasteButton": "Paste from clipboard",
 	"recipeImportPastedLength": "{count, plural, =1{1 character pasted} other{{count} characters pasted}}",
-	"@recipeImportPastedLength": {"placeholders": {"count": {"type": "int"}}},
+	"@recipeImportPastedLength": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"recipeImportLinkOptional": "Link to the recipe (optional)",
 	"recipeImportRefused": "This site doesn't let Polder load the page. Open it in your browser, copy the recipe and paste it here.",
 	"recipeImportClipboardEmpty": "The clipboard holds no text.",
@@ -1628,13 +1796,46 @@
 	"updatesUpToDate": "Polder is up to date",
 	"updatesFailed": "Couldn't check for updates",
 	"updatesInstallFailed": "Couldn't install version {version} ({build})",
-	"@updatesInstallFailed": {"placeholders": {"version": {"type": "String"}, "build": {"type": "int"}}},
+	"@updatesInstallFailed": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"build": {
+				"type": "int"
+			}
+		}
+	},
 	"updatesAvailable": "Version {version} ({build}) is available",
-	"@updatesAvailable": {"placeholders": {"version": {"type": "String"}, "build": {"type": "int"}}},
+	"@updatesAvailable": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"build": {
+				"type": "int"
+			}
+		}
+	},
 	"updatesDownloading": "Downloading update… {percent}%",
-	"@updatesDownloading": {"placeholders": {"percent": {"type": "int"}}},
+	"@updatesDownloading": {
+		"placeholders": {
+			"percent": {
+				"type": "int"
+			}
+		}
+	},
 	"updatesReady": "Version {version} ({build}) installs when Polder quits",
-	"@updatesReady": {"placeholders": {"version": {"type": "String"}, "build": {"type": "int"}}},
+	"@updatesReady": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"build": {
+				"type": "int"
+			}
+		}
+	},
 	"updatesRestart": "Restart to update",
 	"updatesInstall": "Update now",
 	"updatesDownload": "Download",
@@ -1650,24 +1851,60 @@
 	"calendarDefault": "Default",
 	"calendarSetDefault": "Use for invitations",
 	"calendarDeleteTitle": "Delete {name}?",
-	"@calendarDeleteTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@calendarDeleteTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarDeleteMessage": "The calendar and all its events will be deleted for everyone it is shared with.",
 	"calendarLeaveTitle": "Leave {name}?",
-	"@calendarLeaveTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@calendarLeaveTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarLeaveMessage": "You will no longer see this calendar. The owner can share it with you again.",
 	"calendarLeave": "Leave",
 	"calendarRemoveImportedTitle": "Remove {name}?",
-	"@calendarRemoveImportedTitle": {"placeholders": {"name": {"type": "String"}}},
+	"@calendarRemoveImportedTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarRemoveImportedMessage": "The calendar stops syncing and its events are removed from Polder. The original is not affected.",
 	"calendarRemove": "Remove",
 	"calendarSyncNow": "Sync now",
 	"calendarSyncedAt": "Synced {time}",
-	"@calendarSyncedAt": {"placeholders": {"time": {"type": "String"}}},
+	"@calendarSyncedAt": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarSyncPending": "Waiting for the first sync",
 	"calendarSyncFailed": "Sync failed: {error}",
-	"@calendarSyncFailed": {"placeholders": {"error": {"type": "String"}}},
+	"@calendarSyncFailed": {
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarSyncRequested": "Syncing {name}",
-	"@calendarSyncRequested": {"placeholders": {"name": {"type": "String"}}},
+	"@calendarSyncRequested": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarFromUrl": "Link",
 	"calendarFromUrlHint": "Stays up to date. Paste an iCal (.ics) or webcal link, such as the secret address of a Google, Outlook or iCloud calendar.",
 	"calendarFromFile": "File",
@@ -1681,7 +1918,13 @@
 	"calendarEveryDay": "Every day",
 	"calendarChooseFile": "Choose .ics file",
 	"calendarImportDone": "{count, plural, =1{1 event imported} other{{count} events imported}}",
-	"@calendarImportDone": {"placeholders": {"count": {"type": "int"}}},
+	"@calendarImportDone": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"calendarAccessRead": "Can view",
 	"calendarAccessReadWrite": "Can edit",
 	"calendarAccessFreeBusy": "Sees busy times only",
@@ -1695,7 +1938,13 @@
 	"calendarMore": "More",
 	"calendarSearchCountries": "Search countries",
 	"calendarHolidaysIn": "Holidays in {country}",
-	"@calendarHolidaysIn": {"placeholders": {"country": {"type": "String"}}},
+	"@calendarHolidaysIn": {
+		"placeholders": {
+			"country": {
+				"type": "String"
+			}
+		}
+	},
 	"calendarChristianHolidays": "Christian holidays",
 	"calendarOrthodoxHolidays": "Orthodox Christian holidays",
 	"calendarIslamicHolidays": "Islamic holidays",
@@ -1707,7 +1956,13 @@
 	"calendarImportInto": "Import from file",
 	"calendarImportIntoHint": "Choose an .ics file, or a .zip of them such as a Google Calendar export",
 	"calendarImportFailedSome": "{count, plural, =1{1 event could not be imported} other{{count} events could not be imported}}",
-	"@calendarImportFailedSome": {"placeholders": {"count": {"type": "int"}}},
+	"@calendarImportFailedSome": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"calendarFeedLanguage": "Language of the calendars",
 	"calendarFeedLanguageHint": "Google translates calendar names and most holidays; some event names stay in English.",
 	"notifications": "Notifications",
@@ -1740,30 +1995,96 @@
 	"notificationChannelCalendar": "Calendar reminders",
 	"notificationChannelSharing": "Shares",
 	"notificationShareTitle": "{owner} shared {name} with you",
-	"@notificationShareTitle": {"placeholders": {"owner": {"type": "String"}, "name": {"type": "String"}}},
+	"@notificationShareTitle": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"notificationShareGroupTitle": "{owner} shared {name} with {group}",
-	"@notificationShareGroupTitle": {"placeholders": {"owner": {"type": "String"}, "name": {"type": "String"}, "group": {"type": "String"}}},
+	"@notificationShareGroupTitle": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			},
+			"group": {
+				"type": "String"
+			}
+		}
+	},
 	"notificationFederatedShareBody": "From {server}",
-	"@notificationFederatedShareBody": {"placeholders": {"server": {"type": "String"}}},
+	"@notificationFederatedShareBody": {
+		"placeholders": {
+			"server": {
+				"type": "String"
+			}
+		}
+	},
 	"notificationUploadingTitle": "Uploading {done} of {total}",
-	"@notificationUploadingTitle": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+	"@notificationUploadingTitle": {
+		"placeholders": {
+			"done": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
 	"notificationUploadDone": "{count, plural, =1{1 file uploaded} other{{count} files uploaded}}",
-	"@notificationUploadDone": {"placeholders": {"count": {"type": "int"}}},
+	"@notificationUploadDone": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"notificationUploadFailed": "{count, plural, =1{1 file could not be uploaded} other{{count} files could not be uploaded}}",
-	"@notificationUploadFailed": {"placeholders": {"count": {"type": "int"}}},
+	"@notificationUploadFailed": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"notificationUploadFailedBody": "Open auto upload to see what went wrong",
 	"notificationUploadChecking": "Checking for new photos and videos",
 	"notificationReminderAt": "{time}",
-	"@notificationReminderAt": {"placeholders": {"time": {"type": "String"}}},
+	"@notificationReminderAt": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
 	"notificationReminderAllDay": "All day",
 	"calendarRemindersOn": "Turn reminders on",
 	"calendarRemindersOff": "Turn reminders off",
 	"sharedWaiting": "Waiting for you",
 	"sharedWaitingHint": "Accept to add these to your files",
 	"shareAccepted": "{name} is now in your files",
-	"@shareAccepted": {"placeholders": {"name": {"type": "String"}}},
+	"@shareAccepted": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"shareDeclined": "Declined {name}",
-	"@shareDeclined": {"placeholders": {"name": {"type": "String"}}},
+	"@shareDeclined": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"errorStorageFull": "The server ran out of disk space and could not save this.",
 	"errorTimedOut": "The server stopped responding.",
 	"connectionNoNetwork": "No network connection",
@@ -1771,7 +2092,13 @@
 	"connectionServerFull": "Server storage is full",
 	"connectionServerReadOnly": "Server can't store changes",
 	"changesSavedOnDevice": "{count, plural, =0{Changes are saved on this device} =1{1 change saved on this device} other{{count} changes saved on this device}}",
-	"@changesSavedOnDevice": {"placeholders": {"count": {"type": "int"}}},
+	"@changesSavedOnDevice": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"hintUnreachable": "Check your network connection, or whether the server is running. Changes sync automatically when it's back.",
 	"hintStorageFull": "The server could not store the change; its disk may be full. Ask the server administrator to free up space, then retry.",
 	"hintQuota": "Your storage quota is full. Delete files or empty the trash, then retry.",
@@ -1795,27 +2122,84 @@
 	"removeFromDevice": "Remove from device",
 	"offlineDownloadsTitle": "Syncing files for offline use",
 	"offlineDownloadsProgress": "{finished} of {total} files",
-	"@offlineDownloadsProgress": {"placeholders": {"finished": {"type": "String"}, "total": {"type": "String"}}},
+	"@offlineDownloadsProgress": {
+		"placeholders": {
+			"finished": {
+				"type": "String"
+			},
+			"total": {
+				"type": "String"
+			}
+		}
+	},
 	"offlineDownloadsDoneTitle": "Files available offline",
 	"offlineDownloadsDone": "{total} files are ready to use offline",
-	"@offlineDownloadsDone": {"placeholders": {"total": {"type": "String"}}},
+	"@offlineDownloadsDone": {
+		"placeholders": {
+			"total": {
+				"type": "String"
+			}
+		}
+	},
 	"offlineDownloadsFailedTitle": "Some files couldn't be downloaded",
 	"offlineDownloadsFailed": "{failed} of {total} failed; they will be tried again",
-	"@offlineDownloadsFailed": {"placeholders": {"failed": {"type": "String"}, "total": {"type": "String"}}},
+	"@offlineDownloadsFailed": {
+		"placeholders": {
+			"failed": {
+				"type": "String"
+			},
+			"total": {
+				"type": "String"
+			}
+		}
+	},
 	"availableOffline": "Available offline",
 	"errorDeviceFull": "Not enough free space on this device",
 	"hintDeviceFull": "Free up space on this device, or remove offline files with \"Remove from device\".",
 	"offlineDownloadFailed": "Couldn't download for offline use: {reason}",
-	"@offlineDownloadFailed": {"placeholders": {"reason": {"type": "String"}}},
+	"@offlineDownloadFailed": {
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
 	"offlineDownloadingTag": "Downloading {percent}%",
-	"@offlineDownloadingTag": {"placeholders": {"percent": {"type": "int"}}},
+	"@offlineDownloadingTag": {
+		"placeholders": {
+			"percent": {
+				"type": "int"
+			}
+		}
+	},
 	"offlineDownloadsFailedSummary": "{count, plural, =1{1 file couldn't be made available offline} other{{count} files couldn't be made available offline}}",
-	"@offlineDownloadsFailedSummary": {"placeholders": {"count": {"type": "int"}}},
+	"@offlineDownloadsFailedSummary": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"waitingForOffline": "Waiting to download for offline use",
 	"downloadingForOffline": "Downloading for offline use, {percent}%",
-	"@downloadingForOffline": {"placeholders": {"percent": {"type": "int"}}},
+	"@downloadingForOffline": {
+		"placeholders": {
+			"percent": {
+				"type": "int"
+			}
+		}
+	},
 	"downloadingFilesForOffline": "Downloading for offline use, {done} of {total} files",
-	"@downloadingFilesForOffline": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+	"@downloadingFilesForOffline": {
+		"placeholders": {
+			"done": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
 	"sessionEndedTitle": "Sign in again",
 	"sessionEndedMessage": "Your session on this device has ended. Sign in again to keep syncing. Nothing on this device is lost.",
 	"sessionEndedStatus": "Session ended",
@@ -1832,33 +2216,117 @@
 	},
 	"calendarSettings": "Calendar settings",
 	"fileOperationMoving": "Moving {subject}",
-	"@fileOperationMoving": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationMoving": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationMoved": "Moved {subject}",
-	"@fileOperationMoved": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationMoved": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationCopying": "Copying {subject}",
-	"@fileOperationCopying": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationCopying": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationCopied": "Copied {subject}",
-	"@fileOperationCopied": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationCopied": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationDeleting": "Deleting {subject}",
-	"@fileOperationDeleting": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationDeleting": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationDeleted": "Deleted {subject}",
-	"@fileOperationDeleted": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationDeleted": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationRenaming": "Renaming {subject}",
-	"@fileOperationRenaming": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationRenaming": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationRenamed": "Renamed {subject}",
-	"@fileOperationRenamed": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationRenamed": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationRestoring": "Restoring {subject}",
-	"@fileOperationRestoring": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationRestoring": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationRestored": "Restored {subject}",
-	"@fileOperationRestored": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationRestored": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationPurging": "Permanently deleting {subject}",
-	"@fileOperationPurging": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationPurging": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationPurged": "Permanently deleted {subject}",
-	"@fileOperationPurged": {"placeholders": {"subject": {"type": "String"}}},
+	"@fileOperationPurged": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationItems": "{count, plural, =1{1 item} other{{count} items}}",
-	"@fileOperationItems": {"placeholders": {"count": {"type": "int"}}},
+	"@fileOperationItems": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"fileOperationInto": "To {folder}",
-	"@fileOperationInto": {"placeholders": {"folder": {"type": "String"}}},
+	"@fileOperationInto": {
+		"placeholders": {
+			"folder": {
+				"type": "String"
+			}
+		}
+	},
 	"fileOperationIncomplete": "Not everything went through",
 	"fileOperationTagMoving": "Moving…",
 	"fileOperationTagCopying": "Copying…",
@@ -1868,6 +2336,88 @@
 	"fileOperationTagMovingHere": "Moving here…",
 	"fileOperationTagCopyingHere": "Copying here…",
 	"fileOperationsMore": "{count, plural, =1{1 more action} other{{count} more actions}}",
-	"@fileOperationsMore": {"placeholders": {"count": {"type": "int"}}},
-	"fileOperationTagRestoring": "Restoring…"
+	"@fileOperationsMore": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"fileOperationTagRestoring": "Restoring…",
+	"emailSettings": "Email",
+	"emailSettingsHint": "Mail server for password resets, alerts and shares",
+	"emailOn": "Emails are on",
+	"emailOff": "Emails are off",
+	"emailOnHint": "Polder sends password resets, sign-in alerts, storage warnings and shares, styled with your branding.",
+	"emailOffHint": "Set an SMTP server and a sender address to send password resets, sign-in alerts, storage warnings and shares.",
+	"emailManagedByConfig": "These settings come from the server's config or environment, so they can't be changed here.",
+	"mailServerGroup": "SMTP",
+	"mailServerHost": "SMTP server",
+	"notSet": "Not set",
+	"mailSecurity": "Security",
+	"mailServerPort": "SMTP port",
+	"mailServerPortDefault": "Default ({port})",
+	"@mailServerPortDefault": {
+		"placeholders": {
+			"port": {
+				"type": "int"
+			}
+		}
+	},
+	"mailServerPortLabel": "Port, or empty for the default",
+	"mailUsername": "SMTP username",
+	"mailUsernameNone": "None; the SMTP server doesn't need a login",
+	"mailPasswordSaved": "Saved",
+	"mailPassword": "SMTP password",
+	"mailPasswordHint": "Stored on the server and never shown again. Remove it if the SMTP server needs no login.",
+	"mailSenderGroup": "Sender",
+	"mailFrom": "From address",
+	"mailFromHint": "The address emails come from",
+	"mailFromLabel": "Address, such as Polder <polder@example.com>",
+	"mailTestGroup": "Test",
+	"sendTestEmail": "Send a test email",
+	"sendTestEmailHint": "Check the settings with an email in your server's style",
+	"sendTestEmailNeedsServer": "Set an SMTP server and sender address first",
+	"mailTestRecipient": "Send to",
+	"send": "Send",
+	"testEmailSent": "Test email sent to {address}",
+	"@testEmailSent": {
+		"placeholders": {
+			"address": {
+				"type": "String"
+			}
+		}
+	},
+	"mailSecurityStartTls": "STARTTLS",
+	"mailSecurityTls": "TLS",
+	"mailSecurityNone": "None",
+	"mailSecurityStartTlsHint": "Upgrades to an encrypted connection; usually port 587",
+	"mailSecurityTlsHint": "Encrypted from the start; usually port 465",
+	"mailSecurityNoneHint": "Unencrypted; only for an SMTP server on a trusted network",
+	"forgotPassword": "Forgot password?",
+	"forgotPasswordTitle": "Reset your password",
+	"forgotPasswordHint": "Enter your username or email address. If your account has an email address, we'll send it a code to choose a new password.",
+	"usernameOrEmail": "Username or email",
+	"resetUnavailable": "This server can't send password reset emails. Ask an administrator to set a new password for you.",
+	"sendResetCode": "Send code",
+	"resetCodeTitle": "Enter your code",
+	"resetCodeSent": "If an account matches and has an email address, we've sent it a code. It works once, for an hour.",
+	"resetCode": "Code from the email",
+	"resetCodeNeverLinks": "We never send reset links. Type the code here yourself.",
+	"sendResetCodeAgain": "Send a new code",
+	"passwordResetDoneTitle": "Password changed",
+	"passwordResetDone": "Sign in with your new password. You've been signed out on your other devices.",
+	"emailNotifications": "Email",
+	"emailNotificationsNoAddress": "Add an email address",
+	"emailNotificationsNoAddressHint": "Emails need an address in your account",
+	"emailSecurity": "Security alerts",
+	"emailSecurityHint": "Sign-ins from new addresses and changes to your email address",
+	"emailQuota": "Storage warnings",
+	"emailQuotaHint": "When your storage is almost or completely full",
+	"emailShares": "Shares",
+	"emailSharesHint": "When someone shares a file or folder with you",
+	"emailAlwaysSent": "Password resets and password changes are always emailed.",
+	"emailOptional": "Email (optional)",
+	"newUserEmailHint": "Gets a welcome email, and lets the user reset a forgotten password",
+	"invalidEmail": "Not an email address"
 }

@@ -198,6 +198,53 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Which emails the logged-in user gets
+  Future<chopper.Response<EmailPreferences>> getEmailPreferences() {
+    generatedMapping.putIfAbsent(EmailPreferences, () => EmailPreferences.fromJsonFactory);
+
+    return _getEmailPreferences();
+  }
+
+  ///Which emails the logged-in user gets
+  @GET(path: '/api/v1/account/email-notifications')
+  Future<chopper.Response<EmailPreferences>> _getEmailPreferences({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Which emails the logged-in user gets',
+      operationId: 'getEmailPreferences',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Choose which emails the logged-in user gets; password emails are always sent
+  Future<chopper.Response<EmailPreferences>> setEmailPreferences({required Preferences? body}) {
+    generatedMapping.putIfAbsent(EmailPreferences, () => EmailPreferences.fromJsonFactory);
+
+    return _setEmailPreferences(body: body);
+  }
+
+  ///Choose which emails the logged-in user gets; password emails are always sent
+  @PUT(path: '/api/v1/account/email-notifications', optionalBody: true)
+  Future<chopper.Response<EmailPreferences>> _setEmailPreferences({
+    @Body() required Preferences? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose which emails the logged-in user gets; password emails are always sent',
+      operationId: 'setEmailPreferences',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
   ///Change the logged-in user's password; their other sessions are logged out
   Future<chopper.Response> changePassword({required PasswordChange? body}) {
     return _changePassword(body: body);
@@ -633,6 +680,28 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Send a test email with the current mail server settings
+  Future<chopper.Response> sendTestEmail({required TestEmailRequest? body}) {
+    return _sendTestEmail(body: body);
+  }
+
+  ///Send a test email with the current mail server settings
+  @POST(path: '/api/v1/admin/mail/test', optionalBody: true)
+  Future<chopper.Response> _sendTestEmail({
+    @Body() required TestEmailRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Send a test email with the current mail server settings',
+      operationId: 'sendTestEmail',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
   ///Make every file's preview again in the background
   Future<chopper.Response<PreviewRegeneration>> regeneratePreviews() {
     generatedMapping.putIfAbsent(PreviewRegeneration, () => PreviewRegeneration.fromJsonFactory);
@@ -909,6 +978,50 @@ abstract class Polder extends ChopperService {
       consumes: [],
       produces: [],
       security: ["bearer"],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Email a code to choose a new password, if the account exists and has an email address
+  Future<chopper.Response> requestPasswordReset({required PasswordResetRequest? body}) {
+    return _requestPasswordReset(body: body);
+  }
+
+  ///Email a code to choose a new password, if the account exists and has an email address
+  @POST(path: '/api/v1/auth/password-reset', optionalBody: true)
+  Future<chopper.Response> _requestPasswordReset({
+    @Body() required PasswordResetRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Email a code to choose a new password, if the account exists and has an email address',
+      operationId: 'requestPasswordReset',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Choose a new password with the code from a reset email
+  Future<chopper.Response> resetPasswordWithCode({required PasswordResetCodeRequest? body}) {
+    return _resetPasswordWithCode(body: body);
+  }
+
+  ///Choose a new password with the code from a reset email
+  @POST(path: '/api/v1/auth/password-reset/code', optionalBody: true)
+  Future<chopper.Response> _resetPasswordWithCode({
+    @Body() required PasswordResetCodeRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose a new password with the code from a reset email',
+      operationId: 'resetPasswordWithCode',
+      consumes: [],
+      produces: [],
+      security: [],
       tags: ["auth"],
       deprecated: false,
     ),

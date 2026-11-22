@@ -27,6 +27,17 @@ services:
       POLDER_VIDEO_HWACCEL: ${POLDER_VIDEO_HWACCEL:-auto}
       # Only needed with several GPUs, such as /dev/dri/renderD129 for vaapi or qsv, or 1 for cuda.
       POLDER_VIDEO_HWACCEL_DEVICE: ${POLDER_VIDEO_HWACCEL_DEVICE:-}
+      # Mail server for password resets, sign-in alerts, storage warnings and shares. Leave
+      # POLDER_SMTP_HOST empty to set the mail server in Admin → Email instead; setting it here
+      # locks those settings.
+      POLDER_SMTP_HOST: ${POLDER_SMTP_HOST:-}
+      POLDER_SMTP_PORT: ${POLDER_SMTP_PORT:-}
+      POLDER_SMTP_USERNAME: ${POLDER_SMTP_USERNAME:-}
+      POLDER_SMTP_PASSWORD: ${POLDER_SMTP_PASSWORD:-}
+      POLDER_SMTP_FROM: ${POLDER_SMTP_FROM:-}
+      POLDER_SMTP_SECURITY: ${POLDER_SMTP_SECURITY:-}
+      # The https address people reach Polder at; needed for links in emails and password resets.
+      POLDER_PUBLIC_URL: ${POLDER_PUBLIC_URL:-}
     # GPU decoding for previews, on Linux hosts. Uncomment the block for your GPU.
     #
     # Intel (Quick Sync) and AMD: pass the render devices, and the group that may use them, which

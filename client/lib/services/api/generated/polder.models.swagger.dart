@@ -591,7 +591,14 @@ extension $BatchStatusExtension on BatchStatus {
 
 @JsonSerializable(explicitToJson: true)
 class Branding {
-  const Branding({required this.accentColor, this.backgrounds, this.icon, required this.message, required this.name});
+  const Branding({
+    required this.accentColor,
+    this.backgrounds,
+    this.icon,
+    required this.message,
+    required this.name,
+    required this.passwordReset,
+  });
 
   factory Branding.fromJson(Map<String, dynamic> json) => _$BrandingFromJson(json);
 
@@ -608,6 +615,8 @@ class Branding {
   final String message;
   @JsonKey(name: 'name', includeIfNull: false)
   final String name;
+  @JsonKey(name: 'passwordReset', includeIfNull: false)
+  final bool passwordReset;
   static const fromJsonFactory = _$BrandingFromJson;
 
   @override
@@ -620,7 +629,9 @@ class Branding {
                 const DeepCollectionEquality().equals(other.backgrounds, backgrounds)) &&
             (identical(other.icon, icon) || const DeepCollectionEquality().equals(other.icon, icon)) &&
             (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
-            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)));
+            (identical(other.name, name) || const DeepCollectionEquality().equals(other.name, name)) &&
+            (identical(other.passwordReset, passwordReset) ||
+                const DeepCollectionEquality().equals(other.passwordReset, passwordReset)));
   }
 
   @override
@@ -630,6 +641,7 @@ class Branding {
       const DeepCollectionEquality().hash(icon) ^
       const DeepCollectionEquality().hash(message) ^
       const DeepCollectionEquality().hash(name) ^
+      const DeepCollectionEquality().hash(passwordReset) ^
       runtimeType.hashCode;
 }
 
@@ -640,6 +652,7 @@ extension $BrandingExtension on Branding {
     ImageInfo? icon,
     String? message,
     String? name,
+    bool? passwordReset,
   }) {
     return Branding(
       accentColor: accentColor ?? this.accentColor,
@@ -647,6 +660,7 @@ extension $BrandingExtension on Branding {
       icon: icon ?? this.icon,
       message: message ?? this.message,
       name: name ?? this.name,
+      passwordReset: passwordReset ?? this.passwordReset,
     );
   }
 
@@ -656,6 +670,7 @@ extension $BrandingExtension on Branding {
     Wrapped<ImageInfo?>? icon,
     Wrapped<String>? message,
     Wrapped<String>? name,
+    Wrapped<bool>? passwordReset,
   }) {
     return Branding(
       accentColor: (accentColor != null ? accentColor.value : this.accentColor),
@@ -663,6 +678,7 @@ extension $BrandingExtension on Branding {
       icon: (icon != null ? icon.value : this.icon),
       message: (message != null ? message.value : this.message),
       name: (name != null ? name.value : this.name),
+      passwordReset: (passwordReset != null ? passwordReset.value : this.passwordReset),
     );
   }
 }
@@ -2243,6 +2259,82 @@ extension $EditorSessionExtension on EditorSession {
       editorUrl: (editorUrl != null ? editorUrl.value : this.editorUrl),
       hostPage: (hostPage != null ? hostPage.value : this.hostPage),
       readOnly: (readOnly != null ? readOnly.value : this.readOnly),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class EmailPreferences {
+  const EmailPreferences({
+    required this.enabled,
+    required this.hasEmail,
+    required this.quota,
+    required this.security,
+    required this.shares,
+  });
+
+  factory EmailPreferences.fromJson(Map<String, dynamic> json) => _$EmailPreferencesFromJson(json);
+
+  static const toJsonFactory = _$EmailPreferencesToJson;
+  Map<String, dynamic> toJson() => _$EmailPreferencesToJson(this);
+
+  @JsonKey(name: 'enabled', includeIfNull: false)
+  final bool enabled;
+  @JsonKey(name: 'hasEmail', includeIfNull: false)
+  final bool hasEmail;
+  @JsonKey(name: 'quota', includeIfNull: false)
+  final bool quota;
+  @JsonKey(name: 'security', includeIfNull: false)
+  final bool security;
+  @JsonKey(name: 'shares', includeIfNull: false)
+  final bool shares;
+  static const fromJsonFactory = _$EmailPreferencesFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is EmailPreferences &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
+            (identical(other.hasEmail, hasEmail) || const DeepCollectionEquality().equals(other.hasEmail, hasEmail)) &&
+            (identical(other.quota, quota) || const DeepCollectionEquality().equals(other.quota, quota)) &&
+            (identical(other.security, security) || const DeepCollectionEquality().equals(other.security, security)) &&
+            (identical(other.shares, shares) || const DeepCollectionEquality().equals(other.shares, shares)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(enabled) ^
+      const DeepCollectionEquality().hash(hasEmail) ^
+      const DeepCollectionEquality().hash(quota) ^
+      const DeepCollectionEquality().hash(security) ^
+      const DeepCollectionEquality().hash(shares) ^
+      runtimeType.hashCode;
+}
+
+extension $EmailPreferencesExtension on EmailPreferences {
+  EmailPreferences copyWith({bool? enabled, bool? hasEmail, bool? quota, bool? security, bool? shares}) {
+    return EmailPreferences(
+      enabled: enabled ?? this.enabled,
+      hasEmail: hasEmail ?? this.hasEmail,
+      quota: quota ?? this.quota,
+      security: security ?? this.security,
+      shares: shares ?? this.shares,
+    );
+  }
+
+  EmailPreferences copyWithWrapped({
+    Wrapped<bool>? enabled,
+    Wrapped<bool>? hasEmail,
+    Wrapped<bool>? quota,
+    Wrapped<bool>? security,
+    Wrapped<bool>? shares,
+  }) {
+    return EmailPreferences(
+      enabled: (enabled != null ? enabled.value : this.enabled),
+      hasEmail: (hasEmail != null ? hasEmail.value : this.hasEmail),
+      quota: (quota != null ? quota.value : this.quota),
+      security: (security != null ? security.value : this.security),
+      shares: (shares != null ? shares.value : this.shares),
     );
   }
 }
@@ -7164,13 +7256,15 @@ extension $NewSubscriptionExtension on NewSubscription {
 
 @JsonSerializable(explicitToJson: true)
 class NewUser {
-  const NewUser({required this.password, this.quotaBytes, required this.role, required this.username});
+  const NewUser({this.email, required this.password, this.quotaBytes, required this.role, required this.username});
 
   factory NewUser.fromJson(Map<String, dynamic> json) => _$NewUserFromJson(json);
 
   static const toJsonFactory = _$NewUserToJson;
   Map<String, dynamic> toJson() => _$NewUserToJson(this);
 
+  @JsonKey(name: 'email', includeIfNull: false)
+  final String? email;
   @JsonKey(name: 'password', includeIfNull: false)
   final String password;
   @JsonKey(name: 'quotaBytes', includeIfNull: false)
@@ -7185,6 +7279,7 @@ class NewUser {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is NewUser &&
+            (identical(other.email, email) || const DeepCollectionEquality().equals(other.email, email)) &&
             (identical(other.password, password) || const DeepCollectionEquality().equals(other.password, password)) &&
             (identical(other.quotaBytes, quotaBytes) ||
                 const DeepCollectionEquality().equals(other.quotaBytes, quotaBytes)) &&
@@ -7194,6 +7289,7 @@ class NewUser {
 
   @override
   int get hashCode =>
+      const DeepCollectionEquality().hash(email) ^
       const DeepCollectionEquality().hash(password) ^
       const DeepCollectionEquality().hash(quotaBytes) ^
       const DeepCollectionEquality().hash(role) ^
@@ -7202,8 +7298,9 @@ class NewUser {
 }
 
 extension $NewUserExtension on NewUser {
-  NewUser copyWith({String? password, int? quotaBytes, enums.NewUserRole? role, String? username}) {
+  NewUser copyWith({String? email, String? password, int? quotaBytes, enums.NewUserRole? role, String? username}) {
     return NewUser(
+      email: email ?? this.email,
       password: password ?? this.password,
       quotaBytes: quotaBytes ?? this.quotaBytes,
       role: role ?? this.role,
@@ -7212,12 +7309,14 @@ extension $NewUserExtension on NewUser {
   }
 
   NewUser copyWithWrapped({
+    Wrapped<String?>? email,
     Wrapped<String>? password,
     Wrapped<int?>? quotaBytes,
     Wrapped<enums.NewUserRole>? role,
     Wrapped<String>? username,
   }) {
     return NewUser(
+      email: (email != null ? email.value : this.email),
       password: (password != null ? password.value : this.password),
       quotaBytes: (quotaBytes != null ? quotaBytes.value : this.quotaBytes),
       role: (role != null ? role.value : this.role),
@@ -7830,6 +7929,92 @@ extension $PasswordChangeExtension on PasswordChange {
 }
 
 @JsonSerializable(explicitToJson: true)
+class PasswordResetCodeRequest {
+  const PasswordResetCodeRequest({required this.code, required this.login, required this.password});
+
+  factory PasswordResetCodeRequest.fromJson(Map<String, dynamic> json) => _$PasswordResetCodeRequestFromJson(json);
+
+  static const toJsonFactory = _$PasswordResetCodeRequestToJson;
+  Map<String, dynamic> toJson() => _$PasswordResetCodeRequestToJson(this);
+
+  @JsonKey(name: 'code', includeIfNull: false)
+  final String code;
+  @JsonKey(name: 'login', includeIfNull: false)
+  final String login;
+  @JsonKey(name: 'password', includeIfNull: false)
+  final String password;
+  static const fromJsonFactory = _$PasswordResetCodeRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is PasswordResetCodeRequest &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.login, login) || const DeepCollectionEquality().equals(other.login, login)) &&
+            (identical(other.password, password) || const DeepCollectionEquality().equals(other.password, password)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(code) ^
+      const DeepCollectionEquality().hash(login) ^
+      const DeepCollectionEquality().hash(password) ^
+      runtimeType.hashCode;
+}
+
+extension $PasswordResetCodeRequestExtension on PasswordResetCodeRequest {
+  PasswordResetCodeRequest copyWith({String? code, String? login, String? password}) {
+    return PasswordResetCodeRequest(
+      code: code ?? this.code,
+      login: login ?? this.login,
+      password: password ?? this.password,
+    );
+  }
+
+  PasswordResetCodeRequest copyWithWrapped({Wrapped<String>? code, Wrapped<String>? login, Wrapped<String>? password}) {
+    return PasswordResetCodeRequest(
+      code: (code != null ? code.value : this.code),
+      login: (login != null ? login.value : this.login),
+      password: (password != null ? password.value : this.password),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class PasswordResetRequest {
+  const PasswordResetRequest({required this.login});
+
+  factory PasswordResetRequest.fromJson(Map<String, dynamic> json) => _$PasswordResetRequestFromJson(json);
+
+  static const toJsonFactory = _$PasswordResetRequestToJson;
+  Map<String, dynamic> toJson() => _$PasswordResetRequestToJson(this);
+
+  @JsonKey(name: 'login', includeIfNull: false)
+  final String login;
+  static const fromJsonFactory = _$PasswordResetRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is PasswordResetRequest &&
+            (identical(other.login, login) || const DeepCollectionEquality().equals(other.login, login)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(login) ^ runtimeType.hashCode;
+}
+
+extension $PasswordResetRequestExtension on PasswordResetRequest {
+  PasswordResetRequest copyWith({String? login}) {
+    return PasswordResetRequest(login: login ?? this.login);
+  }
+
+  PasswordResetRequest copyWithWrapped({Wrapped<String>? login}) {
+    return PasswordResetRequest(login: (login != null ? login.value : this.login));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class PathRequest {
   const PathRequest({required this.path});
 
@@ -7907,6 +8092,54 @@ extension $PersonExtension on Person {
       email: (email != null ? email.value : this.email),
       name: (name != null ? name.value : this.name),
       self: (self != null ? self.value : this.self),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class Preferences {
+  const Preferences({required this.quota, required this.security, required this.shares});
+
+  factory Preferences.fromJson(Map<String, dynamic> json) => _$PreferencesFromJson(json);
+
+  static const toJsonFactory = _$PreferencesToJson;
+  Map<String, dynamic> toJson() => _$PreferencesToJson(this);
+
+  @JsonKey(name: 'quota', includeIfNull: false)
+  final bool quota;
+  @JsonKey(name: 'security', includeIfNull: false)
+  final bool security;
+  @JsonKey(name: 'shares', includeIfNull: false)
+  final bool shares;
+  static const fromJsonFactory = _$PreferencesFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is Preferences &&
+            (identical(other.quota, quota) || const DeepCollectionEquality().equals(other.quota, quota)) &&
+            (identical(other.security, security) || const DeepCollectionEquality().equals(other.security, security)) &&
+            (identical(other.shares, shares) || const DeepCollectionEquality().equals(other.shares, shares)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(quota) ^
+      const DeepCollectionEquality().hash(security) ^
+      const DeepCollectionEquality().hash(shares) ^
+      runtimeType.hashCode;
+}
+
+extension $PreferencesExtension on Preferences {
+  Preferences copyWith({bool? quota, bool? security, bool? shares}) {
+    return Preferences(quota: quota ?? this.quota, security: security ?? this.security, shares: shares ?? this.shares);
+  }
+
+  Preferences copyWithWrapped({Wrapped<bool>? quota, Wrapped<bool>? security, Wrapped<bool>? shares}) {
+    return Preferences(
+      quota: (quota != null ? quota.value : this.quota),
+      security: (security != null ? security.value : this.security),
+      shares: (shares != null ? shares.value : this.shares),
     );
   }
 }
@@ -9281,6 +9514,13 @@ class ServerSettings {
     this.ocrLanguages,
     required this.ocrMaxPages,
     required this.searchContentEnabled,
+    required this.smtpFrom,
+    required this.smtpHost,
+    required this.smtpManagedByConfig,
+    required this.smtpPasswordSet,
+    required this.smtpPort,
+    required this.smtpSecurity,
+    required this.smtpUsername,
     required this.trashEnabled,
     required this.trashRetentionDays,
     required this.versionsEnabled,
@@ -9309,6 +9549,25 @@ class ServerSettings {
   final int ocrMaxPages;
   @JsonKey(name: 'searchContentEnabled', includeIfNull: false)
   final bool searchContentEnabled;
+  @JsonKey(name: 'smtpFrom', includeIfNull: false)
+  final String smtpFrom;
+  @JsonKey(name: 'smtpHost', includeIfNull: false)
+  final String smtpHost;
+  @JsonKey(name: 'smtpManagedByConfig', includeIfNull: false)
+  final bool smtpManagedByConfig;
+  @JsonKey(name: 'smtpPasswordSet', includeIfNull: false)
+  final bool smtpPasswordSet;
+  @JsonKey(name: 'smtpPort', includeIfNull: false)
+  final int smtpPort;
+  @JsonKey(
+    name: 'smtpSecurity',
+    includeIfNull: false,
+    toJson: serverSettingsSmtpSecurityToJson,
+    fromJson: serverSettingsSmtpSecurityFromJson,
+  )
+  final enums.ServerSettingsSmtpSecurity smtpSecurity;
+  @JsonKey(name: 'smtpUsername', includeIfNull: false)
+  final String smtpUsername;
   @JsonKey(name: 'trashEnabled', includeIfNull: false)
   final bool trashEnabled;
   @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
@@ -9343,6 +9602,17 @@ class ServerSettings {
                 const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
             (identical(other.searchContentEnabled, searchContentEnabled) ||
                 const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
+            (identical(other.smtpFrom, smtpFrom) || const DeepCollectionEquality().equals(other.smtpFrom, smtpFrom)) &&
+            (identical(other.smtpHost, smtpHost) || const DeepCollectionEquality().equals(other.smtpHost, smtpHost)) &&
+            (identical(other.smtpManagedByConfig, smtpManagedByConfig) ||
+                const DeepCollectionEquality().equals(other.smtpManagedByConfig, smtpManagedByConfig)) &&
+            (identical(other.smtpPasswordSet, smtpPasswordSet) ||
+                const DeepCollectionEquality().equals(other.smtpPasswordSet, smtpPasswordSet)) &&
+            (identical(other.smtpPort, smtpPort) || const DeepCollectionEquality().equals(other.smtpPort, smtpPort)) &&
+            (identical(other.smtpSecurity, smtpSecurity) ||
+                const DeepCollectionEquality().equals(other.smtpSecurity, smtpSecurity)) &&
+            (identical(other.smtpUsername, smtpUsername) ||
+                const DeepCollectionEquality().equals(other.smtpUsername, smtpUsername)) &&
             (identical(other.trashEnabled, trashEnabled) ||
                 const DeepCollectionEquality().equals(other.trashEnabled, trashEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
@@ -9368,6 +9638,13 @@ class ServerSettings {
       const DeepCollectionEquality().hash(ocrLanguages) ^
       const DeepCollectionEquality().hash(ocrMaxPages) ^
       const DeepCollectionEquality().hash(searchContentEnabled) ^
+      const DeepCollectionEquality().hash(smtpFrom) ^
+      const DeepCollectionEquality().hash(smtpHost) ^
+      const DeepCollectionEquality().hash(smtpManagedByConfig) ^
+      const DeepCollectionEquality().hash(smtpPasswordSet) ^
+      const DeepCollectionEquality().hash(smtpPort) ^
+      const DeepCollectionEquality().hash(smtpSecurity) ^
+      const DeepCollectionEquality().hash(smtpUsername) ^
       const DeepCollectionEquality().hash(trashEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(versionsEnabled) ^
@@ -9387,6 +9664,13 @@ extension $ServerSettingsExtension on ServerSettings {
     List<String>? ocrLanguages,
     int? ocrMaxPages,
     bool? searchContentEnabled,
+    String? smtpFrom,
+    String? smtpHost,
+    bool? smtpManagedByConfig,
+    bool? smtpPasswordSet,
+    int? smtpPort,
+    enums.ServerSettingsSmtpSecurity? smtpSecurity,
+    String? smtpUsername,
     bool? trashEnabled,
     int? trashRetentionDays,
     bool? versionsEnabled,
@@ -9403,6 +9687,13 @@ extension $ServerSettingsExtension on ServerSettings {
       ocrLanguages: ocrLanguages ?? this.ocrLanguages,
       ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
       searchContentEnabled: searchContentEnabled ?? this.searchContentEnabled,
+      smtpFrom: smtpFrom ?? this.smtpFrom,
+      smtpHost: smtpHost ?? this.smtpHost,
+      smtpManagedByConfig: smtpManagedByConfig ?? this.smtpManagedByConfig,
+      smtpPasswordSet: smtpPasswordSet ?? this.smtpPasswordSet,
+      smtpPort: smtpPort ?? this.smtpPort,
+      smtpSecurity: smtpSecurity ?? this.smtpSecurity,
+      smtpUsername: smtpUsername ?? this.smtpUsername,
       trashEnabled: trashEnabled ?? this.trashEnabled,
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       versionsEnabled: versionsEnabled ?? this.versionsEnabled,
@@ -9421,6 +9712,13 @@ extension $ServerSettingsExtension on ServerSettings {
     Wrapped<List<String>?>? ocrLanguages,
     Wrapped<int>? ocrMaxPages,
     Wrapped<bool>? searchContentEnabled,
+    Wrapped<String>? smtpFrom,
+    Wrapped<String>? smtpHost,
+    Wrapped<bool>? smtpManagedByConfig,
+    Wrapped<bool>? smtpPasswordSet,
+    Wrapped<int>? smtpPort,
+    Wrapped<enums.ServerSettingsSmtpSecurity>? smtpSecurity,
+    Wrapped<String>? smtpUsername,
     Wrapped<bool>? trashEnabled,
     Wrapped<int>? trashRetentionDays,
     Wrapped<bool>? versionsEnabled,
@@ -9437,6 +9735,13 @@ extension $ServerSettingsExtension on ServerSettings {
       ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
       ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
       searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
+      smtpFrom: (smtpFrom != null ? smtpFrom.value : this.smtpFrom),
+      smtpHost: (smtpHost != null ? smtpHost.value : this.smtpHost),
+      smtpManagedByConfig: (smtpManagedByConfig != null ? smtpManagedByConfig.value : this.smtpManagedByConfig),
+      smtpPasswordSet: (smtpPasswordSet != null ? smtpPasswordSet.value : this.smtpPasswordSet),
+      smtpPort: (smtpPort != null ? smtpPort.value : this.smtpPort),
+      smtpSecurity: (smtpSecurity != null ? smtpSecurity.value : this.smtpSecurity),
+      smtpUsername: (smtpUsername != null ? smtpUsername.value : this.smtpUsername),
       trashEnabled: (trashEnabled != null ? trashEnabled.value : this.trashEnabled),
       trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
       versionsEnabled: (versionsEnabled != null ? versionsEnabled.value : this.versionsEnabled),
@@ -9458,6 +9763,12 @@ class ServerSettingsChanges {
     this.ocrLanguages,
     this.ocrMaxPages,
     this.searchContentEnabled,
+    this.smtpFrom,
+    this.smtpHost,
+    this.smtpPassword,
+    this.smtpPort,
+    this.smtpSecurity,
+    this.smtpUsername,
     this.trashEnabled,
     this.trashRetentionDays,
     this.versionsEnabled,
@@ -9486,6 +9797,23 @@ class ServerSettingsChanges {
   final int? ocrMaxPages;
   @JsonKey(name: 'searchContentEnabled', includeIfNull: false)
   final bool? searchContentEnabled;
+  @JsonKey(name: 'smtpFrom', includeIfNull: false)
+  final String? smtpFrom;
+  @JsonKey(name: 'smtpHost', includeIfNull: false)
+  final String? smtpHost;
+  @JsonKey(name: 'smtpPassword', includeIfNull: false)
+  final String? smtpPassword;
+  @JsonKey(name: 'smtpPort', includeIfNull: false)
+  final int? smtpPort;
+  @JsonKey(
+    name: 'smtpSecurity',
+    includeIfNull: false,
+    toJson: serverSettingsChangesSmtpSecurityNullableToJson,
+    fromJson: serverSettingsChangesSmtpSecurityNullableFromJson,
+  )
+  final enums.ServerSettingsChangesSmtpSecurity? smtpSecurity;
+  @JsonKey(name: 'smtpUsername', includeIfNull: false)
+  final String? smtpUsername;
   @JsonKey(name: 'trashEnabled', includeIfNull: false)
   final bool? trashEnabled;
   @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
@@ -9520,6 +9848,15 @@ class ServerSettingsChanges {
                 const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
             (identical(other.searchContentEnabled, searchContentEnabled) ||
                 const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
+            (identical(other.smtpFrom, smtpFrom) || const DeepCollectionEquality().equals(other.smtpFrom, smtpFrom)) &&
+            (identical(other.smtpHost, smtpHost) || const DeepCollectionEquality().equals(other.smtpHost, smtpHost)) &&
+            (identical(other.smtpPassword, smtpPassword) ||
+                const DeepCollectionEquality().equals(other.smtpPassword, smtpPassword)) &&
+            (identical(other.smtpPort, smtpPort) || const DeepCollectionEquality().equals(other.smtpPort, smtpPort)) &&
+            (identical(other.smtpSecurity, smtpSecurity) ||
+                const DeepCollectionEquality().equals(other.smtpSecurity, smtpSecurity)) &&
+            (identical(other.smtpUsername, smtpUsername) ||
+                const DeepCollectionEquality().equals(other.smtpUsername, smtpUsername)) &&
             (identical(other.trashEnabled, trashEnabled) ||
                 const DeepCollectionEquality().equals(other.trashEnabled, trashEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
@@ -9545,6 +9882,12 @@ class ServerSettingsChanges {
       const DeepCollectionEquality().hash(ocrLanguages) ^
       const DeepCollectionEquality().hash(ocrMaxPages) ^
       const DeepCollectionEquality().hash(searchContentEnabled) ^
+      const DeepCollectionEquality().hash(smtpFrom) ^
+      const DeepCollectionEquality().hash(smtpHost) ^
+      const DeepCollectionEquality().hash(smtpPassword) ^
+      const DeepCollectionEquality().hash(smtpPort) ^
+      const DeepCollectionEquality().hash(smtpSecurity) ^
+      const DeepCollectionEquality().hash(smtpUsername) ^
       const DeepCollectionEquality().hash(trashEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
       const DeepCollectionEquality().hash(versionsEnabled) ^
@@ -9564,6 +9907,12 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     List<String>? ocrLanguages,
     int? ocrMaxPages,
     bool? searchContentEnabled,
+    String? smtpFrom,
+    String? smtpHost,
+    String? smtpPassword,
+    int? smtpPort,
+    enums.ServerSettingsChangesSmtpSecurity? smtpSecurity,
+    String? smtpUsername,
     bool? trashEnabled,
     int? trashRetentionDays,
     bool? versionsEnabled,
@@ -9580,6 +9929,12 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       ocrLanguages: ocrLanguages ?? this.ocrLanguages,
       ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
       searchContentEnabled: searchContentEnabled ?? this.searchContentEnabled,
+      smtpFrom: smtpFrom ?? this.smtpFrom,
+      smtpHost: smtpHost ?? this.smtpHost,
+      smtpPassword: smtpPassword ?? this.smtpPassword,
+      smtpPort: smtpPort ?? this.smtpPort,
+      smtpSecurity: smtpSecurity ?? this.smtpSecurity,
+      smtpUsername: smtpUsername ?? this.smtpUsername,
       trashEnabled: trashEnabled ?? this.trashEnabled,
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
       versionsEnabled: versionsEnabled ?? this.versionsEnabled,
@@ -9598,6 +9953,12 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     Wrapped<List<String>?>? ocrLanguages,
     Wrapped<int?>? ocrMaxPages,
     Wrapped<bool?>? searchContentEnabled,
+    Wrapped<String?>? smtpFrom,
+    Wrapped<String?>? smtpHost,
+    Wrapped<String?>? smtpPassword,
+    Wrapped<int?>? smtpPort,
+    Wrapped<enums.ServerSettingsChangesSmtpSecurity?>? smtpSecurity,
+    Wrapped<String?>? smtpUsername,
     Wrapped<bool?>? trashEnabled,
     Wrapped<int?>? trashRetentionDays,
     Wrapped<bool?>? versionsEnabled,
@@ -9614,6 +9975,12 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
       ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
       searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
+      smtpFrom: (smtpFrom != null ? smtpFrom.value : this.smtpFrom),
+      smtpHost: (smtpHost != null ? smtpHost.value : this.smtpHost),
+      smtpPassword: (smtpPassword != null ? smtpPassword.value : this.smtpPassword),
+      smtpPort: (smtpPort != null ? smtpPort.value : this.smtpPort),
+      smtpSecurity: (smtpSecurity != null ? smtpSecurity.value : this.smtpSecurity),
+      smtpUsername: (smtpUsername != null ? smtpUsername.value : this.smtpUsername),
       trashEnabled: (trashEnabled != null ? trashEnabled.value : this.trashEnabled),
       trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
       versionsEnabled: (versionsEnabled != null ? versionsEnabled.value : this.versionsEnabled),
@@ -10556,6 +10923,39 @@ extension $TagRequestExtension on TagRequest {
 
   TagRequest copyWithWrapped({Wrapped<String?>? color, Wrapped<String>? name}) {
     return TagRequest(color: (color != null ? color.value : this.color), name: (name != null ? name.value : this.name));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TestEmailRequest {
+  const TestEmailRequest({this.to});
+
+  factory TestEmailRequest.fromJson(Map<String, dynamic> json) => _$TestEmailRequestFromJson(json);
+
+  static const toJsonFactory = _$TestEmailRequestToJson;
+  Map<String, dynamic> toJson() => _$TestEmailRequestToJson(this);
+
+  @JsonKey(name: 'to', includeIfNull: false)
+  final String? to;
+  static const fromJsonFactory = _$TestEmailRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TestEmailRequest && (identical(other.to, to) || const DeepCollectionEquality().equals(other.to, to)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(to) ^ runtimeType.hashCode;
+}
+
+extension $TestEmailRequestExtension on TestEmailRequest {
+  TestEmailRequest copyWith({String? to}) {
+    return TestEmailRequest(to: to ?? this.to);
+  }
+
+  TestEmailRequest copyWithWrapped({Wrapped<String?>? to}) {
+    return TestEmailRequest(to: (to != null ? to.value : this.to));
   }
 }
 
@@ -14074,6 +14474,144 @@ List<enums.RoleChangeRole>? roleChangeRoleNullableListFromJson(
   }
 
   return roleChangeRole.map((e) => roleChangeRoleFromJson(e.toString())).toList();
+}
+
+String? serverSettingsSmtpSecurityNullableToJson(enums.ServerSettingsSmtpSecurity? serverSettingsSmtpSecurity) {
+  return serverSettingsSmtpSecurity?.value;
+}
+
+String? serverSettingsSmtpSecurityToJson(enums.ServerSettingsSmtpSecurity serverSettingsSmtpSecurity) {
+  return serverSettingsSmtpSecurity.value;
+}
+
+enums.ServerSettingsSmtpSecurity serverSettingsSmtpSecurityFromJson(
+  Object? serverSettingsSmtpSecurity, [
+  enums.ServerSettingsSmtpSecurity? defaultValue,
+]) {
+  return enums.ServerSettingsSmtpSecurity.values.firstWhereOrNull((e) => e.value == serverSettingsSmtpSecurity) ??
+      defaultValue ??
+      enums.ServerSettingsSmtpSecurity.swaggerGeneratedUnknown;
+}
+
+enums.ServerSettingsSmtpSecurity? serverSettingsSmtpSecurityNullableFromJson(
+  Object? serverSettingsSmtpSecurity, [
+  enums.ServerSettingsSmtpSecurity? defaultValue,
+]) {
+  if (serverSettingsSmtpSecurity == null) {
+    return null;
+  }
+  return enums.ServerSettingsSmtpSecurity.values.firstWhereOrNull((e) => e.value == serverSettingsSmtpSecurity) ??
+      defaultValue;
+}
+
+String serverSettingsSmtpSecurityExplodedListToJson(
+  List<enums.ServerSettingsSmtpSecurity>? serverSettingsSmtpSecurity,
+) {
+  return serverSettingsSmtpSecurity?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> serverSettingsSmtpSecurityListToJson(List<enums.ServerSettingsSmtpSecurity>? serverSettingsSmtpSecurity) {
+  if (serverSettingsSmtpSecurity == null) {
+    return [];
+  }
+
+  return serverSettingsSmtpSecurity.map((e) => e.value!).toList();
+}
+
+List<enums.ServerSettingsSmtpSecurity> serverSettingsSmtpSecurityListFromJson(
+  List? serverSettingsSmtpSecurity, [
+  List<enums.ServerSettingsSmtpSecurity>? defaultValue,
+]) {
+  if (serverSettingsSmtpSecurity == null) {
+    return defaultValue ?? [];
+  }
+
+  return serverSettingsSmtpSecurity.map((e) => serverSettingsSmtpSecurityFromJson(e.toString())).toList();
+}
+
+List<enums.ServerSettingsSmtpSecurity>? serverSettingsSmtpSecurityNullableListFromJson(
+  List? serverSettingsSmtpSecurity, [
+  List<enums.ServerSettingsSmtpSecurity>? defaultValue,
+]) {
+  if (serverSettingsSmtpSecurity == null) {
+    return defaultValue;
+  }
+
+  return serverSettingsSmtpSecurity.map((e) => serverSettingsSmtpSecurityFromJson(e.toString())).toList();
+}
+
+String? serverSettingsChangesSmtpSecurityNullableToJson(
+  enums.ServerSettingsChangesSmtpSecurity? serverSettingsChangesSmtpSecurity,
+) {
+  return serverSettingsChangesSmtpSecurity?.value;
+}
+
+String? serverSettingsChangesSmtpSecurityToJson(
+  enums.ServerSettingsChangesSmtpSecurity serverSettingsChangesSmtpSecurity,
+) {
+  return serverSettingsChangesSmtpSecurity.value;
+}
+
+enums.ServerSettingsChangesSmtpSecurity serverSettingsChangesSmtpSecurityFromJson(
+  Object? serverSettingsChangesSmtpSecurity, [
+  enums.ServerSettingsChangesSmtpSecurity? defaultValue,
+]) {
+  return enums.ServerSettingsChangesSmtpSecurity.values.firstWhereOrNull(
+        (e) => e.value == serverSettingsChangesSmtpSecurity,
+      ) ??
+      defaultValue ??
+      enums.ServerSettingsChangesSmtpSecurity.swaggerGeneratedUnknown;
+}
+
+enums.ServerSettingsChangesSmtpSecurity? serverSettingsChangesSmtpSecurityNullableFromJson(
+  Object? serverSettingsChangesSmtpSecurity, [
+  enums.ServerSettingsChangesSmtpSecurity? defaultValue,
+]) {
+  if (serverSettingsChangesSmtpSecurity == null) {
+    return null;
+  }
+  return enums.ServerSettingsChangesSmtpSecurity.values.firstWhereOrNull(
+        (e) => e.value == serverSettingsChangesSmtpSecurity,
+      ) ??
+      defaultValue;
+}
+
+String serverSettingsChangesSmtpSecurityExplodedListToJson(
+  List<enums.ServerSettingsChangesSmtpSecurity>? serverSettingsChangesSmtpSecurity,
+) {
+  return serverSettingsChangesSmtpSecurity?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> serverSettingsChangesSmtpSecurityListToJson(
+  List<enums.ServerSettingsChangesSmtpSecurity>? serverSettingsChangesSmtpSecurity,
+) {
+  if (serverSettingsChangesSmtpSecurity == null) {
+    return [];
+  }
+
+  return serverSettingsChangesSmtpSecurity.map((e) => e.value!).toList();
+}
+
+List<enums.ServerSettingsChangesSmtpSecurity> serverSettingsChangesSmtpSecurityListFromJson(
+  List? serverSettingsChangesSmtpSecurity, [
+  List<enums.ServerSettingsChangesSmtpSecurity>? defaultValue,
+]) {
+  if (serverSettingsChangesSmtpSecurity == null) {
+    return defaultValue ?? [];
+  }
+
+  return serverSettingsChangesSmtpSecurity.map((e) => serverSettingsChangesSmtpSecurityFromJson(e.toString())).toList();
+}
+
+List<enums.ServerSettingsChangesSmtpSecurity>? serverSettingsChangesSmtpSecurityNullableListFromJson(
+  List? serverSettingsChangesSmtpSecurity, [
+  List<enums.ServerSettingsChangesSmtpSecurity>? defaultValue,
+]) {
+  if (serverSettingsChangesSmtpSecurity == null) {
+    return defaultValue;
+  }
+
+  return serverSettingsChangesSmtpSecurity.map((e) => serverSettingsChangesSmtpSecurityFromJson(e.toString())).toList();
 }
 
 String? suggestionKindNullableToJson(enums.SuggestionKind? suggestionKind) {

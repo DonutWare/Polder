@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"cmp"
 	"context"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -72,6 +73,7 @@ func (a *API) login(ctx context.Context, input *loginInput) (*jsonBody[auth.Toke
 		return nil, err
 	}
 	authLog.Info("logged in", "user", tokens.User.Username, "device", input.Body.DeviceName, "address", input.address)
+	a.emails.SignedIn(tokens.User, input.address, cmp.Or(input.Body.DeviceName, auth.UnknownDevice))
 	return respond(tokens), nil
 }
 

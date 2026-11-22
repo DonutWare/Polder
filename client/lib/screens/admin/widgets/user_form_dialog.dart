@@ -51,6 +51,19 @@ class UserFormDialog extends ConsumerWidget {
                   ),
                   onChanged: notifier.setUsername,
                 ),
+              if (form.isNew)
+                TextFormField(
+                  initialValue: form.email,
+                  keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
+                  decoration: InputDecoration(
+                    labelText: localized.emailOptional,
+                    helperText: localized.newUserEmailHint,
+                    helperMaxLines: 3,
+                    errorText: form.isEmailValid ? null : localized.invalidEmail,
+                  ),
+                  onChanged: notifier.setEmail,
+                ),
               PasswordField(
                 label: form.isNew ? localized.password : localized.newPasswordOptional,
                 autofillHints: const [AutofillHints.newPassword],

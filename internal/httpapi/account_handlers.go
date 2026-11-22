@@ -7,6 +7,7 @@ import (
 
 	"polder-server/internal/activity"
 	"polder-server/internal/apperr"
+	"polder-server/internal/emails"
 	"polder-server/internal/settings"
 	"polder-server/internal/users"
 )
@@ -46,14 +47,17 @@ func (a *API) changePassword(ctx context.Context, input *changePasswordInput) (*
 		return nil, err
 	}
 	authLog.Info("password changed; other sessions logged out", "user", user.Username, "address", input.address)
+	a.emails.PasswordChanged(user, emails.PasswordChange{Address: input.address})
 	return nil, nil
 }
 
 func (a *API) setProfile(ctx context.Context, input *jsonBody[users.Profile]) (*jsonBody[users.User], error) {
-	updated, err := a.users.SetProfile(ctx, currentUser(ctx).ID, input.Body)
+	before := currentUser(ctx)
+	updated, err := a.users.SetProfile(ctx, before.ID, input.Body)
 	if err != nil {
 		return nil, err
 	}
+	a.emails.EmailChanged(before, updated.Profile.Email)
 	return respond(updated), nil
 }
 

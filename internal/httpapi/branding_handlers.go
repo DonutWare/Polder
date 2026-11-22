@@ -16,11 +16,12 @@ const (
 )
 
 type branding struct {
-	Name        string               `json:"name" doc:"Name to show for this server; empty means the app's own name"`
-	Message     string               `json:"message" doc:"Welcome message for the login screen; empty means none"`
-	AccentColor string               `json:"accentColor" doc:"Default accent color as #RRGGBB; empty means the app's own default"`
-	Icon        *settings.ImageInfo  `json:"icon,omitempty" required:"false" doc:"Absent when the server has no icon of its own"`
-	Backgrounds []settings.ImageInfo `json:"backgrounds" doc:"The login screen's backgrounds, shown in turn"`
+	Name          string               `json:"name" doc:"Name to show for this server; empty means the app's own name"`
+	Message       string               `json:"message" doc:"Welcome message for the login screen; empty means none"`
+	AccentColor   string               `json:"accentColor" doc:"Default accent color as #RRGGBB; empty means the app's own default"`
+	Icon          *settings.ImageInfo  `json:"icon,omitempty" required:"false" doc:"Absent when the server has no icon of its own"`
+	Backgrounds   []settings.ImageInfo `json:"backgrounds" doc:"The login screen's backgrounds, shown in turn"`
+	PasswordReset bool                 `json:"passwordReset" doc:"Whether a forgotten password can be reset by email"`
 }
 
 type imageUpload struct {
@@ -50,11 +51,12 @@ func (a *API) branding(ctx context.Context, _ *struct{}) (*jsonBody[branding], e
 		return nil, err
 	}
 	return respond(branding{
-		Name:        current.InstanceName,
-		Message:     current.WelcomeMessage,
-		AccentColor: current.AccentColor,
-		Icon:        a.images.Icon(),
-		Backgrounds: a.images.Backgrounds(),
+		Name:          current.InstanceName,
+		Message:       current.WelcomeMessage,
+		AccentColor:   current.AccentColor,
+		Icon:          a.images.Icon(),
+		Backgrounds:   a.images.Backgrounds(),
+		PasswordReset: a.emails.PasswordResetAvailable(ctx),
 	}), nil
 }
 

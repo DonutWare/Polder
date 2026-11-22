@@ -19,6 +19,7 @@ import (
 	"polder-server/internal/auth"
 	"polder-server/internal/caldav"
 	"polder-server/internal/calendar"
+	"polder-server/internal/emails"
 	"polder-server/internal/extract"
 	"polder-server/internal/federation"
 	"polder-server/internal/files"
@@ -67,7 +68,10 @@ type API struct {
 	webdav        *webdav.Handler
 	federation    *federation.Service
 	notifications *notifications.Service
+	emails        *emails.Service
+	brands        emails.BrandSource
 	limiter       *failedAttemptLimiter
+	resetLimiter  *failedAttemptLimiter
 
 	federationLimiter *failedAttemptLimiter
 
@@ -110,6 +114,8 @@ type Dependencies struct {
 	WebDAV                 *webdav.Handler
 	Federation             *federation.Service
 	Notifications          *notifications.Service
+	Emails                 *emails.Service
+	Brands                 emails.BrandSource
 	WebDAVAllowInsecure    bool
 	RequestTrashPurge      func()
 	LoginAttemptsPerMinute int
@@ -146,7 +152,10 @@ func NewRouter(deps Dependencies) http.Handler {
 		webdav:        deps.WebDAV,
 		federation:    deps.Federation,
 		notifications: deps.Notifications,
+		emails:        deps.Emails,
+		brands:        deps.Brands,
 		limiter:       newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+		resetLimiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 
 		federationLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute * federationLimitFactor),
 
@@ -229,6 +238,8 @@ func (a *API) routes(api huma.API) {
 	register(v1, http.MethodPost, "/auth/login", "login", "Log in and get a token pair", a.login)
 	register(v1, http.MethodPost, "/auth/refresh", "refresh", "Exchange a refresh token for a new token pair", a.refresh)
 	register(v1, http.MethodPost, "/auth/logout", "logout", "Revoke a refresh token", a.logout)
+	register(v1, http.MethodPost, "/auth/password-reset", "requestPasswordReset", "Email a code to choose a new password, if the account exists and has an email address", a.requestPasswordReset, accepted)
+	register(v1, http.MethodPost, "/auth/password-reset/code", "resetPasswordWithCode", "Choose a new password with the code from a reset email", a.resetPasswordWithCode)
 	register(v1, http.MethodGet, "/events", "events", "Live activity over a WebSocket", a.events, withDescription(eventsDescription),
 		withSocketMessages(api), withResponse(http.StatusSwitchingProtocols, "WebSocket connection; every message the server sends has this shape",
 			map[string]*huma.MediaType{"application/json": {Schema: api.OpenAPI().Components.Schemas.Schema(reflect.TypeFor[eventMessage](), true, "")}}))
@@ -256,6 +267,8 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPost, "/auth/sessions", "startSession", "Start another session for the logged-in user, such as for a file provider on this device", a.startSession, created)
 	register(user, http.MethodPut, "/account/profile", "setProfile", "Change the logged-in user's name and contact details", a.setProfile)
 	register(user, http.MethodPut, "/account/password", "changePassword", "Change the logged-in user's password; their other sessions are logged out", a.changePassword)
+	register(user, http.MethodGet, "/account/email-notifications", "getEmailPreferences", "Which emails the logged-in user gets", a.getEmailPreferences)
+	register(user, http.MethodPut, "/account/email-notifications", "setEmailPreferences", "Choose which emails the logged-in user gets; password emails are always sent", a.setEmailPreferences)
 	register(user, http.MethodPut, "/account/appearance", "setAppearance", "Choose the theme and accent color the apps use for the logged-in user", a.setAppearance)
 	register(user, http.MethodPut, "/account/avatar", "setAvatar", "Replace the logged-in user's icon with the image in the request body", a.setAvatar,
 		withRequestBody(binaryContent("application/octet-stream")))
@@ -448,6 +461,7 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodPatch, "/admin/users/{userID}", "updateUser", "Change a user; password changes and disabling log the user out", a.updateUser)
 	register(admin, http.MethodGet, "/admin/settings", "getServerSettings", "Server-wide settings", a.getServerSettings)
 	register(admin, http.MethodPatch, "/admin/settings", "updateServerSettings", "Change server-wide settings", a.updateServerSettings)
+	register(admin, http.MethodPost, "/admin/mail/test", "sendTestEmail", "Send a test email with the current mail server settings", a.sendTestEmail)
 	register(admin, http.MethodPut, "/admin/branding/icon", "setBrandingIcon", "Replace the server's icon with the image in the request body", a.setBrandingIcon,
 		withRequestBody(binaryContent("application/octet-stream")))
 	register(admin, http.MethodDelete, "/admin/branding/icon", "removeBrandingIcon", "Go back to the apps' own icon", a.removeBrandingIcon)

@@ -9,6 +9,7 @@ import "package:polder/services/api/notification_mappers.dart";
 import "package:polder/models/change.dart";
 import "package:polder/models/directory_listing.dart";
 import "package:polder/models/document_editor.dart";
+import "package:polder/models/email_preferences.dart";
 import "package:polder/models/file_entry.dart";
 import "package:polder/models/file_links.dart";
 import "package:polder/models/file_mount.dart";
@@ -261,7 +262,31 @@ extension ServerSettingsToModel on wire.ServerSettings {
     versionsMaxAgeDays: versionsMaxAgeDays,
     versionsMaxPerFile: versionsMaxPerFile,
     federationEnabled: federationEnabled,
+    smtpHost: smtpHost,
+    smtpPort: smtpPort,
+    smtpUsername: smtpUsername,
+    smtpPasswordSet: smtpPasswordSet,
+    smtpFrom: smtpFrom,
+    smtpSecurity: switch (smtpSecurity) {
+      wire.ServerSettingsSmtpSecurity.tls => MailSecurity.tls,
+      wire.ServerSettingsSmtpSecurity.none => MailSecurity.none,
+      _ => MailSecurity.starttls,
+    },
+    smtpManagedByConfig: smtpManagedByConfig,
   );
+}
+
+extension MailSecurityToWire on MailSecurity {
+  wire.ServerSettingsChangesSmtpSecurity toWire() => switch (this) {
+    MailSecurity.starttls => wire.ServerSettingsChangesSmtpSecurity.starttls,
+    MailSecurity.tls => wire.ServerSettingsChangesSmtpSecurity.tls,
+    MailSecurity.none => wire.ServerSettingsChangesSmtpSecurity.none,
+  };
+}
+
+extension EmailPreferencesToModel on wire.EmailPreferences {
+  EmailPreferences toModel() =>
+      EmailPreferences(security: security, quota: quota, shares: shares, hasEmail: hasEmail, enabled: enabled);
 }
 
 extension VersionViewToModel on wire.VersionView {
@@ -314,6 +339,7 @@ extension BrandingToModel on wire.Branding {
     accent: parseHexColor(accentColor),
     icon: icon?.toModel(),
     backgrounds: [for (final background in backgrounds ?? <wire.ImageInfo>[]) background.toModel()],
+    passwordReset: passwordReset,
   );
 }
 
@@ -376,6 +402,7 @@ extension CreateUserRequestToWire on CreateUserRequest {
       UserRole.user => wire.NewUserRole.user,
     },
     quotaBytes: quotaBytes,
+    email: email.trim().isEmpty ? null : email.trim(),
   );
 }
 

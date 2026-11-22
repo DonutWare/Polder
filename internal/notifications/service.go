@@ -34,10 +34,25 @@ type Publisher interface {
 	Publish(event activity.Event)
 }
 
+type ShareMailer interface {
+	ShareReceived(userIDs []int64, notice activity.ShareNotice)
+}
+
 type Service struct {
-	db  *sql.DB
-	hub Publisher
-	now func() time.Time
+	db     *sql.DB
+	hub    Publisher
+	mailer ShareMailer
+	now    func() time.Time
+}
+
+func (s *Service) UseMailer(mailer ShareMailer) {
+	s.mailer = mailer
+}
+
+func (s *Service) mailShare(userIDs []int64, notice activity.ShareNotice) {
+	if s.mailer != nil {
+		s.mailer.ShareReceived(userIDs, notice)
+	}
 }
 
 func NewService(db *sql.DB, hub Publisher) *Service {
@@ -46,10 +61,12 @@ func NewService(db *sql.DB, hub Publisher) *Service {
 
 func (s *Service) ShareReceived(ctx context.Context, userIDs []int64, notice activity.ShareNotice) {
 	s.notifyAll(ctx, userIDs, activity.NotificationShareReceived, payload{Share: &notice})
+	s.mailShare(userIDs, notice)
 }
 
 func (s *Service) FederatedShareReceived(ctx context.Context, userID int64, notice activity.ShareNotice) {
 	s.notifyAll(ctx, []int64{userID}, activity.NotificationFederatedShareReceived, payload{Share: &notice})
+	s.mailShare([]int64{userID}, notice)
 }
 
 func (s *Service) notifyAll(ctx context.Context, userIDs []int64, kind activity.NotificationKind, body payload) {

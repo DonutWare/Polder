@@ -5,9 +5,13 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:polder/models/notifications/notification_preferences.dart";
+import "package:polder/providers/notifications/email_preferences_provider.dart";
 import "package:polder/providers/notifications/notification_providers.dart";
 import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/routes/up_scope.dart";
 import "package:polder/services/notifications/notification_service.dart";
+import "package:polder/util/action_feedback.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/layout/app_page.dart";
@@ -57,6 +61,7 @@ class _NotificationSettingsScreenState extends ConsumerState<NotificationSetting
               _TopicsGroup(preferences: preferences),
               if (preferences.enabled) const _ReliabilityGroup(),
             ],
+            const _EmailGroup(),
           ],
         ),
       ),
@@ -147,6 +152,46 @@ class _TopicsGroup extends ConsumerWidget {
             notifier.setUploadCheck,
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _EmailGroup extends ConsumerWidget {
+  const _EmailGroup();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final preferences = ref.watch(emailPreferencesProvider).value;
+    if (preferences == null || !preferences.enabled) return const SizedBox.shrink();
+    final localized = context.localized;
+    final notifier = ref.read(emailPreferencesProvider.notifier);
+    final canSend = preferences.hasEmail;
+    SwitchListTile toggle(String title, String hint, bool value, Future<void> Function(bool) change) => SwitchListTile(
+      contentPadding: _tilePadding,
+      title: Text(title),
+      subtitle: Text(hint),
+      value: canSend && value,
+      onChanged: canSend ? (enabled) => context.runWithFeedback(change(enabled)) : null,
+    );
+    return NavGroup(
+      title: localized.emailNotifications,
+      children: [
+        if (!canSend)
+          NavEntry(
+            icon: IconsaxPlusLinear.sms,
+            title: localized.emailNotificationsNoAddress,
+            subtitle: localized.emailNotificationsNoAddressHint,
+            onTap: () => goWithin(context, AppRoutes.account),
+          ),
+        toggle(localized.emailSecurity, localized.emailSecurityHint, preferences.security, notifier.setSecurity),
+        toggle(localized.emailQuota, localized.emailQuotaHint, preferences.quota, notifier.setQuota),
+        toggle(localized.emailShares, localized.emailSharesHint, preferences.shares, notifier.setShares),
+        ListTile(
+          contentPadding: _tilePadding,
+          leading: const Icon(IconsaxPlusLinear.info_circle),
+          subtitle: Text(localized.emailAlwaysSent),
+        ),
       ],
     );
   }

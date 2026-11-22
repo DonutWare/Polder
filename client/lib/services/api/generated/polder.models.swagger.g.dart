@@ -132,6 +132,7 @@ Branding _$BrandingFromJson(Map<String, dynamic> json) => Branding(
   icon: json['icon'] == null ? null : ImageInfo.fromJson(json['icon'] as Map<String, dynamic>),
   message: json['message'] as String,
   name: json['name'] as String,
+  passwordReset: json['passwordReset'] as bool,
 );
 
 Map<String, dynamic> _$BrandingToJson(Branding instance) => <String, dynamic>{
@@ -140,6 +141,7 @@ Map<String, dynamic> _$BrandingToJson(Branding instance) => <String, dynamic>{
   'icon': ?instance.icon?.toJson(),
   'message': instance.message,
   'name': instance.name,
+  'passwordReset': instance.passwordReset,
 };
 
 BusyPeriod _$BusyPeriodFromJson(Map<String, dynamic> json) => BusyPeriod(
@@ -470,6 +472,22 @@ Map<String, dynamic> _$EditorSessionToJson(EditorSession instance) => <String, d
   'editorUrl': instance.editorUrl,
   'hostPage': instance.hostPage,
   'readOnly': instance.readOnly,
+};
+
+EmailPreferences _$EmailPreferencesFromJson(Map<String, dynamic> json) => EmailPreferences(
+  enabled: json['enabled'] as bool,
+  hasEmail: json['hasEmail'] as bool,
+  quota: json['quota'] as bool,
+  security: json['security'] as bool,
+  shares: json['shares'] as bool,
+);
+
+Map<String, dynamic> _$EmailPreferencesToJson(EmailPreferences instance) => <String, dynamic>{
+  'enabled': instance.enabled,
+  'hasEmail': instance.hasEmail,
+  'quota': instance.quota,
+  'security': instance.security,
+  'shares': instance.shares,
 };
 
 Entry _$EntryFromJson(Map<String, dynamic> json) => Entry(
@@ -1508,6 +1526,7 @@ Map<String, dynamic> _$NewSubscriptionToJson(NewSubscription instance) => <Strin
 };
 
 NewUser _$NewUserFromJson(Map<String, dynamic> json) => NewUser(
+  email: json['email'] as String?,
   password: json['password'] as String,
   quotaBytes: (json['quotaBytes'] as num?)?.toInt(),
   role: newUserRoleFromJson(json['role']),
@@ -1515,6 +1534,7 @@ NewUser _$NewUserFromJson(Map<String, dynamic> json) => NewUser(
 );
 
 Map<String, dynamic> _$NewUserToJson(NewUser instance) => <String, dynamic>{
+  'email': ?instance.email,
   'password': instance.password,
   'quotaBytes': ?instance.quotaBytes,
   'role': ?newUserRoleToJson(instance.role),
@@ -1651,6 +1671,25 @@ Map<String, dynamic> _$PasswordChangeToJson(PasswordChange instance) => <String,
   'newPassword': instance.newPassword,
 };
 
+PasswordResetCodeRequest _$PasswordResetCodeRequestFromJson(Map<String, dynamic> json) => PasswordResetCodeRequest(
+  code: json['code'] as String,
+  login: json['login'] as String,
+  password: json['password'] as String,
+);
+
+Map<String, dynamic> _$PasswordResetCodeRequestToJson(PasswordResetCodeRequest instance) => <String, dynamic>{
+  'code': instance.code,
+  'login': instance.login,
+  'password': instance.password,
+};
+
+PasswordResetRequest _$PasswordResetRequestFromJson(Map<String, dynamic> json) =>
+    PasswordResetRequest(login: json['login'] as String);
+
+Map<String, dynamic> _$PasswordResetRequestToJson(PasswordResetRequest instance) => <String, dynamic>{
+  'login': instance.login,
+};
+
 PathRequest _$PathRequestFromJson(Map<String, dynamic> json) => PathRequest(path: json['path'] as String);
 
 Map<String, dynamic> _$PathRequestToJson(PathRequest instance) => <String, dynamic>{'path': instance.path};
@@ -1662,6 +1701,15 @@ Map<String, dynamic> _$PersonToJson(Person instance) => <String, dynamic>{
   'email': instance.email,
   'name': ?instance.name,
   'self': instance.self,
+};
+
+Preferences _$PreferencesFromJson(Map<String, dynamic> json) =>
+    Preferences(quota: json['quota'] as bool, security: json['security'] as bool, shares: json['shares'] as bool);
+
+Map<String, dynamic> _$PreferencesToJson(Preferences instance) => <String, dynamic>{
+  'quota': instance.quota,
+  'security': instance.security,
+  'shares': instance.shares,
 };
 
 PreviewRegeneration _$PreviewRegenerationFromJson(Map<String, dynamic> json) =>
@@ -1956,6 +2004,13 @@ ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) => ServerSett
   ocrLanguages: (json['ocrLanguages'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   ocrMaxPages: (json['ocrMaxPages'] as num).toInt(),
   searchContentEnabled: json['searchContentEnabled'] as bool,
+  smtpFrom: json['smtpFrom'] as String,
+  smtpHost: json['smtpHost'] as String,
+  smtpManagedByConfig: json['smtpManagedByConfig'] as bool,
+  smtpPasswordSet: json['smtpPasswordSet'] as bool,
+  smtpPort: (json['smtpPort'] as num).toInt(),
+  smtpSecurity: serverSettingsSmtpSecurityFromJson(json['smtpSecurity']),
+  smtpUsername: json['smtpUsername'] as String,
   trashEnabled: json['trashEnabled'] as bool,
   trashRetentionDays: (json['trashRetentionDays'] as num).toInt(),
   versionsEnabled: json['versionsEnabled'] as bool,
@@ -1973,6 +2028,13 @@ Map<String, dynamic> _$ServerSettingsToJson(ServerSettings instance) => <String,
   'ocrLanguages': ?instance.ocrLanguages,
   'ocrMaxPages': instance.ocrMaxPages,
   'searchContentEnabled': instance.searchContentEnabled,
+  'smtpFrom': instance.smtpFrom,
+  'smtpHost': instance.smtpHost,
+  'smtpManagedByConfig': instance.smtpManagedByConfig,
+  'smtpPasswordSet': instance.smtpPasswordSet,
+  'smtpPort': instance.smtpPort,
+  'smtpSecurity': ?serverSettingsSmtpSecurityToJson(instance.smtpSecurity),
+  'smtpUsername': instance.smtpUsername,
   'trashEnabled': instance.trashEnabled,
   'trashRetentionDays': instance.trashRetentionDays,
   'versionsEnabled': instance.versionsEnabled,
@@ -1990,6 +2052,12 @@ ServerSettingsChanges _$ServerSettingsChangesFromJson(Map<String, dynamic> json)
   ocrLanguages: (json['ocrLanguages'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   ocrMaxPages: (json['ocrMaxPages'] as num?)?.toInt(),
   searchContentEnabled: json['searchContentEnabled'] as bool?,
+  smtpFrom: json['smtpFrom'] as String?,
+  smtpHost: json['smtpHost'] as String?,
+  smtpPassword: json['smtpPassword'] as String?,
+  smtpPort: (json['smtpPort'] as num?)?.toInt(),
+  smtpSecurity: serverSettingsChangesSmtpSecurityNullableFromJson(json['smtpSecurity']),
+  smtpUsername: json['smtpUsername'] as String?,
   trashEnabled: json['trashEnabled'] as bool?,
   trashRetentionDays: (json['trashRetentionDays'] as num?)?.toInt(),
   versionsEnabled: json['versionsEnabled'] as bool?,
@@ -2007,6 +2075,12 @@ Map<String, dynamic> _$ServerSettingsChangesToJson(ServerSettingsChanges instanc
   'ocrLanguages': ?instance.ocrLanguages,
   'ocrMaxPages': ?instance.ocrMaxPages,
   'searchContentEnabled': ?instance.searchContentEnabled,
+  'smtpFrom': ?instance.smtpFrom,
+  'smtpHost': ?instance.smtpHost,
+  'smtpPassword': ?instance.smtpPassword,
+  'smtpPort': ?instance.smtpPort,
+  'smtpSecurity': ?serverSettingsChangesSmtpSecurityNullableToJson(instance.smtpSecurity),
+  'smtpUsername': ?instance.smtpUsername,
   'trashEnabled': ?instance.trashEnabled,
   'trashRetentionDays': ?instance.trashRetentionDays,
   'versionsEnabled': ?instance.versionsEnabled,
@@ -2212,6 +2286,10 @@ Map<String, dynamic> _$TagRequestToJson(TagRequest instance) => <String, dynamic
   'color': ?instance.color,
   'name': instance.name,
 };
+
+TestEmailRequest _$TestEmailRequestFromJson(Map<String, dynamic> json) => TestEmailRequest(to: json['to'] as String?);
+
+Map<String, dynamic> _$TestEmailRequestToJson(TestEmailRequest instance) => <String, dynamic>{'to': ?instance.to};
 
 TextSpan _$TextSpanFromJson(Map<String, dynamic> json) =>
     TextSpan(end: (json['end'] as num).toInt(), start: (json['start'] as num).toInt());

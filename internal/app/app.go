@@ -18,6 +18,7 @@ import (
 	"polder-server/internal/calendar"
 	"polder-server/internal/config"
 	"polder-server/internal/database"
+	"polder-server/internal/emails"
 	"polder-server/internal/extract"
 	"polder-server/internal/federation"
 	"polder-server/internal/files"
@@ -74,6 +75,7 @@ type App struct {
 	links     *links.Graph
 	tags      *tags.Service
 	calendar  *calendar.Service
+	emails    *emails.Service
 
 	federation         *federation.Service
 	notifications      *notifications.Service
@@ -82,6 +84,19 @@ type App struct {
 }
 
 var federationRootCAs *x509.CertPool
+
+var mailerOverride emails.Mailer
+
+func newMailer(cfg config.Config, serverSettings *settings.Store) emails.Mailer {
+	serverSettings.UseConfiguredMail(mail.Options{
+		Host: cfg.SMTPHost, Port: cfg.SMTPPort, Username: cfg.SMTPUsername, Password: cfg.SMTPPassword,
+		From: cfg.SMTPFrom, Security: cfg.SMTPSecurity,
+	})
+	if mailerOverride != nil {
+		return mailerOverride
+	}
+	return mail.NewResolver(serverSettings.MailOptions)
+}
 
 func New(cfg config.Config) (*App, error) {
 	db, err := database.Open(cfg)
@@ -125,7 +140,11 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		VersionsMaxAgeDays:   settings.DefaultVersionMaxAgeDays,
 		VersionsMaxPerFile:   settings.DefaultVersionMaxPerFile,
 	})
+	mailer := newMailer(cfg, serverSettings)
+	brands := emails.NewBrandSource(serverSettings, images, cfg.PublicBaseURL())
+	emailService := emails.NewService(emails.NewStore(db), userStore, mailer, brands)
 	fileService := files.NewService(db, disk)
+	fileService.OnMutation(emailService.FileMutation)
 	fileService.SetTrashPolicy(func(ctx context.Context, owner users.User) bool {
 		server, err := serverSettings.Get(ctx)
 		if err != nil {
@@ -165,6 +184,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	fileScanner := scanner.New(fileService, userStore, cfg.RescanInterval, cfg.WatchFiles)
 	userService.OnCreated(func(user users.User) { fileScanner.Request(user.Username) })
 	authService := auth.NewService(userService, sessions, auth.NewAppPasswords(db), tokens)
+	authService.UsePasswordResets(auth.NewPasswordResets(db))
 	authService.OnSession(func(ctx context.Context, user users.User, session auth.Session, event auth.SessionEvent) {
 		activityHub.Session(ctx, user, session.ID, session.DeviceName, event == auth.SessionStarted)
 	})
@@ -214,6 +234,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	}
 	fileService.OnMutation(federationService.FileMutation)
 	notificationService := notifications.NewService(db, activityHub)
+	notificationService.UseMailer(emailService)
 	sharingService.UseNotifier(notificationService)
 	federationService.UseNotifier(notificationService)
 	officeService.UseShares(sharingService, federationService)
@@ -224,10 +245,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		AllowPrivateSubscriptions: cfg.CalendarSubscriptionsAllowPrivate,
 		PublicURL:                 cfg.PublicBaseURL(),
 		RSVPKey:                   tokens.DerivedKey(calendar.RSVPKeyPurpose),
-		Mailer: mail.NewSender(mail.Options{
-			Host: cfg.SMTPHost, Port: cfg.SMTPPort, Username: cfg.SMTPUsername, Password: cfg.SMTPPassword,
-			From: cfg.SMTPFrom, Security: cfg.SMTPSecurity,
-		}),
+		Mailer:                    mailer,
 	})
 	searchService.UseCalendars(calendarService)
 	handler := httpapi.NewRouter(httpapi.Dependencies{
@@ -258,6 +276,8 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		WebDAV:                 webdav.NewHandler(fileService),
 		Federation:             federationService,
 		Notifications:          notificationService,
+		Emails:                 emailService,
+		Brands:                 brands,
 		WebDAVAllowInsecure:    cfg.WebDAVAllowInsecure,
 		RequestTrashPurge:      func() { requestWork(trashPurgeRequests) },
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
@@ -282,6 +302,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		links:     linkGraph,
 		tags:      tagService,
 		calendar:  calendarService,
+		emails:    emailService,
 
 		federation:         federationService,
 		notifications:      notificationService,
@@ -327,6 +348,7 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	a.background.Go(func() { a.links.Run(ctx) })
 	a.background.Go(func() { a.tags.Run(ctx) })
 	a.background.Go(func() { a.federation.Run(ctx) })
+	a.background.Go(func() { a.emails.Run(ctx) })
 	a.background.Go(func() { a.calendar.RunReminders(ctx) })
 	a.background.Go(func() {
 		repeatOnRequest(ctx, calendar.SubscriptionCheckInterval(), a.calendar.RefreshRequests(), "refresh calendar subscriptions", a.calendar.RefreshDueSubscriptions)

@@ -11,6 +11,7 @@ _CreateUserRequest _$CreateUserRequestFromJson(Map<String, dynamic> json) => _Cr
   password: json['password'] as String,
   role: $enumDecode(_$UserRoleEnumMap, json['role']),
   quotaBytes: (json['quotaBytes'] as num).toInt(),
+  email: json['email'] as String? ?? "",
 );
 
 Map<String, dynamic> _$CreateUserRequestToJson(_CreateUserRequest instance) => <String, dynamic>{
@@ -18,6 +19,7 @@ Map<String, dynamic> _$CreateUserRequestToJson(_CreateUserRequest instance) => <
   'password': instance.password,
   'role': _$UserRoleEnumMap[instance.role]!,
   'quotaBytes': instance.quotaBytes,
+  'email': instance.email,
 };
 
 const _$UserRoleEnumMap = {UserRole.admin: 'admin', UserRole.user: 'user'};

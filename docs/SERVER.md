@@ -102,18 +102,46 @@ _caldavs._tcp.example.com. TXT "path=/dav/"
 
 Invitations to people with a Polder account are matched by the email address
 in their profile. Other attendees get an email with an answer link, which
-needs an SMTP server.
+needs a [mail server](#email).
 
 | Setting | Environment variable | Meaning |
 | --- | --- | --- |
 | `calendarMaxEventBytes` | `POLDER_CALENDAR_MAX_EVENT_BYTES` | Largest event apps may store, in bytes (default 1 MiB) |
 | `calendarSubscriptionMinRefresh` | `POLDER_CALENDAR_SUBSCRIPTION_MIN_REFRESH` | Shortest time between refreshes of a subscribed feed (default `15m`) |
 | `calendarSubscriptionsAllowPrivate` | `POLDER_CALENDAR_SUBSCRIPTIONS_ALLOW_PRIVATE` | Allow subscribing to feeds on private networks, such as other services on the same LAN |
-| `smtpHost` | `POLDER_SMTP_HOST` | Mail server for invitations to people outside Polder |
+## Email
+
+With a mail server set, Polder sends email. Each one uses the server's name,
+accent color and icon from the admin's branding settings.
+
+| Email | Sent when | Can users turn it off? |
+| --- | --- | --- |
+| Password reset | "Forgot password?" on the sign-in screen; the link works once, for an hour | No |
+| Password changed | The user, an admin or a reset changed the password | No |
+| Welcome | An admin creates an account with an email address | No |
+| New sign-in | An account signs in from an IP address it hasn't used before | Yes (security) |
+| Email address changed | Sent to the old address | Yes (security) |
+| Storage warning | Use passes 80%, 95% and 100% of the quota; it's sent again after use drops back below | Yes (storage) |
+| Share received | Someone shares a file or folder, also from another server | Yes (sharing) |
+
+Users choose which emails they get in Settings → Notifications. Emails go to
+the address in their profile; accounts without one get none.
+
+Admins set the mail server in Admin → Email, and can send a test email
+from there. Setting `smtpHost` in the config or environment overrides the
+admin settings, which then show the configured values read-only.
+
+Password reset needs `publicUrl`, because the link in the email is built
+from it. It is never built from the request's Host header, so a forged
+request can't send a link to another site.
+
+| Setting | Environment variable | Meaning |
+| --- | --- | --- |
+| `smtpHost` | `POLDER_SMTP_HOST` | Mail server; setting it locks the mail settings in the admin UI |
 | `smtpPort` | `POLDER_SMTP_PORT` | Mail server port (default 587, or 465 with `tls`) |
 | `smtpUsername` | `POLDER_SMTP_USERNAME` | Mail server login |
 | `smtpPassword` | `POLDER_SMTP_PASSWORD` | Mail server password |
-| `smtpFrom` | `POLDER_SMTP_FROM` | Sender address, such as `Polder <calendar@example.com>` |
+| `smtpFrom` | `POLDER_SMTP_FROM` | Sender address, such as `Polder <polder@example.com>` |
 | `smtpSecurity` | `POLDER_SMTP_SECURITY` | `starttls` (default), `tls` or `none` |
 
 ## Federation

@@ -17,6 +17,8 @@ class UserFormNotifier extends Notifier<UserForm> {
 
   void setUsername(String value) => state = state.copyWith(username: value);
 
+  void setEmail(String value) => state = state.copyWith(email: value);
+
   void setPassword(String value) => state = state.copyWith(password: value);
 
   void setPasswordConfirmation(String value) => state = state.copyWith(passwordConfirmation: value);

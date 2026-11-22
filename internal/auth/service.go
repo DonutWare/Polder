@@ -39,6 +39,7 @@ type Service struct {
 	sessions     *Sessions
 	appPasswords *AppPasswords
 	tokens       *AccessTokens
+	resets       *PasswordResets
 	hasher       Argon2Hasher
 	setupMu      sync.Mutex
 	onSession    SessionFunc
@@ -194,7 +195,7 @@ func (s *Service) Authenticate(ctx context.Context, accessToken string) (Identit
 	}
 	device := claims.Device
 	if device == "" {
-		device = unknownDevice
+		device = UnknownDevice
 	}
 	return Identity{User: user, SessionID: claims.SessionID, Device: device, ExpiresAt: claims.ExpiresAt}, nil
 }
@@ -215,7 +216,7 @@ func (s *Service) ActiveUser(ctx context.Context, userID int64) (users.User, err
 
 func (s *Service) startSession(ctx context.Context, user users.User, deviceName string) (TokenPair, error) {
 	if deviceName == "" {
-		deviceName = unknownDevice
+		deviceName = UnknownDevice
 	}
 	session, refreshToken, err := s.sessions.Create(ctx, user.ID, deviceName)
 	if err != nil {
@@ -228,7 +229,7 @@ func (s *Service) startSession(ctx context.Context, user users.User, deviceName 
 	return pair, err
 }
 
-const unknownDevice = "unknown device"
+const UnknownDevice = "unknown device"
 
 func (s *Service) tokenPair(user users.User, session Session, refreshToken string) (TokenPair, error) {
 	accessToken, err := s.tokens.Issue(user.ID, session.ID, session.DeviceName)

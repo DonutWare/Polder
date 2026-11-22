@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"polder-server/internal/apperr"
 )
@@ -34,6 +35,7 @@ func (s *Service) OnCreated(listener func(User)) {
 }
 
 func (s *Service) Create(ctx context.Context, newUser NewUser) (User, error) {
+	newUser.Email = strings.TrimSpace(newUser.Email)
 	if err := newUser.validate(); err != nil {
 		return User{}, err
 	}

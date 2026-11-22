@@ -158,7 +158,7 @@ func displayAddress(prop *ical.Prop) string {
 
 func (s *Service) sendInvitationMail(ctx context.Context, owner users.User, message itipMessage, data []byte, objectID int64) error {
 	address, isMail := strings.CutPrefix(normalizeAddress(message.recipient), mailtoPrefix)
-	if !isMail || s.options.Mailer == nil || !s.options.Mailer.Configured() {
+	if !isMail || s.options.Mailer == nil || !s.options.Mailer.Configured(ctx) {
 		return nil
 	}
 	return s.options.Mailer.Send(ctx, mail.Message{

@@ -12,6 +12,7 @@ abstract class CreateUserRequest with _$CreateUserRequest {
     required String password,
     required UserRole role,
     required int quotaBytes,
+    @Default("") String email,
   }) = _CreateUserRequest;
 
   factory CreateUserRequest.fromJson(Map<String, dynamic> json) => _$CreateUserRequestFromJson(json);

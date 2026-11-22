@@ -4,6 +4,8 @@ import "package:freezed_annotation/freezed_annotation.dart";
 
 part "server_settings.freezed.dart";
 
+enum MailSecurity { starttls, tls, none }
+
 @freezed
 abstract class ServerSettings with _$ServerSettings {
   const factory ServerSettings({
@@ -21,5 +23,12 @@ abstract class ServerSettings with _$ServerSettings {
     @Default(0) int versionsMaxAgeDays,
     @Default(0) int versionsMaxPerFile,
     @Default(false) bool federationEnabled,
+    @Default("") String smtpHost,
+    @Default(0) int smtpPort,
+    @Default("") String smtpUsername,
+    @Default(false) bool smtpPasswordSet,
+    @Default("") String smtpFrom,
+    @Default(MailSecurity.starttls) MailSecurity smtpSecurity,
+    @Default(false) bool smtpManagedByConfig,
   }) = _ServerSettings;
 }

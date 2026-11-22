@@ -1,0 +1,15 @@
+{{.Content.Heading}}
+
+{{range .Content.Paragraphs}}{{.}}
+
+{{end}}{{range .Content.Details}}{{.Label}}: {{.Value}}
+{{end}}{{if .Content.Details}}
+{{end}}{{with .Content.Code}}Your code: {{.Value}}{{with .Note}} ({{.}}){{end}}
+
+{{end}}{{with .Content.Action}}{{.Label}}: {{.URL}}
+
+{{end}}{{range .Content.Closing}}{{.}}
+
+{{end}}--
+{{with .Content.Footer}}{{.}}
+{{end}}Sent by {{.Brand.Name}}{{with .Brand.PublicURL}} ({{.}}){{end}}

@@ -92,8 +92,8 @@ func (s *Store) Count(ctx context.Context) (int, error) {
 func (s *Store) Insert(ctx context.Context, newUser NewUser, passwordHash string) (User, error) {
 	var id int64
 	err := s.db.QueryRowContext(ctx,
-		`INSERT INTO users (username, password_hash, role, quota_bytes, disabled, created_at) VALUES ($1, $2, $3, $4, FALSE, $5) RETURNING id`,
-		newUser.Username, passwordHash, newUser.Role, newUser.QuotaBytes, time.Now().Unix()).Scan(&id)
+		`INSERT INTO users (username, password_hash, role, quota_bytes, disabled, created_at, email) VALUES ($1, $2, $3, $4, FALSE, $5, $6) RETURNING id`,
+		newUser.Username, passwordHash, newUser.Role, newUser.QuotaBytes, time.Now().Unix(), newUser.Email).Scan(&id)
 	if database.IsUniqueViolation(err) {
 		return User{}, apperr.AlreadyExists("user %q already exists", newUser.Username)
 	}

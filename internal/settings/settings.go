@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	netmail "net/mail"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/mail"
 	"polder-server/internal/users"
 )
 
@@ -28,11 +30,18 @@ const (
 	versionsMaxAgeDaysKey   = "versions_max_age_days"
 	versionsMaxPerFileKey   = "versions_max_per_file"
 	federationEnabledKey    = "federation_enabled"
+	smtpHostKey             = "smtp_host"
+	smtpPortKey             = "smtp_port"
+	smtpUsernameKey         = "smtp_username"
+	smtpPasswordKey         = "smtp_password"
+	smtpFromKey             = "smtp_from"
+	smtpSecurityKey         = "smtp_security"
 
 	MaxOCRPages = 10000
 
 	maxInstanceNameLength   = 64
 	maxWelcomeMessageLength = 500
+	maxSMTPPort             = 65535
 )
 
 var (
@@ -55,6 +64,14 @@ type ServerSettings struct {
 	VersionsMaxAgeDays   int      `json:"versionsMaxAgeDays" doc:"Days earlier versions are kept; 0 for no age limit. Users can only choose less"`
 	VersionsMaxPerFile   int      `json:"versionsMaxPerFile" doc:"Most earlier versions kept per file; 0 for no count limit. Users can only choose fewer"`
 	FederationEnabled    bool     `json:"federationEnabled" doc:"Share with people on trusted servers that support Open Cloud Mesh; needs publicUrl in the server config"`
+	SMTPHost             string   `json:"smtpHost" doc:"Mail server for emails; empty sends none"`
+	SMTPPort             int      `json:"smtpPort" doc:"Mail server port; 0 picks 587, 465 with tls or 25 with none"`
+	SMTPUsername         string   `json:"smtpUsername" doc:"Mail server login; empty skips logging in"`
+	SMTPPasswordSet      bool     `json:"smtpPasswordSet" doc:"Whether a mail server password is stored; the password itself is never shown"`
+	SMTPFrom             string   `json:"smtpFrom" doc:"Sender address, such as Polder <polder@example.com>"`
+	SMTPSecurity         string   `json:"smtpSecurity" enum:"starttls,tls,none" doc:"How the connection to the mail server is secured"`
+	SMTPManagedByConfig  bool     `json:"smtpManagedByConfig" doc:"The mail server is set in the server config or environment, so it can't be changed here"`
+	smtpPassword         string
 }
 
 type ServerSettingsChanges struct {
@@ -72,6 +89,31 @@ type ServerSettingsChanges struct {
 	VersionsMaxAgeDays   *int      `json:"versionsMaxAgeDays" required:"false" minimum:"0" maximum:"3650" doc:"Days earlier versions are kept; 0 for no age limit"`
 	VersionsMaxPerFile   *int      `json:"versionsMaxPerFile" required:"false" minimum:"0" maximum:"10000" doc:"Most earlier versions kept per file; 0 for no count limit"`
 	FederationEnabled    *bool     `json:"federationEnabled" required:"false" doc:"Share with people on trusted servers that support Open Cloud Mesh; needs publicUrl in the server config"`
+	SMTPHost             *string   `json:"smtpHost" required:"false" doc:"Mail server for emails; empty sends none"`
+	SMTPPort             *int      `json:"smtpPort" required:"false" minimum:"0" maximum:"65535" doc:"Mail server port; 0 picks the usual port for the security"`
+	SMTPUsername         *string   `json:"smtpUsername" required:"false" doc:"Mail server login; empty skips logging in"`
+	SMTPPassword         *string   `json:"smtpPassword" required:"false" doc:"Mail server password; empty removes it"`
+	SMTPFrom             *string   `json:"smtpFrom" required:"false" doc:"Sender address, such as Polder <polder@example.com>"`
+	SMTPSecurity         *string   `json:"smtpSecurity" required:"false" enum:"starttls,tls,none" doc:"How the connection to the mail server is secured"`
+}
+
+func (c ServerSettingsChanges) changesMail() bool {
+	return c.SMTPHost != nil || c.SMTPPort != nil || c.SMTPUsername != nil || c.SMTPPassword != nil || c.SMTPFrom != nil || c.SMTPSecurity != nil
+}
+
+func (c ServerSettingsChanges) validateMail() error {
+	if c.SMTPPort != nil && (*c.SMTPPort < 0 || *c.SMTPPort > maxSMTPPort) {
+		return apperr.Invalid("mail server port must be between 0 and %d", maxSMTPPort)
+	}
+	if c.SMTPSecurity != nil && !mail.ValidSecurity(*c.SMTPSecurity) {
+		return apperr.Invalid("mail security must be %q, %q or %q", mail.SecurityStartTLS, mail.SecurityTLS, mail.SecurityNone)
+	}
+	if c.SMTPFrom != nil && strings.TrimSpace(*c.SMTPFrom) != "" {
+		if _, err := netmail.ParseAddress(strings.TrimSpace(*c.SMTPFrom)); err != nil {
+			return apperr.Invalid("%q is not an email address", *c.SMTPFrom)
+		}
+	}
+	return nil
 }
 
 func (c ServerSettingsChanges) validate() error {
@@ -99,19 +141,70 @@ func (c ServerSettingsChanges) validate() error {
 	if c.AccentColor != nil && *c.AccentColor != "" && !accentColorPattern.MatchString(*c.AccentColor) {
 		return apperr.Invalid("%q is not a color as #RRGGBB", *c.AccentColor)
 	}
+	if err := c.validateMail(); err != nil {
+		return err
+	}
 	return ValidateVersionLimits(c.VersionsKeepAllHours, c.VersionsMaxAgeDays, c.VersionsMaxPerFile)
 }
 
 type Store struct {
-	db       *sql.DB
-	defaults ServerSettings
+	db         *sql.DB
+	defaults   ServerSettings
+	configured mail.Options
 }
 
 func NewStore(db *sql.DB, defaults ServerSettings) *Store {
 	return &Store{db: db, defaults: defaults}
 }
 
+func (s *Store) UseConfiguredMail(options mail.Options) {
+	s.configured = options
+}
+
+func (s *Store) mailManagedByConfig() bool {
+	return s.configured.Host != ""
+}
+
+func (s *Store) MailOptions(ctx context.Context) (mail.Options, error) {
+	if s.mailManagedByConfig() {
+		return s.configured, nil
+	}
+	current, err := s.Get(ctx)
+	if err != nil {
+		return mail.Options{}, err
+	}
+	return mail.Options{
+		Host:     current.SMTPHost,
+		Port:     current.SMTPPort,
+		Username: current.SMTPUsername,
+		Password: current.smtpPassword,
+		From:     current.SMTPFrom,
+		Security: current.SMTPSecurity,
+	}, nil
+}
+
 func (s *Store) Get(ctx context.Context) (ServerSettings, error) {
+	current, err := s.stored(ctx)
+	if err != nil {
+		return ServerSettings{}, err
+	}
+	if s.mailManagedByConfig() {
+		current.SMTPHost = s.configured.Host
+		current.SMTPPort = s.configured.Port
+		current.SMTPUsername = s.configured.Username
+		current.smtpPassword = s.configured.Password
+		current.SMTPFrom = s.configured.From
+		current.SMTPSecurity = s.configured.Security
+		current.SMTPManagedByConfig = true
+	}
+	if current.SMTPSecurity == "" {
+		current.SMTPSecurity = mail.SecurityStartTLS
+	}
+	current.SMTPPasswordSet = current.smtpPassword != ""
+	return current, nil
+}
+
+func (s *Store) stored(ctx context.Context) (ServerSettings, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT name, value FROM server_settings`)
 	if err != nil {
 		return ServerSettings{}, err
@@ -176,6 +269,8 @@ func (s *Store) Get(ctx context.Context) (ServerSettings, error) {
 			if enabled, err := strconv.ParseBool(value); err == nil {
 				current.FederationEnabled = enabled
 			}
+		default:
+			readMailSetting(&current, name, value)
 		}
 	}
 	return current, rows.Err()
@@ -185,7 +280,11 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	if err := changes.validate(); err != nil {
 		return ServerSettings{}, err
 	}
+	if changes.changesMail() && s.mailManagedByConfig() {
+		return ServerSettings{}, apperr.Invalid("the mail server is set in the server config, so it can't be changed here")
+	}
 	values := map[string]string{}
+	writeMailSettings(values, changes)
 	if changes.TrashRetentionDays != nil {
 		values[trashRetentionDaysKey] = strconv.Itoa(*changes.TrashRetentionDays)
 	}
@@ -233,6 +332,45 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 		return ServerSettings{}, err
 	}
 	return s.Get(ctx)
+}
+
+func readMailSetting(current *ServerSettings, name, value string) {
+	switch name {
+	case smtpHostKey:
+		current.SMTPHost = value
+	case smtpPortKey:
+		if port, err := strconv.Atoi(value); err == nil {
+			current.SMTPPort = port
+		}
+	case smtpUsernameKey:
+		current.SMTPUsername = value
+	case smtpPasswordKey:
+		current.smtpPassword = value
+	case smtpFromKey:
+		current.SMTPFrom = value
+	case smtpSecurityKey:
+		current.SMTPSecurity = value
+	}
+}
+
+func writeMailSettings(values map[string]string, changes ServerSettingsChanges) {
+	texts := map[string]*string{
+		smtpHostKey:     changes.SMTPHost,
+		smtpUsernameKey: changes.SMTPUsername,
+		smtpFromKey:     changes.SMTPFrom,
+		smtpSecurityKey: changes.SMTPSecurity,
+	}
+	for key, value := range texts {
+		if value != nil {
+			values[key] = strings.TrimSpace(*value)
+		}
+	}
+	if changes.SMTPPassword != nil {
+		values[smtpPasswordKey] = *changes.SMTPPassword
+	}
+	if changes.SMTPPort != nil {
+		values[smtpPortKey] = strconv.Itoa(*changes.SMTPPort)
+	}
 }
 
 func (s *Store) save(ctx context.Context, values map[string]string) error {

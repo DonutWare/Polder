@@ -182,6 +182,7 @@ enum AdminPage {
   overview,
   users,
   branding,
+  mail,
   logs,
   server;
 

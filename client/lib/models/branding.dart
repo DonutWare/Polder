@@ -27,6 +27,7 @@ abstract class Branding with _$Branding {
     @ColorConverter() Color? accent,
     ServerImage? icon,
     @Default(<ServerImage>[]) List<ServerImage> backgrounds,
+    @Default(false) bool passwordReset,
   }) = _Branding;
 
   factory Branding.fromJson(Map<String, dynamic> json) => _$BrandingFromJson(json);

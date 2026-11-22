@@ -276,13 +276,18 @@
           "name": {
             "description": "Name to show for this server; empty means the app's own name",
             "type": "string"
+          },
+          "passwordReset": {
+            "description": "Whether a forgotten password can be reset by email",
+            "type": "boolean"
           }
         },
         "required": [
           "name",
           "message",
           "accentColor",
-          "backgrounds"
+          "backgrounds",
+          "passwordReset"
         ],
         "type": "object"
       },
@@ -985,6 +990,39 @@
           "accessToken",
           "accessTokenTtl",
           "readOnly"
+        ],
+        "type": "object"
+      },
+      "EmailPreferences": {
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "description": "Whether the server can send email at all",
+            "type": "boolean"
+          },
+          "hasEmail": {
+            "description": "Whether the user has an email address to send to",
+            "type": "boolean"
+          },
+          "quota": {
+            "description": "Storage running out",
+            "type": "boolean"
+          },
+          "security": {
+            "description": "New sign-ins and changes to the email address",
+            "type": "boolean"
+          },
+          "shares": {
+            "description": "Files and folders shared with the user",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hasEmail",
+          "enabled",
+          "security",
+          "quota",
+          "shares"
         ],
         "type": "object"
       },
@@ -3225,6 +3263,10 @@
       "NewUser": {
         "additionalProperties": false,
         "properties": {
+          "email": {
+            "description": "Where the welcome email and later emails go; the user can change it",
+            "type": "string"
+          },
           "password": {
             "type": "string"
           },
@@ -3499,6 +3541,46 @@
         ],
         "type": "object"
       },
+      "PasswordResetCodeRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "The code from the reset email, with or without its dash",
+            "maxLength": 32,
+            "type": "string"
+          },
+          "login": {
+            "description": "The username or email address the code was asked for",
+            "maxLength": 254,
+            "type": "string"
+          },
+          "password": {
+            "description": "The new password",
+            "maxLength": 1024,
+            "type": "string"
+          }
+        },
+        "required": [
+          "login",
+          "code",
+          "password"
+        ],
+        "type": "object"
+      },
+      "PasswordResetRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "login": {
+            "description": "The username or email address of the account",
+            "maxLength": 254,
+            "type": "string"
+          }
+        },
+        "required": [
+          "login"
+        ],
+        "type": "object"
+      },
       "PathRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3528,6 +3610,29 @@
         "required": [
           "email",
           "self"
+        ],
+        "type": "object"
+      },
+      "Preferences": {
+        "additionalProperties": false,
+        "properties": {
+          "quota": {
+            "description": "Storage running out",
+            "type": "boolean"
+          },
+          "security": {
+            "description": "New sign-ins and changes to the email address",
+            "type": "boolean"
+          },
+          "shares": {
+            "description": "Files and folders shared with the user",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "security",
+          "quota",
+          "shares"
         ],
         "type": "object"
       },
@@ -4179,6 +4284,40 @@
             "description": "Read the text inside files so search can find it",
             "type": "boolean"
           },
+          "smtpFrom": {
+            "description": "Sender address, such as Polder \u003cpolder@example.com\u003e",
+            "type": "string"
+          },
+          "smtpHost": {
+            "description": "Mail server for emails; empty sends none",
+            "type": "string"
+          },
+          "smtpManagedByConfig": {
+            "description": "The mail server is set in the server config or environment, so it can't be changed here",
+            "type": "boolean"
+          },
+          "smtpPasswordSet": {
+            "description": "Whether a mail server password is stored; the password itself is never shown",
+            "type": "boolean"
+          },
+          "smtpPort": {
+            "description": "Mail server port; 0 picks 587, 465 with tls or 25 with none",
+            "format": "int64",
+            "type": "integer"
+          },
+          "smtpSecurity": {
+            "description": "How the connection to the mail server is secured",
+            "enum": [
+              "starttls",
+              "tls",
+              "none"
+            ],
+            "type": "string"
+          },
+          "smtpUsername": {
+            "description": "Mail server login; empty skips logging in",
+            "type": "string"
+          },
           "trashEnabled": {
             "description": "Move deleted items to the trash; off deletes them permanently for everyone",
             "type": "boolean"
@@ -4226,7 +4365,14 @@
           "versionsKeepAllHours",
           "versionsMaxAgeDays",
           "versionsMaxPerFile",
-          "federationEnabled"
+          "federationEnabled",
+          "smtpHost",
+          "smtpPort",
+          "smtpUsername",
+          "smtpPasswordSet",
+          "smtpFrom",
+          "smtpSecurity",
+          "smtpManagedByConfig"
         ],
         "type": "object"
       },
@@ -4274,6 +4420,44 @@
             "description": "Read the text inside files so search can find it",
             "nullable": true,
             "type": "boolean"
+          },
+          "smtpFrom": {
+            "description": "Sender address, such as Polder \u003cpolder@example.com\u003e",
+            "nullable": true,
+            "type": "string"
+          },
+          "smtpHost": {
+            "description": "Mail server for emails; empty sends none",
+            "nullable": true,
+            "type": "string"
+          },
+          "smtpPassword": {
+            "description": "Mail server password; empty removes it",
+            "nullable": true,
+            "type": "string"
+          },
+          "smtpPort": {
+            "description": "Mail server port; 0 picks the usual port for the security",
+            "format": "int64",
+            "maximum": 65535,
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "smtpSecurity": {
+            "description": "How the connection to the mail server is secured",
+            "enum": [
+              "starttls",
+              "tls",
+              "none"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "smtpUsername": {
+            "description": "Mail server login; empty skips logging in",
+            "nullable": true,
+            "type": "string"
           },
           "trashEnabled": {
             "description": "Move deleted items to the trash; off deletes them permanently for everyone",
@@ -4709,6 +4893,17 @@
         "required": [
           "name"
         ],
+        "type": "object"
+      },
+      "TestEmailRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "to": {
+            "description": "Where to send the test; empty sends it to your own email address",
+            "maxLength": 254,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "TextSpan": {
@@ -5636,6 +5831,106 @@
           }
         ],
         "summary": "Replace the logged-in user's icon with the image in the request body",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/email-notifications": {
+      "get": {
+        "operationId": "getEmailPreferences",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailPreferences"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Which emails the logged-in user gets",
+        "tags": [
+          "account"
+        ]
+      },
+      "put": {
+        "operationId": "setEmailPreferences",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Preferences"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailPreferences"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Choose which emails the logged-in user gets; password emails are always sent",
         "tags": [
           "account"
         ]
@@ -6764,6 +7059,65 @@
         ]
       }
     },
+    "/api/v1/admin/mail/test": {
+      "post": {
+        "operationId": "sendTestEmail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a test email with the current mail server settings",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/admin/previews/regenerate": {
       "post": {
         "operationId": "regeneratePreviews",
@@ -7420,6 +7774,74 @@
           }
         ],
         "summary": "The logged-in user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password-reset": {
+      "post": {
+        "operationId": "requestPasswordReset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Email a code to choose a new password, if the account exists and has an email address",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/password-reset/code": {
+      "post": {
+        "operationId": "resetPasswordWithCode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Choose a new password with the code from a reset email",
         "tags": [
           "auth"
         ]

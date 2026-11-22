@@ -31,7 +31,7 @@ type Session struct {
 }
 
 func (s *Sessions) Create(ctx context.Context, userID int64, deviceName string) (Session, string, error) {
-	token, tokenHash := newRefreshToken()
+	token, tokenHash := newSecretToken()
 	now := time.Now()
 	var id int64
 	err := s.db.QueryRowContext(ctx,
@@ -81,7 +81,7 @@ func (s *Sessions) rotateOnce(ctx context.Context, refreshToken, deviceName stri
 	if deviceName != "" {
 		session.DeviceName = deviceName
 	}
-	token, tokenHash := newRefreshToken()
+	token, tokenHash := newSecretToken()
 	now := time.Now()
 	result, err := tx.ExecContext(ctx,
 		`UPDATE sessions SET token_hash = $1, device_name = $2, last_used_at = $3, expires_at = $4 WHERE id = $5 AND token_hash = $6`,
@@ -169,7 +169,7 @@ func (s *Sessions) RevokeOthersForUser(ctx context.Context, userID, keepID int64
 	return err
 }
 
-func newRefreshToken() (token, tokenHash string) {
+func newSecretToken() (token, tokenHash string) {
 	buffer := make([]byte, 32)
 	_, _ = rand.Read(buffer)
 	token = base64.RawURLEncoding.EncodeToString(buffer)

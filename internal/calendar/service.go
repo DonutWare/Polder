@@ -28,7 +28,7 @@ type Publisher interface {
 }
 
 type Mailer interface {
-	Configured() bool
+	Configured(ctx context.Context) bool
 	Send(ctx context.Context, message mail.Message) error
 }
 

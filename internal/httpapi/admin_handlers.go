@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"polder-server/internal/apperr"
+	"polder-server/internal/emails"
 	"polder-server/internal/logging"
 	"polder-server/internal/settings"
 	"polder-server/internal/users"
@@ -39,6 +40,7 @@ func (a *API) createUser(ctx context.Context, input *jsonBody[users.NewUser]) (*
 		return nil, err
 	}
 	usersLog.Info("user created", "user", created.Username, "role", created.Role, "by", currentUser(ctx).Username)
+	a.emails.AccountCreated(created)
 	return respond(created), nil
 }
 
@@ -54,6 +56,12 @@ func (a *API) updateUser(ctx context.Context, input *updateUserInput) (*jsonBody
 			return nil, err
 		}
 		usersLog.Info("user logged out everywhere", "user", updated.Username)
+	}
+	if changes.Password != nil {
+		a.emails.PasswordChanged(updated, emails.PasswordChange{ByAdministrator: updated.ID != currentUser(ctx).ID})
+	}
+	if changes.QuotaBytes != nil {
+		a.emails.QuotaChanged(updated.ID)
 	}
 	return respond(updated), nil
 }

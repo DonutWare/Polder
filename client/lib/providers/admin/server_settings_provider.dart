@@ -59,6 +59,25 @@ class ServerSettingsNotifier extends AsyncNotifier<ServerSettings> {
   Future<void> setFederationEnabled(bool enabled) =>
       _update(() => ref.read(polderApiProvider).updateServerSettings(federationEnabled: enabled));
 
+  Future<void> setSmtpHost(String host) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpHost: host));
+
+  Future<void> setSmtpPort(int port) => _update(() => ref.read(polderApiProvider).updateServerSettings(smtpPort: port));
+
+  Future<void> setSmtpSecurity(MailSecurity security) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpSecurity: security));
+
+  Future<void> setSmtpUsername(String username) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpUsername: username));
+
+  Future<void> setSmtpPassword(String password) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpPassword: password));
+
+  Future<void> setSmtpFrom(String from) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpFrom: from));
+
+  Future<void> sendTestEmail({String? to}) => ref.read(polderApiProvider).sendTestEmail(to: to);
+
   Future<void> _update(Future<ServerSettings> Function() change) async {
     state = AsyncData(await change());
     ref.invalidate(textExtractionStatusProvider);

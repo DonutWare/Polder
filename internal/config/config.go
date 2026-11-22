@@ -181,7 +181,7 @@ func (cfg *Config) mergeEnvironment() error {
 		}
 		cfg.WebDAVAllowInsecure = allow
 	}
-	if value, ok := os.LookupEnv("POLDER_SMTP_PORT"); ok {
+	if value, ok := os.LookupEnv("POLDER_SMTP_PORT"); ok && value != "" {
 		port, err := strconv.Atoi(value)
 		if err != nil {
 			return fmt.Errorf("POLDER_SMTP_PORT: %w", err)

@@ -41,6 +41,7 @@ type Options struct {
 type Attachment struct {
 	ContentType string
 	Filename    string
+	ContentID   string
 	Content     []byte
 }
 
@@ -49,6 +50,8 @@ type Message struct {
 	ReplyTo     string
 	Subject     string
 	Text        string
+	HTML        string
+	Inline      []Attachment
 	Calendar    []byte
 	Method      string
 	Attachments []Attachment
@@ -202,28 +205,75 @@ func compose(from, to *mail.Address, message Message) ([]byte, error) {
 }
 
 func writeTextParts(writer *multipart.Writer, message Message) error {
-	var alternative bytes.Buffer
-	inner := multipart.NewWriter(&alternative)
-	if err := writePart(inner, "text/plain; charset=utf-8", "", []byte(message.Text)); err != nil {
-		return err
-	}
-	if len(message.Calendar) > 0 {
-		contentType := "text/calendar; charset=utf-8; method=" + message.Method
-		if err := writePart(inner, contentType, "", message.Calendar); err != nil {
-			return err
-		}
-	}
-	if err := inner.Close(); err != nil {
+	content, contentType, err := bodyParts(message)
+	if err != nil {
 		return err
 	}
 	header := textproto.MIMEHeader{}
-	header.Set("Content-Type", "multipart/alternative; boundary="+inner.Boundary())
+	header.Set("Content-Type", contentType)
 	part, err := writer.CreatePart(header)
 	if err != nil {
 		return err
 	}
-	_, err = part.Write(alternative.Bytes())
+	_, err = part.Write(content)
 	return err
+}
+
+func bodyParts(message Message) ([]byte, string, error) {
+	alternative, alternativeType, err := alternativeParts(message)
+	if err != nil || len(message.Inline) == 0 {
+		return alternative, alternativeType, err
+	}
+	var related bytes.Buffer
+	inner := multipart.NewWriter(&related)
+	header := textproto.MIMEHeader{}
+	header.Set("Content-Type", alternativeType)
+	part, err := inner.CreatePart(header)
+	if err != nil {
+		return nil, "", err
+	}
+	if _, err := part.Write(alternative); err != nil {
+		return nil, "", err
+	}
+	for _, image := range message.Inline {
+		if err := writeInline(inner, image); err != nil {
+			return nil, "", err
+		}
+	}
+	if err := inner.Close(); err != nil {
+		return nil, "", err
+	}
+	return related.Bytes(), `multipart/related; type="multipart/alternative"; boundary=` + inner.Boundary(), nil
+}
+
+func alternativeParts(message Message) ([]byte, string, error) {
+	var alternative bytes.Buffer
+	inner := multipart.NewWriter(&alternative)
+	if err := writePart(inner, "text/plain; charset=utf-8", "", []byte(message.Text)); err != nil {
+		return nil, "", err
+	}
+	if message.HTML != "" {
+		if err := writePart(inner, "text/html; charset=utf-8", "", []byte(message.HTML)); err != nil {
+			return nil, "", err
+		}
+	}
+	if len(message.Calendar) > 0 {
+		contentType := "text/calendar; charset=utf-8; method=" + message.Method
+		if err := writePart(inner, contentType, "", message.Calendar); err != nil {
+			return nil, "", err
+		}
+	}
+	if err := inner.Close(); err != nil {
+		return nil, "", err
+	}
+	return alternative.Bytes(), "multipart/alternative; boundary=" + inner.Boundary(), nil
+}
+
+func writeInline(writer *multipart.Writer, image Attachment) error {
+	header := textproto.MIMEHeader{}
+	header.Set("Content-ID", "<"+image.ContentID+">")
+	disposition := mime.FormatMediaType("inline", map[string]string{"filename": image.Filename})
+	return writePartWithHeader(writer, header, image.ContentType, disposition, image.Content)
 }
 
 func writeAttachment(writer *multipart.Writer, attachment Attachment) error {
@@ -232,7 +282,10 @@ func writeAttachment(writer *multipart.Writer, attachment Attachment) error {
 }
 
 func writePart(writer *multipart.Writer, contentType, disposition string, content []byte) error {
-	header := textproto.MIMEHeader{}
+	return writePartWithHeader(writer, textproto.MIMEHeader{}, contentType, disposition, content)
+}
+
+func writePartWithHeader(writer *multipart.Writer, header textproto.MIMEHeader, contentType, disposition string, content []byte) error {
 	header.Set("Content-Type", contentType)
 	header.Set("Content-Transfer-Encoding", "base64")
 	if disposition != "" {
