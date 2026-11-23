@@ -129,6 +129,20 @@
         },
         "type": "object"
       },
+      "ApproveLoginInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "number": {
+            "description": "The number the new device shows",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "number"
+        ],
+        "type": "object"
+      },
       "Attendee": {
         "additionalProperties": false,
         "properties": {
@@ -181,6 +195,249 @@
         },
         "required": [
           "email"
+        ],
+        "type": "object"
+      },
+      "AuthProvider": {
+        "additionalProperties": false,
+        "properties": {
+          "allowSignup": {
+            "description": "Create an account for people who sign in for the first time",
+            "type": "boolean"
+          },
+          "callbackUrl": {
+            "description": "Register this at the provider as redirect URI",
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecretSet": {
+            "description": "Whether a client secret is stored; the secret itself is never shown",
+            "type": "boolean"
+          },
+          "enabled": {
+            "description": "Shown on the login screen",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Used in the callback URL",
+            "type": "string"
+          },
+          "issuer": {
+            "description": "The OpenID Connect issuer URL; empty for GitHub",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "oidc",
+              "github"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "description": "Shown on the sign-in button",
+            "type": "string"
+          },
+          "linkByEmail": {
+            "description": "Sign people in to the existing account with the same verified email address",
+            "type": "boolean"
+          },
+          "linkedUsers": {
+            "description": "Accounts linked to this provider",
+            "format": "int64",
+            "type": "integer"
+          },
+          "managedByConfig": {
+            "description": "Set in the server config, so it can't be changed here",
+            "type": "boolean"
+          },
+          "position": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "preset": {
+            "type": "string"
+          },
+          "scopes": {
+            "description": "Space-separated scopes asked for",
+            "type": "string"
+          },
+          "usernameClaim": {
+            "description": "Claim new accounts take their username from",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "preset",
+          "label",
+          "issuer",
+          "clientId",
+          "clientSecretSet",
+          "scopes",
+          "usernameClaim",
+          "allowSignup",
+          "linkByEmail",
+          "enabled",
+          "position",
+          "managedByConfig",
+          "callbackUrl",
+          "linkedUsers"
+        ],
+        "type": "object"
+      },
+      "AuthProviderChanges": {
+        "additionalProperties": false,
+        "properties": {
+          "allowSignup": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "clientId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "clientSecret": {
+            "description": "A new client secret; absent keeps the stored one",
+            "nullable": true,
+            "type": "string"
+          },
+          "enabled": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "issuer": {
+            "nullable": true,
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 64,
+            "nullable": true,
+            "type": "string"
+          },
+          "linkByEmail": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "scopes": {
+            "nullable": true,
+            "type": "string"
+          },
+          "usernameClaim": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AuthProviderOption": {
+        "additionalProperties": false,
+        "properties": {
+          "icon": {
+            "description": "The preset, for the apps to pick an icon",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "icon"
+        ],
+        "type": "object"
+      },
+      "AuthProviderPreset": {
+        "additionalProperties": false,
+        "properties": {
+          "allowSignup": {
+            "description": "Whether new accounts are created by default",
+            "type": "boolean"
+          },
+          "fields": {
+            "description": "What the administrator fills in besides the client ID and secret",
+            "items": {
+              "enum": [
+                "serverUrl",
+                "realm",
+                "slug",
+                "tenantId",
+                "issuer"
+              ],
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "issuerTemplate": {
+            "description": "How the issuer URL is built from the fields, such as {serverUrl}/realms/{realm}",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "oidc",
+              "github"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "description": "Name for the sign-in button",
+            "type": "string"
+          },
+          "linkByEmail": {
+            "description": "Whether existing accounts are matched by verified email address by default",
+            "type": "boolean"
+          },
+          "public": {
+            "description": "Anyone can have an account at this provider, so new accounts are off by default",
+            "type": "boolean"
+          },
+          "scopes": {
+            "type": "string"
+          },
+          "setupHint": {
+            "description": "Where to register Polder at the provider",
+            "type": "string"
+          },
+          "usernameClaim": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "fields",
+          "scopes",
+          "usernameClaim",
+          "allowSignup",
+          "linkByEmail",
+          "public",
+          "setupHint"
+        ],
+        "type": "object"
+      },
+      "AuthProviderTest": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
         ],
         "type": "object"
       },
@@ -257,6 +514,14 @@
             "description": "Default accent color as #RRGGBB; empty means the app's own default",
             "type": "string"
           },
+          "authProviders": {
+            "description": "Single sign-on providers to offer on the login screen, in order",
+            "items": {
+              "$ref": "#/components/schemas/AuthProviderOption"
+            },
+            "nullable": true,
+            "type": "array"
+          },
           "backgrounds": {
             "description": "The login screen's backgrounds, shown in turn",
             "items": {
@@ -287,7 +552,8 @@
           "message",
           "accentColor",
           "backgrounds",
-          "passwordReset"
+          "passwordReset",
+          "authProviders"
         ],
         "type": "object"
       },
@@ -750,6 +1016,24 @@
         ],
         "type": "object"
       },
+      "ConfirmLinkRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "The code the app received on its redirect URI",
+            "type": "string"
+          },
+          "codeVerifier": {
+            "description": "The PKCE verifier the challenge was made from",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "codeVerifier"
+        ],
+        "type": "object"
+      },
       "Contact": {
         "additionalProperties": false,
         "properties": {
@@ -841,6 +1125,76 @@
         "required": [
           "username",
           "password"
+        ],
+        "type": "object"
+      },
+      "DeviceLoginRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "challenge": {
+            "description": "Instead of the authenticator code: the challenge from the two_factor_required answer",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "Name of the device the session is for; shown when approving",
+            "type": "string"
+          },
+          "username": {
+            "description": "Sign in without a password: a signed-in device of this account approves",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DeviceLoginResult": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              "expired",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/TokenPair",
+            "description": "Sent once, with the first approved answer"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "DeviceLoginStart": {
+        "additionalProperties": false,
+        "properties": {
+          "expiresIn": {
+            "description": "Seconds until the request expires",
+            "format": "int64",
+            "type": "integer"
+          },
+          "number": {
+            "description": "Show this; the approving device has to type it",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pollToken": {
+            "description": "Send this when asking for the status; only the new device knows it",
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "requestId",
+          "pollToken",
+          "number",
+          "expiresIn"
         ],
         "type": "object"
       },
@@ -1137,7 +1491,7 @@
         "additionalProperties": false,
         "properties": {
           "current": {
-            "description": "The server's current entry, sent with conflict and already_exists errors"
+            "description": "The server's current entry, sent with conflict and already_exists errors; the sign-in challenge with two_factor_required"
           },
           "error": {
             "$ref": "#/components/schemas/ErrorDetail"
@@ -1558,6 +1912,9 @@
           "entry": {
             "$ref": "#/components/schemas/LogEntry"
           },
+          "loginRequest": {
+            "$ref": "#/components/schemas/LoginRequest"
+          },
           "message": {
             "type": "string"
           },
@@ -1597,7 +1954,9 @@
               "files.changed",
               "calendar.changed",
               "calendar.reminder",
-              "notification.created"
+              "notification.created",
+              "login.requested",
+              "login.resolved"
             ],
             "type": "string"
           },
@@ -2295,6 +2654,37 @@
         },
         "type": "object"
       },
+      "LinkIdentityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "codeChallenge": {
+            "description": "PKCE S256 challenge of a verifier the app keeps",
+            "type": "string"
+          },
+          "redirectUri": {
+            "description": "Where the app waits for the result; it gets code=\u003ccode\u003e for POST /account/identities/confirm, or error=\u003creason\u003e",
+            "type": "string"
+          }
+        },
+        "required": [
+          "redirectUri",
+          "codeChallenge"
+        ],
+        "type": "object"
+      },
+      "LinkIdentityStart": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "description": "Open this in a browser to sign in at the provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
       "LinkInfo": {
         "additionalProperties": false,
         "properties": {
@@ -2461,6 +2851,53 @@
           "expiresAt",
           "info",
           "root"
+        ],
+        "type": "object"
+      },
+      "LinkedIdentity": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "description": "The address the provider gave when the account was linked",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "preset": {
+            "type": "string"
+          },
+          "providerId": {
+            "type": "string"
+          },
+          "providerLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "providerId",
+          "providerLabel",
+          "preset",
+          "email",
+          "createdAt"
+        ],
+        "type": "object"
+      },
+      "LinkedProvider": {
+        "additionalProperties": false,
+        "properties": {
+          "providerId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "providerId"
         ],
         "type": "object"
       },
@@ -2756,6 +3193,48 @@
         ],
         "type": "object"
       },
+      "LoginRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "description": "IP address the request came from",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "device": {
+            "description": "Name the new device gave itself",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "resolution": {
+            "description": "How it ended, with login.resolved",
+            "enum": [
+              "approved",
+              "denied",
+              "expired",
+              "cancelled"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "device",
+          "address",
+          "createdAt",
+          "expiresAt"
+        ],
+        "type": "object"
+      },
       "Manifest": {
         "additionalProperties": false,
         "properties": {
@@ -3042,6 +3521,68 @@
           "readOnly",
           "createdAt",
           "lastUsedAddress"
+        ],
+        "type": "object"
+      },
+      "NewAuthProvider": {
+        "additionalProperties": false,
+        "properties": {
+          "allowSignup": {
+            "description": "The preset's default when absent",
+            "type": "boolean"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "clientSecret": {
+            "type": "string"
+          },
+          "issuer": {
+            "description": "Issuer URL for a generic OpenID Connect provider",
+            "type": "string"
+          },
+          "label": {
+            "description": "Shown on the sign-in button; the preset's name when empty",
+            "maxLength": 64,
+            "type": "string"
+          },
+          "linkByEmail": {
+            "description": "The preset's default when absent",
+            "type": "boolean"
+          },
+          "preset": {
+            "description": "One of the presets",
+            "type": "string"
+          },
+          "realm": {
+            "description": "Keycloak realm",
+            "type": "string"
+          },
+          "scopes": {
+            "description": "Space-separated scopes; the preset's when empty",
+            "type": "string"
+          },
+          "serverUrl": {
+            "description": "Where a self-hosted provider runs",
+            "type": "string"
+          },
+          "slug": {
+            "description": "Authentik application slug",
+            "type": "string"
+          },
+          "tenantId": {
+            "description": "Microsoft Entra tenant ID, or common or organizations",
+            "type": "string"
+          },
+          "usernameClaim": {
+            "description": "The preset's when empty",
+            "type": "string"
+          }
+        },
+        "required": [
+          "preset",
+          "clientId",
+          "clientSecret"
         ],
         "type": "object"
       },
@@ -3613,6 +4154,18 @@
         ],
         "type": "object"
       },
+      "PollTokenBody": {
+        "additionalProperties": false,
+        "properties": {
+          "pollToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "pollToken"
+        ],
+        "type": "object"
+      },
       "Preferences": {
         "additionalProperties": false,
         "properties": {
@@ -3681,6 +4234,23 @@
           "displayName",
           "email",
           "address"
+        ],
+        "type": "object"
+      },
+      "ProviderOrder": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "description": "Every provider id, in the order the login screen shows them",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
         ],
         "type": "object"
       },
@@ -3832,6 +4402,23 @@
         "required": [
           "kind",
           "id"
+        ],
+        "type": "object"
+      },
+      "RecoveryCodes": {
+        "additionalProperties": false,
+        "properties": {
+          "codes": {
+            "description": "One-time codes to sign in with when the authenticator app is lost; shown only now",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "codes"
         ],
         "type": "object"
       },
@@ -4079,6 +4666,31 @@
         ],
         "type": "object"
       },
+      "SecondFactorRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "challenge": {
+            "description": "The challenge from the two_factor_required answer to the login",
+            "type": "string"
+          },
+          "code": {
+            "description": "The six-digit code from the authenticator app",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "Name of the device the session is for",
+            "type": "string"
+          },
+          "recoveryCode": {
+            "description": "One of the recovery codes, instead of a code from the app",
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge"
+        ],
+        "type": "object"
+      },
       "Server": {
         "additionalProperties": false,
         "properties": {
@@ -4280,6 +4892,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "requireTwoFactor": {
+            "description": "Everyone who signs in with a password must set up two-factor authentication",
+            "type": "boolean"
+          },
           "searchContentEnabled": {
             "description": "Read the text inside files so search can find it",
             "type": "boolean"
@@ -4324,6 +4940,11 @@
           },
           "trashRetentionDays": {
             "description": "Days trashed items are kept before they're deleted permanently; 0 keeps them forever. Users can only choose less",
+            "format": "int64",
+            "type": "integer"
+          },
+          "twoFactorGraceDays": {
+            "description": "Days users get to set up two-factor authentication once it's required",
             "format": "int64",
             "type": "integer"
           },
@@ -4372,7 +4993,9 @@
           "smtpPasswordSet",
           "smtpFrom",
           "smtpSecurity",
-          "smtpManagedByConfig"
+          "smtpManagedByConfig",
+          "requireTwoFactor",
+          "twoFactorGraceDays"
         ],
         "type": "object"
       },
@@ -4415,6 +5038,11 @@
             "minimum": 1,
             "nullable": true,
             "type": "integer"
+          },
+          "requireTwoFactor": {
+            "description": "Everyone who signs in with a password must set up two-factor authentication",
+            "nullable": true,
+            "type": "boolean"
           },
           "searchContentEnabled": {
             "description": "Read the text inside files so search can find it",
@@ -4467,6 +5095,14 @@
           "trashRetentionDays": {
             "description": "Days trashed items are kept; 0 keeps them forever. Users can only choose less",
             "format": "int64",
+            "nullable": true,
+            "type": "integer"
+          },
+          "twoFactorGraceDays": {
+            "description": "Days users get to set up two-factor authentication once it's required; changes apply to new deadlines",
+            "format": "int64",
+            "maximum": 365,
+            "minimum": 0,
             "nullable": true,
             "type": "integer"
           },
@@ -4725,6 +5361,28 @@
             "type": "boolean"
           }
         },
+        "type": "object"
+      },
+      "SsoTokenRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "The code the app received on its redirect URI",
+            "type": "string"
+          },
+          "codeVerifier": {
+            "description": "The PKCE verifier the challenge was made from",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "Name of the device the session is for",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "codeVerifier"
+        ],
         "type": "object"
       },
       "StreamTicket": {
@@ -5115,6 +5773,98 @@
         ],
         "type": "object"
       },
+      "TwoFactorCodeRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "The six-digit code from the authenticator app",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "type": "object"
+      },
+      "TwoFactorPasswordRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "password": {
+            "description": "The account password; accounts without one leave it out",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TwoFactorSettings": {
+        "additionalProperties": false,
+        "properties": {
+          "deadline": {
+            "description": "When it must be set up by",
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "recoveryCodesRemaining": {
+            "description": "Unused recovery codes left",
+            "format": "int64",
+            "type": "integer"
+          },
+          "required": {
+            "description": "Whether the server requires two-factor authentication for this account",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "required",
+          "enabled",
+          "recoveryCodesRemaining"
+        ],
+        "type": "object"
+      },
+      "TwoFactorSetup": {
+        "additionalProperties": false,
+        "properties": {
+          "secret": {
+            "description": "The key to type into an authenticator app, in base32",
+            "type": "string"
+          },
+          "url": {
+            "description": "An otpauth:// link with the same key, to show as a QR code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "secret",
+          "url"
+        ],
+        "type": "object"
+      },
+      "TwoFactorStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "deadline": {
+            "description": "When two-factor authentication must be set up by; absent when it isn't required",
+            "format": "date-time",
+            "type": "string"
+          },
+          "enabled": {
+            "description": "Whether sign-ins with a password also need a code from an authenticator app",
+            "type": "boolean"
+          },
+          "setupRequired": {
+            "description": "The deadline has passed: until two-factor authentication is set up, this session can do nothing else",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled",
+          "setupRequired"
+        ],
+        "type": "object"
+      },
       "UnlockRequest": {
         "additionalProperties": false,
         "properties": {
@@ -5214,6 +5964,10 @@
           "disabled": {
             "type": "boolean"
           },
+          "hasPassword": {
+            "description": "False for accounts that only sign in through a single sign-on provider",
+            "type": "boolean"
+          },
           "historyBytes": {
             "description": "Bytes used by earlier versions of files",
             "format": "int64",
@@ -5238,6 +5992,13 @@
             ],
             "type": "string"
           },
+          "sso": {
+            "description": "Whether the account is linked to a single sign-on provider",
+            "type": "boolean"
+          },
+          "twoFactor": {
+            "$ref": "#/components/schemas/TwoFactorStatus"
+          },
           "usedBytes": {
             "description": "Bytes counted against the quota, including file history",
             "format": "int64",
@@ -5257,7 +6018,10 @@
           "disabled",
           "createdAt",
           "profile",
-          "appearance"
+          "appearance",
+          "twoFactor",
+          "hasPassword",
+          "sso"
         ],
         "type": "object"
       },
@@ -5936,6 +6700,386 @@
         ]
       }
     },
+    "/api/v1/account/identities": {
+      "get": {
+        "operationId": "listLinkedIdentities",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LinkedIdentity"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Single sign-on accounts linked to the logged-in user",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/identities/confirm": {
+      "post": {
+        "operationId": "confirmLinkIdentity",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkedProvider"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Finish linking with the code from the redirect URI and the PKCE verifier",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/identities/{identityID}": {
+      "delete": {
+        "operationId": "unlinkIdentity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "identityID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unlink a single sign-on account",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/identities/{providerID}/link": {
+      "post": {
+        "operationId": "linkIdentity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkIdentityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkIdentityStart"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start linking an account at a provider; open the returned URL in a browser",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/login-requests": {
+      "get": {
+        "operationId": "listLoginRequests",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LoginRequest"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sign-ins on other devices waiting for this account's approval",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/login-requests/{requestID}/approve": {
+      "post": {
+        "operationId": "approveLoginRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveLoginInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a sign-in by typing the number the new device shows; a wrong number refuses it",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/login-requests/{requestID}/deny": {
+      "post": {
+        "operationId": "denyLoginRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Refuse a sign-in on another device",
+        "tags": [
+          "account"
+        ]
+      }
+    },
     "/api/v1/account/password": {
       "put": {
         "operationId": "changePassword",
@@ -6036,6 +7180,269 @@
           }
         ],
         "summary": "Change the logged-in user's name and contact details",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/two-factor": {
+      "get": {
+        "operationId": "getTwoFactor",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorSettings"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Whether two-factor authentication is on for the logged-in user, and whether it's required",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/two-factor/confirm": {
+      "post": {
+        "operationId": "confirmTwoFactorSetup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorCodeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryCodes"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Turn two-factor authentication on with a first code from the app; returns the recovery codes once",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/two-factor/disable": {
+      "post": {
+        "operationId": "disableTwoFactor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Turn two-factor authentication off, unless the server requires it",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/two-factor/recovery-codes": {
+      "post": {
+        "operationId": "regenerateRecoveryCodes",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecoveryCodes"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace the recovery codes; the old ones stop working",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/api/v1/account/two-factor/setup": {
+      "post": {
+        "operationId": "beginTwoFactorSetup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TwoFactorPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TwoFactorSetup"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start setting up two-factor authentication; returns the key for the authenticator app",
         "tags": [
           "account"
         ]
@@ -6179,6 +7586,459 @@
         "summary": "Uploads and downloads in progress",
         "tags": [
           "activity"
+        ]
+      }
+    },
+    "/api/v1/admin/auth-providers": {
+      "get": {
+        "operationId": "listAuthProviders",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuthProvider"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Single sign-on providers",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "createAuthProvider",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewAuthProvider"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProvider"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a single sign-on provider",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/auth-providers/order": {
+      "put": {
+        "operationId": "reorderAuthProviders",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderOrder"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuthProvider"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Choose the order of the sign-in buttons",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/auth-providers/presets": {
+      "get": {
+        "operationId": "listAuthProviderPresets",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuthProviderPreset"
+                  },
+                  "nullable": true,
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Providers that are quick to set up, with what each needs",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/auth-providers/{providerID}": {
+      "delete": {
+        "operationId": "deleteAuthProvider",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a single sign-on provider and every account link to it",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "updateAuthProvider",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthProviderChanges"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProvider"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a single sign-on provider",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/auth-providers/{providerID}/test": {
+      "post": {
+        "operationId": "testAuthProvider",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthProviderTest"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Check that the provider can be reached and is set up right",
+        "tags": [
+          "admin"
         ]
       }
     },
@@ -7658,6 +9518,276 @@
         ]
       }
     },
+    "/api/v1/admin/users/{userID}/two-factor/extend": {
+      "post": {
+        "operationId": "extendUserTwoFactorDeadline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Give a user the full grace period again to set up two-factor authentication",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{userID}/two-factor/reset": {
+      "post": {
+        "operationId": "resetUserTwoFactor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userID",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Turn a user's two-factor authentication off and log them out everywhere, for when they lost their device",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/auth/device-login": {
+      "post": {
+        "operationId": "startDeviceLogin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceLoginStart"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Ask a signed-in device of the account to approve this sign-in",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/device-login/{requestID}/cancel": {
+      "post": {
+        "operationId": "cancelDeviceLogin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PollTokenBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Stop waiting for approval",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/device-login/{requestID}/status": {
+      "post": {
+        "operationId": "getDeviceLoginStatus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "requestID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PollTokenBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceLoginResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Whether the sign-in was approved; the first approved answer carries the token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "operationId": "login",
@@ -7939,6 +10069,236 @@
           }
         ],
         "summary": "Start another session for the logged-in user, such as for a file provider on this device",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/sso/token": {
+      "post": {
+        "operationId": "exchangeSingleSignOnCode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SsoTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPair"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Exchange the code from single sign-on for a token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/sso/{providerID}/authorize": {
+      "get": {
+        "operationId": "startSingleSignOn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Where the app waits for the result: polder://auth, a loopback address or the web app",
+            "explode": false,
+            "in": "query",
+            "name": "redirect_uri",
+            "required": true,
+            "schema": {
+              "description": "Where the app waits for the result: polder://auth, a loopback address or the web app",
+              "type": "string"
+            }
+          },
+          {
+            "description": "PKCE S256 challenge of a verifier the app keeps",
+            "explode": false,
+            "in": "query",
+            "name": "code_challenge",
+            "required": true,
+            "schema": {
+              "description": "PKCE S256 challenge of a verifier the app keeps",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the device the session is for",
+            "explode": false,
+            "in": "query",
+            "name": "device_name",
+            "schema": {
+              "description": "Name of the device the session is for",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Found",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Open in a browser to sign in at a provider; ends on the redirect URI with a code for POST /auth/sso/token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/sso/{providerID}/callback": {
+      "get": {
+        "operationId": "finishSingleSignOn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "providerID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Found",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Where the provider sends the browser back to; redirects to the app",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/two-factor": {
+      "post": {
+        "operationId": "verifyTwoFactor",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecondFactorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPair"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Finish logging in with a code from the authenticator app or a recovery code",
         "tags": [
           "auth"
         ]

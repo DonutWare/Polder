@@ -17,6 +17,14 @@ abstract class ServerImage with _$ServerImage {
 }
 
 @freezed
+abstract class AuthProviderOption with _$AuthProviderOption {
+  const factory AuthProviderOption({required String id, required String label, @Default("") String icon}) =
+      _AuthProviderOption;
+
+  factory AuthProviderOption.fromJson(Map<String, dynamic> json) => _$AuthProviderOptionFromJson(json);
+}
+
+@freezed
 abstract class Branding with _$Branding {
   const Branding._();
 
@@ -28,6 +36,7 @@ abstract class Branding with _$Branding {
     ServerImage? icon,
     @Default(<ServerImage>[]) List<ServerImage> backgrounds,
     @Default(false) bool passwordReset,
+    @Default(<AuthProviderOption>[]) List<AuthProviderOption> authProviders,
   }) = _Branding;
 
   factory Branding.fromJson(Map<String, dynamic> json) => _$BrandingFromJson(json);

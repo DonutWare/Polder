@@ -20,6 +20,7 @@ extension ErrorLocalization on AppLocalizations {
     StorageFullException() => errorStorageFull,
     UnauthorizedException() => errorUnauthorized,
     ForbiddenException() => errorForbidden,
+    ReauthenticationRequiredException() => errorReauthenticationRequired,
     NotFoundException() => errorNotFound,
     ConflictException() => errorConflict,
     AlreadyExistsException() => errorAlreadyExists,

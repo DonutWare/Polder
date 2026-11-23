@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
+import "package:intl/intl.dart";
 
 import "package:polder/models/user.dart";
 import "package:polder/providers/admin/admin_users_provider.dart";
@@ -16,7 +17,7 @@ import "package:polder/widgets/shared/icon_badge.dart";
 import "package:polder/widgets/shared/level_bar.dart";
 import "package:polder/widgets/shared/tag.dart";
 
-enum _UserAction { edit, delete }
+enum _UserAction { edit, resetTwoFactor, extendTwoFactor, delete }
 
 class UserTile extends ConsumerWidget {
   const UserTile({required this.user, super.key});
@@ -41,6 +42,12 @@ class UserTile extends ConsumerWidget {
           Flexible(child: Text(user.username, overflow: TextOverflow.ellipsis)),
           if (user.isAdmin) Tag(text: localized.roleAdmin, color: colors.warning),
           if (user.disabled) Tag(text: localized.disabled, color: theme.colorScheme.error),
+          if (user.twoFactorEnabled) Tag(text: localized.twoFactorTag, color: theme.colorScheme.primary),
+          if (user.twoFactorSetupRequired)
+            Tag(text: localized.twoFactorOverdueTag, color: theme.colorScheme.error)
+          else if (user.twoFactorDue)
+            Tag(text: localized.twoFactorDueTag(_date(context, user.twoFactorDeadline!)), color: colors.warning),
+          if (user.sso) Tag(text: localized.ssoTag, color: theme.colorScheme.tertiary),
         ],
       ),
       subtitle: Column(
@@ -56,6 +63,10 @@ class UserTile extends ConsumerWidget {
         icon: const Icon(IconsaxPlusLinear.more),
         onSelected: (action) => switch (action) {
           _UserAction.edit => showUserFormDialog(context, user: user),
+          _UserAction.resetTwoFactor => _confirmResetTwoFactor(context, ref),
+          _UserAction.extendTwoFactor => context.runWithFeedback(
+            ref.read(adminUsersProvider.notifier).extendTwoFactor(user),
+          ),
           _UserAction.delete => _confirmDelete(context, ref),
         },
         itemBuilder: (context) => [
@@ -63,6 +74,22 @@ class UserTile extends ConsumerWidget {
             value: _UserAction.edit,
             child: ListTile(leading: const Icon(IconsaxPlusLinear.edit_2), title: Text(localized.edit)),
           ),
+          if (user.twoFactorEnabled && !isSelf)
+            PopupMenuItem(
+              value: _UserAction.resetTwoFactor,
+              child: ListTile(
+                leading: const Icon(IconsaxPlusLinear.shield_slash),
+                title: Text(localized.resetTwoFactor),
+              ),
+            ),
+          if (user.twoFactorDue)
+            PopupMenuItem(
+              value: _UserAction.extendTwoFactor,
+              child: ListTile(
+                leading: const Icon(IconsaxPlusLinear.timer_1),
+                title: Text(localized.extendTwoFactorDeadline),
+              ),
+            ),
           if (!isSelf)
             PopupMenuItem(
               value: _UserAction.delete,
@@ -81,6 +108,21 @@ class UserTile extends ConsumerWidget {
     return user.hasQuota
         ? context.localized.quotaUsedOf(used, ByteFormat.format(user.quotaBytes, locale: context.localeName))
         : context.localized.quotaUsedUnlimited(used);
+  }
+
+  String _date(BuildContext context, DateTime date) => DateFormat.yMMMd(context.localeName).format(date.toLocal());
+
+  Future<void> _confirmResetTwoFactor(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: context.localized.resetTwoFactorTitle(user.username),
+      message: context.localized.resetTwoFactorMessage,
+      confirmLabel: context.localized.resetTwoFactor,
+      destructive: true,
+    );
+    if (confirmed && context.mounted) {
+      await context.runWithFeedback(ref.read(adminUsersProvider.notifier).resetTwoFactor(user));
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {

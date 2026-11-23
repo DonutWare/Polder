@@ -79,7 +79,7 @@ func (a *API) davUser(w http.ResponseWriter, r *http.Request) (users.User, auth.
 	keys := []string{"dav:" + address, "dav-user:" + username}
 	if a.limiter.blocked(keys...) {
 		davLog.Warn("WebDAV login refused: too many failed attempts", "user", username, "address", address)
-		dav.WriteError(w, r, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute"))
+		dav.WriteError(w, r, errTooManyAttempts)
 		return users.User{}, auth.AppPassword{}, false
 	}
 	user, password, err := a.auth.AuthenticateAppPassword(r.Context(), username, token, address)

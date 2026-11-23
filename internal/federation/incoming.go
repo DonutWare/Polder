@@ -237,7 +237,7 @@ func (s *Service) receiveShare(ctx context.Context, server Server, payload incom
 		ownerName:     truncate(cleanProvider(firstNonEmpty(payload.OwnerDisplayName, owner.User)), maxRemoteDisplayName),
 		senderCloudID: sender.String(), senderDisplayName: truncate(cleanProvider(payload.SenderDisplayName), maxRemoteDisplayName),
 		name: name, isDir: payload.ResourceType == resourceFolder, webdavURI: webdavURI, secretHash: hashSecret(secret)}
-	row.secretSealed = s.box.seal(secret, row.sealContext())
+	row.secretSealed = s.box.Seal(secret, row.sealContext())
 	if row.id, err = s.insertIncoming(ctx, row); err != nil {
 		return receivedShare{}, err
 	}
@@ -397,7 +397,7 @@ func (s *Service) RemoveIncoming(ctx context.Context, user users.User, id int64)
 }
 
 func (s *Service) notifyOwner(ctx context.Context, row incomingRow, kind, message string) {
-	secret, err := s.box.open(row.secretSealed, row.sealContext())
+	secret, err := s.box.Open(row.secretSealed, row.sealContext())
 	if err != nil {
 		logger.Warn("cannot notify the owner of a federated share", "owner", row.ownerCloudID, "error", err)
 		return

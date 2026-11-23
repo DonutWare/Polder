@@ -264,6 +264,7 @@ type socketMessage struct {
 	Transfer  *activity.LiveTransfer  `json:"transfer"`
 	Transfers []activity.LiveTransfer `json:"transfers"`
 	Entry     *activityEntry          `json:"entry"`
+	Login     *activity.LoginRequest  `json:"loginRequest"`
 }
 
 func (c *client) openEvents() *eventSocket {

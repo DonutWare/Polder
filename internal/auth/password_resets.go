@@ -17,8 +17,8 @@ const (
 	PasswordResetLifetime = time.Hour
 	MaxResetCodeAttempts  = 5
 
-	resetCodeAlphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
-	resetCodeLength   = 8
+	codeAlphabet    = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+	resetCodeLength = 8
 )
 
 type PasswordResets struct {
@@ -31,7 +31,7 @@ func NewPasswordResets(db *sql.DB) *PasswordResets {
 }
 
 func (r *PasswordResets) Issue(ctx context.Context, userID int64) (string, error) {
-	code := newResetCode()
+	code := newCode(resetCodeLength)
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return "", err
@@ -45,7 +45,7 @@ func (r *PasswordResets) Issue(ctx context.Context, userID int64) (string, error
 	if err != nil {
 		return "", err
 	}
-	return FormatResetCode(code), tx.Commit()
+	return formatCode(code), tx.Commit()
 }
 
 func (r *PasswordResets) ConsumeCode(ctx context.Context, userID int64, code string) error {
@@ -59,7 +59,7 @@ func (r *PasswordResets) ConsumeCode(ctx context.Context, userID int64, code str
 	if err != nil {
 		return err
 	}
-	if subtle.ConstantTimeCompare([]byte(hashToken(normalizeResetCode(code))), []byte(codeHash)) != 1 {
+	if subtle.ConstantTimeCompare([]byte(hashToken(normalizeCode(code))), []byte(codeHash)) != 1 {
 		return r.failCode(ctx, id)
 	}
 	return r.forget(ctx, userID)
@@ -84,10 +84,10 @@ func (r *PasswordResets) forget(ctx context.Context, userID int64) error {
 
 var errInvalidResetCode = apperr.Invalid("this code is wrong or has expired")
 
-func newResetCode() string {
-	code := make([]byte, resetCodeLength)
+func newCode(length int) string {
+	code := make([]byte, length)
 	for i := range code {
-		code[i] = resetCodeAlphabet[randomIndex(len(resetCodeAlphabet))]
+		code[i] = codeAlphabet[randomIndex(len(codeAlphabet))]
 	}
 	return string(code)
 }
@@ -103,12 +103,12 @@ func randomIndex(size int) int {
 	}
 }
 
-func FormatResetCode(code string) string {
+func formatCode(code string) string {
 	half := len(code) / 2
 	return code[:half] + "-" + code[half:]
 }
 
-func normalizeResetCode(code string) string {
+func normalizeCode(code string) string {
 	return strings.Map(func(r rune) rune {
 		switch {
 		case r == '-' || r == ' ':

@@ -7,10 +7,12 @@ import "package:polder/models/login_state.dart";
 import "package:polder/providers/login_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/login/widgets/credentials_step.dart";
+import "package:polder/screens/login/widgets/device_approval_step.dart";
 import "package:polder/screens/login/widgets/login_backdrop.dart";
 import "package:polder/screens/login/widgets/login_header.dart";
 import "package:polder/screens/login/widgets/session_ended_notice.dart";
 import "package:polder/screens/login/widgets/server_step.dart";
+import "package:polder/screens/login/widgets/two_factor_step.dart";
 import "package:polder/widgets/shared/loading_indicator.dart";
 
 class LoginScreen extends ConsumerWidget {
@@ -56,6 +58,8 @@ class LoginScreen extends ConsumerWidget {
                               LoginStep.server => const ServerStep(),
                               LoginStep.credentials => const CredentialsStep(creatingAdmin: false),
                               LoginStep.setup => const CredentialsStep(creatingAdmin: true),
+                              LoginStep.twoFactor => const TwoFactorStep(),
+                              LoginStep.deviceApproval => const DeviceApprovalStep(),
                             },
                           if (state.reauthenticating) const SessionEndedActions(),
                         ],

@@ -11,6 +11,8 @@ import "package:polder/providers/current_user_provider.dart";
 import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/screens/settings/widgets/app_passwords_group.dart";
 import "package:polder/screens/settings/widgets/calendars_group.dart";
+import "package:polder/screens/settings/widgets/connected_accounts_group.dart";
+import "package:polder/screens/settings/widgets/two_factor_group.dart";
 import "package:polder/services/api/api_exceptions.dart";
 import "package:polder/util/action_feedback.dart";
 import "package:polder/util/api_error_localization.dart";
@@ -49,7 +51,12 @@ class AccountScreen extends ConsumerWidget {
                     title: localized.profile,
                     children: [_ProfileForm(user: account.user)],
                   ),
-                  NavGroup(title: localized.changePassword, children: const [_PasswordForm()]),
+                  NavGroup(
+                    title: account.user.hasPassword ? localized.changePassword : localized.setPassword,
+                    children: const [_PasswordForm()],
+                  ),
+                  if (account.user.hasPassword) const TwoFactorGroup(),
+                  const ConnectedAccountsGroup(),
                   const AppPasswordsGroup(),
                   const CalendarsGroup(),
                   NavGroup(
@@ -287,7 +294,9 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
 
   bool get _newValid => CredentialRules.isValidPassword(_new.text);
 
-  bool get _canSave => _current.text.isNotEmpty && _newValid && _matches && !_saving;
+  bool get _hasPassword => ref.watch(currentUserProvider).value?.hasPassword ?? true;
+
+  bool get _canSave => (_current.text.isNotEmpty || !_hasPassword) && _newValid && _matches && !_saving;
 
   @override
   Widget build(BuildContext context) {
@@ -299,14 +308,15 @@ class _PasswordFormState extends ConsumerState<_PasswordForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 16,
           children: [
-            PasswordField(
-              controller: _current,
-              label: localized.currentPassword,
-              autofillHints: const [AutofillHints.password],
-              textInputAction: TextInputAction.next,
-              errorText: _currentIncorrect ? localized.currentPasswordIncorrect : null,
-              onChanged: (_) => _currentIncorrect = false,
-            ),
+            if (_hasPassword)
+              PasswordField(
+                controller: _current,
+                label: localized.currentPassword,
+                autofillHints: const [AutofillHints.password],
+                textInputAction: TextInputAction.next,
+                errorText: _currentIncorrect ? localized.currentPasswordIncorrect : null,
+                onChanged: (_) => _currentIncorrect = false,
+              ),
             PasswordField(
               controller: _new,
               label: localized.newPassword,

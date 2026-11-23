@@ -27,6 +27,7 @@ abstract final class AppRoutes {
   static const generalSettings = "/settings/general";
   static const about = "/settings/about";
   static const account = "/settings/account";
+  static const twoFactorSetup = "/two-factor-setup";
 
   static const admin = "/admin";
   static const adminOverview = "/admin/overview";
@@ -183,6 +184,7 @@ enum AdminPage {
   users,
   branding,
   mail,
+  authentication,
   logs,
   server;
 

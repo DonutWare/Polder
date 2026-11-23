@@ -58,7 +58,7 @@ type remoteShare struct {
 }
 
 func (s *Service) remote(row incomingRow) (*remoteShare, error) {
-	secret, err := s.box.open(row.secretSealed, row.sealContext())
+	secret, err := s.box.Open(row.secretSealed, row.sealContext())
 	if err != nil {
 		return nil, err
 	}

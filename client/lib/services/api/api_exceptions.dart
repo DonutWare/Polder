@@ -21,6 +21,26 @@ class UnauthorizedException extends ApiException {
   const UnauthorizedException({super.error, super.statusCode});
 }
 
+class TwoFactorRequiredException extends UnauthorizedException {
+  const TwoFactorRequiredException({
+    required this.challenge,
+    this.deviceApproval = false,
+    super.error,
+    super.statusCode,
+  });
+
+  final String challenge;
+  final bool deviceApproval;
+}
+
+class TwoFactorSetupRequiredException extends ForbiddenException {
+  const TwoFactorSetupRequiredException({super.error, super.statusCode});
+}
+
+class ReauthenticationRequiredException extends ApiException {
+  const ReauthenticationRequiredException({super.error, super.statusCode});
+}
+
 class ForbiddenException extends ApiException {
   const ForbiddenException({super.error, super.statusCode});
 }

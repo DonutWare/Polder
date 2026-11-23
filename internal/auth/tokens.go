@@ -58,6 +58,7 @@ type Claims struct {
 	UserID    int64
 	SessionID int64
 	Device    string
+	Method    Method
 	ExpiresAt time.Time
 }
 
@@ -65,9 +66,10 @@ type accessClaims struct {
 	jwt.RegisteredClaims
 	SessionID int64  `json:"sid,omitempty"`
 	Device    string `json:"dev,omitempty"`
+	Method    Method `json:"amr,omitempty"`
 }
 
-func (t *AccessTokens) Issue(userID, sessionID int64, device string) (string, error) {
+func (t *AccessTokens) Issue(userID, sessionID int64, device string, method Method) (string, error) {
 	now := time.Now()
 	claims := accessClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -78,6 +80,7 @@ func (t *AccessTokens) Issue(userID, sessionID int64, device string) (string, er
 		},
 		SessionID: sessionID,
 		Device:    device,
+		Method:    method,
 	}
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(t.key)
 }
@@ -93,5 +96,6 @@ func (t *AccessTokens) Parse(token string) (Claims, error) {
 	if err != nil {
 		return Claims{}, err
 	}
-	return Claims{UserID: userID, SessionID: claims.SessionID, Device: claims.Device, ExpiresAt: claims.ExpiresAt.Time}, nil
+	return Claims{UserID: userID, SessionID: claims.SessionID, Device: claims.Device, Method: claims.Method.orPassword(),
+		ExpiresAt: claims.ExpiresAt.Time}, nil
 }

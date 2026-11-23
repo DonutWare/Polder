@@ -30,5 +30,7 @@ abstract class ServerSettings with _$ServerSettings {
     @Default("") String smtpFrom,
     @Default(MailSecurity.starttls) MailSecurity smtpSecurity,
     @Default(false) bool smtpManagedByConfig,
+    @Default(false) bool requireTwoFactor,
+    @Default(14) int twoFactorGraceDays,
   }) = _ServerSettings;
 }

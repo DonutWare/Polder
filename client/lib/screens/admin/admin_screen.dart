@@ -6,6 +6,7 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder/routes/up_scope.dart";
 import "package:polder/screens/admin/admin_branding_screen.dart";
 import "package:polder/screens/admin/admin_logs_screen.dart";
+import "package:polder/screens/admin/admin_authentication_screen.dart";
 import "package:polder/screens/admin/admin_mail_screen.dart";
 import "package:polder/screens/admin/admin_overview_screen.dart";
 import "package:polder/screens/admin/admin_server_screen.dart";
@@ -38,6 +39,7 @@ class AdminScreen extends StatelessWidget {
     AdminPage.users => const AdminUsersScreen(key: ValueKey(AdminPage.users)),
     AdminPage.branding => const AdminBrandingScreen(key: ValueKey(AdminPage.branding)),
     AdminPage.mail => const AdminMailScreen(key: ValueKey(AdminPage.mail)),
+    AdminPage.authentication => const AdminAuthenticationScreen(key: ValueKey(AdminPage.authentication)),
     AdminPage.logs => const AdminLogsScreen(key: ValueKey(AdminPage.logs)),
     AdminPage.server => const AdminServerScreen(key: ValueKey(AdminPage.server)),
   };
@@ -68,6 +70,12 @@ class _AdminList extends StatelessWidget {
             entry(AdminPage.users, IconsaxPlusLinear.profile_2user, localized.users, localized.manageUsersHint),
             entry(AdminPage.branding, IconsaxPlusLinear.brush_2, localized.brandingGroup, localized.brandingHint),
             entry(AdminPage.mail, IconsaxPlusLinear.sms, localized.emailSettings, localized.emailSettingsHint),
+            entry(
+              AdminPage.authentication,
+              IconsaxPlusLinear.shield_tick,
+              localized.adminAuthentication,
+              localized.adminAuthenticationHint,
+            ),
             entry(AdminPage.logs, IconsaxPlusLinear.document_text, localized.serverLogs, localized.serverLogsHint),
             entry(
               AdminPage.server,

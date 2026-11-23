@@ -39,7 +39,7 @@ func (a *API) changePassword(ctx context.Context, input *changePasswordInput) (*
 	done, allowed := a.limiter.attempt(input.address)
 	if !allowed {
 		authLog.Warn("password change refused: too many failed attempts", "user", user.Username, "address", input.address)
-		return nil, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
+		return nil, errTooManyAttempts
 	}
 	err := a.auth.ChangePassword(ctx, user, activity.ActorFrom(ctx).SessionID, input.Body.CurrentPassword, input.Body.NewPassword)
 	done(apperr.Is(err, apperr.KindForbidden))

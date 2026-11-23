@@ -40,8 +40,17 @@ type User struct {
 	Profile      Profile            `json:"profile"`
 	Avatar       *Avatar            `json:"avatar,omitempty" required:"false" doc:"Absent when the user has no icon of their own"`
 	Appearance   Appearance         `json:"appearance"`
+	TwoFactor    TwoFactorStatus    `json:"twoFactor"`
+	HasPassword  bool               `json:"hasPassword" doc:"False for accounts that only sign in through a single sign-on provider"`
+	SSO          bool               `json:"sso" doc:"Whether the account is linked to a single sign-on provider"`
 	Trash        TrashPreferences   `json:"-"`
 	Versions     VersionPreferences `json:"-"`
+}
+
+type TwoFactorStatus struct {
+	Enabled       bool       `json:"enabled" doc:"Whether sign-ins with a password also need a code from an authenticator app"`
+	Deadline      *time.Time `json:"deadline,omitempty" required:"false" doc:"When two-factor authentication must be set up by; absent when it isn't required"`
+	SetupRequired bool       `json:"setupRequired" doc:"The deadline has passed: until two-factor authentication is set up, this session can do nothing else"`
 }
 
 type TrashPreferences struct {
@@ -55,6 +64,8 @@ type VersionPreferences struct {
 	MaxAgeDays   *int  `json:"maxAgeDays,omitempty" required:"false" doc:"Days to keep earlier versions, 0 for no age limit; absent follows the server"`
 	MaxPerFile   *int  `json:"maxPerFile,omitempty" required:"false" doc:"Most earlier versions kept per file, 0 for no count limit; absent follows the server"`
 }
+
+const NoPasswordHash = "!"
 
 func (u User) IsAdmin() bool { return u.Role == RoleAdmin }
 
@@ -76,11 +87,15 @@ type Changes struct {
 }
 
 func (n NewUser) validate() error {
-	if !usernamePattern.MatchString(n.Username) {
-		return apperr.Invalid("username must be 2-32 characters of a-z, 0-9, '.', '_' or '-'")
-	}
 	if err := validatePassword(n.Password); err != nil {
 		return err
+	}
+	return n.validateWithoutPassword()
+}
+
+func (n NewUser) validateWithoutPassword() error {
+	if !ValidUsername(n.Username) {
+		return apperr.Invalid("username must be 2-32 characters of a-z, 0-9, '.', '_' or '-'")
 	}
 	if err := validateRole(n.Role); err != nil {
 		return err
@@ -108,6 +123,10 @@ func (c Changes) validate() error {
 		}
 	}
 	return nil
+}
+
+func ValidUsername(username string) bool {
+	return usernamePattern.MatchString(username)
 }
 
 func ValidatePassword(password string) error {
@@ -140,4 +159,8 @@ func ValidateRetentionDays(days int) error {
 		return apperr.Invalid("trash retention must be between 0 and %d days", MaxRetentionDays)
 	}
 	return nil
+}
+
+func (s TwoFactorStatus) Due(now time.Time) bool {
+	return !s.Enabled && s.Deadline != nil && !now.Before(*s.Deadline)
 }

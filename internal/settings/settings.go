@@ -36,6 +36,11 @@ const (
 	smtpPasswordKey         = "smtp_password"
 	smtpFromKey             = "smtp_from"
 	smtpSecurityKey         = "smtp_security"
+	requireTwoFactorKey     = "require_two_factor"
+	twoFactorGraceDaysKey   = "two_factor_grace_days"
+
+	DefaultTwoFactorGraceDays = 14
+	MaxTwoFactorGraceDays     = 365
 
 	MaxOCRPages = 10000
 
@@ -71,6 +76,8 @@ type ServerSettings struct {
 	SMTPFrom             string   `json:"smtpFrom" doc:"Sender address, such as Polder <polder@example.com>"`
 	SMTPSecurity         string   `json:"smtpSecurity" enum:"starttls,tls,none" doc:"How the connection to the mail server is secured"`
 	SMTPManagedByConfig  bool     `json:"smtpManagedByConfig" doc:"The mail server is set in the server config or environment, so it can't be changed here"`
+	RequireTwoFactor     bool     `json:"requireTwoFactor" doc:"Everyone who signs in with a password must set up two-factor authentication"`
+	TwoFactorGraceDays   int      `json:"twoFactorGraceDays" doc:"Days users get to set up two-factor authentication once it's required"`
 	smtpPassword         string
 }
 
@@ -95,6 +102,8 @@ type ServerSettingsChanges struct {
 	SMTPPassword         *string   `json:"smtpPassword" required:"false" doc:"Mail server password; empty removes it"`
 	SMTPFrom             *string   `json:"smtpFrom" required:"false" doc:"Sender address, such as Polder <polder@example.com>"`
 	SMTPSecurity         *string   `json:"smtpSecurity" required:"false" enum:"starttls,tls,none" doc:"How the connection to the mail server is secured"`
+	RequireTwoFactor     *bool     `json:"requireTwoFactor" required:"false" doc:"Everyone who signs in with a password must set up two-factor authentication"`
+	TwoFactorGraceDays   *int      `json:"twoFactorGraceDays" required:"false" minimum:"0" maximum:"365" doc:"Days users get to set up two-factor authentication once it's required; changes apply to new deadlines"`
 }
 
 func (c ServerSettingsChanges) changesMail() bool {
@@ -140,6 +149,9 @@ func (c ServerSettingsChanges) validate() error {
 	}
 	if c.AccentColor != nil && *c.AccentColor != "" && !accentColorPattern.MatchString(*c.AccentColor) {
 		return apperr.Invalid("%q is not a color as #RRGGBB", *c.AccentColor)
+	}
+	if c.TwoFactorGraceDays != nil && (*c.TwoFactorGraceDays < 0 || *c.TwoFactorGraceDays > MaxTwoFactorGraceDays) {
+		return apperr.Invalid("the grace period must be between 0 and %d days", MaxTwoFactorGraceDays)
 	}
 	if err := c.validateMail(); err != nil {
 		return err
@@ -269,6 +281,14 @@ func (s *Store) stored(ctx context.Context) (ServerSettings, error) {
 			if enabled, err := strconv.ParseBool(value); err == nil {
 				current.FederationEnabled = enabled
 			}
+		case requireTwoFactorKey:
+			if required, err := strconv.ParseBool(value); err == nil {
+				current.RequireTwoFactor = required
+			}
+		case twoFactorGraceDaysKey:
+			if days, err := strconv.Atoi(value); err == nil {
+				current.TwoFactorGraceDays = days
+			}
 		default:
 			readMailSetting(&current, name, value)
 		}
@@ -327,6 +347,12 @@ func (s *Store) Update(ctx context.Context, changes ServerSettingsChanges) (Serv
 	}
 	if changes.FederationEnabled != nil {
 		values[federationEnabledKey] = strconv.FormatBool(*changes.FederationEnabled)
+	}
+	if changes.RequireTwoFactor != nil {
+		values[requireTwoFactorKey] = strconv.FormatBool(*changes.RequireTwoFactor)
+	}
+	if changes.TwoFactorGraceDays != nil {
+		values[twoFactorGraceDaysKey] = strconv.Itoa(*changes.TwoFactorGraceDays)
 	}
 	if err := s.save(ctx, values); err != nil {
 		return ServerSettings{}, err

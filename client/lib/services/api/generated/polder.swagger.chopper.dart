@@ -218,6 +218,184 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<List<LinkedIdentity>>> _listLinkedIdentities({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Single sign-on accounts linked to the logged-in user',
+      operationId: 'listLinkedIdentities',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/identities');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<LinkedIdentity>, LinkedIdentity>($request);
+  }
+
+  @override
+  Future<Response<LinkedProvider>> _confirmLinkIdentity({
+    required ConfirmLinkRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Finish linking with the code from the redirect URI and the PKCE verifier',
+      operationId: 'confirmLinkIdentity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/identities/confirm');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<LinkedProvider, LinkedProvider>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _unlinkIdentity({
+    required int? identityID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Unlink a single sign-on account',
+      operationId: 'unlinkIdentity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/identities/${identityID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<LinkIdentityStart>> _linkIdentity({
+    required String? providerID,
+    required LinkIdentityRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start linking an account at a provider; open the returned URL in a browser',
+      operationId: 'linkIdentity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/identities/${providerID}/link');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<LinkIdentityStart, LinkIdentityStart>($request);
+  }
+
+  @override
+  Future<Response<List<LoginRequest>>> _listLoginRequests({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Sign-ins on other devices waiting for this account\'s approval',
+      operationId: 'listLoginRequests',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/login-requests');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<LoginRequest>, LoginRequest>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _approveLoginRequest({
+    required String? requestID,
+    required ApproveLoginInputBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Approve a sign-in by typing the number the new device shows; a wrong number refuses it',
+      operationId: 'approveLoginRequest',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/account/login-requests/${requestID}/approve',
+    );
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _denyLoginRequest({
+    required String? requestID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Refuse a sign-in on another device',
+      operationId: 'denyLoginRequest',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/account/login-requests/${requestID}/deny',
+    );
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
   Future<Response<dynamic>> _changePassword({
     required PasswordChange? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -267,6 +445,134 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<User, User>($request);
+  }
+
+  @override
+  Future<Response<TwoFactorSettings>> _getTwoFactor({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether two-factor authentication is on for the logged-in user, and whether it\'s required',
+      operationId: 'getTwoFactor',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/two-factor');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<TwoFactorSettings, TwoFactorSettings>($request);
+  }
+
+  @override
+  Future<Response<RecoveryCodes>> _confirmTwoFactorSetup({
+    required TwoFactorCodeRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Turn two-factor authentication on with a first code from the app; returns the recovery codes once',
+      operationId: 'confirmTwoFactorSetup',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/two-factor/confirm');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<RecoveryCodes, RecoveryCodes>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _disableTwoFactor({
+    required TwoFactorPasswordRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Turn two-factor authentication off, unless the server requires it',
+      operationId: 'disableTwoFactor',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/two-factor/disable');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<RecoveryCodes>> _regenerateRecoveryCodes({
+    required TwoFactorPasswordRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Replace the recovery codes; the old ones stop working',
+      operationId: 'regenerateRecoveryCodes',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/two-factor/recovery-codes');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<RecoveryCodes, RecoveryCodes>($request);
+  }
+
+  @override
+  Future<Response<TwoFactorSetup>> _beginTwoFactorSetup({
+    required TwoFactorPasswordRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start setting up two-factor authentication; returns the key for the authenticator app',
+      operationId: 'beginTwoFactorSetup',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/account/two-factor/setup');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<TwoFactorSetup, TwoFactorSetup>($request);
   }
 
   @override
@@ -325,6 +631,181 @@ final class _$Polder extends Polder {
       tag: swaggerMetaData,
     );
     return client.send<LiveTransfers, LiveTransfers>($request);
+  }
+
+  @override
+  Future<Response<List<AuthProvider>>> _listAuthProviders({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Single sign-on providers',
+      operationId: 'listAuthProviders',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/auth-providers');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<AuthProvider>, AuthProvider>($request);
+  }
+
+  @override
+  Future<Response<AuthProvider>> _createAuthProvider({
+    required NewAuthProvider? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Add a single sign-on provider',
+      operationId: 'createAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/auth-providers');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<AuthProvider, AuthProvider>($request);
+  }
+
+  @override
+  Future<Response<List<AuthProvider>>> _reorderAuthProviders({
+    required ProviderOrder? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose the order of the sign-in buttons',
+      operationId: 'reorderAuthProviders',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/auth-providers/order');
+    final $body = body;
+    final Request $request = Request(
+      'PUT',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<AuthProvider>, AuthProvider>($request);
+  }
+
+  @override
+  Future<Response<List<AuthProviderPreset>>> _listAuthProviderPresets({
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Providers that are quick to set up, with what each needs',
+      operationId: 'listAuthProviderPresets',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/auth-providers/presets');
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<List<AuthProviderPreset>, AuthProviderPreset>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _deleteAuthProvider({
+    required String? providerID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove a single sign-on provider and every account link to it',
+      operationId: 'deleteAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/auth-providers/${providerID}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<AuthProvider>> _updateAuthProvider({
+    required String? providerID,
+    required AuthProviderChanges? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change a single sign-on provider',
+      operationId: 'updateAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/admin/auth-providers/${providerID}');
+    final $body = body;
+    final Request $request = Request(
+      'PATCH',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<AuthProvider, AuthProvider>($request);
+  }
+
+  @override
+  Future<Response<AuthProviderTest>> _testAuthProvider({
+    required String? providerID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Check that the provider can be reached and is set up right',
+      operationId: 'testAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/admin/auth-providers/${providerID}/test',
+    );
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<AuthProviderTest, AuthProviderTest>($request);
   }
 
   @override
@@ -905,6 +1386,138 @@ final class _$Polder extends Polder {
   }
 
   @override
+  Future<Response<User>> _extendUserTwoFactorDeadline({
+    required int? userID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Give a user the full grace period again to set up two-factor authentication',
+      operationId: 'extendUserTwoFactorDeadline',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/admin/users/${userID}/two-factor/extend',
+    );
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<User, User>($request);
+  }
+
+  @override
+  Future<Response<User>> _resetUserTwoFactor({
+    required int? userID,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Turn a user\'s two-factor authentication off and log them out everywhere, for when they lost their device',
+      operationId: 'resetUserTwoFactor',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse(
+      '/api/v1/admin/users/${userID}/two-factor/reset',
+    );
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      tag: swaggerMetaData,
+    );
+    return client.send<User, User>($request);
+  }
+
+  @override
+  Future<Response<DeviceLoginStart>> _startDeviceLogin({
+    required DeviceLoginRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Ask a signed-in device of the account to approve this sign-in',
+      operationId: 'startDeviceLogin',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/device-login');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<DeviceLoginStart, DeviceLoginStart>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _cancelDeviceLogin({
+    required String? requestID,
+    required PollTokenBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop waiting for approval',
+      operationId: 'cancelDeviceLogin',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/device-login/${requestID}/cancel');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<DeviceLoginResult>> _getDeviceLoginStatus({
+    required String? requestID,
+    required PollTokenBody? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether the sign-in was approved; the first approved answer carries the token pair',
+      operationId: 'getDeviceLoginStatus',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/device-login/${requestID}/status');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<DeviceLoginResult, DeviceLoginResult>($request);
+  }
+
+  @override
   Future<Response<TokenPair>> _login({
     required CredentialsRequest? body,
     SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
@@ -1072,6 +1685,125 @@ final class _$Polder extends Polder {
     ),
   }) {
     final Uri $url = Uri.parse('/api/v1/auth/sessions');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<TokenPair, TokenPair>($request);
+  }
+
+  @override
+  Future<Response<TokenPair>> _exchangeSingleSignOnCode({
+    required SsoTokenRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Exchange the code from single sign-on for a token pair',
+      operationId: 'exchangeSingleSignOnCode',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/sso/token');
+    final $body = body;
+    final Request $request = Request(
+      'POST',
+      $url,
+      client.baseUrl,
+      body: $body,
+      tag: swaggerMetaData,
+    );
+    return client.send<TokenPair, TokenPair>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _startSingleSignOn({
+    required String? providerID,
+    required String? redirectUri,
+    required String? codeChallenge,
+    String? deviceName,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Open in a browser to sign in at a provider; ends on the redirect URI with a code for POST /auth/sso/token',
+      operationId: 'startSingleSignOn',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/sso/${providerID}/authorize');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'redirect_uri': redirectUri,
+      'code_challenge': codeChallenge,
+      'device_name': deviceName,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<dynamic>> _finishSingleSignOn({
+    required String? providerID,
+    String? code,
+    String? state,
+    String? error,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Where the provider sends the browser back to; redirects to the app',
+      operationId: 'finishSingleSignOn',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/sso/${providerID}/callback');
+    final Map<String, dynamic> $params = <String, dynamic>{
+      'code': code,
+      'state': state,
+      'error': error,
+    };
+    final Request $request = Request(
+      'GET',
+      $url,
+      client.baseUrl,
+      parameters: $params,
+      tag: swaggerMetaData,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
+
+  @override
+  Future<Response<TokenPair>> _verifyTwoFactor({
+    required SecondFactorRequest? body,
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Finish logging in with a code from the authenticator app or a recovery code',
+      operationId: 'verifyTwoFactor',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  }) {
+    final Uri $url = Uri.parse('/api/v1/auth/two-factor');
     final $body = body;
     final Request $request = Request(
       'POST',

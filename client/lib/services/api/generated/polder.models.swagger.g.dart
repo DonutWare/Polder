@@ -68,6 +68,13 @@ Map<String, dynamic> _$AppearanceToJson(Appearance instance) => <String, dynamic
   'theme': ?appearanceThemeNullableToJson(instance.theme),
 };
 
+ApproveLoginInputBody _$ApproveLoginInputBodyFromJson(Map<String, dynamic> json) =>
+    ApproveLoginInputBody(number: (json['number'] as num).toInt());
+
+Map<String, dynamic> _$ApproveLoginInputBodyToJson(ApproveLoginInputBody instance) => <String, dynamic>{
+  'number': instance.number,
+};
+
 Attendee _$AttendeeFromJson(Map<String, dynamic> json) => Attendee(
   email: json['email'] as String,
   name: json['name'] as String?,
@@ -93,6 +100,113 @@ Map<String, dynamic> _$AttendeeInputToJson(AttendeeInput instance) => <String, d
   'email': instance.email,
   'name': ?instance.name,
   'role': ?instance.role,
+};
+
+AuthProvider _$AuthProviderFromJson(Map<String, dynamic> json) => AuthProvider(
+  allowSignup: json['allowSignup'] as bool,
+  callbackUrl: json['callbackUrl'] as String,
+  clientId: json['clientId'] as String,
+  clientSecretSet: json['clientSecretSet'] as bool,
+  enabled: json['enabled'] as bool,
+  id: json['id'] as String,
+  issuer: json['issuer'] as String,
+  kind: authProviderKindFromJson(json['kind']),
+  label: json['label'] as String,
+  linkByEmail: json['linkByEmail'] as bool,
+  linkedUsers: (json['linkedUsers'] as num).toInt(),
+  managedByConfig: json['managedByConfig'] as bool,
+  position: (json['position'] as num).toInt(),
+  preset: json['preset'] as String,
+  scopes: json['scopes'] as String,
+  usernameClaim: json['usernameClaim'] as String,
+);
+
+Map<String, dynamic> _$AuthProviderToJson(AuthProvider instance) => <String, dynamic>{
+  'allowSignup': instance.allowSignup,
+  'callbackUrl': instance.callbackUrl,
+  'clientId': instance.clientId,
+  'clientSecretSet': instance.clientSecretSet,
+  'enabled': instance.enabled,
+  'id': instance.id,
+  'issuer': instance.issuer,
+  'kind': ?authProviderKindToJson(instance.kind),
+  'label': instance.label,
+  'linkByEmail': instance.linkByEmail,
+  'linkedUsers': instance.linkedUsers,
+  'managedByConfig': instance.managedByConfig,
+  'position': instance.position,
+  'preset': instance.preset,
+  'scopes': instance.scopes,
+  'usernameClaim': instance.usernameClaim,
+};
+
+AuthProviderChanges _$AuthProviderChangesFromJson(Map<String, dynamic> json) => AuthProviderChanges(
+  allowSignup: json['allowSignup'] as bool?,
+  clientId: json['clientId'] as String?,
+  clientSecret: json['clientSecret'] as String?,
+  enabled: json['enabled'] as bool?,
+  issuer: json['issuer'] as String?,
+  label: json['label'] as String?,
+  linkByEmail: json['linkByEmail'] as bool?,
+  scopes: json['scopes'] as String?,
+  usernameClaim: json['usernameClaim'] as String?,
+);
+
+Map<String, dynamic> _$AuthProviderChangesToJson(AuthProviderChanges instance) => <String, dynamic>{
+  'allowSignup': ?instance.allowSignup,
+  'clientId': ?instance.clientId,
+  'clientSecret': ?instance.clientSecret,
+  'enabled': ?instance.enabled,
+  'issuer': ?instance.issuer,
+  'label': ?instance.label,
+  'linkByEmail': ?instance.linkByEmail,
+  'scopes': ?instance.scopes,
+  'usernameClaim': ?instance.usernameClaim,
+};
+
+AuthProviderOption _$AuthProviderOptionFromJson(Map<String, dynamic> json) =>
+    AuthProviderOption(icon: json['icon'] as String, id: json['id'] as String, label: json['label'] as String);
+
+Map<String, dynamic> _$AuthProviderOptionToJson(AuthProviderOption instance) => <String, dynamic>{
+  'icon': instance.icon,
+  'id': instance.id,
+  'label': instance.label,
+};
+
+AuthProviderPreset _$AuthProviderPresetFromJson(Map<String, dynamic> json) => AuthProviderPreset(
+  allowSignup: json['allowSignup'] as bool,
+  fields: authProviderPresetFieldsListFromJson(json['fields'] as List?),
+  id: json['id'] as String,
+  issuerTemplate: json['issuerTemplate'] as String?,
+  kind: authProviderPresetKindFromJson(json['kind']),
+  label: json['label'] as String,
+  linkByEmail: json['linkByEmail'] as bool,
+  public: json['public'] as bool,
+  scopes: json['scopes'] as String,
+  setupHint: json['setupHint'] as String,
+  usernameClaim: json['usernameClaim'] as String,
+);
+
+Map<String, dynamic> _$AuthProviderPresetToJson(AuthProviderPreset instance) => <String, dynamic>{
+  'allowSignup': instance.allowSignup,
+  'fields': authProviderPresetFieldsListToJson(instance.fields),
+  'id': instance.id,
+  'issuerTemplate': ?instance.issuerTemplate,
+  'kind': ?authProviderPresetKindToJson(instance.kind),
+  'label': instance.label,
+  'linkByEmail': instance.linkByEmail,
+  'public': instance.public,
+  'scopes': instance.scopes,
+  'setupHint': instance.setupHint,
+  'usernameClaim': instance.usernameClaim,
+};
+
+AuthProviderTest _$AuthProviderTestFromJson(Map<String, dynamic> json) =>
+    AuthProviderTest(message: json['message'] as String?, ok: json['ok'] as bool);
+
+Map<String, dynamic> _$AuthProviderTestToJson(AuthProviderTest instance) => <String, dynamic>{
+  'message': ?instance.message,
+  'ok': instance.ok,
 };
 
 Avatar _$AvatarFromJson(Map<String, dynamic> json) =>
@@ -127,6 +241,11 @@ Map<String, dynamic> _$BatchStatusToJson(BatchStatus instance) => <String, dynam
 
 Branding _$BrandingFromJson(Map<String, dynamic> json) => Branding(
   accentColor: json['accentColor'] as String,
+  authProviders:
+      (json['authProviders'] as List<dynamic>?)
+          ?.map((e) => AuthProviderOption.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
   backgrounds:
       (json['backgrounds'] as List<dynamic>?)?.map((e) => ImageInfo.fromJson(e as Map<String, dynamic>)).toList() ?? [],
   icon: json['icon'] == null ? null : ImageInfo.fromJson(json['icon'] as Map<String, dynamic>),
@@ -137,6 +256,7 @@ Branding _$BrandingFromJson(Map<String, dynamic> json) => Branding(
 
 Map<String, dynamic> _$BrandingToJson(Branding instance) => <String, dynamic>{
   'accentColor': instance.accentColor,
+  'authProviders': ?instance.authProviders?.map((e) => e.toJson()).toList(),
   'backgrounds': ?instance.backgrounds?.map((e) => e.toJson()).toList(),
   'icon': ?instance.icon?.toJson(),
   'message': instance.message,
@@ -364,6 +484,14 @@ Map<String, dynamic> _$ClientMessageToJson(ClientMessage instance) => <String, d
   'userId': ?instance.userId,
 };
 
+ConfirmLinkRequest _$ConfirmLinkRequestFromJson(Map<String, dynamic> json) =>
+    ConfirmLinkRequest(code: json['code'] as String, codeVerifier: json['codeVerifier'] as String);
+
+Map<String, dynamic> _$ConfirmLinkRequestToJson(ConfirmLinkRequest instance) => <String, dynamic>{
+  'code': instance.code,
+  'codeVerifier': instance.codeVerifier,
+};
+
 Contact _$ContactFromJson(Map<String, dynamic> json) => Contact(
   cloudId: json['cloudId'] as String,
   createdAt: DateTime.parse(json['createdAt'] as String),
@@ -410,6 +538,42 @@ Map<String, dynamic> _$CredentialsRequestToJson(CredentialsRequest instance) => 
   'deviceName': ?instance.deviceName,
   'password': instance.password,
   'username': instance.username,
+};
+
+DeviceLoginRequest _$DeviceLoginRequestFromJson(Map<String, dynamic> json) => DeviceLoginRequest(
+  challenge: json['challenge'] as String?,
+  deviceName: json['deviceName'] as String?,
+  username: json['username'] as String?,
+);
+
+Map<String, dynamic> _$DeviceLoginRequestToJson(DeviceLoginRequest instance) => <String, dynamic>{
+  'challenge': ?instance.challenge,
+  'deviceName': ?instance.deviceName,
+  'username': ?instance.username,
+};
+
+DeviceLoginResult _$DeviceLoginResultFromJson(Map<String, dynamic> json) => DeviceLoginResult(
+  status: deviceLoginResultStatusFromJson(json['status']),
+  tokens: json['tokens'] == null ? null : TokenPair.fromJson(json['tokens'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$DeviceLoginResultToJson(DeviceLoginResult instance) => <String, dynamic>{
+  'status': ?deviceLoginResultStatusToJson(instance.status),
+  'tokens': ?instance.tokens?.toJson(),
+};
+
+DeviceLoginStart _$DeviceLoginStartFromJson(Map<String, dynamic> json) => DeviceLoginStart(
+  expiresIn: (json['expiresIn'] as num).toInt(),
+  number: (json['number'] as num).toInt(),
+  pollToken: json['pollToken'] as String,
+  requestId: json['requestId'] as String,
+);
+
+Map<String, dynamic> _$DeviceLoginStartToJson(DeviceLoginStart instance) => <String, dynamic>{
+  'expiresIn': instance.expiresIn,
+  'number': instance.number,
+  'pollToken': instance.pollToken,
+  'requestId': instance.requestId,
 };
 
 DirectoryResponse _$DirectoryResponseFromJson(Map<String, dynamic> json) => DirectoryResponse(
@@ -720,6 +884,9 @@ EventMessage _$EventMessageFromJson(Map<String, dynamic> json) => EventMessage(
   code: json['code'] as String?,
   dirs: (json['dirs'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   entry: json['entry'] == null ? null : LogEntry.fromJson(json['entry'] as Map<String, dynamic>),
+  loginRequest: json['loginRequest'] == null
+      ? null
+      : LoginRequest.fromJson(json['loginRequest'] as Map<String, dynamic>),
   message: json['message'] as String?,
   notification: json['notification'] == null
       ? null
@@ -740,6 +907,7 @@ Map<String, dynamic> _$EventMessageToJson(EventMessage instance) => <String, dyn
   'code': ?instance.code,
   'dirs': ?instance.dirs,
   'entry': ?instance.entry?.toJson(),
+  'loginRequest': ?instance.loginRequest?.toJson(),
   'message': ?instance.message,
   'notification': ?instance.notification?.toJson(),
   'reminder': ?instance.reminder?.toJson(),
@@ -1072,6 +1240,19 @@ Map<String, dynamic> _$LinkChangesToJson(LinkChanges instance) => <String, dynam
   'removePassword': ?instance.removePassword,
 };
 
+LinkIdentityRequest _$LinkIdentityRequestFromJson(Map<String, dynamic> json) =>
+    LinkIdentityRequest(codeChallenge: json['codeChallenge'] as String, redirectUri: json['redirectUri'] as String);
+
+Map<String, dynamic> _$LinkIdentityRequestToJson(LinkIdentityRequest instance) => <String, dynamic>{
+  'codeChallenge': instance.codeChallenge,
+  'redirectUri': instance.redirectUri,
+};
+
+LinkIdentityStart _$LinkIdentityStartFromJson(Map<String, dynamic> json) =>
+    LinkIdentityStart(url: json['url'] as String);
+
+Map<String, dynamic> _$LinkIdentityStartToJson(LinkIdentityStart instance) => <String, dynamic>{'url': instance.url};
+
 LinkInfo _$LinkInfoFromJson(Map<String, dynamic> json) => LinkInfo(
   expiresAt: json['expiresAt'] == null ? null : DateTime.parse(json['expiresAt'] as String),
   isDir: json['isDir'] as bool?,
@@ -1161,6 +1342,31 @@ Map<String, dynamic> _$LinkUnlockToJson(LinkUnlock instance) => <String, dynamic
   'info': instance.info.toJson(),
   'root': instance.root.toJson(),
   'token': instance.token,
+};
+
+LinkedIdentity _$LinkedIdentityFromJson(Map<String, dynamic> json) => LinkedIdentity(
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  email: json['email'] as String,
+  id: (json['id'] as num).toInt(),
+  preset: json['preset'] as String,
+  providerId: json['providerId'] as String,
+  providerLabel: json['providerLabel'] as String,
+);
+
+Map<String, dynamic> _$LinkedIdentityToJson(LinkedIdentity instance) => <String, dynamic>{
+  'createdAt': instance.createdAt.toIso8601String(),
+  'email': instance.email,
+  'id': instance.id,
+  'preset': instance.preset,
+  'providerId': instance.providerId,
+  'providerLabel': instance.providerLabel,
+};
+
+LinkedProvider _$LinkedProviderFromJson(Map<String, dynamic> json) =>
+    LinkedProvider(providerId: json['providerId'] as String);
+
+Map<String, dynamic> _$LinkedProviderToJson(LinkedProvider instance) => <String, dynamic>{
+  'providerId': instance.providerId,
 };
 
 LinksResponse _$LinksResponseFromJson(Map<String, dynamic> json) => LinksResponse(
@@ -1293,6 +1499,24 @@ Map<String, dynamic> _$LogPageToJson(LogPage instance) => <String, dynamic>{
   'nextCursor': instance.nextCursor,
 };
 
+LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) => LoginRequest(
+  address: json['address'] as String,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  device: json['device'] as String,
+  expiresAt: DateTime.parse(json['expiresAt'] as String),
+  id: json['id'] as String,
+  resolution: loginRequestResolutionNullableFromJson(json['resolution']),
+);
+
+Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) => <String, dynamic>{
+  'address': instance.address,
+  'createdAt': instance.createdAt.toIso8601String(),
+  'device': instance.device,
+  'expiresAt': instance.expiresAt.toIso8601String(),
+  'id': instance.id,
+  'resolution': ?loginRequestResolutionNullableToJson(instance.resolution),
+};
+
 Manifest _$ManifestFromJson(Map<String, dynamic> json) => Manifest(
   chunks: (json['chunks'] as List<dynamic>?)?.map((e) => Chunk.fromJson(e as Map<String, dynamic>)).toList() ?? [],
   hash: json['hash'] as String,
@@ -1419,6 +1643,38 @@ Map<String, dynamic> _$NewAppPasswordToJson(NewAppPassword instance) => <String,
   'name': instance.name,
   'readOnly': instance.readOnly,
   'token': instance.token,
+};
+
+NewAuthProvider _$NewAuthProviderFromJson(Map<String, dynamic> json) => NewAuthProvider(
+  allowSignup: json['allowSignup'] as bool?,
+  clientId: json['clientId'] as String,
+  clientSecret: json['clientSecret'] as String,
+  issuer: json['issuer'] as String?,
+  label: json['label'] as String?,
+  linkByEmail: json['linkByEmail'] as bool?,
+  preset: json['preset'] as String,
+  realm: json['realm'] as String?,
+  scopes: json['scopes'] as String?,
+  serverUrl: json['serverUrl'] as String?,
+  slug: json['slug'] as String?,
+  tenantId: json['tenantId'] as String?,
+  usernameClaim: json['usernameClaim'] as String?,
+);
+
+Map<String, dynamic> _$NewAuthProviderToJson(NewAuthProvider instance) => <String, dynamic>{
+  'allowSignup': ?instance.allowSignup,
+  'clientId': instance.clientId,
+  'clientSecret': instance.clientSecret,
+  'issuer': ?instance.issuer,
+  'label': ?instance.label,
+  'linkByEmail': ?instance.linkByEmail,
+  'preset': instance.preset,
+  'realm': ?instance.realm,
+  'scopes': ?instance.scopes,
+  'serverUrl': ?instance.serverUrl,
+  'slug': ?instance.slug,
+  'tenantId': ?instance.tenantId,
+  'usernameClaim': ?instance.usernameClaim,
 };
 
 NewCalendar _$NewCalendarFromJson(Map<String, dynamic> json) => NewCalendar(
@@ -1703,6 +1959,13 @@ Map<String, dynamic> _$PersonToJson(Person instance) => <String, dynamic>{
   'self': instance.self,
 };
 
+PollTokenBody _$PollTokenBodyFromJson(Map<String, dynamic> json) =>
+    PollTokenBody(pollToken: json['pollToken'] as String);
+
+Map<String, dynamic> _$PollTokenBodyToJson(PollTokenBody instance) => <String, dynamic>{
+  'pollToken': instance.pollToken,
+};
+
 Preferences _$PreferencesFromJson(Map<String, dynamic> json) =>
     Preferences(quota: json['quota'] as bool, security: json['security'] as bool, shares: json['shares'] as bool);
 
@@ -1736,6 +1999,11 @@ Map<String, dynamic> _$ProfileToJson(Profile instance) => <String, dynamic>{
   'firstName': instance.firstName,
   'lastName': instance.lastName,
 };
+
+ProviderOrder _$ProviderOrderFromJson(Map<String, dynamic> json) =>
+    ProviderOrder(ids: (json['ids'] as List<dynamic>?)?.map((e) => e as String).toList() ?? []);
+
+Map<String, dynamic> _$ProviderOrderToJson(ProviderOrder instance) => <String, dynamic>{'ids': ?instance.ids};
 
 QueryFilter _$QueryFilterFromJson(Map<String, dynamic> json) => QueryFilter(
   end: (json['end'] as num).toInt(),
@@ -1800,6 +2068,11 @@ Map<String, dynamic> _$RecipientRefToJson(RecipientRef instance) => <String, dyn
   'id': instance.id,
   'kind': ?recipientRefKindToJson(instance.kind),
 };
+
+RecoveryCodes _$RecoveryCodesFromJson(Map<String, dynamic> json) =>
+    RecoveryCodes(codes: (json['codes'] as List<dynamic>?)?.map((e) => e as String).toList() ?? []);
+
+Map<String, dynamic> _$RecoveryCodesToJson(RecoveryCodes instance) => <String, dynamic>{'codes': ?instance.codes};
 
 RefreshRequest _$RefreshRequestFromJson(Map<String, dynamic> json) =>
     RefreshRequest(deviceName: json['deviceName'] as String?, refreshToken: json['refreshToken'] as String);
@@ -1910,6 +2183,20 @@ Map<String, dynamic> _$SearchStatusToJson(SearchStatus instance) => <String, dyn
   'lastSync': ?instance.lastSync?.toIso8601String(),
 };
 
+SecondFactorRequest _$SecondFactorRequestFromJson(Map<String, dynamic> json) => SecondFactorRequest(
+  challenge: json['challenge'] as String,
+  code: json['code'] as String?,
+  deviceName: json['deviceName'] as String?,
+  recoveryCode: json['recoveryCode'] as String?,
+);
+
+Map<String, dynamic> _$SecondFactorRequestToJson(SecondFactorRequest instance) => <String, dynamic>{
+  'challenge': instance.challenge,
+  'code': ?instance.code,
+  'deviceName': ?instance.deviceName,
+  'recoveryCode': ?instance.recoveryCode,
+};
+
 Server _$ServerFromJson(Map<String, dynamic> json) => Server(
   allowPrivateNetwork: json['allowPrivateNetwork'] as bool,
   apiVersion: json['apiVersion'] as String,
@@ -2003,6 +2290,7 @@ ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) => ServerSett
   ocrEnabled: json['ocrEnabled'] as bool,
   ocrLanguages: (json['ocrLanguages'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   ocrMaxPages: (json['ocrMaxPages'] as num).toInt(),
+  requireTwoFactor: json['requireTwoFactor'] as bool,
   searchContentEnabled: json['searchContentEnabled'] as bool,
   smtpFrom: json['smtpFrom'] as String,
   smtpHost: json['smtpHost'] as String,
@@ -2013,6 +2301,7 @@ ServerSettings _$ServerSettingsFromJson(Map<String, dynamic> json) => ServerSett
   smtpUsername: json['smtpUsername'] as String,
   trashEnabled: json['trashEnabled'] as bool,
   trashRetentionDays: (json['trashRetentionDays'] as num).toInt(),
+  twoFactorGraceDays: (json['twoFactorGraceDays'] as num).toInt(),
   versionsEnabled: json['versionsEnabled'] as bool,
   versionsKeepAllHours: (json['versionsKeepAllHours'] as num).toInt(),
   versionsMaxAgeDays: (json['versionsMaxAgeDays'] as num).toInt(),
@@ -2027,6 +2316,7 @@ Map<String, dynamic> _$ServerSettingsToJson(ServerSettings instance) => <String,
   'ocrEnabled': instance.ocrEnabled,
   'ocrLanguages': ?instance.ocrLanguages,
   'ocrMaxPages': instance.ocrMaxPages,
+  'requireTwoFactor': instance.requireTwoFactor,
   'searchContentEnabled': instance.searchContentEnabled,
   'smtpFrom': instance.smtpFrom,
   'smtpHost': instance.smtpHost,
@@ -2037,6 +2327,7 @@ Map<String, dynamic> _$ServerSettingsToJson(ServerSettings instance) => <String,
   'smtpUsername': instance.smtpUsername,
   'trashEnabled': instance.trashEnabled,
   'trashRetentionDays': instance.trashRetentionDays,
+  'twoFactorGraceDays': instance.twoFactorGraceDays,
   'versionsEnabled': instance.versionsEnabled,
   'versionsKeepAllHours': instance.versionsKeepAllHours,
   'versionsMaxAgeDays': instance.versionsMaxAgeDays,
@@ -2051,6 +2342,7 @@ ServerSettingsChanges _$ServerSettingsChangesFromJson(Map<String, dynamic> json)
   ocrEnabled: json['ocrEnabled'] as bool?,
   ocrLanguages: (json['ocrLanguages'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
   ocrMaxPages: (json['ocrMaxPages'] as num?)?.toInt(),
+  requireTwoFactor: json['requireTwoFactor'] as bool?,
   searchContentEnabled: json['searchContentEnabled'] as bool?,
   smtpFrom: json['smtpFrom'] as String?,
   smtpHost: json['smtpHost'] as String?,
@@ -2060,6 +2352,7 @@ ServerSettingsChanges _$ServerSettingsChangesFromJson(Map<String, dynamic> json)
   smtpUsername: json['smtpUsername'] as String?,
   trashEnabled: json['trashEnabled'] as bool?,
   trashRetentionDays: (json['trashRetentionDays'] as num?)?.toInt(),
+  twoFactorGraceDays: (json['twoFactorGraceDays'] as num?)?.toInt(),
   versionsEnabled: json['versionsEnabled'] as bool?,
   versionsKeepAllHours: (json['versionsKeepAllHours'] as num?)?.toInt(),
   versionsMaxAgeDays: (json['versionsMaxAgeDays'] as num?)?.toInt(),
@@ -2074,6 +2367,7 @@ Map<String, dynamic> _$ServerSettingsChangesToJson(ServerSettingsChanges instanc
   'ocrEnabled': ?instance.ocrEnabled,
   'ocrLanguages': ?instance.ocrLanguages,
   'ocrMaxPages': ?instance.ocrMaxPages,
+  'requireTwoFactor': ?instance.requireTwoFactor,
   'searchContentEnabled': ?instance.searchContentEnabled,
   'smtpFrom': ?instance.smtpFrom,
   'smtpHost': ?instance.smtpHost,
@@ -2083,6 +2377,7 @@ Map<String, dynamic> _$ServerSettingsChangesToJson(ServerSettingsChanges instanc
   'smtpUsername': ?instance.smtpUsername,
   'trashEnabled': ?instance.trashEnabled,
   'trashRetentionDays': ?instance.trashRetentionDays,
+  'twoFactorGraceDays': ?instance.twoFactorGraceDays,
   'versionsEnabled': ?instance.versionsEnabled,
   'versionsKeepAllHours': ?instance.versionsKeepAllHours,
   'versionsMaxAgeDays': ?instance.versionsMaxAgeDays,
@@ -2203,6 +2498,18 @@ Map<String, dynamic> _$SharePermissionsToJson(SharePermissions instance) => <Str
   'create': ?instance.create,
   'delete': ?instance.delete,
   'edit': ?instance.edit,
+};
+
+SsoTokenRequest _$SsoTokenRequestFromJson(Map<String, dynamic> json) => SsoTokenRequest(
+  code: json['code'] as String,
+  codeVerifier: json['codeVerifier'] as String,
+  deviceName: json['deviceName'] as String?,
+);
+
+Map<String, dynamic> _$SsoTokenRequestToJson(SsoTokenRequest instance) => <String, dynamic>{
+  'code': instance.code,
+  'codeVerifier': instance.codeVerifier,
+  'deviceName': ?instance.deviceName,
 };
 
 StreamTicket _$StreamTicketFromJson(Map<String, dynamic> json) =>
@@ -2389,6 +2696,54 @@ Map<String, dynamic> _$TrustedServerRequestToJson(TrustedServerRequest instance)
   'skipAddressCheck': ?instance.skipAddressCheck,
 };
 
+TwoFactorCodeRequest _$TwoFactorCodeRequestFromJson(Map<String, dynamic> json) =>
+    TwoFactorCodeRequest(code: json['code'] as String);
+
+Map<String, dynamic> _$TwoFactorCodeRequestToJson(TwoFactorCodeRequest instance) => <String, dynamic>{
+  'code': instance.code,
+};
+
+TwoFactorPasswordRequest _$TwoFactorPasswordRequestFromJson(Map<String, dynamic> json) =>
+    TwoFactorPasswordRequest(password: json['password'] as String?);
+
+Map<String, dynamic> _$TwoFactorPasswordRequestToJson(TwoFactorPasswordRequest instance) => <String, dynamic>{
+  'password': ?instance.password,
+};
+
+TwoFactorSettings _$TwoFactorSettingsFromJson(Map<String, dynamic> json) => TwoFactorSettings(
+  deadline: json['deadline'] == null ? null : DateTime.parse(json['deadline'] as String),
+  enabled: json['enabled'] as bool,
+  recoveryCodesRemaining: (json['recoveryCodesRemaining'] as num).toInt(),
+  required: json['required'] as bool,
+);
+
+Map<String, dynamic> _$TwoFactorSettingsToJson(TwoFactorSettings instance) => <String, dynamic>{
+  'deadline': ?instance.deadline?.toIso8601String(),
+  'enabled': instance.enabled,
+  'recoveryCodesRemaining': instance.recoveryCodesRemaining,
+  'required': instance.required,
+};
+
+TwoFactorSetup _$TwoFactorSetupFromJson(Map<String, dynamic> json) =>
+    TwoFactorSetup(secret: json['secret'] as String, url: json['url'] as String);
+
+Map<String, dynamic> _$TwoFactorSetupToJson(TwoFactorSetup instance) => <String, dynamic>{
+  'secret': instance.secret,
+  'url': instance.url,
+};
+
+TwoFactorStatus _$TwoFactorStatusFromJson(Map<String, dynamic> json) => TwoFactorStatus(
+  deadline: json['deadline'] == null ? null : DateTime.parse(json['deadline'] as String),
+  enabled: json['enabled'] as bool,
+  setupRequired: json['setupRequired'] as bool,
+);
+
+Map<String, dynamic> _$TwoFactorStatusToJson(TwoFactorStatus instance) => <String, dynamic>{
+  'deadline': ?instance.deadline?.toIso8601String(),
+  'enabled': instance.enabled,
+  'setupRequired': instance.setupRequired,
+};
+
 UnlockRequest _$UnlockRequestFromJson(Map<String, dynamic> json) =>
     UnlockRequest(password: json['password'] as String?);
 
@@ -2431,11 +2786,14 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
   avatar: json['avatar'] == null ? null : Avatar.fromJson(json['avatar'] as Map<String, dynamic>),
   createdAt: DateTime.parse(json['createdAt'] as String),
   disabled: json['disabled'] as bool,
+  hasPassword: json['hasPassword'] as bool,
   historyBytes: (json['historyBytes'] as num).toInt(),
   id: (json['id'] as num).toInt(),
   profile: Profile.fromJson(json['profile'] as Map<String, dynamic>),
   quotaBytes: (json['quotaBytes'] as num).toInt(),
   role: userRoleFromJson(json['role']),
+  sso: json['sso'] as bool,
+  twoFactor: TwoFactorStatus.fromJson(json['twoFactor'] as Map<String, dynamic>),
   usedBytes: (json['usedBytes'] as num).toInt(),
   username: json['username'] as String,
 );
@@ -2445,11 +2803,14 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'avatar': ?instance.avatar?.toJson(),
   'createdAt': instance.createdAt.toIso8601String(),
   'disabled': instance.disabled,
+  'hasPassword': instance.hasPassword,
   'historyBytes': instance.historyBytes,
   'id': instance.id,
   'profile': instance.profile.toJson(),
   'quotaBytes': instance.quotaBytes,
   'role': ?userRoleToJson(instance.role),
+  'sso': instance.sso,
+  'twoFactor': instance.twoFactor.toJson(),
   'usedBytes': instance.usedBytes,
   'username': instance.username,
 };

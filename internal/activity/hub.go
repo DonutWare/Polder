@@ -41,6 +41,8 @@ const (
 	EventCalendarChanged  EventType = "calendar.changed"
 	EventCalendarReminder EventType = "calendar.reminder"
 	EventNotification     EventType = "notification.created"
+	EventLoginRequested   EventType = "login.requested"
+	EventLoginResolved    EventType = "login.resolved"
 )
 
 type Event struct {
@@ -53,6 +55,20 @@ type Event struct {
 	Calendar *CalendarUpdate   `json:"calendar,omitempty"`
 	Reminder *CalendarReminder `json:"reminder,omitempty"`
 	Notice   *Notification     `json:"notification,omitempty"`
+	Login    *LoginRequest     `json:"loginRequest,omitempty" required:"false"`
+}
+
+type LoginRequest struct {
+	ID         string    `json:"id"`
+	Device     string    `json:"device" doc:"Name the new device gave itself"`
+	Address    string    `json:"address" doc:"IP address the request came from"`
+	CreatedAt  time.Time `json:"createdAt"`
+	ExpiresAt  time.Time `json:"expiresAt"`
+	Resolution string    `json:"resolution,omitempty" required:"false" enum:"approved,denied,expired,cancelled" doc:"How it ended, with login.resolved"`
+}
+
+func (e Event) ownerOnly() bool {
+	return e.Type == EventLoginRequested || e.Type == EventLoginResolved
 }
 
 type LiveTransfer struct {
@@ -353,7 +369,7 @@ func (h *Hub) Publish(event Event) {
 // fresh snapshot.
 func (h *Hub) publishLocked(event Event) {
 	for subscription := range h.subscriptions {
-		if !subscription.scope.Matches(event.UserID) {
+		if !subscription.scope.Matches(event.UserID) || (event.ownerOnly() && subscription.scope.Self != event.UserID) {
 			continue
 		}
 		select {

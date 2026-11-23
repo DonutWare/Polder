@@ -245,6 +245,179 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Single sign-on accounts linked to the logged-in user
+  Future<chopper.Response<List<LinkedIdentity>>> listLinkedIdentities() {
+    generatedMapping.putIfAbsent(LinkedIdentity, () => LinkedIdentity.fromJsonFactory);
+
+    return _listLinkedIdentities();
+  }
+
+  ///Single sign-on accounts linked to the logged-in user
+  @GET(path: '/api/v1/account/identities')
+  Future<chopper.Response<List<LinkedIdentity>>> _listLinkedIdentities({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Single sign-on accounts linked to the logged-in user',
+      operationId: 'listLinkedIdentities',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Finish linking with the code from the redirect URI and the PKCE verifier
+  Future<chopper.Response<LinkedProvider>> confirmLinkIdentity({required ConfirmLinkRequest? body}) {
+    generatedMapping.putIfAbsent(LinkedProvider, () => LinkedProvider.fromJsonFactory);
+
+    return _confirmLinkIdentity(body: body);
+  }
+
+  ///Finish linking with the code from the redirect URI and the PKCE verifier
+  @POST(path: '/api/v1/account/identities/confirm', optionalBody: true)
+  Future<chopper.Response<LinkedProvider>> _confirmLinkIdentity({
+    @Body() required ConfirmLinkRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Finish linking with the code from the redirect URI and the PKCE verifier',
+      operationId: 'confirmLinkIdentity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Unlink a single sign-on account
+  ///@param identityID
+  Future<chopper.Response> unlinkIdentity({required int? identityID}) {
+    return _unlinkIdentity(identityID: identityID);
+  }
+
+  ///Unlink a single sign-on account
+  ///@param identityID
+  @DELETE(path: '/api/v1/account/identities/{identityID}')
+  Future<chopper.Response> _unlinkIdentity({
+    @Path('identityID') required int? identityID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Unlink a single sign-on account',
+      operationId: 'unlinkIdentity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Start linking an account at a provider; open the returned URL in a browser
+  ///@param providerID
+  Future<chopper.Response<LinkIdentityStart>> linkIdentity({
+    required String? providerID,
+    required LinkIdentityRequest? body,
+  }) {
+    generatedMapping.putIfAbsent(LinkIdentityStart, () => LinkIdentityStart.fromJsonFactory);
+
+    return _linkIdentity(providerID: providerID, body: body);
+  }
+
+  ///Start linking an account at a provider; open the returned URL in a browser
+  ///@param providerID
+  @POST(path: '/api/v1/account/identities/{providerID}/link', optionalBody: true)
+  Future<chopper.Response<LinkIdentityStart>> _linkIdentity({
+    @Path('providerID') required String? providerID,
+    @Body() required LinkIdentityRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start linking an account at a provider; open the returned URL in a browser',
+      operationId: 'linkIdentity',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Sign-ins on other devices waiting for this account's approval
+  Future<chopper.Response<List<LoginRequest>>> listLoginRequests() {
+    generatedMapping.putIfAbsent(LoginRequest, () => LoginRequest.fromJsonFactory);
+
+    return _listLoginRequests();
+  }
+
+  ///Sign-ins on other devices waiting for this account's approval
+  @GET(path: '/api/v1/account/login-requests')
+  Future<chopper.Response<List<LoginRequest>>> _listLoginRequests({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Sign-ins on other devices waiting for this account\'s approval',
+      operationId: 'listLoginRequests',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Approve a sign-in by typing the number the new device shows; a wrong number refuses it
+  ///@param requestID
+  Future<chopper.Response> approveLoginRequest({required String? requestID, required ApproveLoginInputBody? body}) {
+    return _approveLoginRequest(requestID: requestID, body: body);
+  }
+
+  ///Approve a sign-in by typing the number the new device shows; a wrong number refuses it
+  ///@param requestID
+  @POST(path: '/api/v1/account/login-requests/{requestID}/approve', optionalBody: true)
+  Future<chopper.Response> _approveLoginRequest({
+    @Path('requestID') required String? requestID,
+    @Body() required ApproveLoginInputBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Approve a sign-in by typing the number the new device shows; a wrong number refuses it',
+      operationId: 'approveLoginRequest',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Refuse a sign-in on another device
+  ///@param requestID
+  Future<chopper.Response> denyLoginRequest({required String? requestID}) {
+    return _denyLoginRequest(requestID: requestID);
+  }
+
+  ///Refuse a sign-in on another device
+  ///@param requestID
+  @POST(path: '/api/v1/account/login-requests/{requestID}/deny', optionalBody: true)
+  Future<chopper.Response> _denyLoginRequest({
+    @Path('requestID') required String? requestID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Refuse a sign-in on another device',
+      operationId: 'denyLoginRequest',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
   ///Change the logged-in user's password; their other sessions are logged out
   Future<chopper.Response> changePassword({required PasswordChange? body}) {
     return _changePassword(body: body);
@@ -283,6 +456,123 @@ abstract class Polder extends ChopperService {
       description: '',
       summary: 'Change the logged-in user\'s name and contact details',
       operationId: 'setProfile',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Whether two-factor authentication is on for the logged-in user, and whether it's required
+  Future<chopper.Response<TwoFactorSettings>> getTwoFactor() {
+    generatedMapping.putIfAbsent(TwoFactorSettings, () => TwoFactorSettings.fromJsonFactory);
+
+    return _getTwoFactor();
+  }
+
+  ///Whether two-factor authentication is on for the logged-in user, and whether it's required
+  @GET(path: '/api/v1/account/two-factor')
+  Future<chopper.Response<TwoFactorSettings>> _getTwoFactor({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether two-factor authentication is on for the logged-in user, and whether it\'s required',
+      operationId: 'getTwoFactor',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Turn two-factor authentication on with a first code from the app; returns the recovery codes once
+  Future<chopper.Response<RecoveryCodes>> confirmTwoFactorSetup({required TwoFactorCodeRequest? body}) {
+    generatedMapping.putIfAbsent(RecoveryCodes, () => RecoveryCodes.fromJsonFactory);
+
+    return _confirmTwoFactorSetup(body: body);
+  }
+
+  ///Turn two-factor authentication on with a first code from the app; returns the recovery codes once
+  @POST(path: '/api/v1/account/two-factor/confirm', optionalBody: true)
+  Future<chopper.Response<RecoveryCodes>> _confirmTwoFactorSetup({
+    @Body() required TwoFactorCodeRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Turn two-factor authentication on with a first code from the app; returns the recovery codes once',
+      operationId: 'confirmTwoFactorSetup',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Turn two-factor authentication off, unless the server requires it
+  Future<chopper.Response> disableTwoFactor({required TwoFactorPasswordRequest? body}) {
+    return _disableTwoFactor(body: body);
+  }
+
+  ///Turn two-factor authentication off, unless the server requires it
+  @POST(path: '/api/v1/account/two-factor/disable', optionalBody: true)
+  Future<chopper.Response> _disableTwoFactor({
+    @Body() required TwoFactorPasswordRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Turn two-factor authentication off, unless the server requires it',
+      operationId: 'disableTwoFactor',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Replace the recovery codes; the old ones stop working
+  Future<chopper.Response<RecoveryCodes>> regenerateRecoveryCodes({required TwoFactorPasswordRequest? body}) {
+    generatedMapping.putIfAbsent(RecoveryCodes, () => RecoveryCodes.fromJsonFactory);
+
+    return _regenerateRecoveryCodes(body: body);
+  }
+
+  ///Replace the recovery codes; the old ones stop working
+  @POST(path: '/api/v1/account/two-factor/recovery-codes', optionalBody: true)
+  Future<chopper.Response<RecoveryCodes>> _regenerateRecoveryCodes({
+    @Body() required TwoFactorPasswordRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Replace the recovery codes; the old ones stop working',
+      operationId: 'regenerateRecoveryCodes',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["account"],
+      deprecated: false,
+    ),
+  });
+
+  ///Start setting up two-factor authentication; returns the key for the authenticator app
+  Future<chopper.Response<TwoFactorSetup>> beginTwoFactorSetup({required TwoFactorPasswordRequest? body}) {
+    generatedMapping.putIfAbsent(TwoFactorSetup, () => TwoFactorSetup.fromJsonFactory);
+
+    return _beginTwoFactorSetup(body: body);
+  }
+
+  ///Start setting up two-factor authentication; returns the key for the authenticator app
+  @POST(path: '/api/v1/account/two-factor/setup', optionalBody: true)
+  Future<chopper.Response<TwoFactorSetup>> _beginTwoFactorSetup({
+    @Body() required TwoFactorPasswordRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Start setting up two-factor authentication; returns the key for the authenticator app',
+      operationId: 'beginTwoFactorSetup',
       consumes: [],
       produces: [],
       security: ["bearer"],
@@ -345,6 +635,180 @@ abstract class Polder extends ChopperService {
       produces: [],
       security: ["bearer"],
       tags: ["activity"],
+      deprecated: false,
+    ),
+  });
+
+  ///Single sign-on providers
+  Future<chopper.Response<List<AuthProvider>>> listAuthProviders() {
+    generatedMapping.putIfAbsent(AuthProvider, () => AuthProvider.fromJsonFactory);
+
+    return _listAuthProviders();
+  }
+
+  ///Single sign-on providers
+  @GET(path: '/api/v1/admin/auth-providers')
+  Future<chopper.Response<List<AuthProvider>>> _listAuthProviders({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Single sign-on providers',
+      operationId: 'listAuthProviders',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Add a single sign-on provider
+  Future<chopper.Response<AuthProvider>> createAuthProvider({required NewAuthProvider? body}) {
+    generatedMapping.putIfAbsent(AuthProvider, () => AuthProvider.fromJsonFactory);
+
+    return _createAuthProvider(body: body);
+  }
+
+  ///Add a single sign-on provider
+  @POST(path: '/api/v1/admin/auth-providers', optionalBody: true)
+  Future<chopper.Response<AuthProvider>> _createAuthProvider({
+    @Body() required NewAuthProvider? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Add a single sign-on provider',
+      operationId: 'createAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Choose the order of the sign-in buttons
+  Future<chopper.Response<List<AuthProvider>>> reorderAuthProviders({required ProviderOrder? body}) {
+    generatedMapping.putIfAbsent(AuthProvider, () => AuthProvider.fromJsonFactory);
+
+    return _reorderAuthProviders(body: body);
+  }
+
+  ///Choose the order of the sign-in buttons
+  @PUT(path: '/api/v1/admin/auth-providers/order', optionalBody: true)
+  Future<chopper.Response<List<AuthProvider>>> _reorderAuthProviders({
+    @Body() required ProviderOrder? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Choose the order of the sign-in buttons',
+      operationId: 'reorderAuthProviders',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Providers that are quick to set up, with what each needs
+  Future<chopper.Response<List<AuthProviderPreset>>> listAuthProviderPresets() {
+    generatedMapping.putIfAbsent(AuthProviderPreset, () => AuthProviderPreset.fromJsonFactory);
+
+    return _listAuthProviderPresets();
+  }
+
+  ///Providers that are quick to set up, with what each needs
+  @GET(path: '/api/v1/admin/auth-providers/presets')
+  Future<chopper.Response<List<AuthProviderPreset>>> _listAuthProviderPresets({
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Providers that are quick to set up, with what each needs',
+      operationId: 'listAuthProviderPresets',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Remove a single sign-on provider and every account link to it
+  ///@param providerID
+  Future<chopper.Response> deleteAuthProvider({required String? providerID}) {
+    return _deleteAuthProvider(providerID: providerID);
+  }
+
+  ///Remove a single sign-on provider and every account link to it
+  ///@param providerID
+  @DELETE(path: '/api/v1/admin/auth-providers/{providerID}')
+  Future<chopper.Response> _deleteAuthProvider({
+    @Path('providerID') required String? providerID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Remove a single sign-on provider and every account link to it',
+      operationId: 'deleteAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Change a single sign-on provider
+  ///@param providerID
+  Future<chopper.Response<AuthProvider>> updateAuthProvider({
+    required String? providerID,
+    required AuthProviderChanges? body,
+  }) {
+    generatedMapping.putIfAbsent(AuthProvider, () => AuthProvider.fromJsonFactory);
+
+    return _updateAuthProvider(providerID: providerID, body: body);
+  }
+
+  ///Change a single sign-on provider
+  ///@param providerID
+  @PATCH(path: '/api/v1/admin/auth-providers/{providerID}', optionalBody: true)
+  Future<chopper.Response<AuthProvider>> _updateAuthProvider({
+    @Path('providerID') required String? providerID,
+    @Body() required AuthProviderChanges? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Change a single sign-on provider',
+      operationId: 'updateAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Check that the provider can be reached and is set up right
+  ///@param providerID
+  Future<chopper.Response<AuthProviderTest>> testAuthProvider({required String? providerID}) {
+    generatedMapping.putIfAbsent(AuthProviderTest, () => AuthProviderTest.fromJsonFactory);
+
+    return _testAuthProvider(providerID: providerID);
+  }
+
+  ///Check that the provider can be reached and is set up right
+  ///@param providerID
+  @POST(path: '/api/v1/admin/auth-providers/{providerID}/test', optionalBody: true)
+  Future<chopper.Response<AuthProviderTest>> _testAuthProvider({
+    @Path('providerID') required String? providerID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Check that the provider can be reached and is set up right',
+      operationId: 'testAuthProvider',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
       deprecated: false,
     ),
   });
@@ -914,6 +1378,138 @@ abstract class Polder extends ChopperService {
     ),
   });
 
+  ///Give a user the full grace period again to set up two-factor authentication
+  ///@param userID
+  Future<chopper.Response<User>> extendUserTwoFactorDeadline({required int? userID}) {
+    generatedMapping.putIfAbsent(User, () => User.fromJsonFactory);
+
+    return _extendUserTwoFactorDeadline(userID: userID);
+  }
+
+  ///Give a user the full grace period again to set up two-factor authentication
+  ///@param userID
+  @POST(path: '/api/v1/admin/users/{userID}/two-factor/extend', optionalBody: true)
+  Future<chopper.Response<User>> _extendUserTwoFactorDeadline({
+    @Path('userID') required int? userID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Give a user the full grace period again to set up two-factor authentication',
+      operationId: 'extendUserTwoFactorDeadline',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Turn a user's two-factor authentication off and log them out everywhere, for when they lost their device
+  ///@param userID
+  Future<chopper.Response<User>> resetUserTwoFactor({required int? userID}) {
+    generatedMapping.putIfAbsent(User, () => User.fromJsonFactory);
+
+    return _resetUserTwoFactor(userID: userID);
+  }
+
+  ///Turn a user's two-factor authentication off and log them out everywhere, for when they lost their device
+  ///@param userID
+  @POST(path: '/api/v1/admin/users/{userID}/two-factor/reset', optionalBody: true)
+  Future<chopper.Response<User>> _resetUserTwoFactor({
+    @Path('userID') required int? userID,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Turn a user\'s two-factor authentication off and log them out everywhere, for when they lost their device',
+      operationId: 'resetUserTwoFactor',
+      consumes: [],
+      produces: [],
+      security: ["bearer"],
+      tags: ["admin"],
+      deprecated: false,
+    ),
+  });
+
+  ///Ask a signed-in device of the account to approve this sign-in
+  Future<chopper.Response<DeviceLoginStart>> startDeviceLogin({required DeviceLoginRequest? body}) {
+    generatedMapping.putIfAbsent(DeviceLoginStart, () => DeviceLoginStart.fromJsonFactory);
+
+    return _startDeviceLogin(body: body);
+  }
+
+  ///Ask a signed-in device of the account to approve this sign-in
+  @POST(path: '/api/v1/auth/device-login', optionalBody: true)
+  Future<chopper.Response<DeviceLoginStart>> _startDeviceLogin({
+    @Body() required DeviceLoginRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Ask a signed-in device of the account to approve this sign-in',
+      operationId: 'startDeviceLogin',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Stop waiting for approval
+  ///@param requestID
+  Future<chopper.Response> cancelDeviceLogin({required String? requestID, required PollTokenBody? body}) {
+    return _cancelDeviceLogin(requestID: requestID, body: body);
+  }
+
+  ///Stop waiting for approval
+  ///@param requestID
+  @POST(path: '/api/v1/auth/device-login/{requestID}/cancel', optionalBody: true)
+  Future<chopper.Response> _cancelDeviceLogin({
+    @Path('requestID') required String? requestID,
+    @Body() required PollTokenBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Stop waiting for approval',
+      operationId: 'cancelDeviceLogin',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Whether the sign-in was approved; the first approved answer carries the token pair
+  ///@param requestID
+  Future<chopper.Response<DeviceLoginResult>> getDeviceLoginStatus({
+    required String? requestID,
+    required PollTokenBody? body,
+  }) {
+    generatedMapping.putIfAbsent(DeviceLoginResult, () => DeviceLoginResult.fromJsonFactory);
+
+    return _getDeviceLoginStatus(requestID: requestID, body: body);
+  }
+
+  ///Whether the sign-in was approved; the first approved answer carries the token pair
+  ///@param requestID
+  @POST(path: '/api/v1/auth/device-login/{requestID}/status', optionalBody: true)
+  Future<chopper.Response<DeviceLoginResult>> _getDeviceLoginStatus({
+    @Path('requestID') required String? requestID,
+    @Body() required PollTokenBody? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Whether the sign-in was approved; the first approved answer carries the token pair',
+      operationId: 'getDeviceLoginStatus',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
   ///Log in and get a token pair
   Future<chopper.Response<TokenPair>> login({required CredentialsRequest? body}) {
     generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
@@ -1070,6 +1666,136 @@ abstract class Polder extends ChopperService {
       consumes: [],
       produces: [],
       security: ["bearer"],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Exchange the code from single sign-on for a token pair
+  Future<chopper.Response<TokenPair>> exchangeSingleSignOnCode({required SsoTokenRequest? body}) {
+    generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
+
+    return _exchangeSingleSignOnCode(body: body);
+  }
+
+  ///Exchange the code from single sign-on for a token pair
+  @POST(path: '/api/v1/auth/sso/token', optionalBody: true)
+  Future<chopper.Response<TokenPair>> _exchangeSingleSignOnCode({
+    @Body() required SsoTokenRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Exchange the code from single sign-on for a token pair',
+      operationId: 'exchangeSingleSignOnCode',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Open in a browser to sign in at a provider; ends on the redirect URI with a code for POST /auth/sso/token
+  ///@param providerID
+  ///@param redirect_uri Where the app waits for the result: polder://auth, a loopback address or the web app
+  ///@param code_challenge PKCE S256 challenge of a verifier the app keeps
+  ///@param device_name Name of the device the session is for
+  Future<chopper.Response> startSingleSignOn({
+    required String? providerID,
+    required String? redirectUri,
+    required String? codeChallenge,
+    String? deviceName,
+  }) {
+    return _startSingleSignOn(
+      providerID: providerID,
+      redirectUri: redirectUri,
+      codeChallenge: codeChallenge,
+      deviceName: deviceName,
+    );
+  }
+
+  ///Open in a browser to sign in at a provider; ends on the redirect URI with a code for POST /auth/sso/token
+  ///@param providerID
+  ///@param redirect_uri Where the app waits for the result: polder://auth, a loopback address or the web app
+  ///@param code_challenge PKCE S256 challenge of a verifier the app keeps
+  ///@param device_name Name of the device the session is for
+  @GET(path: '/api/v1/auth/sso/{providerID}/authorize')
+  Future<chopper.Response> _startSingleSignOn({
+    @Path('providerID') required String? providerID,
+    @Query('redirect_uri') required String? redirectUri,
+    @Query('code_challenge') required String? codeChallenge,
+    @Query('device_name') String? deviceName,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary:
+          'Open in a browser to sign in at a provider; ends on the redirect URI with a code for POST /auth/sso/token',
+      operationId: 'startSingleSignOn',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Where the provider sends the browser back to; redirects to the app
+  ///@param providerID
+  ///@param code
+  ///@param state
+  ///@param error
+  Future<chopper.Response> finishSingleSignOn({
+    required String? providerID,
+    String? code,
+    String? state,
+    String? error,
+  }) {
+    return _finishSingleSignOn(providerID: providerID, code: code, state: state, error: error);
+  }
+
+  ///Where the provider sends the browser back to; redirects to the app
+  ///@param providerID
+  ///@param code
+  ///@param state
+  ///@param error
+  @GET(path: '/api/v1/auth/sso/{providerID}/callback')
+  Future<chopper.Response> _finishSingleSignOn({
+    @Path('providerID') required String? providerID,
+    @Query('code') String? code,
+    @Query('state') String? state,
+    @Query('error') String? error,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Where the provider sends the browser back to; redirects to the app',
+      operationId: 'finishSingleSignOn',
+      consumes: [],
+      produces: [],
+      security: [],
+      tags: ["auth"],
+      deprecated: false,
+    ),
+  });
+
+  ///Finish logging in with a code from the authenticator app or a recovery code
+  Future<chopper.Response<TokenPair>> verifyTwoFactor({required SecondFactorRequest? body}) {
+    generatedMapping.putIfAbsent(TokenPair, () => TokenPair.fromJsonFactory);
+
+    return _verifyTwoFactor(body: body);
+  }
+
+  ///Finish logging in with a code from the authenticator app or a recovery code
+  @POST(path: '/api/v1/auth/two-factor', optionalBody: true)
+  Future<chopper.Response<TokenPair>> _verifyTwoFactor({
+    @Body() required SecondFactorRequest? body,
+    @chopper.Tag()
+    SwaggerMetaData swaggerMetaData = const SwaggerMetaData(
+      description: '',
+      summary: 'Finish logging in with a code from the authenticator app or a recovery code',
+      operationId: 'verifyTwoFactor',
+      consumes: [],
+      produces: [],
+      security: [],
       tags: ["auth"],
       deprecated: false,
     ),

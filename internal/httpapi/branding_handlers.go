@@ -8,6 +8,7 @@ import (
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/settings"
+	"polder-server/internal/sso"
 )
 
 const (
@@ -16,12 +17,13 @@ const (
 )
 
 type branding struct {
-	Name          string               `json:"name" doc:"Name to show for this server; empty means the app's own name"`
-	Message       string               `json:"message" doc:"Welcome message for the login screen; empty means none"`
-	AccentColor   string               `json:"accentColor" doc:"Default accent color as #RRGGBB; empty means the app's own default"`
-	Icon          *settings.ImageInfo  `json:"icon,omitempty" required:"false" doc:"Absent when the server has no icon of its own"`
-	Backgrounds   []settings.ImageInfo `json:"backgrounds" doc:"The login screen's backgrounds, shown in turn"`
-	PasswordReset bool                 `json:"passwordReset" doc:"Whether a forgotten password can be reset by email"`
+	Name          string                   `json:"name" doc:"Name to show for this server; empty means the app's own name"`
+	Message       string                   `json:"message" doc:"Welcome message for the login screen; empty means none"`
+	AccentColor   string                   `json:"accentColor" doc:"Default accent color as #RRGGBB; empty means the app's own default"`
+	Icon          *settings.ImageInfo      `json:"icon,omitempty" required:"false" doc:"Absent when the server has no icon of its own"`
+	Backgrounds   []settings.ImageInfo     `json:"backgrounds" doc:"The login screen's backgrounds, shown in turn"`
+	PasswordReset bool                     `json:"passwordReset" doc:"Whether a forgotten password can be reset by email"`
+	AuthProviders []sso.AuthProviderOption `json:"authProviders" doc:"Single sign-on providers to offer on the login screen, in order"`
 }
 
 type imageUpload struct {
@@ -50,7 +52,12 @@ func (a *API) branding(ctx context.Context, _ *struct{}) (*jsonBody[branding], e
 	if err != nil {
 		return nil, err
 	}
+	providers, err := a.sso.LoginOptions(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return respond(branding{
+		AuthProviders: providers,
 		Name:          current.InstanceName,
 		Message:       current.WelcomeMessage,
 		AccentColor:   current.AccentColor,

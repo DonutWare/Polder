@@ -29,7 +29,7 @@ type errorDetail struct {
 type errorResponse struct {
 	status  int
 	Detail  errorDetail `json:"error"`
-	Current any         `json:"current,omitempty" doc:"The server's current entry, sent with conflict and already_exists errors"`
+	Current any         `json:"current,omitempty" doc:"The server's current entry, sent with conflict and already_exists errors; the sign-in challenge with two_factor_required"`
 }
 
 func (e *errorResponse) Error() string  { return e.Detail.Message }
@@ -47,6 +47,10 @@ var statusByKind = map[apperr.Kind]int{
 	apperr.KindRateLimited:   http.StatusTooManyRequests,
 	apperr.KindUnavailable:   http.StatusServiceUnavailable,
 	apperr.KindStorageFull:   http.StatusInsufficientStorage,
+
+	apperr.KindTwoFactorRequired:        http.StatusUnauthorized,
+	apperr.KindTwoFactorSetupRequired:   http.StatusForbidden,
+	apperr.KindReauthenticationRequired: http.StatusForbidden,
 }
 
 // kindByStatus names errors that Huma raises itself, such as failed request validation.
@@ -124,7 +128,7 @@ func appendDetail(details []string, err error) []string {
 
 func fromAppError(appErr *apperr.Error) *errorResponse {
 	response := &errorResponse{status: statusByKind[appErr.Kind], Detail: errorDetail{Code: string(appErr.Kind), Message: appErr.Message}}
-	if appErr.Kind == apperr.KindConflict || appErr.Kind == apperr.KindAlreadyExists {
+	if appErr.Kind == apperr.KindConflict || appErr.Kind == apperr.KindAlreadyExists || appErr.Kind == apperr.KindTwoFactorRequired {
 		response.Current = appErr.Current
 	}
 	return response

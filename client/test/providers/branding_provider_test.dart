@@ -31,6 +31,10 @@ void main() {
       "backgrounds": [
         {"id": "b1", "contentType": "image/svg+xml"},
       ],
+      "passwordReset": false,
+      "authProviders": [
+        {"id": "pocket-id", "label": "Pocket ID", "icon": "pocket-id"},
+      ],
     };
     client = ScriptedClient(handle);
     preferences = InMemoryPreferencesStore();

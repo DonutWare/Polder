@@ -23,7 +23,7 @@ class LoginFailureText extends ConsumerWidget {
   }
 
   String _withDetail(BuildContext context, String message, Object? cause) => switch (cause) {
-    UnauthorizedException() || null => message,
+    UnauthorizedException() || RateLimitedException() || null => message,
     _ => switch (context.localized.errorDetail(cause)) {
       final detail? => "$message\n$detail",
       null => message,
@@ -35,6 +35,13 @@ class LoginFailureText extends ConsumerWidget {
     LoginFailure.invalidCredentials => context.localized.loginErrorInvalidCredentials,
     LoginFailure.accountDisabled => context.localized.loginErrorDisabled,
     LoginFailure.setupUnavailable => context.localized.loginErrorSetupUnavailable,
+    LoginFailure.invalidCode => context.localized.loginErrorInvalidCode,
+    LoginFailure.tooManyAttempts => context.localized.loginErrorTooManyAttempts,
+    LoginFailure.approvalDenied => context.localized.loginErrorApprovalDenied,
+    LoginFailure.approvalExpired => context.localized.loginErrorApprovalExpired,
+    LoginFailure.ssoSignupDisabled => context.localized.loginErrorSsoSignupDisabled,
+    LoginFailure.ssoLinkRequired => context.localized.loginErrorSsoLinkRequired,
+    LoginFailure.ssoFailed => context.localized.loginErrorSsoFailed,
     LoginFailure.unknown => context.localized.errorUnknown,
   };
 }

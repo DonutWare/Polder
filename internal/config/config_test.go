@@ -15,3 +15,22 @@ func TestEmptyComposeMailVariablesLeaveDefaults(t *testing.T) {
 		t.Fatalf("empty variables should leave mail unset: %+v", cfg)
 	}
 }
+
+func TestPublicURLNeedsHTTPSExceptOnThisComputer(t *testing.T) {
+	for address, valid := range map[string]bool{
+		"https://files.example.com":    true,
+		"http://localhost:6060":        true,
+		"http://127.0.0.1:6060":        true,
+		"http://[::1]:6060":            true,
+		"http://files.example.com":     false,
+		"http://localhost.example.com": false,
+		"https://files.example.com/x":  false,
+		"ftp://localhost":              false,
+	} {
+		cfg := Default()
+		cfg.PublicURL = address
+		if err := cfg.validate(); (err == nil) != valid {
+			t.Errorf("%s: valid = %v, error = %v", address, valid, err)
+		}
+	}
+}

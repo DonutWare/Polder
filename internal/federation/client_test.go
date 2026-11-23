@@ -24,17 +24,3 @@ func TestParseCloudID(t *testing.T) {
 		}
 	}
 }
-
-func TestSecretBox(t *testing.T) {
-	box, err := newSecretBox(make([]byte, 32))
-	if err != nil {
-		t.Fatal(err)
-	}
-	sealed := box.seal("secret", "share:1")
-	if opened, err := box.open(sealed, "share:1"); err != nil || opened != "secret" {
-		t.Fatalf("open: %q %v", opened, err)
-	}
-	if _, err := box.open(sealed, "share:2"); err == nil {
-		t.Fatal("a secret sealed for another row must not open")
-	}
-}

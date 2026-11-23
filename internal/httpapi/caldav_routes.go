@@ -57,7 +57,7 @@ func (a *API) serveCalendarFeed(w http.ResponseWriter, r *http.Request) {
 	address := clientAddress(r.RemoteAddr)
 	keys := []string{"feed:" + address}
 	if a.linkLimiter.blocked(keys...) {
-		dav.WriteError(w, r, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute"))
+		dav.WriteError(w, r, errTooManyAttempts)
 		return
 	}
 	feed, err := a.calendar.RenderFeed(r.Context(), chi.URLParam(r, "token"))

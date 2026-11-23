@@ -19,6 +19,12 @@ class ServerSettingsNotifier extends AsyncNotifier<ServerSettings> {
   Future<void> setTrashRetentionDays(int days) =>
       _update(() => ref.read(polderApiProvider).updateServerSettings(trashRetentionDays: days));
 
+  Future<void> setRequireTwoFactor(bool required) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(requireTwoFactor: required));
+
+  Future<void> setTwoFactorGraceDays(int days) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(twoFactorGraceDays: days));
+
   Future<void> setTrashEnabled(bool enabled) =>
       _update(() => ref.read(polderApiProvider).updateServerSettings(trashEnabled: enabled));
 

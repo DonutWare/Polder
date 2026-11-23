@@ -22,6 +22,7 @@ type Identity struct {
 	User      users.User
 	SessionID int64
 	Device    string
+	Method    Method
 	ExpiresAt time.Time
 }
 
@@ -40,6 +41,9 @@ type Service struct {
 	appPasswords *AppPasswords
 	tokens       *AccessTokens
 	resets       *PasswordResets
+	twoFactor    *TwoFactor
+	challenges   *Challenges
+	deviceLogins *DeviceLogins
 	hasher       Argon2Hasher
 	setupMu      sync.Mutex
 	onSession    SessionFunc
@@ -78,29 +82,40 @@ func (s *Service) Setup(ctx context.Context, username, password, deviceName stri
 	if err != nil {
 		return TokenPair{}, err
 	}
-	return s.startSession(ctx, admin, deviceName)
+	return s.startSession(ctx, admin, deviceName, MethodPassword, time.Now())
 }
 
 func (s *Service) Login(ctx context.Context, username, password, deviceName string) (TokenPair, error) {
-	user, passwordHash, err := s.users.Store().CredentialsByUsername(ctx, username)
-	if apperr.Is(err, apperr.KindNotFound) {
-		s.hasher.Verify(password, dummyHash)
-		return TokenPair{}, apperr.Unauthorized("invalid username or password")
-	}
+	user, err := s.checkPassword(ctx, username, password)
 	if err != nil {
 		return TokenPair{}, err
 	}
+	if err := s.requireSecondFactor(ctx, user, deviceName); err != nil {
+		return TokenPair{}, err
+	}
+	return s.startSession(ctx, user, deviceName, MethodPassword, time.Now())
+}
+
+func (s *Service) checkPassword(ctx context.Context, username, password string) (users.User, error) {
+	user, passwordHash, err := s.users.Store().CredentialsByUsername(ctx, username)
+	if apperr.Is(err, apperr.KindNotFound) {
+		s.hasher.Verify(password, dummyHash)
+		return users.User{}, apperr.Unauthorized("invalid username or password")
+	}
+	if err != nil {
+		return users.User{}, err
+	}
 	if !s.hasher.Verify(password, passwordHash) {
-		return TokenPair{}, apperr.Unauthorized("invalid username or password")
+		return users.User{}, apperr.Unauthorized("invalid username or password")
 	}
 	if user.Disabled {
-		return TokenPair{}, apperr.Forbidden("this account is disabled")
+		return users.User{}, apperr.Forbidden("this account is disabled")
 	}
-	return s.startSession(ctx, user, deviceName)
+	return user, nil
 }
 
 func (s *Service) ChangePassword(ctx context.Context, user users.User, sessionID int64, currentPassword, newPassword string) error {
-	if err := s.ConfirmPassword(ctx, user, currentPassword); err != nil {
+	if err := s.ConfirmPassword(ctx, user, sessionID, currentPassword); err != nil {
 		return err
 	}
 	if _, err := s.users.Update(ctx, user, user.ID, users.Changes{Password: &newPassword}); err != nil {
@@ -112,13 +127,27 @@ func (s *Service) ChangePassword(ctx context.Context, user users.User, sessionID
 	return s.sessions.RevokeOthersForUser(ctx, user.ID, sessionID)
 }
 
-func (s *Service) ConfirmPassword(ctx context.Context, user users.User, password string) error {
+func (s *Service) ConfirmPassword(ctx context.Context, user users.User, sessionID int64, password string) error {
 	passwordHash, err := s.users.Store().PasswordHash(ctx, user.ID)
 	if err != nil {
 		return err
 	}
+	if passwordHash == users.NoPasswordHash {
+		return s.requireRecentSignIn(ctx, user.ID, sessionID)
+	}
 	if !s.hasher.Verify(password, passwordHash) {
 		return apperr.Forbidden("current password is incorrect")
+	}
+	return nil
+}
+
+func (s *Service) requireRecentSignIn(ctx context.Context, userID, sessionID int64) error {
+	authenticatedAt, err := s.sessions.AuthenticatedAt(ctx, userID, sessionID)
+	if err != nil {
+		return err
+	}
+	if time.Since(authenticatedAt) > RecentSignInWindow {
+		return apperr.New(apperr.KindReauthenticationRequired, "sign in again to confirm it's you, then try once more")
 	}
 	return nil
 }
@@ -127,8 +156,8 @@ func (s *Service) LogOutEverywhere(ctx context.Context, userID int64) error {
 	return errors.Join(s.sessions.RevokeAllForUser(ctx, userID), s.appPasswords.RevokeAllForUser(ctx, userID))
 }
 
-func (s *Service) CreateAppPassword(ctx context.Context, user users.User, accountPassword, name string, readOnly bool) (NewAppPassword, error) {
-	if err := s.ConfirmPassword(ctx, user, accountPassword); err != nil {
+func (s *Service) CreateAppPassword(ctx context.Context, user users.User, sessionID int64, accountPassword, name string, readOnly bool) (NewAppPassword, error) {
+	if err := s.ConfirmPassword(ctx, user, sessionID, accountPassword); err != nil {
 		return NewAppPassword{}, err
 	}
 	return s.appPasswords.Create(ctx, user.ID, name, readOnly)
@@ -146,6 +175,9 @@ func (s *Service) AuthenticateAppPassword(ctx context.Context, username, token, 
 	}
 	if !knownAs(user, username) {
 		return users.User{}, AppPassword{}, invalid
+	}
+	if user.TwoFactor.SetupRequired {
+		return users.User{}, AppPassword{}, apperr.Forbidden("set up two-factor authentication in the app before using app passwords again")
 	}
 	return user, identity.Password, nil
 }
@@ -169,8 +201,16 @@ func (s *Service) Refresh(ctx context.Context, refreshToken, deviceName string) 
 	return s.tokenPair(user, session, rotatedToken)
 }
 
-func (s *Service) StartSession(ctx context.Context, user users.User, deviceName string) (TokenPair, error) {
-	return s.startSession(ctx, user, deviceName)
+func (s *Service) StartSession(ctx context.Context, user users.User, deviceName string, method Method, authenticatedAt time.Time) (TokenPair, error) {
+	return s.startSession(ctx, user, deviceName, method, authenticatedAt)
+}
+
+func (s *Service) StartSessionLike(ctx context.Context, identity Identity, deviceName string) (TokenPair, error) {
+	authenticatedAt, err := s.sessions.AuthenticatedAt(ctx, identity.User.ID, identity.SessionID)
+	if err != nil {
+		return TokenPair{}, err
+	}
+	return s.startSession(ctx, identity.User, deviceName, identity.Method, authenticatedAt)
 }
 
 func (s *Service) Logout(ctx context.Context, refreshToken string) error {
@@ -197,7 +237,8 @@ func (s *Service) Authenticate(ctx context.Context, accessToken string) (Identit
 	if device == "" {
 		device = UnknownDevice
 	}
-	return Identity{User: user, SessionID: claims.SessionID, Device: device, ExpiresAt: claims.ExpiresAt}, nil
+	return Identity{User: forSession(user, claims.Method), SessionID: claims.SessionID, Device: device, Method: claims.Method,
+		ExpiresAt: claims.ExpiresAt}, nil
 }
 
 func (s *Service) ActiveUser(ctx context.Context, userID int64) (users.User, error) {
@@ -214,11 +255,18 @@ func (s *Service) ActiveUser(ctx context.Context, userID int64) (users.User, err
 	return user, nil
 }
 
-func (s *Service) startSession(ctx context.Context, user users.User, deviceName string) (TokenPair, error) {
+func forSession(user users.User, method Method) users.User {
+	if method == MethodSSO {
+		user.TwoFactor.SetupRequired = false
+	}
+	return user
+}
+
+func (s *Service) startSession(ctx context.Context, user users.User, deviceName string, method Method, authenticatedAt time.Time) (TokenPair, error) {
 	if deviceName == "" {
 		deviceName = UnknownDevice
 	}
-	session, refreshToken, err := s.sessions.Create(ctx, user.ID, deviceName)
+	session, refreshToken, err := s.sessions.Create(ctx, user.ID, deviceName, method, authenticatedAt)
 	if err != nil {
 		return TokenPair{}, err
 	}
@@ -229,10 +277,13 @@ func (s *Service) startSession(ctx context.Context, user users.User, deviceName 
 	return pair, err
 }
 
-const UnknownDevice = "unknown device"
+const (
+	UnknownDevice      = "unknown device"
+	RecentSignInWindow = 10 * time.Minute
+)
 
 func (s *Service) tokenPair(user users.User, session Session, refreshToken string) (TokenPair, error) {
-	accessToken, err := s.tokens.Issue(user.ID, session.ID, session.DeviceName)
+	accessToken, err := s.tokens.Issue(user.ID, session.ID, session.DeviceName, session.Method)
 	if err != nil {
 		return TokenPair{}, err
 	}
@@ -240,6 +291,6 @@ func (s *Service) tokenPair(user users.User, session Session, refreshToken strin
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    int(AccessTokenLifetime.Seconds()),
-		User:         user,
+		User:         forSession(user, session.Method),
 	}, nil
 }

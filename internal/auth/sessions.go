@@ -24,23 +24,56 @@ func NewSessions(db *sql.DB) *Sessions {
 	return &Sessions{db: db}
 }
 
+type Method string
+
+const (
+	MethodPassword Method = "password"
+	MethodSSO      Method = "sso"
+	MethodDevice   Method = "device"
+)
+
+func (m Method) orPassword() Method {
+	if m == "" {
+		return MethodPassword
+	}
+	return m
+}
+
 type Session struct {
 	ID         int64
 	UserID     int64
 	DeviceName string
+	Method     Method
 }
 
-func (s *Sessions) Create(ctx context.Context, userID int64, deviceName string) (Session, string, error) {
+func (s *Sessions) Create(ctx context.Context, userID int64, deviceName string, method Method, authenticatedAt time.Time) (Session, string, error) {
 	token, tokenHash := newSecretToken()
 	now := time.Now()
+	method = method.orPassword()
 	var id int64
 	err := s.db.QueryRowContext(ctx,
-		`INSERT INTO sessions (user_id, token_hash, device_name, created_at, last_used_at, expires_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-		userID, tokenHash, deviceName, now.Unix(), now.Unix(), now.Add(RefreshTokenLifetime).Unix()).Scan(&id)
+		`INSERT INTO sessions (user_id, token_hash, device_name, created_at, last_used_at, expires_at, auth_method, authenticated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+		userID, tokenHash, deviceName, now.Unix(), now.Unix(), now.Add(RefreshTokenLifetime).Unix(), string(method), authenticatedAt.Unix()).Scan(&id)
 	if err != nil {
 		return Session{}, "", err
 	}
-	return Session{ID: id, UserID: userID, DeviceName: deviceName}, token, err
+	return Session{ID: id, UserID: userID, DeviceName: deviceName, Method: method}, token, err
+}
+
+func (s *Sessions) AuthenticatedAt(ctx context.Context, userID, sessionID int64) (time.Time, error) {
+	var authenticatedAt int64
+	err := s.db.QueryRowContext(ctx, `SELECT authenticated_at FROM sessions WHERE id = $1 AND user_id = $2`, sessionID, userID).Scan(&authenticatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return time.Time{}, nil
+	}
+	return time.Unix(authenticatedAt, 0), err
+}
+
+func (s *Sessions) CountActiveForUser(ctx context.Context, userID int64) (int, error) {
+	var count int
+	err := s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM sessions WHERE user_id = $1 AND expires_at > $2`, userID, time.Now().Unix()).Scan(&count)
+	return count, err
 }
 
 const (
@@ -150,12 +183,12 @@ type queryer interface {
 func find(ctx context.Context, db queryer, refreshToken string) (tokenMatch, error) {
 	var match tokenMatch
 	err := db.QueryRowContext(ctx, `
-		SELECT id, user_id, device_name, expires_at, token_hash, 0 FROM sessions WHERE token_hash = $1
+		SELECT id, user_id, device_name, auth_method, expires_at, token_hash, 0 FROM sessions WHERE token_hash = $1
 		UNION ALL
-		SELECT s.id, s.user_id, s.device_name, s.expires_at, s.token_hash, g.id
+		SELECT s.id, s.user_id, s.device_name, s.auth_method, s.expires_at, s.token_hash, g.id
 		FROM session_grace_tokens g JOIN sessions s ON s.id = g.session_id WHERE g.token_hash = $1`,
 		hashToken(refreshToken)).
-		Scan(&match.session.ID, &match.session.UserID, &match.session.DeviceName, &match.expiresAt, &match.currentHash, &match.graceID)
+		Scan(&match.session.ID, &match.session.UserID, &match.session.DeviceName, &match.session.Method, &match.expiresAt, &match.currentHash, &match.graceID)
 	return match, err
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 	"strings"
+	"time"
 
 	"polder-server/internal/apperr"
 	"polder-server/internal/emails"
@@ -41,6 +42,9 @@ func (a *API) createUser(ctx context.Context, input *jsonBody[users.NewUser]) (*
 	}
 	usersLog.Info("user created", "user", created.Username, "role", created.Role, "by", currentUser(ctx).Username)
 	a.emails.AccountCreated(created)
+	if err := a.twoFactorPolicy.UserCreated(ctx, created, time.Now()); err != nil {
+		usersLog.Warn("could not ask the new user to set up two-factor authentication", "user", created.Username, "error", err)
+	}
 	return respond(created), nil
 }
 
@@ -93,8 +97,15 @@ func (a *API) updateServerSettings(ctx context.Context, input *jsonBody[settings
 	if enable := input.Body.FederationEnabled; enable != nil && *enable && !a.federation.Configured() {
 		return nil, apperr.Invalid("federation needs publicUrl in the server config")
 	}
+	before, err := a.settings.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
 	updated, err := a.settings.Update(ctx, input.Body)
 	if err != nil {
+		return nil, err
+	}
+	if err := a.twoFactorPolicy.SettingsChanged(ctx, before, updated, time.Now()); err != nil {
 		return nil, err
 	}
 	settingsLog.Info("server settings changed", "fields", changedFields(input.Body), "by", currentUser(ctx).Username)

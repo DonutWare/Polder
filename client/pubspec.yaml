@@ -75,6 +75,8 @@ dependencies:
   uuid: ^4.6.0
   background_downloader: ^9.6.4
   win32_registry: ^3.0.3
+  qr_flutter: ^4.1.0
+  flutter_web_auth_2: ^6.1.0
 dependency_overrides:
   media_kit:
     git:
@@ -140,6 +142,7 @@ flutter:
 
   assets:
     - assets/icon/polder.svg
+    - assets/icons/sso/
 
   fonts:
     - family: Rubik

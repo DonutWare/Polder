@@ -1,0 +1,84 @@
+name: polder-sso
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    command: start-dev --import-realm --http-port=8180
+    environment:
+      KC_HOSTNAME: http://localhost:8180
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "127.0.0.1:8180:8180"
+    volumes:
+      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
+
+  authelia:
+    image: authelia/authelia:4.39.28
+    environment:
+      X_AUTHELIA_CONFIG_FILTERS: template
+    ports:
+      - "127.0.0.1:9091:9091"
+    volumes:
+      - ./authelia/configuration.yml:/config/configuration.yml:ro
+      - ./authelia/users.yml:/config/users.yml:ro
+      - ./certs:/certs:ro
+      - authelia-data:/data
+
+  pocket-id:
+    image: ghcr.io/pocket-id/pocket-id:v2.19.2
+    environment:
+      APP_URL: http://localhost:1411
+      ENCRYPTION_KEY: cG9sZGVyLWRldi1wb2NrZXQtaWQtZW5jcnlwdGlvbi1rZXk=
+      STATIC_API_KEY: polder-dev-pocket-id-api-key
+      TRUST_PROXY: "false"
+    ports:
+      - "127.0.0.1:1411:1411"
+    volumes:
+      - pocket-id-data:/app/data
+
+  authentik-postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: authentik
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD: authentik
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U authentik -d authentik"]
+      interval: 5s
+      retries: 20
+    volumes:
+      - authentik-postgres:/var/lib/postgresql/data
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2026.8.4
+    command: server
+    environment: &authentik
+      AUTHENTIK_SECRET_KEY: polder-dev-authentik-secret-key-0123456789abcdef
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: authentik
+      AUTHENTIK_BOOTSTRAP_PASSWORD: admin-password
+      AUTHENTIK_BOOTSTRAP_TOKEN: polder-dev-authentik-api-token
+      AUTHENTIK_BOOTSTRAP_EMAIL: admin@example.com
+      AUTHENTIK_DISABLE_UPDATE_CHECK: "true"
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+    depends_on:
+      authentik-postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:9000:9000"
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2026.8.4
+    command: worker
+    environment: *authentik
+    depends_on:
+      authentik-postgres:
+        condition: service_healthy
+
+volumes:
+  authelia-data:
+  pocket-id-data:
+  authentik-postgres:

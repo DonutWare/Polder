@@ -19,6 +19,10 @@ const (
 	KindRateLimited   Kind = "rate_limited"
 	KindUnavailable   Kind = "unavailable"
 	KindStorageFull   Kind = "storage_full"
+
+	KindTwoFactorRequired        Kind = "two_factor_required"
+	KindTwoFactorSetupRequired   Kind = "two_factor_setup_required"
+	KindReauthenticationRequired Kind = "reauthentication_required"
 )
 
 type Error struct {
@@ -54,6 +58,12 @@ func StorageFull(format string, args ...any) *Error {
 
 func Conflict(current any, format string, args ...any) *Error {
 	err := New(KindConflict, format, args...)
+	err.Current = current
+	return err
+}
+
+func WithCurrent(kind Kind, current any, format string, args ...any) *Error {
+	err := New(kind, format, args...)
 	err.Current = current
 	return err
 }

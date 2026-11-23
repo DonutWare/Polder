@@ -21,6 +21,7 @@ import "package:polder/models/manifest.dart";
 import "package:polder/models/note_item.dart";
 import "package:polder/models/notifications/feed_notification.dart";
 import "package:polder/models/search.dart";
+import "package:polder/models/security.dart";
 import "package:polder/models/server_connection.dart";
 import "package:polder/models/server_info.dart";
 import "package:polder/models/server_log.dart";
@@ -38,6 +39,7 @@ import "package:polder/services/api/federation_mappers.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
 import "package:polder/services/api/notification_mappers.dart";
 import "package:polder/services/api/pending_uploads.dart";
+import "package:polder/services/api/security_mappers.dart";
 import "package:polder/services/api/sharing_mappers.dart";
 import "package:polder/services/api/wire_mappers.dart";
 import "package:polder_calendar/polder_calendar.dart" as cal;
@@ -101,6 +103,120 @@ class PolderApi {
       (await _service.login(
         body: wire.CredentialsRequest(username: username, password: password, deviceName: deviceName),
       )).body!.toModel();
+
+  Future<TokenPair> verifyTwoFactor({
+    required String challenge,
+    String? code,
+    String? recoveryCode,
+    required String deviceName,
+  }) async => (await _service.verifyTwoFactor(
+    body: wire.SecondFactorRequest(
+      challenge: challenge,
+      code: code,
+      recoveryCode: recoveryCode,
+      deviceName: deviceName,
+    ),
+  )).body!.toModel();
+
+  Future<DeviceLoginStart> startDeviceLogin({String? username, String? challenge, required String deviceName}) async =>
+      (await _service.startDeviceLogin(
+        body: wire.DeviceLoginRequest(username: username, challenge: challenge, deviceName: deviceName),
+      )).body!.toModel();
+
+  Future<DeviceLoginResult> deviceLoginStatus(DeviceLoginStart started) async => (await _service.getDeviceLoginStatus(
+    requestID: started.requestId,
+    body: wire.PollTokenBody(pollToken: started.pollToken),
+  )).body!.toModel();
+
+  Future<void> cancelDeviceLogin(DeviceLoginStart started) => _service.cancelDeviceLogin(
+    requestID: started.requestId,
+    body: wire.PollTokenBody(pollToken: started.pollToken),
+  );
+
+  Future<TokenPair> exchangeSingleSignOnCode({
+    required String code,
+    required String codeVerifier,
+    required String deviceName,
+  }) async => (await _service.exchangeSingleSignOnCode(
+    body: wire.SsoTokenRequest(code: code, codeVerifier: codeVerifier, deviceName: deviceName),
+  )).body!.toModel();
+
+  Future<TwoFactorState> twoFactor() async => (await _service.getTwoFactor()).body!.toModel();
+
+  Future<TwoFactorSetup> beginTwoFactorSetup(String password) async =>
+      (await _service.beginTwoFactorSetup(body: wire.TwoFactorPasswordRequest(password: password))).body!.toModel();
+
+  Future<List<String>> confirmTwoFactorSetup(String code) async =>
+      (await _service.confirmTwoFactorSetup(body: wire.TwoFactorCodeRequest(code: code))).body!.codes ?? const [];
+
+  Future<List<String>> regenerateRecoveryCodes(String password) async =>
+      (await _service.regenerateRecoveryCodes(body: wire.TwoFactorPasswordRequest(password: password))).body!.codes ??
+      const [];
+
+  Future<void> disableTwoFactor(String password) =>
+      _service.disableTwoFactor(body: wire.TwoFactorPasswordRequest(password: password));
+
+  Future<List<LoginRequest>> loginRequests() async => [
+    for (final request in (await _service.listLoginRequests()).body!) request.toModel(),
+  ];
+
+  Future<void> approveLoginRequest(String id, int number) => _service.approveLoginRequest(
+    requestID: id,
+    body: wire.ApproveLoginInputBody(number: number),
+  );
+
+  Future<void> denyLoginRequest(String id) => _service.denyLoginRequest(requestID: id);
+
+  Future<List<LinkedIdentity>> linkedIdentities() async => [
+    for (final identity in (await _service.listLinkedIdentities()).body!) identity.toModel(),
+  ];
+
+  Future<String> startLinkingIdentity(
+    String providerId, {
+    required String redirectUri,
+    required String codeChallenge,
+  }) async => (await _service.linkIdentity(
+    providerID: providerId,
+    body: wire.LinkIdentityRequest(redirectUri: redirectUri, codeChallenge: codeChallenge),
+  )).body!.url;
+
+  Future<void> confirmLinkingIdentity({required String code, required String codeVerifier}) =>
+      _service.confirmLinkIdentity(
+        body: wire.ConfirmLinkRequest(code: code, codeVerifier: codeVerifier),
+      );
+
+  Future<void> unlinkIdentity(int id) => _service.unlinkIdentity(identityID: id);
+
+  Future<List<AuthProviderPreset>> authProviderPresets() async => [
+    for (final preset in (await _service.listAuthProviderPresets()).body!) preset.toModel(),
+  ];
+
+  Future<List<AuthProvider>> authProviders() async => [
+    for (final provider in (await _service.listAuthProviders()).body!) provider.toModel(),
+  ];
+
+  Future<AuthProvider> createAuthProvider(NewAuthProvider provider) async =>
+      (await _service.createAuthProvider(body: provider.toWire())).body!.toModel();
+
+  Future<AuthProvider> updateAuthProvider(String id, AuthProviderChanges changes) async =>
+      (await _service.updateAuthProvider(providerID: id, body: changes.toWire())).body!.toModel();
+
+  Future<void> deleteAuthProvider(String id) => _service.deleteAuthProvider(providerID: id);
+
+  Future<List<AuthProvider>> reorderAuthProviders(List<String> ids) async => [
+    for (final provider in (await _service.reorderAuthProviders(body: wire.ProviderOrder(ids: ids))).body!)
+      provider.toModel(),
+  ];
+
+  Future<String?> testAuthProvider(String id) async {
+    final result = (await _service.testAuthProvider(providerID: id)).body!;
+    return result.ok ? null : (result.message ?? "");
+  }
+
+  Future<User> resetUserTwoFactor(int id) async => (await _service.resetUserTwoFactor(userID: id)).body!.toModel();
+
+  Future<User> extendUserTwoFactorDeadline(int id) async =>
+      (await _service.extendUserTwoFactorDeadline(userID: id)).body!.toModel();
 
   Future<TokenPair> refresh(String refreshToken) async =>
       (await _service.refresh(body: wire.RefreshRequest(refreshToken: refreshToken))).body!.toModel();
@@ -451,8 +567,12 @@ class PolderApi {
     String? smtpPassword,
     String? smtpFrom,
     MailSecurity? smtpSecurity,
+    bool? requireTwoFactor,
+    int? twoFactorGraceDays,
   }) async => (await _service.updateServerSettings(
     body: wire.ServerSettingsChanges(
+      requireTwoFactor: requireTwoFactor,
+      twoFactorGraceDays: twoFactorGraceDays,
       smtpHost: smtpHost,
       smtpPort: smtpPort,
       smtpUsername: smtpUsername,

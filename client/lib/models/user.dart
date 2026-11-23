@@ -40,11 +40,18 @@ abstract class User with _$User {
     ServerImage? avatar,
     ThemeMode? theme,
     @ColorConverter() Color? accent,
+    @Default(false) bool twoFactorEnabled,
+    DateTime? twoFactorDeadline,
+    @Default(false) bool twoFactorSetupRequired,
+    @Default(true) bool hasPassword,
+    @Default(false) bool sso,
   }) = _User;
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   bool get isAdmin => role == UserRole.admin;
+
+  bool get twoFactorDue => !twoFactorEnabled && twoFactorDeadline != null;
 
   bool get hasQuota => quotaBytes > 0;
 

@@ -69,6 +69,18 @@ type Config struct {
 	SMTPPassword string `yaml:"smtpPassword"`
 	SMTPFrom     string `yaml:"smtpFrom"`
 	SMTPSecurity string `yaml:"smtpSecurity"`
+
+	SSOPreset       string `yaml:"ssoPreset"`
+	SSOLabel        string `yaml:"ssoLabel"`
+	SSOServerURL    string `yaml:"ssoServerUrl"`
+	SSORealm        string `yaml:"ssoRealm"`
+	SSOSlug         string `yaml:"ssoSlug"`
+	SSOTenantID     string `yaml:"ssoTenantId"`
+	SSOIssuer       string `yaml:"ssoIssuer"`
+	SSOClientID     string `yaml:"ssoClientId"`
+	SSOClientSecret string `yaml:"ssoClientSecret"`
+	SSOAllowSignup  *bool  `yaml:"ssoAllowSignup"`
+	SSOLinkByEmail  *bool  `yaml:"ssoLinkByEmail"`
 }
 
 func Default() Config {
@@ -142,6 +154,24 @@ func (cfg *Config) mergeEnvironment() error {
 	cfg.SMTPPassword = envOr("POLDER_SMTP_PASSWORD", cfg.SMTPPassword)
 	cfg.SMTPFrom = envOr("POLDER_SMTP_FROM", cfg.SMTPFrom)
 	cfg.SMTPSecurity = envOr("POLDER_SMTP_SECURITY", cfg.SMTPSecurity)
+	cfg.SSOPreset = envOr("POLDER_SSO_PRESET", cfg.SSOPreset)
+	cfg.SSOLabel = envOr("POLDER_SSO_LABEL", cfg.SSOLabel)
+	cfg.SSOServerURL = envOr("POLDER_SSO_SERVER_URL", cfg.SSOServerURL)
+	cfg.SSORealm = envOr("POLDER_SSO_REALM", cfg.SSORealm)
+	cfg.SSOSlug = envOr("POLDER_SSO_SLUG", cfg.SSOSlug)
+	cfg.SSOTenantID = envOr("POLDER_SSO_TENANT_ID", cfg.SSOTenantID)
+	cfg.SSOIssuer = envOr("POLDER_SSO_ISSUER", cfg.SSOIssuer)
+	cfg.SSOClientID = envOr("POLDER_SSO_CLIENT_ID", cfg.SSOClientID)
+	cfg.SSOClientSecret = envOr("POLDER_SSO_CLIENT_SECRET", cfg.SSOClientSecret)
+	for name, target := range map[string]**bool{"POLDER_SSO_ALLOW_SIGNUP": &cfg.SSOAllowSignup, "POLDER_SSO_LINK_BY_EMAIL": &cfg.SSOLinkByEmail} {
+		if value, ok := os.LookupEnv(name); ok && value != "" {
+			parsed, err := strconv.ParseBool(value)
+			if err != nil {
+				return fmt.Errorf("%s: %w", name, err)
+			}
+			*target = &parsed
+		}
+	}
 	if value, ok := os.LookupEnv("POLDER_TRUSTED_PROXIES"); ok {
 		cfg.TrustedProxies = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || unicode.IsSpace(r) })
 	}
@@ -236,9 +266,9 @@ func (cfg Config) validate() error {
 		return errors.New("collaboraUrl and euroOfficeUrl are both set; choose one document editor")
 	}
 	if cfg.PublicURL != "" {
-		if parsed, err := url.Parse(cfg.PublicURL); err != nil || parsed.Scheme != "https" || parsed.Host == "" || parsed.User != nil ||
+		if parsed, err := url.Parse(cfg.PublicURL); err != nil || !securePublicScheme(parsed) || parsed.Host == "" || parsed.User != nil ||
 			parsed.RawQuery != "" || parsed.Fragment != "" || strings.Trim(parsed.Path, "/") != "" {
-			return fmt.Errorf("publicUrl: %q must be an https address without a path, such as https://files.example.com", cfg.PublicURL)
+			return fmt.Errorf("publicUrl: %q must be an https address without a path, such as https://files.example.com; http only works for localhost", cfg.PublicURL)
 		}
 	}
 	for name, value := range map[string]string{"collaboraUrl": cfg.CollaboraURL, "euroOfficeUrl": cfg.EuroOfficeURL, "wopiUrl": cfg.WOPIURL} {
@@ -260,6 +290,21 @@ func (cfg Config) validate() error {
 	default:
 		return fmt.Errorf("unknown database driver %q (use %q or %q)", cfg.DatabaseDriver, DriverSQLite, DriverPostgres)
 	}
+}
+
+func securePublicScheme(address *url.URL) bool {
+	if address.Scheme == "https" {
+		return true
+	}
+	if address.Scheme != "http" {
+		return false
+	}
+	host := address.Hostname()
+	if host == "localhost" {
+		return true
+	}
+	ip, err := netip.ParseAddr(host)
+	return err == nil && ip.IsLoopback()
 }
 
 func (cfg Config) validateCalendar() error {

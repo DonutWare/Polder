@@ -301,7 +301,7 @@ as String,
 /// @nodoc
 mixin _$User {
 
- int get id; String get username;@JsonKey(unknownEnumValue: UserRole.user) UserRole get role; int get quotaBytes; int get usedBytes; int get historyBytes; bool get disabled; DateTime? get createdAt; UserProfile get profile; ServerImage? get avatar; ThemeMode? get theme;@ColorConverter() Color? get accent;
+ int get id; String get username;@JsonKey(unknownEnumValue: UserRole.user) UserRole get role; int get quotaBytes; int get usedBytes; int get historyBytes; bool get disabled; DateTime? get createdAt; UserProfile get profile; ServerImage? get avatar; ThemeMode? get theme;@ColorConverter() Color? get accent; bool get twoFactorEnabled; DateTime? get twoFactorDeadline; bool get twoFactorSetupRequired; bool get hasPassword; bool get sso;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -315,20 +315,20 @@ $UserCopyWith<User> get copyWith => _$UserCopyWithImpl<User>(this as User, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as User;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes)&&(identical(other.usedBytes, _this.usedBytes) || other.usedBytes == _this.usedBytes)&&(identical(other.historyBytes, _this.historyBytes) || other.historyBytes == _this.historyBytes)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.avatar, _this.avatar) || other.avatar == _this.avatar)&&(identical(other.theme, _this.theme) || other.theme == _this.theme)&&(identical(other.accent, _this.accent) || other.accent == _this.accent));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is User&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.quotaBytes, _this.quotaBytes) || other.quotaBytes == _this.quotaBytes)&&(identical(other.usedBytes, _this.usedBytes) || other.usedBytes == _this.usedBytes)&&(identical(other.historyBytes, _this.historyBytes) || other.historyBytes == _this.historyBytes)&&(identical(other.disabled, _this.disabled) || other.disabled == _this.disabled)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.avatar, _this.avatar) || other.avatar == _this.avatar)&&(identical(other.theme, _this.theme) || other.theme == _this.theme)&&(identical(other.accent, _this.accent) || other.accent == _this.accent)&&(identical(other.twoFactorEnabled, _this.twoFactorEnabled) || other.twoFactorEnabled == _this.twoFactorEnabled)&&(identical(other.twoFactorDeadline, _this.twoFactorDeadline) || other.twoFactorDeadline == _this.twoFactorDeadline)&&(identical(other.twoFactorSetupRequired, _this.twoFactorSetupRequired) || other.twoFactorSetupRequired == _this.twoFactorSetupRequired)&&(identical(other.hasPassword, _this.hasPassword) || other.hasPassword == _this.hasPassword)&&(identical(other.sso, _this.sso) || other.sso == _this.sso));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as User;
-  return Object.hash(runtimeType,_this.id,_this.username,_this.role,_this.quotaBytes,_this.usedBytes,_this.historyBytes,_this.disabled,_this.createdAt,_this.profile,_this.avatar,_this.theme,_this.accent);
+  return Object.hash(runtimeType,_this.id,_this.username,_this.role,_this.quotaBytes,_this.usedBytes,_this.historyBytes,_this.disabled,_this.createdAt,_this.profile,_this.avatar,_this.theme,_this.accent,_this.twoFactorEnabled,_this.twoFactorDeadline,_this.twoFactorSetupRequired,_this.hasPassword,_this.sso);
 }
 
 @override
 String toString() {
   final _this = this as User;
-  return 'User(id: ${_this.id}, username: ${_this.username}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes}, usedBytes: ${_this.usedBytes}, historyBytes: ${_this.historyBytes}, disabled: ${_this.disabled}, createdAt: ${_this.createdAt}, profile: ${_this.profile}, avatar: ${_this.avatar}, theme: ${_this.theme}, accent: ${_this.accent})';
+  return 'User(id: ${_this.id}, username: ${_this.username}, role: ${_this.role}, quotaBytes: ${_this.quotaBytes}, usedBytes: ${_this.usedBytes}, historyBytes: ${_this.historyBytes}, disabled: ${_this.disabled}, createdAt: ${_this.createdAt}, profile: ${_this.profile}, avatar: ${_this.avatar}, theme: ${_this.theme}, accent: ${_this.accent}, twoFactorEnabled: ${_this.twoFactorEnabled}, twoFactorDeadline: ${_this.twoFactorDeadline}, twoFactorSetupRequired: ${_this.twoFactorSetupRequired}, hasPassword: ${_this.hasPassword}, sso: ${_this.sso})';
 }
 
 
@@ -339,7 +339,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, int historyBytes, bool disabled, DateTime? createdAt, UserProfile profile, ServerImage? avatar, ThemeMode? theme,@ColorConverter() Color? accent
+ int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, int historyBytes, bool disabled, DateTime? createdAt, UserProfile profile, ServerImage? avatar, ThemeMode? theme,@ColorConverter() Color? accent, bool twoFactorEnabled, DateTime? twoFactorDeadline, bool twoFactorSetupRequired, bool hasPassword, bool sso
 });
 
 
@@ -356,7 +356,7 @@ class _$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? historyBytes = null,Object? disabled = null,Object? createdAt = freezed,Object? profile = null,Object? avatar = freezed,Object? theme = freezed,Object? accent = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? historyBytes = null,Object? disabled = null,Object? createdAt = freezed,Object? profile = null,Object? avatar = freezed,Object? theme = freezed,Object? accent = freezed,Object? twoFactorEnabled = null,Object? twoFactorDeadline = freezed,Object? twoFactorSetupRequired = null,Object? hasPassword = null,Object? sso = null,}) {
   return _then(User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -370,7 +370,12 @@ as DateTime?,profile: null == profile ? _self.profile : profile // ignore: cast_
 as UserProfile,avatar: freezed == avatar ? _self.avatar : avatar // ignore: cast_nullable_to_non_nullable
 as ServerImage?,theme: freezed == theme ? _self.theme : theme // ignore: cast_nullable_to_non_nullable
 as ThemeMode?,accent: freezed == accent ? _self.accent : accent // ignore: cast_nullable_to_non_nullable
-as Color?,
+as Color?,twoFactorEnabled: null == twoFactorEnabled ? _self.twoFactorEnabled : twoFactorEnabled // ignore: cast_nullable_to_non_nullable
+as bool,twoFactorDeadline: freezed == twoFactorDeadline ? _self.twoFactorDeadline : twoFactorDeadline // ignore: cast_nullable_to_non_nullable
+as DateTime?,twoFactorSetupRequired: null == twoFactorSetupRequired ? _self.twoFactorSetupRequired : twoFactorSetupRequired // ignore: cast_nullable_to_non_nullable
+as bool,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
+as bool,sso: null == sso ? _self.sso : sso // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of User
@@ -476,10 +481,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  int historyBytes,  bool disabled,  DateTime? createdAt,  UserProfile profile,  ServerImage? avatar,  ThemeMode? theme, @ColorConverter()  Color? accent)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  int historyBytes,  bool disabled,  DateTime? createdAt,  UserProfile profile,  ServerImage? avatar,  ThemeMode? theme, @ColorConverter()  Color? accent,  bool twoFactorEnabled,  DateTime? twoFactorDeadline,  bool twoFactorSetupRequired,  bool hasPassword,  bool sso)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.historyBytes,_that.disabled,_that.createdAt,_that.profile,_that.avatar,_that.theme,_that.accent);case _:
+return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.historyBytes,_that.disabled,_that.createdAt,_that.profile,_that.avatar,_that.theme,_that.accent,_that.twoFactorEnabled,_that.twoFactorDeadline,_that.twoFactorSetupRequired,_that.hasPassword,_that.sso);case _:
   return orElse();
 
 }
@@ -497,10 +502,10 @@ return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBy
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  int historyBytes,  bool disabled,  DateTime? createdAt,  UserProfile profile,  ServerImage? avatar,  ThemeMode? theme, @ColorConverter()  Color? accent)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  int historyBytes,  bool disabled,  DateTime? createdAt,  UserProfile profile,  ServerImage? avatar,  ThemeMode? theme, @ColorConverter()  Color? accent,  bool twoFactorEnabled,  DateTime? twoFactorDeadline,  bool twoFactorSetupRequired,  bool hasPassword,  bool sso)  $default,) {final _that = this;
 switch (_that) {
 case _User():
-return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.historyBytes,_that.disabled,_that.createdAt,_that.profile,_that.avatar,_that.theme,_that.accent);case _:
+return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.historyBytes,_that.disabled,_that.createdAt,_that.profile,_that.avatar,_that.theme,_that.accent,_that.twoFactorEnabled,_that.twoFactorDeadline,_that.twoFactorSetupRequired,_that.hasPassword,_that.sso);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -517,10 +522,10 @@ return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBy
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  int historyBytes,  bool disabled,  DateTime? createdAt,  UserProfile profile,  ServerImage? avatar,  ThemeMode? theme, @ColorConverter()  Color? accent)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String username, @JsonKey(unknownEnumValue: UserRole.user)  UserRole role,  int quotaBytes,  int usedBytes,  int historyBytes,  bool disabled,  DateTime? createdAt,  UserProfile profile,  ServerImage? avatar,  ThemeMode? theme, @ColorConverter()  Color? accent,  bool twoFactorEnabled,  DateTime? twoFactorDeadline,  bool twoFactorSetupRequired,  bool hasPassword,  bool sso)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
-return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.historyBytes,_that.disabled,_that.createdAt,_that.profile,_that.avatar,_that.theme,_that.accent);case _:
+return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBytes,_that.historyBytes,_that.disabled,_that.createdAt,_that.profile,_that.avatar,_that.theme,_that.accent,_that.twoFactorEnabled,_that.twoFactorDeadline,_that.twoFactorSetupRequired,_that.hasPassword,_that.sso);case _:
   return null;
 
 }
@@ -532,7 +537,7 @@ return $default(_that.id,_that.username,_that.role,_that.quotaBytes,_that.usedBy
 @JsonSerializable()
 
 class _User extends User {
-  const _User({required this.id, required this.username, @JsonKey(unknownEnumValue: UserRole.user) this.role = UserRole.user, this.quotaBytes = 0, this.usedBytes = 0, this.historyBytes = 0, this.disabled = false, this.createdAt, this.profile = const UserProfile(), this.avatar, this.theme, @ColorConverter() this.accent}): super._();
+  const _User({required this.id, required this.username, @JsonKey(unknownEnumValue: UserRole.user) this.role = UserRole.user, this.quotaBytes = 0, this.usedBytes = 0, this.historyBytes = 0, this.disabled = false, this.createdAt, this.profile = const UserProfile(), this.avatar, this.theme, @ColorConverter() this.accent, this.twoFactorEnabled = false, this.twoFactorDeadline, this.twoFactorSetupRequired = false, this.hasPassword = true, this.sso = false}): super._();
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  int id;
@@ -547,6 +552,11 @@ class _User extends User {
 @override final  ServerImage? avatar;
 @override final  ThemeMode? theme;
 @override@ColorConverter() final  Color? accent;
+@override@JsonKey() final  bool twoFactorEnabled;
+@override final  DateTime? twoFactorDeadline;
+@override@JsonKey() final  bool twoFactorSetupRequired;
+@override@JsonKey() final  bool hasPassword;
+@override@JsonKey() final  bool sso;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -561,18 +571,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes)&&(identical(other.usedBytes, usedBytes) || other.usedBytes == usedBytes)&&(identical(other.historyBytes, historyBytes) || other.historyBytes == historyBytes)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.theme, theme) || other.theme == theme)&&(identical(other.accent, accent) || other.accent == accent));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _User&&(identical(other.id, id) || other.id == id)&&(identical(other.username, username) || other.username == username)&&(identical(other.role, role) || other.role == role)&&(identical(other.quotaBytes, quotaBytes) || other.quotaBytes == quotaBytes)&&(identical(other.usedBytes, usedBytes) || other.usedBytes == usedBytes)&&(identical(other.historyBytes, historyBytes) || other.historyBytes == historyBytes)&&(identical(other.disabled, disabled) || other.disabled == disabled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.avatar, avatar) || other.avatar == avatar)&&(identical(other.theme, theme) || other.theme == theme)&&(identical(other.accent, accent) || other.accent == accent)&&(identical(other.twoFactorEnabled, twoFactorEnabled) || other.twoFactorEnabled == twoFactorEnabled)&&(identical(other.twoFactorDeadline, twoFactorDeadline) || other.twoFactorDeadline == twoFactorDeadline)&&(identical(other.twoFactorSetupRequired, twoFactorSetupRequired) || other.twoFactorSetupRequired == twoFactorSetupRequired)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.sso, sso) || other.sso == sso));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,username,role,quotaBytes,usedBytes,historyBytes,disabled,createdAt,profile,avatar,theme,accent);
+    return Object.hash(runtimeType,id,username,role,quotaBytes,usedBytes,historyBytes,disabled,createdAt,profile,avatar,theme,accent,twoFactorEnabled,twoFactorDeadline,twoFactorSetupRequired,hasPassword,sso);
 }
 
 @override
 String toString() {
-    return 'User(id: $id, username: $username, role: $role, quotaBytes: $quotaBytes, usedBytes: $usedBytes, historyBytes: $historyBytes, disabled: $disabled, createdAt: $createdAt, profile: $profile, avatar: $avatar, theme: $theme, accent: $accent)';
+    return 'User(id: $id, username: $username, role: $role, quotaBytes: $quotaBytes, usedBytes: $usedBytes, historyBytes: $historyBytes, disabled: $disabled, createdAt: $createdAt, profile: $profile, avatar: $avatar, theme: $theme, accent: $accent, twoFactorEnabled: $twoFactorEnabled, twoFactorDeadline: $twoFactorDeadline, twoFactorSetupRequired: $twoFactorSetupRequired, hasPassword: $hasPassword, sso: $sso)';
 }
 
 
@@ -583,7 +593,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, int historyBytes, bool disabled, DateTime? createdAt, UserProfile profile, ServerImage? avatar, ThemeMode? theme,@ColorConverter() Color? accent
+ int id, String username,@JsonKey(unknownEnumValue: UserRole.user) UserRole role, int quotaBytes, int usedBytes, int historyBytes, bool disabled, DateTime? createdAt, UserProfile profile, ServerImage? avatar, ThemeMode? theme,@ColorConverter() Color? accent, bool twoFactorEnabled, DateTime? twoFactorDeadline, bool twoFactorSetupRequired, bool hasPassword, bool sso
 });
 
 
@@ -600,7 +610,7 @@ class __$UserCopyWithImpl<$Res>
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? historyBytes = null,Object? disabled = null,Object? createdAt = freezed,Object? profile = null,Object? avatar = freezed,Object? theme = freezed,Object? accent = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? username = null,Object? role = null,Object? quotaBytes = null,Object? usedBytes = null,Object? historyBytes = null,Object? disabled = null,Object? createdAt = freezed,Object? profile = null,Object? avatar = freezed,Object? theme = freezed,Object? accent = freezed,Object? twoFactorEnabled = null,Object? twoFactorDeadline = freezed,Object? twoFactorSetupRequired = null,Object? hasPassword = null,Object? sso = null,}) {
   return _then(_User(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -614,7 +624,12 @@ as DateTime?,profile: null == profile ? _self.profile : profile // ignore: cast_
 as UserProfile,avatar: freezed == avatar ? _self.avatar : avatar // ignore: cast_nullable_to_non_nullable
 as ServerImage?,theme: freezed == theme ? _self.theme : theme // ignore: cast_nullable_to_non_nullable
 as ThemeMode?,accent: freezed == accent ? _self.accent : accent // ignore: cast_nullable_to_non_nullable
-as Color?,
+as Color?,twoFactorEnabled: null == twoFactorEnabled ? _self.twoFactorEnabled : twoFactorEnabled // ignore: cast_nullable_to_non_nullable
+as bool,twoFactorDeadline: freezed == twoFactorDeadline ? _self.twoFactorDeadline : twoFactorDeadline // ignore: cast_nullable_to_non_nullable
+as DateTime?,twoFactorSetupRequired: null == twoFactorSetupRequired ? _self.twoFactorSetupRequired : twoFactorSetupRequired // ignore: cast_nullable_to_non_nullable
+as bool,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
+as bool,sso: null == sso ? _self.sso : sso // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

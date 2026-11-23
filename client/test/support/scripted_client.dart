@@ -70,6 +70,9 @@ Map<String, dynamic> userJson({String role = "user"}) => {
   "createdAt": "2026-09-30T12:00:00Z",
   "profile": {"firstName": "", "lastName": "", "displayName": "", "email": "", "address": ""},
   "appearance": <String, dynamic>{},
+  "twoFactor": {"enabled": false, "setupRequired": false},
+  "hasPassword": true,
+  "sso": false,
 };
 
 Map<String, dynamic> tokenJson(String access, String refresh) => {

@@ -36,9 +36,11 @@ import (
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
 	"polder-server/internal/sharing"
+	"polder-server/internal/sso"
 	"polder-server/internal/storage"
 	"polder-server/internal/syncing"
 	"polder-server/internal/tags"
+	"polder-server/internal/twofactor"
 	"polder-server/internal/users"
 	"polder-server/internal/versions"
 	"polder-server/internal/webdav"
@@ -76,6 +78,8 @@ type App struct {
 	tags      *tags.Service
 	calendar  *calendar.Service
 	emails    *emails.Service
+	twoFactor *twofactor.Policy
+	sso       *sso.Service
 
 	federation         *federation.Service
 	notifications      *notifications.Service
@@ -139,6 +143,7 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		VersionsKeepAllHours: settings.DefaultVersionKeepAllHours,
 		VersionsMaxAgeDays:   settings.DefaultVersionMaxAgeDays,
 		VersionsMaxPerFile:   settings.DefaultVersionMaxPerFile,
+		TwoFactorGraceDays:   settings.DefaultTwoFactorGraceDays,
 	})
 	mailer := newMailer(cfg, serverSettings)
 	brands := emails.NewBrandSource(serverSettings, images, cfg.PublicBaseURL())
@@ -185,6 +190,27 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 	userService.OnCreated(func(user users.User) { fileScanner.Request(user.Username) })
 	authService := auth.NewService(userService, sessions, auth.NewAppPasswords(db), tokens)
 	authService.UsePasswordResets(auth.NewPasswordResets(db))
+	totp, err := auth.NewTwoFactor(db, tokens.DerivedKey(auth.TOTPSecretKeyPurpose))
+	if err != nil {
+		return nil, err
+	}
+	authService.UseTwoFactor(totp, auth.NewChallenges(tokens.DerivedKey(auth.ChallengeKeyPurpose)))
+	authService.UseDeviceLogins(auth.NewDeviceLogins(activityHub.Publish))
+	twoFactorPolicy := twofactor.NewPolicy(userStore, serverSettings, emailService)
+	ssoService, err := sso.NewService(db, userService, authService, sso.Options{
+		PublicURL: cfg.PublicBaseURL(),
+		SecretKey: tokens.DerivedKey(sso.SecretKeyPurpose),
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := ssoService.UseConfiguredProvider(context.Background(), sso.NewAuthProvider{
+		Preset: cfg.SSOPreset, Label: cfg.SSOLabel, ServerURL: cfg.SSOServerURL, Realm: cfg.SSORealm, Slug: cfg.SSOSlug,
+		TenantID: cfg.SSOTenantID, Issuer: cfg.SSOIssuer, ClientID: cfg.SSOClientID, ClientSecret: cfg.SSOClientSecret,
+		AllowSignup: cfg.SSOAllowSignup, LinkByEmail: cfg.SSOLinkByEmail,
+	}); err != nil {
+		return nil, fmt.Errorf("single sign-on provider from the config: %w", err)
+	}
 	authService.OnSession(func(ctx context.Context, user users.User, session auth.Session, event auth.SessionEvent) {
 		activityHub.Session(ctx, user, session.ID, session.DeviceName, event == auth.SessionStarted)
 	})
@@ -278,6 +304,8 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		Notifications:          notificationService,
 		Emails:                 emailService,
 		Brands:                 brands,
+		TwoFactorPolicy:        twoFactorPolicy,
+		SSO:                    ssoService,
 		WebDAVAllowInsecure:    cfg.WebDAVAllowInsecure,
 		RequestTrashPurge:      func() { requestWork(trashPurgeRequests) },
 		LoginAttemptsPerMinute: cfg.LoginRateLimit,
@@ -303,6 +331,8 @@ func wire(cfg config.Config, db *sql.DB) (*App, error) {
 		tags:      tagService,
 		calendar:  calendarService,
 		emails:    emailService,
+		twoFactor: twoFactorPolicy,
+		sso:       ssoService,
 
 		federation:         federationService,
 		notifications:      notificationService,
@@ -355,6 +385,12 @@ func (a *App) StartBackgroundWork(ctx context.Context) {
 	})
 	a.background.Go(func() { repeat(ctx, calendarPruneInterval, "prune calendar history", a.calendar.PruneChanges) })
 	a.background.Go(func() { repeat(ctx, notifications.PruneInterval, "prune notifications", a.notifications.Prune) })
+	a.background.Go(func() { repeat(ctx, sso.PruneInterval, "prune single sign-on attempts", a.sso.Prune) })
+	a.background.Go(func() {
+		repeat(ctx, twofactor.ReminderInterval, "send two-factor reminders", func(ctx context.Context) error {
+			return a.SendTwoFactorReminders(ctx, time.Now())
+		})
+	})
 	a.background.Go(func() { repeat(ctx, uploadCleanupInterval, "remove expired uploads", a.sync.RemoveExpiredUploads) })
 	a.background.Go(func() {
 		repeatOnRequest(ctx, trashPurgeInterval, a.trashPurgeRequests, "purge expired trash", func(ctx context.Context) error {
@@ -409,6 +445,10 @@ func requestWork(requests chan<- struct{}) {
 	case requests <- struct{}{}:
 	default:
 	}
+}
+
+func (a *App) SendTwoFactorReminders(ctx context.Context, now time.Time) error {
+	return a.twoFactor.SendReminders(ctx, now)
 }
 
 func (a *App) TrashUnlinkedAttachments(ctx context.Context, now time.Time) error {

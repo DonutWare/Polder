@@ -43,6 +43,19 @@ func (s *Service) Create(ctx context.Context, newUser NewUser) (User, error) {
 	if err != nil {
 		return User{}, err
 	}
+	return s.insert(ctx, newUser, passwordHash)
+}
+
+func (s *Service) CreateWithoutPassword(ctx context.Context, newUser NewUser) (User, error) {
+	newUser.Email = strings.TrimSpace(newUser.Email)
+	newUser.Password = ""
+	if err := newUser.validateWithoutPassword(); err != nil {
+		return User{}, err
+	}
+	return s.insert(ctx, newUser, NoPasswordHash)
+}
+
+func (s *Service) insert(ctx context.Context, newUser NewUser, passwordHash string) (User, error) {
 	user, err := s.store.Insert(ctx, newUser, passwordHash)
 	if err != nil {
 		return User{}, err

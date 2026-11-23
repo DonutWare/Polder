@@ -17,6 +17,8 @@ import "package:polder/screens/shell/widgets/file_operations_bar.dart";
 import "package:polder/screens/shell/widgets/more_options.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/util/remote_path.dart";
+import "package:polder/widgets/auth/login_approval_dialog.dart";
+import "package:polder/widgets/auth/two_factor_deadline_banner.dart";
 import "package:polder/widgets/layout/adaptive.dart";
 import "package:polder/widgets/navigation/intercept_back.dart";
 import "package:polder/widgets/navigation/navigation_shell.dart";
@@ -82,7 +84,16 @@ class AppShell extends ConsumerWidget {
               unawaited(context.push(destination.route));
             },
             sidebarFooter: const QuotaBar(),
-            child: FileOperationsOverlay(child: SearchShortcut(child: child)),
+            child: LoginApprovalListener(
+              child: Column(
+                children: [
+                  const TwoFactorDeadlineBanner(),
+                  Expanded(
+                    child: FileOperationsOverlay(child: SearchShortcut(child: child)),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

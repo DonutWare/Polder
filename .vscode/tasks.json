@@ -47,6 +47,13 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Start SSO docker",
+			"detail": "Start Keycloak, Authelia, Pocket ID and authentik in Docker, for the Server (SSO) launch configuration",
+			"type": "shell",
+			"command": "sh dev/sso/start.sh",
+			"problemMatcher": []
+		},
+		{
 			"label": "Generate client code",
 			"detail": "build_runner for freezed / json / drift",
 			"type": "shell",

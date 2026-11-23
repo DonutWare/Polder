@@ -15,6 +15,7 @@ import (
 	"polder-server/internal/apperr"
 	"polder-server/internal/files"
 	"polder-server/internal/logging"
+	"polder-server/internal/secretbox"
 	"polder-server/internal/settings"
 	"polder-server/internal/users"
 )
@@ -38,7 +39,7 @@ type Service struct {
 	servers    serverStore
 	clients    *Clients
 	signer     signer
-	box        *secretBox
+	box        *secretbox.Box
 	publicURL  string
 	publicHost string
 	now        func() time.Time
@@ -48,7 +49,7 @@ type Service struct {
 }
 
 func New(db *sql.DB, fileService *files.Service, userStore *users.Store, settingsStore *settings.Store, options Options) (*Service, error) {
-	box, err := newSecretBox(options.SecretKey)
+	box, err := secretbox.New(options.SecretKey)
 	if err != nil {
 		return nil, err
 	}

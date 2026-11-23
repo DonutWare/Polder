@@ -201,6 +201,7 @@ class PluginNotificationService implements NotificationService {
       NotificationChannel.uploads => (_strings.notificationChannelUploads, Importance.low),
       NotificationChannel.calendar => (_strings.notificationChannelCalendar, Importance.high),
       NotificationChannel.sharing => (_strings.notificationChannelSharing, Importance.defaultImportance),
+      NotificationChannel.security => (_strings.notificationChannelSecurity, Importance.high),
     };
     return AndroidNotificationDetails(
       notification.channel.name,
@@ -236,6 +237,7 @@ class PluginNotificationService implements NotificationService {
       NotificationChannel.calendar => InterruptionLevel.timeSensitive,
       NotificationChannel.uploads => InterruptionLevel.passive,
       NotificationChannel.sharing => InterruptionLevel.active,
+      NotificationChannel.security => InterruptionLevel.timeSensitive,
     },
   );
 }

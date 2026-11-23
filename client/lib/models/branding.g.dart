@@ -14,6 +14,15 @@ Map<String, dynamic> _$ServerImageToJson(_ServerImage instance) => <String, dyna
   'contentType': instance.contentType,
 };
 
+_AuthProviderOption _$AuthProviderOptionFromJson(Map<String, dynamic> json) =>
+    _AuthProviderOption(id: json['id'] as String, label: json['label'] as String, icon: json['icon'] as String? ?? "");
+
+Map<String, dynamic> _$AuthProviderOptionToJson(_AuthProviderOption instance) => <String, dynamic>{
+  'id': instance.id,
+  'label': instance.label,
+  'icon': instance.icon,
+};
+
 _Branding _$BrandingFromJson(Map<String, dynamic> json) => _Branding(
   serverUrl: json['serverUrl'] as String?,
   name: json['name'] as String? ?? "",
@@ -24,6 +33,11 @@ _Branding _$BrandingFromJson(Map<String, dynamic> json) => _Branding(
       (json['backgrounds'] as List<dynamic>?)?.map((e) => ServerImage.fromJson(e as Map<String, dynamic>)).toList() ??
       const <ServerImage>[],
   passwordReset: json['passwordReset'] as bool? ?? false,
+  authProviders:
+      (json['authProviders'] as List<dynamic>?)
+          ?.map((e) => AuthProviderOption.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <AuthProviderOption>[],
 );
 
 Map<String, dynamic> _$BrandingToJson(_Branding instance) => <String, dynamic>{
@@ -34,6 +48,7 @@ Map<String, dynamic> _$BrandingToJson(_Branding instance) => <String, dynamic>{
   'icon': ?instance.icon?.toJson(),
   'backgrounds': instance.backgrounds.map((e) => e.toJson()).toList(),
   'passwordReset': instance.passwordReset,
+  'authProviders': instance.authProviders.map((e) => e.toJson()).toList(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>

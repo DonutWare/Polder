@@ -35,7 +35,7 @@ func (s *Service) enqueueNotification(ctx context.Context, serverID int64, paylo
 	now := s.now().Unix()
 	_, err = s.db.ExecContext(ctx,
 		`INSERT INTO federation_outbox (server_id, body_sealed, attempts, next_attempt_at, created_at) VALUES ($1, $2, 0, $3, $3)`,
-		serverID, s.box.seal(string(body), outboxSealContext), now)
+		serverID, s.box.Seal(string(body), outboxSealContext), now)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (s *Service) DeliverNotifications(ctx context.Context) error {
 }
 
 func (s *Service) deliver(ctx context.Context, item outboxItem) {
-	body, err := s.box.open(item.sealed, outboxSealContext)
+	body, err := s.box.Open(item.sealed, outboxSealContext)
 	if err != nil {
 		s.dropOutboxItem(ctx, item.id)
 		return

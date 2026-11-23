@@ -17,6 +17,9 @@ const selectUserColumns = `SELECT u.id, u.username, u.role, u.quota_bytes, u.dis
 	u.trash_enabled, u.trash_retention_days,
 	u.versions_enabled, u.versions_keep_all_hours, u.versions_max_age_days, u.versions_max_per_file,
 	u.first_name, u.last_name, u.display_name, u.email, u.age, u.address, u.avatar_id, u.avatar_type, u.theme, u.accent_color,
+	u.two_factor_deadline, u.password_hash <> '` + NoPasswordHash + `',
+	EXISTS (SELECT 1 FROM user_totp t WHERE t.user_id = u.id AND t.confirmed_at IS NOT NULL),
+	EXISTS (SELECT 1 FROM user_identities i WHERE i.user_id = u.id),
 	COALESCE((SELECT SUM(f.size) FROM files f WHERE f.user_id = u.id), 0),
 	COALESCE((SELECT SUM(k.stored_size) FROM version_chunks k WHERE k.user_id = u.id), 0)
 	+ COALESCE((SELECT SUM(v.size) FROM file_versions v WHERE v.user_id = u.id AND v.state = 'pending'), 0) FROM users u`
@@ -37,11 +40,16 @@ func scanUser(row database.RowScanner) (User, error) {
 	var age sql.NullInt64
 	var avatarID, avatarType, theme, accentColor sql.NullString
 	var fileBytes int64
+	var twoFactorDeadline sql.NullInt64
 	profile := &user.Profile
 	err := row.Scan(&user.ID, &user.Username, &user.Role, &user.QuotaBytes, &user.Disabled, &createdAt,
 		&trashEnabled, &retention, &versionsEnabled, &versionsKeepAll, &versionsMaxAge, &versionsMaxPerFile,
 		&profile.FirstName, &profile.LastName, &profile.DisplayName, &profile.Email, &age, &profile.Address,
-		&avatarID, &avatarType, &theme, &accentColor, &fileBytes, &user.HistoryBytes)
+		&avatarID, &avatarType, &theme, &accentColor,
+		&twoFactorDeadline, &user.HasPassword, &user.TwoFactor.Enabled, &user.SSO,
+		&fileBytes, &user.HistoryBytes)
+	user.TwoFactor.Deadline = optionalTime(twoFactorDeadline)
+	user.TwoFactor.SetupRequired = user.TwoFactor.Due(time.Now())
 	user.CreatedAt = time.Unix(createdAt, 0).UTC()
 	user.Trash = TrashPreferences{
 		Enabled: optionalBool(trashEnabled),
@@ -73,6 +81,14 @@ func optionalInt(value sql.NullInt64) *int {
 		return nil
 	}
 	converted := int(value.Int64)
+	return &converted
+}
+
+func optionalTime(value sql.NullInt64) *time.Time {
+	if !value.Valid {
+		return nil
+	}
+	converted := time.Unix(value.Int64, 0).UTC()
 	return &converted
 }
 

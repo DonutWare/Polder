@@ -21,6 +21,10 @@ class AdminUsersNotifier extends AsyncNotifier<List<User>> {
     _replace(saved);
   }
 
+  Future<void> resetTwoFactor(User user) async => _replace(await _api.resetUserTwoFactor(user.id));
+
+  Future<void> extendTwoFactor(User user) async => _replace(await _api.extendUserTwoFactorDeadline(user.id));
+
   Future<void> delete(User user) async {
     await _api.deleteUser(user.id);
     state = AsyncData((state.value ?? []).where((existing) => existing.id != user.id).toList());

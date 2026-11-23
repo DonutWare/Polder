@@ -42,9 +42,9 @@ func (a *API) createAppPassword(ctx context.Context, input *createAppPasswordInp
 	done, allowed := a.limiter.attempt(input.address, "user:"+user.Username)
 	if !allowed {
 		authLog.Warn("app password refused: too many failed attempts", "user", user.Username, "address", input.address)
-		return nil, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
+		return nil, errTooManyAttempts
 	}
-	created, err := a.auth.CreateAppPassword(ctx, user, input.Body.CurrentPassword, input.Body.Name, input.Body.ReadOnly)
+	created, err := a.auth.CreateAppPassword(ctx, user, currentIdentity(ctx).SessionID, input.Body.CurrentPassword, input.Body.Name, input.Body.ReadOnly)
 	done(apperr.Is(err, apperr.KindForbidden))
 	if err != nil {
 		return nil, err

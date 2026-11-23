@@ -20,6 +20,54 @@ enum AppearanceTheme {
   const AppearanceTheme(this.value);
 }
 
+enum AuthProviderKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('oidc')
+  oidc('oidc'),
+  @JsonValue('github')
+  github('github');
+
+  final String? value;
+
+  const AuthProviderKind(this.value);
+}
+
+enum AuthProviderPresetFields {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('serverUrl')
+  serverurl('serverUrl'),
+  @JsonValue('realm')
+  realm('realm'),
+  @JsonValue('slug')
+  slug('slug'),
+  @JsonValue('tenantId')
+  tenantid('tenantId'),
+  @JsonValue('issuer')
+  issuer('issuer');
+
+  final String? value;
+
+  const AuthProviderPresetFields(this.value);
+}
+
+enum AuthProviderPresetKind {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('oidc')
+  oidc('oidc'),
+  @JsonValue('github')
+  github('github');
+
+  final String? value;
+
+  const AuthProviderPresetKind(this.value);
+}
+
 enum CalendarAccess {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -130,6 +178,26 @@ enum ClientMessageType {
   const ClientMessageType(this.value);
 }
 
+enum DeviceLoginResultStatus {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('pending')
+  pending('pending'),
+  @JsonValue('approved')
+  approved('approved'),
+  @JsonValue('denied')
+  denied('denied'),
+  @JsonValue('expired')
+  expired('expired'),
+  @JsonValue('cancelled')
+  cancelled('cancelled');
+
+  final String? value;
+
+  const DeviceLoginResultStatus(this.value);
+}
+
 enum EntryPreviewState {
   @JsonValue(null)
   swaggerGeneratedUnknown(null),
@@ -231,7 +299,11 @@ enum EventMessageType {
   @JsonValue('calendar.reminder')
   calendarReminder('calendar.reminder'),
   @JsonValue('notification.created')
-  notificationCreated('notification.created');
+  notificationCreated('notification.created'),
+  @JsonValue('login.requested')
+  loginRequested('login.requested'),
+  @JsonValue('login.resolved')
+  loginResolved('login.resolved');
 
   final String? value;
 
@@ -390,6 +462,24 @@ enum LogEntryStatus {
   final String? value;
 
   const LogEntryStatus(this.value);
+}
+
+enum LoginRequestResolution {
+  @JsonValue(null)
+  swaggerGeneratedUnknown(null),
+
+  @JsonValue('approved')
+  approved('approved'),
+  @JsonValue('denied')
+  denied('denied'),
+  @JsonValue('expired')
+  expired('expired'),
+  @JsonValue('cancelled')
+  cancelled('cancelled');
+
+  final String? value;
+
+  const LoginRequestResolution(this.value);
 }
 
 enum MemberRole {

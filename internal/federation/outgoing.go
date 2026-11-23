@@ -134,7 +134,7 @@ func (s *Service) ShareOut(ctx context.Context, owner users.User, request NewOut
 	secret := newShareSecret()
 	row := outgoingRow{ownerID: owner.ID, fileID: entry.ID, serverID: server.ID, remoteUser: recipient.User, secretHash: hashSecret(secret),
 		permissions: permissions, expiresAt: request.ExpiresAt, state: StatePending, serverRemote: server.Remote}
-	row.secretSealed = s.box.seal(secret, row.sealContext())
+	row.secretSealed = s.box.Seal(secret, row.sealContext())
 	if row.id, err = s.insertOutgoing(ctx, row); err != nil {
 		return OutgoingShare{}, err
 	}
@@ -309,7 +309,7 @@ func (s *Service) UpdateOutgoing(ctx context.Context, owner users.User, id int64
 }
 
 func (s *Service) announcePermissions(ctx context.Context, row outgoingRow) {
-	secret, err := s.box.open(row.secretSealed, row.sealContext())
+	secret, err := s.box.Open(row.secretSealed, row.sealContext())
 	if err != nil {
 		return
 	}
@@ -334,7 +334,7 @@ func (s *Service) unshare(ctx context.Context, row outgoingRow) error {
 	if _, err := s.db.ExecContext(ctx, `DELETE FROM federated_shares_out WHERE id = $1`, row.id); err != nil {
 		return err
 	}
-	secret, err := s.box.open(row.secretSealed, row.sealContext())
+	secret, err := s.box.Open(row.secretSealed, row.sealContext())
 	if err != nil {
 		logger.Warn("cannot tell the recipient a share ended", "recipient", row.recipient(), "error", err)
 		return nil

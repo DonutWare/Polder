@@ -83,6 +83,32 @@
 			}
 		},
 		{
+			"name": "Server (SSO)",
+			"type": "go",
+			"request": "launch",
+			"mode": "debug",
+			"program": "${workspaceFolder}/cmd/polder",
+			"cwd": "${workspaceFolder}",
+			"preLaunchTask": "Start SSO docker",
+			"env": {
+				"POLDER_LISTEN": ":6060",
+				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
+				"POLDER_DATA_DIR": "${workspaceFolder}/data",
+				"POLDER_PUBLIC_URL": "http://localhost:6060",
+				"POLDER_DEBUG": "1"
+			}
+		},
+		{
+			"name": "Server tests (single sign-on, live)",
+			"type": "go",
+			"request": "launch",
+			"mode": "test",
+			"program": "${workspaceFolder}/internal/app",
+			"buildFlags": "-tags=ssolive",
+			"args": ["-test.run", "TestLiveSingleSignOn", "-test.v"],
+			"preLaunchTask": "Start SSO docker"
+		},
+		{
 			"name": "Client (Dev)",
 			"type": "dart",
 			"request": "launch",
@@ -166,6 +192,14 @@
 			"name": "Server (Collabora) + Client",
 			"configurations": [
 				"Server (Collabora)",
+				"Client (Dev)"
+			],
+			"stopAll": true
+		},
+		{
+			"name": "Server (SSO) + Client",
+			"configurations": [
+				"Server (SSO)",
 				"Client (Dev)"
 			],
 			"stopAll": true

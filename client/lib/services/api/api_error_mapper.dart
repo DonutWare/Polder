@@ -34,8 +34,25 @@ class ApiErrorInterceptor implements Interceptor {
 }
 
 abstract final class ApiErrorMapper {
-  static ApiException fromResponse(int statusCode, Map<String, dynamic>? body) =>
-      _fromParts(statusCode, _parseError(body), _parseCurrent(body));
+  static ApiException fromResponse(int statusCode, Map<String, dynamic>? body) {
+    final error = _parseError(body);
+    return switch (error?.code) {
+      "two_factor_required" => _twoFactorRequired(statusCode, error, body?["current"]),
+      "two_factor_setup_required" => TwoFactorSetupRequiredException(error: error, statusCode: statusCode),
+      "reauthentication_required" => ReauthenticationRequiredException(error: error, statusCode: statusCode),
+      _ => _fromParts(statusCode, error, _parseCurrent(body)),
+    };
+  }
+
+  static ApiException _twoFactorRequired(int statusCode, ApiError? error, Object? current) => switch (current) {
+    {"challenge": final String challenge} when current is Map<String, dynamic> => TwoFactorRequiredException(
+      challenge: challenge,
+      deviceApproval: current["deviceApproval"] == true,
+      error: error,
+      statusCode: statusCode,
+    ),
+    _ => UnauthorizedException(error: error, statusCode: statusCode),
+  };
 
   static ApiException fromError(ApiError error, {FileEntry? current}) => _fromParts(null, error, current);
 

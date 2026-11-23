@@ -123,6 +123,8 @@ accent color and icon from the admin's branding settings.
 | Email address changed | Sent to the old address | Yes (security) |
 | Storage warning | Use passes 80%, 95% and 100% of the quota; it's sent again after use drops back below | Yes (storage) |
 | Share received | Someone shares a file or folder, also from another server | Yes (sharing) |
+| Two-factor required / reminder | 2FA becomes required, and again shortly before the deadline | No |
+| Two-factor changed | 2FA turned on (security, optional), turned off or reset, or a recovery code was used | Mostly no |
 
 Users choose which emails they get in Settings → Notifications. Emails go to
 the address in their profile; accounts without one get none.
@@ -143,6 +145,26 @@ request can't send a link to another site.
 | `smtpPassword` | `POLDER_SMTP_PASSWORD` | Mail server password |
 | `smtpFrom` | `POLDER_SMTP_FROM` | Sender address, such as `Polder <polder@example.com>` |
 | `smtpSecurity` | `POLDER_SMTP_SECURITY` | `starttls` (default), `tls` or `none` |
+
+## Signing in
+
+- **Two-factor (TOTP)**: users enable it under account settings and get recovery codes. Admins can require it with a grace period in days; after the deadline, password sessions and app passwords are limited to setting it up. Reminders go out from an hourly job.
+- **Quick login**: a signed-in device approves a new sign-in by typing the number the new device shows. It works passwordless or instead of the TOTP code, and is delivered over `/events`.
+- **Single sign-on**: OIDC providers (with presets) and GitHub are configured in the admin UI. This needs `publicUrl`; the callback is `<publicUrl>/api/v1/auth/sso/<id>/callback`. SSO sessions are exempt from the 2FA requirement. Accounts without a password need a sign-in from the last 10 minutes to set a password, create app passwords or change two-factor settings. One provider can also come from the config:
+
+| Setting | Environment variable | Meaning |
+| --- | --- | --- |
+| `ssoPreset` | `POLDER_SSO_PRESET` | `pocket-id`, `authentik`, `authelia`, `keycloak`, `google`, `microsoft`, `github` or `oidc` |
+| `ssoLabel` | `POLDER_SSO_LABEL` | Text on the sign-in button; the preset's name by default |
+| `ssoServerUrl` | `POLDER_SSO_SERVER_URL` | Where a self-hosted provider runs |
+| `ssoRealm` | `POLDER_SSO_REALM` | Keycloak realm |
+| `ssoSlug` | `POLDER_SSO_SLUG` | Authentik application slug |
+| `ssoTenantId` | `POLDER_SSO_TENANT_ID` | Microsoft Entra tenant ID |
+| `ssoIssuer` | `POLDER_SSO_ISSUER` | Issuer URL, for `oidc` |
+| `ssoClientId` | `POLDER_SSO_CLIENT_ID` | Client ID registered at the provider |
+| `ssoClientSecret` | `POLDER_SSO_CLIENT_SECRET` | Client secret |
+| `ssoAllowSignup` | `POLDER_SSO_ALLOW_SIGNUP` | Create accounts on a first sign-in |
+| `ssoLinkByEmail` | `POLDER_SSO_LINK_BY_EMAIL` | Match existing accounts by verified email address; never administrators, accounts with two-factor authentication, or addresses shared by several accounts. Off by default for Google, Microsoft and GitHub |
 
 ## Federation
 

@@ -16,6 +16,16 @@ final isAdminProvider = Provider<bool>((ref) {
   return fetched?.isAdmin ?? ref.watch(currentAccountProvider)?.user.isAdmin ?? false;
 });
 
+final twoFactorSetupRequiredProvider = Provider<bool>((ref) {
+  final fetched = ref.watch(currentUserProvider).value?.twoFactorSetupRequired ?? false;
+  return fetched || (ref.watch(currentAccountProvider)?.user.twoFactorSetupRequired ?? false);
+});
+
+final twoFactorDeadlineProvider = Provider<DateTime?>((ref) {
+  final user = ref.watch(currentUserProvider).value ?? ref.watch(currentAccountProvider)?.user;
+  return user != null && user.twoFactorDue && !user.twoFactorSetupRequired ? user.twoFactorDeadline : null;
+});
+
 class CurrentUserNotifier extends AsyncNotifier<User> {
   @override
   Future<User> build() async => _store(await ref.watch(polderApiProvider).me());

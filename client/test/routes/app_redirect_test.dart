@@ -11,8 +11,19 @@ import "../support/provider_harness.dart";
 void main() {
   AsyncValue<Account?> signedIn(UserRole role) => AsyncData(testAccount(role: role));
 
-  String? resolve(AsyncValue<Account?> account, String location, {bool isAdmin = false, bool offline = false}) =>
-      AppRedirect.resolve(account, Uri.parse(location), isAdmin: isAdmin, continueOffline: offline);
+  String? resolve(
+    AsyncValue<Account?> account,
+    String location, {
+    bool isAdmin = false,
+    bool offline = false,
+    bool twoFactorSetup = false,
+  }) => AppRedirect.resolve(
+    account,
+    Uri.parse(location),
+    isAdmin: isAdmin,
+    continueOffline: offline,
+    twoFactorSetupRequired: twoFactorSetup,
+  );
 
   AsyncValue<Account?> ended() => AsyncData(testAccount().endSession());
 
@@ -66,5 +77,12 @@ void main() {
   test("paths that only start like /admin are not administration", () {
     expect(AppRoutes.isAdmin("/administrator-notes"), isFalse);
     expect(AppRoutes.isAdmin(AppRoutes.files), isFalse);
+  });
+
+  test("an overdue second factor keeps the user on its setup page", () {
+    expect(resolve(signedIn(UserRole.user), AppRoutes.files, twoFactorSetup: true), AppRoutes.twoFactorSetup);
+    expect(resolve(signedIn(UserRole.user), AppRoutes.twoFactorSetup, twoFactorSetup: true), isNull);
+    expect(resolve(signedIn(UserRole.user), AppRoutes.twoFactorSetup), AppRoutes.files);
+    expect(resolve(const AsyncData(null), AppRoutes.twoFactorSetup), startsWith(AppRoutes.login));
   });
 }

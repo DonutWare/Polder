@@ -47,4 +47,25 @@ void main() {
   test("keeps the server message", () {
     expect(ApiErrorMapper.fromResponse(403, error("forbidden")).serverMessage, "forbidden");
   });
+
+  test("carries the sign-in challenge of two_factor_required", () {
+    final exception = ApiErrorMapper.fromResponse(401, {
+      ...error("two_factor_required"),
+      "current": {"challenge": "abc", "expiresIn": 300, "deviceApproval": true},
+    });
+
+    expect(
+      exception,
+      isA<TwoFactorRequiredException>()
+          .having((e) => e.challenge, "challenge", "abc")
+          .having((e) => e.deviceApproval, "deviceApproval", isTrue),
+    );
+  });
+
+  test("maps two_factor_setup_required to its own forbidden exception", () {
+    expect(
+      ApiErrorMapper.fromResponse(403, error("two_factor_setup_required")),
+      isA<TwoFactorSetupRequiredException>(),
+    );
+  });
 }

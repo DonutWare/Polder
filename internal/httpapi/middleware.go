@@ -22,9 +22,10 @@ import (
 type contextKey string
 
 const (
-	currentUserKey  contextKey = "currentUser"
-	trustedProxyKey contextKey = "trustedProxy"
-	forwardedHTTPS             = "https"
+	currentUserKey     contextKey = "currentUser"
+	currentIdentityKey contextKey = "currentIdentity"
+	trustedProxyKey    contextKey = "trustedProxy"
+	forwardedHTTPS                = "https"
 )
 
 // requireUser lets only requests with a valid access token through, and makes their user available
@@ -37,7 +38,12 @@ func (a *API) requireUser(api huma.API) func(huma.Context, func(huma.Context)) {
 			return
 		}
 		noteUsername(ctx.Context(), identity.User.Username)
+		if identity.User.TwoFactor.SetupRequired && !allowedDuringTwoFactorSetup[ctx.Operation().OperationID] {
+			writeError(api, ctx, apperr.New(apperr.KindTwoFactorSetupRequired, "set up two-factor authentication to continue"))
+			return
+		}
 		ctx = huma.WithValue(ctx, currentUserKey, identity.User)
+		ctx = huma.WithValue(ctx, currentIdentityKey, identity)
 		next(huma.WithContext(ctx, activity.WithActor(ctx.Context(), activity.Actor{SessionID: identity.SessionID, Device: identity.Device})))
 	}
 }
@@ -63,6 +69,19 @@ func requireAdmin(api huma.API) func(huma.Context, func(huma.Context)) {
 	}
 }
 
+var allowedDuringTwoFactorSetup = map[string]bool{
+	"getMe":                 true,
+	"getTwoFactor":          true,
+	"beginTwoFactorSetup":   true,
+	"confirmTwoFactorSetup": true,
+	"denyLoginRequest":      true,
+}
+
+func currentIdentity(ctx context.Context) auth.Identity {
+	identity, _ := ctx.Value(currentIdentityKey).(auth.Identity)
+	return identity
+}
+
 func currentUser(ctx context.Context) users.User {
 	user, _ := ctx.Value(currentUserKey).(users.User)
 	return user
@@ -78,6 +97,8 @@ type failedAttemptLimiter struct {
 func newFailedAttemptLimiter(limitPerMinute int) *failedAttemptLimiter {
 	return &failedAttemptLimiter{limit: limitPerMinute, window: time.Minute, failures: map[string][]time.Time{}}
 }
+
+var errTooManyAttempts = apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
 
 func (l *failedAttemptLimiter) attempt(keys ...string) (func(failed bool), bool) {
 	if l.limit <= 0 {

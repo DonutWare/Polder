@@ -1,0 +1,9 @@
+users:
+  alice:
+    displayname: Alice Example
+    password: $argon2id$v=19$m=65536,t=3,p=4$AEQYw/VTQZ+PCYcT7w2Zbw$QObxN5uO27wejMIztfIOuya+gMobSpMo6Xipm7C+x3w
+    email: alice@example.com
+  bob:
+    displayname: Bob Example
+    password: $argon2id$v=19$m=65536,t=3,p=4$Z28cSJB2GekyMDc+8qIOCQ$aznJbxblz6+l5UStUahc7ZuJ5x3FNa2KKt/hNn3cFEU
+    email: bob@example.com

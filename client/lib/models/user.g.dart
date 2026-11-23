@@ -39,6 +39,11 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   avatar: json['avatar'] == null ? null : ServerImage.fromJson(json['avatar'] as Map<String, dynamic>),
   theme: $enumDecodeNullable(_$ThemeModeEnumMap, json['theme']),
   accent: _$JsonConverterFromJson<int, Color>(json['accent'], const ColorConverter().fromJson),
+  twoFactorEnabled: json['twoFactorEnabled'] as bool? ?? false,
+  twoFactorDeadline: json['twoFactorDeadline'] == null ? null : DateTime.parse(json['twoFactorDeadline'] as String),
+  twoFactorSetupRequired: json['twoFactorSetupRequired'] as bool? ?? false,
+  hasPassword: json['hasPassword'] as bool? ?? true,
+  sso: json['sso'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
@@ -54,6 +59,11 @@ Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
   'avatar': ?instance.avatar?.toJson(),
   'theme': ?_$ThemeModeEnumMap[instance.theme],
   'accent': ?_$JsonConverterToJson<int, Color>(instance.accent, const ColorConverter().toJson),
+  'twoFactorEnabled': instance.twoFactorEnabled,
+  'twoFactorDeadline': ?instance.twoFactorDeadline?.toIso8601String(),
+  'twoFactorSetupRequired': instance.twoFactorSetupRequired,
+  'hasPassword': instance.hasPassword,
+  'sso': instance.sso,
 };
 
 const _$UserRoleEnumMap = {UserRole.admin: 'admin', UserRole.user: 'user'};

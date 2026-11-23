@@ -34,8 +34,10 @@ import (
 	"polder-server/internal/search"
 	"polder-server/internal/settings"
 	"polder-server/internal/sharing"
+	"polder-server/internal/sso"
 	"polder-server/internal/syncing"
 	"polder-server/internal/tags"
+	"polder-server/internal/twofactor"
 	"polder-server/internal/users"
 	"polder-server/internal/versions"
 	"polder-server/internal/webdav"
@@ -71,7 +73,13 @@ type API struct {
 	emails        *emails.Service
 	brands        emails.BrandSource
 	limiter       *failedAttemptLimiter
-	resetLimiter  *failedAttemptLimiter
+
+	twoFactorPolicy  *twofactor.Policy
+	twoFactorLimiter *failedAttemptLimiter
+	sso              *sso.Service
+
+	deviceLoginLimiter *failedAttemptLimiter
+	resetLimiter       *failedAttemptLimiter
 
 	federationLimiter *failedAttemptLimiter
 
@@ -116,6 +124,8 @@ type Dependencies struct {
 	Notifications          *notifications.Service
 	Emails                 *emails.Service
 	Brands                 emails.BrandSource
+	TwoFactorPolicy        *twofactor.Policy
+	SSO                    *sso.Service
 	WebDAVAllowInsecure    bool
 	RequestTrashPurge      func()
 	LoginAttemptsPerMinute int
@@ -156,6 +166,12 @@ func NewRouter(deps Dependencies) http.Handler {
 		brands:        deps.Brands,
 		limiter:       newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 		resetLimiter:  newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+
+		twoFactorPolicy:  deps.TwoFactorPolicy,
+		twoFactorLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
+		sso:              deps.SSO,
+
+		deviceLoginLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute),
 
 		federationLimiter: newFailedAttemptLimiter(deps.LoginAttemptsPerMinute * federationLimitFactor),
 
@@ -236,6 +252,13 @@ func (a *API) routes(api huma.API) {
 	register(v1, http.MethodGet, "/users/{userID}/avatar/{imageID}", "getUserAvatar", "A user's icon", a.userAvatar,
 		withResponse(http.StatusOK, "Icon image", binaryContent("application/octet-stream")))
 	register(v1, http.MethodPost, "/auth/login", "login", "Log in and get a token pair", a.login)
+	register(v1, http.MethodPost, "/auth/two-factor", "verifyTwoFactor", "Finish logging in with a code from the authenticator app or a recovery code", a.verifyTwoFactor)
+	register(v1, http.MethodGet, "/auth/sso/{providerID}/authorize", "startSingleSignOn", "Open in a browser to sign in at a provider; ends on the redirect URI with a code for POST /auth/sso/token", a.ssoAuthorize, found)
+	register(v1, http.MethodGet, "/auth/sso/{providerID}/callback", "finishSingleSignOn", "Where the provider sends the browser back to; redirects to the app", a.ssoCallback, found)
+	register(v1, http.MethodPost, "/auth/sso/token", "exchangeSingleSignOnCode", "Exchange the code from single sign-on for a token pair", a.ssoToken)
+	register(v1, http.MethodPost, "/auth/device-login", "startDeviceLogin", "Ask a signed-in device of the account to approve this sign-in", a.startDeviceLogin, created)
+	register(v1, http.MethodPost, "/auth/device-login/{requestID}/status", "getDeviceLoginStatus", "Whether the sign-in was approved; the first approved answer carries the token pair", a.deviceLoginStatus)
+	register(v1, http.MethodPost, "/auth/device-login/{requestID}/cancel", "cancelDeviceLogin", "Stop waiting for approval", a.cancelDeviceLogin)
 	register(v1, http.MethodPost, "/auth/refresh", "refresh", "Exchange a refresh token for a new token pair", a.refresh)
 	register(v1, http.MethodPost, "/auth/logout", "logout", "Revoke a refresh token", a.logout)
 	register(v1, http.MethodPost, "/auth/password-reset", "requestPasswordReset", "Email a code to choose a new password, if the account exists and has an email address", a.requestPasswordReset, accepted)
@@ -273,6 +296,18 @@ func (a *API) routes(api huma.API) {
 	register(user, http.MethodPut, "/account/avatar", "setAvatar", "Replace the logged-in user's icon with the image in the request body", a.setAvatar,
 		withRequestBody(binaryContent("application/octet-stream")))
 	register(user, http.MethodDelete, "/account/avatar", "removeAvatar", "Go back to showing the logged-in user's initials", a.removeAvatar)
+	register(user, http.MethodGet, "/account/two-factor", "getTwoFactor", "Whether two-factor authentication is on for the logged-in user, and whether it's required", a.getTwoFactor)
+	register(user, http.MethodPost, "/account/two-factor/setup", "beginTwoFactorSetup", "Start setting up two-factor authentication; returns the key for the authenticator app", a.beginTwoFactorSetup)
+	register(user, http.MethodPost, "/account/two-factor/confirm", "confirmTwoFactorSetup", "Turn two-factor authentication on with a first code from the app; returns the recovery codes once", a.confirmTwoFactorSetup)
+	register(user, http.MethodPost, "/account/two-factor/recovery-codes", "regenerateRecoveryCodes", "Replace the recovery codes; the old ones stop working", a.regenerateRecoveryCodes)
+	register(user, http.MethodPost, "/account/two-factor/disable", "disableTwoFactor", "Turn two-factor authentication off, unless the server requires it", a.disableTwoFactor)
+	register(user, http.MethodGet, "/account/login-requests", "listLoginRequests", "Sign-ins on other devices waiting for this account's approval", a.listLoginRequests)
+	register(user, http.MethodPost, "/account/login-requests/{requestID}/approve", "approveLoginRequest", "Approve a sign-in by typing the number the new device shows; a wrong number refuses it", a.approveLoginRequest)
+	register(user, http.MethodPost, "/account/login-requests/{requestID}/deny", "denyLoginRequest", "Refuse a sign-in on another device", a.denyLoginRequest)
+	register(user, http.MethodGet, "/account/identities", "listLinkedIdentities", "Single sign-on accounts linked to the logged-in user", a.listIdentities)
+	register(user, http.MethodPost, "/account/identities/{providerID}/link", "linkIdentity", "Start linking an account at a provider; open the returned URL in a browser", a.linkIdentity)
+	register(user, http.MethodPost, "/account/identities/confirm", "confirmLinkIdentity", "Finish linking with the code from the redirect URI and the PKCE verifier", a.confirmLinkIdentity)
+	register(user, http.MethodDelete, "/account/identities/{identityID}", "unlinkIdentity", "Unlink a single sign-on account", a.unlinkIdentity)
 	register(user, http.MethodGet, "/account/app-passwords", "listAppPasswords", "The logged-in user's app passwords, for WebDAV and other apps", a.listAppPasswords)
 	register(user, http.MethodPost, "/account/app-passwords", "createAppPassword", "Create an app password; needs the account password and returns the new password once", a.createAppPassword, created)
 	register(user, http.MethodDelete, "/account/app-passwords/{appPasswordID}", "deleteAppPassword", "Revoke an app password; it stops working at once", a.deleteAppPassword)
@@ -459,6 +494,15 @@ func (a *API) routes(api huma.API) {
 	register(admin, http.MethodGet, "/admin/users", "listUsers", "List all users", a.listUsers)
 	register(admin, http.MethodPost, "/admin/users", "createUser", "Create a user", a.createUser, created)
 	register(admin, http.MethodPatch, "/admin/users/{userID}", "updateUser", "Change a user; password changes and disabling log the user out", a.updateUser)
+	register(admin, http.MethodPost, "/admin/users/{userID}/two-factor/reset", "resetUserTwoFactor", "Turn a user's two-factor authentication off and log them out everywhere, for when they lost their device", a.resetUserTwoFactor)
+	register(admin, http.MethodPost, "/admin/users/{userID}/two-factor/extend", "extendUserTwoFactorDeadline", "Give a user the full grace period again to set up two-factor authentication", a.extendUserTwoFactorDeadline)
+	register(admin, http.MethodGet, "/admin/auth-providers/presets", "listAuthProviderPresets", "Providers that are quick to set up, with what each needs", a.listProviderPresets)
+	register(admin, http.MethodGet, "/admin/auth-providers", "listAuthProviders", "Single sign-on providers", a.listAuthProviders)
+	register(admin, http.MethodPost, "/admin/auth-providers", "createAuthProvider", "Add a single sign-on provider", a.createAuthProvider, created)
+	register(admin, http.MethodPut, "/admin/auth-providers/order", "reorderAuthProviders", "Choose the order of the sign-in buttons", a.reorderAuthProviders)
+	register(admin, http.MethodPatch, "/admin/auth-providers/{providerID}", "updateAuthProvider", "Change a single sign-on provider", a.updateAuthProvider)
+	register(admin, http.MethodDelete, "/admin/auth-providers/{providerID}", "deleteAuthProvider", "Remove a single sign-on provider and every account link to it", a.deleteAuthProvider)
+	register(admin, http.MethodPost, "/admin/auth-providers/{providerID}/test", "testAuthProvider", "Check that the provider can be reached and is set up right", a.testAuthProvider)
 	register(admin, http.MethodGet, "/admin/settings", "getServerSettings", "Server-wide settings", a.getServerSettings)
 	register(admin, http.MethodPatch, "/admin/settings", "updateServerSettings", "Change server-wide settings", a.updateServerSettings)
 	register(admin, http.MethodPost, "/admin/mail/test", "sendTestEmail", "Send a test email with the current mail server settings", a.sendTestEmail)

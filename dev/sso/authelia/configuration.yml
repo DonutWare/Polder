@@ -1,0 +1,45 @@
+server:
+  address: tcp://0.0.0.0:9091
+  tls:
+    key: /certs/key.pem
+    certificate: /certs/cert.pem
+log:
+  level: info
+identity_validation:
+  reset_password:
+    jwt_secret: polder-dev-authelia-reset-password-secret
+authentication_backend:
+  file:
+    path: /config/users.yml
+access_control:
+  default_policy: one_factor
+session:
+  secret: polder-dev-authelia-session-secret
+  cookies:
+    - domain: 127.0.0.1
+      authelia_url: https://127.0.0.1:9091
+storage:
+  encryption_key: polder-dev-authelia-storage-encryption-key
+  local:
+    path: /data/db.sqlite3
+notifier:
+  filesystem:
+    filename: /data/notification.txt
+identity_providers:
+  oidc:
+    hmac_secret: polder-dev-authelia-oidc-hmac-secret-0123456789
+    jwks:
+      - key: {{ secret "/certs/key.pem" | mindent 10 "|" | msquote }}
+    clients:
+      - client_id: polder
+        client_name: Polder
+        client_secret: $plaintext$polder-authelia-secret
+        public: false
+        authorization_policy: one_factor
+        consent_mode: implicit
+        require_pkce: true
+        pkce_challenge_method: S256
+        redirect_uris:
+          - http://localhost:6060/api/v1/auth/sso/authelia/callback
+        scopes: [openid, profile, email]
+        token_endpoint_auth_method: client_secret_basic

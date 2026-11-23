@@ -1,6 +1,6 @@
 import "dart:convert";
 
-enum NotificationChannel { uploads, calendar, sharing }
+enum NotificationChannel { uploads, calendar, sharing, security }
 
 enum NotificationActionId {
   accept,
@@ -73,6 +73,7 @@ class NotificationTap {
 abstract final class NotificationIds {
   static const upload = 1;
   static const uploadCheck = 2;
+  static const loginRequest = 3;
   static const _feed = 0x10000000;
   static const _calendar = 0x20000000;
   static const _mask = 0x0FFFFFFF;

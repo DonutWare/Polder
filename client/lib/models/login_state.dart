@@ -1,11 +1,25 @@
 import "package:freezed_annotation/freezed_annotation.dart";
+import "package:polder/models/security.dart";
 import "package:polder/util/credential_rules.dart";
 
 part "login_state.freezed.dart";
 
-enum LoginStep { server, credentials, setup }
+enum LoginStep { server, credentials, setup, twoFactor, deviceApproval }
 
-enum LoginFailure { unreachable, invalidCredentials, accountDisabled, setupUnavailable, unknown }
+enum LoginFailure {
+  unreachable,
+  invalidCredentials,
+  accountDisabled,
+  setupUnavailable,
+  invalidCode,
+  tooManyAttempts,
+  approvalDenied,
+  approvalExpired,
+  ssoSignupDisabled,
+  ssoLinkRequired,
+  ssoFailed,
+  unknown,
+}
 
 @freezed
 abstract class LoginState with _$LoginState {
@@ -29,6 +43,12 @@ abstract class LoginState with _$LoginState {
     @Default(false) bool reauthenticating,
     LoginFailure? failure,
     Object? failureCause,
+    String? challenge,
+    @Default(false) bool deviceApprovalAvailable,
+    @Default(false) bool useRecoveryCode,
+    @Default("") String code,
+    DeviceLoginStart? deviceLogin,
+    String? signingInWith,
   }) = _LoginState;
 
   bool get canConnect => serverUrl.trim().isNotEmpty && !loading;
@@ -39,6 +59,13 @@ abstract class LoginState with _$LoginState {
 
   bool get meetsRequirements =>
       !_creatingAdmin || CredentialRules.isValidUsername(username) && CredentialRules.isValidPassword(password);
+
+  bool get canSubmitCode {
+    final trimmed = code.replaceAll(RegExp(r"\s"), "");
+    return !loading && (useRecoveryCode ? trimmed.length >= 10 : RegExp(r"^\d{6}$").hasMatch(trimmed));
+  }
+
+  bool get canAskAnotherDevice => username.trim().isNotEmpty && !loading;
 
   bool get canSubmitCredentials =>
       username.trim().isNotEmpty && password.isNotEmpty && passwordsMatch && meetsRequirements && !loading;

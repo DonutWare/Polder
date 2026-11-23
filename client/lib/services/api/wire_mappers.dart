@@ -32,6 +32,7 @@ import "package:polder/models/user.dart";
 import "package:polder/models/user_tag.dart";
 import "package:polder/services/api/api_error_mapper.dart";
 import "package:polder/services/api/generated/polder.swagger.dart" as wire;
+import "package:polder/services/api/security_mappers.dart";
 
 extension EntryToModel on wire.Entry {
   FileEntry toModel() => FileEntry(
@@ -179,6 +180,11 @@ extension UserToModel on wire.User {
       wire.AppearanceTheme.swaggerGeneratedUnknown || null => null,
     },
     accent: parseHexColor(appearance.accentColor ?? ""),
+    twoFactorEnabled: twoFactor.enabled,
+    twoFactorDeadline: twoFactor.deadline,
+    twoFactorSetupRequired: twoFactor.setupRequired,
+    hasPassword: hasPassword,
+    sso: sso,
   );
 }
 
@@ -273,6 +279,8 @@ extension ServerSettingsToModel on wire.ServerSettings {
       _ => MailSecurity.starttls,
     },
     smtpManagedByConfig: smtpManagedByConfig,
+    requireTwoFactor: requireTwoFactor,
+    twoFactorGraceDays: twoFactorGraceDays,
   );
 }
 
@@ -340,6 +348,10 @@ extension BrandingToModel on wire.Branding {
     icon: icon?.toModel(),
     backgrounds: [for (final background in backgrounds ?? <wire.ImageInfo>[]) background.toModel()],
     passwordReset: passwordReset,
+    authProviders: [
+      for (final option in authProviders ?? <wire.AuthProviderOption>[])
+        AuthProviderOption(id: option.id, label: option.label, icon: option.icon),
+    ],
   );
 }
 
@@ -532,6 +544,14 @@ extension EventMessageToModel on wire.EventMessage {
       reminder == null ? null : ServerEvent.calendarReminder(userId, reminder!.toModel()),
     wire.EventMessageType.notificationCreated => switch (notification?.toModel()) {
       final notification? => ServerEvent.notification(userId, notification),
+      null => null,
+    },
+    wire.EventMessageType.loginRequested => switch (loginRequest) {
+      final request? => ServerEvent.loginRequested(userId, request.toModel()),
+      null => null,
+    },
+    wire.EventMessageType.loginResolved => switch (loginRequest) {
+      final request? => ServerEvent.loginResolved(userId, request.id),
       null => null,
     },
   };

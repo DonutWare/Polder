@@ -325,6 +325,40 @@ extension $AppearanceExtension on Appearance {
 }
 
 @JsonSerializable(explicitToJson: true)
+class ApproveLoginInputBody {
+  const ApproveLoginInputBody({required this.number});
+
+  factory ApproveLoginInputBody.fromJson(Map<String, dynamic> json) => _$ApproveLoginInputBodyFromJson(json);
+
+  static const toJsonFactory = _$ApproveLoginInputBodyToJson;
+  Map<String, dynamic> toJson() => _$ApproveLoginInputBodyToJson(this);
+
+  @JsonKey(name: 'number', includeIfNull: false)
+  final int number;
+  static const fromJsonFactory = _$ApproveLoginInputBodyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ApproveLoginInputBody &&
+            (identical(other.number, number) || const DeepCollectionEquality().equals(other.number, number)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(number) ^ runtimeType.hashCode;
+}
+
+extension $ApproveLoginInputBodyExtension on ApproveLoginInputBody {
+  ApproveLoginInputBody copyWith({int? number}) {
+    return ApproveLoginInputBody(number: number ?? this.number);
+  }
+
+  ApproveLoginInputBody copyWithWrapped({Wrapped<int>? number}) {
+    return ApproveLoginInputBody(number: (number != null ? number.value : this.number));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Attendee {
   const Attendee({
     required this.email,
@@ -453,6 +487,556 @@ extension $AttendeeInputExtension on AttendeeInput {
       email: (email != null ? email.value : this.email),
       name: (name != null ? name.value : this.name),
       role: (role != null ? role.value : this.role),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthProvider {
+  const AuthProvider({
+    required this.allowSignup,
+    required this.callbackUrl,
+    required this.clientId,
+    required this.clientSecretSet,
+    required this.enabled,
+    required this.id,
+    required this.issuer,
+    required this.kind,
+    required this.label,
+    required this.linkByEmail,
+    required this.linkedUsers,
+    required this.managedByConfig,
+    required this.position,
+    required this.preset,
+    required this.scopes,
+    required this.usernameClaim,
+  });
+
+  factory AuthProvider.fromJson(Map<String, dynamic> json) => _$AuthProviderFromJson(json);
+
+  static const toJsonFactory = _$AuthProviderToJson;
+  Map<String, dynamic> toJson() => _$AuthProviderToJson(this);
+
+  @JsonKey(name: 'allowSignup', includeIfNull: false)
+  final bool allowSignup;
+  @JsonKey(name: 'callbackUrl', includeIfNull: false)
+  final String callbackUrl;
+  @JsonKey(name: 'clientId', includeIfNull: false)
+  final String clientId;
+  @JsonKey(name: 'clientSecretSet', includeIfNull: false)
+  final bool clientSecretSet;
+  @JsonKey(name: 'enabled', includeIfNull: false)
+  final bool enabled;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final String id;
+  @JsonKey(name: 'issuer', includeIfNull: false)
+  final String issuer;
+  @JsonKey(name: 'kind', includeIfNull: false, toJson: authProviderKindToJson, fromJson: authProviderKindFromJson)
+  final enums.AuthProviderKind kind;
+  @JsonKey(name: 'label', includeIfNull: false)
+  final String label;
+  @JsonKey(name: 'linkByEmail', includeIfNull: false)
+  final bool linkByEmail;
+  @JsonKey(name: 'linkedUsers', includeIfNull: false)
+  final int linkedUsers;
+  @JsonKey(name: 'managedByConfig', includeIfNull: false)
+  final bool managedByConfig;
+  @JsonKey(name: 'position', includeIfNull: false)
+  final int position;
+  @JsonKey(name: 'preset', includeIfNull: false)
+  final String preset;
+  @JsonKey(name: 'scopes', includeIfNull: false)
+  final String scopes;
+  @JsonKey(name: 'usernameClaim', includeIfNull: false)
+  final String usernameClaim;
+  static const fromJsonFactory = _$AuthProviderFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AuthProvider &&
+            (identical(other.allowSignup, allowSignup) ||
+                const DeepCollectionEquality().equals(other.allowSignup, allowSignup)) &&
+            (identical(other.callbackUrl, callbackUrl) ||
+                const DeepCollectionEquality().equals(other.callbackUrl, callbackUrl)) &&
+            (identical(other.clientId, clientId) || const DeepCollectionEquality().equals(other.clientId, clientId)) &&
+            (identical(other.clientSecretSet, clientSecretSet) ||
+                const DeepCollectionEquality().equals(other.clientSecretSet, clientSecretSet)) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.issuer, issuer) || const DeepCollectionEquality().equals(other.issuer, issuer)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.label, label) || const DeepCollectionEquality().equals(other.label, label)) &&
+            (identical(other.linkByEmail, linkByEmail) ||
+                const DeepCollectionEquality().equals(other.linkByEmail, linkByEmail)) &&
+            (identical(other.linkedUsers, linkedUsers) ||
+                const DeepCollectionEquality().equals(other.linkedUsers, linkedUsers)) &&
+            (identical(other.managedByConfig, managedByConfig) ||
+                const DeepCollectionEquality().equals(other.managedByConfig, managedByConfig)) &&
+            (identical(other.position, position) || const DeepCollectionEquality().equals(other.position, position)) &&
+            (identical(other.preset, preset) || const DeepCollectionEquality().equals(other.preset, preset)) &&
+            (identical(other.scopes, scopes) || const DeepCollectionEquality().equals(other.scopes, scopes)) &&
+            (identical(other.usernameClaim, usernameClaim) ||
+                const DeepCollectionEquality().equals(other.usernameClaim, usernameClaim)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(allowSignup) ^
+      const DeepCollectionEquality().hash(callbackUrl) ^
+      const DeepCollectionEquality().hash(clientId) ^
+      const DeepCollectionEquality().hash(clientSecretSet) ^
+      const DeepCollectionEquality().hash(enabled) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(issuer) ^
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(label) ^
+      const DeepCollectionEquality().hash(linkByEmail) ^
+      const DeepCollectionEquality().hash(linkedUsers) ^
+      const DeepCollectionEquality().hash(managedByConfig) ^
+      const DeepCollectionEquality().hash(position) ^
+      const DeepCollectionEquality().hash(preset) ^
+      const DeepCollectionEquality().hash(scopes) ^
+      const DeepCollectionEquality().hash(usernameClaim) ^
+      runtimeType.hashCode;
+}
+
+extension $AuthProviderExtension on AuthProvider {
+  AuthProvider copyWith({
+    bool? allowSignup,
+    String? callbackUrl,
+    String? clientId,
+    bool? clientSecretSet,
+    bool? enabled,
+    String? id,
+    String? issuer,
+    enums.AuthProviderKind? kind,
+    String? label,
+    bool? linkByEmail,
+    int? linkedUsers,
+    bool? managedByConfig,
+    int? position,
+    String? preset,
+    String? scopes,
+    String? usernameClaim,
+  }) {
+    return AuthProvider(
+      allowSignup: allowSignup ?? this.allowSignup,
+      callbackUrl: callbackUrl ?? this.callbackUrl,
+      clientId: clientId ?? this.clientId,
+      clientSecretSet: clientSecretSet ?? this.clientSecretSet,
+      enabled: enabled ?? this.enabled,
+      id: id ?? this.id,
+      issuer: issuer ?? this.issuer,
+      kind: kind ?? this.kind,
+      label: label ?? this.label,
+      linkByEmail: linkByEmail ?? this.linkByEmail,
+      linkedUsers: linkedUsers ?? this.linkedUsers,
+      managedByConfig: managedByConfig ?? this.managedByConfig,
+      position: position ?? this.position,
+      preset: preset ?? this.preset,
+      scopes: scopes ?? this.scopes,
+      usernameClaim: usernameClaim ?? this.usernameClaim,
+    );
+  }
+
+  AuthProvider copyWithWrapped({
+    Wrapped<bool>? allowSignup,
+    Wrapped<String>? callbackUrl,
+    Wrapped<String>? clientId,
+    Wrapped<bool>? clientSecretSet,
+    Wrapped<bool>? enabled,
+    Wrapped<String>? id,
+    Wrapped<String>? issuer,
+    Wrapped<enums.AuthProviderKind>? kind,
+    Wrapped<String>? label,
+    Wrapped<bool>? linkByEmail,
+    Wrapped<int>? linkedUsers,
+    Wrapped<bool>? managedByConfig,
+    Wrapped<int>? position,
+    Wrapped<String>? preset,
+    Wrapped<String>? scopes,
+    Wrapped<String>? usernameClaim,
+  }) {
+    return AuthProvider(
+      allowSignup: (allowSignup != null ? allowSignup.value : this.allowSignup),
+      callbackUrl: (callbackUrl != null ? callbackUrl.value : this.callbackUrl),
+      clientId: (clientId != null ? clientId.value : this.clientId),
+      clientSecretSet: (clientSecretSet != null ? clientSecretSet.value : this.clientSecretSet),
+      enabled: (enabled != null ? enabled.value : this.enabled),
+      id: (id != null ? id.value : this.id),
+      issuer: (issuer != null ? issuer.value : this.issuer),
+      kind: (kind != null ? kind.value : this.kind),
+      label: (label != null ? label.value : this.label),
+      linkByEmail: (linkByEmail != null ? linkByEmail.value : this.linkByEmail),
+      linkedUsers: (linkedUsers != null ? linkedUsers.value : this.linkedUsers),
+      managedByConfig: (managedByConfig != null ? managedByConfig.value : this.managedByConfig),
+      position: (position != null ? position.value : this.position),
+      preset: (preset != null ? preset.value : this.preset),
+      scopes: (scopes != null ? scopes.value : this.scopes),
+      usernameClaim: (usernameClaim != null ? usernameClaim.value : this.usernameClaim),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthProviderChanges {
+  const AuthProviderChanges({
+    this.allowSignup,
+    this.clientId,
+    this.clientSecret,
+    this.enabled,
+    this.issuer,
+    this.label,
+    this.linkByEmail,
+    this.scopes,
+    this.usernameClaim,
+  });
+
+  factory AuthProviderChanges.fromJson(Map<String, dynamic> json) => _$AuthProviderChangesFromJson(json);
+
+  static const toJsonFactory = _$AuthProviderChangesToJson;
+  Map<String, dynamic> toJson() => _$AuthProviderChangesToJson(this);
+
+  @JsonKey(name: 'allowSignup', includeIfNull: false)
+  final bool? allowSignup;
+  @JsonKey(name: 'clientId', includeIfNull: false)
+  final String? clientId;
+  @JsonKey(name: 'clientSecret', includeIfNull: false)
+  final String? clientSecret;
+  @JsonKey(name: 'enabled', includeIfNull: false)
+  final bool? enabled;
+  @JsonKey(name: 'issuer', includeIfNull: false)
+  final String? issuer;
+  @JsonKey(name: 'label', includeIfNull: false)
+  final String? label;
+  @JsonKey(name: 'linkByEmail', includeIfNull: false)
+  final bool? linkByEmail;
+  @JsonKey(name: 'scopes', includeIfNull: false)
+  final String? scopes;
+  @JsonKey(name: 'usernameClaim', includeIfNull: false)
+  final String? usernameClaim;
+  static const fromJsonFactory = _$AuthProviderChangesFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AuthProviderChanges &&
+            (identical(other.allowSignup, allowSignup) ||
+                const DeepCollectionEquality().equals(other.allowSignup, allowSignup)) &&
+            (identical(other.clientId, clientId) || const DeepCollectionEquality().equals(other.clientId, clientId)) &&
+            (identical(other.clientSecret, clientSecret) ||
+                const DeepCollectionEquality().equals(other.clientSecret, clientSecret)) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
+            (identical(other.issuer, issuer) || const DeepCollectionEquality().equals(other.issuer, issuer)) &&
+            (identical(other.label, label) || const DeepCollectionEquality().equals(other.label, label)) &&
+            (identical(other.linkByEmail, linkByEmail) ||
+                const DeepCollectionEquality().equals(other.linkByEmail, linkByEmail)) &&
+            (identical(other.scopes, scopes) || const DeepCollectionEquality().equals(other.scopes, scopes)) &&
+            (identical(other.usernameClaim, usernameClaim) ||
+                const DeepCollectionEquality().equals(other.usernameClaim, usernameClaim)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(allowSignup) ^
+      const DeepCollectionEquality().hash(clientId) ^
+      const DeepCollectionEquality().hash(clientSecret) ^
+      const DeepCollectionEquality().hash(enabled) ^
+      const DeepCollectionEquality().hash(issuer) ^
+      const DeepCollectionEquality().hash(label) ^
+      const DeepCollectionEquality().hash(linkByEmail) ^
+      const DeepCollectionEquality().hash(scopes) ^
+      const DeepCollectionEquality().hash(usernameClaim) ^
+      runtimeType.hashCode;
+}
+
+extension $AuthProviderChangesExtension on AuthProviderChanges {
+  AuthProviderChanges copyWith({
+    bool? allowSignup,
+    String? clientId,
+    String? clientSecret,
+    bool? enabled,
+    String? issuer,
+    String? label,
+    bool? linkByEmail,
+    String? scopes,
+    String? usernameClaim,
+  }) {
+    return AuthProviderChanges(
+      allowSignup: allowSignup ?? this.allowSignup,
+      clientId: clientId ?? this.clientId,
+      clientSecret: clientSecret ?? this.clientSecret,
+      enabled: enabled ?? this.enabled,
+      issuer: issuer ?? this.issuer,
+      label: label ?? this.label,
+      linkByEmail: linkByEmail ?? this.linkByEmail,
+      scopes: scopes ?? this.scopes,
+      usernameClaim: usernameClaim ?? this.usernameClaim,
+    );
+  }
+
+  AuthProviderChanges copyWithWrapped({
+    Wrapped<bool?>? allowSignup,
+    Wrapped<String?>? clientId,
+    Wrapped<String?>? clientSecret,
+    Wrapped<bool?>? enabled,
+    Wrapped<String?>? issuer,
+    Wrapped<String?>? label,
+    Wrapped<bool?>? linkByEmail,
+    Wrapped<String?>? scopes,
+    Wrapped<String?>? usernameClaim,
+  }) {
+    return AuthProviderChanges(
+      allowSignup: (allowSignup != null ? allowSignup.value : this.allowSignup),
+      clientId: (clientId != null ? clientId.value : this.clientId),
+      clientSecret: (clientSecret != null ? clientSecret.value : this.clientSecret),
+      enabled: (enabled != null ? enabled.value : this.enabled),
+      issuer: (issuer != null ? issuer.value : this.issuer),
+      label: (label != null ? label.value : this.label),
+      linkByEmail: (linkByEmail != null ? linkByEmail.value : this.linkByEmail),
+      scopes: (scopes != null ? scopes.value : this.scopes),
+      usernameClaim: (usernameClaim != null ? usernameClaim.value : this.usernameClaim),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthProviderOption {
+  const AuthProviderOption({required this.icon, required this.id, required this.label});
+
+  factory AuthProviderOption.fromJson(Map<String, dynamic> json) => _$AuthProviderOptionFromJson(json);
+
+  static const toJsonFactory = _$AuthProviderOptionToJson;
+  Map<String, dynamic> toJson() => _$AuthProviderOptionToJson(this);
+
+  @JsonKey(name: 'icon', includeIfNull: false)
+  final String icon;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final String id;
+  @JsonKey(name: 'label', includeIfNull: false)
+  final String label;
+  static const fromJsonFactory = _$AuthProviderOptionFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AuthProviderOption &&
+            (identical(other.icon, icon) || const DeepCollectionEquality().equals(other.icon, icon)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.label, label) || const DeepCollectionEquality().equals(other.label, label)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(icon) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(label) ^
+      runtimeType.hashCode;
+}
+
+extension $AuthProviderOptionExtension on AuthProviderOption {
+  AuthProviderOption copyWith({String? icon, String? id, String? label}) {
+    return AuthProviderOption(icon: icon ?? this.icon, id: id ?? this.id, label: label ?? this.label);
+  }
+
+  AuthProviderOption copyWithWrapped({Wrapped<String>? icon, Wrapped<String>? id, Wrapped<String>? label}) {
+    return AuthProviderOption(
+      icon: (icon != null ? icon.value : this.icon),
+      id: (id != null ? id.value : this.id),
+      label: (label != null ? label.value : this.label),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthProviderPreset {
+  const AuthProviderPreset({
+    required this.allowSignup,
+    this.fields,
+    required this.id,
+    this.issuerTemplate,
+    required this.kind,
+    required this.label,
+    required this.linkByEmail,
+    required this.public,
+    required this.scopes,
+    required this.setupHint,
+    required this.usernameClaim,
+  });
+
+  factory AuthProviderPreset.fromJson(Map<String, dynamic> json) => _$AuthProviderPresetFromJson(json);
+
+  static const toJsonFactory = _$AuthProviderPresetToJson;
+  Map<String, dynamic> toJson() => _$AuthProviderPresetToJson(this);
+
+  @JsonKey(name: 'allowSignup', includeIfNull: false)
+  final bool allowSignup;
+  @JsonKey(
+    name: 'fields',
+    includeIfNull: false,
+    toJson: authProviderPresetFieldsListToJson,
+    fromJson: authProviderPresetFieldsListFromJson,
+  )
+  final List<enums.AuthProviderPresetFields>? fields;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final String id;
+  @JsonKey(name: 'issuerTemplate', includeIfNull: false)
+  final String? issuerTemplate;
+  @JsonKey(
+    name: 'kind',
+    includeIfNull: false,
+    toJson: authProviderPresetKindToJson,
+    fromJson: authProviderPresetKindFromJson,
+  )
+  final enums.AuthProviderPresetKind kind;
+  @JsonKey(name: 'label', includeIfNull: false)
+  final String label;
+  @JsonKey(name: 'linkByEmail', includeIfNull: false)
+  final bool linkByEmail;
+  @JsonKey(name: 'public', includeIfNull: false)
+  final bool public;
+  @JsonKey(name: 'scopes', includeIfNull: false)
+  final String scopes;
+  @JsonKey(name: 'setupHint', includeIfNull: false)
+  final String setupHint;
+  @JsonKey(name: 'usernameClaim', includeIfNull: false)
+  final String usernameClaim;
+  static const fromJsonFactory = _$AuthProviderPresetFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AuthProviderPreset &&
+            (identical(other.allowSignup, allowSignup) ||
+                const DeepCollectionEquality().equals(other.allowSignup, allowSignup)) &&
+            (identical(other.fields, fields) || const DeepCollectionEquality().equals(other.fields, fields)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.issuerTemplate, issuerTemplate) ||
+                const DeepCollectionEquality().equals(other.issuerTemplate, issuerTemplate)) &&
+            (identical(other.kind, kind) || const DeepCollectionEquality().equals(other.kind, kind)) &&
+            (identical(other.label, label) || const DeepCollectionEquality().equals(other.label, label)) &&
+            (identical(other.linkByEmail, linkByEmail) ||
+                const DeepCollectionEquality().equals(other.linkByEmail, linkByEmail)) &&
+            (identical(other.public, public) || const DeepCollectionEquality().equals(other.public, public)) &&
+            (identical(other.scopes, scopes) || const DeepCollectionEquality().equals(other.scopes, scopes)) &&
+            (identical(other.setupHint, setupHint) ||
+                const DeepCollectionEquality().equals(other.setupHint, setupHint)) &&
+            (identical(other.usernameClaim, usernameClaim) ||
+                const DeepCollectionEquality().equals(other.usernameClaim, usernameClaim)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(allowSignup) ^
+      const DeepCollectionEquality().hash(fields) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(issuerTemplate) ^
+      const DeepCollectionEquality().hash(kind) ^
+      const DeepCollectionEquality().hash(label) ^
+      const DeepCollectionEquality().hash(linkByEmail) ^
+      const DeepCollectionEquality().hash(public) ^
+      const DeepCollectionEquality().hash(scopes) ^
+      const DeepCollectionEquality().hash(setupHint) ^
+      const DeepCollectionEquality().hash(usernameClaim) ^
+      runtimeType.hashCode;
+}
+
+extension $AuthProviderPresetExtension on AuthProviderPreset {
+  AuthProviderPreset copyWith({
+    bool? allowSignup,
+    List<enums.AuthProviderPresetFields>? fields,
+    String? id,
+    String? issuerTemplate,
+    enums.AuthProviderPresetKind? kind,
+    String? label,
+    bool? linkByEmail,
+    bool? public,
+    String? scopes,
+    String? setupHint,
+    String? usernameClaim,
+  }) {
+    return AuthProviderPreset(
+      allowSignup: allowSignup ?? this.allowSignup,
+      fields: fields ?? this.fields,
+      id: id ?? this.id,
+      issuerTemplate: issuerTemplate ?? this.issuerTemplate,
+      kind: kind ?? this.kind,
+      label: label ?? this.label,
+      linkByEmail: linkByEmail ?? this.linkByEmail,
+      public: public ?? this.public,
+      scopes: scopes ?? this.scopes,
+      setupHint: setupHint ?? this.setupHint,
+      usernameClaim: usernameClaim ?? this.usernameClaim,
+    );
+  }
+
+  AuthProviderPreset copyWithWrapped({
+    Wrapped<bool>? allowSignup,
+    Wrapped<List<enums.AuthProviderPresetFields>?>? fields,
+    Wrapped<String>? id,
+    Wrapped<String?>? issuerTemplate,
+    Wrapped<enums.AuthProviderPresetKind>? kind,
+    Wrapped<String>? label,
+    Wrapped<bool>? linkByEmail,
+    Wrapped<bool>? public,
+    Wrapped<String>? scopes,
+    Wrapped<String>? setupHint,
+    Wrapped<String>? usernameClaim,
+  }) {
+    return AuthProviderPreset(
+      allowSignup: (allowSignup != null ? allowSignup.value : this.allowSignup),
+      fields: (fields != null ? fields.value : this.fields),
+      id: (id != null ? id.value : this.id),
+      issuerTemplate: (issuerTemplate != null ? issuerTemplate.value : this.issuerTemplate),
+      kind: (kind != null ? kind.value : this.kind),
+      label: (label != null ? label.value : this.label),
+      linkByEmail: (linkByEmail != null ? linkByEmail.value : this.linkByEmail),
+      public: (public != null ? public.value : this.public),
+      scopes: (scopes != null ? scopes.value : this.scopes),
+      setupHint: (setupHint != null ? setupHint.value : this.setupHint),
+      usernameClaim: (usernameClaim != null ? usernameClaim.value : this.usernameClaim),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class AuthProviderTest {
+  const AuthProviderTest({this.message, required this.ok});
+
+  factory AuthProviderTest.fromJson(Map<String, dynamic> json) => _$AuthProviderTestFromJson(json);
+
+  static const toJsonFactory = _$AuthProviderTestToJson;
+  Map<String, dynamic> toJson() => _$AuthProviderTestToJson(this);
+
+  @JsonKey(name: 'message', includeIfNull: false)
+  final String? message;
+  @JsonKey(name: 'ok', includeIfNull: false)
+  final bool ok;
+  static const fromJsonFactory = _$AuthProviderTestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is AuthProviderTest &&
+            (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
+            (identical(other.ok, ok) || const DeepCollectionEquality().equals(other.ok, ok)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(message) ^ const DeepCollectionEquality().hash(ok) ^ runtimeType.hashCode;
+}
+
+extension $AuthProviderTestExtension on AuthProviderTest {
+  AuthProviderTest copyWith({String? message, bool? ok}) {
+    return AuthProviderTest(message: message ?? this.message, ok: ok ?? this.ok);
+  }
+
+  AuthProviderTest copyWithWrapped({Wrapped<String?>? message, Wrapped<bool>? ok}) {
+    return AuthProviderTest(
+      message: (message != null ? message.value : this.message),
+      ok: (ok != null ? ok.value : this.ok),
     );
   }
 }
@@ -593,6 +1177,7 @@ extension $BatchStatusExtension on BatchStatus {
 class Branding {
   const Branding({
     required this.accentColor,
+    this.authProviders,
     this.backgrounds,
     this.icon,
     required this.message,
@@ -607,6 +1192,8 @@ class Branding {
 
   @JsonKey(name: 'accentColor', includeIfNull: false)
   final String accentColor;
+  @JsonKey(name: 'authProviders', includeIfNull: false, defaultValue: <AuthProviderOption>[])
+  final List<AuthProviderOption>? authProviders;
   @JsonKey(name: 'backgrounds', includeIfNull: false, defaultValue: <ImageInfo>[])
   final List<ImageInfo>? backgrounds;
   @JsonKey(name: 'icon', includeIfNull: false)
@@ -625,6 +1212,8 @@ class Branding {
         (other is Branding &&
             (identical(other.accentColor, accentColor) ||
                 const DeepCollectionEquality().equals(other.accentColor, accentColor)) &&
+            (identical(other.authProviders, authProviders) ||
+                const DeepCollectionEquality().equals(other.authProviders, authProviders)) &&
             (identical(other.backgrounds, backgrounds) ||
                 const DeepCollectionEquality().equals(other.backgrounds, backgrounds)) &&
             (identical(other.icon, icon) || const DeepCollectionEquality().equals(other.icon, icon)) &&
@@ -637,6 +1226,7 @@ class Branding {
   @override
   int get hashCode =>
       const DeepCollectionEquality().hash(accentColor) ^
+      const DeepCollectionEquality().hash(authProviders) ^
       const DeepCollectionEquality().hash(backgrounds) ^
       const DeepCollectionEquality().hash(icon) ^
       const DeepCollectionEquality().hash(message) ^
@@ -648,6 +1238,7 @@ class Branding {
 extension $BrandingExtension on Branding {
   Branding copyWith({
     String? accentColor,
+    List<AuthProviderOption>? authProviders,
     List<ImageInfo>? backgrounds,
     ImageInfo? icon,
     String? message,
@@ -656,6 +1247,7 @@ extension $BrandingExtension on Branding {
   }) {
     return Branding(
       accentColor: accentColor ?? this.accentColor,
+      authProviders: authProviders ?? this.authProviders,
       backgrounds: backgrounds ?? this.backgrounds,
       icon: icon ?? this.icon,
       message: message ?? this.message,
@@ -666,6 +1258,7 @@ extension $BrandingExtension on Branding {
 
   Branding copyWithWrapped({
     Wrapped<String>? accentColor,
+    Wrapped<List<AuthProviderOption>?>? authProviders,
     Wrapped<List<ImageInfo>?>? backgrounds,
     Wrapped<ImageInfo?>? icon,
     Wrapped<String>? message,
@@ -674,6 +1267,7 @@ extension $BrandingExtension on Branding {
   }) {
     return Branding(
       accentColor: (accentColor != null ? accentColor.value : this.accentColor),
+      authProviders: (authProviders != null ? authProviders.value : this.authProviders),
       backgrounds: (backgrounds != null ? backgrounds.value : this.backgrounds),
       icon: (icon != null ? icon.value : this.icon),
       message: (message != null ? message.value : this.message),
@@ -1748,6 +2342,50 @@ extension $ClientMessageExtension on ClientMessage {
 }
 
 @JsonSerializable(explicitToJson: true)
+class ConfirmLinkRequest {
+  const ConfirmLinkRequest({required this.code, required this.codeVerifier});
+
+  factory ConfirmLinkRequest.fromJson(Map<String, dynamic> json) => _$ConfirmLinkRequestFromJson(json);
+
+  static const toJsonFactory = _$ConfirmLinkRequestToJson;
+  Map<String, dynamic> toJson() => _$ConfirmLinkRequestToJson(this);
+
+  @JsonKey(name: 'code', includeIfNull: false)
+  final String code;
+  @JsonKey(name: 'codeVerifier', includeIfNull: false)
+  final String codeVerifier;
+  static const fromJsonFactory = _$ConfirmLinkRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ConfirmLinkRequest &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.codeVerifier, codeVerifier) ||
+                const DeepCollectionEquality().equals(other.codeVerifier, codeVerifier)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(code) ^
+      const DeepCollectionEquality().hash(codeVerifier) ^
+      runtimeType.hashCode;
+}
+
+extension $ConfirmLinkRequestExtension on ConfirmLinkRequest {
+  ConfirmLinkRequest copyWith({String? code, String? codeVerifier}) {
+    return ConfirmLinkRequest(code: code ?? this.code, codeVerifier: codeVerifier ?? this.codeVerifier);
+  }
+
+  ConfirmLinkRequest copyWithWrapped({Wrapped<String>? code, Wrapped<String>? codeVerifier}) {
+    return ConfirmLinkRequest(
+      code: (code != null ? code.value : this.code),
+      codeVerifier: (codeVerifier != null ? codeVerifier.value : this.codeVerifier),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Contact {
   const Contact({
     required this.cloudId,
@@ -1965,6 +2603,181 @@ extension $CredentialsRequestExtension on CredentialsRequest {
       deviceName: (deviceName != null ? deviceName.value : this.deviceName),
       password: (password != null ? password.value : this.password),
       username: (username != null ? username.value : this.username),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class DeviceLoginRequest {
+  const DeviceLoginRequest({this.challenge, this.deviceName, this.username});
+
+  factory DeviceLoginRequest.fromJson(Map<String, dynamic> json) => _$DeviceLoginRequestFromJson(json);
+
+  static const toJsonFactory = _$DeviceLoginRequestToJson;
+  Map<String, dynamic> toJson() => _$DeviceLoginRequestToJson(this);
+
+  @JsonKey(name: 'challenge', includeIfNull: false)
+  final String? challenge;
+  @JsonKey(name: 'deviceName', includeIfNull: false)
+  final String? deviceName;
+  @JsonKey(name: 'username', includeIfNull: false)
+  final String? username;
+  static const fromJsonFactory = _$DeviceLoginRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is DeviceLoginRequest &&
+            (identical(other.challenge, challenge) ||
+                const DeepCollectionEquality().equals(other.challenge, challenge)) &&
+            (identical(other.deviceName, deviceName) ||
+                const DeepCollectionEquality().equals(other.deviceName, deviceName)) &&
+            (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(challenge) ^
+      const DeepCollectionEquality().hash(deviceName) ^
+      const DeepCollectionEquality().hash(username) ^
+      runtimeType.hashCode;
+}
+
+extension $DeviceLoginRequestExtension on DeviceLoginRequest {
+  DeviceLoginRequest copyWith({String? challenge, String? deviceName, String? username}) {
+    return DeviceLoginRequest(
+      challenge: challenge ?? this.challenge,
+      deviceName: deviceName ?? this.deviceName,
+      username: username ?? this.username,
+    );
+  }
+
+  DeviceLoginRequest copyWithWrapped({
+    Wrapped<String?>? challenge,
+    Wrapped<String?>? deviceName,
+    Wrapped<String?>? username,
+  }) {
+    return DeviceLoginRequest(
+      challenge: (challenge != null ? challenge.value : this.challenge),
+      deviceName: (deviceName != null ? deviceName.value : this.deviceName),
+      username: (username != null ? username.value : this.username),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class DeviceLoginResult {
+  const DeviceLoginResult({required this.status, this.tokens});
+
+  factory DeviceLoginResult.fromJson(Map<String, dynamic> json) => _$DeviceLoginResultFromJson(json);
+
+  static const toJsonFactory = _$DeviceLoginResultToJson;
+  Map<String, dynamic> toJson() => _$DeviceLoginResultToJson(this);
+
+  @JsonKey(
+    name: 'status',
+    includeIfNull: false,
+    toJson: deviceLoginResultStatusToJson,
+    fromJson: deviceLoginResultStatusFromJson,
+  )
+  final enums.DeviceLoginResultStatus status;
+  @JsonKey(name: 'tokens', includeIfNull: false)
+  final TokenPair? tokens;
+  static const fromJsonFactory = _$DeviceLoginResultFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is DeviceLoginResult &&
+            (identical(other.status, status) || const DeepCollectionEquality().equals(other.status, status)) &&
+            (identical(other.tokens, tokens) || const DeepCollectionEquality().equals(other.tokens, tokens)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(status) ^ const DeepCollectionEquality().hash(tokens) ^ runtimeType.hashCode;
+}
+
+extension $DeviceLoginResultExtension on DeviceLoginResult {
+  DeviceLoginResult copyWith({enums.DeviceLoginResultStatus? status, TokenPair? tokens}) {
+    return DeviceLoginResult(status: status ?? this.status, tokens: tokens ?? this.tokens);
+  }
+
+  DeviceLoginResult copyWithWrapped({Wrapped<enums.DeviceLoginResultStatus>? status, Wrapped<TokenPair?>? tokens}) {
+    return DeviceLoginResult(
+      status: (status != null ? status.value : this.status),
+      tokens: (tokens != null ? tokens.value : this.tokens),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class DeviceLoginStart {
+  const DeviceLoginStart({
+    required this.expiresIn,
+    required this.number,
+    required this.pollToken,
+    required this.requestId,
+  });
+
+  factory DeviceLoginStart.fromJson(Map<String, dynamic> json) => _$DeviceLoginStartFromJson(json);
+
+  static const toJsonFactory = _$DeviceLoginStartToJson;
+  Map<String, dynamic> toJson() => _$DeviceLoginStartToJson(this);
+
+  @JsonKey(name: 'expiresIn', includeIfNull: false)
+  final int expiresIn;
+  @JsonKey(name: 'number', includeIfNull: false)
+  final int number;
+  @JsonKey(name: 'pollToken', includeIfNull: false)
+  final String pollToken;
+  @JsonKey(name: 'requestId', includeIfNull: false)
+  final String requestId;
+  static const fromJsonFactory = _$DeviceLoginStartFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is DeviceLoginStart &&
+            (identical(other.expiresIn, expiresIn) ||
+                const DeepCollectionEquality().equals(other.expiresIn, expiresIn)) &&
+            (identical(other.number, number) || const DeepCollectionEquality().equals(other.number, number)) &&
+            (identical(other.pollToken, pollToken) ||
+                const DeepCollectionEquality().equals(other.pollToken, pollToken)) &&
+            (identical(other.requestId, requestId) ||
+                const DeepCollectionEquality().equals(other.requestId, requestId)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(expiresIn) ^
+      const DeepCollectionEquality().hash(number) ^
+      const DeepCollectionEquality().hash(pollToken) ^
+      const DeepCollectionEquality().hash(requestId) ^
+      runtimeType.hashCode;
+}
+
+extension $DeviceLoginStartExtension on DeviceLoginStart {
+  DeviceLoginStart copyWith({int? expiresIn, int? number, String? pollToken, String? requestId}) {
+    return DeviceLoginStart(
+      expiresIn: expiresIn ?? this.expiresIn,
+      number: number ?? this.number,
+      pollToken: pollToken ?? this.pollToken,
+      requestId: requestId ?? this.requestId,
+    );
+  }
+
+  DeviceLoginStart copyWithWrapped({
+    Wrapped<int>? expiresIn,
+    Wrapped<int>? number,
+    Wrapped<String>? pollToken,
+    Wrapped<String>? requestId,
+  }) {
+    return DeviceLoginStart(
+      expiresIn: (expiresIn != null ? expiresIn.value : this.expiresIn),
+      number: (number != null ? number.value : this.number),
+      pollToken: (pollToken != null ? pollToken.value : this.pollToken),
+      requestId: (requestId != null ? requestId.value : this.requestId),
     );
   }
 }
@@ -3416,6 +4229,7 @@ class EventMessage {
     this.code,
     this.dirs,
     this.entry,
+    this.loginRequest,
     this.message,
     this.notification,
     this.reminder,
@@ -3440,6 +4254,8 @@ class EventMessage {
   final List<String>? dirs;
   @JsonKey(name: 'entry', includeIfNull: false)
   final LogEntry? entry;
+  @JsonKey(name: 'loginRequest', includeIfNull: false)
+  final LoginRequest? loginRequest;
   @JsonKey(name: 'message', includeIfNull: false)
   final String? message;
   @JsonKey(name: 'notification', includeIfNull: false)
@@ -3473,6 +4289,8 @@ class EventMessage {
             (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
             (identical(other.dirs, dirs) || const DeepCollectionEquality().equals(other.dirs, dirs)) &&
             (identical(other.entry, entry) || const DeepCollectionEquality().equals(other.entry, entry)) &&
+            (identical(other.loginRequest, loginRequest) ||
+                const DeepCollectionEquality().equals(other.loginRequest, loginRequest)) &&
             (identical(other.message, message) || const DeepCollectionEquality().equals(other.message, message)) &&
             (identical(other.notification, notification) ||
                 const DeepCollectionEquality().equals(other.notification, notification)) &&
@@ -3492,6 +4310,7 @@ class EventMessage {
       const DeepCollectionEquality().hash(code) ^
       const DeepCollectionEquality().hash(dirs) ^
       const DeepCollectionEquality().hash(entry) ^
+      const DeepCollectionEquality().hash(loginRequest) ^
       const DeepCollectionEquality().hash(message) ^
       const DeepCollectionEquality().hash(notification) ^
       const DeepCollectionEquality().hash(reminder) ^
@@ -3510,6 +4329,7 @@ extension $EventMessageExtension on EventMessage {
     String? code,
     List<String>? dirs,
     LogEntry? entry,
+    LoginRequest? loginRequest,
     String? message,
     Notification? notification,
     CalendarReminder? reminder,
@@ -3525,6 +4345,7 @@ extension $EventMessageExtension on EventMessage {
       code: code ?? this.code,
       dirs: dirs ?? this.dirs,
       entry: entry ?? this.entry,
+      loginRequest: loginRequest ?? this.loginRequest,
       message: message ?? this.message,
       notification: notification ?? this.notification,
       reminder: reminder ?? this.reminder,
@@ -3542,6 +4363,7 @@ extension $EventMessageExtension on EventMessage {
     Wrapped<String?>? code,
     Wrapped<List<String>?>? dirs,
     Wrapped<LogEntry?>? entry,
+    Wrapped<LoginRequest?>? loginRequest,
     Wrapped<String?>? message,
     Wrapped<Notification?>? notification,
     Wrapped<CalendarReminder?>? reminder,
@@ -3557,6 +4379,7 @@ extension $EventMessageExtension on EventMessage {
       code: (code != null ? code.value : this.code),
       dirs: (dirs != null ? dirs.value : this.dirs),
       entry: (entry != null ? entry.value : this.entry),
+      loginRequest: (loginRequest != null ? loginRequest.value : this.loginRequest),
       message: (message != null ? message.value : this.message),
       notification: (notification != null ? notification.value : this.notification),
       reminder: (reminder != null ? reminder.value : this.reminder),
@@ -5102,6 +5925,88 @@ extension $LinkChangesExtension on LinkChanges {
 }
 
 @JsonSerializable(explicitToJson: true)
+class LinkIdentityRequest {
+  const LinkIdentityRequest({required this.codeChallenge, required this.redirectUri});
+
+  factory LinkIdentityRequest.fromJson(Map<String, dynamic> json) => _$LinkIdentityRequestFromJson(json);
+
+  static const toJsonFactory = _$LinkIdentityRequestToJson;
+  Map<String, dynamic> toJson() => _$LinkIdentityRequestToJson(this);
+
+  @JsonKey(name: 'codeChallenge', includeIfNull: false)
+  final String codeChallenge;
+  @JsonKey(name: 'redirectUri', includeIfNull: false)
+  final String redirectUri;
+  static const fromJsonFactory = _$LinkIdentityRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LinkIdentityRequest &&
+            (identical(other.codeChallenge, codeChallenge) ||
+                const DeepCollectionEquality().equals(other.codeChallenge, codeChallenge)) &&
+            (identical(other.redirectUri, redirectUri) ||
+                const DeepCollectionEquality().equals(other.redirectUri, redirectUri)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(codeChallenge) ^
+      const DeepCollectionEquality().hash(redirectUri) ^
+      runtimeType.hashCode;
+}
+
+extension $LinkIdentityRequestExtension on LinkIdentityRequest {
+  LinkIdentityRequest copyWith({String? codeChallenge, String? redirectUri}) {
+    return LinkIdentityRequest(
+      codeChallenge: codeChallenge ?? this.codeChallenge,
+      redirectUri: redirectUri ?? this.redirectUri,
+    );
+  }
+
+  LinkIdentityRequest copyWithWrapped({Wrapped<String>? codeChallenge, Wrapped<String>? redirectUri}) {
+    return LinkIdentityRequest(
+      codeChallenge: (codeChallenge != null ? codeChallenge.value : this.codeChallenge),
+      redirectUri: (redirectUri != null ? redirectUri.value : this.redirectUri),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LinkIdentityStart {
+  const LinkIdentityStart({required this.url});
+
+  factory LinkIdentityStart.fromJson(Map<String, dynamic> json) => _$LinkIdentityStartFromJson(json);
+
+  static const toJsonFactory = _$LinkIdentityStartToJson;
+  Map<String, dynamic> toJson() => _$LinkIdentityStartToJson(this);
+
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String url;
+  static const fromJsonFactory = _$LinkIdentityStartFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LinkIdentityStart &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(url) ^ runtimeType.hashCode;
+}
+
+extension $LinkIdentityStartExtension on LinkIdentityStart {
+  LinkIdentityStart copyWith({String? url}) {
+    return LinkIdentityStart(url: url ?? this.url);
+  }
+
+  LinkIdentityStart copyWithWrapped({Wrapped<String>? url}) {
+    return LinkIdentityStart(url: (url != null ? url.value : this.url));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class LinkInfo {
   const LinkInfo({
     this.expiresAt,
@@ -5537,6 +6442,135 @@ extension $LinkUnlockExtension on LinkUnlock {
       root: (root != null ? root.value : this.root),
       token: (token != null ? token.value : this.token),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LinkedIdentity {
+  const LinkedIdentity({
+    required this.createdAt,
+    required this.email,
+    required this.id,
+    required this.preset,
+    required this.providerId,
+    required this.providerLabel,
+  });
+
+  factory LinkedIdentity.fromJson(Map<String, dynamic> json) => _$LinkedIdentityFromJson(json);
+
+  static const toJsonFactory = _$LinkedIdentityToJson;
+  Map<String, dynamic> toJson() => _$LinkedIdentityToJson(this);
+
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'email', includeIfNull: false)
+  final String email;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final int id;
+  @JsonKey(name: 'preset', includeIfNull: false)
+  final String preset;
+  @JsonKey(name: 'providerId', includeIfNull: false)
+  final String providerId;
+  @JsonKey(name: 'providerLabel', includeIfNull: false)
+  final String providerLabel;
+  static const fromJsonFactory = _$LinkedIdentityFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LinkedIdentity &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.email, email) || const DeepCollectionEquality().equals(other.email, email)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.preset, preset) || const DeepCollectionEquality().equals(other.preset, preset)) &&
+            (identical(other.providerId, providerId) ||
+                const DeepCollectionEquality().equals(other.providerId, providerId)) &&
+            (identical(other.providerLabel, providerLabel) ||
+                const DeepCollectionEquality().equals(other.providerLabel, providerLabel)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(email) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(preset) ^
+      const DeepCollectionEquality().hash(providerId) ^
+      const DeepCollectionEquality().hash(providerLabel) ^
+      runtimeType.hashCode;
+}
+
+extension $LinkedIdentityExtension on LinkedIdentity {
+  LinkedIdentity copyWith({
+    DateTime? createdAt,
+    String? email,
+    int? id,
+    String? preset,
+    String? providerId,
+    String? providerLabel,
+  }) {
+    return LinkedIdentity(
+      createdAt: createdAt ?? this.createdAt,
+      email: email ?? this.email,
+      id: id ?? this.id,
+      preset: preset ?? this.preset,
+      providerId: providerId ?? this.providerId,
+      providerLabel: providerLabel ?? this.providerLabel,
+    );
+  }
+
+  LinkedIdentity copyWithWrapped({
+    Wrapped<DateTime>? createdAt,
+    Wrapped<String>? email,
+    Wrapped<int>? id,
+    Wrapped<String>? preset,
+    Wrapped<String>? providerId,
+    Wrapped<String>? providerLabel,
+  }) {
+    return LinkedIdentity(
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      email: (email != null ? email.value : this.email),
+      id: (id != null ? id.value : this.id),
+      preset: (preset != null ? preset.value : this.preset),
+      providerId: (providerId != null ? providerId.value : this.providerId),
+      providerLabel: (providerLabel != null ? providerLabel.value : this.providerLabel),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LinkedProvider {
+  const LinkedProvider({required this.providerId});
+
+  factory LinkedProvider.fromJson(Map<String, dynamic> json) => _$LinkedProviderFromJson(json);
+
+  static const toJsonFactory = _$LinkedProviderToJson;
+  Map<String, dynamic> toJson() => _$LinkedProviderToJson(this);
+
+  @JsonKey(name: 'providerId', includeIfNull: false)
+  final String providerId;
+  static const fromJsonFactory = _$LinkedProviderFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LinkedProvider &&
+            (identical(other.providerId, providerId) ||
+                const DeepCollectionEquality().equals(other.providerId, providerId)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(providerId) ^ runtimeType.hashCode;
+}
+
+extension $LinkedProviderExtension on LinkedProvider {
+  LinkedProvider copyWith({String? providerId}) {
+    return LinkedProvider(providerId: providerId ?? this.providerId);
+  }
+
+  LinkedProvider copyWithWrapped({Wrapped<String>? providerId}) {
+    return LinkedProvider(providerId: (providerId != null ? providerId.value : this.providerId));
   }
 }
 
@@ -6125,6 +7159,105 @@ extension $LogPageExtension on LogPage {
     return LogPage(
       entries: (entries != null ? entries.value : this.entries),
       nextCursor: (nextCursor != null ? nextCursor.value : this.nextCursor),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class LoginRequest {
+  const LoginRequest({
+    required this.address,
+    required this.createdAt,
+    required this.device,
+    required this.expiresAt,
+    required this.id,
+    this.resolution,
+  });
+
+  factory LoginRequest.fromJson(Map<String, dynamic> json) => _$LoginRequestFromJson(json);
+
+  static const toJsonFactory = _$LoginRequestToJson;
+  Map<String, dynamic> toJson() => _$LoginRequestToJson(this);
+
+  @JsonKey(name: 'address', includeIfNull: false)
+  final String address;
+  @JsonKey(name: 'createdAt', includeIfNull: false)
+  final DateTime createdAt;
+  @JsonKey(name: 'device', includeIfNull: false)
+  final String device;
+  @JsonKey(name: 'expiresAt', includeIfNull: false)
+  final DateTime expiresAt;
+  @JsonKey(name: 'id', includeIfNull: false)
+  final String id;
+  @JsonKey(
+    name: 'resolution',
+    includeIfNull: false,
+    toJson: loginRequestResolutionNullableToJson,
+    fromJson: loginRequestResolutionNullableFromJson,
+  )
+  final enums.LoginRequestResolution? resolution;
+  static const fromJsonFactory = _$LoginRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is LoginRequest &&
+            (identical(other.address, address) || const DeepCollectionEquality().equals(other.address, address)) &&
+            (identical(other.createdAt, createdAt) ||
+                const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
+            (identical(other.device, device) || const DeepCollectionEquality().equals(other.device, device)) &&
+            (identical(other.expiresAt, expiresAt) ||
+                const DeepCollectionEquality().equals(other.expiresAt, expiresAt)) &&
+            (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
+            (identical(other.resolution, resolution) ||
+                const DeepCollectionEquality().equals(other.resolution, resolution)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(address) ^
+      const DeepCollectionEquality().hash(createdAt) ^
+      const DeepCollectionEquality().hash(device) ^
+      const DeepCollectionEquality().hash(expiresAt) ^
+      const DeepCollectionEquality().hash(id) ^
+      const DeepCollectionEquality().hash(resolution) ^
+      runtimeType.hashCode;
+}
+
+extension $LoginRequestExtension on LoginRequest {
+  LoginRequest copyWith({
+    String? address,
+    DateTime? createdAt,
+    String? device,
+    DateTime? expiresAt,
+    String? id,
+    enums.LoginRequestResolution? resolution,
+  }) {
+    return LoginRequest(
+      address: address ?? this.address,
+      createdAt: createdAt ?? this.createdAt,
+      device: device ?? this.device,
+      expiresAt: expiresAt ?? this.expiresAt,
+      id: id ?? this.id,
+      resolution: resolution ?? this.resolution,
+    );
+  }
+
+  LoginRequest copyWithWrapped({
+    Wrapped<String>? address,
+    Wrapped<DateTime>? createdAt,
+    Wrapped<String>? device,
+    Wrapped<DateTime>? expiresAt,
+    Wrapped<String>? id,
+    Wrapped<enums.LoginRequestResolution?>? resolution,
+  }) {
+    return LoginRequest(
+      address: (address != null ? address.value : this.address),
+      createdAt: (createdAt != null ? createdAt.value : this.createdAt),
+      device: (device != null ? device.value : this.device),
+      expiresAt: (expiresAt != null ? expiresAt.value : this.expiresAt),
+      id: (id != null ? id.value : this.id),
+      resolution: (resolution != null ? resolution.value : this.resolution),
     );
   }
 }
@@ -6746,6 +7879,165 @@ extension $NewAppPasswordExtension on NewAppPassword {
       name: (name != null ? name.value : this.name),
       readOnly: (readOnly != null ? readOnly.value : this.readOnly),
       token: (token != null ? token.value : this.token),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class NewAuthProvider {
+  const NewAuthProvider({
+    this.allowSignup,
+    required this.clientId,
+    required this.clientSecret,
+    this.issuer,
+    this.label,
+    this.linkByEmail,
+    required this.preset,
+    this.realm,
+    this.scopes,
+    this.serverUrl,
+    this.slug,
+    this.tenantId,
+    this.usernameClaim,
+  });
+
+  factory NewAuthProvider.fromJson(Map<String, dynamic> json) => _$NewAuthProviderFromJson(json);
+
+  static const toJsonFactory = _$NewAuthProviderToJson;
+  Map<String, dynamic> toJson() => _$NewAuthProviderToJson(this);
+
+  @JsonKey(name: 'allowSignup', includeIfNull: false)
+  final bool? allowSignup;
+  @JsonKey(name: 'clientId', includeIfNull: false)
+  final String clientId;
+  @JsonKey(name: 'clientSecret', includeIfNull: false)
+  final String clientSecret;
+  @JsonKey(name: 'issuer', includeIfNull: false)
+  final String? issuer;
+  @JsonKey(name: 'label', includeIfNull: false)
+  final String? label;
+  @JsonKey(name: 'linkByEmail', includeIfNull: false)
+  final bool? linkByEmail;
+  @JsonKey(name: 'preset', includeIfNull: false)
+  final String preset;
+  @JsonKey(name: 'realm', includeIfNull: false)
+  final String? realm;
+  @JsonKey(name: 'scopes', includeIfNull: false)
+  final String? scopes;
+  @JsonKey(name: 'serverUrl', includeIfNull: false)
+  final String? serverUrl;
+  @JsonKey(name: 'slug', includeIfNull: false)
+  final String? slug;
+  @JsonKey(name: 'tenantId', includeIfNull: false)
+  final String? tenantId;
+  @JsonKey(name: 'usernameClaim', includeIfNull: false)
+  final String? usernameClaim;
+  static const fromJsonFactory = _$NewAuthProviderFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is NewAuthProvider &&
+            (identical(other.allowSignup, allowSignup) ||
+                const DeepCollectionEquality().equals(other.allowSignup, allowSignup)) &&
+            (identical(other.clientId, clientId) || const DeepCollectionEquality().equals(other.clientId, clientId)) &&
+            (identical(other.clientSecret, clientSecret) ||
+                const DeepCollectionEquality().equals(other.clientSecret, clientSecret)) &&
+            (identical(other.issuer, issuer) || const DeepCollectionEquality().equals(other.issuer, issuer)) &&
+            (identical(other.label, label) || const DeepCollectionEquality().equals(other.label, label)) &&
+            (identical(other.linkByEmail, linkByEmail) ||
+                const DeepCollectionEquality().equals(other.linkByEmail, linkByEmail)) &&
+            (identical(other.preset, preset) || const DeepCollectionEquality().equals(other.preset, preset)) &&
+            (identical(other.realm, realm) || const DeepCollectionEquality().equals(other.realm, realm)) &&
+            (identical(other.scopes, scopes) || const DeepCollectionEquality().equals(other.scopes, scopes)) &&
+            (identical(other.serverUrl, serverUrl) ||
+                const DeepCollectionEquality().equals(other.serverUrl, serverUrl)) &&
+            (identical(other.slug, slug) || const DeepCollectionEquality().equals(other.slug, slug)) &&
+            (identical(other.tenantId, tenantId) || const DeepCollectionEquality().equals(other.tenantId, tenantId)) &&
+            (identical(other.usernameClaim, usernameClaim) ||
+                const DeepCollectionEquality().equals(other.usernameClaim, usernameClaim)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(allowSignup) ^
+      const DeepCollectionEquality().hash(clientId) ^
+      const DeepCollectionEquality().hash(clientSecret) ^
+      const DeepCollectionEquality().hash(issuer) ^
+      const DeepCollectionEquality().hash(label) ^
+      const DeepCollectionEquality().hash(linkByEmail) ^
+      const DeepCollectionEquality().hash(preset) ^
+      const DeepCollectionEquality().hash(realm) ^
+      const DeepCollectionEquality().hash(scopes) ^
+      const DeepCollectionEquality().hash(serverUrl) ^
+      const DeepCollectionEquality().hash(slug) ^
+      const DeepCollectionEquality().hash(tenantId) ^
+      const DeepCollectionEquality().hash(usernameClaim) ^
+      runtimeType.hashCode;
+}
+
+extension $NewAuthProviderExtension on NewAuthProvider {
+  NewAuthProvider copyWith({
+    bool? allowSignup,
+    String? clientId,
+    String? clientSecret,
+    String? issuer,
+    String? label,
+    bool? linkByEmail,
+    String? preset,
+    String? realm,
+    String? scopes,
+    String? serverUrl,
+    String? slug,
+    String? tenantId,
+    String? usernameClaim,
+  }) {
+    return NewAuthProvider(
+      allowSignup: allowSignup ?? this.allowSignup,
+      clientId: clientId ?? this.clientId,
+      clientSecret: clientSecret ?? this.clientSecret,
+      issuer: issuer ?? this.issuer,
+      label: label ?? this.label,
+      linkByEmail: linkByEmail ?? this.linkByEmail,
+      preset: preset ?? this.preset,
+      realm: realm ?? this.realm,
+      scopes: scopes ?? this.scopes,
+      serverUrl: serverUrl ?? this.serverUrl,
+      slug: slug ?? this.slug,
+      tenantId: tenantId ?? this.tenantId,
+      usernameClaim: usernameClaim ?? this.usernameClaim,
+    );
+  }
+
+  NewAuthProvider copyWithWrapped({
+    Wrapped<bool?>? allowSignup,
+    Wrapped<String>? clientId,
+    Wrapped<String>? clientSecret,
+    Wrapped<String?>? issuer,
+    Wrapped<String?>? label,
+    Wrapped<bool?>? linkByEmail,
+    Wrapped<String>? preset,
+    Wrapped<String?>? realm,
+    Wrapped<String?>? scopes,
+    Wrapped<String?>? serverUrl,
+    Wrapped<String?>? slug,
+    Wrapped<String?>? tenantId,
+    Wrapped<String?>? usernameClaim,
+  }) {
+    return NewAuthProvider(
+      allowSignup: (allowSignup != null ? allowSignup.value : this.allowSignup),
+      clientId: (clientId != null ? clientId.value : this.clientId),
+      clientSecret: (clientSecret != null ? clientSecret.value : this.clientSecret),
+      issuer: (issuer != null ? issuer.value : this.issuer),
+      label: (label != null ? label.value : this.label),
+      linkByEmail: (linkByEmail != null ? linkByEmail.value : this.linkByEmail),
+      preset: (preset != null ? preset.value : this.preset),
+      realm: (realm != null ? realm.value : this.realm),
+      scopes: (scopes != null ? scopes.value : this.scopes),
+      serverUrl: (serverUrl != null ? serverUrl.value : this.serverUrl),
+      slug: (slug != null ? slug.value : this.slug),
+      tenantId: (tenantId != null ? tenantId.value : this.tenantId),
+      usernameClaim: (usernameClaim != null ? usernameClaim.value : this.usernameClaim),
     );
   }
 }
@@ -8097,6 +9389,41 @@ extension $PersonExtension on Person {
 }
 
 @JsonSerializable(explicitToJson: true)
+class PollTokenBody {
+  const PollTokenBody({required this.pollToken});
+
+  factory PollTokenBody.fromJson(Map<String, dynamic> json) => _$PollTokenBodyFromJson(json);
+
+  static const toJsonFactory = _$PollTokenBodyToJson;
+  Map<String, dynamic> toJson() => _$PollTokenBodyToJson(this);
+
+  @JsonKey(name: 'pollToken', includeIfNull: false)
+  final String pollToken;
+  static const fromJsonFactory = _$PollTokenBodyFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is PollTokenBody &&
+            (identical(other.pollToken, pollToken) ||
+                const DeepCollectionEquality().equals(other.pollToken, pollToken)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(pollToken) ^ runtimeType.hashCode;
+}
+
+extension $PollTokenBodyExtension on PollTokenBody {
+  PollTokenBody copyWith({String? pollToken}) {
+    return PollTokenBody(pollToken: pollToken ?? this.pollToken);
+  }
+
+  PollTokenBody copyWithWrapped({Wrapped<String>? pollToken}) {
+    return PollTokenBody(pollToken: (pollToken != null ? pollToken.value : this.pollToken));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Preferences {
   const Preferences({required this.quota, required this.security, required this.shares});
 
@@ -8268,6 +9595,40 @@ extension $ProfileExtension on Profile {
       firstName: (firstName != null ? firstName.value : this.firstName),
       lastName: (lastName != null ? lastName.value : this.lastName),
     );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class ProviderOrder {
+  const ProviderOrder({this.ids});
+
+  factory ProviderOrder.fromJson(Map<String, dynamic> json) => _$ProviderOrderFromJson(json);
+
+  static const toJsonFactory = _$ProviderOrderToJson;
+  Map<String, dynamic> toJson() => _$ProviderOrderToJson(this);
+
+  @JsonKey(name: 'ids', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? ids;
+  static const fromJsonFactory = _$ProviderOrderFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ProviderOrder &&
+            (identical(other.ids, ids) || const DeepCollectionEquality().equals(other.ids, ids)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(ids) ^ runtimeType.hashCode;
+}
+
+extension $ProviderOrderExtension on ProviderOrder {
+  ProviderOrder copyWith({List<String>? ids}) {
+    return ProviderOrder(ids: ids ?? this.ids);
+  }
+
+  ProviderOrder copyWithWrapped({Wrapped<List<String>?>? ids}) {
+    return ProviderOrder(ids: (ids != null ? ids.value : this.ids));
   }
 }
 
@@ -8548,6 +9909,40 @@ extension $RecipientRefExtension on RecipientRef {
 
   RecipientRef copyWithWrapped({Wrapped<int>? id, Wrapped<enums.RecipientRefKind>? kind}) {
     return RecipientRef(id: (id != null ? id.value : this.id), kind: (kind != null ? kind.value : this.kind));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class RecoveryCodes {
+  const RecoveryCodes({this.codes});
+
+  factory RecoveryCodes.fromJson(Map<String, dynamic> json) => _$RecoveryCodesFromJson(json);
+
+  static const toJsonFactory = _$RecoveryCodesToJson;
+  Map<String, dynamic> toJson() => _$RecoveryCodesToJson(this);
+
+  @JsonKey(name: 'codes', includeIfNull: false, defaultValue: <String>[])
+  final List<String>? codes;
+  static const fromJsonFactory = _$RecoveryCodesFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is RecoveryCodes &&
+            (identical(other.codes, codes) || const DeepCollectionEquality().equals(other.codes, codes)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(codes) ^ runtimeType.hashCode;
+}
+
+extension $RecoveryCodesExtension on RecoveryCodes {
+  RecoveryCodes copyWith({List<String>? codes}) {
+    return RecoveryCodes(codes: codes ?? this.codes);
+  }
+
+  RecoveryCodes copyWithWrapped({Wrapped<List<String>?>? codes}) {
+    return RecoveryCodes(codes: (codes != null ? codes.value : this.codes));
   }
 }
 
@@ -9095,6 +10490,72 @@ extension $SearchStatusExtension on SearchStatus {
 }
 
 @JsonSerializable(explicitToJson: true)
+class SecondFactorRequest {
+  const SecondFactorRequest({required this.challenge, this.code, this.deviceName, this.recoveryCode});
+
+  factory SecondFactorRequest.fromJson(Map<String, dynamic> json) => _$SecondFactorRequestFromJson(json);
+
+  static const toJsonFactory = _$SecondFactorRequestToJson;
+  Map<String, dynamic> toJson() => _$SecondFactorRequestToJson(this);
+
+  @JsonKey(name: 'challenge', includeIfNull: false)
+  final String challenge;
+  @JsonKey(name: 'code', includeIfNull: false)
+  final String? code;
+  @JsonKey(name: 'deviceName', includeIfNull: false)
+  final String? deviceName;
+  @JsonKey(name: 'recoveryCode', includeIfNull: false)
+  final String? recoveryCode;
+  static const fromJsonFactory = _$SecondFactorRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is SecondFactorRequest &&
+            (identical(other.challenge, challenge) ||
+                const DeepCollectionEquality().equals(other.challenge, challenge)) &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.deviceName, deviceName) ||
+                const DeepCollectionEquality().equals(other.deviceName, deviceName)) &&
+            (identical(other.recoveryCode, recoveryCode) ||
+                const DeepCollectionEquality().equals(other.recoveryCode, recoveryCode)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(challenge) ^
+      const DeepCollectionEquality().hash(code) ^
+      const DeepCollectionEquality().hash(deviceName) ^
+      const DeepCollectionEquality().hash(recoveryCode) ^
+      runtimeType.hashCode;
+}
+
+extension $SecondFactorRequestExtension on SecondFactorRequest {
+  SecondFactorRequest copyWith({String? challenge, String? code, String? deviceName, String? recoveryCode}) {
+    return SecondFactorRequest(
+      challenge: challenge ?? this.challenge,
+      code: code ?? this.code,
+      deviceName: deviceName ?? this.deviceName,
+      recoveryCode: recoveryCode ?? this.recoveryCode,
+    );
+  }
+
+  SecondFactorRequest copyWithWrapped({
+    Wrapped<String>? challenge,
+    Wrapped<String?>? code,
+    Wrapped<String?>? deviceName,
+    Wrapped<String?>? recoveryCode,
+  }) {
+    return SecondFactorRequest(
+      challenge: (challenge != null ? challenge.value : this.challenge),
+      code: (code != null ? code.value : this.code),
+      deviceName: (deviceName != null ? deviceName.value : this.deviceName),
+      recoveryCode: (recoveryCode != null ? recoveryCode.value : this.recoveryCode),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class Server {
   const Server({
     required this.allowPrivateNetwork,
@@ -9513,6 +10974,7 @@ class ServerSettings {
     required this.ocrEnabled,
     this.ocrLanguages,
     required this.ocrMaxPages,
+    required this.requireTwoFactor,
     required this.searchContentEnabled,
     required this.smtpFrom,
     required this.smtpHost,
@@ -9523,6 +10985,7 @@ class ServerSettings {
     required this.smtpUsername,
     required this.trashEnabled,
     required this.trashRetentionDays,
+    required this.twoFactorGraceDays,
     required this.versionsEnabled,
     required this.versionsKeepAllHours,
     required this.versionsMaxAgeDays,
@@ -9547,6 +11010,8 @@ class ServerSettings {
   final List<String>? ocrLanguages;
   @JsonKey(name: 'ocrMaxPages', includeIfNull: false)
   final int ocrMaxPages;
+  @JsonKey(name: 'requireTwoFactor', includeIfNull: false)
+  final bool requireTwoFactor;
   @JsonKey(name: 'searchContentEnabled', includeIfNull: false)
   final bool searchContentEnabled;
   @JsonKey(name: 'smtpFrom', includeIfNull: false)
@@ -9572,6 +11037,8 @@ class ServerSettings {
   final bool trashEnabled;
   @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
   final int trashRetentionDays;
+  @JsonKey(name: 'twoFactorGraceDays', includeIfNull: false)
+  final int twoFactorGraceDays;
   @JsonKey(name: 'versionsEnabled', includeIfNull: false)
   final bool versionsEnabled;
   @JsonKey(name: 'versionsKeepAllHours', includeIfNull: false)
@@ -9600,6 +11067,8 @@ class ServerSettings {
                 const DeepCollectionEquality().equals(other.ocrLanguages, ocrLanguages)) &&
             (identical(other.ocrMaxPages, ocrMaxPages) ||
                 const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
+            (identical(other.requireTwoFactor, requireTwoFactor) ||
+                const DeepCollectionEquality().equals(other.requireTwoFactor, requireTwoFactor)) &&
             (identical(other.searchContentEnabled, searchContentEnabled) ||
                 const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
             (identical(other.smtpFrom, smtpFrom) || const DeepCollectionEquality().equals(other.smtpFrom, smtpFrom)) &&
@@ -9617,6 +11086,8 @@ class ServerSettings {
                 const DeepCollectionEquality().equals(other.trashEnabled, trashEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
                 const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
+            (identical(other.twoFactorGraceDays, twoFactorGraceDays) ||
+                const DeepCollectionEquality().equals(other.twoFactorGraceDays, twoFactorGraceDays)) &&
             (identical(other.versionsEnabled, versionsEnabled) ||
                 const DeepCollectionEquality().equals(other.versionsEnabled, versionsEnabled)) &&
             (identical(other.versionsKeepAllHours, versionsKeepAllHours) ||
@@ -9637,6 +11108,7 @@ class ServerSettings {
       const DeepCollectionEquality().hash(ocrEnabled) ^
       const DeepCollectionEquality().hash(ocrLanguages) ^
       const DeepCollectionEquality().hash(ocrMaxPages) ^
+      const DeepCollectionEquality().hash(requireTwoFactor) ^
       const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(smtpFrom) ^
       const DeepCollectionEquality().hash(smtpHost) ^
@@ -9647,6 +11119,7 @@ class ServerSettings {
       const DeepCollectionEquality().hash(smtpUsername) ^
       const DeepCollectionEquality().hash(trashEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
+      const DeepCollectionEquality().hash(twoFactorGraceDays) ^
       const DeepCollectionEquality().hash(versionsEnabled) ^
       const DeepCollectionEquality().hash(versionsKeepAllHours) ^
       const DeepCollectionEquality().hash(versionsMaxAgeDays) ^
@@ -9663,6 +11136,7 @@ extension $ServerSettingsExtension on ServerSettings {
     bool? ocrEnabled,
     List<String>? ocrLanguages,
     int? ocrMaxPages,
+    bool? requireTwoFactor,
     bool? searchContentEnabled,
     String? smtpFrom,
     String? smtpHost,
@@ -9673,6 +11147,7 @@ extension $ServerSettingsExtension on ServerSettings {
     String? smtpUsername,
     bool? trashEnabled,
     int? trashRetentionDays,
+    int? twoFactorGraceDays,
     bool? versionsEnabled,
     int? versionsKeepAllHours,
     int? versionsMaxAgeDays,
@@ -9686,6 +11161,7 @@ extension $ServerSettingsExtension on ServerSettings {
       ocrEnabled: ocrEnabled ?? this.ocrEnabled,
       ocrLanguages: ocrLanguages ?? this.ocrLanguages,
       ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
+      requireTwoFactor: requireTwoFactor ?? this.requireTwoFactor,
       searchContentEnabled: searchContentEnabled ?? this.searchContentEnabled,
       smtpFrom: smtpFrom ?? this.smtpFrom,
       smtpHost: smtpHost ?? this.smtpHost,
@@ -9696,6 +11172,7 @@ extension $ServerSettingsExtension on ServerSettings {
       smtpUsername: smtpUsername ?? this.smtpUsername,
       trashEnabled: trashEnabled ?? this.trashEnabled,
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
+      twoFactorGraceDays: twoFactorGraceDays ?? this.twoFactorGraceDays,
       versionsEnabled: versionsEnabled ?? this.versionsEnabled,
       versionsKeepAllHours: versionsKeepAllHours ?? this.versionsKeepAllHours,
       versionsMaxAgeDays: versionsMaxAgeDays ?? this.versionsMaxAgeDays,
@@ -9711,6 +11188,7 @@ extension $ServerSettingsExtension on ServerSettings {
     Wrapped<bool>? ocrEnabled,
     Wrapped<List<String>?>? ocrLanguages,
     Wrapped<int>? ocrMaxPages,
+    Wrapped<bool>? requireTwoFactor,
     Wrapped<bool>? searchContentEnabled,
     Wrapped<String>? smtpFrom,
     Wrapped<String>? smtpHost,
@@ -9721,6 +11199,7 @@ extension $ServerSettingsExtension on ServerSettings {
     Wrapped<String>? smtpUsername,
     Wrapped<bool>? trashEnabled,
     Wrapped<int>? trashRetentionDays,
+    Wrapped<int>? twoFactorGraceDays,
     Wrapped<bool>? versionsEnabled,
     Wrapped<int>? versionsKeepAllHours,
     Wrapped<int>? versionsMaxAgeDays,
@@ -9734,6 +11213,7 @@ extension $ServerSettingsExtension on ServerSettings {
       ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
       ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
       ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
+      requireTwoFactor: (requireTwoFactor != null ? requireTwoFactor.value : this.requireTwoFactor),
       searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
       smtpFrom: (smtpFrom != null ? smtpFrom.value : this.smtpFrom),
       smtpHost: (smtpHost != null ? smtpHost.value : this.smtpHost),
@@ -9744,6 +11224,7 @@ extension $ServerSettingsExtension on ServerSettings {
       smtpUsername: (smtpUsername != null ? smtpUsername.value : this.smtpUsername),
       trashEnabled: (trashEnabled != null ? trashEnabled.value : this.trashEnabled),
       trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
+      twoFactorGraceDays: (twoFactorGraceDays != null ? twoFactorGraceDays.value : this.twoFactorGraceDays),
       versionsEnabled: (versionsEnabled != null ? versionsEnabled.value : this.versionsEnabled),
       versionsKeepAllHours: (versionsKeepAllHours != null ? versionsKeepAllHours.value : this.versionsKeepAllHours),
       versionsMaxAgeDays: (versionsMaxAgeDays != null ? versionsMaxAgeDays.value : this.versionsMaxAgeDays),
@@ -9762,6 +11243,7 @@ class ServerSettingsChanges {
     this.ocrEnabled,
     this.ocrLanguages,
     this.ocrMaxPages,
+    this.requireTwoFactor,
     this.searchContentEnabled,
     this.smtpFrom,
     this.smtpHost,
@@ -9771,6 +11253,7 @@ class ServerSettingsChanges {
     this.smtpUsername,
     this.trashEnabled,
     this.trashRetentionDays,
+    this.twoFactorGraceDays,
     this.versionsEnabled,
     this.versionsKeepAllHours,
     this.versionsMaxAgeDays,
@@ -9795,6 +11278,8 @@ class ServerSettingsChanges {
   final List<String>? ocrLanguages;
   @JsonKey(name: 'ocrMaxPages', includeIfNull: false)
   final int? ocrMaxPages;
+  @JsonKey(name: 'requireTwoFactor', includeIfNull: false)
+  final bool? requireTwoFactor;
   @JsonKey(name: 'searchContentEnabled', includeIfNull: false)
   final bool? searchContentEnabled;
   @JsonKey(name: 'smtpFrom', includeIfNull: false)
@@ -9818,6 +11303,8 @@ class ServerSettingsChanges {
   final bool? trashEnabled;
   @JsonKey(name: 'trashRetentionDays', includeIfNull: false)
   final int? trashRetentionDays;
+  @JsonKey(name: 'twoFactorGraceDays', includeIfNull: false)
+  final int? twoFactorGraceDays;
   @JsonKey(name: 'versionsEnabled', includeIfNull: false)
   final bool? versionsEnabled;
   @JsonKey(name: 'versionsKeepAllHours', includeIfNull: false)
@@ -9846,6 +11333,8 @@ class ServerSettingsChanges {
                 const DeepCollectionEquality().equals(other.ocrLanguages, ocrLanguages)) &&
             (identical(other.ocrMaxPages, ocrMaxPages) ||
                 const DeepCollectionEquality().equals(other.ocrMaxPages, ocrMaxPages)) &&
+            (identical(other.requireTwoFactor, requireTwoFactor) ||
+                const DeepCollectionEquality().equals(other.requireTwoFactor, requireTwoFactor)) &&
             (identical(other.searchContentEnabled, searchContentEnabled) ||
                 const DeepCollectionEquality().equals(other.searchContentEnabled, searchContentEnabled)) &&
             (identical(other.smtpFrom, smtpFrom) || const DeepCollectionEquality().equals(other.smtpFrom, smtpFrom)) &&
@@ -9861,6 +11350,8 @@ class ServerSettingsChanges {
                 const DeepCollectionEquality().equals(other.trashEnabled, trashEnabled)) &&
             (identical(other.trashRetentionDays, trashRetentionDays) ||
                 const DeepCollectionEquality().equals(other.trashRetentionDays, trashRetentionDays)) &&
+            (identical(other.twoFactorGraceDays, twoFactorGraceDays) ||
+                const DeepCollectionEquality().equals(other.twoFactorGraceDays, twoFactorGraceDays)) &&
             (identical(other.versionsEnabled, versionsEnabled) ||
                 const DeepCollectionEquality().equals(other.versionsEnabled, versionsEnabled)) &&
             (identical(other.versionsKeepAllHours, versionsKeepAllHours) ||
@@ -9881,6 +11372,7 @@ class ServerSettingsChanges {
       const DeepCollectionEquality().hash(ocrEnabled) ^
       const DeepCollectionEquality().hash(ocrLanguages) ^
       const DeepCollectionEquality().hash(ocrMaxPages) ^
+      const DeepCollectionEquality().hash(requireTwoFactor) ^
       const DeepCollectionEquality().hash(searchContentEnabled) ^
       const DeepCollectionEquality().hash(smtpFrom) ^
       const DeepCollectionEquality().hash(smtpHost) ^
@@ -9890,6 +11382,7 @@ class ServerSettingsChanges {
       const DeepCollectionEquality().hash(smtpUsername) ^
       const DeepCollectionEquality().hash(trashEnabled) ^
       const DeepCollectionEquality().hash(trashRetentionDays) ^
+      const DeepCollectionEquality().hash(twoFactorGraceDays) ^
       const DeepCollectionEquality().hash(versionsEnabled) ^
       const DeepCollectionEquality().hash(versionsKeepAllHours) ^
       const DeepCollectionEquality().hash(versionsMaxAgeDays) ^
@@ -9906,6 +11399,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     bool? ocrEnabled,
     List<String>? ocrLanguages,
     int? ocrMaxPages,
+    bool? requireTwoFactor,
     bool? searchContentEnabled,
     String? smtpFrom,
     String? smtpHost,
@@ -9915,6 +11409,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     String? smtpUsername,
     bool? trashEnabled,
     int? trashRetentionDays,
+    int? twoFactorGraceDays,
     bool? versionsEnabled,
     int? versionsKeepAllHours,
     int? versionsMaxAgeDays,
@@ -9928,6 +11423,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       ocrEnabled: ocrEnabled ?? this.ocrEnabled,
       ocrLanguages: ocrLanguages ?? this.ocrLanguages,
       ocrMaxPages: ocrMaxPages ?? this.ocrMaxPages,
+      requireTwoFactor: requireTwoFactor ?? this.requireTwoFactor,
       searchContentEnabled: searchContentEnabled ?? this.searchContentEnabled,
       smtpFrom: smtpFrom ?? this.smtpFrom,
       smtpHost: smtpHost ?? this.smtpHost,
@@ -9937,6 +11433,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       smtpUsername: smtpUsername ?? this.smtpUsername,
       trashEnabled: trashEnabled ?? this.trashEnabled,
       trashRetentionDays: trashRetentionDays ?? this.trashRetentionDays,
+      twoFactorGraceDays: twoFactorGraceDays ?? this.twoFactorGraceDays,
       versionsEnabled: versionsEnabled ?? this.versionsEnabled,
       versionsKeepAllHours: versionsKeepAllHours ?? this.versionsKeepAllHours,
       versionsMaxAgeDays: versionsMaxAgeDays ?? this.versionsMaxAgeDays,
@@ -9952,6 +11449,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     Wrapped<bool?>? ocrEnabled,
     Wrapped<List<String>?>? ocrLanguages,
     Wrapped<int?>? ocrMaxPages,
+    Wrapped<bool?>? requireTwoFactor,
     Wrapped<bool?>? searchContentEnabled,
     Wrapped<String?>? smtpFrom,
     Wrapped<String?>? smtpHost,
@@ -9961,6 +11459,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
     Wrapped<String?>? smtpUsername,
     Wrapped<bool?>? trashEnabled,
     Wrapped<int?>? trashRetentionDays,
+    Wrapped<int?>? twoFactorGraceDays,
     Wrapped<bool?>? versionsEnabled,
     Wrapped<int?>? versionsKeepAllHours,
     Wrapped<int?>? versionsMaxAgeDays,
@@ -9974,6 +11473,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       ocrEnabled: (ocrEnabled != null ? ocrEnabled.value : this.ocrEnabled),
       ocrLanguages: (ocrLanguages != null ? ocrLanguages.value : this.ocrLanguages),
       ocrMaxPages: (ocrMaxPages != null ? ocrMaxPages.value : this.ocrMaxPages),
+      requireTwoFactor: (requireTwoFactor != null ? requireTwoFactor.value : this.requireTwoFactor),
       searchContentEnabled: (searchContentEnabled != null ? searchContentEnabled.value : this.searchContentEnabled),
       smtpFrom: (smtpFrom != null ? smtpFrom.value : this.smtpFrom),
       smtpHost: (smtpHost != null ? smtpHost.value : this.smtpHost),
@@ -9983,6 +11483,7 @@ extension $ServerSettingsChangesExtension on ServerSettingsChanges {
       smtpUsername: (smtpUsername != null ? smtpUsername.value : this.smtpUsername),
       trashEnabled: (trashEnabled != null ? trashEnabled.value : this.trashEnabled),
       trashRetentionDays: (trashRetentionDays != null ? trashRetentionDays.value : this.trashRetentionDays),
+      twoFactorGraceDays: (twoFactorGraceDays != null ? twoFactorGraceDays.value : this.twoFactorGraceDays),
       versionsEnabled: (versionsEnabled != null ? versionsEnabled.value : this.versionsEnabled),
       versionsKeepAllHours: (versionsKeepAllHours != null ? versionsKeepAllHours.value : this.versionsKeepAllHours),
       versionsMaxAgeDays: (versionsMaxAgeDays != null ? versionsMaxAgeDays.value : this.versionsMaxAgeDays),
@@ -10574,6 +12075,64 @@ extension $SharePermissionsExtension on SharePermissions {
       create: (create != null ? create.value : this.create),
       delete: (delete != null ? delete.value : this.delete),
       edit: (edit != null ? edit.value : this.edit),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class SsoTokenRequest {
+  const SsoTokenRequest({required this.code, required this.codeVerifier, this.deviceName});
+
+  factory SsoTokenRequest.fromJson(Map<String, dynamic> json) => _$SsoTokenRequestFromJson(json);
+
+  static const toJsonFactory = _$SsoTokenRequestToJson;
+  Map<String, dynamic> toJson() => _$SsoTokenRequestToJson(this);
+
+  @JsonKey(name: 'code', includeIfNull: false)
+  final String code;
+  @JsonKey(name: 'codeVerifier', includeIfNull: false)
+  final String codeVerifier;
+  @JsonKey(name: 'deviceName', includeIfNull: false)
+  final String? deviceName;
+  static const fromJsonFactory = _$SsoTokenRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is SsoTokenRequest &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)) &&
+            (identical(other.codeVerifier, codeVerifier) ||
+                const DeepCollectionEquality().equals(other.codeVerifier, codeVerifier)) &&
+            (identical(other.deviceName, deviceName) ||
+                const DeepCollectionEquality().equals(other.deviceName, deviceName)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(code) ^
+      const DeepCollectionEquality().hash(codeVerifier) ^
+      const DeepCollectionEquality().hash(deviceName) ^
+      runtimeType.hashCode;
+}
+
+extension $SsoTokenRequestExtension on SsoTokenRequest {
+  SsoTokenRequest copyWith({String? code, String? codeVerifier, String? deviceName}) {
+    return SsoTokenRequest(
+      code: code ?? this.code,
+      codeVerifier: codeVerifier ?? this.codeVerifier,
+      deviceName: deviceName ?? this.deviceName,
+    );
+  }
+
+  SsoTokenRequest copyWithWrapped({
+    Wrapped<String>? code,
+    Wrapped<String>? codeVerifier,
+    Wrapped<String?>? deviceName,
+  }) {
+    return SsoTokenRequest(
+      code: (code != null ? code.value : this.code),
+      codeVerifier: (codeVerifier != null ? codeVerifier.value : this.codeVerifier),
+      deviceName: (deviceName != null ? deviceName.value : this.deviceName),
     );
   }
 }
@@ -11455,6 +13014,243 @@ extension $TrustedServerRequestExtension on TrustedServerRequest {
 }
 
 @JsonSerializable(explicitToJson: true)
+class TwoFactorCodeRequest {
+  const TwoFactorCodeRequest({required this.code});
+
+  factory TwoFactorCodeRequest.fromJson(Map<String, dynamic> json) => _$TwoFactorCodeRequestFromJson(json);
+
+  static const toJsonFactory = _$TwoFactorCodeRequestToJson;
+  Map<String, dynamic> toJson() => _$TwoFactorCodeRequestToJson(this);
+
+  @JsonKey(name: 'code', includeIfNull: false)
+  final String code;
+  static const fromJsonFactory = _$TwoFactorCodeRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TwoFactorCodeRequest &&
+            (identical(other.code, code) || const DeepCollectionEquality().equals(other.code, code)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(code) ^ runtimeType.hashCode;
+}
+
+extension $TwoFactorCodeRequestExtension on TwoFactorCodeRequest {
+  TwoFactorCodeRequest copyWith({String? code}) {
+    return TwoFactorCodeRequest(code: code ?? this.code);
+  }
+
+  TwoFactorCodeRequest copyWithWrapped({Wrapped<String>? code}) {
+    return TwoFactorCodeRequest(code: (code != null ? code.value : this.code));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TwoFactorPasswordRequest {
+  const TwoFactorPasswordRequest({this.password});
+
+  factory TwoFactorPasswordRequest.fromJson(Map<String, dynamic> json) => _$TwoFactorPasswordRequestFromJson(json);
+
+  static const toJsonFactory = _$TwoFactorPasswordRequestToJson;
+  Map<String, dynamic> toJson() => _$TwoFactorPasswordRequestToJson(this);
+
+  @JsonKey(name: 'password', includeIfNull: false)
+  final String? password;
+  static const fromJsonFactory = _$TwoFactorPasswordRequestFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TwoFactorPasswordRequest &&
+            (identical(other.password, password) || const DeepCollectionEquality().equals(other.password, password)));
+  }
+
+  @override
+  int get hashCode => const DeepCollectionEquality().hash(password) ^ runtimeType.hashCode;
+}
+
+extension $TwoFactorPasswordRequestExtension on TwoFactorPasswordRequest {
+  TwoFactorPasswordRequest copyWith({String? password}) {
+    return TwoFactorPasswordRequest(password: password ?? this.password);
+  }
+
+  TwoFactorPasswordRequest copyWithWrapped({Wrapped<String?>? password}) {
+    return TwoFactorPasswordRequest(password: (password != null ? password.value : this.password));
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TwoFactorSettings {
+  const TwoFactorSettings({
+    this.deadline,
+    required this.enabled,
+    required this.recoveryCodesRemaining,
+    required this.required,
+  });
+
+  factory TwoFactorSettings.fromJson(Map<String, dynamic> json) => _$TwoFactorSettingsFromJson(json);
+
+  static const toJsonFactory = _$TwoFactorSettingsToJson;
+  Map<String, dynamic> toJson() => _$TwoFactorSettingsToJson(this);
+
+  @JsonKey(name: 'deadline', includeIfNull: false)
+  final DateTime? deadline;
+  @JsonKey(name: 'enabled', includeIfNull: false)
+  final bool enabled;
+  @JsonKey(name: 'recoveryCodesRemaining', includeIfNull: false)
+  final int recoveryCodesRemaining;
+  @JsonKey(name: 'required', includeIfNull: false)
+  final bool required;
+  static const fromJsonFactory = _$TwoFactorSettingsFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TwoFactorSettings &&
+            (identical(other.deadline, deadline) || const DeepCollectionEquality().equals(other.deadline, deadline)) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
+            (identical(other.recoveryCodesRemaining, recoveryCodesRemaining) ||
+                const DeepCollectionEquality().equals(other.recoveryCodesRemaining, recoveryCodesRemaining)) &&
+            (identical(other.required, required) || const DeepCollectionEquality().equals(other.required, required)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(deadline) ^
+      const DeepCollectionEquality().hash(enabled) ^
+      const DeepCollectionEquality().hash(recoveryCodesRemaining) ^
+      const DeepCollectionEquality().hash(required) ^
+      runtimeType.hashCode;
+}
+
+extension $TwoFactorSettingsExtension on TwoFactorSettings {
+  TwoFactorSettings copyWith({DateTime? deadline, bool? enabled, int? recoveryCodesRemaining, bool? required}) {
+    return TwoFactorSettings(
+      deadline: deadline ?? this.deadline,
+      enabled: enabled ?? this.enabled,
+      recoveryCodesRemaining: recoveryCodesRemaining ?? this.recoveryCodesRemaining,
+      required: required ?? this.required,
+    );
+  }
+
+  TwoFactorSettings copyWithWrapped({
+    Wrapped<DateTime?>? deadline,
+    Wrapped<bool>? enabled,
+    Wrapped<int>? recoveryCodesRemaining,
+    Wrapped<bool>? required,
+  }) {
+    return TwoFactorSettings(
+      deadline: (deadline != null ? deadline.value : this.deadline),
+      enabled: (enabled != null ? enabled.value : this.enabled),
+      recoveryCodesRemaining: (recoveryCodesRemaining != null
+          ? recoveryCodesRemaining.value
+          : this.recoveryCodesRemaining),
+      required: (required != null ? required.value : this.required),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TwoFactorSetup {
+  const TwoFactorSetup({required this.secret, required this.url});
+
+  factory TwoFactorSetup.fromJson(Map<String, dynamic> json) => _$TwoFactorSetupFromJson(json);
+
+  static const toJsonFactory = _$TwoFactorSetupToJson;
+  Map<String, dynamic> toJson() => _$TwoFactorSetupToJson(this);
+
+  @JsonKey(name: 'secret', includeIfNull: false)
+  final String secret;
+  @JsonKey(name: 'url', includeIfNull: false)
+  final String url;
+  static const fromJsonFactory = _$TwoFactorSetupFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TwoFactorSetup &&
+            (identical(other.secret, secret) || const DeepCollectionEquality().equals(other.secret, secret)) &&
+            (identical(other.url, url) || const DeepCollectionEquality().equals(other.url, url)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(secret) ^ const DeepCollectionEquality().hash(url) ^ runtimeType.hashCode;
+}
+
+extension $TwoFactorSetupExtension on TwoFactorSetup {
+  TwoFactorSetup copyWith({String? secret, String? url}) {
+    return TwoFactorSetup(secret: secret ?? this.secret, url: url ?? this.url);
+  }
+
+  TwoFactorSetup copyWithWrapped({Wrapped<String>? secret, Wrapped<String>? url}) {
+    return TwoFactorSetup(
+      secret: (secret != null ? secret.value : this.secret),
+      url: (url != null ? url.value : this.url),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
+class TwoFactorStatus {
+  const TwoFactorStatus({this.deadline, required this.enabled, required this.setupRequired});
+
+  factory TwoFactorStatus.fromJson(Map<String, dynamic> json) => _$TwoFactorStatusFromJson(json);
+
+  static const toJsonFactory = _$TwoFactorStatusToJson;
+  Map<String, dynamic> toJson() => _$TwoFactorStatusToJson(this);
+
+  @JsonKey(name: 'deadline', includeIfNull: false)
+  final DateTime? deadline;
+  @JsonKey(name: 'enabled', includeIfNull: false)
+  final bool enabled;
+  @JsonKey(name: 'setupRequired', includeIfNull: false)
+  final bool setupRequired;
+  static const fromJsonFactory = _$TwoFactorStatusFromJson;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is TwoFactorStatus &&
+            (identical(other.deadline, deadline) || const DeepCollectionEquality().equals(other.deadline, deadline)) &&
+            (identical(other.enabled, enabled) || const DeepCollectionEquality().equals(other.enabled, enabled)) &&
+            (identical(other.setupRequired, setupRequired) ||
+                const DeepCollectionEquality().equals(other.setupRequired, setupRequired)));
+  }
+
+  @override
+  int get hashCode =>
+      const DeepCollectionEquality().hash(deadline) ^
+      const DeepCollectionEquality().hash(enabled) ^
+      const DeepCollectionEquality().hash(setupRequired) ^
+      runtimeType.hashCode;
+}
+
+extension $TwoFactorStatusExtension on TwoFactorStatus {
+  TwoFactorStatus copyWith({DateTime? deadline, bool? enabled, bool? setupRequired}) {
+    return TwoFactorStatus(
+      deadline: deadline ?? this.deadline,
+      enabled: enabled ?? this.enabled,
+      setupRequired: setupRequired ?? this.setupRequired,
+    );
+  }
+
+  TwoFactorStatus copyWithWrapped({
+    Wrapped<DateTime?>? deadline,
+    Wrapped<bool>? enabled,
+    Wrapped<bool>? setupRequired,
+  }) {
+    return TwoFactorStatus(
+      deadline: (deadline != null ? deadline.value : this.deadline),
+      enabled: (enabled != null ? enabled.value : this.enabled),
+      setupRequired: (setupRequired != null ? setupRequired.value : this.setupRequired),
+    );
+  }
+}
+
+@JsonSerializable(explicitToJson: true)
 class UnlockRequest {
   const UnlockRequest({this.password});
 
@@ -11660,11 +13456,14 @@ class User {
     this.avatar,
     required this.createdAt,
     required this.disabled,
+    required this.hasPassword,
     required this.historyBytes,
     required this.id,
     required this.profile,
     required this.quotaBytes,
     required this.role,
+    required this.sso,
+    required this.twoFactor,
     required this.usedBytes,
     required this.username,
   });
@@ -11682,6 +13481,8 @@ class User {
   final DateTime createdAt;
   @JsonKey(name: 'disabled', includeIfNull: false)
   final bool disabled;
+  @JsonKey(name: 'hasPassword', includeIfNull: false)
+  final bool hasPassword;
   @JsonKey(name: 'historyBytes', includeIfNull: false)
   final int historyBytes;
   @JsonKey(name: 'id', includeIfNull: false)
@@ -11692,6 +13493,10 @@ class User {
   final int quotaBytes;
   @JsonKey(name: 'role', includeIfNull: false, toJson: userRoleToJson, fromJson: userRoleFromJson)
   final enums.UserRole role;
+  @JsonKey(name: 'sso', includeIfNull: false)
+  final bool sso;
+  @JsonKey(name: 'twoFactor', includeIfNull: false)
+  final TwoFactorStatus twoFactor;
   @JsonKey(name: 'usedBytes', includeIfNull: false)
   final int usedBytes;
   @JsonKey(name: 'username', includeIfNull: false)
@@ -11708,6 +13513,8 @@ class User {
             (identical(other.createdAt, createdAt) ||
                 const DeepCollectionEquality().equals(other.createdAt, createdAt)) &&
             (identical(other.disabled, disabled) || const DeepCollectionEquality().equals(other.disabled, disabled)) &&
+            (identical(other.hasPassword, hasPassword) ||
+                const DeepCollectionEquality().equals(other.hasPassword, hasPassword)) &&
             (identical(other.historyBytes, historyBytes) ||
                 const DeepCollectionEquality().equals(other.historyBytes, historyBytes)) &&
             (identical(other.id, id) || const DeepCollectionEquality().equals(other.id, id)) &&
@@ -11715,6 +13522,9 @@ class User {
             (identical(other.quotaBytes, quotaBytes) ||
                 const DeepCollectionEquality().equals(other.quotaBytes, quotaBytes)) &&
             (identical(other.role, role) || const DeepCollectionEquality().equals(other.role, role)) &&
+            (identical(other.sso, sso) || const DeepCollectionEquality().equals(other.sso, sso)) &&
+            (identical(other.twoFactor, twoFactor) ||
+                const DeepCollectionEquality().equals(other.twoFactor, twoFactor)) &&
             (identical(other.usedBytes, usedBytes) ||
                 const DeepCollectionEquality().equals(other.usedBytes, usedBytes)) &&
             (identical(other.username, username) || const DeepCollectionEquality().equals(other.username, username)));
@@ -11726,11 +13536,14 @@ class User {
       const DeepCollectionEquality().hash(avatar) ^
       const DeepCollectionEquality().hash(createdAt) ^
       const DeepCollectionEquality().hash(disabled) ^
+      const DeepCollectionEquality().hash(hasPassword) ^
       const DeepCollectionEquality().hash(historyBytes) ^
       const DeepCollectionEquality().hash(id) ^
       const DeepCollectionEquality().hash(profile) ^
       const DeepCollectionEquality().hash(quotaBytes) ^
       const DeepCollectionEquality().hash(role) ^
+      const DeepCollectionEquality().hash(sso) ^
+      const DeepCollectionEquality().hash(twoFactor) ^
       const DeepCollectionEquality().hash(usedBytes) ^
       const DeepCollectionEquality().hash(username) ^
       runtimeType.hashCode;
@@ -11742,11 +13555,14 @@ extension $UserExtension on User {
     Avatar? avatar,
     DateTime? createdAt,
     bool? disabled,
+    bool? hasPassword,
     int? historyBytes,
     int? id,
     Profile? profile,
     int? quotaBytes,
     enums.UserRole? role,
+    bool? sso,
+    TwoFactorStatus? twoFactor,
     int? usedBytes,
     String? username,
   }) {
@@ -11755,11 +13571,14 @@ extension $UserExtension on User {
       avatar: avatar ?? this.avatar,
       createdAt: createdAt ?? this.createdAt,
       disabled: disabled ?? this.disabled,
+      hasPassword: hasPassword ?? this.hasPassword,
       historyBytes: historyBytes ?? this.historyBytes,
       id: id ?? this.id,
       profile: profile ?? this.profile,
       quotaBytes: quotaBytes ?? this.quotaBytes,
       role: role ?? this.role,
+      sso: sso ?? this.sso,
+      twoFactor: twoFactor ?? this.twoFactor,
       usedBytes: usedBytes ?? this.usedBytes,
       username: username ?? this.username,
     );
@@ -11770,11 +13589,14 @@ extension $UserExtension on User {
     Wrapped<Avatar?>? avatar,
     Wrapped<DateTime>? createdAt,
     Wrapped<bool>? disabled,
+    Wrapped<bool>? hasPassword,
     Wrapped<int>? historyBytes,
     Wrapped<int>? id,
     Wrapped<Profile>? profile,
     Wrapped<int>? quotaBytes,
     Wrapped<enums.UserRole>? role,
+    Wrapped<bool>? sso,
+    Wrapped<TwoFactorStatus>? twoFactor,
     Wrapped<int>? usedBytes,
     Wrapped<String>? username,
   }) {
@@ -11783,11 +13605,14 @@ extension $UserExtension on User {
       avatar: (avatar != null ? avatar.value : this.avatar),
       createdAt: (createdAt != null ? createdAt.value : this.createdAt),
       disabled: (disabled != null ? disabled.value : this.disabled),
+      hasPassword: (hasPassword != null ? hasPassword.value : this.hasPassword),
       historyBytes: (historyBytes != null ? historyBytes.value : this.historyBytes),
       id: (id != null ? id.value : this.id),
       profile: (profile != null ? profile.value : this.profile),
       quotaBytes: (quotaBytes != null ? quotaBytes.value : this.quotaBytes),
       role: (role != null ? role.value : this.role),
+      sso: (sso != null ? sso.value : this.sso),
+      twoFactor: (twoFactor != null ? twoFactor.value : this.twoFactor),
       usedBytes: (usedBytes != null ? usedBytes.value : this.usedBytes),
       username: (username != null ? username.value : this.username),
     );
@@ -12401,6 +14226,187 @@ List<enums.AppearanceTheme>? appearanceThemeNullableListFromJson(
   return appearanceTheme.map((e) => appearanceThemeFromJson(e.toString())).toList();
 }
 
+String? authProviderKindNullableToJson(enums.AuthProviderKind? authProviderKind) {
+  return authProviderKind?.value;
+}
+
+String? authProviderKindToJson(enums.AuthProviderKind authProviderKind) {
+  return authProviderKind.value;
+}
+
+enums.AuthProviderKind authProviderKindFromJson(Object? authProviderKind, [enums.AuthProviderKind? defaultValue]) {
+  return enums.AuthProviderKind.values.firstWhereOrNull((e) => e.value == authProviderKind) ??
+      defaultValue ??
+      enums.AuthProviderKind.swaggerGeneratedUnknown;
+}
+
+enums.AuthProviderKind? authProviderKindNullableFromJson(
+  Object? authProviderKind, [
+  enums.AuthProviderKind? defaultValue,
+]) {
+  if (authProviderKind == null) {
+    return null;
+  }
+  return enums.AuthProviderKind.values.firstWhereOrNull((e) => e.value == authProviderKind) ?? defaultValue;
+}
+
+String authProviderKindExplodedListToJson(List<enums.AuthProviderKind>? authProviderKind) {
+  return authProviderKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> authProviderKindListToJson(List<enums.AuthProviderKind>? authProviderKind) {
+  if (authProviderKind == null) {
+    return [];
+  }
+
+  return authProviderKind.map((e) => e.value!).toList();
+}
+
+List<enums.AuthProviderKind> authProviderKindListFromJson(
+  List? authProviderKind, [
+  List<enums.AuthProviderKind>? defaultValue,
+]) {
+  if (authProviderKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return authProviderKind.map((e) => authProviderKindFromJson(e.toString())).toList();
+}
+
+List<enums.AuthProviderKind>? authProviderKindNullableListFromJson(
+  List? authProviderKind, [
+  List<enums.AuthProviderKind>? defaultValue,
+]) {
+  if (authProviderKind == null) {
+    return defaultValue;
+  }
+
+  return authProviderKind.map((e) => authProviderKindFromJson(e.toString())).toList();
+}
+
+String? authProviderPresetFieldsNullableToJson(enums.AuthProviderPresetFields? authProviderPresetFields) {
+  return authProviderPresetFields?.value;
+}
+
+String? authProviderPresetFieldsToJson(enums.AuthProviderPresetFields authProviderPresetFields) {
+  return authProviderPresetFields.value;
+}
+
+enums.AuthProviderPresetFields authProviderPresetFieldsFromJson(
+  Object? authProviderPresetFields, [
+  enums.AuthProviderPresetFields? defaultValue,
+]) {
+  return enums.AuthProviderPresetFields.values.firstWhereOrNull((e) => e.value == authProviderPresetFields) ??
+      defaultValue ??
+      enums.AuthProviderPresetFields.swaggerGeneratedUnknown;
+}
+
+enums.AuthProviderPresetFields? authProviderPresetFieldsNullableFromJson(
+  Object? authProviderPresetFields, [
+  enums.AuthProviderPresetFields? defaultValue,
+]) {
+  if (authProviderPresetFields == null) {
+    return null;
+  }
+  return enums.AuthProviderPresetFields.values.firstWhereOrNull((e) => e.value == authProviderPresetFields) ??
+      defaultValue;
+}
+
+String authProviderPresetFieldsExplodedListToJson(List<enums.AuthProviderPresetFields>? authProviderPresetFields) {
+  return authProviderPresetFields?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> authProviderPresetFieldsListToJson(List<enums.AuthProviderPresetFields>? authProviderPresetFields) {
+  if (authProviderPresetFields == null) {
+    return [];
+  }
+
+  return authProviderPresetFields.map((e) => e.value!).toList();
+}
+
+List<enums.AuthProviderPresetFields> authProviderPresetFieldsListFromJson(
+  List? authProviderPresetFields, [
+  List<enums.AuthProviderPresetFields>? defaultValue,
+]) {
+  if (authProviderPresetFields == null) {
+    return defaultValue ?? [];
+  }
+
+  return authProviderPresetFields.map((e) => authProviderPresetFieldsFromJson(e.toString())).toList();
+}
+
+List<enums.AuthProviderPresetFields>? authProviderPresetFieldsNullableListFromJson(
+  List? authProviderPresetFields, [
+  List<enums.AuthProviderPresetFields>? defaultValue,
+]) {
+  if (authProviderPresetFields == null) {
+    return defaultValue;
+  }
+
+  return authProviderPresetFields.map((e) => authProviderPresetFieldsFromJson(e.toString())).toList();
+}
+
+String? authProviderPresetKindNullableToJson(enums.AuthProviderPresetKind? authProviderPresetKind) {
+  return authProviderPresetKind?.value;
+}
+
+String? authProviderPresetKindToJson(enums.AuthProviderPresetKind authProviderPresetKind) {
+  return authProviderPresetKind.value;
+}
+
+enums.AuthProviderPresetKind authProviderPresetKindFromJson(
+  Object? authProviderPresetKind, [
+  enums.AuthProviderPresetKind? defaultValue,
+]) {
+  return enums.AuthProviderPresetKind.values.firstWhereOrNull((e) => e.value == authProviderPresetKind) ??
+      defaultValue ??
+      enums.AuthProviderPresetKind.swaggerGeneratedUnknown;
+}
+
+enums.AuthProviderPresetKind? authProviderPresetKindNullableFromJson(
+  Object? authProviderPresetKind, [
+  enums.AuthProviderPresetKind? defaultValue,
+]) {
+  if (authProviderPresetKind == null) {
+    return null;
+  }
+  return enums.AuthProviderPresetKind.values.firstWhereOrNull((e) => e.value == authProviderPresetKind) ?? defaultValue;
+}
+
+String authProviderPresetKindExplodedListToJson(List<enums.AuthProviderPresetKind>? authProviderPresetKind) {
+  return authProviderPresetKind?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> authProviderPresetKindListToJson(List<enums.AuthProviderPresetKind>? authProviderPresetKind) {
+  if (authProviderPresetKind == null) {
+    return [];
+  }
+
+  return authProviderPresetKind.map((e) => e.value!).toList();
+}
+
+List<enums.AuthProviderPresetKind> authProviderPresetKindListFromJson(
+  List? authProviderPresetKind, [
+  List<enums.AuthProviderPresetKind>? defaultValue,
+]) {
+  if (authProviderPresetKind == null) {
+    return defaultValue ?? [];
+  }
+
+  return authProviderPresetKind.map((e) => authProviderPresetKindFromJson(e.toString())).toList();
+}
+
+List<enums.AuthProviderPresetKind>? authProviderPresetKindNullableListFromJson(
+  List? authProviderPresetKind, [
+  List<enums.AuthProviderPresetKind>? defaultValue,
+]) {
+  if (authProviderPresetKind == null) {
+    return defaultValue;
+  }
+
+  return authProviderPresetKind.map((e) => authProviderPresetKindFromJson(e.toString())).toList();
+}
+
 String? calendarAccessNullableToJson(enums.CalendarAccess? calendarAccess) {
   return calendarAccess?.value;
 }
@@ -12784,6 +14790,68 @@ List<enums.ClientMessageType>? clientMessageTypeNullableListFromJson(
   }
 
   return clientMessageType.map((e) => clientMessageTypeFromJson(e.toString())).toList();
+}
+
+String? deviceLoginResultStatusNullableToJson(enums.DeviceLoginResultStatus? deviceLoginResultStatus) {
+  return deviceLoginResultStatus?.value;
+}
+
+String? deviceLoginResultStatusToJson(enums.DeviceLoginResultStatus deviceLoginResultStatus) {
+  return deviceLoginResultStatus.value;
+}
+
+enums.DeviceLoginResultStatus deviceLoginResultStatusFromJson(
+  Object? deviceLoginResultStatus, [
+  enums.DeviceLoginResultStatus? defaultValue,
+]) {
+  return enums.DeviceLoginResultStatus.values.firstWhereOrNull((e) => e.value == deviceLoginResultStatus) ??
+      defaultValue ??
+      enums.DeviceLoginResultStatus.swaggerGeneratedUnknown;
+}
+
+enums.DeviceLoginResultStatus? deviceLoginResultStatusNullableFromJson(
+  Object? deviceLoginResultStatus, [
+  enums.DeviceLoginResultStatus? defaultValue,
+]) {
+  if (deviceLoginResultStatus == null) {
+    return null;
+  }
+  return enums.DeviceLoginResultStatus.values.firstWhereOrNull((e) => e.value == deviceLoginResultStatus) ??
+      defaultValue;
+}
+
+String deviceLoginResultStatusExplodedListToJson(List<enums.DeviceLoginResultStatus>? deviceLoginResultStatus) {
+  return deviceLoginResultStatus?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> deviceLoginResultStatusListToJson(List<enums.DeviceLoginResultStatus>? deviceLoginResultStatus) {
+  if (deviceLoginResultStatus == null) {
+    return [];
+  }
+
+  return deviceLoginResultStatus.map((e) => e.value!).toList();
+}
+
+List<enums.DeviceLoginResultStatus> deviceLoginResultStatusListFromJson(
+  List? deviceLoginResultStatus, [
+  List<enums.DeviceLoginResultStatus>? defaultValue,
+]) {
+  if (deviceLoginResultStatus == null) {
+    return defaultValue ?? [];
+  }
+
+  return deviceLoginResultStatus.map((e) => deviceLoginResultStatusFromJson(e.toString())).toList();
+}
+
+List<enums.DeviceLoginResultStatus>? deviceLoginResultStatusNullableListFromJson(
+  List? deviceLoginResultStatus, [
+  List<enums.DeviceLoginResultStatus>? defaultValue,
+]) {
+  if (deviceLoginResultStatus == null) {
+    return defaultValue;
+  }
+
+  return deviceLoginResultStatus.map((e) => deviceLoginResultStatusFromJson(e.toString())).toList();
 }
 
 String? entryPreviewStateNullableToJson(enums.EntryPreviewState? entryPreviewState) {
@@ -13644,6 +15712,67 @@ List<enums.LogEntryStatus>? logEntryStatusNullableListFromJson(
   }
 
   return logEntryStatus.map((e) => logEntryStatusFromJson(e.toString())).toList();
+}
+
+String? loginRequestResolutionNullableToJson(enums.LoginRequestResolution? loginRequestResolution) {
+  return loginRequestResolution?.value;
+}
+
+String? loginRequestResolutionToJson(enums.LoginRequestResolution loginRequestResolution) {
+  return loginRequestResolution.value;
+}
+
+enums.LoginRequestResolution loginRequestResolutionFromJson(
+  Object? loginRequestResolution, [
+  enums.LoginRequestResolution? defaultValue,
+]) {
+  return enums.LoginRequestResolution.values.firstWhereOrNull((e) => e.value == loginRequestResolution) ??
+      defaultValue ??
+      enums.LoginRequestResolution.swaggerGeneratedUnknown;
+}
+
+enums.LoginRequestResolution? loginRequestResolutionNullableFromJson(
+  Object? loginRequestResolution, [
+  enums.LoginRequestResolution? defaultValue,
+]) {
+  if (loginRequestResolution == null) {
+    return null;
+  }
+  return enums.LoginRequestResolution.values.firstWhereOrNull((e) => e.value == loginRequestResolution) ?? defaultValue;
+}
+
+String loginRequestResolutionExplodedListToJson(List<enums.LoginRequestResolution>? loginRequestResolution) {
+  return loginRequestResolution?.map((e) => e.value!).join(',') ?? '';
+}
+
+List<String> loginRequestResolutionListToJson(List<enums.LoginRequestResolution>? loginRequestResolution) {
+  if (loginRequestResolution == null) {
+    return [];
+  }
+
+  return loginRequestResolution.map((e) => e.value!).toList();
+}
+
+List<enums.LoginRequestResolution> loginRequestResolutionListFromJson(
+  List? loginRequestResolution, [
+  List<enums.LoginRequestResolution>? defaultValue,
+]) {
+  if (loginRequestResolution == null) {
+    return defaultValue ?? [];
+  }
+
+  return loginRequestResolution.map((e) => loginRequestResolutionFromJson(e.toString())).toList();
+}
+
+List<enums.LoginRequestResolution>? loginRequestResolutionNullableListFromJson(
+  List? loginRequestResolution, [
+  List<enums.LoginRequestResolution>? defaultValue,
+]) {
+  if (loginRequestResolution == null) {
+    return defaultValue;
+  }
+
+  return loginRequestResolution.map((e) => loginRequestResolutionFromJson(e.toString())).toList();
 }
 
 String? memberRoleNullableToJson(enums.MemberRole? memberRole) {

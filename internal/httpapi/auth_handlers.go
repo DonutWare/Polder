@@ -64,10 +64,14 @@ func (a *API) login(ctx context.Context, input *loginInput) (*jsonBody[auth.Toke
 	done, allowed := a.limiter.attempt(input.address)
 	if !allowed {
 		authLog.Warn("login refused: too many failed attempts", "user", input.Body.Username, "address", input.address)
-		return nil, apperr.New(apperr.KindRateLimited, "too many failed attempts, try again in a minute")
+		return nil, errTooManyAttempts
 	}
 	tokens, err := a.auth.Login(ctx, input.Body.Username, input.Body.Password, input.Body.DeviceName)
 	done(apperr.Is(err, apperr.KindUnauthorized))
+	if apperr.Is(err, apperr.KindTwoFactorRequired) {
+		authLog.Info("password accepted; waiting for the second factor", "user", input.Body.Username, "address", input.address)
+		return nil, err
+	}
 	if err != nil {
 		authLog.Warn("login failed", "user", input.Body.Username, "address", input.address, "error", err)
 		return nil, err
@@ -91,7 +95,7 @@ func (a *API) logout(ctx context.Context, input *jsonBody[refreshRequest]) (*str
 }
 
 func (a *API) startSession(ctx context.Context, input *jsonBody[sessionRequest]) (*jsonBody[auth.TokenPair], error) {
-	tokens, err := a.auth.StartSession(ctx, currentUser(ctx), input.Body.DeviceName)
+	tokens, err := a.auth.StartSessionLike(ctx, currentIdentity(ctx), input.Body.DeviceName)
 	if err != nil {
 		return nil, err
 	}

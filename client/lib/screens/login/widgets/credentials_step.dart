@@ -7,6 +7,7 @@ import "package:polder/providers/login_provider.dart";
 import "package:polder/screens/login/widgets/forgot_password_dialog.dart";
 import "package:polder/screens/login/widgets/login_failure_text.dart";
 import "package:polder/screens/login/widgets/server_summary.dart";
+import "package:polder/screens/login/widgets/sign_in_alternatives.dart";
 import "package:polder/util/credential_rules.dart";
 import "package:polder/util/localization_helper.dart";
 import "package:polder/widgets/shared/loading_button.dart";
@@ -99,6 +100,7 @@ class CredentialsStep extends ConsumerWidget {
             loading: state.loading,
             onPressed: state.canSubmitCredentials ? submit : null,
           ),
+          if (!creatingAdmin) const SignInAlternatives(),
         ],
       ),
     );

@@ -28,6 +28,7 @@ import "package:polder/screens/viewer/document_editor_screen.dart";
 import "package:polder/screens/viewer/media/media_viewer_screen.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
+import "package:polder/screens/two_factor/two_factor_setup_screen.dart";
 import "package:polder/screens/public_share/public_share_screen.dart";
 import "package:polder/screens/groups/groups_screen.dart";
 import "package:polder/screens/tags/tags_screen.dart";
@@ -43,6 +44,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final account = ValueNotifier<AsyncValue<Account?>>(ref.read(accountProvider));
   final isAdmin = ValueNotifier<bool>(ref.read(isAdminProvider));
   final continueOffline = ValueNotifier<bool>(ref.read(continueOfflineProvider));
+  final twoFactorSetup = ValueNotifier<bool>(ref.read(twoFactorSetupRequiredProvider));
   var lastBrowsedPath = RemotePath.root;
   ref.listen(accountProvider, (previous, next) {
     if (previous?.value?.id != next.value?.id) lastBrowsedPath = RemotePath.root;
@@ -50,14 +52,21 @@ final routerProvider = Provider<GoRouter>((ref) {
   });
   ref.listen(isAdminProvider, (_, next) => isAdmin.value = next);
   ref.listen(continueOfflineProvider, (_, next) => continueOffline.value = next);
+  ref.listen(twoFactorSetupRequiredProvider, (_, next) => twoFactorSetup.value = next);
   final router = GoRouter(
     initialLocation: AppRoutes.files,
     extraCodec: const RouteExtraCodec(),
-    refreshListenable: Listenable.merge([account, isAdmin, continueOffline]),
-    redirect: (_, state) =>
-        AppRedirect.resolve(account.value, state.uri, isAdmin: isAdmin.value, continueOffline: continueOffline.value),
+    refreshListenable: Listenable.merge([account, isAdmin, continueOffline, twoFactorSetup]),
+    redirect: (_, state) => AppRedirect.resolve(
+      account.value,
+      state.uri,
+      isAdmin: isAdmin.value,
+      continueOffline: continueOffline.value,
+      twoFactorSetupRequired: twoFactorSetup.value,
+    ),
     routes: [
       _route(path: AppRoutes.login, page: (_) => const LoginScreen()),
+      _route(path: AppRoutes.twoFactorSetup, page: (_) => const TwoFactorSetupScreen()),
       _route(
         path: "${AppRoutes.publicShare}/:code",
         page: (state) => PublicShareScreen(
@@ -242,6 +251,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     router.dispose();
     account.dispose();
     isAdmin.dispose();
+    twoFactorSetup.dispose();
   });
   return router;
 });
@@ -252,6 +262,7 @@ abstract final class AppRedirect {
     Uri location, {
     bool isAdmin = false,
     bool continueOffline = false,
+    bool twoFactorSetupRequired = false,
   }) {
     if (account.isLoading && !account.hasValue) return null;
     if (AppRoutes.isPublic(location.path)) return null;
@@ -264,6 +275,9 @@ abstract final class AppRedirect {
     if (signedIn && atLogin) {
       return AppRoutes.safeReturn(location.queryParameters[AppRoutes.fromParameter]) ?? AppRoutes.files;
     }
+    final atTwoFactorSetup = location.path == AppRoutes.twoFactorSetup;
+    if (signedIn && twoFactorSetupRequired && !atTwoFactorSetup) return AppRoutes.twoFactorSetup;
+    if (atTwoFactorSetup && !twoFactorSetupRequired) return AppRoutes.files;
     if (signedIn && !isAdmin && AppRoutes.isAdmin(location.path)) return AppRoutes.files;
     return null;
   }

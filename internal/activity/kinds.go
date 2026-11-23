@@ -54,7 +54,7 @@ func (Direction) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
 func (EventType) TransformSchema(_ huma.Registry, s *huma.Schema) *huma.Schema {
 	s.Enum = []any{string(EventReady), string(EventSnapshot), string(EventError), string(EventTransferStarted),
 		string(EventTransferProgress), string(EventTransferFinished), string(EventActivity), string(EventFilesChanged), string(EventCalendarChanged), string(EventCalendarReminder),
-		string(EventNotification)}
+		string(EventNotification), string(EventLoginRequested), string(EventLoginResolved)}
 	return s
 }
 

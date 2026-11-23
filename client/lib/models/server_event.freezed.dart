@@ -56,7 +56,7 @@ extension ServerEventPatterns on ServerEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ReadyEvent value)?  ready,TResult Function( SnapshotEvent value)?  snapshot,TResult Function( TransferEvent value)?  transfer,TResult Function( ActivityCreatedEvent value)?  activityCreated,TResult Function( FilesChangedEvent value)?  filesChanged,TResult Function( CalendarChangedEvent value)?  calendarChanged,TResult Function( CalendarReminderEvent value)?  calendarReminder,TResult Function( NotificationEvent value)?  notification,TResult Function( ServerErrorEvent value)?  error,TResult Function( DisconnectedEvent value)?  disconnected,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ReadyEvent value)?  ready,TResult Function( SnapshotEvent value)?  snapshot,TResult Function( TransferEvent value)?  transfer,TResult Function( ActivityCreatedEvent value)?  activityCreated,TResult Function( FilesChangedEvent value)?  filesChanged,TResult Function( CalendarChangedEvent value)?  calendarChanged,TResult Function( CalendarReminderEvent value)?  calendarReminder,TResult Function( NotificationEvent value)?  notification,TResult Function( LoginRequestedEvent value)?  loginRequested,TResult Function( LoginResolvedEvent value)?  loginResolved,TResult Function( ServerErrorEvent value)?  error,TResult Function( DisconnectedEvent value)?  disconnected,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
@@ -67,7 +67,9 @@ return activityCreated(_that);case FilesChangedEvent() when filesChanged != null
 return filesChanged(_that);case CalendarChangedEvent() when calendarChanged != null:
 return calendarChanged(_that);case CalendarReminderEvent() when calendarReminder != null:
 return calendarReminder(_that);case NotificationEvent() when notification != null:
-return notification(_that);case ServerErrorEvent() when error != null:
+return notification(_that);case LoginRequestedEvent() when loginRequested != null:
+return loginRequested(_that);case LoginResolvedEvent() when loginResolved != null:
+return loginResolved(_that);case ServerErrorEvent() when error != null:
 return error(_that);case DisconnectedEvent() when disconnected != null:
 return disconnected(_that);case _:
   return orElse();
@@ -87,7 +89,7 @@ return disconnected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ReadyEvent value)  ready,required TResult Function( SnapshotEvent value)  snapshot,required TResult Function( TransferEvent value)  transfer,required TResult Function( ActivityCreatedEvent value)  activityCreated,required TResult Function( FilesChangedEvent value)  filesChanged,required TResult Function( CalendarChangedEvent value)  calendarChanged,required TResult Function( CalendarReminderEvent value)  calendarReminder,required TResult Function( NotificationEvent value)  notification,required TResult Function( ServerErrorEvent value)  error,required TResult Function( DisconnectedEvent value)  disconnected,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ReadyEvent value)  ready,required TResult Function( SnapshotEvent value)  snapshot,required TResult Function( TransferEvent value)  transfer,required TResult Function( ActivityCreatedEvent value)  activityCreated,required TResult Function( FilesChangedEvent value)  filesChanged,required TResult Function( CalendarChangedEvent value)  calendarChanged,required TResult Function( CalendarReminderEvent value)  calendarReminder,required TResult Function( NotificationEvent value)  notification,required TResult Function( LoginRequestedEvent value)  loginRequested,required TResult Function( LoginResolvedEvent value)  loginResolved,required TResult Function( ServerErrorEvent value)  error,required TResult Function( DisconnectedEvent value)  disconnected,}){
 final _that = this;
 switch (_that) {
 case ReadyEvent():
@@ -98,7 +100,9 @@ return activityCreated(_that);case FilesChangedEvent():
 return filesChanged(_that);case CalendarChangedEvent():
 return calendarChanged(_that);case CalendarReminderEvent():
 return calendarReminder(_that);case NotificationEvent():
-return notification(_that);case ServerErrorEvent():
+return notification(_that);case LoginRequestedEvent():
+return loginRequested(_that);case LoginResolvedEvent():
+return loginResolved(_that);case ServerErrorEvent():
 return error(_that);case DisconnectedEvent():
 return disconnected(_that);}
 }
@@ -114,7 +118,7 @@ return disconnected(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ReadyEvent value)?  ready,TResult? Function( SnapshotEvent value)?  snapshot,TResult? Function( TransferEvent value)?  transfer,TResult? Function( ActivityCreatedEvent value)?  activityCreated,TResult? Function( FilesChangedEvent value)?  filesChanged,TResult? Function( CalendarChangedEvent value)?  calendarChanged,TResult? Function( CalendarReminderEvent value)?  calendarReminder,TResult? Function( NotificationEvent value)?  notification,TResult? Function( ServerErrorEvent value)?  error,TResult? Function( DisconnectedEvent value)?  disconnected,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ReadyEvent value)?  ready,TResult? Function( SnapshotEvent value)?  snapshot,TResult? Function( TransferEvent value)?  transfer,TResult? Function( ActivityCreatedEvent value)?  activityCreated,TResult? Function( FilesChangedEvent value)?  filesChanged,TResult? Function( CalendarChangedEvent value)?  calendarChanged,TResult? Function( CalendarReminderEvent value)?  calendarReminder,TResult? Function( NotificationEvent value)?  notification,TResult? Function( LoginRequestedEvent value)?  loginRequested,TResult? Function( LoginResolvedEvent value)?  loginResolved,TResult? Function( ServerErrorEvent value)?  error,TResult? Function( DisconnectedEvent value)?  disconnected,}){
 final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
@@ -125,7 +129,9 @@ return activityCreated(_that);case FilesChangedEvent() when filesChanged != null
 return filesChanged(_that);case CalendarChangedEvent() when calendarChanged != null:
 return calendarChanged(_that);case CalendarReminderEvent() when calendarReminder != null:
 return calendarReminder(_that);case NotificationEvent() when notification != null:
-return notification(_that);case ServerErrorEvent() when error != null:
+return notification(_that);case LoginRequestedEvent() when loginRequested != null:
+return loginRequested(_that);case LoginResolvedEvent() when loginResolved != null:
+return loginResolved(_that);case ServerErrorEvent() when error != null:
 return error(_that);case DisconnectedEvent() when disconnected != null:
 return disconnected(_that);case _:
   return null;
@@ -144,7 +150,7 @@ return disconnected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  ready,TResult Function( List<LiveTransfer> transfers)?  snapshot,TResult Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult Function( ActivityEntry entry)?  activityCreated,TResult Function( int userId,  List<String> dirs)?  filesChanged,TResult Function( int userId,  int calendarId)?  calendarChanged,TResult Function( int userId,  CalendarReminder reminder)?  calendarReminder,TResult Function( int userId,  FeedNotification notification)?  notification,TResult Function( String code,  String message)?  error,TResult Function()?  disconnected,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  ready,TResult Function( List<LiveTransfer> transfers)?  snapshot,TResult Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult Function( ActivityEntry entry)?  activityCreated,TResult Function( int userId,  List<String> dirs)?  filesChanged,TResult Function( int userId,  int calendarId)?  calendarChanged,TResult Function( int userId,  CalendarReminder reminder)?  calendarReminder,TResult Function( int userId,  FeedNotification notification)?  notification,TResult Function( int userId,  LoginRequest request)?  loginRequested,TResult Function( int userId,  String requestId)?  loginResolved,TResult Function( String code,  String message)?  error,TResult Function()?  disconnected,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
 return ready();case SnapshotEvent() when snapshot != null:
@@ -154,7 +160,9 @@ return activityCreated(_that.entry);case FilesChangedEvent() when filesChanged !
 return filesChanged(_that.userId,_that.dirs);case CalendarChangedEvent() when calendarChanged != null:
 return calendarChanged(_that.userId,_that.calendarId);case CalendarReminderEvent() when calendarReminder != null:
 return calendarReminder(_that.userId,_that.reminder);case NotificationEvent() when notification != null:
-return notification(_that.userId,_that.notification);case ServerErrorEvent() when error != null:
+return notification(_that.userId,_that.notification);case LoginRequestedEvent() when loginRequested != null:
+return loginRequested(_that.userId,_that.request);case LoginResolvedEvent() when loginResolved != null:
+return loginResolved(_that.userId,_that.requestId);case ServerErrorEvent() when error != null:
 return error(_that.code,_that.message);case DisconnectedEvent() when disconnected != null:
 return disconnected();case _:
   return orElse();
@@ -174,7 +182,7 @@ return disconnected();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  ready,required TResult Function( List<LiveTransfer> transfers)  snapshot,required TResult Function( TransferPhase phase,  LiveTransfer transfer)  transfer,required TResult Function( ActivityEntry entry)  activityCreated,required TResult Function( int userId,  List<String> dirs)  filesChanged,required TResult Function( int userId,  int calendarId)  calendarChanged,required TResult Function( int userId,  CalendarReminder reminder)  calendarReminder,required TResult Function( int userId,  FeedNotification notification)  notification,required TResult Function( String code,  String message)  error,required TResult Function()  disconnected,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  ready,required TResult Function( List<LiveTransfer> transfers)  snapshot,required TResult Function( TransferPhase phase,  LiveTransfer transfer)  transfer,required TResult Function( ActivityEntry entry)  activityCreated,required TResult Function( int userId,  List<String> dirs)  filesChanged,required TResult Function( int userId,  int calendarId)  calendarChanged,required TResult Function( int userId,  CalendarReminder reminder)  calendarReminder,required TResult Function( int userId,  FeedNotification notification)  notification,required TResult Function( int userId,  LoginRequest request)  loginRequested,required TResult Function( int userId,  String requestId)  loginResolved,required TResult Function( String code,  String message)  error,required TResult Function()  disconnected,}) {final _that = this;
 switch (_that) {
 case ReadyEvent():
 return ready();case SnapshotEvent():
@@ -184,7 +192,9 @@ return activityCreated(_that.entry);case FilesChangedEvent():
 return filesChanged(_that.userId,_that.dirs);case CalendarChangedEvent():
 return calendarChanged(_that.userId,_that.calendarId);case CalendarReminderEvent():
 return calendarReminder(_that.userId,_that.reminder);case NotificationEvent():
-return notification(_that.userId,_that.notification);case ServerErrorEvent():
+return notification(_that.userId,_that.notification);case LoginRequestedEvent():
+return loginRequested(_that.userId,_that.request);case LoginResolvedEvent():
+return loginResolved(_that.userId,_that.requestId);case ServerErrorEvent():
 return error(_that.code,_that.message);case DisconnectedEvent():
 return disconnected();}
 }
@@ -200,7 +210,7 @@ return disconnected();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  ready,TResult? Function( List<LiveTransfer> transfers)?  snapshot,TResult? Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult? Function( ActivityEntry entry)?  activityCreated,TResult? Function( int userId,  List<String> dirs)?  filesChanged,TResult? Function( int userId,  int calendarId)?  calendarChanged,TResult? Function( int userId,  CalendarReminder reminder)?  calendarReminder,TResult? Function( int userId,  FeedNotification notification)?  notification,TResult? Function( String code,  String message)?  error,TResult? Function()?  disconnected,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  ready,TResult? Function( List<LiveTransfer> transfers)?  snapshot,TResult? Function( TransferPhase phase,  LiveTransfer transfer)?  transfer,TResult? Function( ActivityEntry entry)?  activityCreated,TResult? Function( int userId,  List<String> dirs)?  filesChanged,TResult? Function( int userId,  int calendarId)?  calendarChanged,TResult? Function( int userId,  CalendarReminder reminder)?  calendarReminder,TResult? Function( int userId,  FeedNotification notification)?  notification,TResult? Function( int userId,  LoginRequest request)?  loginRequested,TResult? Function( int userId,  String requestId)?  loginResolved,TResult? Function( String code,  String message)?  error,TResult? Function()?  disconnected,}) {final _that = this;
 switch (_that) {
 case ReadyEvent() when ready != null:
 return ready();case SnapshotEvent() when snapshot != null:
@@ -210,7 +220,9 @@ return activityCreated(_that.entry);case FilesChangedEvent() when filesChanged !
 return filesChanged(_that.userId,_that.dirs);case CalendarChangedEvent() when calendarChanged != null:
 return calendarChanged(_that.userId,_that.calendarId);case CalendarReminderEvent() when calendarReminder != null:
 return calendarReminder(_that.userId,_that.reminder);case NotificationEvent() when notification != null:
-return notification(_that.userId,_that.notification);case ServerErrorEvent() when error != null:
+return notification(_that.userId,_that.notification);case LoginRequestedEvent() when loginRequested != null:
+return loginRequested(_that.userId,_that.request);case LoginResolvedEvent() when loginResolved != null:
+return loginResolved(_that.userId,_that.requestId);case ServerErrorEvent() when error != null:
 return error(_that.code,_that.message);case DisconnectedEvent() when disconnected != null:
 return disconnected();case _:
   return null;
@@ -784,6 +796,146 @@ $FeedNotificationCopyWith<$Res> get notification {
     return _then(_self.copyWith(notification: value));
   });
 }
+}
+
+/// @nodoc
+
+
+class LoginRequestedEvent extends ServerEvent {
+  const LoginRequestedEvent(this.userId, this.request): super._();
+  
+
+ final  int userId;
+ final  LoginRequest request;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoginRequestedEventCopyWith<LoginRequestedEvent> get copyWith => _$LoginRequestedEventCopyWithImpl<LoginRequestedEvent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginRequestedEvent&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.request, request) || other.request == request));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,userId,request);
+}
+
+@override
+String toString() {
+    return 'ServerEvent.loginRequested(userId: $userId, request: $request)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LoginRequestedEventCopyWith<$Res> implements $ServerEventCopyWith<$Res> {
+  factory $LoginRequestedEventCopyWith(LoginRequestedEvent value, $Res Function(LoginRequestedEvent) _then) = _$LoginRequestedEventCopyWithImpl;
+@useResult
+$Res call({
+ int userId, LoginRequest request
+});
+
+
+
+
+}
+/// @nodoc
+class _$LoginRequestedEventCopyWithImpl<$Res>
+    implements $LoginRequestedEventCopyWith<$Res> {
+  _$LoginRequestedEventCopyWithImpl(this._self, this._then);
+
+  final LoginRequestedEvent _self;
+  final $Res Function(LoginRequestedEvent) _then;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? request = null,}) {
+  return _then(LoginRequestedEvent(
+null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as int,null == request ? _self.request : request // ignore: cast_nullable_to_non_nullable
+as LoginRequest,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class LoginResolvedEvent extends ServerEvent {
+  const LoginResolvedEvent(this.userId, this.requestId): super._();
+  
+
+ final  int userId;
+ final  String requestId;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoginResolvedEventCopyWith<LoginResolvedEvent> get copyWith => _$LoginResolvedEventCopyWithImpl<LoginResolvedEvent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginResolvedEvent&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.requestId, requestId) || other.requestId == requestId));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,userId,requestId);
+}
+
+@override
+String toString() {
+    return 'ServerEvent.loginResolved(userId: $userId, requestId: $requestId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LoginResolvedEventCopyWith<$Res> implements $ServerEventCopyWith<$Res> {
+  factory $LoginResolvedEventCopyWith(LoginResolvedEvent value, $Res Function(LoginResolvedEvent) _then) = _$LoginResolvedEventCopyWithImpl;
+@useResult
+$Res call({
+ int userId, String requestId
+});
+
+
+
+
+}
+/// @nodoc
+class _$LoginResolvedEventCopyWithImpl<$Res>
+    implements $LoginResolvedEventCopyWith<$Res> {
+  _$LoginResolvedEventCopyWithImpl(this._self, this._then);
+
+  final LoginResolvedEvent _self;
+  final $Res Function(LoginResolvedEvent) _then;
+
+/// Create a copy of ServerEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? userId = null,Object? requestId = null,}) {
+  return _then(LoginResolvedEvent(
+null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
+as int,null == requestId ? _self.requestId : requestId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
 }
 
 /// @nodoc
