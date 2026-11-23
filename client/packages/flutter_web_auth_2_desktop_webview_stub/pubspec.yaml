@@ -1,0 +1,13 @@
+name: flutter_web_auth_2_desktop_webview
+description: Leaves out the Linux and Windows webview of flutter_web_auth_2, which needs WebKitGTK; desktop sign-in uses the system browser.
+version: 6.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+  flutter: '>=3.47.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_auth_2_platform_interface: ^6.0.0

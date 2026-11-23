@@ -21,10 +21,6 @@ type pathRequest struct {
 	ready   chan struct{}
 }
 
-func (l *pathLocks) lockAll(userID int64) func() {
-	return l.lock(userID, storage.RootPath)
-}
-
 func (l *pathLocks) lock(userID int64, paths ...string) func() {
 	request := &pathRequest{paths: paths, ready: make(chan struct{})}
 	l.mu.Lock()

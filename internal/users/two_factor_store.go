@@ -66,37 +66,42 @@ func (s *Store) SetTwoFactorReminderLevel(ctx context.Context, id int64, level i
 }
 
 func (s *Store) PendingTwoFactorReminders(ctx context.Context, belowLevel int) ([]TwoFactorReminder, error) {
+	levels, err := s.reminderLevels(ctx, belowLevel)
+	if err != nil {
+		return nil, err
+	}
+	reminders := make([]TwoFactorReminder, 0, len(levels))
+	for _, pending := range levels {
+		user, err := s.ByID(ctx, pending.id)
+		if err != nil {
+			return nil, err
+		}
+		if user.TwoFactor.Deadline != nil {
+			reminders = append(reminders, TwoFactorReminder{User: user, Deadline: *user.TwoFactor.Deadline, Level: pending.level})
+		}
+	}
+	return reminders, nil
+}
+
+type reminderLevel struct {
+	id    int64
+	level int
+}
+
+func (s *Store) reminderLevels(ctx context.Context, belowLevel int) ([]reminderLevel, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT id, two_factor_reminder_level FROM users WHERE two_factor_deadline IS NOT NULL
 		AND two_factor_reminder_level < $1 AND id NOT IN (SELECT user_id FROM user_totp WHERE confirmed_at IS NOT NULL) ORDER BY id`, belowLevel)
 	if err != nil {
 		return nil, err
 	}
-	type pending struct {
-		id    int64
-		level int
-	}
-	var found []pending
+	defer rows.Close()
+	var found []reminderLevel
 	for rows.Next() {
-		var next pending
+		var next reminderLevel
 		if err := rows.Scan(&next.id, &next.level); err != nil {
-			rows.Close()
 			return nil, err
 		}
 		found = append(found, next)
 	}
-	rows.Close()
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	reminders := make([]TwoFactorReminder, 0, len(found))
-	for _, next := range found {
-		user, err := s.ByID(ctx, next.id)
-		if err != nil {
-			return nil, err
-		}
-		if user.TwoFactor.Deadline != nil {
-			reminders = append(reminders, TwoFactorReminder{User: user, Deadline: *user.TwoFactor.Deadline, Level: next.level})
-		}
-	}
-	return reminders, nil
+	return found, rows.Err()
 }

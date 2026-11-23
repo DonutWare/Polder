@@ -78,6 +78,8 @@ dependencies:
   qr_flutter: ^4.1.0
   flutter_web_auth_2: ^6.1.0
 dependency_overrides:
+  flutter_web_auth_2_desktop_webview:
+    path: packages/flutter_web_auth_2_desktop_webview_stub
   media_kit:
     git:
       url: https://github.com/DonutWare/media-kit.git
