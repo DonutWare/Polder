@@ -1,0 +1,407 @@
+import "dart:async";
+import "dart:convert";
+import "dart:io";
+import "dart:ui" as ui;
+
+import "package:flutter/material.dart";
+import "package:flutter/services.dart";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:iconsax_plus/iconsax_plus.dart";
+import "package:polder_ui/l10n/generated/app_localizations.dart";
+import "package:polder/providers/desktop/tray_status_provider.dart";
+import "package:polder/providers/platform_service_providers.dart";
+import "package:polder/providers/shortcuts/app_shortcut_runner.dart";
+import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder/providers/update/update_provider.dart";
+import "package:polder/routes/app_router.dart";
+import "package:polder/routes/app_routes.dart";
+import "package:polder/services/desktop/launch_at_login.dart";
+import "package:polder/services/shortcuts/app_shortcut.dart";
+import "package:polder_core/services/storage/preferences_store.dart";
+import "package:polder_ui/util/byte_format.dart";
+import "package:polder_core/util/flavor.dart";
+import "package:polder_ui/widgets/shared/confirm_dialog.dart";
+import "package:tray_manager/tray_manager.dart" as tray;
+import "package:window_manager/window_manager.dart";
+
+final _isDesktopPlatform = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+final _isDesktop = desktopIntegrationsEnabled && _isDesktopPlatform;
+
+Future<void> initializeDesktopWindow(List<String> arguments) async {
+  if (!_isDesktopPlatform) return;
+  await windowManager.ensureInitialized();
+  if (_isDesktop) await windowManager.setPreventClose(true);
+  if (await _startsMinimized(arguments)) {
+    if (Platform.isMacOS) await windowManager.setSkipTaskbar(true);
+    return;
+  }
+  unawaited(WidgetsBinding.instance.waitUntilFirstFrameRasterized.then((_) => windowManager.show()));
+}
+
+Future<bool> _startsMinimized(List<String> arguments) async {
+  final launchAtLogin = _isDesktop ? createLaunchAtLogin() : null;
+  if (launchAtLogin == null || !await launchAtLogin.launchedAtLogin(arguments)) return false;
+  return LaunchMinimizedPreference(SharedPreferencesStore()).read();
+}
+
+Future<void> setDesktopWindowTitle(String title) async {
+  if (_isDesktop) await windowManager.setTitle(title);
+}
+
+Future<void> showDesktopWindow() async {
+  if (!_isDesktop) return;
+  if (Platform.isMacOS) await windowManager.setSkipTaskbar(false);
+  await windowManager.show();
+  await windowManager.focus();
+}
+
+class DesktopTray extends ConsumerStatefulWidget {
+  const DesktopTray({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  ConsumerState<DesktopTray> createState() => _DesktopTrayState();
+}
+
+typedef _TrayView = ({String status, String? speed, bool paused, bool signedIn, IconData glyph, Color color});
+
+class _DesktopTrayState extends ConsumerState<DesktopTray> with WindowListener {
+  static final _template = Platform.isMacOS;
+
+  tray.TrayIcon? _icon;
+  tray.Menu? _menu;
+  tray.MenuItem? _statusItem;
+  tray.MenuItem? _speedItem;
+  tray.MenuItem? _openItem;
+  final Map<String, tray.MenuItem> _routeItems = {};
+  tray.MenuItem? _newItem;
+  final Map<AppShortcut, tray.MenuItem> _shortcutItems = {};
+  tray.MenuItem? _pauseItem;
+  tray.MenuItem? _updateItem;
+  tray.MenuItem? _quitItem;
+  final Map<(IconData, Color), tray.Image> _images = {};
+
+  AppLocalizations? _l10n;
+  Color _color = Colors.black;
+  _TrayView? _shown;
+  bool _speedShown = false;
+  bool _quitting = false;
+  AppLifecycleListener? _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_isDesktop) return;
+    windowManager.addListener(this);
+    _lifecycle = AppLifecycleListener(onExitRequested: _onExitRequested);
+    ref.listenManual(trayStatusProvider, (_, _) => _apply());
+    ref.listenManual(updateProvider, (previous, next) {
+      _applyUpdate();
+      if (next.restartRequested && !(previous?.restartRequested ?? false)) unawaited(_restartToUpdate());
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isDesktop) return;
+    _l10n = AppLocalizations.of(context);
+    _color = _template ? Colors.black : Theme.of(context).colorScheme.primary;
+    _apply();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    if (!_isDesktop) return;
+    _images.clear();
+    _shown = null;
+    _apply();
+  }
+
+  @override
+  void dispose() {
+    if (_isDesktop) {
+      windowManager.removeListener(this);
+      _lifecycle?.dispose();
+      _icon?.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+
+  @override
+  void onWindowClose() => _hideWindow();
+
+  @override
+  void onWindowMinimize() => _hideWindow();
+
+  void _apply() {
+    final l10n = _l10n;
+    if (l10n == null) return;
+    final status = ref.read(trayStatusProvider);
+    final view = (
+      status: switch (status.phase) {
+        TrayPhase.signedOut => l10n.traySignedOut,
+        TrayPhase.idle => l10n.trayUpToDate,
+        TrayPhase.syncing => status.files > 0 ? l10n.traySyncingFiles(status.files) : l10n.traySyncing,
+        TrayPhase.paused => l10n.traySyncPaused,
+        TrayPhase.error => l10n.traySyncFailed,
+      },
+      speed: status.isSyncing ? _speed(status, l10n.localeName) : null,
+      paused: status.phase == TrayPhase.paused,
+      signedIn: status.phase != TrayPhase.signedOut,
+      glyph: switch (status.phase) {
+        TrayPhase.signedOut => IconsaxPlusBold.cloud_remove,
+        TrayPhase.idle => IconsaxPlusBold.cloud,
+        TrayPhase.syncing => IconsaxPlusBold.cloud_change,
+        TrayPhase.paused => IconsaxPlusBold.cloud_minus,
+        TrayPhase.error => IconsaxPlusBold.cloud_cross,
+      },
+      color: _color,
+    );
+    if (view == _shown) return;
+    final previous = _shown;
+    _shown = view;
+
+    final icon = _icon ??= _createIcon();
+    if (icon == null) return;
+    _statusItem!.label = view.status;
+    _speedItem!.label = view.speed;
+    _showSpeed(view.speed != null);
+    _openItem!.label = l10n.trayOpenApp;
+    for (final MapEntry(key: route, value: item) in _routeItems.entries) {
+      item
+        ..label = _routeLabel(route, l10n)
+        ..isEnabled = view.signedIn;
+    }
+    _newItem!
+      ..label = l10n.trayNew
+      ..isEnabled = view.signedIn;
+    for (final MapEntry(key: shortcut, value: item) in _shortcutItems.entries) {
+      item
+        ..label = shortcut.groupedLabel(context)
+        ..isEnabled = view.signedIn;
+    }
+    _pauseItem!
+      ..label = view.paused ? l10n.resumeSync : l10n.pauseSync
+      ..isEnabled = view.signedIn;
+    _quitItem!.label = l10n.trayQuit;
+    _applyUpdate();
+    icon.setTooltip([l10n.appTitle, view.status, ?view.speed].join("\n"));
+    if (previous?.glyph != view.glyph || previous?.color != view.color) unawaited(_showGlyph(icon, view));
+  }
+
+  static String? _speed(TrayStatus status, String locale) {
+    final parts = [
+      if (status.uploadRate > 0) "↑ ${ByteFormat.rate(status.uploadRate, locale: locale)}",
+      if (status.downloadRate > 0) "↓ ${ByteFormat.rate(status.downloadRate, locale: locale)}",
+    ];
+    return parts.isEmpty ? null : parts.join("   ");
+  }
+
+  tray.TrayIcon? _createIcon() {
+    if (!tray.TrayManager.instance.isSupported()) return null;
+    final icon = tray.TrayIcon.create();
+    if (icon == null) return null;
+    icon
+      ..setContextMenuTrigger(
+        Platform.isWindows ? tray.ContextMenuTrigger.rightClicked : tray.ContextMenuTrigger.clicked,
+      )
+      ..addListener((event) {
+        if (!Platform.isWindows) return;
+        if (event is tray.TrayIconClickedEvent || event is tray.TrayIconDoubleClickedEvent) {
+          Timer.run(showDesktopWindow);
+        }
+      })
+      ..setVisible(true);
+    _buildMenu(icon);
+    return icon;
+  }
+
+  void _buildMenu(tray.TrayIcon icon) {
+    tray.MenuItem item(void Function()? onClick) {
+      final item = tray.MenuItem.createWithLabelAndType("", tray.MenuItemType.normal)!;
+      if (onClick == null) {
+        item.isEnabled = false;
+      } else {
+        item.addListener((event) {
+          if (event is tray.MenuItemClickedEvent) Timer.run(onClick);
+        });
+      }
+      return item;
+    }
+
+    tray.MenuItem shortcutItem(AppShortcut shortcut) =>
+        _shortcutItems[shortcut] = item(() => unawaited(ref.read(appShortcutRunnerProvider).run(shortcut)));
+
+    final canScan = ref.read(documentScannerServiceProvider).isSupported;
+    final newMenu = tray.Menu.create()!;
+    for (final shortcut in AppShortcut.inGroup(AppShortcutGroup.create, canScan: canScan)) {
+      newMenu.addItem(shortcutItem(shortcut));
+    }
+    _newItem = tray.MenuItem.createWithLabelAndType("", tray.MenuItemType.submenu)!..submenu = newMenu;
+
+    _speedItem = item(null);
+    final menu = _menu = tray.Menu.create()!
+      ..addItem(_statusItem = item(null))
+      ..addSeparator()
+      ..addItem(_openItem = item(showDesktopWindow));
+    for (final route in _trayRoutes) {
+      menu.addItem(_routeItems[route] = item(() => unawaited(_openRoute(route))));
+    }
+    menu
+      ..addSeparator()
+      ..addItem(_newItem);
+    for (final shortcut in AppShortcut.inGroup(AppShortcutGroup.find, canScan: canScan)) {
+      menu.addItem(shortcutItem(shortcut));
+    }
+    menu
+      ..addSeparator()
+      ..addItem(_pauseItem = item(_togglePause))
+      ..addSeparator();
+    if (ref.read(updateProvider).phase != UpdatePhase.disabled) {
+      menu
+        ..addItem(_updateItem = item(_updateClicked))
+        ..addSeparator();
+    }
+    menu.addItem(_quitItem = item(_requestQuit));
+    icon.setContextMenu(menu);
+  }
+
+  void _applyUpdate() {
+    final l10n = _l10n;
+    final item = _updateItem;
+    if (l10n == null || item == null) return;
+    final state = ref.read(updateProvider);
+    item
+      ..label = switch (state) {
+        UpdateState(phase: UpdatePhase.ready) => l10n.updatesRestart,
+        UpdateState(phase: UpdatePhase.available, inPlace: true) => l10n.updatesInstall,
+        _ => l10n.updatesCheck,
+      }
+      ..isEnabled = !state.busy;
+  }
+
+  void _updateClicked() {
+    final notifier = ref.read(updateProvider.notifier);
+    unawaited(switch (ref.read(updateProvider)) {
+      UpdateState(phase: UpdatePhase.ready) ||
+      UpdateState(phase: UpdatePhase.available, inPlace: true) => notifier.restartToUpdate(),
+      _ => notifier.check(),
+    });
+  }
+
+  Future<void> _restartToUpdate() async {
+    if (!await _requestQuit(restart: true)) ref.read(updateProvider.notifier).cancelRestart();
+  }
+
+  void _showSpeed(bool show) {
+    if (show == _speedShown) return;
+    _speedShown = show;
+    if (show) {
+      _menu!.insertItem(1, _speedItem);
+    } else {
+      _menu!.removeItem(_speedItem);
+    }
+  }
+
+  Future<void> _showGlyph(tray.TrayIcon icon, _TrayView view) async {
+    final key = (view.glyph, view.color);
+    final image = _images[key] ?? await _render(view.glyph, view.color);
+    if (image == null || !mounted || _icon != icon) return;
+    _images[key] = image;
+    if (_shown?.glyph != view.glyph || _shown?.color != view.color) return;
+    icon
+      ..icon = image
+      ..isIconTemplate = _template;
+    if (_template) icon.iconSize = const Size.square(18);
+  }
+
+  static Future<tray.Image?> _render(IconData glyph, Color color) async {
+    final size = _template ? 36.0 : 64.0;
+    final painter = TextPainter(
+      textDirection: TextDirection.ltr,
+      text: TextSpan(
+        text: String.fromCharCode(glyph.codePoint),
+        style: TextStyle(
+          fontFamily: glyph.fontFamily,
+          package: glyph.fontPackage,
+          fontSize: size,
+          height: 1,
+          color: color,
+        ),
+      ),
+    )..layout();
+    final recorder = ui.PictureRecorder();
+    painter.paint(Canvas(recorder), Offset((size - painter.width) / 2, (size - painter.height) / 2));
+    painter.dispose();
+    final image = await recorder.endRecording().toImage(size.toInt(), size.toInt());
+    final png = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    if (png == null) return null;
+    return tray.Image.fromBase64("data:image/png;base64,${base64Encode(png.buffer.asUint8List())}");
+  }
+
+  Future<ui.AppExitResponse> _onExitRequested() async {
+    if (_quitting) return ui.AppExitResponse.exit;
+    await _hideWindow();
+    return ui.AppExitResponse.cancel;
+  }
+
+  Future<void> _hideWindow() async {
+    await windowManager.hide();
+    if (Platform.isMacOS) await windowManager.setSkipTaskbar(true);
+  }
+
+  static const _trayRoutes = [AppRoutes.sync, AppRoutes.files, AppRoutes.calendar, AppRoutes.notes];
+
+  static String _routeLabel(String route, AppLocalizations l10n) => switch (route) {
+    AppRoutes.files => l10n.trayOpenFiles,
+    AppRoutes.calendar => l10n.trayOpenCalendar,
+    AppRoutes.notes => l10n.trayOpenNotes,
+    _ => l10n.trayOpenSyncedFolders,
+  };
+
+  Future<void> _openRoute(String route) async {
+    ref.read(routerProvider).go(route);
+    await showDesktopWindow();
+  }
+
+  Future<void> _togglePause() async {
+    final notifier = ref.read(syncPausedProvider.notifier);
+    await ((await ref.read(syncPausedProvider.future)) ? notifier.resume() : notifier.pause());
+  }
+
+  Future<bool> _requestQuit({bool restart = false}) async {
+    if (_quitting) return false;
+    _quitting = true;
+    try {
+      if (ref.read(trayStatusProvider).isSyncing && !await _confirmQuit()) return false;
+      await ref.read(updateProvider.notifier).installBeforeQuit(relaunch: restart);
+      _icon?.dispose();
+      _icon = null;
+      await ServicesBinding.instance.exitApplication(ui.AppExitType.required);
+      return true;
+    } finally {
+      _quitting = false;
+    }
+  }
+
+  Future<bool> _confirmQuit() async {
+    await showDesktopWindow();
+    final context = ref.read(routerProvider).routerDelegate.navigatorKey.currentContext;
+    if (context == null || !context.mounted) return true;
+    final l10n = AppLocalizations.of(context);
+    return showConfirmDialog(
+      context,
+      title: l10n.quitWhileSyncingTitle,
+      message: l10n.quitWhileSyncingMessage,
+      confirmLabel: l10n.quit,
+    );
+  }
+}

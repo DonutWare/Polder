@@ -1,0 +1,43 @@
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "package:polder_core/models/file_entry.dart";
+import "package:polder_core/models/file_links.dart";
+import "package:polder_core/providers/offline/offline_storage_provider.dart";
+import "package:polder_core/providers/polder_api_provider.dart";
+import "package:polder_core/providers/realtime/files_changed_provider.dart";
+import "package:polder_core/services/api/api_exceptions.dart";
+import "package:polder_core/util/ref_cache.dart";
+
+final fileLinksProvider = FutureProvider.autoDispose.family<FileLinks, int>(
+  (ref, id) => ref.watch(polderApiProvider).fileLinks(id),
+);
+
+final filesByIdProvider = FutureProvider.autoDispose.family<Map<int, FileEntry>, String>((ref, key) async {
+  ref.cacheFor(const Duration(minutes: 1));
+  ref.listen(filesChangedProvider, (_, _) => ref.invalidateSelf());
+  final ids = [for (final part in key.split(",")) ?int.tryParse(part)];
+  if (ids.isEmpty) return const {};
+  try {
+    return {for (final entry in await ref.watch(polderApiProvider).filesById(ids)) entry.id: entry};
+  } on NetworkException {
+    final files = await ref.read(offlineFilesProvider.future);
+    return {for (final row in await files.filesWithIds(ids)) row.entry.id: row.entry};
+  }
+});
+
+String fileIdsKey(Iterable<int> ids) => (ids.toSet().toList()..sort()).join(",");
+
+final fileAtPathProvider = FutureProvider.autoDispose.family<FileEntry?, String>((ref, path) async {
+  ref.cacheFor(const Duration(minutes: 1));
+  try {
+    return await ref.watch(polderApiProvider).stat(path);
+  } on NotFoundException {
+    return null;
+  } on InvalidRequestException {
+    return null;
+  } on NetworkException {
+    final row = await (await ref.read(offlineFilesProvider.future)).file(path);
+    if (row == null) rethrow;
+    return row.entry;
+  }
+});

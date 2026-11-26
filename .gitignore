@@ -7,9 +7,9 @@
 !/internal/webui/dist/.gitkeep
 .DS_Store
 __debug_bin*
-client/lib/l10n/generated/*
-client/android/.kotlin/sessions/*
-client/android/build/reports/*
+client/apps/*/lib/l10n/generated/*
+client/apps/*/android/.kotlin/sessions/*
+client/apps/*/android/build/reports/*
 
 client/flatpak/build.env
 .flatpak-builder/

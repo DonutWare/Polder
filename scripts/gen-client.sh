@@ -3,7 +3,7 @@
 set -eu
 
 server_dir=$(cd "$(dirname "$0")/.." && pwd)
-client_dir="$server_dir/client"
+client_dir="$server_dir/client/packages/polder_core"
 
 spec=$(mktemp)
 trap 'rm -f "$spec"' EXIT

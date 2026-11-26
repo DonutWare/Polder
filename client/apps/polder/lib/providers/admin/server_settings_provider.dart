@@ -1,0 +1,92 @@
+import "dart:ui";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "package:polder_core/models/branding.dart";
+import "package:polder_core/models/server_settings.dart";
+import "package:polder/providers/admin/text_extraction_status_provider.dart";
+import "package:polder_core/providers/branding/branding_provider.dart";
+import "package:polder_core/providers/polder_api_provider.dart";
+
+final serverSettingsProvider = AsyncNotifierProvider.autoDispose<ServerSettingsNotifier, ServerSettings>(
+  ServerSettingsNotifier.new,
+);
+
+class ServerSettingsNotifier extends AsyncNotifier<ServerSettings> {
+  @override
+  Future<ServerSettings> build() => ref.watch(polderApiProvider).serverSettings();
+
+  Future<void> setTrashRetentionDays(int days) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(trashRetentionDays: days));
+
+  Future<void> setRequireTwoFactor(bool required) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(requireTwoFactor: required));
+
+  Future<void> setTwoFactorGraceDays(int days) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(twoFactorGraceDays: days));
+
+  Future<void> setTrashEnabled(bool enabled) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(trashEnabled: enabled));
+
+  Future<void> setVersionsEnabled(bool enabled) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsEnabled: enabled));
+
+  Future<void> setVersionsKeepAllHours(int hours) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsKeepAllHours: hours));
+
+  Future<void> setVersionsMaxAgeDays(int days) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsMaxAgeDays: days));
+
+  Future<void> setVersionsMaxPerFile(int count) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(versionsMaxPerFile: count));
+
+  Future<void> setSearchContentEnabled(bool enabled) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(searchContentEnabled: enabled));
+
+  Future<void> setOcrEnabled(bool enabled) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(ocrEnabled: enabled));
+
+  Future<void> setOcrLanguages(List<String> languages) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(ocrLanguages: languages));
+
+  Future<void> setOcrMaxPages(int pages) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(ocrMaxPages: pages));
+
+  Future<void> setInstanceName(String name) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(instanceName: name));
+
+  Future<void> setWelcomeMessage(String message) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(welcomeMessage: message));
+
+  Future<void> setAccentColor(Color? color) => _update(
+    () => ref.read(polderApiProvider).updateServerSettings(accentColor: color == null ? "" : hexColor(color)),
+  );
+
+  Future<void> setFederationEnabled(bool enabled) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(federationEnabled: enabled));
+
+  Future<void> setSmtpHost(String host) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpHost: host));
+
+  Future<void> setSmtpPort(int port) => _update(() => ref.read(polderApiProvider).updateServerSettings(smtpPort: port));
+
+  Future<void> setSmtpSecurity(MailSecurity security) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpSecurity: security));
+
+  Future<void> setSmtpUsername(String username) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpUsername: username));
+
+  Future<void> setSmtpPassword(String password) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpPassword: password));
+
+  Future<void> setSmtpFrom(String from) =>
+      _update(() => ref.read(polderApiProvider).updateServerSettings(smtpFrom: from));
+
+  Future<void> sendTestEmail({String? to}) => ref.read(polderApiProvider).sendTestEmail(to: to);
+
+  Future<void> _update(Future<ServerSettings> Function() change) async {
+    state = AsyncData(await change());
+    ref.invalidate(textExtractionStatusProvider);
+    await ref.read(brandingProvider.notifier).refresh();
+  }
+}

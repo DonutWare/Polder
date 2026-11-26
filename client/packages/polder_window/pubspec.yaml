@@ -1,0 +1,24 @@
+name: polder_window
+description: "Window chrome shared by the Polder apps: on macOS the content draws under a transparent title bar."
+publish_to: "none"
+
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.4
+  flutter: ">=3.3.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      macos:
+        pluginClass: PolderWindowPlugin

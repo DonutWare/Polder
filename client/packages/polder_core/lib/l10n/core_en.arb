@@ -1,0 +1,52 @@
+{
+	"@@locale": "en",
+	"browserSignInFinishedTitle": "Back to {app}",
+	"@browserSignInFinishedTitle": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
+	"browserSignInFinished": "You can close this tab and go back to {app}.",
+	"@browserSignInFinished": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
+	"offlineDownloadsTitle": "Syncing files for offline use",
+	"offlineDownloadsProgress": "{finished} of {total} files",
+	"@offlineDownloadsProgress": {
+		"placeholders": {
+			"finished": {
+				"type": "String"
+			},
+			"total": {
+				"type": "String"
+			}
+		}
+	},
+	"offlineDownloadsDoneTitle": "Files available offline",
+	"offlineDownloadsDone": "{total} files are ready to use offline",
+	"@offlineDownloadsDone": {
+		"placeholders": {
+			"total": {
+				"type": "String"
+			}
+		}
+	},
+	"offlineDownloadsFailedTitle": "Some files couldn't be downloaded",
+	"offlineDownloadsFailed": "{failed} of {total} failed; they will be tried again",
+	"@offlineDownloadsFailed": {
+		"placeholders": {
+			"failed": {
+				"type": "String"
+			},
+			"total": {
+				"type": "String"
+			}
+		}
+	}
+}

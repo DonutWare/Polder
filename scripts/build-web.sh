@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
-# Builds the Flutter web app from client/ and copies it where `go build` embeds it
+# Builds the Flutter web app from client/apps/polder/ and copies it where `go build` embeds it
 # (internal/webui/dist).
 set -eu
 
 server_dir=$(cd "$(dirname "$0")/.." && pwd)
-client_dir="$server_dir/client"
+client_dir="$server_dir/client/apps/polder"
 dist="$server_dir/internal/webui/dist"
 
 (

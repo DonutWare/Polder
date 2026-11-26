@@ -1,0 +1,43 @@
+import "package:freezed_annotation/freezed_annotation.dart";
+
+import "package:polder_core/models/file_entry.dart";
+import "package:polder_core/models/sync/local_file_state.dart";
+
+part "conflict.freezed.dart";
+part "conflict.g.dart";
+
+enum ConflictKind { bothModified, bothCreated, localModifiedRemoteDeleted, localDeletedRemoteModified }
+
+enum ConflictResolution { keepMine, keepServer, keepBoth }
+
+@freezed
+abstract class Conflict with _$Conflict {
+  const Conflict._();
+
+  const factory Conflict({
+    required String syncRootId,
+    required String relativePath,
+    required ConflictKind kind,
+    LocalFileState? local,
+    FileEntry? remote,
+  }) = _Conflict;
+
+  factory Conflict.fromJson(Map<String, dynamic> json) => _$ConflictFromJson(json);
+
+  static const offlineRoot = "offline";
+
+  String get id => "$syncRootId:$relativePath";
+
+  static const calendarRoot = "calendar";
+
+  bool get fromOffline => syncRootId == offlineRoot;
+
+  bool get fromCalendar => syncRootId == calendarRoot;
+
+  int? get calendarEntryId => fromCalendar ? int.tryParse(relativePath.split("/").first) : null;
+
+  String get name => relativePath.split("/").last;
+
+  bool get isDeleteVersusModify =>
+      kind == ConflictKind.localModifiedRemoteDeleted || kind == ConflictKind.localDeletedRemoteModified;
+}

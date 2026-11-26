@@ -1,0 +1,18 @@
+name: polder_tools
+description: "Development tools for the Polder apps: icon generation and moving strings between catalogs."
+publish_to: "none"
+
+environment:
+  sdk: ^3.13.4
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

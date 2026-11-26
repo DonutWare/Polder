@@ -29,7 +29,7 @@ install itself on the first start.
 
 ## Start
 
-In VS Code, run **Server (Nextcloud)**, or **Server (Nextcloud) + Client** for
+In VS Code, run **Server (Nextcloud)**, or **Server (Nextcloud) + Polder** for
 the app as well. It starts the containers first and serves the web client
 built into the server, with your usual development data in `config` and
 `data`.

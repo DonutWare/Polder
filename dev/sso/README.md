@@ -18,7 +18,7 @@ Authelia only speaks https, with a certificate made on the first start. The
 script prints the command that makes this Mac trust it; Polder needs that to
 reach Authelia. Your browser still warns about it once.
 
-In VS Code, run **Server (SSO)** or **Server (SSO) + Client**. They start the
+In VS Code, run **Server (SSO)** or **Server (SSO) + Polder**. They start the
 containers and run Polder with `publicUrl` set to `http://localhost:6060`.
 
 ## Users

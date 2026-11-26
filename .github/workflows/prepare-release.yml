@@ -29,14 +29,14 @@ jobs:
       - name: Extract Version
         id: version
         run: |
-          FULL_VERSION=$(grep '^version: ' client/pubspec.yaml | sed 's/version: //')
+          FULL_VERSION=$(grep '^version: ' client/apps/polder/pubspec.yaml | sed 's/version: //')
           VERSION_NAME=$(echo "$FULL_VERSION" | cut -d'+' -f1)
           echo "version=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION_NAME"
 
           if git rev-parse "v${VERSION_NAME}" >/dev/null 2>&1; then
             echo "is_new_version=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::v${VERSION_NAME} is already tagged, bump the version in client/pubspec.yaml first"
+            echo "::warning::v${VERSION_NAME} is already tagged, bump the version in client/apps/polder/pubspec.yaml first"
           else
             echo "is_new_version=true" >> "$GITHUB_OUTPUT"
           fi

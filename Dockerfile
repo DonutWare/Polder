@@ -2,7 +2,7 @@
 
 # WEB selects what the server serves at its root:
 #   none    only the API (default; skips the Flutter build)
-#   client  the Flutter web app from client/
+#   client  the Flutter web app from client/apps/polder/
 #   docker build --build-arg WEB=client .
 ARG WEB=none
 # The Flutter release the web app is built with; keep it in step with client/.fvmrc.
@@ -21,15 +21,17 @@ ENV PATH=/flutter/bin:$PATH
 RUN flutter config --no-analytics >/dev/null && flutter precache --web
 WORKDIR /client
 COPY client/pubspec.yaml client/pubspec.lock ./
+COPY client/apps/polder/pubspec.yaml ./apps/polder/
 COPY client/packages/ ./packages/
 RUN flutter pub get
 COPY client/ .
+WORKDIR /client/apps/polder
 # CanvasKit is served by Polder itself, so the web client also works on a LAN without internet.
 RUN flutter build web --release --no-web-resources-cdn --no-wasm-dry-run \
     && find build/web -name '*.symbols' -delete
 
 FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS web-client
-COPY --from=flutter /client/build/web /web
+COPY --from=flutter /client/apps/polder/build/web /web
 
 FROM web-${WEB} AS web
 

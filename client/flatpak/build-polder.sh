@@ -17,6 +17,7 @@ git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutt
 
 flutter config --no-analytics --no-cli-animations
 flutter pub get
+cd apps/polder
 flutter build linux --release \
   --build-number="$BUILD_NUMBER" \
   --dart-define=POLDER_CHANNEL="$POLDER_CHANNEL" \

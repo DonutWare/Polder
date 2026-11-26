@@ -1,0 +1,228 @@
+import "dart:math";
+import "dart:typed_data";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:polder_core/models/file_entry.dart";
+import "package:polder_core/models/file_space.dart";
+import "package:polder_core/models/file_version.dart";
+import "package:polder_core/models/server_log.dart";
+import "package:polder_core/models/transfer.dart";
+import "package:polder_core/models/trash.dart";
+import "package:polder_core/models/user.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/connection/server_connection_provider.dart";
+import "package:polder_core/providers/current_user_provider.dart";
+import "package:polder_core/providers/offline/offline_storage_provider.dart";
+import "package:polder_core/providers/polder_api_provider.dart";
+import "package:polder_core/providers/service_providers.dart";
+import "package:polder/providers/sharing/file_space_providers.dart";
+import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder_core/services/api/api_exceptions.dart";
+import "package:polder_core/services/offline/outbox_errors.dart";
+import "package:polder_core/services/transfer/file_picker_service.dart";
+import "package:polder_core/util/remote_path.dart";
+import "package:polder/util/throughput_meter.dart";
+import "package:polder_core/services/api/polder_api.dart";
+
+final transfersProvider = NotifierProvider<TransfersNotifier, List<Transfer>>(TransfersNotifier.new);
+
+class TransfersNotifier extends Notifier<List<Transfer>> {
+  /// Progress arrives for every few KB sent; rebuilding the transfer list that often makes the UI sluggish.
+  static const progressInterval = Duration(milliseconds: 100);
+
+  var _nextId = 0;
+  final _random = Random.secure();
+  final Map<int, Stopwatch> _sinceProgress = {};
+  final Map<int, ThroughputMeter> _meters = {};
+
+  @override
+  List<Transfer> build() => const [];
+
+  Future<void> pickAndUpload(String directory) async {
+    final files = await ref.read(filePickerServiceProvider).pickFiles();
+    await Future.wait(files.map((file) => upload(directory, file)));
+  }
+
+  Future<void> upload(String directory, PickedFile file) async {
+    final length = await file.length() ?? 0;
+    final remotePath = RemotePath.join(directory, file.name);
+    if (ref.read(serverConnectionProvider).isOffline) return _queue(remotePath, file);
+    final transfer = _start(file.name, TransferDirection.upload, length, remotePath: remotePath);
+    await _track(transfer, onRetryable: () => _queue(remotePath, file), () async {
+      await _ensureRoomFor(length);
+      await ref
+          .read(polderApiProvider)
+          .putContent(
+            remotePath,
+            file.openRead(),
+            length: length,
+            transferId: transfer.clientId,
+            onProgress: (sent, total) => _progress(transfer.id, sent, total),
+          );
+      ref.invalidate(directoryProvider(directory));
+      ref.invalidate(currentUserProvider);
+      ref.read(syncSchedulerProvider)?.requestRun();
+    });
+  }
+
+  Future<void> _ensureRoomFor(int length) async {
+    if (_fits(await ref.read(currentUserProvider.future), length)) return;
+    if (_fits(await ref.refresh(currentUserProvider.future), length)) return;
+    throw const QuotaExceededException();
+  }
+
+  static bool _fits(User user, int length) => !user.hasQuota || user.usedBytes + length <= user.quotaBytes;
+
+  Future<void> ensureFolder(String path) async {
+    if (path == RemotePath.root) return;
+    try {
+      await ref.read(polderApiProvider).mkdir(path);
+    } on AlreadyExistsException {
+      return;
+    }
+    ref.invalidate(directoryProvider(RemotePath.parent(path)));
+  }
+
+  Future<void> download(FileEntry entry, {FileSpace? space}) => switch (space) {
+    final space? => downloadFromSpace(space, entry),
+    null => _downloadAndSave(
+      name: entry.name,
+      size: entry.size,
+      mime: entry.mime,
+      fetch: (onProgress) => ref
+          .read(polderApiProvider)
+          .downloadBytes(entry.path, purpose: DownloadPurpose.download, onProgress: onProgress),
+    ),
+  };
+
+  Future<void> pickAndUploadToSpace(SpaceLocation location) async {
+    final files = await ref.read(filePickerServiceProvider).pickFiles();
+    await Future.wait(files.map((file) => uploadToSpace(location, file)));
+  }
+
+  Future<void> uploadToSpace(SpaceLocation location, PickedFile file) async {
+    final length = await file.length() ?? 0;
+    final transfer = _start(file.name, TransferDirection.upload, length);
+    await _track(transfer, () async {
+      await ref
+          .read(fileSpaceApiProvider(location.space))
+          .upload(
+            RemotePath.join(location.path, file.name),
+            file.openRead(),
+            length: length,
+            transferId: transfer.clientId,
+            onProgress: (sent, total) => _progress(transfer.id, sent, total),
+          );
+      ref.invalidate(spaceDirectoryProvider(location));
+    });
+  }
+
+  Future<void> downloadFromSpace(FileSpace space, FileEntry entry) async {
+    final name = entry.isDir ? "${entry.name}.zip" : entry.name;
+    final api = ref.read(fileSpaceApiProvider(space));
+    final picker = ref.read(filePickerServiceProvider);
+    if (picker.savesInBrowser) {
+      return picker.saveFromUrl(await api.downloadUrl(entry.path, folder: entry.isDir), name: name);
+    }
+    await _downloadAndSave(
+      name: name,
+      size: entry.isDir ? 0 : entry.size,
+      mime: entry.isDir ? "application/zip" : entry.mime,
+      fetch: (onProgress) => entry.isDir
+          ? api.downloadArchive(entry.path, onProgress: onProgress)
+          : api.download(entry.path, onProgress: onProgress),
+    );
+  }
+
+  Future<void> downloadVersion(FileEntry entry, FileVersion version) => _downloadAndSave(
+    name: entry.name,
+    size: version.size,
+    mime: entry.mime,
+    fetch: (onProgress) => ref.read(polderApiProvider).downloadVersion(version.id, onProgress: onProgress),
+  );
+
+  Future<void> downloadFromTrash(TrashItem item) => _downloadAndSave(
+    name: item.isDir ? "${item.name}.zip" : item.name,
+    size: item.isDir ? 0 : item.size,
+    mime: item.isDir ? "application/zip" : item.mime,
+    fetch: (onProgress) => ref.read(polderApiProvider).downloadFromTrash(item.id, onProgress: onProgress),
+  );
+
+  Future<void> downloadLogFile(ServerLogFile file) => _downloadAndSave(
+    name: file.name,
+    size: file.size,
+    mime: "application/x-ndjson",
+    fetch: (onProgress) => ref.read(polderApiProvider).downloadLogFile(file.name, onProgress: onProgress),
+  );
+
+  Future<void> _downloadAndSave({
+    required String name,
+    required int size,
+    required String mime,
+    required Future<Uint8List> Function(void Function(int received, int total) onProgress) fetch,
+  }) async {
+    final transfer = _start(name, TransferDirection.download, size);
+    await _track(transfer, () async {
+      final bytes = await fetch((received, total) => _progress(transfer.id, received, total));
+      await ref.read(filePickerServiceProvider).saveFile(name: name, bytes: bytes, mime: mime);
+    });
+  }
+
+  void clearFinished() => state = state.where((transfer) => transfer.isRunning).toList();
+
+  Transfer _start(String name, TransferDirection direction, int total, {String? remotePath}) {
+    final transfer = Transfer(
+      id: _nextId++,
+      clientId: _newClientId(),
+      name: name,
+      direction: direction,
+      remotePath: remotePath,
+      total: total,
+    );
+    state = [...state, transfer];
+    return transfer;
+  }
+
+  Future<void> _queue(String remotePath, PickedFile file) async {
+    final files = await ref.read(offlineFilesProvider.future);
+    await files.queueUpload(remotePath, file.openRead());
+  }
+
+  Future<void> _track(Transfer transfer, Future<void> Function() work, {Future<void> Function()? onRetryable}) async {
+    try {
+      await work();
+      _replace(
+        transfer.id,
+        (current) => current.copyWith(status: TransferStatus.done, transferred: current.total, rate: 0),
+      );
+    } on ApiException catch (error) {
+      if (onRetryable != null && OutboxErrors.kindOf(error).retries) {
+        state = [
+          for (final current in state)
+            if (current.id != transfer.id) current,
+        ];
+        await onRetryable();
+        return;
+      }
+      _replace(transfer.id, (current) => current.copyWith(status: TransferStatus.failed, error: error, rate: 0));
+    } finally {
+      _sinceProgress.remove(transfer.id);
+      _meters.remove(transfer.id);
+    }
+  }
+
+  void _progress(int id, int transferred, int total) {
+    final since = _sinceProgress[id];
+    if (since != null && since.elapsed < progressInterval && transferred < total) return;
+    _sinceProgress[id] = Stopwatch()..start();
+    _replace(id, (current) {
+      final meter = _meters.putIfAbsent(id, ThroughputMeter.new)..add(transferred - current.transferred);
+      return current.copyWith(transferred: transferred, total: total > 0 ? total : current.total, rate: meter.rate);
+    });
+  }
+
+  String _newClientId() => [for (var i = 0; i < 16; i++) _random.nextInt(256).toRadixString(16).padLeft(2, "0")].join();
+
+  void _replace(int id, Transfer Function(Transfer current) update) =>
+      state = [for (final transfer in state) transfer.id == id ? update(transfer) : transfer];
+}

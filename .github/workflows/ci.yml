@@ -38,10 +38,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: client/openapi/polder.json matches the server (run scripts/gen-client.sh)
+      - name: client/packages/polder_core/openapi/polder.json matches the server (run scripts/gen-client.sh)
         run: |
           go run ./cmd/polder openapi | jq -S . > /tmp/server.json
-          jq -S . client/openapi/polder.json > /tmp/client.json
+          jq -S . client/packages/polder_core/openapi/polder.json > /tmp/client.json
           diff -u /tmp/client.json /tmp/server.json
 
   client:

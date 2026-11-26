@@ -1,11 +1,12 @@
 # Used when a Docker build compiles the web client from this directory.
-.dart_tool
-build
-android
-ios
-macos
-windows
-linux
-.idea
-*.iml
-test
+**/.dart_tool
+**/build
+apps/*/android
+apps/*/ios
+apps/*/macos
+apps/*/windows
+apps/*/linux
+**/.idea
+**/*.iml
+**/test
+flatpak

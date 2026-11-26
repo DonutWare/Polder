@@ -1,0 +1,17 @@
+import "dart:typed_data";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "package:polder_core/models/thumbnail_request.dart";
+import "package:polder_core/providers/polder_api_provider.dart";
+import "package:polder_core/util/ref_cache.dart";
+
+final thumbnailProvider = FutureProvider.autoDispose.family<Uint8List?, ThumbnailRequest>((ref, request) async {
+  ref.cacheFor(const Duration(minutes: 5));
+  final api = ref.watch(polderApiProvider);
+  return switch (request) {
+    FileThumbnailRequest(:final path, :final size) => api.preview(path, size: size),
+    TrashThumbnailRequest(:final itemId, :final size) => api.trashPreview(itemId, size: size),
+    VersionThumbnailRequest(:final versionId, :final size) => api.versionPreview(versionId, size: size),
+  };
+});

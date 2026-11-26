@@ -124,6 +124,8 @@ modules:
         skip:
           - build
           - .dart_tool
+          - apps/polder/build
+          - apps/polder/.dart_tool
           - .flutter-sdk
           - .pub-cache
           - flatpak/.flatpak-builder

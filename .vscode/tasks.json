@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"label": "Build web client",
-			"detail": "flutter build web in client/, copied into internal/webui/dist",
+			"detail": "flutter build web in client/apps/polder/, copied into internal/webui/dist",
 			"type": "shell",
 			"command": "scripts/build-web.sh",
 			"group": "build",
@@ -59,7 +59,7 @@
 			"type": "shell",
 			"command": "dart run build_runner build --delete-conflicting-outputs",
 			"options": {
-				"cwd": "${workspaceFolder}/client"
+				"cwd": "${workspaceFolder}/client/apps/polder"
 			},
 			"group": "build",
 			"problemMatcher": []
@@ -78,7 +78,7 @@
 			"type": "shell",
 			"command": "dart run build_runner watch --delete-conflicting-outputs",
 			"options": {
-				"cwd": "${workspaceFolder}/client"
+				"cwd": "${workspaceFolder}/client/apps/polder"
 			},
 			"isBackground": true,
 			"problemMatcher": []
@@ -114,7 +114,7 @@
 			"type": "shell",
 			"command": "flutter test --exclude-tags integration",
 			"options": {
-				"cwd": "${workspaceFolder}/client"
+				"cwd": "${workspaceFolder}/client/apps/polder"
 			},
 			"group": "test",
 			"problemMatcher": []

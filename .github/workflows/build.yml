@@ -9,6 +9,7 @@ on:
   pull_request:
     paths:
       - client/pubspec.yaml
+      - client/apps/polder/pubspec.yaml
       - client/.fvmrc
       - .github/workflows/build.yml
     types:
@@ -71,7 +72,7 @@ jobs:
         id: fetch
         working-directory: client
         run: |
-          VERSION_NAME=$(grep '^version:' pubspec.yaml | cut -d ':' -f2 | cut -d '+' -f1 | tr -d ' ')
+          VERSION_NAME=$(grep '^version:' apps/polder/pubspec.yaml | cut -d ':' -f2 | cut -d '+' -f1 | tr -d ' ')
           echo "version_name=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
 
           FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc)
@@ -92,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: client
+        working-directory: client/apps/polder
     outputs:
       artifact_suffix: ${{ env.ARTIFACT_SUFFIX }}
     steps:
@@ -176,14 +177,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: polder-android
-          path: client/build/app/outputs/android_artifacts/
+          path: client/apps/polder/build/app/outputs/android_artifacts/
 
   build-windows:
     runs-on: windows-2022
     needs: [fetch-info]
     defaults:
       run:
-        working-directory: client
+        working-directory: client/apps/polder
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
@@ -206,27 +207,27 @@ jobs:
       - name: Compile Inno Setup installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
-          path: client/windows/windows_setup.iss
+          path: client/apps/polder/windows/windows_setup.iss
           options: /O+ /DPOLDER_VERSION="${{ needs.fetch-info.outputs.version_name }}"
 
       - name: Archive Windows portable artifact
         uses: actions/upload-artifact@v4
         with:
           name: polder-windows-portable
-          path: client\build\windows\x64\prod\runner\Release\
+          path: client\apps\polder\build\windows\x64\prod\runner\Release\
 
       - name: Archive Windows installer artifact
         uses: actions/upload-artifact@v4
         with:
           name: polder-windows-installer
-          path: client\windows\Output\polder_setup.exe
+          path: client\apps\polder\windows\Output\polder_setup.exe
 
   build-ios:
     runs-on: xcode-27
     needs: [fetch-info]
     defaults:
       run:
-        working-directory: client
+        working-directory: client/apps/polder
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
@@ -257,7 +258,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: polder-iOS
-          path: client/build/ios/archive/Runner.xcarchive/Products/Applications/iOS.ipa
+          path: client/apps/polder/build/ios/archive/Runner.xcarchive/Products/Applications/iOS.ipa
 
   # flutter_inappwebview_macos fails to compile with Xcode 26 (the macos-latest default); Xcode 27 builds it.
   build-macos:
@@ -265,7 +266,7 @@ jobs:
     needs: [fetch-info]
     defaults:
       run:
-        working-directory: client
+        working-directory: client/apps/polder
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
@@ -289,7 +290,7 @@ jobs:
         run: brew install create-dmg
 
       - name: Create DMG
-        run: ./scripts/create_dmg.sh
+        run: ../../scripts/create_dmg.sh
 
       - name: Create update zip
         run: ditto -c -k --keepParent build/macos/Build/Products/Release-prod/Polder.app build/macos/Build/Products/Release-prod/macOS.zip
@@ -299,8 +300,8 @@ jobs:
         with:
           name: polder-macOS
           path: |
-            client/build/macos/Build/Products/Release-prod/macOS.dmg
-            client/build/macos/Build/Products/Release-prod/macOS.zip
+            client/apps/polder/build/macos/Build/Products/Release-prod/macOS.dmg
+            client/apps/polder/build/macos/Build/Products/Release-prod/macOS.zip
 
   # flutter_inappwebview_linux only compiles against WPE WebKit 2.50-2.52: older releases lack APIs it uses and 2.54
   # removed one. Ubuntu doesn't ship WPE at all, so build on Debian with 2.52 pinned from the archive snapshot.
@@ -314,7 +315,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: client
+        working-directory: client/apps/polder
     steps:
       - name: Get packages
         working-directory: .
@@ -362,7 +363,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: polder-linux
-          path: client/build/linux/x64/prod/release/bundle
+          path: client/apps/polder/build/linux/x64/prod/release/bundle
 
       - name: Build AppImage
         run: |
@@ -381,8 +382,8 @@ jobs:
         with:
           name: polder-linux-appimage
           path: |
-            client/Polder_x86_64.AppImage
-            client/Polder_x86_64.AppImage.zsync
+            client/apps/polder/Polder_x86_64.AppImage
+            client/apps/polder/Polder_x86_64.AppImage.zsync
 
   build-linux-flatpak:
     runs-on: ubuntu-latest
@@ -445,7 +446,7 @@ jobs:
     needs: [fetch-info]
     defaults:
       run:
-        working-directory: client
+        working-directory: client/apps/polder
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
@@ -471,7 +472,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: polder-web
-          path: client/build/web
+          path: client/apps/polder/build/web
 
   build-docker:
     needs: [fetch-info]

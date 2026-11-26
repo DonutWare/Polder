@@ -1,0 +1,144 @@
+import "dart:async";
+
+import "package:flutter/foundation.dart";
+import "package:flutter/material.dart";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "package:polder_ui/l10n/generated/app_localizations.dart";
+import "package:polder_core/providers/account_provider.dart";
+import "package:polder/providers/app/app_location_provider.dart";
+import "package:polder/providers/app/browser_favicon_provider.dart";
+import "package:polder_ui/providers/appearance/appearance_provider.dart";
+import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder/providers/calendar/calendar_insert_provider.dart";
+import "package:polder_calendar/providers/calendar/week_layout_provider.dart";
+import "package:polder_core/providers/connection/server_connection_provider.dart";
+import "package:polder_core/providers/current_user_provider.dart";
+import "package:polder/providers/notes/notes_folder_provider.dart";
+import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder_core/providers/offline/offline_availability_provider.dart";
+import "package:polder_core/providers/offline/offline_sync_provider.dart";
+import "package:polder_core/providers/branding/branding_provider.dart";
+import "package:polder/providers/deep_link/deep_link_provider.dart";
+import "package:polder/providers/notifications/notification_coordinator.dart";
+import "package:polder/providers/file_browser/file_browser_location_provider.dart";
+import "package:polder/providers/sharing/share_target_provider.dart";
+import "package:polder/routes/app_router.dart";
+import "package:polder_ui/theme/app_theme.dart";
+import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder/widgets/desktop/desktop_window_title.dart";
+import "package:polder/widgets/layout/mouse_navigation.dart";
+import "package:polder/widgets/navigation/navigation_history_scope.dart";
+import "package:polder_window/window_titlebar.dart";
+import "package:polder/widgets/shortcuts/launcher_shortcuts.dart";
+import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder/util/app_title.dart";
+import "package:calendar_views/calendar_views.dart";
+
+class PolderApp extends ConsumerStatefulWidget {
+  const PolderApp({super.key});
+
+  @override
+  ConsumerState<PolderApp> createState() => _PolderAppState();
+}
+
+class _PolderAppState extends ConsumerState<PolderApp> {
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onResume: _onResume);
+  }
+
+  void _onResume() {
+    ref.read(appearanceProvider.notifier).refreshSystemAccent();
+    if (ref.read(currentAccountProvider) == null || ref.read(sessionEndedProvider)) return;
+    unawaited(ref.read(serverConnectionProvider.notifier).check());
+    ref.read(offlineSyncProvider.notifier).kickAll();
+  }
+
+  void _recoverFromOffline() {
+    for (final provider in [currentUserProvider, notesFolderProvider]) {
+      if (ref.read(provider).hasError) ref.invalidate(provider);
+    }
+    ref
+      ..invalidate(monthEventsProvider)
+      ..invalidate(calendarListProvider)
+      ..invalidate(directoryProvider)
+      ..invalidate(notesTreeProvider);
+  }
+
+  void _onSessionEnded(bool? wasEnded, bool ended) {
+    if (!ended && wasEnded == true && ref.read(currentAccountProvider) != null) {
+      _recoverFromOffline();
+      unawaited(ref.read(serverConnectionProvider.notifier).check());
+      ref.read(offlineSyncProvider.notifier).kickAll();
+    }
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(showInFileBrowserProvider);
+    final appearance = ref.watch(appearanceProvider);
+    final branding = ref.watch(brandingProvider);
+    final seed = appearance.seedWith(branding.accent);
+    final location = ref.watch(appLocationProvider);
+    final weekLayout = ref.watch(weekLayoutProvider);
+    String titleIn(BuildContext context) {
+      final localized = AppLocalizations.of(context);
+      return appTitle(location, branding.nameOr(localized.appTitle), localized);
+    }
+
+    ref.watch(deepLinkHandlerProvider);
+    ref.watch(calendarInsertHandlerProvider);
+    ref.watch(shareTargetHandlerProvider);
+    ref.watch(notificationCoordinatorProvider);
+    ref.watch(offlineSyncProvider);
+    if (kIsWeb) ref.watch(browserFaviconProvider);
+    ref.listen(sessionEndedProvider, _onSessionEnded);
+    ref.listen(serverConnectionProvider.select((connection) => connection.isOnline), (wasOnline, isOnline) {
+      if (isOnline && wasOnline == false) _recoverFromOffline();
+    });
+    if (ref.watch(currentAccountProvider.select((account) => account != null))) {
+      ref
+        ..watch(notesOfflinePinProvider)
+        ..watch(offlinePinsProvider);
+    }
+    final restoringAccount = ref.watch(accountProvider.select((account) => account.isLoading && !account.hasValue));
+    return MaterialApp.router(
+      onGenerateTitle: titleIn,
+      theme: AppTheme.build(seed, Brightness.light),
+      darkTheme: AppTheme.build(seed, Brightness.dark),
+      themeMode: appearance.mode,
+      localizationsDelegates: [...AppLocalizations.localizationsDelegates, CalendarLocalizations.delegate],
+      supportedLocales: AppLocalizations.supportedLocales,
+      builder: (context, child) => restoringAccount
+          ? ColoredBox(color: Theme.of(context).colorScheme.surface)
+          : AdaptiveLayoutBuilder(
+              child: (_) => DesktopWindowTitle(
+                title: titleIn(context),
+                child: LauncherShortcuts(
+                  child: DesktopTray(
+                    child: WindowTitlebar(
+                      child: MouseNavigation(
+                        child: NavigationHistoryScope(
+                          child: WeekLayoutScope(layout: weekLayout, child: child!),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+      routerConfig: ref.watch(routerProvider),
+    );
+  }
+}

@@ -1,0 +1,2650 @@
+{
+	"@@locale": "en",
+	"about": "About",
+	"aboutCreatedBy": "Created by DonutWare",
+	"aboutHint": "Version, licenses and supporting the project",
+	"aboutLegalese": "Create your own private polder and sync your files.",
+	"aboutLicenses": "Licenses",
+	"aboutSocials": "Socials",
+	"aboutVersion": "Application version {version}",
+	"@aboutVersion": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			}
+		}
+	},
+	"aboutServerInfo": "Server version {version} ({buildNumber})",
+	"@aboutServerInfo": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"buildNumber": {
+				"type": "String"
+			}
+		}
+	},
+	"accentBlue": "Blue",
+	"accentColor": "Accent color",
+	"accentCustomHint": "Status colors are tuned to match your accent.",
+	"accentGreen": "Green",
+	"accentNoSystemHint": "This device has no accent color to follow, so the default is used.",
+	"accentOrange": "Orange",
+	"accentPolder": "Polder",
+	"accentRose": "Rose",
+	"accentSlate": "Slate",
+	"accentSystemHint": "Follows your device's accent color.",
+	"accentTeal": "Teal",
+	"accentViolet": "Violet",
+	"account": "Account",
+	"add": "Add",
+	"addAutoUploadFolder": "Add folder",
+	"addSyncFolder": "Add sync folder",
+	"addUser": "Add user",
+	"addUserHint": "Create an account with its own storage",
+	"adminAccountsCaption": "{count, plural, =1{1 administrator} other{{count} administrators}}",
+	"@adminAccountsCaption": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"adminDisabledCaption": "Can't sign in",
+	"administration": "Administration",
+	"administrationHint": "Users and server management",
+	"adminNearQuota": "Near quota",
+	"adminNearQuotaCaption": "Over 90% of their quota",
+	"adminOverview": "Overview",
+	"adminOverviewHint": "Storage and usage at a glance",
+	"adminStorageCaption": "Across all accounts",
+	"adminStorageUsed": "Storage used",
+	"appearance": "Appearance",
+	"applyToAll": "Apply my choice to all {count} conflicts",
+	"@applyToAll": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"appTitle": "Polder",
+	"autoUploadDescription": "Upload new photos and files from the chosen folders automatically.",
+	"autoUploadEnabled": "Auto-upload",
+	"cancel": "Cancel",
+	"change": "Change",
+	"chargingOnly": "Only while charging",
+	"choose": "Choose",
+	"chooseServerFolder": "Choose a server folder",
+	"chooseThisFolder": "Choose this folder",
+	"clearFinished": "Clear finished",
+	"collapseSidebar": "Collapse sidebar",
+	"conflictBothCreated": "A different file with this name was created on both sides.",
+	"conflictBothModified": "Changed on this device and on the server.",
+	"conflictLocalDeletedRemoteModified": "Deleted on this device but changed on the server.",
+	"conflictLocalModifiedRemoteDeleted": "Changed on this device but deleted on the server.",
+	"conflicts": "Conflicts",
+	"conflictsWaiting": "{count, plural, =1{1 conflict needs your decision} other{{count} conflicts need your decision}}",
+	"@conflictsWaiting": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"connect": "Connect",
+	"create": "Create",
+	"createAdmin": "Create administrator",
+	"delete": "Delete",
+	"deleted": "Deleted",
+	"deletePermanently": "Delete permanently",
+	"deletePermanentlyMessage": "It can't be restored afterwards.",
+	"deletePermanentlyTitle": "Delete \"{name}\" permanently?",
+	"@deletePermanentlyTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"deleteMessage": "It will be moved to the trash on the server.",
+	"deleteTitle": "Delete \"{name}\"?",
+	"@deleteTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"deleteUserMessage": "The account is removed. Their files are kept on the server disk.",
+	"deleteUserTitle": "Delete user \"{username}\"?",
+	"@deleteUserTitle": {
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"dimensions": "{width} × {height}",
+	"@dimensions": {
+		"placeholders": {
+			"width": {
+				"type": "int"
+			},
+			"height": {
+				"type": "int"
+			}
+		}
+	},
+	"dimensionsLabel": "Dimensions",
+	"disabled": "Disabled",
+	"done": "Done",
+	"download": "Download",
+	"edit": "Edit",
+	"editUser": "Edit {username}",
+	"@editUser": {
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"emptyFolder": "This folder is empty",
+	"emptyTrash": "Empty trash",
+	"emptyTrashMessage": "Everything in the trash is deleted permanently. This can't be undone.",
+	"emptyTrashTitle": "Empty the trash?",
+	"errorAlreadyExists": "Something with that name already exists.",
+	"errorConflict": "It changed since it was last loaded. Refresh and try again.",
+	"errorForbidden": "You are not allowed to do that.",
+	"errorReauthenticationRequired": "For your security, sign out and sign in again, then try once more.",
+	"errorInvalidRequest": "The request was not valid.",
+	"errorLocalFolderMissing": "The local folder {path} is missing.",
+	"@errorLocalFolderMissing": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"errorNetwork": "Could not reach the server.",
+	"errorNotFound": "It no longer exists.",
+	"errorQuotaExceeded": "Your storage quota is full.",
+	"errorRateLimited": "Too many attempts. Wait a moment and try again.",
+	"errorUnauthorized": "Your session has expired. Please sign in again.",
+	"errorUnavailable": "The server is busy. Try again shortly.",
+	"errorPreconditionFailed": "It changed on the server while this was in progress.",
+	"errorServer": "The server ran into an error (HTTP {status}).",
+	"@errorServer": {
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"errorUnknown": "The app ran into an unexpected error.",
+	"expandSidebar": "Expand sidebar",
+	"folders": "Folders",
+	"generalSettings": "General",
+	"generalSettingsHint": "Trash and file versions",
+	"gridView": "Grid view",
+	"keepBoth": "Keep both",
+	"keepMine": "Keep mine",
+	"keepServer": "Keep server's",
+	"lastSynced": "Last synced {time}",
+	"@lastSynced": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"listView": "List view",
+	"localFolder": "Folder on this device",
+	"loginErrorDisabled": "This account is disabled.",
+	"loginErrorInvalidCredentials": "Wrong username or password.",
+	"loginErrorSetupUnavailable": "This server has already been set up.",
+	"loginErrorUnreachable": "Could not reach a Polder server at this address.",
+	"loginServerIntro": "Enter the address of your Polder server.",
+	"management": "Management",
+	"manageUsersHint": "Accounts, roles and quotas",
+	"modified": "Modified",
+	"moreOptions": "More options",
+	"move": "Move",
+	"name": "Name",
+	"navAutoUpload": "Auto-upload",
+	"navFiles": "Files",
+	"navSettings": "Settings",
+	"navSync": "Sync",
+	"navTrash": "Trash",
+	"newFolder": "New folder",
+	"newPasswordOptional": "New password (leave empty to keep)",
+	"noConflicts": "No conflicts. Everything is in sync.",
+	"noFolders": "No folders yet.",
+	"notChosen": "Not chosen",
+	"noUsers": "No users yet.",
+	"ocrLanguagesLabel": "Tesseract models, comma-separated, like eng, jpn or script/Latin",
+	"ocrLanguagesSetting": "Languages and scripts",
+	"ocrMaxPagesHint": "{count, plural, =1{OCR reads at most 1 page of each PDF} other{OCR reads at most {count} pages of each PDF}}",
+	"@ocrMaxPagesHint": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"ocrMaxPagesLabel": "Pages",
+	"ocrMaxPagesSetting": "Pages per PDF",
+	"ocrSetting": "Recognise text in images and scans",
+	"ocrSettingHint": "Reads photos and scanned PDF pages with OCR. This is slow and runs in the background.",
+	"ocrUnavailable": "OCR is unavailable: {reason}",
+	"@ocrUnavailable": {
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"overwrite": "Overwrite",
+	"password": "Password",
+	"quota": "Quota",
+	"quotaInvalid": "Enter a number of 0 or more",
+	"quotaUnlimitedHint": "0 means unlimited",
+	"quotaUsedOf": "{used} of {total} used",
+	"@quotaUsedOf": {
+		"placeholders": {
+			"used": {
+				"type": "String"
+			},
+			"total": {
+				"type": "String"
+			}
+		}
+	},
+	"quotaUsedUnlimited": "{used} used",
+	"@quotaUsedUnlimited": {
+		"placeholders": {
+			"used": {
+				"type": "String"
+			}
+		}
+	},
+	"refresh": "Refresh",
+	"remove": "Remove",
+	"removeSyncFolderMessage": "The folder stops syncing. No files are deleted.",
+	"removeSyncFolderTitle": "Remove this folder?",
+	"rename": "Rename",
+	"resolve": "Resolve",
+	"restore": "Restore",
+	"restoreConflictMessage": "There is already something at {path}. Overwrite moves it to the trash, Keep both restores this item next to it under a new name.",
+	"@restoreConflictMessage": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"restoreConflictTitle": "\"{name}\" already exists",
+	"@restoreConflictTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"restoredTo": "Restored to {path}",
+	"@restoredTo": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"retry": "Retry",
+	"revisionShort": "Revision {rev}",
+	"@revisionShort": {
+		"placeholders": {
+			"rev": {
+				"type": "int"
+			}
+		}
+	},
+	"roleAdmin": "Administrator",
+	"roleUser": "User",
+	"rootFolder": "Files",
+	"save": "Save",
+	"searchAddFilterButton": "Filter",
+	"searchChooseFolder": "Choose folder",
+	"searchClear": "Clear",
+	"searchContentPending": "{count, plural, =1{1 file still to read} other{{count} files still to read}}",
+	"@searchContentPending": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchContentSetting": "Search inside files",
+	"searchContentSettingHint": "Reads the text in documents, PDFs and images so search can find it.",
+	"searchCustomSize": "Another size, like 250mb",
+	"searchCustomType": "Another type or extension, like heic",
+	"searchDaysAgo": "{count, plural, =1{1 day ago} other{{count} days ago}}",
+	"@searchDaysAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchFieldFolder": "Folder",
+	"searchFieldModified": "Modified",
+	"searchFieldSize": "Size",
+	"searchFieldType": "Type",
+	"searchEventsCount": "{count, plural, =1{1 event} other{{count} events}}",
+	"@searchEventsCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchMoreEvents": "Show more events",
+	"searchFieldCalendar": "Calendar",
+	"searchFieldRepeats": "Repeats",
+	"searchFieldWhen": "When",
+	"searchRepeatYes": "repeating",
+	"searchRepeatNo": "one-off",
+	"searchRepeatDaily": "daily",
+	"searchRepeatWeekly": "weekly",
+	"searchRepeatMonthly": "monthly",
+	"searchRepeatYearly": "yearly",
+	"searchWhenUpcoming": "upcoming",
+	"searchWhenPast": "past",
+	"searchEventPast": "Past",
+	"searchOpenInCalendar": "Open in calendar",
+	"searchFilesCount": "{count, plural, =1{1 file} other{{count} files}}",
+	"@searchFilesCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchFilterAdd": "Add filter",
+	"searchFilterValues": "Values",
+	"searchGoTo": "Go to",
+	"searchHint": "Search files, folders and pages",
+	"searchKeywordsAbout": "version, licenses, info",
+	"searchKeywordsActivity": "history, log, uploads, downloads, transfers, sessions, devices",
+	"searchKeywordsAdmin": "admin, server, administration, retention, storage, ocr, text recognition, search",
+	"searchKeywordsAdminUsers": "accounts, people, members, quota",
+	"searchKeywordsAutoUpload": "camera, photos, backup, gallery",
+	"searchKeywordsConflicts": "conflict, resolve, versions",
+	"searchKeywordsFiles": "browse, documents, home, storage",
+	"searchKeywordsSettings": "preferences, appearance, theme, account, language, password",
+	"searchKeywordsSync": "folders, desktop, mirror",
+	"searchKeywordsTrash": "deleted, recycle bin, restore, bin",
+	"searchMonthsAgo": "{count, plural, =1{1 month ago} other{{count} months ago}}",
+	"@searchMonthsAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchNoResults": "Nothing matches your search",
+	"searchOpAfter": "after",
+	"searchOpAtLeast": "at least",
+	"searchOpAtMost": "at most",
+	"searchOpBefore": "before",
+	"searchOpBetween": "between",
+	"searchOpFrom": "from",
+	"searchOpIs": "is",
+	"searchOpIsNot": "is not",
+	"searchOpLarger": "larger than",
+	"searchOpOn": "on",
+	"searchOpSmaller": "smaller than",
+	"searchOpUntil": "until",
+	"searchPickDate": "Pick a date",
+	"searchPickRange": "Pick dates",
+	"searchPresetToday": "today",
+	"searchPresetYesterday": "yesterday",
+	"searchRange": "{from} and {to}",
+	"@searchRange": {
+		"placeholders": {
+			"from": {
+				"type": "String"
+			},
+			"to": {
+				"type": "String"
+			}
+		}
+	},
+	"searchShowInFolder": "Show in folder",
+	"searchSizeFrom": "From",
+	"searchSizeTo": "To",
+	"searchSyncConflicts": "Sync conflicts",
+	"searchTipsBody": "Type part of a name, even with typos. Add tags like type=pdf, modified>7d or size>100mb, use != to leave things out, or pick one with Filter. type=event searches your calendar, with repeats=no or when=upcoming to narrow it.",
+	"searchTipsTitle": "Narrow it down",
+	"searchTooltip": "Search ({shortcut})",
+	"@searchTooltip": {
+		"placeholders": {
+			"shortcut": {
+				"type": "String"
+			}
+		}
+	},
+	"searchWeeksAgo": "{count, plural, =1{1 week ago} other{{count} weeks ago}}",
+	"@searchWeeksAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchYearsAgo": "{count, plural, =1{1 year ago} other{{count} years ago}}",
+	"@searchYearsAgo": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"server": "Server",
+	"serverFolder": "Folder on the server",
+	"serverSearchGroup": "Search",
+	"serverSettings": "Server settings",
+	"serverSettingsHint": "Trash, versions, search, previews and federation",
+	"serverTrashRetention": "Trash retention",
+	"serverTrashRetentionHint": "Default and upper limit for every user: {duration}",
+	"@serverTrashRetentionHint": {
+		"placeholders": {
+			"duration": {
+				"type": "String"
+			}
+		}
+	},
+	"serverUrl": "Server address",
+	"serverUrlHint": "https://cloud.example.com",
+	"setupIntro": "This server has no users yet. Create the first administrator account.",
+	"signIn": "Sign in",
+	"signOut": "Sign out",
+	"signOutMessage": "Sign out {username} from {server}?",
+	"@signOutMessage": {
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"server": {
+				"type": "String"
+			}
+		}
+	},
+	"size": "Size",
+	"sponsor": "Sponsor",
+	"sponsorMessage": "If you enjoy using Polder, consider sponsoring the project to support ongoing development and improvements. Thank you for your support!",
+	"storageByUser": "Storage by user",
+	"syncedWith": "Synced with {remotePath}",
+	"@syncedWith": {
+		"placeholders": {
+			"remotePath": {
+				"type": "String"
+			}
+		}
+	},
+	"syncError": "Sync finished with errors",
+	"syncFolders": "Sync folders",
+	"syncIdle": "Up to date",
+	"syncNow": "Sync now",
+	"syncRunning": "Syncing…",
+	"syncUnsupported": "Folder sync is not available on this platform.",
+	"systemAccentUnavailable": "System (not available on this device)",
+	"takenAt": "Taken",
+	"theme": "Theme",
+	"themeDark": "Dark",
+	"themeLight": "Light",
+	"themeSystem": "System",
+	"thisDevice": "This device",
+	"transferDone": "Done",
+	"transfers": "Transfers",
+	"trashEmpty": "The trash is empty",
+	"trashItemDeleted": "Deleted {date}",
+	"@trashItemDeleted": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"trashItemExpires": "Deleted permanently on {date}",
+	"@trashItemExpires": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"trashItemFrom": "From {folder}",
+	"@trashItemFrom": {
+		"placeholders": {
+			"folder": {
+				"type": "String"
+			}
+		}
+	},
+	"trashRetention": "Keep deleted items",
+	"trashRetentionDays": "{count, plural, =1{1 day} other{{count} days}}",
+	"@trashRetentionDays": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"trashRetentionForever": "Forever",
+	"trashRetentionForeverHint": "Items stay in the trash until you delete them.",
+	"trashRetentionHint": "Items in the trash are deleted permanently after {duration}.",
+	"@trashRetentionHint": {
+		"placeholders": {
+			"duration": {
+				"type": "String"
+			}
+		}
+	},
+	"trashRetentionServerDefault": "Server default ({duration})",
+	"@trashRetentionServerDefault": {
+		"placeholders": {
+			"duration": {
+				"type": "String"
+			}
+		}
+	},
+	"trashSummary": "{count, plural, =1{1 item} other{{count} items}} · {size}",
+	"@trashSummary": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			},
+			"size": {
+				"type": "String"
+			}
+		}
+	},
+	"type": "Type",
+	"unit": "Unit",
+	"uploadFiles": "Upload files",
+	"uploadHere": "Upload here",
+	"uploadSharedFiles": "{count, plural, =1{Upload shared file} other{Upload {count} shared files}}",
+	"@uploadSharedFiles": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"username": "Username",
+	"users": "Users",
+	"usersCount": "{count, plural, =1{1 user} other{{count} users}}",
+	"@usersCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"wifiOnly": "Only on Wi-Fi",
+	"navActivity": "Activity",
+	"activityNow": "Now",
+	"activityHistory": "History",
+	"activityEmpty": "Nothing has happened yet.",
+	"nothingTransferring": "Nothing is transferring right now.",
+	"activityScopeMe": "Only me",
+	"activityScopeAll": "All users",
+	"activityScopeChooseUser": "Choose a user…",
+	"activityScopeTooltip": "Whose activity to show",
+	"chooseUserTitle": "Show activity of",
+	"activityAllFiles": "All files",
+	"activityKindUpload": "Uploaded",
+	"activityKindDownload": "Downloaded",
+	"activityKindMkdir": "Created folder",
+	"activityKindMove": "Moved",
+	"activityKindDelete": "Moved to trash",
+	"activityKindRestore": "Restored from trash",
+	"activityKindTrashDelete": "Deleted permanently",
+	"activityKindTrashEmpty": "Emptied the trash",
+	"activityKindTrashExpire": "Old items removed from trash",
+	"activityKindLogin": "Signed in",
+	"activityKindLogout": "Signed out",
+	"activityKindUnknown": "Something happened",
+	"activityRescanAdded": "Added on the server",
+	"activityRescanChanged": "Changed on the server",
+	"activityRescanRemoved": "Removed on the server",
+	"activityRescanSummary": "{count, plural, =1{1 change} other{{count} changes}} found on the server",
+	"@activityRescanSummary": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"activityMovedFrom": "from {path}",
+	"@activityMovedFrom": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"activityItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+	"@activityItemCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"activityFailed": "Failed",
+	"activityCancelled": "Cancelled",
+	"durationSeconds": "{count} s",
+	"@durationSeconds": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"durationMinutes": "{count} min",
+	"@durationMinutes": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"transferUploading": "Uploading",
+	"transferDownloading": "Downloading",
+	"transferProgress": "{done} of {total}",
+	"@transferProgress": {
+		"placeholders": {
+			"done": {
+				"type": "String"
+			},
+			"total": {
+				"type": "String"
+			}
+		}
+	},
+	"folderUploading": "Uploading…",
+	"folderDownloading": "Downloading…",
+	"realtimeOffline": "Live updates paused, reconnecting…",
+	"today": "Today",
+	"yesterday": "Yesterday",
+	"syncWaiting": "Waiting to sync",
+	"syncPreparing": "Preparing to sync",
+	"syncPaused": "Sync paused",
+	"pauseSync": "Pause sync",
+	"resumeSync": "Resume sync",
+	"itemPaused": "Paused",
+	"nowGroupFiles": "{count, plural, =1{1 file} other{{count} files}}",
+	"@nowGroupFiles": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupProgress": "{done} of {total} files",
+	"@nowGroupProgress": {
+		"placeholders": {
+			"done": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupUploading": "{count} uploading",
+	"@nowGroupUploading": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupDownloading": "{count} downloading",
+	"@nowGroupDownloading": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupPreparing": "{count} preparing",
+	"@nowGroupPreparing": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"nowGroupWaiting": "{count} waiting",
+	"@nowGroupWaiting": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"showFiles": "Show files",
+	"hideFiles": "Hide files",
+	"uploadExistingFiles": "Upload existing files",
+	"uploadExistingFilesHint": "Otherwise only files added from now on are uploaded",
+	"storageAccessDenied": "Polder needs access to your files to upload this folder. Allow all files access, or at least photos and videos, in the app settings.",
+	"folderWillBeCreated": "This folder doesn't exist yet. It will be created.",
+	"trayUpToDate": "Up to date",
+	"traySyncing": "Syncing…",
+	"traySyncingFiles": "{count, plural, =1{Syncing 1 file} other{Syncing {count} files}}",
+	"@traySyncingFiles": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"traySyncPaused": "Sync paused",
+	"traySyncFailed": "Sync failed",
+	"traySignedOut": "Not signed in",
+	"trayOpenApp": "Open Polder",
+	"trayOpenSyncedFolders": "Open synced folders",
+	"trayOpenFiles": "Open files",
+	"trayOpenCalendar": "Open calendar",
+	"trayOpenNotes": "Open notes",
+	"trayQuit": "Quit Polder",
+	"trayNew": "New",
+	"shortcutNewNote": "New note",
+	"shortcutEvent": "Event",
+	"shortcutChecklist": "Checklist",
+	"shortcutSearch": "Search",
+	"quit": "Quit",
+	"quitWhileSyncingTitle": "Quit while syncing?",
+	"quitWhileSyncingMessage": "Polder is still syncing. Unfinished transfers continue the next time you open Polder.",
+	"newDocument": "New document",
+	"reviewScan": "Review scan",
+	"addPages": "Add pages",
+	"removePage": "Remove page",
+	"pageNumber": "Page {number}",
+	"@pageNumber": {
+		"placeholders": {
+			"number": {
+				"type": "int"
+			}
+		}
+	},
+	"scanFormatPdf": "PDF",
+	"scanFormatImages": "Images",
+	"scanSaveTo": "Save to",
+	"discard": "Discard",
+	"discardScanTitle": "Discard this scan?",
+	"discardScanMessage": "The scanned pages won't be saved.",
+	"scanFailed": "Couldn't scan the document.",
+	"scanCameraDenied": "Allow camera access to scan documents.",
+	"scanCameraOpenSettings": "Open settings",
+	"pages": "Pages",
+	"details": "Details",
+	"sortBy": "Sort",
+	"sortAscending": "Ascending",
+	"sortDescending": "Descending",
+	"sortFoldersFirst": "Folders on top",
+	"indexingBanner": "Indexing… folders fill in as files are found.",
+	"indexingEmptyFolder": "Still indexing. Files appear here as they're found.",
+	"serverLogs": "Server logs",
+	"serverLogsHint": "What the server did and every error it ran into",
+	"logLevelDebug": "Debug",
+	"logLevelInfo": "Info",
+	"logLevelWarn": "Warnings",
+	"logLevelError": "Errors",
+	"logMinimumLevel": "Minimum level",
+	"logComponent": "Component",
+	"logAllComponents": "All components",
+	"logSearchHint": "Search messages and details",
+	"logFollow": "Follow new entries",
+	"logStopFollowing": "Stop following",
+	"logDownload": "Download log file",
+	"logNoFiles": "No log files yet.",
+	"logsEmpty": "No log entries match.",
+	"editorOpen": "Open in editor",
+	"editorSaved": "All changes saved",
+	"editorSaving": "Saving…",
+	"editorUnsaved": "Unsaved changes",
+	"editorReadOnly": "Read only",
+	"editorSaveFailedTitle": "Changes not saved",
+	"editorSaveFailedMessage": "Your changes could not be saved to the server. Leave anyway and lose them?",
+	"editorLeave": "Leave anyway",
+	"scanDocument": "Scan document",
+	"documentKind": "Document",
+	"spreadsheetKind": "Spreadsheet",
+	"presentationKind": "Presentation",
+	"newSpreadsheet": "New spreadsheet",
+	"newPresentation": "New presentation",
+	"pdfKind": "PDF",
+	"newPdf": "New PDF",
+	"brandingGroup": "Branding",
+	"serverName": "Server name",
+	"serverNameHint": "Shown on the login screen, in the sidebar and as the window title",
+	"brandingDefault": "{value} (default)",
+	"@brandingDefault": {
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"welcomeMessage": "Welcome message",
+	"welcomeMessageNone": "Not shown",
+	"brandingAccent": "Default accent color",
+	"brandingAccentHint": "Used unless someone picks their own accent color",
+	"appDefault": "App default",
+	"hexColorLabel": "Color as #RRGGBB",
+	"serverIcon": "Icon",
+	"serverIconHint": "Shown on the login screen and in the sidebar",
+	"loginBackgrounds": "Login backgrounds",
+	"loginBackgroundsHint": "{count, plural, =0{None; images you add are shown in turn behind the login screen} =1{1 image} other{{count} images, shown in turn}}",
+	"@loginBackgroundsHint": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"brandingHint": "Name, colors, icon and login screen",
+	"brandingIdentityGroup": "Name and colors",
+	"brandingImagesGroup": "Images",
+	"imageFromDevice": "From this device",
+	"imageFromFiles": "From your files",
+	"chooseImage": "Choose an image",
+	"chooseImages": "Choose images",
+	"noImagesInFolder": "No images or folders here",
+	"addSelected": "{count, plural, =0{Add} other{Add {count}}}",
+	"@addSelected": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"versionHistory": "Version history",
+	"versions": "Versions",
+	"versionCount": "{count, plural, =0{None yet} =1{1 earlier version} other{{count} earlier versions}}",
+	"@versionCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"versionCurrent": "Current version",
+	"versionHistoryEmpty": "No earlier versions yet. When this file is saved over, the previous content is kept here.",
+	"versionHistoryOff": "Version history is turned off, so earlier versions aren't kept.",
+	"versionView": "View",
+	"versionRestore": "Restore",
+	"versionRestoreTitle": "Restore this version?",
+	"versionRestoreMessage": "The current content is kept as a version, so you can go back to it.",
+	"versionRestored": "Version restored",
+	"versionDeleteTitle": "Delete this version?",
+	"versionDeleteMessage": "This version is deleted permanently.",
+	"versionViewing": "Version from {date}, read only",
+	"@versionViewing": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"versionBackToCurrent": "Back to current",
+	"versionsKeep": "Keep earlier versions",
+	"versionsKeepHint": "When a file is saved over, its previous content is kept. Versions count towards your storage.",
+	"versionsPerFile": "{count, plural, =0{No limit per file} =1{1 per file} other{{count} per file}}",
+	"@versionsPerFile": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"versionsMaxPerFile": "Versions per file",
+	"versionsMaxPerFileHint": "The server allows at most {limit}.",
+	"@versionsMaxPerFileHint": {
+		"placeholders": {
+			"limit": {
+				"type": "String"
+			}
+		}
+	},
+	"versionsMaxAge": "Keep versions for",
+	"versionsFollowServer": "Follow the server",
+	"versionsTurnOffTitle": "Turn off version history?",
+	"versionsTurnOffMessage": "All earlier versions of your files are deleted permanently.",
+	"turnOff": "Turn off",
+	"versionsTurnedOffByAdmin": "Turned off by your administrator",
+	"versionsKeepAllHint": "The server allows at most {limit}.",
+	"@versionsKeepAllHint": {
+		"placeholders": {
+			"limit": {
+				"type": "String"
+			}
+		}
+	},
+	"trashKeep": "Move deleted items to the trash",
+	"trashKeepHint": "Deleted items can be restored until the trash is emptied. Off deletes them permanently.",
+	"trashTurnedOffByAdmin": "Turned off by your administrator. Deleted items are removed permanently.",
+	"trashTurnOffTitle": "Turn off the trash?",
+	"trashTurnOffMessage": "Everything in your trash is deleted permanently, and from now on deleting can't be undone.",
+	"serverTrashEnabledHint": "Turning this off empties every user's trash and makes deleting permanent.",
+	"serverTrashTurnOffMessage": "Every user's trash is emptied permanently, and from now on deleting can't be undone.",
+	"serverVersionsEnabled": "Keep earlier versions",
+	"serverVersionsEnabledHint": "Only changes made through Polder are kept. Turning this off deletes all history.",
+	"serverVersionsTurnOffMessage": "Earlier versions of every user's files are deleted permanently, and no new ones are kept.",
+	"versionsKeepAll": "Keep every save for",
+	"serverVersionsKeepAllHint": "After this, versions thin out: about one per hour after a day, fewer as they age.",
+	"versionsHours": "{count, plural, =0{Don't keep every save} =1{1 hour} other{{count} hours}}",
+	"@versionsHours": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"versionsHoursLabel": "Hours",
+	"serverVersionsMaxAge": "Keep versions for",
+	"serverVersionsMaxPerFile": "Versions per file",
+	"serverVersionsLimitHint": "Default and upper limit for every user",
+	"quotaHistory": "{size} of that is version history",
+	"@quotaHistory": {
+		"placeholders": {
+			"size": {
+				"type": "String"
+			}
+		}
+	},
+	"navNotes": "Notes",
+	"navCalendar": "Calendar",
+	"searchKeywordsCalendar": "calendar, agenda, events, appointments, schedule, meetings",
+	"searchKeywordsNotes": "notes, markdown, wiki, knowledge base, pages, journal",
+	"notesSetupTitle": "Set up notes",
+	"notesSetupMessage": "Notes are markdown files in a folder of your choice. Pick a name for the folder; it's created if it doesn't exist yet.",
+	"notesFolder": "Notes folder",
+	"notesDefaultFolder": "Notes",
+	"notesSetUp": "Set up",
+	"notesFolderIsFile": "That's a file, not a folder.",
+	"notesFolderExistsTitle": "Folder already exists",
+	"notesFolderExistsMessage": "{path} already exists. Use it as your notes folder? The markdown files in it become pages.",
+	"@notesFolderExistsMessage": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"notesUseExistingFolder": "Use this folder",
+	"notesChooseAnotherName": "Choose another name",
+	"notesChangeFolder": "Change notes folder",
+	"notesEmptyFolder": "No pages yet.",
+	"notesMoveToTop": "Drop here to move to the top level",
+	"notesNothingOpenMessage": "Pick a page on the left, or start a new one.",
+	"noteNewPage": "New page",
+	"noteNewSubpage": "New subpage",
+	"noteNewChecklist": "New checklist",
+	"noteListItem": "List item",
+	"noteRemoveItem": "Remove item",
+	"noteCheckedItems": "{count, plural, =1{1 checked item} other{{count} checked items}}",
+	"@noteCheckedItems": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"noteShowCheckboxes": "Show checkboxes",
+	"noteHideCheckboxes": "Hide checkboxes",
+	"noteSubpages": "Subpages",
+	"noteCollapse": "Collapse",
+	"noteExpand": "Expand",
+	"notesUpOneLevel": "Up one level",
+	"noteNewNote": "Note",
+	"noteDefaultName": "Note",
+	"noteMove": "Move",
+	"noteShowInFiles": "Show in files",
+	"noteDeleteTitle": "Delete {title}?",
+	"@noteDeleteTitle": {
+		"placeholders": {
+			"title": {
+				"type": "String"
+			}
+		}
+	},
+	"noteDeleteMessage": "The page goes to the trash.",
+	"noteDeleteWithChildrenMessage": "The page and its subpages go to the trash.",
+	"noteDeleteManyTitle": "Delete {count} pages?",
+	"@noteDeleteManyTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"noteDeleteManyMessage": "The pages and any subpages go to the trash.",
+	"noteSelect": "Select",
+	"noteUnsaved": "Unsaved changes; save now",
+	"noteSaving": "Saving",
+	"noteLivePreview": "Live preview",
+	"noteSourceMode": "Source mode",
+	"noteLinks": "Links",
+	"noteBack": "Back",
+	"noteForward": "Forward",
+	"noteLinkedFrom": "Linked from",
+	"noteLinksTo": "Links to",
+	"noteNoBacklinks": "Nothing links here yet.",
+	"noteNoLinks": "This note doesn't link to anything.",
+	"noteBrokenLink": "Not found: {path}",
+	"@noteBrokenLink": {
+		"placeholders": {
+			"path": {
+				"type": "String"
+			}
+		}
+	},
+	"noteLinkMissing": "The linked file no longer exists.",
+	"noteLinkSearch": "Search",
+	"noteLinkBrowse": "Browse",
+	"noteLinkThisFolder": "Link to this folder",
+	"noteNotText": "This file isn't plain UTF-8 text, so it can't be edited here.",
+	"noteDraftFound": "Unsaved changes from {time} were found on this device.",
+	"@noteDraftFound": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"noteDraftFoundChanged": "Unsaved changes from {time} were found, but the note has changed since.",
+	"@noteDraftFoundChanged": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"noteRecoverDraft": "Recover",
+	"noteDiscardDraft": "Discard",
+	"noteConflict": "This note was changed somewhere else.",
+	"noteConflictTheirs": "Use theirs",
+	"noteConflictMine": "Keep mine",
+	"noteConflictCopy": "Save mine as copy",
+	"copySuffix": "copy",
+	"noteUndo": "Undo",
+	"noteRedo": "Redo",
+	"noteHeading": "Heading",
+	"noteHeadingLevel": "Heading {level}",
+	"@noteHeadingLevel": {
+		"placeholders": {
+			"level": {
+				"type": "int"
+			}
+		}
+	},
+	"noteParagraph": "Normal text",
+	"noteBold": "Bold",
+	"noteItalic": "Italic",
+	"noteStrikethrough": "Strikethrough",
+	"noteInlineCode": "Code",
+	"noteBulletList": "Bulleted list",
+	"noteNumberedList": "Numbered list",
+	"noteTaskList": "Task list",
+	"noteQuote": "Quote",
+	"noteCallout": "Callout",
+	"noteCodeBlock": "Code block",
+	"noteTable": "Table",
+	"noteDivider": "Divider",
+	"noteLinkFile": "Link a file or note",
+	"noteAttachFiles": "Attach files",
+	"profile": "Profile",
+	"accountSettingsHint": "Your name, picture and appearance",
+	"firstName": "First name",
+	"lastName": "Last name",
+	"displayName": "Display name",
+	"displayNameHint": "Shown instead of your first name",
+	"email": "Email",
+	"age": "Age",
+	"address": "Address",
+	"profileSaved": "Profile saved",
+	"userIcon": "Picture",
+	"userIconHint": "Without a picture, your initials are shown",
+	"open": "Open",
+	"deleteItemsTitle": "{count, plural, =1{Delete 1 item?} other{Delete {count} items?}}",
+	"@deleteItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"deletePermanentlyItemsTitle": "{count, plural, =1{Delete 1 item permanently?} other{Delete {count} items permanently?}}",
+	"@deletePermanentlyItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"copy": "Copy",
+	"moveEntryTitle": "Move \"{name}\" to…",
+	"@moveEntryTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"moveItemsTitle": "{count, plural, =1{Move 1 item to…} other{Move {count} items to…}}",
+	"@moveItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"moveHere": "Move here",
+	"copyEntryTitle": "Copy \"{name}\" to…",
+	"@copyEntryTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"copyItemsTitle": "{count, plural, =1{Copy 1 item to…} other{Copy {count} items to…}}",
+	"@copyItemsTitle": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"copyHere": "Copy here",
+	"showPassword": "Show password",
+	"hidePassword": "Hide password",
+	"confirmPassword": "Confirm password",
+	"confirmNewPassword": "Confirm new password",
+	"passwordsDoNotMatch": "Passwords don't match",
+	"changePassword": "Change password",
+	"changePasswordHint": "Your other devices are signed out after the change.",
+	"currentPassword": "Current password",
+	"newPassword": "New password",
+	"currentPasswordIncorrect": "Current password is incorrect",
+	"passwordChanged": "Password changed",
+	"usernameRequirements": "2–32 characters: lowercase letters, digits, '.', '_' or '-', starting with a letter or digit",
+	"passwordRequirements": "At least {count} characters",
+	"@passwordRequirements": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"navShared": "Shared",
+	"searchKeywordsShared": "shared share links people groups",
+	"sharedWithMe": "Shared with me",
+	"sharedByMe": "Shared by me",
+	"shareLinks": "Links",
+	"noIncomingShares": "Nothing has been shared with you yet",
+	"noOutgoingShares": "You haven't shared anything yet",
+	"noShareLinks": "You haven't created any links yet",
+	"share": "Share",
+	"shareTitle": "Share {name}",
+	"@shareTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"shareRecipients": "Shared with",
+	"shareSearchHint": "Add people or groups",
+	"shareNoMatches": "No people or groups found",
+	"sharePermissionRead": "Can view",
+	"sharePermissionWrite": "Can edit",
+	"shareNotSharedYet": "Not shared with anyone yet",
+	"sharedBy": "Shared by {name}",
+	"@sharedBy": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"shareUnavailable": "In the trash",
+	"shareLeave": "Remove from my shared items",
+	"shareDetailsOwner": "Shared by",
+	"shareDetailsGroups": "{count, plural, =1{Group} other{Groups}}",
+	"@shareDetailsGroups": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"shareDetailsAccess": "Access",
+	"shareDetailsNote": "Note",
+	"shareStop": "Stop sharing",
+	"shareGroupMembers": "{count, plural, =1{1 member} other{{count} members}}",
+	"@shareGroupMembers": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"createLink": "Create link",
+	"editLink": "Edit link",
+	"linkAccess": "Anyone with the link can",
+	"linkCanView": "View",
+	"linkCanViewHint": "Browse the files and see previews",
+	"linkCanDownload": "Download",
+	"linkCanDownloadHint": "Save files and folders to their device",
+	"linkCanUpload": "Upload",
+	"linkCanUploadHint": "Add files to this folder; existing files are never replaced",
+	"linkPassword": "Password",
+	"linkPasswordHint": "Leave empty for no password",
+	"linkPasswordKeep": "Leave empty to keep the current password",
+	"linkPasswordSet": "Password protected",
+	"linkRemovePassword": "Remove password",
+	"linkExpiry": "Expiry date",
+	"linkNoExpiry": "Never expires",
+	"linkExpiresOn": "Expires {date}",
+	"@linkExpiresOn": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"linkExpired": "Expired",
+	"linkCopy": "Copy link",
+	"linkCopied": "Link copied",
+	"deleteLinkTitle": "Delete link?",
+	"deleteLinkMessage": "The link stops working right away for everyone who has it.",
+	"publicShareLocked": "This link is password protected",
+	"publicShareUnlock": "Open",
+	"publicShareWrongPassword": "Wrong password",
+	"publicShareRateLimited": "Too many attempts. Try again in a minute.",
+	"publicShareNotFound": "This link doesn't exist or has expired",
+	"publicShareUploadOnly": "Files you upload here go to {name}. You can't see what's already there.",
+	"@publicShareUploadOnly": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"downloadAll": "Download all",
+	"openInApp": "Open in app",
+	"openInPolder": "Open in Polder",
+	"groups": "Groups",
+	"groupName": "Group name",
+	"renameGroup": "Rename group",
+	"deleteGroupTitle": "Delete group?",
+	"deleteGroupMessage": "{name} is deleted and anything shared with it is no longer shared.",
+	"@deleteGroupMessage": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"groupMembers": "Members",
+	"noGroups": "No groups yet",
+	"filterUsers": "Filter users",
+	"newGroup": "New group",
+	"myGroups": "My groups",
+	"allGroups": "All groups",
+	"groupRoleAdmin": "Admin",
+	"groupRoleMember": "Member",
+	"groupRoleViewer": "Viewer",
+	"groupRoleAdminHint": "Manages members and can remove anything shared with the group",
+	"groupRoleMemberHint": "Can share with the group",
+	"groupRoleViewerHint": "Can only view what is shared with the group",
+	"addMember": "Add member",
+	"leaveGroup": "Leave group",
+	"leaveGroupTitle": "Leave {name}?",
+	"@leaveGroupTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"leaveGroupMessage": "You will no longer see what is shared with this group, and what you shared with it is no longer shared.",
+	"leaveGroupAloneMessage": "You are the only member of {name}. Leaving deletes the group, and anything shared with it is no longer shared.",
+	"@leaveGroupAloneMessage": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"leaveAndDeleteGroup": "Leave and delete",
+	"leaveGroupLastAdminMessage": "You are the last admin of {name}. Make someone else an admin before you leave, or delete the group.",
+	"@leaveGroupLastAdminMessage": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"removeMember": "Remove from group",
+	"groupShared": "Shared with this group",
+	"noGroupShares": "Nothing is shared with this group yet",
+	"selectGroup": "Select a group or create one",
+	"searchKeywordsGroups": "groups teams members roles",
+	"groupCreatedBy": "Created by {name}",
+	"@groupCreatedBy": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"sharePermissionCustom": "Custom permissions",
+	"sharePermView": "View",
+	"sharePermCreate": "Create",
+	"sharePermEdit": "Edit",
+	"sharePermDelete": "Delete",
+	"shareNote": "Note to recipient",
+	"shareNoteHint": "Shown to them together with the share",
+	"nothingSelected": "Choose something on the left",
+	"sharedByWithPermission": "Shared by {name} · {permission}",
+	"@sharedByWithPermission": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"permission": {
+				"type": "String"
+			}
+		}
+	},
+	"shareWithName": "Share with {name}",
+	"@shareWithName": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"sharedWithName": "Shared with {name}",
+	"@sharedWithName": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"finderLocationDisabled": "Turn on Polder in System Settings › General › Login Items & Extensions › File Providers to see your files in Finder.",
+	"openSystemSettings": "Open System Settings",
+	"startup": "Startup",
+	"launchAtLogin": "Open at login",
+	"launchAtLoginHint": "Start Polder automatically when you sign in to your computer",
+	"launchMinimized": "Start minimized",
+	"launchMinimizedHint": "Run in the background at login without opening the window",
+	"showInFinder": "Show in Finder",
+	"showInFinderHint": "Browse your files in Finder; they download when you open them",
+	"finderRemoveTitle": "Remove from Finder?",
+	"finderRemoveMessage": "Files downloaded for offline use are removed from this Mac. They stay on the server.",
+	"showInFilesApp": "Show in Files",
+	"showInFilesAppHint": "Open and save Polder files from other apps through the Files app",
+	"filesAppRemoveTitle": "Remove from Files?",
+	"filesAppRemoveMessage": "Other apps can no longer open or save files in Polder. Your files stay on the server.",
+	"accept": "Accept",
+	"decline": "Decline",
+	"appPasswords": "App passwords",
+	"appPasswordsHint": "WebDAV and CalDAV apps such as Finder, Explorer, rclone and Apple Calendar log in with your username and an app password. Your account password does not work there.",
+	"createAppPassword": "Create app password",
+	"appPasswordNameHint": "For example: Finder on my laptop",
+	"appPasswordReadOnly": "Read-only",
+	"appPasswordReadOnlyHint": "Apps using it can only read files",
+	"appPasswordConfirmHint": "Enter your account password to confirm it is you",
+	"appPasswordCreatedTitle": "App password created",
+	"appPasswordCreatedMessage": "Copy this password now. It will not be shown again.",
+	"appPasswordCopied": "App password copied",
+	"appPasswordNeverUsed": "Never used",
+	"appPasswordLastUsed": "Last used {date} from {address}",
+	"@appPasswordLastUsed": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			},
+			"address": {
+				"type": "String"
+			}
+		}
+	},
+	"noAppPasswords": "No app passwords yet",
+	"revokeAppPassword": "Revoke",
+	"revokeAppPasswordTitle": "Revoke {name}?",
+	"@revokeAppPasswordTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"revokeAppPasswordMessage": "Apps using this password stop working at once.",
+	"webdavAddress": "WebDAV address",
+	"webdavAddressCopied": "WebDAV address copied",
+	"caldavAddress": "CalDAV address",
+	"caldavAddressCopied": "CalDAV address copied",
+	"calendars": "Calendars",
+	"calendarsHint": "Apps such as Apple Calendar, Thunderbird and DAVx⁵ sync a calendar over CalDAV with your username and an app password. Apps such as Google Calendar and Outlook can instead subscribe to a secret link, which they refresh every few hours.",
+	"noCalendars": "No calendars yet",
+	"calendarAddressCopied": "Calendar address copied",
+	"calendarSharedBy": "Shared by {name}",
+	"@calendarSharedBy": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarSubscribedFeed": "Subscribed feed",
+	"subscriptionLinks": "Subscription links",
+	"noSubscriptionLinks": "No subscription links yet",
+	"createSubscriptionLink": "Create subscription link",
+	"subscriptionLinkModeFull": "All details",
+	"subscriptionLinkModeFullHint": "Titles, places, notes and attendees",
+	"subscriptionLinkModeBusy": "Only busy times",
+	"subscriptionLinkModeBusyHint": "Shows when you are busy and nothing else",
+	"subscriptionLinkNameHint": "For example: Outlook at work",
+	"subscriptionLinkCreatedTitle": "Subscription link created",
+	"subscriptionLinkCreatedMessage": "Copy the link now. It will not be shown again, and anyone who has it can see this calendar.",
+	"subscriptionLinkWebcal": "Link for calendar apps (webcal)",
+	"subscriptionLinkCopied": "Subscription link copied",
+	"subscriptionLinkLastUsed": "Last used {date}",
+	"@subscriptionLinkLastUsed": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"revokeSubscriptionLink": "Revoke",
+	"revokeSubscriptionLinkTitle": "Revoke this subscription link?",
+	"revokeSubscriptionLinkMessage": "Apps subscribed with it stop getting updates at once.",
+	"federation": "Federation",
+	"federationEnabled": "Share with other servers",
+	"federationEnabledHint": "People can share with users on trusted servers that support Open Cloud Mesh",
+	"federationNeedsPublicUrl": "Set publicUrl in the server config to turn this on",
+	"trustServer": "Trust server",
+	"trustServerHint": "Shares are only exchanged with servers you trust. The server's signing key is pinned when you add it.",
+	"serverAddress": "Server address",
+	"allowPrivateNetwork": "Allow private network",
+	"allowPrivateNetworkHint": "Only for a server on your own network, such as at home",
+	"noTrustedServers": "No trusted servers yet",
+	"noTrustedServersHint": "Add a server to share with its users",
+	"serverKey": "Key {fingerprint}",
+	"@serverKey": {
+		"placeholders": {
+			"fingerprint": {
+				"type": "String"
+			}
+		}
+	},
+	"rediscoverServer": "Fetch key again",
+	"rediscoverServerTitle": "Fetch the key of {name} again?",
+	"@rediscoverServerTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"rediscoverServerMessage": "Only do this when the server's administrator tells you its key changed. The new key is trusted from now on.",
+	"removeTrustedServerTitle": "Stop trusting {name}?",
+	"@removeTrustedServerTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"removeTrustedServerMessage": "Every share with this server ends.",
+	"federatedRecipients": "On other servers",
+	"federatedNotSharedYet": "Type a cloud ID, such as alice@cloud.example.com, to share with someone on another server",
+	"federatedShareHint": "They get a request on their own server and can open the item once they accept.",
+	"federatedSharePending": "Waiting for them to accept.",
+	"federatedSharePendingShort": "Pending",
+	"federatedShareAccepted": "They accepted this share.",
+	"shareSearchFederatedHint": "Name, group or cloud ID",
+	"shareWithFederated": "Share with someone on another server",
+	"sharedFromOtherServers": "From other servers",
+	"noFederatedShares": "Nothing has been shared with you from other servers",
+	"declineFederatedTitle": "Decline {name}?",
+	"@declineFederatedTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"removeFederatedTitle": "Remove {name}?",
+	"@removeFederatedTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"removeFederatedMessage": "{owner} is told you no longer want this share.",
+	"@removeFederatedMessage": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			}
+		}
+	},
+	"acceptInvite": "Accept invite",
+	"acceptInviteHint": "Enter the invite token and server address you received. You become each other's contacts and can share with each other.",
+	"inviteSomeone": "Invite someone",
+	"inviteToken": "Invite token",
+	"inviteCreatedTitle": "Invite created",
+	"inviteCreatedMessage": "Send the token and this server's address to the other person. They accept it on their own server before {date}.",
+	"@inviteCreatedMessage": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"inviteAccepted": "{name} is now a contact",
+	"@inviteAccepted": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"openInvite": "Open invite",
+	"openInvites": "Open invites",
+	"federationContacts": "Contacts on other servers",
+	"removeContactTitle": "Remove {name}?",
+	"@removeContactTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"removeContactMessage": "Shares stay as they are; you can invite each other again later.",
+	"copied": "Copied",
+	"checkSenderAddress": "Check sender address",
+	"checkSenderAddressHint": "For servers that do not sign requests: only accept them from addresses the server's name points to",
+	"serverUnsignedChecked": "Does not sign requests; sender address checked",
+	"serverUnsignedAnyAddress": "Does not sign requests; any sender address accepted",
+	"shareDetailsTitle": "Share details",
+	"shareDetailsSoftware": "Software",
+	"shareDetailsSharedOn": "Shared on",
+	"sharedWithYou": "Shared with you",
+	"leaveShareMessage": "It disappears from your files. {owner} can share it with you again.",
+	"@leaveShareMessage": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			}
+		}
+	},
+	"showSharesInFiles": "Show in Files",
+	"showSharesInFilesHint": "Shares appear among your own files. When off, open them from here.",
+	"sharedByYou": "Shared by you",
+	"serverPreviewsGroup": "Previews",
+	"regeneratePreviews": "Regenerate previews",
+	"regeneratePreviewsHint": "Make every file's preview again in the background",
+	"regeneratePreviewsMessage": "Every file gets a new preview in the background. Until its new preview is ready, a file shows its icon.",
+	"regenerate": "Regenerate",
+	"previewsQueued": "{count, plural, =1{1 file queued for a new preview} other{{count} files queued for a new preview}}",
+	"@previewsQueued": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"searchFieldTag": "Tag",
+	"tagsTitle": "Tags",
+	"tagsAction": "Tags…",
+	"tagPickerHint": "Search or create a tag",
+	"tagInvalidName": "Use letters, digits, -, _ or / without spaces",
+	"tagsEmpty": "No tags yet. Type #name in a note, or add one from an item's menu.",
+	"tagCreate": "Create #{name}",
+	"@tagCreate": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"tagUsage": "{count, plural, =0{Not used} =1{1 item} other{{count} items}}",
+	"@tagUsage": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"tagEditTitle": "Edit tag",
+	"tagName": "Name",
+	"tagColor": "Color",
+	"tagDeleteTitle": "Delete #{name}?",
+	"@tagDeleteTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"tagDeleteMessage": "{count, plural, =0{The tag is not used anywhere.} =1{It is removed from 1 item, including the text of your notes.} other{It is removed from {count} items, including the text of your notes.}}",
+	"@tagDeleteMessage": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"tagSuggestionCreate": "New tag",
+	"searchKeywordsTags": "labels, hashtags, colors, categories",
+	"tagsDeleteUnused": "Delete unused tags",
+	"tagsDeleteUnusedTitle": "Delete unused tags?",
+	"tagsDeleteUnusedMessage": "{count, plural, =1{1 tag is not on any item or in any of your notes. It will be deleted.} other{{count} tags are not on any item or in any of your notes. They will be deleted.}}",
+	"@tagsDeleteUnusedMessage": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"tagsUnusedDeleted": "{count, plural, =0{No unused tags} =1{1 tag deleted} other{{count} tags deleted}}",
+	"@tagsUnusedDeleted": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"recipeImportLink": "Link to the recipe",
+	"recipeImportMessage": "The ingredients, steps and images are copied into a new note. You can tidy it up afterwards.",
+	"recipeImportAction": "Import",
+	"recipeStartCooking": "Start cooking",
+	"recipeIngredients": "Ingredients",
+	"recipeServings": "Servings",
+	"recipeFewerServings": "Fewer servings",
+	"recipeMoreServings": "More servings",
+	"recipeStepOf": "Step {current} of {total}",
+	"@recipeStepOf": {
+		"placeholders": {
+			"current": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
+	"recipeYouNeed": "You'll need",
+	"recipePrevious": "Previous",
+	"recipeNext": "Next",
+	"recipeBegin": "Begin",
+	"recipeDone": "Done",
+	"recipeNoSteps": "This recipe has no steps yet.",
+	"recipeStartTimer": "Start a timer for {duration}",
+	"@recipeStartTimer": {
+		"placeholders": {
+			"duration": {
+				"type": "String"
+			}
+		}
+	},
+	"recipeStopTimer": "Stop timer",
+	"recipeTimerDone": "{label} is done",
+	"@recipeTimerDone": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
+	"recipeImportFromLink": "Link",
+	"recipeImportFromPaste": "Paste",
+	"recipeImportPasteMessage": "Copy the recipe in your browser and paste it here. Select the text from the title to the last step, or copy the whole page source to get the images too.",
+	"recipeImportPasteButton": "Paste from clipboard",
+	"recipeImportPastedLength": "{count, plural, =1{1 character pasted} other{{count} characters pasted}}",
+	"@recipeImportPastedLength": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"recipeImportLinkOptional": "Link to the recipe (optional)",
+	"recipeImportRefused": "This site doesn't let Polder load the page. Open it in your browser, copy the recipe and paste it here.",
+	"recipeImportClipboardEmpty": "The clipboard holds no text.",
+	"recipeAdd": "Add recipe",
+	"recipeFromScratch": "Custom",
+	"recipeFromScratchMessage": "Start from an empty recipe with ingredients and steps to fill in yourself.",
+	"notesFilterByTag": "Filter by tag",
+	"notesFilterClear": "Clear",
+	"notesFilterNoTags": "No tags yet. Create tags to filter your notes by them.",
+	"notesFilterNoMatches": "No notes in your notes folder have these tags.",
+	"notesSearchHint": "Filter notes",
+	"notesSearchNoResults": "No notes match your search.",
+	"notesViewOptions": "Sort and view options",
+	"notesExpandAll": "Expand all",
+	"notesCollapseAll": "Collapse all",
+	"notesRevealCurrent": "Reveal open note",
+	"notesShowFamilyTree": "Related pages",
+	"notesViewAll": "All notes",
+	"notesViewUntagged": "Untagged",
+	"notesViewUntaggedEmpty": "Every note in your notes folder has a tag.",
+	"durationLabel": "Duration",
+	"slideshow": "Slideshow",
+	"previousItem": "Previous",
+	"nextItem": "Next",
+	"mediaCounter": "{index} / {count}",
+	"@mediaCounter": {
+		"placeholders": {
+			"index": {
+				"type": "int"
+			},
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"couldNotLoadMedia": "This file couldn't be loaded",
+	"play": "Play",
+	"pause": "Pause",
+	"mute": "Mute",
+	"unmute": "Unmute",
+	"setAsWallpaper": "Set as wallpaper",
+	"wallpaperSet": "Wallpaper updated",
+	"setAs": "Set as…",
+	"cameraLabel": "Camera",
+	"lensLabel": "Lens",
+	"apertureLabel": "Aperture",
+	"shutterSpeedLabel": "Shutter speed",
+	"focalLengthLabel": "Focal length",
+	"isoLabel": "ISO",
+	"locationLabel": "Location",
+	"videoCodecLabel": "Video codec",
+	"frameRateLabel": "Frame rate",
+	"audioCodecLabel": "Audio codec",
+	"bitrateLabel": "Bitrate",
+	"updates": "Updates",
+	"updatesAutomatic": "Install updates automatically",
+	"updatesAutomaticHint": "Download new versions in the background and install them when Polder quits",
+	"updatesNightly": "Receive nightly builds",
+	"updatesNightlyHint": "Get the newest development builds early; they may contain bugs",
+	"updatesCheck": "Check for updates",
+	"updatesChecking": "Checking for updates…",
+	"updatesUpToDate": "Polder is up to date",
+	"updatesFailed": "Couldn't check for updates",
+	"updatesInstallFailed": "Couldn't install version {version} ({build})",
+	"@updatesInstallFailed": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"build": {
+				"type": "int"
+			}
+		}
+	},
+	"updatesAvailable": "Version {version} ({build}) is available",
+	"@updatesAvailable": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"build": {
+				"type": "int"
+			}
+		}
+	},
+	"updatesDownloading": "Downloading update… {percent}%",
+	"@updatesDownloading": {
+		"placeholders": {
+			"percent": {
+				"type": "int"
+			}
+		}
+	},
+	"updatesReady": "Version {version} ({build}) installs when Polder quits",
+	"@updatesReady": {
+		"placeholders": {
+			"version": {
+				"type": "String"
+			},
+			"build": {
+				"type": "int"
+			}
+		}
+	},
+	"updatesRestart": "Restart to update",
+	"updatesInstall": "Update now",
+	"updatesDownload": "Download",
+	"updatesReleaseNotes": "Release notes",
+	"aboutNightly": "Nightly build",
+	"calendarImported": "Imported",
+	"calendarNoImported": "Add calendars from other services, such as Google Calendar, Outlook or iCloud.",
+	"calendarNew": "New calendar",
+	"calendarEdit": "Edit calendar",
+	"calendarAddExternal": "Add external calendar",
+	"calendarName": "Name",
+	"calendarColorLabel": "Color",
+	"calendarDefault": "Default",
+	"calendarSetDefault": "Use for invitations",
+	"calendarDeleteTitle": "Delete {name}?",
+	"@calendarDeleteTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarDeleteMessage": "The calendar and all its events will be deleted for everyone it is shared with.",
+	"calendarLeaveTitle": "Leave {name}?",
+	"@calendarLeaveTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarLeaveMessage": "You will no longer see this calendar. The owner can share it with you again.",
+	"calendarLeave": "Leave",
+	"calendarRemoveImportedTitle": "Remove {name}?",
+	"@calendarRemoveImportedTitle": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarRemoveImportedMessage": "The calendar stops syncing and its events are removed from Polder. The original is not affected.",
+	"calendarRemove": "Remove",
+	"calendarSyncNow": "Sync now",
+	"calendarSyncedAt": "Synced {time}",
+	"@calendarSyncedAt": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarSyncPending": "Waiting for the first sync",
+	"calendarSyncFailed": "Sync failed: {error}",
+	"@calendarSyncFailed": {
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarSyncRequested": "Syncing {name}",
+	"@calendarSyncRequested": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarFromUrl": "Link",
+	"calendarFromUrlHint": "Stays up to date. Paste an iCal (.ics) or webcal link, such as the secret address of a Google, Outlook or iCloud calendar.",
+	"calendarFromFile": "File",
+	"calendarFromFileHint": "Adds the events of an .ics file once, as a new calendar. A .zip with .ics files, such as a Google Calendar export, works too.",
+	"calendarLink": "Calendar link",
+	"calendarInvalidLink": "Enter an http, https or webcal link",
+	"calendarRefreshEvery": "Refresh",
+	"calendarEvery15Minutes": "Every 15 minutes",
+	"calendarEveryHour": "Every hour",
+	"calendarEvery6Hours": "Every 6 hours",
+	"calendarEveryDay": "Every day",
+	"calendarChooseFile": "Choose .ics file",
+	"calendarImportDone": "{count, plural, =1{1 event imported} other{{count} events imported}}",
+	"@calendarImportDone": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"calendarAccessRead": "Can view",
+	"calendarAccessReadWrite": "Can edit",
+	"calendarAccessFreeBusy": "Sees busy times only",
+	"calendarStopSharing": "Stop sharing",
+	"calendarManage": "Calendars",
+	"calendarDiscover": "Discover",
+	"calendarDiscoverHint": "Calendars that stay up to date by themselves.",
+	"calendarSuggested": "Suggested",
+	"calendarPublicHolidays": "Public holidays",
+	"calendarReligiousHolidays": "Religious holidays",
+	"calendarMore": "More",
+	"calendarSearchCountries": "Search countries",
+	"calendarHolidaysIn": "Holidays in {country}",
+	"@calendarHolidaysIn": {
+		"placeholders": {
+			"country": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarChristianHolidays": "Christian holidays",
+	"calendarOrthodoxHolidays": "Orthodox Christian holidays",
+	"calendarIslamicHolidays": "Islamic holidays",
+	"calendarJewishHolidays": "Jewish holidays",
+	"calendarHinduHolidays": "Hindu holidays",
+	"calendarWeekNumbers": "Week numbers",
+	"calendarMoonPhases": "Phases of the moon",
+	"calendarAdded": "Added",
+	"calendarImportInto": "Import from file",
+	"calendarImportIntoHint": "Choose an .ics file, or a .zip of them such as a Google Calendar export",
+	"calendarImportFailedSome": "{count, plural, =1{1 event could not be imported} other{{count} events could not be imported}}",
+	"@calendarImportFailedSome": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"calendarFeedLanguage": "Language of the calendars",
+	"calendarFeedLanguageHint": "Google translates calendar names and most holidays; some event names stay in English.",
+	"notifications": "Notifications",
+	"notificationsHint": "Shares, reminders and uploads",
+	"notificationsEnable": "Show notifications",
+	"notificationsEnableHint": "On this device",
+	"notificationsWebHint": "Your browser shows them while Polder is open in a tab",
+	"notificationsBlocked": "Notifications are blocked. Allow them for Polder in your system or browser settings.",
+	"notificationsNotAllowed": "Notifications are on, but this device hasn't allowed Polder to show them yet.",
+	"notificationsAllow": "Allow",
+	"notificationsOpenSettings": "Open settings",
+	"notificationsReminderOff": "Calendar reminder notifications are off, so you won't get these.",
+	"notificationsTurnOn": "Turn on",
+	"notificationsAbout": "What to notify about",
+	"notificationsShares": "New shares",
+	"notificationsSharesHint": "When someone shares a file or folder with you, with buttons to accept or decline",
+	"notificationsCalendar": "Calendar reminders",
+	"notificationsCalendarHint": "At the reminder times set on each event; turn calendars on or off from their menu in the calendar",
+	"notificationsUploadProgress": "Upload progress",
+	"notificationsUploadProgressHint": "One notification that keeps updating while auto upload runs",
+	"notificationsUploadSummary": "Upload results",
+	"notificationsUploadSummaryHint": "How much was uploaded, and anything that failed",
+	"notificationsUploadCheck": "Checking for new photos",
+	"notificationsUploadCheckHint": "A quiet notification while auto upload looks for new photos and videos",
+	"notificationsReliability": "Reliability",
+	"notificationsBattery": "Run in the background",
+	"notificationsBatteryHint": "Stops the system from delaying reminders, shares and uploads to save battery",
+	"notificationsAllowed": "Allowed",
+	"notificationChannelUploads": "Uploads",
+	"notificationChannelCalendar": "Calendar reminders",
+	"notificationChannelSharing": "Shares",
+	"notificationShareTitle": "{owner} shared {name} with you",
+	"@notificationShareTitle": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"notificationShareGroupTitle": "{owner} shared {name} with {group}",
+	"@notificationShareGroupTitle": {
+		"placeholders": {
+			"owner": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			},
+			"group": {
+				"type": "String"
+			}
+		}
+	},
+	"notificationFederatedShareBody": "From {server}",
+	"@notificationFederatedShareBody": {
+		"placeholders": {
+			"server": {
+				"type": "String"
+			}
+		}
+	},
+	"notificationUploadingTitle": "Uploading {done} of {total}",
+	"@notificationUploadingTitle": {
+		"placeholders": {
+			"done": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
+	"notificationUploadDone": "{count, plural, =1{1 file uploaded} other{{count} files uploaded}}",
+	"@notificationUploadDone": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"notificationUploadFailed": "{count, plural, =1{1 file could not be uploaded} other{{count} files could not be uploaded}}",
+	"@notificationUploadFailed": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"notificationUploadFailedBody": "Open auto upload to see what went wrong",
+	"notificationUploadChecking": "Checking for new photos and videos",
+	"notificationReminderAt": "{time}",
+	"@notificationReminderAt": {
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"notificationReminderAllDay": "All day",
+	"calendarRemindersOn": "Turn reminders on",
+	"calendarRemindersOff": "Turn reminders off",
+	"sharedWaiting": "Waiting for you",
+	"sharedWaitingHint": "Accept to add these to your files",
+	"shareAccepted": "{name} is now in your files",
+	"@shareAccepted": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"shareDeclined": "Declined {name}",
+	"@shareDeclined": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"errorStorageFull": "The server ran out of disk space and could not save this.",
+	"errorTimedOut": "The server stopped responding.",
+	"connectionNoNetwork": "No network connection",
+	"connectionServerUnreachable": "Not connected to server",
+	"connectionServerFull": "Server storage is full",
+	"connectionServerReadOnly": "Server can't store changes",
+	"changesSavedOnDevice": "{count, plural, =0{Changes are saved on this device} =1{1 change saved on this device} other{{count} changes saved on this device}}",
+	"@changesSavedOnDevice": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"hintUnreachable": "Check your network connection, or whether the server is running. Changes sync automatically when it's back.",
+	"hintStorageFull": "The server could not store the change; its disk may be full. Ask the server administrator to free up space, then retry.",
+	"hintQuota": "Your storage quota is full. Delete files or empty the trash, then retry.",
+	"hintServerError": "The server ran into an error. Retry later, or ask the server administrator to check the server logs.",
+	"hintConflict": "This was changed somewhere else too. Choose which version to keep.",
+	"hintRejected": "The server refused this change. Discard it, or save a copy and try again.",
+	"noteSynced": "Saved and synced",
+	"noteSavedOnDevice": "Saved on this device; waiting to sync. Tap to sync now",
+	"noteNotSynced": "Saved on this device, but not synced to the server",
+	"retrySync": "Retry",
+	"retryAll": "Retry all",
+	"discardChange": "Discard",
+	"discardChangeTitle": "Discard this change?",
+	"discardChangeMessage": "The version on this device is thrown away and the server's version is kept.",
+	"offlineGroupNotes": "Notes",
+	"offlineGroupFiles": "Files",
+	"offlineGroupCalendar": "Calendar",
+	"syncWaitingForServer": "Waiting for the server",
+	"syncFailedItem": "Not synced",
+	"keepOffline": "Make available offline",
+	"removeFromDevice": "Remove from device",
+	"availableOffline": "Available offline",
+	"errorDeviceFull": "Not enough free space on this device",
+	"hintDeviceFull": "Free up space on this device, or remove offline files with \"Remove from device\".",
+	"offlineDownloadFailed": "Couldn't download for offline use: {reason}",
+	"@offlineDownloadFailed": {
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"offlineDownloadingTag": "Downloading {percent}%",
+	"@offlineDownloadingTag": {
+		"placeholders": {
+			"percent": {
+				"type": "int"
+			}
+		}
+	},
+	"offlineDownloadsFailedSummary": "{count, plural, =1{1 file couldn't be made available offline} other{{count} files couldn't be made available offline}}",
+	"@offlineDownloadsFailedSummary": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"waitingForOffline": "Waiting to download for offline use",
+	"downloadingForOffline": "Downloading for offline use, {percent}%",
+	"@downloadingForOffline": {
+		"placeholders": {
+			"percent": {
+				"type": "int"
+			}
+		}
+	},
+	"downloadingFilesForOffline": "Downloading for offline use, {done} of {total} files",
+	"@downloadingFilesForOffline": {
+		"placeholders": {
+			"done": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
+	"sessionEndedTitle": "Sign in again",
+	"sessionEndedMessage": "Your session on this device has ended. Sign in again to keep syncing. Nothing on this device is lost.",
+	"sessionEndedStatus": "Session ended",
+	"sessionEndedSignIn": "Sign in",
+	"continueOffline": "Continue offline",
+	"firstDayOfWeek": "First day of the week",
+	"firstDayOfWeekRegional": "Regional default ({day})",
+	"@firstDayOfWeekRegional": {
+		"placeholders": {
+			"day": {
+				"type": "String"
+			}
+		}
+	},
+	"calendarSettings": "Calendar settings",
+	"fileOperationMoving": "Moving {subject}",
+	"@fileOperationMoving": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationMoved": "Moved {subject}",
+	"@fileOperationMoved": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationCopying": "Copying {subject}",
+	"@fileOperationCopying": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationCopied": "Copied {subject}",
+	"@fileOperationCopied": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationDeleting": "Deleting {subject}",
+	"@fileOperationDeleting": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationDeleted": "Deleted {subject}",
+	"@fileOperationDeleted": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationRenaming": "Renaming {subject}",
+	"@fileOperationRenaming": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationRenamed": "Renamed {subject}",
+	"@fileOperationRenamed": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationRestoring": "Restoring {subject}",
+	"@fileOperationRestoring": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationRestored": "Restored {subject}",
+	"@fileOperationRestored": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationPurging": "Permanently deleting {subject}",
+	"@fileOperationPurging": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationPurged": "Permanently deleted {subject}",
+	"@fileOperationPurged": {
+		"placeholders": {
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationItems": "{count, plural, =1{1 item} other{{count} items}}",
+	"@fileOperationItems": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"fileOperationInto": "To {folder}",
+	"@fileOperationInto": {
+		"placeholders": {
+			"folder": {
+				"type": "String"
+			}
+		}
+	},
+	"fileOperationIncomplete": "Not everything went through",
+	"fileOperationTagMoving": "Moving…",
+	"fileOperationTagCopying": "Copying…",
+	"fileOperationTagDeleting": "Deleting…",
+	"fileOperationTagRenaming": "Renaming…",
+	"fileOperationTagWaiting": "Waiting",
+	"fileOperationTagMovingHere": "Moving here…",
+	"fileOperationTagCopyingHere": "Copying here…",
+	"fileOperationsMore": "{count, plural, =1{1 more action} other{{count} more actions}}",
+	"@fileOperationsMore": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"fileOperationTagRestoring": "Restoring…",
+	"emailSettings": "Email",
+	"emailSettingsHint": "Mail server for password resets, alerts and shares",
+	"emailOn": "Emails are on",
+	"emailOff": "Emails are off",
+	"emailOnHint": "Polder sends password resets, sign-in alerts, storage warnings and shares, styled with your branding.",
+	"emailOffHint": "Set an SMTP server and a sender address to send password resets, sign-in alerts, storage warnings and shares.",
+	"emailManagedByConfig": "These settings come from the server's config or environment, so they can't be changed here.",
+	"mailServerGroup": "SMTP",
+	"mailServerHost": "SMTP server",
+	"notSet": "Not set",
+	"mailSecurity": "Security",
+	"mailServerPort": "SMTP port",
+	"mailServerPortDefault": "Default ({port})",
+	"@mailServerPortDefault": {
+		"placeholders": {
+			"port": {
+				"type": "int"
+			}
+		}
+	},
+	"mailServerPortLabel": "Port, or empty for the default",
+	"mailUsername": "SMTP username",
+	"mailUsernameNone": "None; the SMTP server doesn't need a login",
+	"mailPasswordSaved": "Saved",
+	"mailPassword": "SMTP password",
+	"mailPasswordHint": "Stored on the server and never shown again. Remove it if the SMTP server needs no login.",
+	"mailSenderGroup": "Sender",
+	"mailFrom": "From address",
+	"mailFromHint": "The address emails come from",
+	"mailFromLabel": "Address, such as Polder <polder@example.com>",
+	"mailTestGroup": "Test",
+	"sendTestEmail": "Send a test email",
+	"sendTestEmailHint": "Check the settings with an email in your server's style",
+	"sendTestEmailNeedsServer": "Set an SMTP server and sender address first",
+	"mailTestRecipient": "Send to",
+	"send": "Send",
+	"testEmailSent": "Test email sent to {address}",
+	"@testEmailSent": {
+		"placeholders": {
+			"address": {
+				"type": "String"
+			}
+		}
+	},
+	"mailSecurityStartTls": "STARTTLS",
+	"mailSecurityTls": "TLS",
+	"mailSecurityNone": "None",
+	"mailSecurityStartTlsHint": "Upgrades to an encrypted connection; usually port 587",
+	"mailSecurityTlsHint": "Encrypted from the start; usually port 465",
+	"mailSecurityNoneHint": "Unencrypted; only for an SMTP server on a trusted network",
+	"forgotPassword": "Forgot password?",
+	"forgotPasswordTitle": "Reset your password",
+	"forgotPasswordHint": "Enter your username or email address. If your account has an email address, we'll send it a code to choose a new password.",
+	"usernameOrEmail": "Username or email",
+	"resetUnavailable": "This server can't send password reset emails. Ask an administrator to set a new password for you.",
+	"sendResetCode": "Send code",
+	"resetCodeTitle": "Enter your code",
+	"resetCodeSent": "If an account matches and has an email address, we've sent it a code. It works once, for an hour.",
+	"resetCode": "Code from the email",
+	"resetCodeNeverLinks": "We never send reset links. Type the code here yourself.",
+	"sendResetCodeAgain": "Send a new code",
+	"passwordResetDoneTitle": "Password changed",
+	"passwordResetDone": "Sign in with your new password. You've been signed out on your other devices.",
+	"emailNotifications": "Email",
+	"emailNotificationsNoAddress": "Add an email address",
+	"emailNotificationsNoAddressHint": "Emails need an address in your account",
+	"emailSecurity": "Security alerts",
+	"emailSecurityHint": "Sign-ins from new addresses and changes to your email address",
+	"emailQuota": "Storage warnings",
+	"emailQuotaHint": "When your storage is almost or completely full",
+	"emailShares": "Shares",
+	"emailSharesHint": "When someone shares a file or folder with you",
+	"emailAlwaysSent": "Password resets and password changes are always emailed.",
+	"emailOptional": "Email (optional)",
+	"newUserEmailHint": "Gets a welcome email, and lets the user reset a forgotten password",
+	"invalidEmail": "Not an email address",
+	"waitingForBrowser": "Finish signing in in your browser",
+	"signInOr": "or",
+	"signInWithProvider": "Sign in with {provider}",
+	"@signInWithProvider": {
+		"placeholders": {
+			"provider": {
+				"type": "String"
+			}
+		}
+	},
+	"signInWithAnotherDevice": "Sign in with another device",
+	"twoFactorCodePrompt": "Enter the 6-digit code from your authenticator app.",
+	"twoFactorRecoveryPrompt": "Enter one of your recovery codes. Each code works once.",
+	"authenticatorCode": "Authentication code",
+	"recoveryCode": "Recovery code",
+	"verify": "Verify",
+	"back": "Back",
+	"approveOnAnotherDevice": "Approve on another device instead",
+	"useRecoveryCode": "Use a recovery code",
+	"useAuthenticatorCode": "Use the authenticator app",
+	"deviceApprovalPrompt": "Open Polder on a device where you're signed in and type this number:",
+	"deviceApprovalHint": "The request only reaches devices with Polder open.",
+	"loginErrorInvalidCode": "That code is wrong or has expired.",
+	"loginErrorTooManyAttempts": "Too many attempts. Wait a minute and try again.",
+	"loginErrorApprovalDenied": "The sign-in was refused on your other device.",
+	"loginErrorApprovalExpired": "No device approved the sign-in in time.",
+	"loginErrorSsoSignupDisabled": "There's no account for you on this server yet. Ask your administrator to create one or to link it.",
+	"loginErrorSsoLinkRequired": "An account with this email address already exists. Sign in with its password, then connect this provider under Settings → Account.",
+	"loginErrorSsoFailed": "Signing in with the provider didn't work. Try again or ask your administrator.",
+	"loginApprovalTitle": "Sign-in request",
+	"loginApprovalBody": "{device} wants to sign in to your account from {address}.",
+	"@loginApprovalBody": {
+		"placeholders": {
+			"device": {
+				"type": "String"
+			},
+			"address": {
+				"type": "String"
+			}
+		}
+	},
+	"loginApprovalTypeNumber": "Type the number shown on that device",
+	"loginApprovalApprove": "Approve",
+	"loginApprovalDeny": "It wasn't me",
+	"loginApprovalWrongNumber": "That wasn't the right number, so the sign-in was refused.",
+	"loginApprovalNotificationTitle": "{device} wants to sign in",
+	"@loginApprovalNotificationTitle": {
+		"placeholders": {
+			"device": {
+				"type": "String"
+			}
+		}
+	},
+	"loginApprovalNotificationBody": "Open Polder to approve or refuse the sign-in from {address}.",
+	"@loginApprovalNotificationBody": {
+		"placeholders": {
+			"address": {
+				"type": "String"
+			}
+		}
+	},
+	"notificationChannelSecurity": "Security",
+	"twoFactorTitle": "Two-factor authentication",
+	"twoFactorOn": "On",
+	"twoFactorOff": "Off",
+	"twoFactorOffHint": "Ask for a code from an authenticator app when signing in with your password.",
+	"twoFactorRequiredBy": "Required by your administrator before {date}",
+	"@twoFactorRequiredBy": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"twoFactorRequiredByAdmin": "Your administrator requires it",
+	"recoveryCodesLeft": "{count, plural, =1{1 recovery code left} other{{count} recovery codes left}}",
+	"@recoveryCodesLeft": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"regenerateRecoveryCodes": "New recovery codes",
+	"regenerateRecoveryCodesHint": "Your current recovery codes stop working.",
+	"turnOffTwoFactor": "Turn off two-factor authentication",
+	"turnOffTwoFactorHint": "Signing in will only need your password again.",
+	"twoFactorSetupTitle": "Set up two-factor authentication",
+	"twoFactorSetupIntro": "Enter your password to start.",
+	"twoFactorContinue": "Continue",
+	"twoFactorScanIntro": "Scan this QR code with an authenticator app such as Aegis, 2FAS or Google Authenticator, then enter the code it shows.",
+	"twoFactorOpenAuthenticator": "Open in authenticator app",
+	"twoFactorManualKey": "Or enter this key",
+	"twoFactorCodeMismatch": "That code doesn't match. Check the time on your device and try again.",
+	"recoveryCodesTitle": "Save your recovery codes",
+	"recoveryCodesIntro": "If you lose your phone, each of these codes lets you sign in once. Keep them somewhere safe; you won't see them again.",
+	"copyRecoveryCodes": "Copy codes",
+	"recoveryCodesSaved": "I've saved them",
+	"setUp": "Set up",
+	"twoFactorDeadlineBanner": "Set up two-factor authentication before {date}.",
+	"@twoFactorDeadlineBanner": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"twoFactorRequiredTitle": "Two-factor authentication is required",
+	"twoFactorRequiredBody": "Your administrator requires it for every account. Set it up to keep using Polder.",
+	"setPassword": "Set a password",
+	"connectedAccounts": "Connected accounts",
+	"notConnected": "Not connected",
+	"unlink": "Unlink",
+	"unlinkTitle": "Unlink {provider}?",
+	"@unlinkTitle": {
+		"placeholders": {
+			"provider": {
+				"type": "String"
+			}
+		}
+	},
+	"unlinkMessage": "You can no longer sign in with {provider} until you connect it again.",
+	"@unlinkMessage": {
+		"placeholders": {
+			"provider": {
+				"type": "String"
+			}
+		}
+	},
+	"ssoAlreadyLinked": "That account is already linked to someone else.",
+	"adminAuthentication": "Authentication",
+	"adminAuthenticationHint": "Two-factor authentication and single sign-on",
+	"requireTwoFactor": "Require two-factor authentication",
+	"requireTwoFactorHint": "Everyone who signs in with a password must set it up. Single sign-on is exempt.",
+	"requireTwoFactorConfirm": "Everyone without it gets an email and has {days, plural, =0{to set it up right away} =1{1 day to set it up} other{{days} days to set it up}}. After that, they can only set it up.",
+	"@requireTwoFactorConfirm": {
+		"placeholders": {
+			"days": {
+				"type": "int"
+			}
+		}
+	},
+	"require": "Require",
+	"twoFactorGracePeriod": "Grace period",
+	"twoFactorGracePeriodHint": "{days, plural, =0{No grace period} =1{1 day to set it up} other{{days} days to set it up}}; changes apply to new deadlines",
+	"@twoFactorGracePeriodHint": {
+		"placeholders": {
+			"days": {
+				"type": "int"
+			}
+		}
+	},
+	"days": "Days",
+	"twoFactorNoMailWarning": "No mail server is set up, so users won't get an email about the deadline. They'll still see it in the apps.",
+	"singleSignOn": "Single sign-on",
+	"singleSignOnHint": "Let people sign in with an identity provider such as Pocket ID, authentik, Keycloak, Google, Microsoft or GitHub.",
+	"addProvider": "Add provider",
+	"addProviderNamed": "Add {provider}",
+	"@addProviderNamed": {
+		"placeholders": {
+			"provider": {
+				"type": "String"
+			}
+		}
+	},
+	"noProviders": "No providers yet",
+	"managedByConfig": "Set in the server config",
+	"linkedAccounts": "{count, plural, =0{No linked accounts} =1{1 linked account} other{{count} linked accounts}}",
+	"@linkedAccounts": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"providerManagedByConfigHint": "This provider is set in the server config. You can only turn it on or off here.",
+	"buttonLabel": "Button label",
+	"issuerUrl": "Issuer URL",
+	"clientId": "Client ID",
+	"clientSecret": "Client secret",
+	"clientSecretKept": "Leave empty to keep the stored secret",
+	"callbackUrl": "Callback URL",
+	"providerServerUrl": "Server URL",
+	"providerRealm": "Realm",
+	"providerSlug": "Application slug",
+	"providerTenantId": "Tenant ID",
+	"identityProvider": "the identity provider",
+	"providerUrlNamed": "{provider} URL",
+	"@providerUrlNamed": {
+		"placeholders": {
+			"provider": {
+				"type": "String"
+			}
+		}
+	},
+	"providerTenantIdHint": "Your directory (tenant) ID, or common, organizations or consumers to allow other directories",
+	"callbackUrlHint": "Paste this at {provider} under “{field}”",
+	"@callbackUrlHint": {
+		"placeholders": {
+			"provider": {
+				"type": "String"
+			},
+			"field": {
+				"type": "String"
+			}
+		}
+	},
+	"providerAllowSignup": "Create accounts",
+	"providerAllowSignupHint": "People without an account get one when they first sign in",
+	"providerLinkByEmail": "Match by email address",
+	"providerLinkByEmailHint": "Sign in to the existing account with the same verified email address",
+	"testConnection": "Test",
+	"providerTestOk": "The provider answered correctly.",
+	"providerTestFailed": "The provider can't be reached: {reason}",
+	"@providerTestFailed": {
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"deleteProviderTitle": "Remove {provider}?",
+	"@deleteProviderTitle": {
+		"placeholders": {
+			"provider": {
+				"type": "String"
+			}
+		}
+	},
+	"deleteProviderMessage": "{count, plural, =0{The sign-in button disappears.} =1{The sign-in button disappears and 1 account is unlinked. Accounts without a password can then no longer sign in.} other{The sign-in button disappears and {count} accounts are unlinked. Accounts without a password can then no longer sign in.}}",
+	"@deleteProviderMessage": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"twoFactorTag": "2FA",
+	"twoFactorDueTag": "2FA due {date}",
+	"@twoFactorDueTag": {
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"twoFactorOverdueTag": "2FA overdue",
+	"ssoTag": "SSO",
+	"resetTwoFactor": "Reset two-factor",
+	"resetTwoFactorTitle": "Reset two-factor authentication for {username}?",
+	"@resetTwoFactorTitle": {
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"resetTwoFactorMessage": "Use this when they lost their authenticator app. They're signed out everywhere and can set it up again.",
+	"extendTwoFactorDeadline": "Give more time for 2FA"
+}

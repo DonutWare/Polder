@@ -1,0 +1,94 @@
+import "dart:async";
+import "dart:typed_data";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "package:polder/providers/browser/file_operations_provider.dart";
+import "package:polder_core/models/directory_listing.dart";
+import "package:polder_core/models/document_editor.dart";
+import "package:polder_core/models/file_entry.dart";
+import "package:polder_core/models/file_space.dart";
+import "package:polder_core/providers/polder_api_provider.dart";
+import "package:polder/providers/sharing/public_link_session_provider.dart";
+import "package:polder/services/sharing/file_space_api.dart";
+import "package:polder_core/util/guarded_refresh.dart";
+import "package:polder_core/util/ref_cache.dart";
+import "package:polder_core/util/remote_path.dart";
+
+final fileSpaceApiProvider = Provider.autoDispose.family<FileSpaceApi, FileSpace>(
+  (ref, space) => switch (space) {
+    final LinkSpace link => LinkSpaceApi(
+      ref.watch(serverPolderApiProvider(link.serverUrl)),
+      link.code,
+      ref.watch(publicLinkSessionProvider(link).notifier).token,
+    ),
+  },
+);
+
+final spaceCapabilitiesProvider = Provider.autoDispose.family<SpaceCapabilities, FileSpace>(
+  (ref, space) => switch (space) {
+    final LinkSpace link => switch (ref.watch(publicLinkSessionProvider(link)).value?.shownInfo.permissions) {
+      final permissions? => SpaceCapabilities(canDownload: permissions.download, canUpload: permissions.upload),
+      null => const SpaceCapabilities(canDownload: false),
+    },
+  },
+);
+
+final spaceThumbnailProvider = FutureProvider.autoDispose.family<Uint8List?, (SpaceLocation, int)>((
+  ref,
+  request,
+) async {
+  ref.cacheFor(const Duration(minutes: 5));
+  final (location, size) = request;
+  return ref.watch(fileSpaceApiProvider(location.space)).preview(location.path, size: size);
+});
+
+final spaceEditorCapabilitiesProvider = FutureProvider.autoDispose.family<EditorCapabilities, FileSpace>((ref, space) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(fileSpaceApiProvider(space)).editorCapabilities();
+});
+
+final spaceDirectoryProvider = AsyncNotifierProvider.autoDispose
+    .family<SpaceDirectoryNotifier, DirectoryListing, SpaceLocation>(SpaceDirectoryNotifier.new);
+
+class SpaceDirectoryNotifier extends AsyncNotifier<DirectoryListing> with GuardedRefresh {
+  SpaceDirectoryNotifier(this.location);
+
+  final SpaceLocation location;
+
+  FileSpaceApi get _api => ref.read(fileSpaceApiProvider(location.space));
+
+  String get path => location.path;
+
+  @override
+  Future<DirectoryListing> build() => _fetch(ref.watch(fileSpaceApiProvider(location.space)));
+
+  Future<void> refresh() => refreshWith(() => _fetch(_api));
+
+  Future<DirectoryListing> _fetch(FileSpaceApi api) => api.list(path);
+
+  Future<void> createFolder(String name) => _mutate(() => _api.mkdir(RemotePath.join(path, name)));
+
+  Future<void> rename(FileEntry entry, String newName) => _mutate(
+    () => _track(
+      FileOperationKind.rename,
+      entry,
+      () => _api.move(from: entry.path, to: RemotePath.join(path, newName), baseRev: entry.rev),
+    ),
+  );
+
+  Future<void> delete(FileEntry entry) =>
+      _mutate(() => _track(FileOperationKind.delete, entry, () => _api.delete(entry.path, baseRev: entry.rev)));
+
+  Future<void> _track(FileOperationKind kind, FileEntry entry, Future<Object?> Function() perform) => ref
+      .read(fileOperationsProvider.notifier)
+      .runSingle(kind: kind, item: FileOperationItem.of(entry), ownFiles: false, perform: perform);
+
+  Future<void> _mutate(Future<Object?> Function() action) async {
+    try {
+      await action();
+    } finally {
+      if (ref.mounted) await refresh();
+    }
+  }
+}

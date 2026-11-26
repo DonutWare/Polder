@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-    <a href="https://github.com/DonutWare/Polder"><img src="./client/assets/icon/desktop_icon.png" alt="Polder" width="200"></a>
+    <a href="https://github.com/DonutWare/Polder"><img src="./client/apps/polder/assets/icon/desktop_icon.png" alt="Polder" width="200"></a>
   <br>
   Polder
   <br>

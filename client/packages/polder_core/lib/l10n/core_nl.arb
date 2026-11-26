@@ -1,0 +1,11 @@
+{
+	"@@locale": "nl",
+	"browserSignInFinishedTitle": "Terug naar {app}",
+	"browserSignInFinished": "Je kunt dit tabblad sluiten en teruggaan naar {app}.",
+	"offlineDownloadsTitle": "Bestanden synchroniseren voor offline gebruik",
+	"offlineDownloadsProgress": "{finished} van {total} bestanden",
+	"offlineDownloadsDoneTitle": "Bestanden offline beschikbaar",
+	"offlineDownloadsDone": "{total} bestanden zijn klaar voor offline gebruik",
+	"offlineDownloadsFailedTitle": "Sommige bestanden konden niet worden gedownload",
+	"offlineDownloadsFailed": "{failed} van {total} mislukt; ze worden opnieuw geprobeerd"
+}

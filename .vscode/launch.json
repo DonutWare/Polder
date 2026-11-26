@@ -8,12 +8,8 @@
 			"mode": "debug",
 			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
-			"env": {
-				"POLDER_LISTEN": ":6060",
-				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
-				"POLDER_DATA_DIR": "${workspaceFolder}/data",
-				"POLDER_DEBUG": "1"
-			}
+			"envFile": "${workspaceFolder}/.vscode/server.env",
+			"presentation": { "group": "1 Server", "order": 1 }
 		},
 		{
 			"name": "Server (web app)",
@@ -22,14 +18,12 @@
 			"mode": "debug",
 			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
+			"envFile": "${workspaceFolder}/.vscode/server.env",
 			"preLaunchTask": "Build web client",
 			"env": {
-				"POLDER_LISTEN": ":6060",
-				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
-				"POLDER_DATA_DIR": "${workspaceFolder}/data",
-				"POLDER_WEB_DIR": "${workspaceFolder}/client/build/web",
-				"POLDER_DEBUG": "1"
-			}
+				"POLDER_WEB_DIR": "${workspaceFolder}/client/apps/polder/build/web"
+			},
+			"presentation": { "group": "1 Server", "order": 2 }
 		},
 		{
 			"name": "Server (Collabora)",
@@ -38,15 +32,13 @@
 			"mode": "debug",
 			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
+			"envFile": "${workspaceFolder}/.vscode/server.env",
 			"preLaunchTask": "Start collabora online docker",
 			"env": {
-				"POLDER_LISTEN": ":6060",
-				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
-				"POLDER_DATA_DIR": "${workspaceFolder}/data",
 				"POLDER_COLLABORA_URL": "http://localhost:9980",
-				"POLDER_WOPI_URL": "http://host.docker.internal:6060",
-				"POLDER_DEBUG": "1"
-			}
+				"POLDER_WOPI_URL": "http://host.docker.internal:6060"
+			},
+			"presentation": { "group": "1 Server", "order": 3 }
 		},
 		{
 			"name": "Server (Euro-Office)",
@@ -55,15 +47,13 @@
 			"mode": "debug",
 			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
+			"envFile": "${workspaceFolder}/.vscode/server.env",
 			"preLaunchTask": "Start euro office docker",
 			"env": {
-				"POLDER_LISTEN": ":6060",
-				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
-				"POLDER_DATA_DIR": "${workspaceFolder}/data",
 				"POLDER_EURO_OFFICE_URL": "http://localhost:9981",
-				"POLDER_WOPI_URL": "http://host.docker.internal:6060",
-				"POLDER_DEBUG": "1"
-			}
+				"POLDER_WOPI_URL": "http://host.docker.internal:6060"
+			},
+			"presentation": { "group": "1 Server", "order": 4 }
 		},
 		{
 			"name": "Server (Nextcloud)",
@@ -72,15 +62,13 @@
 			"mode": "debug",
 			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
+			"envFile": "${workspaceFolder}/.vscode/server.env",
 			"preLaunchTask": "Start nextcloud docker",
 			"env": {
-				"POLDER_LISTEN": ":6060",
-				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
-				"POLDER_DATA_DIR": "${workspaceFolder}/data",
 				"POLDER_PUBLIC_URL": "https://polder.test",
-				"POLDER_TRUSTED_PROXIES": "127.0.0.1,::1",
-				"POLDER_DEBUG": "1"
-			}
+				"POLDER_TRUSTED_PROXIES": "127.0.0.1,::1"
+			},
+			"presentation": { "group": "1 Server", "order": 5 }
 		},
 		{
 			"name": "Server (SSO)",
@@ -89,14 +77,66 @@
 			"mode": "debug",
 			"program": "${workspaceFolder}/cmd/polder",
 			"cwd": "${workspaceFolder}",
+			"envFile": "${workspaceFolder}/.vscode/server.env",
 			"preLaunchTask": "Start SSO docker",
 			"env": {
-				"POLDER_LISTEN": ":6060",
-				"POLDER_CONFIG_DIR": "${workspaceFolder}/config",
-				"POLDER_DATA_DIR": "${workspaceFolder}/data",
-				"POLDER_PUBLIC_URL": "http://localhost:6060",
-				"POLDER_DEBUG": "1"
-			}
+				"POLDER_PUBLIC_URL": "http://localhost:6060"
+			},
+			"presentation": { "group": "1 Server", "order": 6 }
+		},
+		{
+			"name": "Polder (Dev)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client/apps/polder",
+			"args": ["--flavor", "dev"],
+			"presentation": { "group": "2 Apps", "order": 1 }
+		},
+		{
+			"name": "Polder (Dev, Profile)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client/apps/polder",
+			"flutterMode": "profile",
+			"args": ["--flavor", "dev"],
+			"presentation": { "group": "2 Apps", "order": 2 }
+		},
+		{
+			"name": "Polder (Release)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client/apps/polder",
+			"flutterMode": "release",
+			"args": ["--flavor", "prod"],
+			"presentation": { "group": "2 Apps", "order": 3 }
+		},
+		{
+			"name": "Calendar (Dev)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client/apps/calendar",
+			"args": ["--flavor", "dev"],
+			"presentation": { "group": "2 Apps", "order": 4 }
+		},
+		{
+			"name": "Server tests (end-to-end)",
+			"type": "go",
+			"request": "launch",
+			"mode": "test",
+			"program": "${workspaceFolder}/internal/app",
+			"presentation": { "group": "4 Tests", "order": 1 }
+		},
+		{
+			"name": "Server tests (chunker)",
+			"type": "go",
+			"request": "launch",
+			"mode": "test",
+			"program": "${workspaceFolder}/internal/chunker",
+			"presentation": { "group": "4 Tests", "order": 2 }
 		},
 		{
 			"name": "Server tests (single sign-on, live)",
@@ -106,119 +146,66 @@
 			"program": "${workspaceFolder}/internal/app",
 			"buildFlags": "-tags=ssolive",
 			"args": ["-test.run", "TestLiveSingleSignOn", "-test.v"],
-			"preLaunchTask": "Start SSO docker"
+			"preLaunchTask": "Start SSO docker",
+			"presentation": { "group": "4 Tests", "order": 3 }
 		},
 		{
-			"name": "Client (Dev)",
-			"type": "dart",
-			"request": "launch",
-			"program": "lib/main.dart",
-			"cwd": "${workspaceFolder}/client",
-			"args": [
-				"--flavor",
-				"dev"
-			]
-		},
-		{
-			"name": "Client (Dev, Profile)",
-			"type": "dart",
-			"request": "launch",
-			"program": "lib/main.dart",
-			"cwd": "${workspaceFolder}/client",
-			"flutterMode": "profile",
-			"args": [
-				"--flavor",
-				"dev"
-			]
-		},
-		{
-			"name": "Client (Release)",
-			"type": "dart",
-			"request": "launch",
-			"program": "lib/main.dart",
-			"cwd": "${workspaceFolder}/client",
-			"flutterMode": "release",
-			"args": [
-				"--flavor",
-				"prod"
-			]
-		},
-		{
-			"name": "Server tests (end-to-end)",
-			"type": "go",
-			"request": "launch",
-			"mode": "test",
-			"program": "${workspaceFolder}/internal/app"
-		},
-		{
-			"name": "Server tests (chunker)",
-			"type": "go",
-			"request": "launch",
-			"mode": "test",
-			"program": "${workspaceFolder}/internal/chunker"
-		},
-		{
-			"name": "Client tests",
+			"name": "Polder tests",
 			"type": "dart",
 			"request": "launch",
 			"program": "test/",
-			"cwd": "${workspaceFolder}/client",
-			"toolArgs": [
-				"--exclude-tags",
-				"integration"
-			]
+			"cwd": "${workspaceFolder}/client/apps/polder",
+			"toolArgs": ["--exclude-tags", "integration"],
+			"presentation": { "group": "4 Tests", "order": 4 }
 		},
 		{
-			"name": "Client ↔ real server tests",
+			"name": "Polder ↔ real server tests",
 			"type": "dart",
 			"request": "launch",
 			"program": "test/integration/real_server_test.dart",
-			"cwd": "${workspaceFolder}/client",
+			"cwd": "${workspaceFolder}/client/apps/polder",
 			"env": {
 				"POLDER_SERVER_DIR": "${workspaceFolder}"
-			}
+			},
+			"presentation": { "group": "4 Tests", "order": 5 }
 		}
 	],
 	"compounds": [
 		{
-			"name": "Server + Client",
-			"configurations": [
-				"Server",
-				"Client (Dev)"
-			],
-			"stopAll": true
+			"name": "Server + Polder",
+			"configurations": ["Server", "Polder (Dev)"],
+			"stopAll": true,
+			"presentation": { "group": "3 Server + app", "order": 1 }
 		},
 		{
-			"name": "Server (Collabora) + Client",
-			"configurations": [
-				"Server (Collabora)",
-				"Client (Dev)"
-			],
-			"stopAll": true
+			"name": "Server + Calendar",
+			"configurations": ["Server", "Calendar (Dev)"],
+			"stopAll": true,
+			"presentation": { "group": "3 Server + app", "order": 2 }
 		},
 		{
-			"name": "Server (SSO) + Client",
-			"configurations": [
-				"Server (SSO)",
-				"Client (Dev)"
-			],
-			"stopAll": true
+			"name": "Server (SSO) + Polder",
+			"configurations": ["Server (SSO)", "Polder (Dev)"],
+			"stopAll": true,
+			"presentation": { "group": "3 Server + app", "order": 3 }
 		},
 		{
-			"name": "Server (Nextcloud) + Client",
-			"configurations": [
-				"Server (Nextcloud)",
-				"Client (Dev)"
-			],
-			"stopAll": true
+			"name": "Server (Collabora) + Polder",
+			"configurations": ["Server (Collabora)", "Polder (Dev)"],
+			"stopAll": true,
+			"presentation": { "group": "3 Server + app", "order": 4 }
 		},
 		{
-			"name": "Server (Euro-Office) + Client",
-			"configurations": [
-				"Server (Euro-Office)",
-				"Client (Dev)"
-			],
-			"stopAll": true
+			"name": "Server (Euro-Office) + Polder",
+			"configurations": ["Server (Euro-Office)", "Polder (Dev)"],
+			"stopAll": true,
+			"presentation": { "group": "3 Server + app", "order": 5 }
+		},
+		{
+			"name": "Server (Nextcloud) + Polder",
+			"configurations": ["Server (Nextcloud)", "Polder (Dev)"],
+			"stopAll": true,
+			"presentation": { "group": "3 Server + app", "order": 6 }
 		}
 	]
 }

@@ -3,5 +3,5 @@
 set -eu
 
 server_dir=$(cd "$(dirname "$0")/.." && pwd)
-cd "$server_dir/client"
+cd "$server_dir/client/apps/polder"
 POLDER_SERVER_DIR="$server_dir" flutter test --tags integration "$@"

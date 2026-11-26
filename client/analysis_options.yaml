@@ -5,18 +5,18 @@ formatter:
 
 analyzer:
   exclude:
-    - build/**
-    - .dart_tool/**
-    - lib/**/**.g.dart
-    - lib/**/**.freezed.dart
-    - lib/services/api/generated/**
-    - lib/l10n/**
-    - android/**
-    - ios/**
-    - web/**
-    - windows/**
-    - macos/**
-    - linux/**
+    - "**/build/**"
+    - "**/.dart_tool/**"
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/lib/services/api/generated/**"
+    - "**/lib/l10n/**"
+    - "apps/*/android/**"
+    - "apps/*/ios/**"
+    - "apps/*/web/**"
+    - "apps/*/windows/**"
+    - "apps/*/macos/**"
+    - "apps/*/linux/**"
   language:
     strict-casts: true
     strict-raw-types: true
