@@ -72,6 +72,7 @@ jobs:
       version: ${{ steps.info.outputs.version }}
       tag: ${{ steps.info.outputs.tag }}
       flutter_version: ${{ steps.info.outputs.flutter_version }}
+      build_number: ${{ steps.info.outputs.build_number }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4.1.1
@@ -121,6 +122,9 @@ jobs:
             echo "version=$VERSION"
             echo "tag=$TAG"
             echo "flutter_version=$(jq -r '.flutter' .fvmrc)"
+            # Offset keeps build numbers above those from the old build.yml workflow (last run #69),
+            # since run_number restarted when it was split into per-app workflows.
+            echo "build_number=$((GITHUB_RUN_NUMBER + 100))"
           } >> "$GITHUB_OUTPUT"
           echo "$APP $VERSION ($BUILD_TYPE)"
 
@@ -178,13 +182,13 @@ jobs:
 
       - name: Build Android APK (development)
         if: needs.info.outputs.build_type == 'development'
-        run: flutter build apk --debug --split-per-abi --build-number=${{ github.run_number }}
+        run: flutter build apk --debug --split-per-abi --build-number=${{ needs.info.outputs.build_number }}
 
       - name: Build Android APK and AAB
         if: needs.info.outputs.build_type != 'development'
         run: |
-          flutter build apk --release --split-per-abi --build-number=${{ github.run_number }}
-          flutter build appbundle --release --build-number=${{ github.run_number }}
+          flutter build apk --release --split-per-abi --build-number=${{ needs.info.outputs.build_number }}
+          flutter build appbundle --release --build-number=${{ needs.info.outputs.build_number }}
 
       - name: Collect Android artifacts
         env:
@@ -227,7 +231,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Windows EXE
-        run: flutter build windows --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+        run: flutter build windows --build-number=${{ needs.info.outputs.build_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
 
       - name: Compile Inno Setup installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
@@ -282,7 +286,7 @@ jobs:
           git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64)"
 
       - name: Build iOS app
-        run: flutter build ipa --no-codesign --build-number=${{ github.run_number }}
+        run: flutter build ipa --no-codesign --build-number=${{ needs.info.outputs.build_number }}
 
       - name: Create unsigned IPA
         run: |
@@ -331,7 +335,7 @@ jobs:
           git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64)"
 
       - name: Build macOS app
-        run: flutter build macos --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+        run: flutter build macos --build-number=${{ needs.info.outputs.build_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
 
       - name: Install create-dmg
         run: brew install create-dmg
@@ -394,13 +398,13 @@ jobs:
 
       - name: Update build number in pubspec.yaml
         run: |
-          sed -i -E 's/(version: [0-9]+\.[0-9]+\.[0-9]+\+)[0-9]+/\1${{ github.run_number }}/' pubspec.yaml
+          sed -i -E 's/(version: [0-9]+\.[0-9]+\.[0-9]+\+)[0-9]+/\1${{ needs.info.outputs.build_number }}/' pubspec.yaml
 
       - name: Get dependencies
         run: flutter pub get
 
       - name: Build Linux app
-        run: flutter build linux --release --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+        run: flutter build linux --release --build-number=${{ needs.info.outputs.build_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
 
       - name: Fix RPATH
         run: |
@@ -467,7 +471,7 @@ jobs:
       - name: Write build settings
         run: |
           cat > client/flatpak/build.env <<EOF
-          BUILD_NUMBER=${{ github.run_number }}
+          BUILD_NUMBER=${{ needs.info.outputs.build_number }}
           POLDER_CHANNEL=${{ needs.info.outputs.channel }}
           POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
           EOF
@@ -522,7 +526,7 @@ jobs:
 
       - name: Build web app
         run: |
-          flutter build web --release --no-web-resources-cdn --no-wasm-dry-run --build-number=${{ github.run_number }}
+          flutter build web --release --no-web-resources-cdn --no-wasm-dry-run --build-number=${{ needs.info.outputs.build_number }}
           find build/web -name '*.symbols' -delete
 
       - name: Archive web artifact
@@ -577,7 +581,7 @@ jobs:
             WEB=client
             FLUTTER_VERSION=${{ needs.info.outputs.flutter_version }}
             VERSION=${{ needs.info.outputs.version }}
-            BUILD_NUMBER=${{ github.run_number }}
+            BUILD_NUMBER=${{ needs.info.outputs.build_number }}
           push: ${{ steps.tags.outputs.push == 'true' }}
           tags: ${{ steps.tags.outputs.tags }}
           labels: |
@@ -694,7 +698,7 @@ jobs:
           ---
 
           📅 **Build Date:** $(date -u "+%Y-%m-%d %H:%M:%S UTC")
-          🔧 **Build Number:** ${{ github.run_number }}
+          🔧 **Build Number:** ${{ needs.info.outputs.build_number }}
           📝 **Commit:** ${{ github.sha }}
           🌿 **Branch:** develop
           EOF
@@ -726,7 +730,7 @@ jobs:
           ../scripts/update-manifest.sh \
             ${{ needs.info.outputs.channel }} \
             "$VERSION" \
-            ${{ github.run_number }} \
+            ${{ needs.info.outputs.build_number }} \
             "$TAG" \
             "$ASSET_PREFIX-macOS-$VERSION.zip" \
             "$ASSET_PREFIX-Windows-$VERSION-Setup.exe" \
@@ -773,4 +777,4 @@ jobs:
           releaseFiles: android/${{ inputs.asset_prefix }}-Android-${{ needs.info.outputs.version }}.aab
           track: ${{ needs.info.outputs.build_type == 'nightly' && 'internal' || 'production' }}
           status: ${{ needs.info.outputs.build_type == 'nightly' && 'completed' || 'draft' }}
-          releaseName: "${{ github.run_number }} (${{ needs.info.outputs.version_name }})"
+          releaseName: "${{ needs.info.outputs.build_number }} (${{ needs.info.outputs.version_name }})"
