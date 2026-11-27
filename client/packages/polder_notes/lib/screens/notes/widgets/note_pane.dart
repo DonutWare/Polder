@@ -127,7 +127,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     if (controller.text == _reported) return;
     final document = ref.read(noteDocumentProvider(widget.path)).value;
     if (document == null) return;
-    final trigger = FormatActions.takeLinkTrigger(controller.value, _reported);
+    final trigger = document.entry.isPlainText ? null : FormatActions.takeLinkTrigger(controller.value, _reported);
     if (trigger != null && !_pickingLink) {
       controller.setValue(trigger, addToHistory: false);
       unawaited(_insertLink(document));
@@ -330,13 +330,14 @@ class _NotePaneState extends ConsumerState<NotePane> {
 
   Widget _page(BuildContext context, NoteDocument document) {
     final localized = context.localized;
-    final sourceMode = widget.sourceMode;
-    final name = RemotePath.withoutExtension(document.entry.name);
+    final plainText = document.entry.isPlainText;
+    final sourceMode = plainText || widget.sourceMode;
+    final name = document.entry.displayName;
     final targets = _targets(document);
     final readOnly = !document.editable || document.state == NoteSaveState.conflict;
     final controller = _controllerFor(document);
     final checklist = !sourceMode && NoteChecklist.isChecklist(controller.text);
-    final recipe = !checklist && NoteRecipe.isRecipe(controller.text);
+    final recipe = !plainText && !checklist && NoteRecipe.isRecipe(controller.text);
     final colors = Theme.of(context).colorScheme;
     final banners = _banners(document, localized);
     final host = ref.watch(notesHostProvider);
@@ -386,13 +387,14 @@ class _NotePaneState extends ConsumerState<NotePane> {
               icon: const Icon(IconsaxPlusLinear.hierarchy),
               onPressed: onShowFamily,
             ),
-          IconButton(
-            tooltip: sourceMode ? localized.noteLivePreview : localized.noteSourceMode,
-            isSelected: sourceMode,
-            icon: const Icon(IconsaxPlusLinear.code_1),
-            selectedIcon: Icon(IconsaxPlusBold.code_1, color: colors.primary),
-            onPressed: widget.onToggleSourceMode,
-          ),
+          if (!plainText)
+            IconButton(
+              tooltip: sourceMode ? localized.noteLivePreview : localized.noteSourceMode,
+              isSelected: sourceMode,
+              icon: const Icon(IconsaxPlusLinear.code_1),
+              selectedIcon: Icon(IconsaxPlusBold.code_1, color: colors.primary),
+              onPressed: widget.onToggleSourceMode,
+            ),
           if (widget.onToggleLinks != null)
             IconButton(
               tooltip: localized.noteLinks,
@@ -410,7 +412,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
               _NoteMenu.checkboxes => _toggleCheckboxes(controller),
             },
             itemBuilder: (context) => [
-              if (!readOnly)
+              if (!readOnly && !plainText)
                 PopupMenuItem(
                   value: _NoteMenu.checkboxes,
                   child: Text(
@@ -429,7 +431,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
           ),
           const SizedBox(width: 8),
         ],
-        bottom: readOnly || checklist
+        bottom: readOnly || checklist || plainText
             ? null
             : NoteToolbar(
                 controller: controller,
@@ -469,7 +471,14 @@ class _NotePaneState extends ConsumerState<NotePane> {
                       if (readOnly && !sourceMode) {
                         return ReadOnlyNote(text: document.text, targets: targets, padding: padding, onLink: openLink);
                       }
-                      if (sourceMode) return SourceEditor(controller: controller, readOnly: readOnly, padding: padding);
+                      if (sourceMode) {
+                        return SourceEditor(
+                          controller: controller,
+                          readOnly: readOnly,
+                          plainText: plainText,
+                          padding: padding,
+                        );
+                      }
                       if (checklist) return ChecklistEditor(controller: controller, padding: padding);
                       return LiveNoteEditor(
                         controller: controller,

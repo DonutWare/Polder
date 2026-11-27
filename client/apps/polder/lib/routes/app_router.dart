@@ -18,7 +18,7 @@ import "package:polder_ui/screens/login/login_screen.dart";
 import "package:polder_notes/screens/notes/cooking/cooking_screen.dart";
 import "package:polder_notes/screens/notes/notes_screen.dart";
 import "package:polder_calendar/screens/calendar/calendar_screen.dart";
-import "package:polder/screens/search/open_search.dart";
+import "package:polder_drive/screens/search/open_search.dart";
 import "package:polder/screens/settings/settings_screen.dart";
 import "package:polder_ui/screens/two_factor/two_factor_setup_screen.dart";
 import "package:polder/screens/groups/groups_screen.dart";

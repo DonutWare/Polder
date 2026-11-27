@@ -6,6 +6,8 @@ import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/media_gallery.dart";
 import "package:polder_core/models/scan_session.dart";
 import "package:polder_core/util/remote_path.dart";
+import "package:polder_notes/notes_locations.dart";
+import "package:polder_notes/screens/notes/cooking/cooking_screen.dart";
 import "package:polder_ui/routes/up_scope.dart";
 
 import "package:polder_drive/routes/drive_routes.dart";
@@ -20,6 +22,7 @@ import "package:polder_drive/screens/sync/sync_folders_screen.dart";
 import "package:polder_drive/screens/tags/tags_screen.dart";
 import "package:polder_drive/screens/trash/trash_screen.dart";
 import "package:polder_drive/screens/viewer/document_editor_screen.dart";
+import "package:polder_drive/screens/viewer/drive_note_screen.dart";
 import "package:polder_drive/screens/viewer/media/polder_media_viewer.dart";
 import "package:polder_drive/screens/viewer/pdf_viewer_screen.dart";
 
@@ -63,6 +66,20 @@ List<RouteBase> driveFullScreenRoutes() => [
         final extra => EditorTarget(extra! as FileEntry),
       },
     ),
+  ),
+];
+
+List<RouteBase> driveNoteRoutes() => [
+  drivePage(
+    path: DriveRoutes.note,
+    key: (state) => ValueKey("note:${NotesLocations.pathOf(state.uri)}"),
+    redirect: (_, state) => NotesLocations.pathOf(state.uri) == null ? DriveRoutes.files : null,
+    page: (state) => UpScope(child: DriveNoteScreen(path: NotesLocations.pathOf(state.uri)!)),
+  ),
+  drivePage(
+    path: DriveRoutes.cook,
+    redirect: (_, state) => NotesLocations.pathOf(state.uri) == null ? DriveRoutes.files : null,
+    page: (state) => UpScope(child: CookingScreen(path: NotesLocations.pathOf(state.uri)!)),
   ),
 ];
 

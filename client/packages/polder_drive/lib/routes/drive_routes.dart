@@ -1,4 +1,5 @@
 import "package:polder_core/util/remote_path.dart";
+import "package:polder_notes/notes_locations.dart";
 
 abstract final class DriveRoutes {
   static const files = "/files";
@@ -6,6 +7,9 @@ abstract final class DriveRoutes {
   static const pdf = "/pdf";
   static const media = "/media";
   static const editor = "/editor";
+  static const note = "/note";
+  static const cook = "/note/cook";
+  static const notes = NotesLocations(note, cook: cook);
   static const activity = "/activity";
   static const sync = "/sync";
   static const conflicts = "/sync/conflicts";
@@ -14,13 +18,20 @@ abstract final class DriveRoutes {
   static const shared = "/shared";
   static const tags = "/tags";
   static const publicShare = "/share";
+  static const search = "/search";
 
   static const pathParameter = "path";
   static const selectParameter = "select";
   static const serverParameter = "server";
+  static const queryParameter = "q";
 
   static String filesAt(String path, {String? select}) =>
       Uri(path: files, queryParameters: {pathParameter: path, selectParameter: ?select}).toString();
+
+  static String noteAt(String path) => notes.noteAt(path);
+
+  static String searchFor(String query) =>
+      Uri(path: search, queryParameters: query.isEmpty ? null : {queryParameter: query}).toString();
 
   static String sharedSection(String section) => "$shared/$section";
 
@@ -51,9 +62,13 @@ abstract final class DriveRoutes {
       files => path == RemotePath.root ? null : filesAt(RemotePath.parent(path)),
       shared => _sharedUp(segments, path, single: single, home: home),
       sync when segments.length > 1 => sync,
+      note => _noteUp(location, path),
       _ => home,
     };
   }
+
+  static String _noteUp(Uri location, String path) =>
+      location.path == cook ? noteAt(path) : filesAt(RemotePath.parent(path), select: RemotePath.name(path));
 
   static String _sharedUp(List<String> segments, String path, {required bool single, required String home}) {
     final section = SharedSection.fromSegment(segments.elementAtOrNull(1));

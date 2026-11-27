@@ -26,6 +26,21 @@ class FileBrowserSettingsGroup extends ConsumerWidget {
     if (ref.watch(fileBrowserLocationProvider) == null || shown == null) return const SizedBox.shrink();
     final localized = context.localized;
     final turnedOffInSystem = shown && ref.watch(fileBrowserLocationEnabledProvider).value == false;
+    if (ref.watch(fileBrowserHandedOffProvider).value ?? false) {
+      return NavGroup(
+        title: fileBrowserName,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: NoticeTile(
+              icon: IconsaxPlusLinear.folder_cloud,
+              color: Theme.of(context).colorScheme.primary,
+              text: usesFilesApp ? localized.filesAppHandedOffToDrive : localized.finderHandedOffToDrive,
+            ),
+          ),
+        ],
+      );
+    }
     return NavGroup(
       title: fileBrowserName,
       children: [

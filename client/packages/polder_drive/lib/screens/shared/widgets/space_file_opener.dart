@@ -14,7 +14,7 @@ import "package:polder_drive/screens/viewer/shared_note_screen.dart";
 
 bool hasSpaceViewer(FileEntry entry, EditorCapabilities editor) => _hasBuiltInViewer(entry) || editor.canOpen(entry);
 
-bool _hasBuiltInViewer(FileEntry entry) => entry.isMarkdown || entry.isPdf || entry.isViewableMedia;
+bool _hasBuiltInViewer(FileEntry entry) => entry.isText || entry.isPdf || entry.isViewableMedia;
 
 Future<void> openSpaceEntry(
   BuildContext context,
@@ -39,7 +39,7 @@ Future<bool> _editorOpens(ProviderContainer container, FileSpace space, FileEntr
 }
 
 Widget _viewer(FileSpace space, FileEntry entry, List<FileEntry> siblings) {
-  if (entry.isMarkdown) return SharedNoteScreen(space: space, entry: entry);
+  if (entry.isText) return SharedNoteScreen(space: space, entry: entry);
   if (entry.isPdf) return PdfViewerScreen(entry: entry, space: space);
   if (entry.isViewableMedia) {
     final media = [

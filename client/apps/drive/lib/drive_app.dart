@@ -9,8 +9,10 @@ import "package:polder_account_link/companion_app.dart";
 import "package:polder_core/util/flavor.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/services/notifications/local_notification.dart";
+import "package:polder_drive/providers/file_browser/file_browser_location_provider.dart";
 import "package:polder_drive/providers/notifications/drive_notification_providers.dart";
 import "package:polder_drive/providers/realtime/directory_refresher_provider.dart";
+import "package:polder_drive/providers/sharing/share_target_provider.dart";
 import "package:polder_drive/providers/sync/sync_platform_provider.dart";
 import "package:polder_drive/providers/sync/sync_scheduler_provider.dart";
 import "package:polder_ui/providers/notifications/notification_providers.dart";
@@ -27,7 +29,9 @@ class DriveApp extends ConsumerWidget {
       ..watch(syncSchedulerProvider)
       ..watch(directoryRefresherProvider)
       ..watch(_driveNotificationsProvider)
-      ..watch(_incomingLinksProvider);
+      ..watch(_incomingLinksProvider)
+      ..watch(shareTargetHandlerProvider)
+      ..watch(showInFileBrowserProvider);
     return StandaloneApp(title: (localized) => localized.navFiles, router: ref.watch(driveRouterProvider));
   }
 }

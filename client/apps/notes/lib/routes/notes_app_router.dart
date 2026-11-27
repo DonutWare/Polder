@@ -31,6 +31,7 @@ final notesRouterProvider = Provider<GoRouter>(
     ),
     rail: (location) => NotesNavigationRail(location: location),
     railFooter: (location) => SettingsRailTile(location: location),
+    sheetItems: (location) => NotesNavigationSheetItems(location: location),
     sidebarWidth: 320,
     fullScreenRoutes: [
       GoRoute(

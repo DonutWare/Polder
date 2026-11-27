@@ -14,7 +14,8 @@ class StandaloneShell extends StatelessWidget {
     this.sidebar,
     this.rail,
     this.railFooter,
-    this.sheet = const AccountSheet(),
+    this.sheetItems,
+    this.sheetFooter,
     this.sidebarWidth = 300,
     super.key,
   });
@@ -24,16 +25,27 @@ class StandaloneShell extends StatelessWidget {
   final Widget? sidebar;
   final Widget? rail;
   final Widget? railFooter;
-  final Widget sheet;
+  final Widget? sheetItems;
+  final Widget? sheetFooter;
   final double sidebarWidth;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final phone = AdaptiveLayout.isPhone(context);
+    final items = sheetItems;
     return SideSheetDrawer(
       title: title,
-      sheet: sheet,
+      sheet: AccountSheet(
+        identityFooter: sheetFooter,
+        children: [
+          if (phone && items != null) ...[
+            items,
+            const Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Divider()),
+          ],
+          const AccountSettingsTile(),
+        ],
+      ),
       canEdgeSwipe: () => phone && readPolderUiConfig(context).isTopLevel(location.toString()),
       child: NavigationShell(
         showNavigation: !phone,

@@ -4,12 +4,20 @@ import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editi
 
 import "package:polder_notes/screens/notes/editor/markdown_syntax_controller.dart";
 import "package:polder_notes/screens/notes/editor/note_editor.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
 
 class SourceEditor extends StatefulWidget {
-  const SourceEditor({required this.controller, this.readOnly = false, this.padding = EdgeInsets.zero, super.key});
+  const SourceEditor({
+    required this.controller,
+    this.readOnly = false,
+    this.plainText = false,
+    this.padding = EdgeInsets.zero,
+    super.key,
+  });
 
   final MarkdownEditingController controller;
   final bool readOnly;
+  final bool plainText;
   final EdgeInsets padding;
 
   @override
@@ -19,9 +27,10 @@ class SourceEditor extends StatefulWidget {
 class _SourceEditorState extends State<SourceEditor> {
   static const _typingGroup = Duration(milliseconds: 800);
 
-  late final MarkdownSyntaxController _controller = MarkdownSyntaxController()
-    ..value = widget.controller.value
-    ..addListener(_toDocument);
+  late final TextEditingController _controller =
+      (widget.plainText ? TextEditingController() : MarkdownSyntaxController())
+        ..value = widget.controller.value
+        ..addListener(_toDocument);
   final _typingOrigin = Object();
   DateTime? _lastTyped;
   bool _syncing = false;
@@ -58,18 +67,21 @@ class _SourceEditorState extends State<SourceEditor> {
   }
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: widget.padding,
-    child: TextField(
-      controller: _controller,
-      readOnly: widget.readOnly,
-      autofocus: true,
-      maxLines: null,
-      expands: true,
-      textAlignVertical: TextAlignVertical.top,
-      keyboardType: TextInputType.multiline,
-      style: Theme.of(context).textTheme.bodyLarge,
-      decoration: noteFieldDecoration,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodyLarge;
+    return Padding(
+      padding: widget.padding,
+      child: TextField(
+        controller: _controller,
+        readOnly: widget.readOnly,
+        autofocus: true,
+        maxLines: null,
+        expands: true,
+        textAlignVertical: TextAlignVertical.top,
+        keyboardType: TextInputType.multiline,
+        style: widget.plainText && style != null ? monospaced(style) : style,
+        decoration: noteFieldDecoration,
+      ),
+    );
+  }
 }

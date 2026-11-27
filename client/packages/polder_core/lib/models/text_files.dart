@@ -1,0 +1,132 @@
+import "package:polder_core/util/remote_path.dart";
+
+abstract final class TextFiles {
+  static const _mimes = {
+    "application/json",
+    "application/ld+json",
+    "application/xml",
+    "application/yaml",
+    "application/x-yaml",
+    "application/toml",
+    "application/javascript",
+    "application/x-javascript",
+    "application/typescript",
+    "application/x-sh",
+    "application/x-shellscript",
+    "application/sql",
+    "application/graphql",
+    "application/x-httpd-php",
+    "application/x-python",
+    "application/x-ruby",
+    "application/x-perl",
+    "application/x-tex",
+    "application/x-latex",
+    "application/x-subrip",
+    "application/x-ndjson",
+    "image/svg+xml",
+  };
+
+  static const _extensions = {
+    "txt",
+    "text",
+    "md",
+    "markdown",
+    "rst",
+    "adoc",
+    "org",
+    "tex",
+    "log",
+    "csv",
+    "tsv",
+    "json",
+    "jsonc",
+    "json5",
+    "ndjson",
+    "yaml",
+    "yml",
+    "toml",
+    "ini",
+    "cfg",
+    "conf",
+    "config",
+    "properties",
+    "env",
+    "xml",
+    "svg",
+    "html",
+    "htm",
+    "css",
+    "scss",
+    "sass",
+    "less",
+    "js",
+    "mjs",
+    "cjs",
+    "jsx",
+    "ts",
+    "tsx",
+    "dart",
+    "go",
+    "rs",
+    "py",
+    "rb",
+    "php",
+    "java",
+    "kt",
+    "kts",
+    "swift",
+    "c",
+    "h",
+    "cc",
+    "cpp",
+    "hpp",
+    "cs",
+    "m",
+    "mm",
+    "scala",
+    "lua",
+    "pl",
+    "r",
+    "sql",
+    "graphql",
+    "gql",
+    "sh",
+    "bash",
+    "zsh",
+    "fish",
+    "ps1",
+    "bat",
+    "cmd",
+    "gradle",
+    "cmake",
+    "make",
+    "mk",
+    "dockerfile",
+    "gitignore",
+    "gitattributes",
+    "editorconfig",
+    "srt",
+    "vtt",
+    "ics",
+    "vcf",
+    "diff",
+    "patch",
+    "nfo",
+  };
+
+  static const _names = {"dockerfile", "makefile", "license", "readme", "changelog", "authors", "codeowners"};
+
+  static bool isTextMime(String mime) => mime.startsWith("text/") || _mimes.contains(mime) || mime.endsWith("+json");
+
+  static bool isTextName(String name) {
+    final lower = name.toLowerCase();
+    final extension = RemotePath.extension(lower);
+    if (extension.isNotEmpty) return _extensions.contains(extension);
+    return _names.contains(lower) || (lower.startsWith(".") && _extensions.contains(lower.substring(1)));
+  }
+
+  static bool isMarkdownName(String name) =>
+      const {"md", "markdown"}.contains(RemotePath.extension(name).toLowerCase());
+
+  static bool isText({required String name, required String mime}) => isTextMime(mime) || isTextName(name);
+}

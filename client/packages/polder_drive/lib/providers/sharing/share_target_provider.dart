@@ -8,12 +8,12 @@ import "package:flutter/widgets.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:polder_drive/providers/browser/transfers_provider.dart";
-import "package:polder/providers/shortcuts/app_shortcut_runner.dart";
-import "package:polder/routes/app_router.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/services/sharing/shared_content.dart";
+import "package:polder_core/providers/account_provider.dart";
 import "package:polder_core/services/transfer/file_picker_service.dart";
+import "package:polder_drive/providers/browser/transfers_provider.dart";
+import "package:polder_drive/routes/drive_routes.dart";
+import "package:polder_drive/services/sharing/shared_content.dart";
+import "package:polder_ui/providers/app/navigation_history_provider.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
 
@@ -21,18 +21,31 @@ const _channel = MethodChannel("polder/share");
 
 final shareTargetHandlerProvider = Provider<void>((ref) {
   if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return;
-  void receive(Object? arguments) {
+  var choosing = false;
+  Future<void> receive(Object? arguments) async {
     final content = SharedContent.fromMap(arguments);
-    if (content == null) return;
-    unawaited(ref.read(appShortcutRunnerProvider).perform(null, (context) => _chooseFolder(ref, context, content)));
+    if (content == null || choosing) return;
+    choosing = true;
+    try {
+      final context = await _signedInContext(ref);
+      if (context != null && context.mounted) await _chooseFolder(ref, context, content);
+    } finally {
+      choosing = false;
+    }
   }
 
   _channel.setMethodCallHandler((call) async {
-    if (call.method == "share") receive(call.arguments);
+    if (call.method == "share") unawaited(receive(call.arguments));
   });
   unawaited(_channel.invokeMethod<Object?>("takePending").then(receive));
   ref.onDispose(() => _channel.setMethodCallHandler(null));
 });
+
+Future<BuildContext?> _signedInContext(Ref ref) async {
+  if (await ref.read(accountProvider.future) == null) return null;
+  await WidgetsBinding.instance.endOfFrame;
+  return ref.read(historyRouterProvider).routerDelegate.navigatorKey.currentContext;
+}
 
 Future<void> _chooseFolder(Ref ref, BuildContext context, SharedContent content) async {
   final folder = await showRemoteFolderPicker(
@@ -43,7 +56,7 @@ Future<void> _chooseFolder(Ref ref, BuildContext context, SharedContent content)
   if (folder == null) return;
   final transfers = ref.read(transfersProvider.notifier);
   await transfers.ensureFolder(folder);
-  ref.read(routerProvider).go(AppRoutes.filesAt(folder));
+  ref.read(historyRouterProvider).go(DriveRoutes.filesAt(folder));
   unawaited(_upload(transfers, folder, content));
 }
 

@@ -17,6 +17,7 @@ import "package:polder_notes/screens/notes/editor/note_embeds.dart";
 import "package:polder_drive/screens/shared/widgets/space_file_opener.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_notes/services/notes/note_link.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
 import "package:polder_ui/util/external_link.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
@@ -48,12 +49,17 @@ class SharedNoteScreen extends ConsumerWidget {
         value: ref.watch(content),
         onRetry: () => ref.invalidate(content),
         data: (bytes) => ReadableWidth(
-          builder: (context, inset) => ReadOnlyNote(
-            text: utf8.decode(bytes, allowMalformed: true),
-            targets: NoteTargets(notePath: entry.path, byId: const {}, space: space),
-            padding: inset + const EdgeInsets.fromLTRB(24, 16, 24, 32),
-            onLink: (destination) => _openLink(context, ref, destination),
-          ),
+          builder: (context, inset) {
+            final text = utf8.decode(bytes, allowMalformed: true);
+            final padding = inset + const EdgeInsets.fromLTRB(24, 16, 24, 32);
+            if (entry.isPlainText) return _PlainText(text: text, padding: padding);
+            return ReadOnlyNote(
+              text: text,
+              targets: NoteTargets(notePath: entry.path, byId: const {}, space: space),
+              padding: padding,
+              onLink: (destination) => _openLink(context, ref, destination),
+            );
+          },
         ),
       ),
     );
@@ -76,4 +82,17 @@ class SharedNoteScreen extends ConsumerWidget {
     if (target == null || target.isDir || !context.mounted) return;
     await openSpaceEntry(context, space, target, siblings: listing.entries);
   }
+}
+
+class _PlainText extends StatelessWidget {
+  const _PlainText({required this.text, required this.padding});
+
+  final String text;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: padding,
+    child: SelectableText(text, style: monospaced(Theme.of(context).textTheme.bodyLarge!)),
+  );
 }

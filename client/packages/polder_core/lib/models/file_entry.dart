@@ -1,6 +1,7 @@
 import "package:freezed_annotation/freezed_annotation.dart";
 
 import "package:polder_core/models/file_mount.dart";
+import "package:polder_core/models/text_files.dart";
 import "package:polder_core/util/remote_path.dart";
 
 part "file_entry.freezed.dart";
@@ -57,6 +58,10 @@ abstract class FileEntry with _$FileEntry {
   bool get isPdf => mime == "application/pdf";
 
   bool get isMarkdown => !isDir && mime == markdownMime;
+
+  bool get isText => !isDir && (isMarkdown || TextFiles.isText(name: name, mime: mime));
+
+  bool get isPlainText => isText && !isMarkdown && !TextFiles.isMarkdownName(name);
 
   String get displayName => isMarkdown ? RemotePath.withoutExtension(name) : name;
 

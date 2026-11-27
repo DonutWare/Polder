@@ -50,7 +50,12 @@ void main() {
     await harness.container.read(accountProvider.future);
   });
 
-  tearDown(() => harness.dispose());
+  void sidebarTest(String description, Future<void> Function(WidgetTester tester) body) =>
+      testWidgets(description, (tester) async {
+        await body(tester);
+        await tester.pumpWidget(const SizedBox());
+        harness.dispose();
+      }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
   Future<void> showTree(WidgetTester tester) async {
     final searchFocus = FocusNode();
@@ -75,7 +80,7 @@ void main() {
 
   Set<String> selected() => harness.container.read(noteSelectionProvider).names;
 
-  testWidgets("command-click picks notes and shift-click selects a range", (tester) async {
+  sidebarTest("command-click picks notes and shift-click selects a range", (tester) async {
     await showTree(tester);
 
     await clickWith(tester, LogicalKeyboardKey.metaLeft, "A");
@@ -87,9 +92,9 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     expect(selected(), isEmpty);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 
-  testWidgets("dragging a selected note moves every selected note", (tester) async {
+  sidebarTest("dragging a selected note moves every selected note", (tester) async {
     await showTree(tester);
     await clickWith(tester, LogicalKeyboardKey.metaLeft, "A");
     await clickWith(tester, LogicalKeyboardKey.metaLeft, "B");
@@ -108,7 +113,7 @@ void main() {
     ];
     expect(moves, [("/Notes/A.md", "/Notes/D/A.md"), ("/Notes/B.md", "/Notes/D/B.md")]);
     expect(selected(), isEmpty);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 
   Future<TestGesture> dragOver(WidgetTester tester, String from, String to) async {
     final drag = await tester.startGesture(tester.getCenter(find.text(from)), kind: PointerDeviceKind.mouse);
@@ -121,7 +126,7 @@ void main() {
 
   Iterable<RecordedRequest> moves() => client.requests.where((request) => request.path == "/files/move");
 
-  testWidgets("escape stops a drag without moving anything", (tester) async {
+  sidebarTest("escape stops a drag without moving anything", (tester) async {
     await showTree(tester);
     final drag = await dragOver(tester, "A", "D");
     expect(find.byType(DragChip), findsOneWidget);
@@ -133,9 +138,9 @@ void main() {
     await drag.up();
     await tester.pumpAndSettle();
     expect(moves(), isEmpty);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 
-  testWidgets("selected notes cannot be dropped onto one of themselves", (tester) async {
+  sidebarTest("selected notes cannot be dropped onto one of themselves", (tester) async {
     await showTree(tester);
     for (final name in ["A", "B", "C"]) {
       await clickWith(tester, LogicalKeyboardKey.metaLeft, name);
@@ -147,5 +152,5 @@ void main() {
 
     expect(moves(), isEmpty);
     expect(selected(), {"/Notes/A.md", "/Notes/B.md", "/Notes/C.md"});
-  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+  });
 }

@@ -17,6 +17,7 @@ final calendarRouterProvider = Provider<GoRouter>(
     home: (location) => CalendarScreen.at(location, showSidebar: false),
     sidebar: (location) => CalendarNavigationSidebar(location: location),
     rail: (location) => CalendarNavigationRail(location: location),
+    sheetItems: (location) => CalendarNavigationSheetItems(location: location),
     settingsGroups: const [ReminderSettingsGroup(), CalendarsGroup()],
   ),
 );

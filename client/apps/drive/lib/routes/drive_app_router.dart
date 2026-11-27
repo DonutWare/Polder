@@ -7,10 +7,12 @@ import "package:polder_drive/screens/settings/widgets/drive_notification_setting
 import "package:polder_drive/screens/settings/widgets/file_browser_settings_group.dart";
 import "package:polder_drive/screens/settings/widgets/trash_settings_group.dart";
 import "package:polder_drive/screens/browser/browser_stack.dart";
+import "package:polder_drive/screens/search/open_search.dart";
 import "package:polder_ui/l10n/generated/app_localizations.dart";
 import "package:polder_ui/routes/standalone_router.dart";
 import "package:polder_ui/routes/up_scope.dart";
 import "package:polder_ui/screens/settings/standalone_settings_screen.dart";
+import "package:polder_ui/widgets/shared/quota_bar.dart";
 
 import "package:polder_drive_app/routes/drive_app_routes.dart";
 import "package:polder_drive_app/widgets/drive_navigation.dart";
@@ -31,8 +33,19 @@ final driveRouterProvider = Provider<GoRouter>((ref) {
     sidebar: (location) => DriveSidebar(location: location),
     rail: (location) => DriveRail(location: location),
     railFooter: (location) => SettingsRailTile(location: location),
+    sheetItems: (location) => DriveSheetItems(location: location),
+    sheetFooter: const QuotaBar(),
     settingsGroups: const [DriveNotificationSettingsGroup(), FileBrowserSettingsGroup(), TrashSettingsGroup()],
     routes: [for (final route in shellRoutes.skip(1)) route as GoRoute],
-    fullScreenRoutes: driveFullScreenRoutes(),
+    fullScreenRoutes: [
+      ...driveFullScreenRoutes(),
+      ...driveNoteRoutes(),
+      standalonePage(
+        DriveRoutes.search,
+        (location) =>
+            UpScope(child: SearchScreen(initialQuery: location.queryParameters[DriveRoutes.queryParameter] ?? "")),
+      ),
+    ],
+    wrapShellChild: (child) => SearchShortcut(child: child),
   );
 });

@@ -1,7 +1,7 @@
 import "package:flutter/widgets.dart";
 
 import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/search/open_search.dart";
+import "package:polder_drive/screens/search/open_search.dart";
 import "package:polder_ui/polder_ui_config.dart";
 import "package:polder/widgets/layout/more_options_button.dart";
 

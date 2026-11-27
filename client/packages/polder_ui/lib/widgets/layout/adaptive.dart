@@ -83,6 +83,11 @@ class SideSheetDrawerState extends State<SideSheetDrawer> with SingleTickerProvi
     _controller.value = 0;
   }
 
+  void dismissThen(void Function(BuildContext context) action) {
+    dismiss();
+    action(context);
+  }
+
   @override
   void dispose() {
     _peekTimer?.cancel();

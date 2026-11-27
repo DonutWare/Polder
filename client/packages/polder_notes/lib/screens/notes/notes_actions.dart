@@ -186,7 +186,8 @@ abstract final class NotesActions {
     return _moveWithFeedback(context, node, parent, name.trim());
   }
 
-  static String _extension(FileEntry page) => page.name.substring(page.name.lastIndexOf(".") + 1);
+  static String _pageFileName(FileEntry page, String name) =>
+      page.isMarkdown ? "$name.${RemotePath.extension(page.name)}" : name;
 
   static Future<String?> move(BuildContext context, NoteTreeNode node) async {
     final destination = await showRemoteFolderPicker(context, initialPath: RemotePath.parent(node.path));
@@ -233,7 +234,7 @@ abstract final class NotesActions {
   }
 
   static String _movedPath(NoteTreeNode node, String destination, String name) =>
-      RemotePath.join(destination, node.page == null ? name : "$name.${_extension(node.page!)}");
+      RemotePath.join(destination, node.page == null ? name : _pageFileName(node.page!, name));
 
   static Future<String?> _moveWithFeedback(
     BuildContext context,
@@ -299,18 +300,14 @@ abstract final class NotesActions {
     final offline = await offlineFor(container.read(offlineFilesProvider.future), node.path);
     if (offline != null && await offline.availableOffline(destination)) {
       if (node.page case final page?) {
-        await offline.move(page.path, RemotePath.join(destination, "$name.${_extension(page)}"));
+        await offline.move(page.path, RemotePath.join(destination, _pageFileName(page, name)));
       }
       if (node.folder case final folder?) await offline.move(folder.path, RemotePath.join(destination, name));
     } else {
       final api = container.read(polderApiProvider);
       final page = node.page;
       if (page != null) {
-        await api.move(
-          from: page.path,
-          to: RemotePath.join(destination, "$name.${_extension(page)}"),
-          baseRev: page.rev,
-        );
+        await api.move(from: page.path, to: RemotePath.join(destination, _pageFileName(page, name)), baseRev: page.rev);
       }
       final folder = node.folder;
       if (folder != null) await api.move(from: folder.path, to: RemotePath.join(destination, name));

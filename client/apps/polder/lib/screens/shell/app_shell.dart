@@ -13,7 +13,7 @@ import "package:polder_drive/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder_ui/routes/history_back.dart";
 import "package:polder_ui/routes/up_scope.dart";
-import "package:polder/screens/search/open_search.dart";
+import "package:polder_drive/screens/search/open_search.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder/screens/shell/sync_background_activator.dart";
 import "package:polder/screens/shell/widgets/file_operations_bar.dart";

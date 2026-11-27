@@ -7,6 +7,7 @@ import "package:polder_drive/providers/sync/sync_platform_provider.dart";
 import "package:polder_drive/routes/drive_routes.dart";
 import "package:polder_ui/screens/settings/standalone_settings_screen.dart";
 import "package:polder_ui/util/localization_helper.dart";
+import "package:polder_ui/widgets/layout/adaptive.dart";
 import "package:polder_ui/widgets/navigation/navigation_shell.dart";
 import "package:polder_ui/widgets/shared/quota_bar.dart";
 
@@ -93,6 +94,26 @@ class DriveRail extends ConsumerWidget {
           label: destination.label(context),
           selected: destination.isAt(location),
           onTap: () => context.go(destination.route),
+        ),
+    ],
+  );
+}
+
+class DriveSheetItems extends ConsumerWidget {
+  const DriveSheetItems({required this.location, super.key});
+
+  final Uri location;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      for (final destination in ref.watch(driveDestinationsProvider))
+        ListTile(
+          leading: Icon(destination.isAt(location) ? destination.selectedIcon : destination.icon),
+          title: Text(destination.label(context)),
+          selected: destination.isAt(location),
+          onTap: () => SideSheetDrawer.of(context).dismissThen((context) => context.go(destination.route)),
         ),
     ],
   );

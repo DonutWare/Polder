@@ -2,83 +2,86 @@ import "package:flutter/widgets.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:polder_ui/l10n/generated/app_localizations.dart";
+import "package:polder_core/models/search.dart";
 import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
+import "package:polder_drive/providers/search/search_destinations_provider.dart";
 import "package:polder_drive/providers/sync/sync_platform_provider.dart";
+import "package:polder_drive/search_host.dart";
 import "package:polder/routes/app_routes.dart";
-import "package:polder_ui/util/fuzzy_match.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_ui/util/search_syntax.dart";
 
-@immutable
-class AppDestination {
-  const AppDestination({required this.route, required this.icon, required this.label, required this.keywords});
+const polderSearchHost = SearchHost(scopeFor: _scopeFor, eventAt: AppRoutes.calendarEventAt);
 
-  final String route;
-  final IconData icon;
-  final String Function(AppLocalizations) label;
+String _scopeFor(BuildContext context, Uri location) => searchScopeFor(
+  location,
+  notesRoot: ProviderScope.containerOf(context, listen: false).read(notesFolderProvider).value,
+);
 
-  final String Function(AppLocalizations) keywords;
+String searchScopeFor(Uri uri, {String? notesRoot}) {
+  if (uri.path == AppRoutes.notes) {
+    return notesRoot == null ? "" : appendSearchFilter("", notesFolderQuery(notesRoot));
+  }
+  if (uri.path == AppRoutes.calendar) {
+    return appendSearchFilter(
+      "",
+      formatSearchFilter(const SearchFilter(key: SearchKey.type, op: SearchOp.equals, values: [searchEventType])),
+    );
+  }
+  return folderSearchScope(uri);
 }
 
-@immutable
-class DestinationMatch {
-  const DestinationMatch({required this.destination, required this.label, required this.match});
-
-  final AppDestination destination;
-  final String label;
-
-  final FuzzyMatch match;
-}
-
-final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
+List<SearchDestination> polderSearchDestinations(Ref ref) {
   final stacked = ref.watch(stackedDestinationsProvider);
   final platform = ref.watch(syncPlatformProvider);
   final isAdmin = ref.watch(isAdminProvider);
   return [
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.files,
       icon: IconsaxPlusLinear.folder_2,
       label: (l) => l.navFiles,
       keywords: (l) => l.searchKeywordsFiles,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.shared,
       icon: IconsaxPlusLinear.share,
       label: (l) => l.navShared,
       keywords: (l) => l.searchKeywordsShared,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.groups,
       icon: IconsaxPlusLinear.people,
       label: (l) => l.groups,
       keywords: (l) => l.searchKeywordsGroups,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.notes,
       icon: IconsaxPlusLinear.note_2,
       label: (l) => l.navNotes,
       keywords: (l) => l.searchKeywordsNotes,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.calendar,
       icon: IconsaxPlusLinear.calendar_1,
       label: (l) => l.navCalendar,
       keywords: (l) => l.searchKeywordsCalendar,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.activity,
       icon: IconsaxPlusLinear.activity,
       label: (l) => l.navActivity,
       keywords: (l) => l.searchKeywordsActivity,
     ),
     if (stacked.contains(ShellDestination.sync)) ...[
-      AppDestination(
+      SearchDestination(
         route: AppRoutes.sync,
         icon: IconsaxPlusLinear.refresh_2,
         label: (l) => l.navSync,
         keywords: (l) => l.searchKeywordsSync,
       ),
-      AppDestination(
+      SearchDestination(
         route: AppRoutes.conflicts,
         icon: IconsaxPlusLinear.warning_2,
         label: (l) => l.searchSyncConflicts,
@@ -86,44 +89,44 @@ final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
       ),
     ],
     if (platform.supportsAutoUpload)
-      AppDestination(
+      SearchDestination(
         route: AppRoutes.autoUpload,
         icon: IconsaxPlusLinear.gallery_import,
         label: (l) => l.navAutoUpload,
         keywords: (l) => l.searchKeywordsAutoUpload,
       ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.tags,
       icon: IconsaxPlusLinear.tag,
       label: (l) => l.tagsTitle,
       keywords: (l) => l.searchKeywordsTags,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.trash,
       icon: IconsaxPlusLinear.trash,
       label: (l) => l.navTrash,
       keywords: (l) => l.searchKeywordsTrash,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.settings,
       icon: IconsaxPlusLinear.setting_2,
       label: (l) => l.navSettings,
       keywords: (l) => l.searchKeywordsSettings,
     ),
-    AppDestination(
+    SearchDestination(
       route: AppRoutes.about,
       icon: IconsaxPlusLinear.info_circle,
       label: (l) => l.about,
       keywords: (l) => l.searchKeywordsAbout,
     ),
     if (isAdmin) ...[
-      AppDestination(
+      SearchDestination(
         route: AppRoutes.admin,
         icon: IconsaxPlusLinear.shield_tick,
         label: (l) => l.administration,
         keywords: (l) => l.searchKeywordsAdmin,
       ),
-      AppDestination(
+      SearchDestination(
         route: AppRoutes.adminUsers,
         icon: IconsaxPlusLinear.profile_2user,
         label: (l) => l.users,
@@ -131,26 +134,4 @@ final appDestinationsProvider = Provider<List<AppDestination>>((ref) {
       ),
     ],
   ];
-});
-
-List<DestinationMatch> matchDestinations(List<AppDestination> destinations, AppLocalizations l, String query) {
-  final matches = <DestinationMatch>[];
-  for (final destination in destinations) {
-    final label = destination.label(l);
-    final byLabel = fuzzyMatch(query, label);
-    final byKeyword = destination
-        .keywords(l)
-        .split(",")
-        .map((keyword) => fuzzyMatch(query, keyword.trim()))
-        .whereType<FuzzyMatch>()
-        .fold<FuzzyMatch?>(null, (best, match) => best == null || match.score > best.score ? match : best);
-    final match = switch ((byLabel, byKeyword)) {
-      (final label?, final keyword?) when keyword.score > label.score + 20 => FuzzyMatch(keyword.score - 10, const []),
-      (final label?, _) => label,
-      (null, final keyword?) => FuzzyMatch(keyword.score - 10, const []),
-      _ => null,
-    };
-    if (match != null) matches.add(DestinationMatch(destination: destination, label: label, match: match));
-  }
-  return matches..sort((a, b) => b.match.score.compareTo(a.match.score));
 }

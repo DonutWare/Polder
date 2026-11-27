@@ -1401,6 +1401,8 @@
 	"showInFinderHint": "Browse your files in Finder; they download when you open them",
 	"finderRemoveTitle": "Remove from Finder?",
 	"finderRemoveMessage": "Files downloaded for offline use are removed from this Mac. They stay on the server.",
+	"finderHandedOffToDrive": "Polder Drive shows your files in Finder. You can change this in Polder Drive.",
+	"filesAppHandedOffToDrive": "Polder Drive shows your files in the Files app. You can change this in Polder Drive.",
 	"showInFilesApp": "Show in Files",
 	"showInFilesAppHint": "Open and save Polder files from other apps through the Files app",
 	"filesAppRemoveTitle": "Remove from Files?",

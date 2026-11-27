@@ -1,10 +1,13 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/user.dart";
-import "package:polder/screens/search/search_view.dart";
+import "package:polder_drive/providers/search/search_destinations_provider.dart";
+import "package:polder_drive/screens/search/search_view.dart";
+import "package:polder_drive/search_host.dart";
 
 import "../support/localized_app.dart";
 import "../support/provider_harness.dart";
@@ -110,7 +113,7 @@ void main() {
   late List<FileEntry> opened;
   late List<String> visited;
 
-  Future<void> pumpSearch(WidgetTester tester, {String initialQuery = ""}) async {
+  Future<void> pumpSearch(WidgetTester tester, {String initialQuery = "", bool filesOnly = false}) async {
     tester.view.physicalSize = const Size(900, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -138,13 +141,21 @@ void main() {
     await tester.pumpWidget(
       localizedApp(
         harness.container,
-        Scaffold(
-          body: SearchView(
-            initialQuery: initialQuery,
-            onOpenEntry: opened.add,
-            onShowInFolder: (_) {},
-            onGo: visited.add,
-            onClose: () {},
+        ProviderScope(
+          overrides: [
+            if (filesOnly) ...[
+              searchHostProvider.overrideWithValue(const SearchHost()),
+              searchDestinationsProvider.overrideWithValue(const []),
+            ],
+          ],
+          child: Scaffold(
+            body: SearchView(
+              initialQuery: initialQuery,
+              onOpenEntry: opened.add,
+              onShowInFolder: (_) {},
+              onGo: visited.add,
+              onClose: () {},
+            ),
           ),
         ),
       ),
@@ -218,5 +229,19 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, "repeats=no"));
     await tester.pumpAndSettle();
     expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, "type=event ");
+  });
+
+  testWidgets("a files-only search leaves events out", (tester) async {
+    await pumpSearch(tester, filesOnly: true);
+
+    expect(find.widgetWithText(ActionChip, "type=image"), findsOneWidget);
+    expect(find.widgetWithText(ActionChip, "type=event"), findsNothing);
+
+    await tester.enterText(find.byType(TextField), "standup");
+    await tester.pumpAndSettle();
+
+    expect(find.text("1 file"), findsOneWidget);
+    expect(find.text("1 event"), findsNothing);
+    expect(find.text("Team standup", findRichText: true), findsNothing);
   });
 }

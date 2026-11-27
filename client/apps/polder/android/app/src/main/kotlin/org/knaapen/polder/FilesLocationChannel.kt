@@ -14,6 +14,7 @@ class FilesLocationChannel(messenger: BinaryMessenger, private val context: Cont
         when (call.method) {
             "enabled" -> result.success(true)
             "connectedAccount" -> result.success(ProviderAccountStore.load(context)?.accountId)
+            "handedOff" -> result.success(driveIsInstalled())
             "connect" -> connect(call, result)
             "disconnect" -> result.success(replaceAccount(null))
             "signal" -> {
@@ -36,6 +37,12 @@ class FilesLocationChannel(messenger: BinaryMessenger, private val context: Cont
         if (previous?.accountId != account?.accountId) PolderDocumentsProvider.clearCache(context)
         PolderDocumentsProvider.notifyAll(context)
         return previous?.revocation()
+    }
+
+    private fun driveIsInstalled(): Boolean {
+        val dev = context.packageName.endsWith(".dev")
+        val drive = "${context.packageName.removeSuffix(".dev")}.drive${if (dev) ".dev" else ""}"
+        return context.packageManager.getLaunchIntentForPackage(drive) != null
     }
 
     private fun accountFrom(call: MethodCall): ProviderAccount? = ProviderAccount(

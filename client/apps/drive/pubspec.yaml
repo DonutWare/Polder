@@ -27,6 +27,8 @@ dependencies:
     path: ../../packages/polder_account_link
   polder_core:
     path: ../../packages/polder_core
+  polder_notes:
+    path: ../../packages/polder_notes
   polder_ui:
     path: ../../packages/polder_ui
   polder_window:

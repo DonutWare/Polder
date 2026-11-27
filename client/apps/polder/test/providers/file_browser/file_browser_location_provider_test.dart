@@ -31,7 +31,7 @@ void main() {
       preferences: preferences,
     );
     addTearDown(harness.dispose);
-    harness.container.read(showInFileBrowserProvider);
+    harness.container.listen(showInFileBrowserProvider, (_, _) {});
     await pumpEventQueue();
     return harness;
   }
@@ -56,12 +56,28 @@ void main() {
       ..accountId = testAccount().id
       ..session = (serverUrl: testAccount().serverUrl, refreshToken: "earlier");
 
-    harness.container.read(showInFileBrowserProvider);
+    harness.container.listen(showInFileBrowserProvider, (_, _) {});
     await pumpEventQueue();
 
     expect(server.requests.where((request) => request.path == "/auth/sessions"), isEmpty);
     expect(harness.fileBrowserLocation.session?.refreshToken, "earlier");
     expect(harness.fileBrowserLocation.signals, 1);
+  });
+
+  test("steps aside when Polder Drive shows the files", () async {
+    final harness = ProviderHarness(httpClient: server, account: testAccount());
+    addTearDown(harness.dispose);
+    harness.fileBrowserLocation
+      ..handedOff = true
+      ..accountId = testAccount().id
+      ..session = (serverUrl: testAccount().serverUrl, refreshToken: "earlier");
+
+    harness.container.listen(showInFileBrowserProvider, (_, _) {});
+    await pumpEventQueue();
+
+    expect(harness.fileBrowserLocation.accountId, isNull);
+    expect(server.requests.where((request) => request.path == "/auth/sessions"), isEmpty);
+    expect(revoked(), ["earlier"]);
   });
 
   test("revokes the session of the account it replaces", () async {
@@ -71,7 +87,7 @@ void main() {
       ..accountId = "bob@https://cloud.test"
       ..session = (serverUrl: "https://cloud.test", refreshToken: "bobs");
 
-    harness.container.read(showInFileBrowserProvider);
+    harness.container.listen(showInFileBrowserProvider, (_, _) {});
     await pumpEventQueue();
 
     expect(harness.fileBrowserLocation.accountId, testAccount().id);

@@ -15,6 +15,8 @@ typedef FileBrowserSession = ({String serverUrl, String refreshToken});
 abstract interface class FileBrowserLocation {
   Stream<bool?> watchEnabled();
 
+  Stream<bool> watchHandedOff();
+
   Future<String?> connectedAccount();
 
   Future<FileBrowserSession?> connect(Account account, TokenPair session, {required String deviceName});
@@ -35,21 +37,28 @@ class ChannelFileBrowserLocation implements FileBrowserLocation {
   );
 
   @override
-  Stream<bool?> watchEnabled() async* {
+  Stream<bool?> watchEnabled() => _watch(() => _ask("enabled"));
+
+  @override
+  Stream<bool> watchHandedOff() => _watch(() async => await _ask("handedOff") ?? false);
+
+  static Stream<T> _watch<T>(Future<T> Function() read) async* {
     final changes = StreamIterator(_changes.stream);
     try {
       do {
-        yield await _enabled();
+        yield await read();
       } while (await changes.moveNext());
     } finally {
       await changes.cancel();
     }
   }
 
-  Future<bool?> _enabled() async {
+  static Future<bool?> _ask(String method) async {
     try {
-      return await _channel.invokeMethod<bool>("enabled");
+      return await _channel.invokeMethod<bool>(method);
     } on PlatformException {
+      return null;
+    } on MissingPluginException {
       return null;
     }
   }

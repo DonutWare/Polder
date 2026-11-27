@@ -11,6 +11,8 @@ import "package:polder_ui/widgets/navigation/standalone_shell.dart";
 
 typedef LocationBuilder = Widget Function(Uri location);
 
+typedef ShellChildWrapper = Widget Function(Widget child);
+
 GoRouter createStandaloneRouter(
   Ref ref, {
   required SignInRoutes signIn,
@@ -20,10 +22,13 @@ GoRouter createStandaloneRouter(
   LocationBuilder? sidebar,
   LocationBuilder? rail,
   LocationBuilder? railFooter,
+  LocationBuilder? sheetItems,
+  Widget? sheetFooter,
   double sidebarWidth = 300,
   List<Widget> settingsGroups = const [],
   List<GoRoute> routes = const [],
   List<RouteBase> fullScreenRoutes = const [],
+  ShellChildWrapper? wrapShellChild,
 }) {
   final state = SignInState(ref);
   final router = GoRouter(
@@ -41,8 +46,10 @@ GoRouter createStandaloneRouter(
           sidebar: sidebar?.call(route.uri),
           rail: rail?.call(route.uri),
           railFooter: railFooter?.call(route.uri),
+          sheetItems: sheetItems?.call(route.uri),
+          sheetFooter: sheetFooter,
           sidebarWidth: sidebarWidth,
-          child: child,
+          child: wrapShellChild?.call(child) ?? child,
         ),
         routes: [
           standalonePage(signIn.home, (location) => UpScope(child: home(location))),

@@ -1,6 +1,17 @@
 import FileProvider
 import FlutterMacOS
 
+enum DriveFinder {
+  static let changedNotification = "org.knaapen.polder.drive.finder.changed"
+
+  static var isConnected: Bool {
+    guard let group = Bundle.main.object(forInfoDictionaryKey: "PolderAppGroup") as? String,
+      let container = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group)
+    else { return false }
+    return FileManager.default.fileExists(atPath: container.appendingPathComponent("drive-finder.account.json").path)
+  }
+}
+
 final class FinderLocation {
   private static let identifier = NSFileProviderDomainIdentifier(rawValue: "polder")
 
@@ -15,12 +26,30 @@ final class FinderLocation {
     observer = NotificationCenter.default.addObserver(
       forName: NSNotification.Name("NSFileProviderDomainDidChange"), object: nil, queue: .main
     ) { [weak self] _ in
-      self?.channel.invokeMethod("changed", arguments: nil)
+      self?.announceChange()
     }
+    CFNotificationCenterAddObserver(
+      CFNotificationCenterGetDarwinNotifyCenter(),
+      Unmanaged.passUnretained(self).toOpaque(),
+      { _, observer, _, _, _ in
+        guard let observer else { return }
+        let location = Unmanaged<FinderLocation>.fromOpaque(observer).takeUnretainedValue()
+        DispatchQueue.main.async { location.announceChange() }
+      },
+      DriveFinder.changedNotification as CFString,
+      nil,
+      .deliverImmediately
+    )
   }
 
   deinit {
     if let observer { NotificationCenter.default.removeObserver(observer) }
+    CFNotificationCenterRemoveEveryObserver(
+      CFNotificationCenterGetDarwinNotifyCenter(), Unmanaged.passUnretained(self).toOpaque())
+  }
+
+  private func announceChange() {
+    channel.invokeMethod("changed", arguments: nil)
   }
 
   private static func handle(_ call: FlutterMethodCall, reply: @escaping (Any?) -> Void) {
@@ -31,6 +60,8 @@ final class FinderLocation {
       }
     case "connectedAccount":
       reply(ProviderAccountStore.load()?.accountId)
+    case "handedOff":
+      reply(DriveFinder.isConnected)
     case "connect":
       guard let arguments = call.arguments as? [String: String],
         let account = account(from: arguments),

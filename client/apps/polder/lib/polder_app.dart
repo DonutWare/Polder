@@ -24,7 +24,7 @@ import "package:polder_core/providers/branding/branding_provider.dart";
 import "package:polder/providers/deep_link/deep_link_provider.dart";
 import "package:polder/providers/notifications/notification_coordinator.dart";
 import "package:polder_drive/providers/file_browser/file_browser_location_provider.dart";
-import "package:polder/providers/sharing/share_target_provider.dart";
+import "package:polder_drive/providers/sharing/share_target_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder/widgets/desktop/desktop_tray.dart";
@@ -56,6 +56,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
   void _onResume() {
     ref.read(appearanceProvider.notifier).refreshSystemAccent();
     unawaited(ref.read(installedCompanionsProvider.notifier).refresh());
+    ref.invalidate(fileBrowserHandedOffProvider);
     if (ref.read(currentAccountProvider) == null || ref.read(sessionEndedProvider)) return;
     unawaited(ref.read(serverConnectionProvider.notifier).check());
     ref.read(offlineSyncProvider.notifier).kickAll();

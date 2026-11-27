@@ -48,7 +48,7 @@ type notesItem struct {
 
 type notesListing struct {
 	Path  string      `json:"path"`
-	Items []notesItem `json:"items" doc:"The folders and notes in the folder; other files are left out"`
+	Items []notesItem `json:"items" doc:"The folders, notes and other text files in the folder; other files are left out"`
 }
 
 func (a *API) listNotes(ctx context.Context, input *pathQuery) (*jsonBody[notesListing], error) {
@@ -57,7 +57,7 @@ func (a *API) listNotes(ctx context.Context, input *pathQuery) (*jsonBody[notesL
 	if err != nil {
 		return nil, err
 	}
-	notesInside, err := a.files.DescendantPaths(ctx, owner, listedPath, files.MarkdownMime)
+	notesInside, err := a.files.DescendantTextPaths(ctx, owner, listedPath)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (a *API) listNotes(ctx context.Context, input *pathQuery) (*jsonBody[notesL
 	notesPerFolder := notesInFolders(listedPath, notesInside)
 	items := []notesItem{}
 	for _, entry := range entries {
-		if entry.IsDir || entry.Mime == files.MarkdownMime {
+		if entry.IsDir || entry.IsText() {
 			item := notesItem{Entry: entry}
 			if entry.IsDir {
 				item.HasNotes = notesPerFolder[entry.Name].hasNotes
@@ -104,5 +104,6 @@ func notesInFolders(folder string, notePaths []string) map[string]folderNotes {
 }
 
 func isReadme(noteName string) bool {
-	return strings.EqualFold(strings.TrimSuffix(noteName, path.Ext(noteName)), "README")
+	return files.MimeFor(noteName) == files.MarkdownMime &&
+		strings.EqualFold(strings.TrimSuffix(noteName, path.Ext(noteName)), "README")
 }

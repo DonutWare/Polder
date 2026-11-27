@@ -4,7 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/search.dart";
-import "package:polder/providers/search/app_destinations_provider.dart";
+import "package:polder_drive/providers/search/search_destinations_provider.dart";
 import "package:polder_drive/screens/browser/widgets/file_metadata_text.dart";
 import "package:polder_drive/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder_ui/util/localization_helper.dart";

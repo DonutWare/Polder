@@ -316,6 +316,32 @@ func TestNotesListingTellsWhichFoldersHoldNotes(t *testing.T) {
 	})
 }
 
+func TestNotesListingIncludesTextFiles(t *testing.T) {
+	forEachDatabase(t, func(t *testing.T, server *testServer) {
+		alice := server.createUser(server.setupAdmin(), "alice", 0)
+		alice.put("/Notes/todo.txt", 0, []byte("milk"), http.StatusOK, nil)
+		alice.put("/Notes/server.log", 0, []byte("started"), http.StatusOK, nil)
+		alice.put("/Notes/photo.jpg", 0, []byte("jpg"), http.StatusOK, nil)
+		alice.put("/Notes/Config/app.yaml", 0, []byte("a: 1"), http.StatusOK, nil)
+		alice.put("/Notes/Images/cat.png", 0, []byte("cat"), http.StatusOK, nil)
+
+		var notes struct {
+			Items []struct {
+				Entry    fileEntry `json:"entry"`
+				HasNotes bool      `json:"hasNotes"`
+			} `json:"items"`
+		}
+		alice.mustJSON(http.MethodGet, "/notes/list?path=/Notes", nil, http.StatusOK, &notes)
+		var summary []string
+		for _, item := range notes.Items {
+			summary = append(summary, fmt.Sprintf("%s=%v", item.Entry.Name, item.HasNotes))
+		}
+		if err := expectSummary(summary, []string{"Config=true", "Images=false", "server.log=false", "todo.txt=false"}); err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
 func TestAttachmentsNoNoteLinksToGoToTheTrash(t *testing.T) {
 	forEachDatabase(t, func(t *testing.T, server *testServer) {
 		alice := server.createUser(server.setupAdmin(), "alice", 0)

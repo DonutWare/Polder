@@ -33,6 +33,18 @@
 				<data android:scheme="${deepLinkScheme}" android:host="auth" />
 			</intent-filter>
 		</activity>
+		<activity android:name=".IntentForwardActivity" android:exported="true" android:taskAffinity="" android:excludeFromRecents="true" android:noHistory="true" android:theme="@android:style/Theme.Translucent.NoTitleBar">
+			<intent-filter>
+				<action android:name="android.intent.action.SEND" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="*/*" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.SEND_MULTIPLE" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="*/*" />
+			</intent-filter>
+		</activity>
 		<meta-data android:name="flutterEmbedding" android:value="2" />
 		<receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
 		<receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
@@ -44,6 +56,11 @@
 				<action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
 			</intent-filter>
 		</receiver>
+		<provider android:name=".PolderDocumentsProvider" android:authorities="${applicationId}.documents" android:exported="true" android:grantUriPermissions="true" android:permission="android.permission.MANAGE_DOCUMENTS">
+			<intent-filter>
+				<action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+			</intent-filter>
+		</provider>
 		<provider android:name=".WallpaperFileProvider" android:authorities="${applicationId}.wallpaper_provider" android:exported="false" android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/wallpaper_file_paths" />
 		</provider>

@@ -19,6 +19,7 @@ import "package:polder_notes/screens/notes/widgets/notes_sidebar.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_ui/util/localization_helper.dart";
+import "package:polder_ui/widgets/layout/adaptive.dart";
 import "package:polder_ui/widgets/layout/dual_pane.dart";
 import "package:polder_ui/widgets/navigation/navigation_shell.dart";
 import "package:polder_ui/widgets/tags/tag_chip.dart";
@@ -248,6 +249,51 @@ class _NotesNavigationRailState extends ConsumerState<NotesNavigationRail> {
           icon: IconsaxPlusLinear.setting_4,
           label: localized.notesChangeFolder,
           onTap: () => unawaited(_changeFolder(context, ref)),
+        ),
+      ],
+    );
+  }
+}
+
+class NotesNavigationSheetItems extends ConsumerWidget {
+  const NotesNavigationSheetItems({required this.location, super.key});
+
+  final Uri location;
+
+  void _changeFolderFromSheet(BuildContext context, WidgetRef ref) {
+    final suggestion = ref.read(notesFolderProvider).value;
+    SideSheetDrawer.of(context)
+        .dismissThen((context) => unawaited(showNotesSetupDialog(context, suggestion: suggestion)));
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    final root = ref.watch(notesFolderProvider).value;
+    final grid = ref.watch(notesViewModeProvider) == NotesViewMode.grid;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (root != null) ...[
+          ListTile(
+            leading: Icon(grid ? IconsaxPlusLinear.row_vertical : IconsaxPlusLinear.element_3),
+            title: Text(grid ? localized.listView : localized.gridView),
+            onTap: ref.read(notesViewModeProvider.notifier).toggle,
+          ),
+          Builder(
+            builder: (context) => ListTile(
+              leading: const Icon(IconsaxPlusLinear.sort),
+              title: Text(localized.notesViewOptions),
+              onTap: () => unawaited(
+                NotesOptionsMenu.showFrom(context, ref, root: root, selectedPath: _selectedNote(ref, location)),
+              ),
+            ),
+          ),
+        ],
+        ListTile(
+          leading: const Icon(IconsaxPlusLinear.setting_4),
+          title: Text(localized.notesChangeFolder),
+          onTap: () => _changeFolderFromSheet(context, ref),
         ),
       ],
     );

@@ -41,7 +41,7 @@ final List<Override> notesAppOverrides = [
 String _afterSignIn(Uri loginLocation) => NotesAppRoutes.signIn.afterSignIn(loginLocation);
 
 Future<void> _openFile(BuildContext context, FileEntry entry, {List<FileEntry>? gallery}) async {
-  if (entry.isMarkdown) return context.go(NotesAppRoutes.notes.noteAt(entry.path));
+  if (entry.isText) return context.go(NotesAppRoutes.notes.noteAt(entry.path));
   if (entry.isDir) return _openInFiles(context, entry.path);
   if (entry.isViewableMedia) {
     await context.push(NotesAppRoutes.media, extra: gallery == null ? entry : MediaGallery(entry, gallery));

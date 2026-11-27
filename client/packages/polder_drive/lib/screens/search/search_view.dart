@@ -8,13 +8,13 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/search.dart";
-import "package:polder/providers/search/app_destinations_provider.dart";
-import "package:polder/providers/search/search_provider.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/search/widgets/search_filter_builder.dart";
-import "package:polder/screens/search/widgets/outline_progress.dart";
-import "package:polder/screens/search/widgets/search_query_controller.dart";
-import "package:polder/screens/search/widgets/search_result_tiles.dart";
+import "package:polder_drive/providers/search/search_destinations_provider.dart";
+import "package:polder_drive/providers/search/search_provider.dart";
+import "package:polder_drive/screens/search/widgets/search_filter_builder.dart";
+import "package:polder_drive/screens/search/widgets/outline_progress.dart";
+import "package:polder_drive/screens/search/widgets/search_query_controller.dart";
+import "package:polder_drive/screens/search/widgets/search_result_tiles.dart";
+import "package:polder_drive/search_host.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/util/search_syntax.dart";
@@ -26,13 +26,14 @@ const _maxDestinations = 4;
 const _tileExtent = 64.0;
 const _exampleFilters = [
   "type=note",
-  "type=event",
+  _eventTypeFilter,
   "type=image",
   "type=pdf",
   "modified>7d",
   "size>100mb",
   "type=folder",
 ];
+const _eventTypeFilter = "type=event";
 const _eventFilters = ["repeats=no", "repeats=yes", "when=upcoming", "when=past", "when=today"];
 
 class SearchView extends ConsumerStatefulWidget {
@@ -52,7 +53,6 @@ class SearchView extends ConsumerStatefulWidget {
   final ValueChanged<String> onGo;
   final VoidCallback onClose;
 
-  // Shown at the start of the search bar, such as a back button.
   final Widget? leading;
 
   @override
@@ -139,13 +139,17 @@ class _SearchViewState extends ConsumerState<SearchView> {
   }
 
   Future<void> _addFilter() async {
-    final filter = await showSearchFilterBuilder(context, events: searchesEvents(_controller.text));
+    final events = ref.read(searchHostProvider).searchesEvents && searchesEvents(_controller.text);
+    final filter = await showSearchFilterBuilder(context, events: events);
     if (filter == null || !mounted) return;
     final text = appendSearchFilter(_controller.text, formatSearchFilter(filter));
     _setText(text, text.length);
   }
 
-  void _openEvent(EventSearchHit hit) => widget.onGo(AppRoutes.calendarEventAt(hit.event.ref, hit.event.start));
+  void _openEvent(EventSearchHit hit) {
+    final eventAt = ref.read(searchHostProvider).eventAt;
+    if (eventAt != null) widget.onGo(eventAt(hit.event.ref, hit.event.start));
+  }
 
   void _moveSelection(int delta, int count) {
     if (count == 0) return;
@@ -165,8 +169,9 @@ class _SearchViewState extends ConsumerState<SearchView> {
   @override
   Widget build(BuildContext context) {
     final l = context.localized;
+    final withEvents = ref.watch(searchHostProvider).searchesEvents;
     final results = _query.isEmpty ? null : ref.watch(searchResultsProvider(_query));
-    final eventResults = _query.isEmpty ? null : ref.watch(eventSearchResultsProvider(_query));
+    final eventResults = _query.isEmpty || !withEvents ? null : ref.watch(eventSearchResultsProvider(_query));
     if (results?.value case final current?) _shown = current;
     if (eventResults?.value case final current?) _shownEvents = current;
     if (_query.isEmpty) {
@@ -184,7 +189,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
     final freeText = tokenizeSearch(_query).where((token) => !token.isFilter).map((token) => token.text).join(" ");
     final destinations = freeText.isEmpty
         ? const <DestinationMatch>[]
-        : matchDestinations(ref.watch(appDestinationsProvider), l, freeText).take(_maxDestinations).toList();
+        : matchDestinations(ref.watch(searchDestinationsProvider), l, freeText).take(_maxDestinations).toList();
     final hits = shown?.hits ?? const <SearchHit>[];
     final eventHits = shownEvents?.hits ?? const <EventSearchHit>[];
     final count = destinations.length + eventHits.length + hits.length;
@@ -200,7 +205,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
 
     final suggestions = _controller.text.isEmpty ? null : ref.watch(searchSuggestionsProvider(_suggestFor)).value;
     final visibleSuggestions = suggestions?.suggestions ?? const <SearchSuggestion>[];
-    final eventChips = visibleSuggestions.isEmpty && searchesEvents(_controller.text);
+    final eventChips = withEvents && visibleSuggestions.isEmpty && searchesEvents(_controller.text);
     final activeFilters = {for (final token in tokenizeSearch(_controller.text)) token.text.toLowerCase()};
     final failure = results?.error ?? eventResults?.error;
 
@@ -252,6 +257,7 @@ class _SearchViewState extends ConsumerState<SearchView> {
           Expanded(
             child: switch ((results, shown ?? shownEvents)) {
               (null, _) => _SearchHints(
+                withEvents: withEvents,
                 onFilter: (filter) {
                   final text = appendSearchFilter(_controller.text, filter);
                   _setText(text, text.length);
@@ -435,8 +441,9 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _SearchHints extends StatelessWidget {
-  const _SearchHints({required this.onFilter});
+  const _SearchHints({required this.withEvents, required this.onFilter});
 
+  final bool withEvents;
   final ValueChanged<String> onFilter;
 
   @override
@@ -454,7 +461,9 @@ class _SearchHints extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final filter in _exampleFilters) ActionChip(label: Text(filter), onPressed: () => onFilter(filter)),
+            for (final filter in _exampleFilters)
+              if (withEvents || filter != _eventTypeFilter)
+                ActionChip(label: Text(filter), onPressed: () => onFilter(filter)),
           ],
         ),
       ],

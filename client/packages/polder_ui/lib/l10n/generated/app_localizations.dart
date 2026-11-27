@@ -4346,6 +4346,18 @@ abstract class AppLocalizations {
   /// **'Files downloaded for offline use are removed from this Mac. They stay on the server.'**
   String get finderRemoveMessage;
 
+  /// No description provided for @finderHandedOffToDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Polder Drive shows your files in Finder. You can change this in Polder Drive.'**
+  String get finderHandedOffToDrive;
+
+  /// No description provided for @filesAppHandedOffToDrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Polder Drive shows your files in the Files app. You can change this in Polder Drive.'**
+  String get filesAppHandedOffToDrive;
+
   /// No description provided for @showInFilesApp.
   ///
   /// In en, this message translates to:

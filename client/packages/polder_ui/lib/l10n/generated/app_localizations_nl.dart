@@ -2475,6 +2475,14 @@ class AppLocalizationsNl extends AppLocalizations {
       'Bestanden die voor offline gebruik zijn gedownload, worden van deze Mac verwijderd. Ze blijven op de server staan.';
 
   @override
+  String get finderHandedOffToDrive =>
+      'Polder Drive toont je bestanden in Finder. Je kunt dit wijzigen in Polder Drive.';
+
+  @override
+  String get filesAppHandedOffToDrive =>
+      'Polder Drive toont je bestanden in de app Bestanden. Je kunt dit wijzigen in Polder Drive.';
+
+  @override
   String get showInFilesApp => 'Tonen in Bestanden';
 
   @override

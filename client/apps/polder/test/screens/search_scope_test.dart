@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/screens/search/open_search.dart";
+import "package:polder/providers/search/polder_search.dart";
 
 void main() {
   test("search from the calendar starts with events", () {

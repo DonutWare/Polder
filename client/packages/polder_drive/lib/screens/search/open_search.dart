@@ -4,32 +4,27 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
-import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder_core/models/search.dart";
-import "package:polder_notes/providers/notes/notes_folder_provider.dart";
-import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder_drive/screens/browser/widgets/file_open_action.dart";
-import "package:polder/screens/search/search_view.dart";
-import "package:polder_ui/theme/app_theme.dart";
-import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
-import "package:polder_ui/util/search_syntax.dart";
-import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder_drive/routes/drive_routes.dart";
+import "package:polder_drive/screens/browser/widgets/file_open_action.dart";
+import "package:polder_drive/screens/search/search_view.dart";
+import "package:polder_drive/search_host.dart";
+import "package:polder_ui/polder_ui_config.dart";
 import "package:polder_ui/routes/up_scope.dart";
+import "package:polder_ui/theme/app_theme.dart";
+import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder_ui/util/localization_helper.dart";
 
 bool _paletteOpen = false;
 
-// Compact windows get a full page, so the keyboard and the results have the whole screen; larger
-// windows get a palette over whatever is open.
 Future<void> openSearch(BuildContext context, {String initialQuery = ""}) async {
   if (AdaptiveLayout.isPhone(context)) {
-    if (GoRouter.of(context).routerDelegate.currentConfiguration.uri.path == AppRoutes.search) return;
-    await context.push(AppRoutes.searchFor(initialQuery));
+    if (GoRouter.of(context).routerDelegate.currentConfiguration.uri.path == DriveRoutes.search) return;
+    await context.push(DriveRoutes.searchFor(initialQuery));
     return;
   }
   if (_paletteOpen) return;
@@ -44,13 +39,18 @@ Future<void> openSearch(BuildContext context, {String initialQuery = ""}) async 
   }
 }
 
+void openSearchInScope(BuildContext context, Uri location) =>
+    unawaited(openSearch(context, initialQuery: searchHostOf(context).scopeFor(context, location)));
+
 void showInFolder(BuildContext context, FileEntry entry) =>
-    context.go(AppRoutes.filesAt(RemotePath.parent(entry.path), select: entry.name));
+    context.go(DriveRoutes.filesAt(RemotePath.parent(entry.path), select: entry.name));
+
+void _goFromSearch(BuildContext context, String route) =>
+    readPolderUiConfig(context).isTopLevel(route) ? context.go(route) : unawaited(context.push(route));
 
 class _SearchPalette extends StatelessWidget {
   const _SearchPalette({required this.host, required this.initialQuery});
 
-  // Results open from the page behind the palette, which outlives the palette itself.
   final BuildContext host;
   final String initialQuery;
 
@@ -73,7 +73,7 @@ class _SearchPalette extends StatelessWidget {
           initialQuery: initialQuery,
           onOpenEntry: (entry) => closeThen((host) => openEntry(host, entry)),
           onShowInFolder: (entry) => closeThen((host) => showInFolder(host, entry)),
-          onGo: (route) => closeThen((host) => AppRoutes.isTab(route) ? host.go(route) : unawaited(host.push(route))),
+          onGo: (route) => closeThen((host) => _goFromSearch(host, route)),
           onClose: () => Navigator.of(context).pop(),
         ),
       ),
@@ -97,7 +97,8 @@ class SearchScreen extends StatelessWidget {
           leading: BackButton(onPressed: close),
           onOpenEntry: (entry) => openEntry(context, entry),
           onShowInFolder: (entry) => showInFolder(context, entry),
-          onGo: (route) => AppRoutes.isTab(route) ? context.go(route) : context.pushReplacement(route),
+          onGo: (route) =>
+              readPolderUiConfig(context).isTopLevel(route) ? context.go(route) : context.pushReplacement(route),
           onClose: close,
         ),
       ),
@@ -130,20 +131,13 @@ class _SearchShortcutState extends State<SearchShortcut> {
   bool _onKey(KeyEvent event) {
     if (event is! KeyDownEvent || event.logicalKey != LogicalKeyboardKey.keyK) return false;
     final keyboard = HardwareKeyboard.instance;
-    final apple = const {TargetPlatform.macOS, TargetPlatform.iOS}.contains(defaultTargetPlatform);
-    if (!(apple ? keyboard.isMetaPressed : keyboard.isControlPressed) ||
+    if (!(_usesCommandKey ? keyboard.isMetaPressed : keyboard.isControlPressed) ||
         keyboard.isShiftPressed ||
         keyboard.isAltPressed) {
       return false;
     }
     if (!mounted || !(ModalRoute.of(context)?.isCurrent ?? true)) return false;
-    openSearch(
-      context,
-      initialQuery: searchScopeFor(
-        GoRouter.of(context).routerDelegate.currentConfiguration.uri,
-        notesRoot: _notesRootOf(context),
-      ),
-    );
+    openSearchInScope(context, GoRouter.of(context).routerDelegate.currentConfiguration.uri);
     return true;
   }
 
@@ -151,40 +145,15 @@ class _SearchShortcutState extends State<SearchShortcut> {
   Widget build(BuildContext context) => widget.child;
 }
 
-String? _notesRootOf(BuildContext context) =>
-    ProviderScope.containerOf(context, listen: false).read(notesFolderProvider).value;
-
-String searchScopeFor(Uri uri, {String? notesRoot}) {
-  if (uri.path == AppRoutes.notes) {
-    return notesRoot == null ? "" : appendSearchFilter("", notesFolderQuery(notesRoot));
-  }
-  if (uri.path == AppRoutes.calendar) {
-    return appendSearchFilter(
-      "",
-      formatSearchFilter(const SearchFilter(key: SearchKey.type, op: SearchOp.equals, values: [searchEventType])),
-    );
-  }
-  final folder = uri.path == AppRoutes.files ? uri.queryParameters[AppRoutes.pathParameter] : null;
-  if (folder == null || folder == RemotePath.root) return "";
-  return appendSearchFilter(
-    "",
-    formatSearchFilter(SearchFilter(key: SearchKey.folder, op: SearchOp.equals, values: [folder])),
-  );
-}
-
 class SearchButton extends StatelessWidget {
   const SearchButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final apple = const {TargetPlatform.macOS, TargetPlatform.iOS}.contains(defaultTargetPlatform);
-    return IconButton(
-      tooltip: context.localized.searchTooltip(apple ? "⌘K" : "Ctrl+K"),
-      icon: const Icon(IconsaxPlusLinear.search_normal_1),
-      onPressed: () => openSearch(
-        context,
-        initialQuery: searchScopeFor(GoRouterState.of(context).uri, notesRoot: _notesRootOf(context)),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => IconButton(
+    tooltip: context.localized.searchTooltip(_usesCommandKey ? "⌘K" : "Ctrl+K"),
+    icon: const Icon(IconsaxPlusLinear.search_normal_1),
+    onPressed: () => openSearchInScope(context, GoRouterState.of(context).uri),
+  );
 }
+
+bool get _usesCommandKey => const {TargetPlatform.macOS, TargetPlatform.iOS}.contains(defaultTargetPlatform);

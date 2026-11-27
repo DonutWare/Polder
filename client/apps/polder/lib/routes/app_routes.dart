@@ -12,7 +12,7 @@ abstract final class AppRoutes {
   static const files = DriveRoutes.files;
   static const notes = "/notes";
   static const calendar = "/calendar";
-  static const search = "/search";
+  static const search = DriveRoutes.search;
   static const scan = DriveRoutes.scan;
   static const pdf = DriveRoutes.pdf;
   static const media = DriveRoutes.media;
@@ -42,7 +42,7 @@ abstract final class AppRoutes {
 
   static const pathParameter = NotesLocations.pathParameter;
   static const selectParameter = DriveRoutes.selectParameter;
-  static const queryParameter = "q";
+  static const queryParameter = DriveRoutes.queryParameter;
   static const scopeParameter = "scope";
   static const serverParameter = DriveRoutes.serverParameter;
   static const fromParameter = SignInRoutes.fromParameter;
@@ -63,8 +63,7 @@ abstract final class AppRoutes {
 
   static bool isNoteLocation(String? location) => notesLocations.isNoteLocation(location);
 
-  static String searchFor(String query) =>
-      Uri(path: search, queryParameters: query.isEmpty ? null : {queryParameter: query}).toString();
+  static String searchFor(String query) => DriveRoutes.searchFor(query);
 
   static String sharedSection(String section) => DriveRoutes.sharedSection(section);
 

@@ -22,12 +22,11 @@ class NoteTreeNode {
 
   String get path => (page ?? folder)!.path;
 
-  String get name => page != null ? RemotePath.withoutExtension(page!.name) : folder!.name;
+  String get name => page?.displayName ?? folder!.name;
 
   bool holds(String path) => path == page?.path || RemotePath.isWithin(path, childrenPath);
 
-  String get childrenPath =>
-      folder?.path ?? RemotePath.join(RemotePath.parent(page!.path), RemotePath.withoutExtension(page!.name));
+  String get childrenPath => folder?.path ?? RemotePath.join(RemotePath.parent(page!.path), page!.displayName);
 }
 
 class NotesFolderContents {
@@ -100,7 +99,7 @@ class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> with GuardedR
   static Future<List<NoteItem>> localItems(OfflineFiles files, String folder) async {
     final inside = <String, ({bool notes, bool readme})>{};
     for (final row in await files.tree(folder)) {
-      if (!row.entry.isMarkdown) continue;
+      if (!row.entry.isText) continue;
       final relative = RemotePath.relativeTo(row.path, folder);
       final slash = relative?.indexOf("/") ?? -1;
       if (relative == null || slash < 0) continue;
@@ -112,7 +111,7 @@ class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> with GuardedR
     }
     return [
       for (final row in await files.children(folder))
-        if (row.isDir || row.entry.isMarkdown)
+        if (row.isDir || row.entry.isText)
           NoteItem(
             entry: row.entry,
             hasNotes: inside[row.entry.name]?.notes ?? false,
@@ -133,7 +132,7 @@ class NotesTreeNotifier extends AsyncNotifier<NotesFolderContents> with GuardedR
       } else if (_readme.hasMatch(item.entry.name)) {
         readme = item.entry;
       } else {
-        pages[RemotePath.withoutExtension(item.entry.name)] = item;
+        pages[item.entry.displayName] = item;
       }
     }
     final nodes = [

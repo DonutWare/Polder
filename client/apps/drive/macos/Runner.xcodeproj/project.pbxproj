@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		24D4E78265E21138D9FBB623 /* ProviderAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07908E1553DFDEC826B645BD /* ProviderAccount.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -29,7 +30,14 @@
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		3C9F7E4FBDDC1339FD8C44BA /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E8B824D395228E26EF8FC8E /* Pods_RunnerTests.framework */; };
 		4586D37240B8218751DB474D /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C94684D399D2E8D177A88E7 /* Pods_Runner.framework */; };
+		575477352C40C04178761964 /* FileProviderExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90765583D44B39D2C3988DED /* FileProviderExtension.swift */; };
+		5D005CA3ECA7844945955985 /* ServerClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CA42A5FF8CB1E02FE19CAB /* ServerClient.swift */; };
+		6D09FC17049D255300904C0A /* FinderLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C4477400AB2C56C19C57C6 /* FinderLocation.swift */; };
+		70C168E43D7579C6D245240C /* DriveFinder.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1F77C4AD00CFBDC8CD9D6507 /* DriveFinder.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		73EC2C555650DD281E034FB7 /* FileProviderEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3F3C8BA85381971140C26A /* FileProviderEnumerator.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		99D6B3EC874F1CEBF7945CDB /* FileProviderItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A2328F0646E7E2E358DFDA2 /* FileProviderItem.swift */; };
+		C117A426FED7BB1EF2F6527D /* ProviderAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07908E1553DFDEC826B645BD /* ProviderAccount.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +55,13 @@
 			remoteGlobalIDString = 33CC111A2044C6BA0003C045;
 			remoteInfo = FLX;
 		};
+		5EC3518C1EE5D9254D700F28 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 33CC10E52044A3C60003C045 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 831699675635FC714D3C73C6;
+			remoteInfo = DriveFinder;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -60,14 +75,29 @@
 			name = "Bundle Framework";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AD1574C66D6E20733FA772DB /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				70C168E43D7579C6D245240C /* DriveFinder.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		07908E1553DFDEC826B645BD /* ProviderAccount.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProviderAccount.swift; sourceTree = "<group>"; };
 		0B07A7C77790C1F6496FBDC4 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		15B5BEEDE31F4F683C414B18 /* Pods-Runner.debug-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-prod.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-prod.xcconfig"; sourceTree = "<group>"; };
 		1911F45094AFEF45A3CF8FBF /* Pods-RunnerTests.debug-dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug-dev.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug-dev.xcconfig"; sourceTree = "<group>"; };
+		1F77C4AD00CFBDC8CD9D6507 /* DriveFinder.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DriveFinder.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A2328F0646E7E2E358DFDA2 /* FileProviderItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FileProviderItem.swift; sourceTree = "<group>"; };
 		2C301495800EE66E48871C23 /* Pods-Runner.debug-dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-dev.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-dev.xcconfig"; sourceTree = "<group>"; };
 		2DF972976E1A9B53E2E66933 /* Pods-RunnerTests.debug-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug-prod.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug-prod.xcconfig"; sourceTree = "<group>"; };
+		2E45F31835813B830963DC9A /* DriveFinder.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = DriveFinder.entitlements; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
@@ -84,27 +114,41 @@
 		33E51913231747F40026EE4D /* DebugProfile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DebugProfile.entitlements; sourceTree = "<group>"; };
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
+		457C17C59463E5A203E92E76 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DriveFinder.xcconfig; sourceTree = "<group>"; };
 		543E7C257E18FBC458C644CF /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		626455E3894F48F1A5AFCA4B /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		8C94684D399D2E8D177A88E7 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E8B824D395228E26EF8FC8E /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		90765583D44B39D2C3988DED /* FileProviderExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FileProviderExtension.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		A064DE49AC4BA1D62B9DFAE7 /* Pods-RunnerTests.release-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release-prod.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release-prod.xcconfig"; sourceTree = "<group>"; };
+		A0CA42A5FF8CB1E02FE19CAB /* ServerClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServerClient.swift; sourceTree = "<group>"; };
 		A2758B7040E2E47319394E1D /* Pods-Runner.profile-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile-prod.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile-prod.xcconfig"; sourceTree = "<group>"; };
 		AA7DDF15A37F2802F940E1B8 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		B5409F25BCDB1C67A0A9B242 /* Pods-RunnerTests.profile-dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile-dev.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile-dev.xcconfig"; sourceTree = "<group>"; };
 		BA98A7DCB1BDFE31F4C65469 /* Pods-Runner.release-dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-dev.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-dev.xcconfig"; sourceTree = "<group>"; };
 		BFD3D12B8BE9F62F99384B76 /* Pods-RunnerTests.profile-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile-prod.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile-prod.xcconfig"; sourceTree = "<group>"; };
+		C6C4477400AB2C56C19C57C6 /* FinderLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FinderLocation.swift; sourceTree = "<group>"; };
 		CA6C90B02DF66ED96B93397D /* Pods-Runner.release-prod.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-prod.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-prod.xcconfig"; sourceTree = "<group>"; };
 		D4B57DD4C6D5FD3F986B363F /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		D6AA4523FCEAD5479402317B /* Pods-RunnerTests.release-dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release-dev.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release-dev.xcconfig"; sourceTree = "<group>"; };
+		DF3F3C8BA85381971140C26A /* FileProviderEnumerator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FileProviderEnumerator.swift; sourceTree = "<group>"; };
+		E2E0792EA6ADC386DD1068D3 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EDDE0CFDBA8ED6D668838781 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		F963D05C48E4FB07378B9808 /* Pods-Runner.profile-dev.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile-dev.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile-dev.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		26C5E8B5230E8970771CD92B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		331C80D2294CF70F00263BE5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -125,6 +169,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1E79FB43D609E18465B8B268 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				07908E1553DFDEC826B645BD /* ProviderAccount.swift */,
+			);
+			name = Shared;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		331C80D6294CF71000263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -153,6 +206,8 @@
 				33CC10EE2044A3C60003C045 /* Products */,
 				D73912EC22F37F3D000D13A0 /* Frameworks */,
 				917C652E550269C03781912E /* Pods */,
+				1E79FB43D609E18465B8B268 /* Shared */,
+				863884F704A6CFD068661E2C /* DriveFinder */,
 			);
 			sourceTree = "<group>";
 		};
@@ -161,6 +216,7 @@
 			children = (
 				33CC10ED2044A3C60003C045 /* polder_drive_app.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
+				1F77C4AD00CFBDC8CD9D6507 /* DriveFinder.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -197,8 +253,24 @@
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
 				33BA886A226E78AF003329D5 /* Configs */,
+				C6C4477400AB2C56C19C57C6 /* FinderLocation.swift */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		863884F704A6CFD068661E2C /* DriveFinder */ = {
+			isa = PBXGroup;
+			children = (
+				90765583D44B39D2C3988DED /* FileProviderExtension.swift */,
+				DF3F3C8BA85381971140C26A /* FileProviderEnumerator.swift */,
+				2A2328F0646E7E2E358DFDA2 /* FileProviderItem.swift */,
+				A0CA42A5FF8CB1E02FE19CAB /* ServerClient.swift */,
+				E2E0792EA6ADC386DD1068D3 /* Info.plist */,
+				2E45F31835813B830963DC9A /* DriveFinder.entitlements */,
+				4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */,
+			);
+			name = DriveFinder;
+			path = DriveFinder;
 			sourceTree = "<group>";
 		};
 		917C652E550269C03781912E /* Pods */ = {
@@ -232,8 +304,17 @@
 			children = (
 				8C94684D399D2E8D177A88E7 /* Pods_Runner.framework */,
 				8E8B824D395228E26EF8FC8E /* Pods_RunnerTests.framework */,
+				FF6C7B024E2E774CA654A8E3 /* OS X */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FF6C7B024E2E774CA654A8E3 /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				457C17C59463E5A203E92E76 /* Cocoa.framework */,
+			);
+			name = "OS X";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -268,12 +349,14 @@
 				33CC10EB2044A3C60003C045 /* Resources */,
 				33CC110E2044A8840003C045 /* Bundle Framework */,
 				3399D490228B24CF009A79C7 /* ShellScript */,
+				AD1574C66D6E20733FA772DB /* Embed Foundation Extensions */,
 				D6D782D40A3F4C4EA531A2E5 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				33CC11202044C79F0003C045 /* PBXTargetDependency */,
+				08B427F80B412AD671E44437 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -282,6 +365,23 @@
 			productName = Runner;
 			productReference = 33CC10ED2044A3C60003C045 /* polder_drive_app.app */;
 			productType = "com.apple.product-type.application";
+		};
+		831699675635FC714D3C73C6 /* DriveFinder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 53D4366BD7E56D22F2BAEBF5 /* Build configuration list for PBXNativeTarget "DriveFinder" */;
+			buildPhases = (
+				DE4116720C4FF767A04E3BE3 /* Sources */,
+				26C5E8B5230E8970771CD92B /* Frameworks */,
+				CD74BA01CA74D107A175C424 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DriveFinder;
+			productName = DriveFinder;
+			productReference = 1F77C4AD00CFBDC8CD9D6507 /* DriveFinder.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -333,6 +433,7 @@
 				33CC10EC2044A3C60003C045 /* Runner */,
 				331C80D4294CF70F00263BE5 /* RunnerTests */,
 				33CC111A2044C6BA0003C045 /* Flutter Assemble */,
+				831699675635FC714D3C73C6 /* DriveFinder */,
 			);
 		};
 /* End PBXProject section */
@@ -351,6 +452,13 @@
 			files = (
 				33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */,
 				33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CD74BA01CA74D107A175C424 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -474,12 +582,32 @@
 				33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
+				6D09FC17049D255300904C0A /* FinderLocation.swift in Sources */,
+				C117A426FED7BB1EF2F6527D /* ProviderAccount.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE4116720C4FF767A04E3BE3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				575477352C40C04178761964 /* FileProviderExtension.swift in Sources */,
+				73EC2C555650DD281E034FB7 /* FileProviderEnumerator.swift in Sources */,
+				99D6B3EC874F1CEBF7945CDB /* FileProviderItem.swift in Sources */,
+				5D005CA3ECA7844945955985 /* ServerClient.swift in Sources */,
+				24D4E78265E21138D9FBB623 /* ProviderAccount.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		08B427F80B412AD671E44437 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DriveFinder;
+			target = 831699675635FC714D3C73C6 /* DriveFinder */;
+			targetProxy = 5EC3518C1EE5D9254D700F28 /* PBXContainerItemProxy */;
+		};
 		331C80DA294CF71000263BE5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 33CC10EC2044A3C60003C045 /* Runner */;
@@ -505,6 +633,48 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0885DC5F13E1A3A9C5291EE1 /* Release-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = "Release-prod";
+		};
+		091360DCC40AA5D7952F6573 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		0E0B93FEE703403E396FCA0F /* Profile-prod */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BFD3D12B8BE9F62F99384B76 /* Pods-RunnerTests.profile-prod.xcconfig */;
@@ -1113,6 +1283,49 @@
 			};
 			name = "Profile-prod";
 		};
+		4F7AB5A1BE03062857D09A9F /* Profile-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = "Profile-prod";
+		};
+		5C807C2D34A3040B51B475FC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
 		6D47C7DEB47D4454E5B17F10 /* Profile-dev */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
@@ -1162,6 +1375,27 @@
 			};
 			name = "Profile-dev";
 		};
+		72D5A8E6FC8A84FB35871BD3 /* Profile-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.dev.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = "Profile-dev";
+		};
 		7FEA75DF65860583B466E4BE /* Profile-dev */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1177,6 +1411,48 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = "Profile-prod";
+		};
+		89C9633645FCCED36FE7AE5C /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Profile;
+		};
+		95739F24014C4D7AFE2DA2A0 /* Release-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.dev.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = "Release-dev";
 		};
 		98311DB8CD9BB5C3231749CF /* Debug-prod */ = {
 			isa = XCBuildConfiguration;
@@ -1246,6 +1522,28 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_drive_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_drive_app";
 			};
 			name = "Release-prod";
+		};
+		C5170508B9A760DFAEE49D2B /* Debug-prod */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = "Debug-prod";
 		};
 		CAFBD5CAD2E7E757FF6BDF91 /* Debug-dev */ = {
 			isa = XCBuildConfiguration;
@@ -1321,6 +1619,28 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = "Release-dev";
+		};
+		F1B0E0E0A1EE5FF71C3F2D92 /* Debug-dev */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4A1EF5302170D8C334038FF3 /* DriveFinder.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DriveFinder/DriveFinder.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = DriveFinder/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.drive.dev.finder;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = "Debug-dev";
 		};
 		F73FC0B301EE840BD66C1B2D /* Release-prod */ = {
 			isa = XCBuildConfiguration;
@@ -1429,6 +1749,22 @@
 				E98BD304D4E604AAC13B7662 /* Release-dev */,
 				842715F1AF2980507B15C5B0 /* Profile-prod */,
 				7FEA75DF65860583B466E4BE /* Profile-dev */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		53D4366BD7E56D22F2BAEBF5 /* Build configuration list for PBXNativeTarget "DriveFinder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C807C2D34A3040B51B475FC /* Debug */,
+				091360DCC40AA5D7952F6573 /* Release */,
+				89C9633645FCCED36FE7AE5C /* Profile */,
+				C5170508B9A760DFAEE49D2B /* Debug-prod */,
+				F1B0E0E0A1EE5FF71C3F2D92 /* Debug-dev */,
+				0885DC5F13E1A3A9C5291EE1 /* Release-prod */,
+				95739F24014C4D7AFE2DA2A0 /* Release-dev */,
+				4F7AB5A1BE03062857D09A9F /* Profile-prod */,
+				72D5A8E6FC8A84FB35871BD3 /* Profile-dev */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

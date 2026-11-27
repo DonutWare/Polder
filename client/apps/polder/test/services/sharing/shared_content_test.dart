@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/services/sharing/shared_content.dart";
+import "package:polder_drive/services/sharing/shared_content.dart";
 
 void main() {
   test("ignores anything without files or text", () {

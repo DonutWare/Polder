@@ -8,6 +8,8 @@ import "package:polder_core/providers/account_provider.dart";
 import "package:polder_notes/providers/notes/note_document_provider.dart";
 import "package:polder_notes/screens/notes/editor/checklist_editor.dart";
 import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor.dart";
+import "package:polder_notes/screens/notes/editor/markdown_syntax_controller.dart";
+import "package:polder_notes/screens/notes/editor/source_editor.dart";
 import "package:polder_notes/screens/notes/widgets/link_preview_card.dart";
 import "package:polder_notes/screens/notes/widgets/note_pane.dart";
 import "package:polder_notes/screens/notes/widgets/file_link_picker_dialog.dart";
@@ -22,8 +24,13 @@ final liveField = find.descendant(of: find.byType(MarkdownEditor), matching: fin
 void main() {
   late ProviderHarness harness;
 
-  Future<void> openNote(WidgetTester tester, {double bottomInset = 0}) async {
-    final server = FakePolderServer()..putFile(notePath, utf8.encode("# Plan\n"));
+  Future<void> openNote(
+    WidgetTester tester, {
+    double bottomInset = 0,
+    String path = notePath,
+    String content = "# Plan\n",
+  }) async {
+    final server = FakePolderServer()..putFile(path, utf8.encode(content));
     harness = ProviderHarness(httpClient: SignedInServer(server), account: testAccount());
     await harness.container.read(accountProvider.future);
     var sourceMode = false;
@@ -35,7 +42,7 @@ void main() {
             data: MediaQuery.of(context).copyWith(padding: EdgeInsets.only(bottom: bottomInset)),
             child: StatefulBuilder(
               builder: (context, setState) => NotePane(
-                path: notePath,
+                path: path,
                 sourceMode: sourceMode,
                 onToggleSourceMode: () => setState(() => sourceMode = !sourceMode),
               ),
@@ -54,6 +61,26 @@ void main() {
   }
 
   String noteText() => harness.container.read(noteDocumentProvider(notePath)).requireValue.text;
+
+  testWidgets("a plain text file opens in a plain source editor without markdown tools", (tester) async {
+    const textPath = "/Notes/todo.txt";
+    await openNote(tester, path: textPath, content: "# not a heading\n");
+    expect(find.byType(SourceEditor), findsOneWidget);
+    expect(find.byType(MarkdownEditor), findsNothing);
+    expect(find.text("todo.txt"), findsOneWidget);
+
+    final field = find.descendant(of: find.byType(SourceEditor), matching: find.byType(TextField));
+    expect(tester.widget<TextField>(field).controller, isNot(isA<MarkdownSyntaxController>()));
+    await tester.enterText(field, "milk [[");
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(FileLinkPickerDialog), findsNothing);
+    expect(harness.container.read(noteDocumentProvider(textPath)).requireValue.text, "milk [[");
+
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    expect(find.text("Show checkboxes"), findsNothing);
+    await closeNote(tester);
+  });
 
   testWidgets("show and hide checkboxes switch between text and checklist", (tester) async {
     await openNote(tester);

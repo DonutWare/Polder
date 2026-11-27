@@ -16,6 +16,10 @@ final fileBrowserLocationEnabledProvider = StreamProvider<bool?>(
   (ref) => ref.watch(fileBrowserLocationProvider)?.watchEnabled() ?? Stream.value(null),
 );
 
+final fileBrowserHandedOffProvider = StreamProvider<bool>(
+  (ref) => ref.watch(fileBrowserLocationProvider)?.watchHandedOff() ?? Stream.value(false),
+);
+
 final showInFileBrowserProvider = AsyncNotifierProvider<ShowInFileBrowserNotifier, bool>(ShowInFileBrowserNotifier.new);
 
 class ShowInFileBrowserNotifier extends AsyncNotifier<bool> {
@@ -28,6 +32,7 @@ class ShowInFileBrowserNotifier extends AsyncNotifier<bool> {
   Future<bool> build() async {
     final location = ref.watch(fileBrowserLocationProvider);
     if (location == null) return false;
+    await ref.watch(fileBrowserHandedOffProvider.future);
 
     ref.listen(accountProvider.select((state) => state.hasValue ? (accountId: state.value?.id) : null), (_, next) {
       if (next != null) _follow(location);
@@ -58,7 +63,8 @@ class ShowInFileBrowserNotifier extends AsyncNotifier<bool> {
     try {
       final shown = await future;
       final account = ref.read(accountProvider).value;
-      if (account == null || !shown) return await _revoke(await location.disconnect());
+      final handedOff = ref.read(fileBrowserHandedOffProvider).value ?? false;
+      if (account == null || !shown || handedOff) return await _revoke(await location.disconnect());
       if (await location.connectedAccount() == account.id) return await location.signal();
       final deviceName = "${ref.read(deviceNameProvider)} ($fileBrowserName)";
       final session = await ref.read(polderApiProvider).startSession(deviceName: deviceName);

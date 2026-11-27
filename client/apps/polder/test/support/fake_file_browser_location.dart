@@ -6,9 +6,13 @@ class FakeFileBrowserLocation implements FileBrowserLocation {
   String? accountId;
   FileBrowserSession? session;
   int signals = 0;
+  bool handedOff = false;
 
   @override
   Stream<bool?> watchEnabled() => Stream.value(accountId == null ? null : true);
+
+  @override
+  Stream<bool> watchHandedOff() => Stream.value(handedOff);
 
   @override
   Future<String?> connectedAccount() async => accountId;

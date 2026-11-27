@@ -34,4 +34,18 @@ void main() {
     expect(contents.nodes[2].folder?.name, "Plan");
     expect(contents.nodes[2].childrenPath, "/Notes/Plan");
   });
+
+  test("text files are pages named with their extension and do not take a folder's children", () {
+    final contents = NotesTreeNotifier.arrange([
+      NoteItem(
+        entry: FileEntry(path: "/Notes/todo.txt", name: "todo.txt", mtime: DateTime.utc(2026), mime: "text/plain"),
+      ),
+      NoteItem(
+        entry: FileEntry(path: "/Notes/todo.md", name: "todo.md", mtime: DateTime.utc(2026), mime: markdownMime),
+      ),
+      _folder("todo", hasNotes: true),
+    ]);
+    final summary = [for (final node in contents.nodes) "${node.name}:${node.folder?.name}:${node.childrenPath}"];
+    expect(summary, ["todo:todo:/Notes/todo", "todo.txt:null:/Notes/todo.txt"]);
+  });
 }

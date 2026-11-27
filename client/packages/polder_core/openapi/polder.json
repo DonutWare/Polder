@@ -3858,7 +3858,7 @@
         "additionalProperties": false,
         "properties": {
           "items": {
-            "description": "The folders and notes in the folder; other files are left out",
+            "description": "The folders, notes and other text files in the folder; other files are left out",
             "items": {
               "$ref": "#/components/schemas/NotesItem"
             },

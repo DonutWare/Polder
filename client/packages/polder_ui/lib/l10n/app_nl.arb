@@ -709,6 +709,8 @@
 	"showInFinderHint": "Blader door je bestanden in Finder; ze worden gedownload zodra je ze opent",
 	"finderRemoveTitle": "Verwijderen uit Finder?",
 	"finderRemoveMessage": "Bestanden die voor offline gebruik zijn gedownload, worden van deze Mac verwijderd. Ze blijven op de server staan.",
+	"finderHandedOffToDrive": "Polder Drive toont je bestanden in Finder. Je kunt dit wijzigen in Polder Drive.",
+	"filesAppHandedOffToDrive": "Polder Drive toont je bestanden in de app Bestanden. Je kunt dit wijzigen in Polder Drive.",
 	"showInFilesApp": "Tonen in Bestanden",
 	"showInFilesAppHint": "Open en bewaar Polder-bestanden vanuit andere apps via de app Bestanden",
 	"filesAppRemoveTitle": "Verwijderen uit Bestanden?",

@@ -22,7 +22,10 @@ import "package:polder/routes/polder_ui_config_override.dart";
 import "package:polder_drive/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder_drive/screens/browser/widgets/file_open_action.dart";
 import "package:polder_drive/screens/browser/widgets/file_thumbnail.dart";
-import "package:polder/screens/search/search_view.dart";
+import "package:polder_drive/screens/search/search_view.dart";
+import "package:polder_drive/providers/search/search_destinations_provider.dart";
+import "package:polder_drive/search_host.dart";
+import "package:polder/providers/search/polder_search.dart";
 
 final List<Override> polderPackageOverrides = [
   polderUiConfigOverride,
@@ -40,6 +43,8 @@ final List<Override> polderPackageOverrides = [
         ? const DriveHost(openNote: _openNote)
         : const DriveHost(),
   ),
+  searchHostProvider.overrideWithValue(polderSearchHost),
+  searchDestinationsProvider.overrideWith(polderSearchDestinations),
   deliveredNotificationPreferencesProvider.overrideWith(
     (ref) async =>
         ref.watch(resolvedFeatureModesProvider).restrict(await ref.watch(notificationPreferencesProvider.future)),

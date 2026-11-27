@@ -13,7 +13,7 @@ import "package:polder_drive/screens/browser/widgets/file_details_sheet.dart";
 
 Future<void> openEntry(BuildContext context, FileEntry entry, {List<FileEntry>? gallery}) async {
   if (entry.isDir) return context.go(BrowserRoutes.of(context).routeFor(entry.path));
-  if (entry.isMarkdown) {
+  if (entry.isText) {
     if (driveHostOf(context).openNote case final openNote?) return openNote(context, entry.path);
   }
   if (entry.isPdf) {

@@ -150,18 +150,29 @@ func (s *Service) List(ctx context.Context, owner users.User, rawPath string) (s
 	return directory.Path, entries, err
 }
 
-func (s *Service) DescendantPaths(ctx context.Context, owner users.User, folder, mimeType string) ([]string, error) {
+func (s *Service) DescendantTextPaths(ctx context.Context, owner users.User, folder string) ([]string, error) {
 	prefix := folder + "/"
 	if folder == storage.RootPath {
 		prefix = storage.RootPath
 	}
 	rows, err := s.db.QueryContext(ctx,
-		`SELECT path FROM files WHERE user_id = $1 AND mime = $2 AND is_dir = FALSE AND SUBSTR(path, 1, $3) = $4`,
-		owner.ID, mimeType, utf8.RuneCountInString(prefix), prefix)
+		`SELECT path, mime FROM files WHERE user_id = $1 AND is_dir = FALSE AND SUBSTR(path, 1, $2) = $3`,
+		owner.ID, utf8.RuneCountInString(prefix), prefix)
 	if err != nil {
 		return nil, err
 	}
-	return scanValues[string](rows)
+	defer rows.Close()
+	var paths []string
+	for rows.Next() {
+		var filePath, mimeType string
+		if err := rows.Scan(&filePath, &mimeType); err != nil {
+			return nil, err
+		}
+		if IsText(filePath, mimeType) {
+			paths = append(paths, filePath)
+		}
+	}
+	return paths, rows.Err()
 }
 
 func (s *Service) Open(ctx context.Context, owner users.User, rawPath string) (*os.File, Entry, error) {
