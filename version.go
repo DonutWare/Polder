@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-//go:embed client/pubspec.yaml
+//go:embed client/apps/polder/pubspec.yaml
 var pubspec string
 
 func PubspecVersion() (name, build string) {

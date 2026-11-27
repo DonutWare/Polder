@@ -24,6 +24,7 @@ COPY client/pubspec.yaml client/pubspec.lock ./
 COPY client/apps/polder/pubspec.yaml ./apps/polder/
 COPY client/apps/notes/pubspec.yaml ./apps/notes/
 COPY client/apps/calendar/pubspec.yaml ./apps/calendar/
+COPY client/apps/drive/pubspec.yaml ./apps/drive/
 COPY client/tool/pubspec.yaml ./tool/
 COPY client/packages/ ./packages/
 RUN flutter pub get
