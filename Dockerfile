@@ -6,7 +6,7 @@
 #   docker build --build-arg WEB=client .
 ARG WEB=none
 # The Flutter release the web app is built with; keep it in step with client/.fvmrc.
-ARG FLUTTER_VERSION=3.47.5
+ARG FLUTTER_VERSION=3.50.1
 
 FROM --platform=$BUILDPLATFORM golang:1.27-alpine AS web-none
 RUN mkdir /web
