@@ -1,7 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/screens/notes/editor/note_embeds.dart";
+import "package:polder_notes/screens/notes/editor/note_embeds.dart";
 
 void main() {
   FileEntry file(int id, String name, String mime) =>

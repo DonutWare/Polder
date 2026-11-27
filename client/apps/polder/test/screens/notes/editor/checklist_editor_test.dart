@@ -5,8 +5,8 @@ import "package:flutter_test/flutter_test.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_ui/l10n/generated/app_localizations.dart";
-import "package:polder/screens/notes/editor/checklist_editor.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/checklist_editor.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
 
 Future<MarkdownEditingController> _pump(WidgetTester tester, String text) async {
   final controller = MarkdownEditingController(text: text);

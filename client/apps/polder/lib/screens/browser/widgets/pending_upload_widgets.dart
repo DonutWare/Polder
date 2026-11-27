@@ -6,7 +6,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/activity.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/providers/sync/sync_paused_provider.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder/services/sync/sync_activity.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/byte_format.dart";

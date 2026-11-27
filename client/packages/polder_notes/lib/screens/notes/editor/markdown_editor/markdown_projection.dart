@@ -3,10 +3,10 @@ import "dart:math" as math;
 import "package:flutter/material.dart";
 
 import "package:polder_core/models/user_tag.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
 import "package:polder_core/services/notes/markdown_source.dart";
-import "package:polder/screens/notes/editor/note_embeds.dart";
-import "package:polder/services/notes/note_markdown.dart";
+import "package:polder_notes/screens/notes/editor/note_embeds.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
 
 typedef MarkdownBlockBuilder = Widget? Function(BuildContext context, MarkdownBlock block, String source);
 

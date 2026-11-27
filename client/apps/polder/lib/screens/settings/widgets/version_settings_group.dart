@@ -4,7 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/file_version.dart";
-import "package:polder/providers/versions/file_versions_provider.dart";
+import "package:polder_core/providers/versions/file_versions_provider.dart";
 import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/confirm_dialog.dart";

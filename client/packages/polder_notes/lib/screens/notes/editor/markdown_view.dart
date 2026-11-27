@@ -7,8 +7,8 @@ import "package:re_highlight/re_highlight.dart";
 import "package:re_highlight/styles/github-dark.dart";
 import "package:re_highlight/styles/github.dart";
 
-import "package:polder/screens/notes/editor/note_embeds.dart";
-import "package:polder/services/notes/note_markdown.dart";
+import "package:polder_notes/screens/notes/editor/note_embeds.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
 
 class ReadOnlyNote extends StatelessWidget {
   const ReadOnlyNote({required this.text, required this.targets, required this.onLink, this.padding, super.key});

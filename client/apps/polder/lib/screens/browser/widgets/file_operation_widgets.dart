@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:polder/providers/browser/file_operations_provider.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_core/providers/browser/file_operations_provider.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/localization_helper.dart";

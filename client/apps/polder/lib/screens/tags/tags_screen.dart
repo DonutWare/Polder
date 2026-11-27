@@ -13,8 +13,8 @@ import "package:polder_ui/widgets/shared/async_value_view.dart";
 import "package:polder_ui/widgets/shared/confirm_dialog.dart";
 import "package:polder_ui/widgets/shared/message_view.dart";
 import "package:polder_ui/widgets/shared/nav_group.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
-import "package:polder/widgets/tags/tag_picker.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/tags/tag_picker.dart";
 
 enum _TagAction { edit, delete }
 

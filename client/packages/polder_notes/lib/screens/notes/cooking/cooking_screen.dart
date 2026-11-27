@@ -7,10 +7,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:wakelock_plus/wakelock_plus.dart";
 
-import "package:polder/providers/notes/note_document_provider.dart";
-import "package:polder/screens/notes/cooking/cooking_pages.dart";
-import "package:polder/screens/notes/cooking/cooking_timer_bar.dart";
-import "package:polder/services/notes/note_recipe.dart";
+import "package:polder_notes/providers/notes/note_document_provider.dart";
+import "package:polder_notes/screens/notes/cooking/cooking_pages.dart";
+import "package:polder_notes/screens/notes/cooking/cooking_timer_bar.dart";
+import "package:polder_notes/services/notes/note_recipe.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/widgets/shared/async_value_view.dart";

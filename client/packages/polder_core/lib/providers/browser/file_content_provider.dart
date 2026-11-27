@@ -1,0 +1,31 @@
+import "dart:typed_data";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+
+import "package:polder_core/models/file_entry.dart";
+import "package:polder_core/models/file_space.dart";
+import "package:polder_core/providers/offline/offline_storage_provider.dart";
+import "package:polder_core/providers/polder_api_provider.dart";
+import "package:polder_core/providers/sharing/file_space_providers.dart";
+import "package:polder_core/services/api/api_exceptions.dart";
+import "package:polder_core/services/api/polder_api.dart";
+
+final fileContentProvider = FutureProvider.autoDispose.family<Uint8List, (FileEntry, FileSpace?)>(
+  (ref, request) => switch (request) {
+    (final entry, final space?) => ref.watch(fileSpaceApiProvider(space)).download(entry.path),
+    (final entry, null) => ownFileContent(ref, entry),
+  },
+);
+
+Future<Uint8List> ownFileContent(Ref ref, FileEntry entry) async {
+  final files = await ref.watch(offlineFilesProvider.future);
+  final local = await files.readMatching(entry);
+  if (local != null) return local;
+  try {
+    return await ref.watch(polderApiProvider).downloadBytes(entry.path, purpose: DownloadPurpose.view);
+  } on NetworkException {
+    final stale = await files.read(entry.path);
+    if (stale != null) return stale;
+    rethrow;
+  }
+}

@@ -23,8 +23,9 @@ IGNORED = re.compile(r"^(prepare release|merge )", re.IGNORECASE)
 
 def main():
     rev_range = sys.argv[1] if len(sys.argv) > 1 else "HEAD"
+    paths = sys.argv[2:]
     commits = subprocess.run(
-        ["git", "log", "--format=%h%x1f%s%x1f%b%x1e", rev_range],
+        ["git", "log", "--format=%h%x1f%s%x1f%b%x1e", rev_range, *(["--", *paths] if paths else [])],
         capture_output=True, text=True, check=True,
     ).stdout.split("\x1e")
 

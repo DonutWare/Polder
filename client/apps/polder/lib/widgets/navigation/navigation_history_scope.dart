@@ -2,7 +2,7 @@ import "package:flutter/widgets.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:polder/providers/app/navigation_history_provider.dart";
+import "package:polder_ui/providers/app/navigation_history_provider.dart";
 import "package:polder_ui/routes/history_back.dart";
 
 class NavigationHistoryScope extends ConsumerWidget {

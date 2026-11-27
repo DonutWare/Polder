@@ -6,7 +6,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/offline_models.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/notes/note_document_provider.dart";
+import "package:polder_notes/providers/notes/note_document_provider.dart";
 import "package:polder_core/providers/offline/offline_sync_provider.dart";
 import "package:polder_core/services/storage/preferences_store.dart";
 

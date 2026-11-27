@@ -5,10 +5,10 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/screens/notes/widgets/note_node_interactions.dart";
-import "package:polder/screens/notes/widgets/notes_sidebar.dart";
-import "package:polder/screens/notes/widgets/notes_tree.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder_notes/screens/notes/widgets/notes_sidebar.dart";
+import "package:polder_notes/screens/notes/widgets/notes_tree.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_ui/util/localization_helper.dart";
 

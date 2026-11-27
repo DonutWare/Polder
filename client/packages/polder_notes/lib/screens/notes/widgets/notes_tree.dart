@@ -5,18 +5,18 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/item_selection.dart";
-import "package:polder/providers/notes/note_selection_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/providers/notes/notes_search_provider.dart";
-import "package:polder/providers/notes/notes_view_provider.dart";
+import "package:polder_notes/providers/notes/note_selection_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_search_provider.dart";
+import "package:polder_notes/providers/notes/notes_view_provider.dart";
 import "package:polder_core/providers/tags/tags_provider.dart";
-import "package:polder/providers/notes/notes_tag_filter_provider.dart";
-import "package:polder/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_notes/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/util/modifier_keys.dart";
 import "package:polder_ui/widgets/shared/async_value_view.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
 
 class NotesTree extends StatelessWidget {
   const NotesTree({

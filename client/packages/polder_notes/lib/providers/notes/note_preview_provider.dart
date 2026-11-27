@@ -7,7 +7,7 @@ import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_core/services/api/polder_api.dart";
-import "package:polder/services/notes/note_preview.dart";
+import "package:polder_notes/services/notes/note_preview.dart";
 import "package:polder_core/services/offline/offline_files.dart";
 import "package:polder_core/util/ref_cache.dart";
 

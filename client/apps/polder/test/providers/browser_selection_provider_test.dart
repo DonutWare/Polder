@@ -2,7 +2,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/providers/account_provider.dart";
 import "package:polder/providers/browser/browser_selection_provider.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 
 import "../support/fake_server.dart";
 import "../support/provider_harness.dart";

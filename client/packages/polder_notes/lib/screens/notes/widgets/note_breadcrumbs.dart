@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:polder/providers/notes/notes_folder_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/screens/notes/note_navigation.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/screens/notes/note_navigation.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 

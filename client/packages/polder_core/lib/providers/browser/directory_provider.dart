@@ -4,11 +4,11 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/directory_listing.dart";
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/browser/file_operations_provider.dart";
+import "package:polder_core/providers/browser/file_operations_provider.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/providers/current_user_provider.dart";
-import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder_core/providers/sync/sync_request_provider.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_core/util/guarded_refresh.dart";
@@ -190,7 +190,7 @@ class DirectoryNotifier extends AsyncNotifier<DirectoryListing> with GuardedRefr
       await action();
     } finally {
       container.invalidate(currentUserProvider);
-      container.read(syncSchedulerProvider)?.requestRun();
+      container.read(syncRequestProvider)();
       await _refreshIfShown(container, path);
     }
   }

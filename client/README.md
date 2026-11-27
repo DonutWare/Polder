@@ -10,17 +10,22 @@ for every app and package.
 | Path | What |
 | --- | --- |
 | `apps/polder` | Polder: file browser, folder sync, conflict resolution, auto-upload on mobile, notes, calendar and an admin area |
+| `apps/calendar` | Polder Calendar: the calendar on its own |
+| `apps/notes` | Polder Notes: the notes on its own |
 | `packages/polder_core` | Data layer shared by the apps: API client, models, sign-in, offline storage and sync, realtime events |
 | `packages/polder_ui` | Shared look and building blocks: theme, strings, layout, navigation, sign-in screens and common widgets |
 | `packages/media_viewer` | Gesture layer for full-screen photo and video viewers |
 | `packages/polder_calendar` | Calendar views and state over pluggable calendar sources |
+| `packages/polder_notes` | Notes: tree, editor, links, checklists, recipes and tag filters |
 | `packages/flutter_web_auth_2_desktop_webview_stub` | Override that leaves out flutter_web_auth_2's desktop webview |
 
 Shared dependency overrides live in the workspace `pubspec.yaml`. Packages commit their generated localizations,
 because Flutter only generates them for the app being built.
 
 Dependencies point one way: apps → feature packages → `polder_ui` → `polder_core`. Each app tells `polder_ui`
-about its routes by overriding `polderUiConfigProvider`.
+about its routes by overriding `polderUiConfigProvider`, and each feature package through its own providers:
+`calendarLocationsProvider`, and `notesLocationsProvider` plus `notesHostProvider` for what notes hand off to the
+file browser (opening files, version history, showing a note in its folder).
 
 Strings shared by the apps are in `packages/polder_ui/lib/l10n`, and the data layer's few strings (notifications,
 the browser sign-in page) are in `packages/polder_core/lib/l10n`. After editing an `.arb` file, run

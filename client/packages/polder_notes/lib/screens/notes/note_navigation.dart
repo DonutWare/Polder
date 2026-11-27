@@ -3,12 +3,12 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/notes/last_note_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/providers/notes/notes_view_provider.dart";
-import "package:polder/routes/app_routes.dart";
+import "package:polder_notes/providers/notes/last_note_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_view_provider.dart";
+import "package:polder_notes/notes_locations.dart";
 import "package:polder_ui/routes/up_scope.dart";
-import "package:polder/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder_notes/screens/notes/widgets/note_node_interactions.dart";
 import "package:polder_core/util/remote_path.dart";
 
 abstract final class NoteNavigation {
@@ -16,7 +16,7 @@ abstract final class NoteNavigation {
     final page = await pageFor(ref, root, folder);
     if (!context.mounted) return;
     if (page != null) {
-      context.go(AppRoutes.noteAt(page.path));
+      context.go(notesLocationsOf(context).noteAt(page.path));
     } else {
       showFolder(context, ref, root, folder);
     }
@@ -26,7 +26,7 @@ abstract final class NoteNavigation {
     if (ref.read(notesViewModeProvider) == NotesViewMode.grid) {
       ref.read(notesGridFolderProvider.notifier).open(folder == root ? null : folder);
       ref.read(lastNoteProvider.notifier).set(null);
-      goWithin(context, AppRoutes.notes, replacing: true);
+      goWithin(context, notesLocationsOf(context).root, replacing: true);
       return;
     }
     if (folder == root) return;

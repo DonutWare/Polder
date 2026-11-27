@@ -2,9 +2,9 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/note_item.dart";
-import "package:polder/providers/notes/notes_search_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/providers/notes/notes_view_provider.dart";
+import "package:polder_notes/providers/notes/notes_search_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_view_provider.dart";
 
 FileEntry _page(String path, {DateTime? mtime}) => FileEntry(
   path: path,

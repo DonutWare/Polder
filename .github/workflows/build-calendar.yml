@@ -1,0 +1,60 @@
+name: Build Polder Calendar
+
+on:
+  push:
+    tags:
+      - "calendar-v*"
+    branches:
+      - develop
+    paths:
+      - client/apps/calendar/**
+      - client/packages/**
+      - client/pubspec.yaml
+      - client/pubspec.lock
+      - client/.fvmrc
+      - client/flatpak/**
+      - client/scripts/**
+      - .github/workflows/build-app.yml
+      - .github/workflows/build-calendar.yml
+  pull_request:
+    paths:
+      - client/pubspec.yaml
+      - client/apps/calendar/pubspec.yaml
+      - client/.fvmrc
+      - .github/workflows/build-app.yml
+      - .github/workflows/build-calendar.yml
+    types:
+      - opened
+      - reopened
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Build type (release, nightly)"
+        required: false
+        default: "nightly"
+        type: choice
+        options:
+          - release
+          - nightly
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-app.yml
+    permissions:
+      contents: write
+      packages: write
+    secrets: inherit
+    with:
+      build_type: ${{ github.event.inputs.build_type }}
+      app: calendar
+      name: Polder Calendar
+      asset_prefix: Polder-Calendar
+      binary: polder_calendar
+      app_id: org.knaapen.polder.calendar
+      tag_prefix: "calendar-v"
+      nightly_tag: calendar-nightly
+      changelog_paths: "client/apps/calendar client/packages client/pubspec.yaml"

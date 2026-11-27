@@ -4,8 +4,8 @@ import "package:flutter/services.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/notes/note_selection_provider.dart";
-import "package:polder/screens/notes/widgets/notes_sidebar.dart";
+import "package:polder_notes/providers/notes/note_selection_provider.dart";
+import "package:polder_notes/screens/notes/widgets/notes_sidebar.dart";
 import "package:polder_ui/widgets/shared/drag_chip.dart";
 
 import "../../support/localized_app.dart";

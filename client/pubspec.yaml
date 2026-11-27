@@ -7,10 +7,13 @@ environment:
 workspace:
   - apps/polder
   - apps/calendar
+  - apps/notes
   - packages/media_viewer
+  - packages/polder_media
   - packages/calendar_views
   - packages/polder_calendar
   - packages/polder_core
+  - packages/polder_notes
   - packages/polder_ui
   - packages/polder_window
   - tool

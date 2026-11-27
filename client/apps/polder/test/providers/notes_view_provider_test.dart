@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/providers/notes/notes_view_provider.dart";
+import "package:polder_notes/providers/notes/notes_view_provider.dart";
 import "package:polder_core/services/storage/preferences_store.dart";
 
 import "../support/provider_harness.dart";

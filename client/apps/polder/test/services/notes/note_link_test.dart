@@ -1,7 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/services/notes/note_link.dart";
+import "package:polder_notes/services/notes/note_link.dart";
 
 FileEntry _file(int id, String path) => FileEntry(
   id: id,

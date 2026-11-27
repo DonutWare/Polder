@@ -7,7 +7,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:go_router/go_router.dart";
 
-import "package:polder/providers/app/navigation_history_provider.dart";
+import "package:polder_ui/providers/app/navigation_history_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";

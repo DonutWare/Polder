@@ -4,10 +4,10 @@ project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "polder_calendar_app")
+set(BINARY_NAME "polder_calendar")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "org.knaapen.polder.polder_calendar_app")
+set(APPLICATION_ID "org.knaapen.polder.calendar")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -49,6 +49,12 @@ endfunction()
 # Flutter library and tool build rules.
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
+
+set(APP_TITLE "Polder Calendar")
+if(FLUTTER_APP_FLAVOR STREQUAL "dev")
+  set(APPLICATION_ID "org.knaapen.polder.calendar.dev")
+  set(APP_TITLE "Polder Calendar Dev")
+endif()
 
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)

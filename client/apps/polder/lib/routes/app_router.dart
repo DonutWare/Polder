@@ -18,13 +18,13 @@ import "package:polder/screens/admin/admin_screen.dart";
 import "package:polder/screens/auto_upload/auto_upload_screen.dart";
 import "package:polder/screens/browser/browser_stack.dart";
 import "package:polder_ui/screens/login/login_screen.dart";
-import "package:polder/screens/notes/cooking/cooking_screen.dart";
-import "package:polder/screens/notes/notes_screen.dart";
+import "package:polder_notes/screens/notes/cooking/cooking_screen.dart";
+import "package:polder_notes/screens/notes/notes_screen.dart";
 import "package:polder_calendar/screens/calendar/calendar_screen.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/screens/viewer/document_editor_screen.dart";
-import "package:polder/screens/viewer/media/media_viewer_screen.dart";
+import "package:polder/screens/viewer/media/polder_media_viewer.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
 import "package:polder_ui/screens/two_factor/two_factor_setup_screen.dart";
@@ -89,8 +89,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.media,
         redirect: (_, state) => state.extra is FileEntry || state.extra is MediaGallery ? null : AppRoutes.files,
         page: (state) => switch (state.extra) {
-          final MediaGallery gallery => MediaViewerScreen(entry: gallery.entry, gallery: gallery.items),
-          final extra => MediaViewerScreen(entry: extra! as FileEntry),
+          final MediaGallery gallery => PolderMediaViewer(entry: gallery.entry, gallery: gallery.items),
+          final extra => PolderMediaViewer(entry: extra! as FileEntry),
         },
       ),
       _route(

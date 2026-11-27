@@ -3,7 +3,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/user_tag.dart";
-import "package:polder/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
 
 FileEntry _note(String path, {List<int> tagIds = const []}) =>
     FileEntry(path: path, name: path.split("/").last, mtime: DateTime(2026), tagIds: tagIds);

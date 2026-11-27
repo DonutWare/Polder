@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_ui/l10n/generated/app_localizations.dart";
-import "package:polder/screens/notes/cooking/cooking_pages.dart";
-import "package:polder/services/notes/note_recipe.dart";
+import "package:polder_notes/screens/notes/cooking/cooking_pages.dart";
+import "package:polder_notes/services/notes/note_recipe.dart";
 
 class _CheckableIngredients extends StatefulWidget {
   const _CheckableIngredients({required this.recipe});

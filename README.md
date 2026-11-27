@@ -21,9 +21,11 @@
 
 <div align="center">
   
-  [![Build](https://github.com/DonutWare/Polder/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build.yml)
+  [![Build Polder](https://github.com/DonutWare/Polder/actions/workflows/build-polder.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build-polder.yml)
+  [![Build Polder Notes](https://github.com/DonutWare/Polder/actions/workflows/build-notes.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build-notes.yml)
+  [![Build Polder Calendar](https://github.com/DonutWare/Polder/actions/workflows/build-calendar.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build-calendar.yml)
   [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/DonutWare/Polder/total)](https://github.com/DonutWare/Polder/releases/latest)
-  [![GitHub Release](https://img.shields.io/github/v/release/DonutWare/Polder?display_name=tag)](https://github.com/DonutWare/Polder/releases/latest)
+  [![GitHub Release](https://img.shields.io/github/v/release/DonutWare/Polder?display_name=tag&filter=v*)](https://github.com/DonutWare/Polder/releases/latest)
   [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
   
 </div>

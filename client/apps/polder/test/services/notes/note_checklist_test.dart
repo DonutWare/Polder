@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/services/notes/note_checklist.dart";
+import "package:polder_notes/services/notes/note_checklist.dart";
 
 void main() {
   test("parses notes made only of top-level tasks", () {

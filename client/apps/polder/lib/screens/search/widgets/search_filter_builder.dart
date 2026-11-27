@@ -10,8 +10,8 @@ import "package:polder_core/providers/tags/tags_provider.dart";
 import "package:polder/screens/search/widgets/search_filter_label.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
-import "package:polder/widgets/files/remote_folder_picker_dialog.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
 import "package:calendar_views/calendar_views.dart" as cal;
 
 Future<SearchFilter?> showSearchFilterBuilder(BuildContext context, {bool events = false}) => showDialog<SearchFilter>(

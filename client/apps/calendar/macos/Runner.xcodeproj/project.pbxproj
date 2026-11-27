@@ -395,7 +395,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -465,7 +465,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -535,7 +535,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -647,7 +647,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -661,7 +661,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -675,7 +675,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -689,7 +689,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -1100,7 +1100,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";
@@ -1114,7 +1114,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.polderCalendarApp.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.knaapen.polder.calendar.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/polder_calendar_app.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/polder_calendar_app";

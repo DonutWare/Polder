@@ -8,30 +8,30 @@ import "package:go_router/go_router.dart";
 
 import "package:polder_ui/l10n/generated/app_localizations.dart";
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/browser/directory_provider.dart";
-import "package:polder/providers/browser/file_operations_provider.dart";
-import "package:polder/providers/notes/last_note_provider.dart";
-import "package:polder/providers/notes/notes_folder_provider.dart";
-import "package:polder/providers/notes/notes_tag_filter_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/file_operations_provider.dart";
+import "package:polder_notes/providers/notes/last_note_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/providers/offline/offline_sync_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/providers/tags/tags_provider.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
-import "package:polder/screens/notes/widgets/recipe_dialog.dart";
+import "package:polder_notes/notes_locations.dart";
+import "package:polder_notes/screens/notes/widgets/notes_setup_dialog.dart";
+import "package:polder_notes/screens/notes/widgets/recipe_dialog.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_core/services/offline/offline_files.dart";
-import "package:polder/services/notes/note_checklist.dart";
-import "package:polder/services/notes/note_recipe.dart";
+import "package:polder_notes/services/notes/note_checklist.dart";
+import "package:polder_notes/services/notes/note_recipe.dart";
 import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/util/unique_name.dart";
 import "package:polder_ui/widgets/shared/confirm_dialog.dart";
-import "package:polder/widgets/files/remote_folder_picker_dialog.dart";
+import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
 import "package:polder_ui/widgets/shared/text_input_dialog.dart";
 
 enum NewNoteKind {
@@ -72,7 +72,7 @@ abstract final class NotesActions {
         await _applyTagFilter(container, created!);
       }),
     );
-    if (succeeded && created != null && context.mounted) context.go(AppRoutes.noteAt(created!.path));
+    if (succeeded && created != null && context.mounted) context.go(notesLocationsOf(context).noteAt(created!.path));
   }
 
   static Future<void> createSubpage(BuildContext context, NoteTreeNode parent) =>
@@ -93,7 +93,7 @@ abstract final class NotesActions {
     if (created == null || !context.mounted) return;
     await context.runWithFeedback(_applyTagFilter(container, created));
     _refresh(container, folder);
-    if (context.mounted) context.go(AppRoutes.noteAt(created.path));
+    if (context.mounted) context.go(notesLocationsOf(context).noteAt(created.path));
   }
 
   static Future<void> _applyTagFilter(ProviderContainer container, FileEntry created) async {

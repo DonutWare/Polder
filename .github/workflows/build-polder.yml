@@ -1,0 +1,61 @@
+name: Build Polder
+
+on:
+  push:
+    tags:
+      - "v*"
+    branches:
+      - develop
+    paths-ignore:
+      - client/apps/notes/**
+      - client/apps/calendar/**
+      - client/flatpak/org.knaapen.polder.notes*
+      - client/flatpak/org.knaapen.polder.calendar*
+      - .github/workflows/build-notes.yml
+      - .github/workflows/build-calendar.yml
+  pull_request:
+    paths:
+      - client/pubspec.yaml
+      - client/apps/polder/pubspec.yaml
+      - client/.fvmrc
+      - .github/workflows/build-app.yml
+      - .github/workflows/build-polder.yml
+    types:
+      - opened
+      - reopened
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Build type (release, nightly)"
+        required: false
+        default: "nightly"
+        type: choice
+        options:
+          - release
+          - nightly
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-app.yml
+    permissions:
+      contents: write
+      packages: write
+    secrets: inherit
+    with:
+      build_type: ${{ github.event.inputs.build_type }}
+      app: polder
+      name: Polder
+      asset_prefix: Polder
+      binary: polder
+      app_id: org.knaapen.polder
+      tag_prefix: "v"
+      nightly_tag: nightly
+      web: true
+      docker: true
+      desktop_updates: true
+      make_latest: true
+      play_store: true

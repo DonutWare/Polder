@@ -7,7 +7,7 @@ import "package:polder_core/models/sync/sync_root.dart";
 import "package:polder/providers/sync/sync_folder_form_provider.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/icon_badge.dart";
-import "package:polder/widgets/files/remote_folder_picker_dialog.dart";
+import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
 
 Future<void> showAddSyncFolderDialog(BuildContext context, SyncMode mode) => showDialog<void>(
   context: context,

@@ -4,7 +4,7 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
-import "package:polder/screens/notes/widgets/notes_grid.dart";
+import "package:polder_notes/screens/notes/widgets/notes_grid.dart";
 
 import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";

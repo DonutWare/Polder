@@ -1,6 +1,6 @@
 import "package:flutter/widgets.dart";
 
-import "package:polder/screens/notes/editor/markdown_editor/markdown_projection.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_projection.dart";
 import "package:polder_core/services/notes/markdown_source.dart";
 
 class MarkdownEditingController extends TextEditingController {

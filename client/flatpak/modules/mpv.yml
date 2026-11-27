@@ -1,0 +1,33 @@
+name: mpv
+buildsystem: meson
+config-opts:
+  - -Dlibmpv=true
+  - -Dcplayer=false
+  - -Dbuild-date=false
+  - -Dmanpage-build=disabled
+  - -Dhtml-build=disabled
+  - -Dpdf-build=disabled
+  - -Dlua=disabled
+  - -Djavascript=disabled
+  - -Dvulkan=disabled
+  - -Dvaapi=enabled
+  - -Dpulse=enabled
+  - -Dalsa=enabled
+  - -Duchardet=enabled
+sources:
+  - type: archive
+    url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.42.0.tar.gz
+    sha256: bcfebbfa2b65a6d88dc97ea18117831072373e38b5785a2afb874ed4df5070dd
+modules:
+  - name: uchardet
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DBUILD_BINARY=OFF
+      - -DBUILD_STATIC=OFF
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    sources:
+      - type: archive
+        url: https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.8.tar.xz
+        sha256: e97a60cfc00a1c147a674b097bb1422abd9fa78a2d9ce3f3fdcc2e78a34ac5f0

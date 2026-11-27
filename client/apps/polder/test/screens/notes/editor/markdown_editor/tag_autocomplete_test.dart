@@ -3,11 +3,11 @@ import "package:flutter/services.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/user_tag.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
 import "package:polder_core/services/notes/markdown_source.dart";
-import "package:polder/screens/notes/editor/markdown_editor/tag_autocomplete.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/tag_autocomplete.dart";
 
 const _style = MarkdownEditorStyle(
   body: TextStyle(fontSize: 16, height: 1.5, color: Colors.black),

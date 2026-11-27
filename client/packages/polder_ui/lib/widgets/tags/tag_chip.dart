@@ -5,7 +5,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/user_tag.dart";
 import "package:polder_core/providers/tags/tags_provider.dart";
-import "package:polder/screens/search/open_search.dart";
+import "package:polder_ui/polder_ui_config.dart";
 import "package:polder_ui/theme/app_theme.dart";
 
 class TagDot extends StatelessWidget {
@@ -51,7 +51,7 @@ class TagChip extends StatelessWidget {
 
 void searchForTag(BuildContext context, String name) {
   final handled = TagTapHandler.of(context)?.call(name) ?? false;
-  if (!handled) openSearch(context, initialQuery: "#$name ");
+  if (!handled) readPolderUiConfig(context).openSearch?.call(context, "#$name ");
 }
 
 class TagTapHandler extends InheritedWidget {

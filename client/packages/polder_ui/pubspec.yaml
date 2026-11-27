@@ -27,6 +27,7 @@ dependencies:
   flutter_local_notifications: ^23.0.0
   permission_handler: ^13.0.2
   timezone: ^0.11.2
+  web: ^1.1.1
   calendar_views:
     path: ../calendar_views
   polder_core:

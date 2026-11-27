@@ -2,6 +2,7 @@ import "package:polder_core/models/group.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:calendar_views/calendar_views.dart";
 import "package:polder_calendar/calendar_locations.dart";
+import "package:polder_notes/notes_locations.dart";
 import "package:polder_ui/routes/sign_in_routes.dart";
 
 abstract final class AppRoutes {
@@ -37,7 +38,7 @@ abstract final class AppRoutes {
   static const adminBranding = "/admin/branding";
   static const adminServer = "/admin/server";
 
-  static const pathParameter = "path";
+  static const pathParameter = NotesLocations.pathParameter;
   static const selectParameter = "select";
   static const queryParameter = "q";
   static const scopeParameter = "scope";
@@ -47,7 +48,9 @@ abstract final class AppRoutes {
   static String filesAt(String path, {String? select}) =>
       Uri(path: files, queryParameters: {pathParameter: path, selectParameter: ?select}).toString();
 
-  static String noteAt(String path) => Uri(path: notes, queryParameters: {pathParameter: path}).toString();
+  static const notesLocations = NotesLocations(notes, cook: cook);
+
+  static String noteAt(String path) => notesLocations.noteAt(path);
 
   static const calendarLocations = CalendarLocations(calendar);
 
@@ -55,12 +58,9 @@ abstract final class AppRoutes {
 
   static String calendarEventAt(EventRef ref, DateTime start) => calendarLocations.eventAt(ref, start);
 
-  static String cookAt(String path) => Uri(path: cook, queryParameters: {pathParameter: path}).toString();
+  static String cookAt(String path) => notesLocations.cookAt(path);
 
-  static bool isNoteLocation(String? location) {
-    final uri = location == null ? null : Uri.tryParse(location);
-    return uri != null && uri.path == notes && uri.queryParameters.containsKey(pathParameter);
-  }
+  static bool isNoteLocation(String? location) => notesLocations.isNoteLocation(location);
 
   static String searchFor(String query) =>
       Uri(path: search, queryParameters: query.isEmpty ? null : {queryParameter: query}).toString();

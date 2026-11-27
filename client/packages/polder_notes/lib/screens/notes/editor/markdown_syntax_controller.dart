@@ -2,8 +2,8 @@ import "dart:typed_data";
 
 import "package:flutter/material.dart";
 
-import "package:polder/services/notes/note_link.dart";
-import "package:polder/services/notes/note_markdown.dart";
+import "package:polder_notes/services/notes/note_link.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
 
 class MarkdownSyntaxController extends TextEditingController {
   MarkdownSyntaxController({super.text});

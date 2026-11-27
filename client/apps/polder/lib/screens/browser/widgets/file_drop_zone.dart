@@ -8,7 +8,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:path/path.dart" as p;
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_mount.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/screens/browser/widgets/file_drag.dart";
 import "package:polder_core/services/transfer/file_picker_service.dart";

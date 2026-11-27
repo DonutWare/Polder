@@ -7,18 +7,18 @@ import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:polder/providers/app/navigation_history_provider.dart";
-import "package:polder/providers/notes/note_selection_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/providers/notes/renamed_note_provider.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/notes/notes_actions.dart";
+import "package:polder_ui/providers/app/navigation_history_provider.dart";
+import "package:polder_notes/providers/notes/note_selection_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/renamed_note_provider.dart";
+import "package:polder_notes/notes_locations.dart";
+import "package:polder_notes/screens/notes/notes_actions.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/widgets/shared/drag_chip.dart";
 import "package:polder_ui/widgets/shared/escape_cancels_drag.dart";
-import "package:polder/widgets/tags/tag_picker.dart";
+import "package:polder_ui/widgets/tags/tag_picker.dart";
 
 final expandedNotesProvider = NotifierProvider<ExpandedNotes, Set<String>>(ExpandedNotes.new);
 
@@ -98,6 +98,7 @@ abstract final class NoteNodeActions {
     );
     if (action == null || !context.mounted) return;
     final navigation = ref.read(navigationHistoryProvider.notifier);
+    final locations = ref.read(notesLocationsProvider);
     final renames = ref.read(renamedNoteProvider.notifier);
     final selection = ref.read(noteSelectionProvider.notifier);
     switch (action) {
@@ -105,7 +106,7 @@ abstract final class NoteNodeActions {
         await createSubpage(context, ref, single!);
       case _NodeAction.rename:
         final renamed = await NotesActions.rename(context, single!);
-        if (renamed != null) _follow(navigation, renames, selectedPath, {single: renamed});
+        if (renamed != null) _follow(navigation, locations, renames, selectedPath, {single: renamed});
       case _NodeAction.tags:
         await showTagPicker(context, [for (final node in nodes) node.page ?? node.folder!]);
       case _NodeAction.select:
@@ -113,13 +114,13 @@ abstract final class NoteNodeActions {
       case _NodeAction.move:
         final moved = await NotesActions.moveAll(context, nodes);
         if (moved.isNotEmpty) selection.clear();
-        _follow(navigation, renames, selectedPath, moved);
+        _follow(navigation, locations, renames, selectedPath, moved);
       case _NodeAction.delete:
         final deleted = await NotesActions.deleteAll(context, nodes);
         if (!deleted) return;
         selection.clear();
         if (selectedPath != null && nodes.any((node) => node.holds(selectedPath))) {
-          navigation.replace(AppRoutes.notes);
+          navigation.replace(locations.root);
         }
     }
   }
@@ -139,17 +140,19 @@ abstract final class NoteNodeActions {
   }) async {
     final expanded = ref.read(expandedNotesProvider.notifier);
     final navigation = ref.read(navigationHistoryProvider.notifier);
+    final locations = ref.read(notesLocationsProvider);
     final renames = ref.read(renamedNoteProvider.notifier);
     final selection = ref.read(noteSelectionProvider.notifier);
     final moved = await NotesActions.moveAllInto(context, drag.nodes, destination);
     if (moved.isEmpty) return;
     selection.clear();
     expanded.expand(destination);
-    _follow(navigation, renames, selectedPath, moved);
+    _follow(navigation, locations, renames, selectedPath, moved);
   }
 
   static void _follow(
     NavigationHistoryNotifier navigation,
+    NotesLocations locations,
     RenamedNote renames,
     String? selectedPath,
     Map<NoteTreeNode, String> moved,
@@ -159,7 +162,7 @@ abstract final class NoteNodeActions {
       final selected = NotesActions.pathAfterMove(selectedPath, node, movedTo);
       if (selected == null) continue;
       renames.record(selectedPath, selected);
-      navigation.replace(AppRoutes.noteAt(selected));
+      navigation.replace(locations.noteAt(selected));
       return;
     }
   }

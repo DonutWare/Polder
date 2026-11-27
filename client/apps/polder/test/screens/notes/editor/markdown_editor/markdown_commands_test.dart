@@ -1,7 +1,7 @@
 import "package:flutter/services.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/screens/notes/editor/markdown_editor/markdown_commands.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_commands.dart";
 
 TextEditingValue _at(String text, [int? offset]) => TextEditingValue(
   text: text,

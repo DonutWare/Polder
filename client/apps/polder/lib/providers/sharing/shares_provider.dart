@@ -2,7 +2,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:flutter_riverpod/misc.dart";
 
 import "package:polder_core/models/sharing.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_core/util/guarded_refresh.dart";

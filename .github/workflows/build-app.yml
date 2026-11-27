@@ -1,0 +1,761 @@
+name: Build App
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: "Directory under client/apps"
+        required: true
+        type: string
+      name:
+        description: "Product name, matching the macOS PRODUCT_NAME"
+        required: true
+        type: string
+      asset_prefix:
+        description: "Prefix of every release asset"
+        required: true
+        type: string
+      binary:
+        description: "Executable name on Windows and Linux"
+        required: true
+        type: string
+      app_id:
+        description: "Application ID, also the name of the Flatpak manifest"
+        required: true
+        type: string
+      tag_prefix:
+        description: "Release tags are <tag_prefix><version>"
+        required: true
+        type: string
+      nightly_tag:
+        required: true
+        type: string
+      changelog_paths:
+        description: "Space separated paths the changelog is limited to; empty for the whole repository"
+        required: false
+        default: ""
+        type: string
+      build_type:
+        description: "Overrides the build type derived from the trigger"
+        required: false
+        default: ""
+        type: string
+      web:
+        required: false
+        default: false
+        type: boolean
+      docker:
+        required: false
+        default: false
+        type: boolean
+      desktop_updates:
+        description: "Publish a signed update manifest for the desktop updater"
+        required: false
+        default: false
+        type: boolean
+      make_latest:
+        required: false
+        default: false
+        type: boolean
+      play_store:
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  info:
+    runs-on: ubuntu-latest
+    outputs:
+      build_type: ${{ steps.info.outputs.build_type }}
+      channel: ${{ steps.info.outputs.channel }}
+      version_name: ${{ steps.info.outputs.version_name }}
+      version: ${{ steps.info.outputs.version }}
+      tag: ${{ steps.info.outputs.tag }}
+      flutter_version: ${{ steps.info.outputs.flutter_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Determine build type and version
+        id: info
+        working-directory: client
+        env:
+          APP: ${{ inputs.app }}
+          REQUESTED_TYPE: ${{ inputs.build_type }}
+          TAG_PREFIX: ${{ inputs.tag_prefix }}
+          NIGHTLY_TAG: ${{ inputs.nightly_tag }}
+        run: |
+          if [[ -n "$REQUESTED_TYPE" ]]; then
+            BUILD_TYPE="$REQUESTED_TYPE"
+          elif [[ "$GITHUB_REF" == refs/tags/${TAG_PREFIX}* ]]; then
+            BUILD_TYPE="release"
+          elif [[ "$GITHUB_REF" == "refs/heads/develop" ]]; then
+            BUILD_TYPE="nightly"
+          else
+            BUILD_TYPE="development"
+          fi
+
+          VERSION_NAME=$(grep '^version:' "apps/$APP/pubspec.yaml" | cut -d ':' -f2 | cut -d '+' -f1 | tr -d ' ')
+          case "$BUILD_TYPE" in
+            nightly)
+              VERSION="${VERSION_NAME}-nightly"
+              TAG="$NIGHTLY_TAG"
+              CHANNEL="nightly"
+              ;;
+            release)
+              VERSION="$VERSION_NAME"
+              if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then TAG="$GITHUB_REF_NAME"; else TAG="${TAG_PREFIX}${VERSION_NAME}"; fi
+              CHANNEL="stable"
+              ;;
+            *)
+              VERSION="$VERSION_NAME"
+              TAG=""
+              CHANNEL="$BUILD_TYPE"
+              ;;
+          esac
+
+          {
+            echo "build_type=$BUILD_TYPE"
+            echo "channel=$CHANNEL"
+            echo "version_name=$VERSION_NAME"
+            echo "version=$VERSION"
+            echo "tag=$TAG"
+            echo "flutter_version=$(jq -r '.flutter' .fvmrc)"
+          } >> "$GITHUB_OUTPUT"
+          echo "$APP $VERSION ($BUILD_TYPE)"
+
+  build-android:
+    needs: [info]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client/apps/${{ inputs.app }}
+    env:
+      ASSET: ${{ inputs.asset_prefix }}-Android-${{ needs.info.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Decode Keystore for release
+        if: needs.info.outputs.build_type != 'development'
+        env:
+          ENCODED_STRING: ${{ secrets.KEYSTORE_BASE_64 }}
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEYSTORE_ALIAS: ${{ secrets.RELEASE_KEYSTORE_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ENCODED_STRING" ]; then
+            echo "::warning::KEYSTORE_BASE_64 is not set, signing with the debug keys"
+            exit 0
+          fi
+          echo "$ENCODED_STRING" | base64 -d > android/app/keystore.jks
+
+          cat > android/app/key.properties <<EOF
+          storePassword=$RELEASE_KEYSTORE_PASSWORD
+          keyPassword=$RELEASE_KEY_PASSWORD
+          keyAlias=$RELEASE_KEYSTORE_ALIAS
+          EOF
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
+          check-latest: true
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.19.0
+        with:
+          channel: "stable"
+          flutter-version: ${{ needs.info.outputs.flutter_version }}
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Android APK (development)
+        if: needs.info.outputs.build_type == 'development'
+        run: flutter build apk --debug --split-per-abi --build-number=${{ github.run_number }}
+
+      - name: Build Android APK and AAB
+        if: needs.info.outputs.build_type != 'development'
+        run: |
+          flutter build apk --release --split-per-abi --build-number=${{ github.run_number }}
+          flutter build appbundle --release --build-number=${{ github.run_number }}
+
+      - name: Collect Android artifacts
+        env:
+          MODE: ${{ needs.info.outputs.build_type == 'development' && 'debug' || 'release' }}
+        run: |
+          mkdir -p build/android_artifacts
+          for abi in armeabi-v7a arm64-v8a x86_64; do
+            cp "build/app/outputs/flutter-apk/app-$abi-prod-$MODE.apk" "build/android_artifacts/$ASSET-$abi.apk" || true
+          done
+          if [ "$MODE" = "release" ]; then
+            cp build/app/outputs/bundle/prodRelease/app-prod-release.aab "build/android_artifacts/$ASSET.aab"
+          fi
+
+      - name: Archive Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-android
+          path: client/apps/${{ inputs.app }}/build/android_artifacts/
+
+  build-windows:
+    needs: [info]
+    runs-on: windows-2022
+    defaults:
+      run:
+        working-directory: client/apps/${{ inputs.app }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.19.0
+        with:
+          channel: "stable"
+          flutter-version: ${{ needs.info.outputs.flutter_version }}
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows EXE
+        run: flutter build windows --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+
+      - name: Compile Inno Setup installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: client/apps/${{ inputs.app }}/windows/windows_setup.iss
+          options: /O+ /DPOLDER_VERSION="${{ needs.info.outputs.version_name }}"
+
+      - name: Rename Windows installer
+        shell: bash
+        run: mv "windows/Output/${{ inputs.binary }}_setup.exe" "windows/Output/${{ inputs.asset_prefix }}-Windows-${{ needs.info.outputs.version }}-Setup.exe"
+
+      - name: Archive Windows portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-windows-portable
+          path: client/apps/${{ inputs.app }}/build/windows/x64/prod/runner/Release/
+
+      - name: Archive Windows installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-windows-installer
+          path: client/apps/${{ inputs.app }}/windows/Output/${{ inputs.asset_prefix }}-Windows-${{ needs.info.outputs.version }}-Setup.exe
+
+  build-ios:
+    needs: [info]
+    runs-on: xcode-27
+    defaults:
+      run:
+        working-directory: client/apps/${{ inputs.app }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.19.0
+        with:
+          channel: "stable"
+          flutter-version: ${{ needs.info.outputs.flutter_version }}
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build iOS app
+        run: flutter build ipa --no-codesign --build-number=${{ github.run_number }}
+
+      - name: Create unsigned IPA
+        run: |
+          cd build/ios/archive/Runner.xcarchive/Products/Applications/
+          mkdir Payload
+          mv Runner.app Payload/
+          zip -r "${{ inputs.asset_prefix }}-iOS-${{ needs.info.outputs.version }}.ipa" Payload
+
+      - name: Archive iOS IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-ios
+          path: client/apps/${{ inputs.app }}/build/ios/archive/Runner.xcarchive/Products/Applications/*.ipa
+
+  # flutter_inappwebview_macos fails to compile with Xcode 26 (the macos-latest default); Xcode 27 builds it.
+  build-macos:
+    needs: [info]
+    runs-on: xcode-27
+    defaults:
+      run:
+        working-directory: client/apps/${{ inputs.app }}
+    env:
+      PRODUCTS: build/macos/Build/Products/Release-prod
+      ASSET: ${{ inputs.asset_prefix }}-macOS-${{ needs.info.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.19.0
+        with:
+          channel: "stable"
+          flutter-version: ${{ needs.info.outputs.flutter_version }}
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build macOS app
+        run: flutter build macos --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Create DMG
+        run: |
+          ../../scripts/create_dmg.sh "${{ inputs.name }}"
+          mv "$PRODUCTS/macOS.dmg" "$PRODUCTS/$ASSET.dmg"
+
+      - name: Create update zip
+        run: ditto -c -k --keepParent "$PRODUCTS/${{ inputs.name }}.app" "$PRODUCTS/$ASSET.zip"
+
+      - name: Archive macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-macos
+          path: |
+            client/apps/${{ inputs.app }}/${{ env.PRODUCTS }}/${{ env.ASSET }}.dmg
+            client/apps/${{ inputs.app }}/${{ env.PRODUCTS }}/${{ env.ASSET }}.zip
+
+  # flutter_inappwebview_linux only compiles against WPE WebKit 2.50-2.52: older releases lack APIs it uses and 2.54
+  # removed one. Ubuntu doesn't ship WPE at all, so build on Debian with 2.52 pinned from the archive snapshot.
+  build-linux:
+    needs: [info]
+    runs-on: ubuntu-latest
+    container:
+      image: debian:forky
+    env:
+      APPIMAGE_EXTRACT_AND_RUN: 1
+      BUNDLE: build/linux/x64/prod/release/bundle
+      ASSET: ${{ inputs.asset_prefix }}-Linux-${{ needs.info.outputs.version }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: client/apps/${{ inputs.app }}
+    steps:
+      - name: Get packages
+        working-directory: .
+        run: |
+          echo "deb [check-valid-until=no] http://snapshot.debian.org/archive/debian/20260910T000000Z/ sid main" \
+            > /etc/apt/sources.list.d/wpe-snapshot.list
+          apt-get update -y
+          apt-get install -y --no-install-recommends ca-certificates curl wget git jq unzip xz-utils zip file \
+            clang g++ make cmake ninja-build pkg-config patchelf libgtk-3-dev libsecret-1-dev libepoxy-dev libwayland-dev libmpv-dev \
+            libwpe-1.0-dev libwpebackend-fdo-1.0-dev libwpewebkit-2.0-dev=2.52.6-1 libwpewebkit-2.0-1=2.52.6-1
+          # The Flutter SDK in the tool cache is owned by the runner user, not the container's root.
+          git config --global --add safe.directory '*'
+
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.19.0
+        with:
+          channel: "stable"
+          flutter-version: ${{ needs.info.outputs.flutter_version }}
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Update build number in pubspec.yaml
+        run: |
+          sed -i -E 's/(version: [0-9]+\.[0-9]+\.[0-9]+\+)[0-9]+/\1${{ github.run_number }}/' pubspec.yaml
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Linux app
+        run: flutter build linux --release --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+
+      - name: Fix RPATH
+        run: |
+          for lib in "$BUNDLE/lib"/*.so; do
+            [[ -f "$lib" && -n "$(patchelf --print-rpath "$lib")" ]] && \
+            patchelf --set-rpath '$ORIGIN' "$lib"
+          done
+          patchelf --set-rpath '$ORIGIN/lib' "$BUNDLE/${{ inputs.binary }}"
+
+      - name: Archive Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-linux
+          path: client/apps/${{ inputs.app }}/${{ env.BUNDLE }}
+
+      - name: Build AppImage
+        run: |
+          sed -i -E "s/(version:\\s*)latest/\\1${{ needs.info.outputs.version_name }}/" AppImageBuilder.yml
+          if [[ "${{ needs.info.outputs.build_type }}" == "nightly" ]]; then
+            sed -i "s/|latest|/|nightly|/" AppImageBuilder.yml
+          fi
+          wget -O appimage-builder-x86_64.AppImage https://github.com/AppImageCrafters/appimage-builder/releases/download/v1.1.0/appimage-builder-1.1.0-x86_64.AppImage
+          chmod +x appimage-builder-x86_64.AppImage
+          mv appimage-builder-x86_64.AppImage /usr/local/bin/appimage-builder
+          appimage-builder --recipe AppImageBuilder.yml
+
+          mkdir -p build/appimage
+          for file in *_x86_64.AppImage *_x86_64.AppImage.zsync; do
+            [[ -f "$file" ]] && mv "$file" "build/appimage/$ASSET.${file#*_x86_64.}"
+          done
+          ls build/appimage
+
+      - name: Archive Linux AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-linux-appimage
+          path: client/apps/${{ inputs.app }}/build/appimage/
+
+  build-linux-flatpak:
+    needs: [info]
+    if: needs.info.outputs.build_type == 'release' || needs.info.outputs.build_type == 'nightly'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    continue-on-error: ${{ needs.info.outputs.build_type == 'nightly' }}
+    outputs:
+      built: ${{ steps.result.outputs.built }}
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-51
+      options: --privileged
+    env:
+      MANIFEST: client/flatpak/${{ inputs.app_id }}.yml
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Restore flatpak-builder cache
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .flatpak-builder
+          key: flatpak-gnome51-${{ inputs.app }}-${{ hashFiles(format('client/flatpak/{0}.yml', inputs.app_id), 'client/flatpak/modules/*.yml') }}
+          restore-keys: flatpak-gnome51-${{ inputs.app }}-
+
+      - name: Write build settings
+        run: |
+          cat > client/flatpak/build.env <<EOF
+          BUILD_NUMBER=${{ github.run_number }}
+          POLDER_CHANNEL=${{ needs.info.outputs.channel }}
+          POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}
+          EOF
+
+      - name: Build Flatpak
+        run: |
+          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak-builder --repo=repo --disable-rofiles-fuse --install-deps-from=flathub \
+            --force-clean --ccache build-dir "$MANIFEST"
+          flatpak build-bundle repo "${{ inputs.asset_prefix }}-Linux-${{ needs.info.outputs.version }}.flatpak" ${{ inputs.app_id }} \
+            --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Save flatpak-builder cache
+        if: always() && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .flatpak-builder
+          key: flatpak-gnome51-${{ inputs.app }}-${{ hashFiles(format('client/flatpak/{0}.yml', inputs.app_id), 'client/flatpak/modules/*.yml') }}
+
+      - name: Archive Linux Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-linux-flatpak
+          path: ${{ inputs.asset_prefix }}-Linux-${{ needs.info.outputs.version }}.flatpak
+
+      - name: Report result
+        id: result
+        run: echo "built=true" >> "$GITHUB_OUTPUT"
+
+  build-web:
+    needs: [info]
+    if: inputs.web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client/apps/${{ inputs.app }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.19.0
+        with:
+          channel: "stable"
+          flutter-version: ${{ needs.info.outputs.flutter_version }}
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          cache-path: "${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:"
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build web app
+        run: |
+          flutter build web --release --no-web-resources-cdn --no-wasm-dry-run --build-number=${{ github.run_number }}
+          find build/web -name '*.symbols' -delete
+
+      - name: Archive web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-web
+          path: client/apps/${{ inputs.app }}/build/web
+
+  build-docker:
+    needs: [info]
+    if: inputs.docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
+      - name: Determine image tags
+        id: tags
+        run: |
+          IMAGE="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/polder"
+          case "${{ needs.info.outputs.build_type }}" in
+            release) TAGS="${IMAGE}:${{ needs.info.outputs.version }},${IMAGE}:latest" ;;
+            nightly) TAGS="${IMAGE}:${{ inputs.nightly_tag }}" ;;
+            *)       TAGS="${IMAGE}:development" ;;
+          esac
+          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
+          echo "push=${{ needs.info.outputs.build_type != 'development' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to ghcr.io
+        if: steps.tags.outputs.push == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          build-args: |
+            WEB=client
+            FLUTTER_VERSION=${{ needs.info.outputs.flutter_version }}
+            VERSION=${{ needs.info.outputs.version }}
+            BUILD_NUMBER=${{ github.run_number }}
+          push: ${{ steps.tags.outputs.push == 'true' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.info.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  create-release:
+    name: Create Release
+    needs:
+      - info
+      - build-android
+      - build-windows
+      - build-ios
+      - build-macos
+      - build-linux
+      - build-linux-flatpak
+      - build-web
+      - build-docker
+    runs-on: ubuntu-latest
+    if: >-
+      !cancelled()
+      && (needs.info.outputs.build_type == 'release' || needs.info.outputs.build_type == 'nightly')
+      && needs.build-android.result == 'success'
+      && needs.build-windows.result == 'success'
+      && needs.build-ios.result == 'success'
+      && needs.build-macos.result == 'success'
+      && needs.build-linux.result == 'success'
+      && (needs.build-web.result == 'success' || !inputs.web)
+      && (needs.build-docker.result == 'success' || !inputs.docker)
+      && (needs.build-linux-flatpak.result == 'success' || needs.info.outputs.build_type == 'nightly')
+    permissions:
+      contents: write
+    env:
+      APP: ${{ inputs.app }}
+      NAME: ${{ inputs.name }}
+      BUILD_TYPE: ${{ needs.info.outputs.build_type }}
+      VERSION: ${{ needs.info.outputs.version }}
+      TAG: ${{ needs.info.outputs.tag }}
+      TAG_PREFIX: ${{ inputs.tag_prefix }}
+      NIGHTLY_TAG: ${{ inputs.nightly_tag }}
+      ASSET_PREFIX: ${{ inputs.asset_prefix }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Delete existing nightly release
+        if: needs.info.outputs.build_type == 'nightly'
+        run: |
+          if gh release view "$NIGHTLY_TAG" >/dev/null 2>&1; then
+            echo "Deleting existing nightly release..."
+            gh release delete "$NIGHTLY_TAG" --yes --cleanup-tag
+          else
+            echo "No existing nightly release found."
+          fi
+
+          if git tag -l | grep -qx "$NIGHTLY_TAG"; then
+            echo "Deleting orphaned nightly tag..."
+            git push origin --delete "$NIGHTLY_TAG" || true
+          fi
+
+      - name: Generate changelog
+        env:
+          CHANGELOG_PATHS: ${{ inputs.changelog_paths }}
+          DOCKER: ${{ inputs.docker }}
+        run: |
+          PREVIOUS_RELEASE=$(git tag --list "${TAG_PREFIX}*" --sort=-v:refname | grep -E "^${TAG_PREFIX}[0-9]+\.[0-9]+\.[0-9]+$" | grep -vx "$TAG" | head -1 || echo "")
+          RANGE=${PREVIOUS_RELEASE:+$PREVIOUS_RELEASE..}HEAD
+
+          if [[ "$BUILD_TYPE" == "nightly" ]]; then
+            IMAGE_TAG="$NIGHTLY_TAG"
+            cat > changelog.md <<-EOF
+          # $(date -u "+%Y-%m-%d %H:%M:%S UTC")
+
+          This is an automated nightly build of $NAME containing the latest changes from the develop branch.
+
+          **⚠️ Warning:** This is a development build and may contain bugs or incomplete features.
+
+          EOF
+          else
+            IMAGE_TAG="$VERSION"
+            : > changelog.md
+          fi
+
+          if [[ "$DOCKER" == "true" ]]; then
+            IMAGE="ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/polder"
+            cat >> changelog.md <<-EOF
+          ## 🐳 Server
+
+          \`\`\`
+          docker pull ${IMAGE}:${IMAGE_TAG}
+          \`\`\`
+
+          EOF
+          fi
+
+          echo "## 📋 What's Changed" >> changelog.md
+          echo >> changelog.md
+          python3 .github/scripts/changelog.py "$RANGE" $CHANGELOG_PATHS >> changelog.md
+
+          if [ -n "$PREVIOUS_RELEASE" ]; then
+            COMPARE_TARGET=${{ needs.info.outputs.build_type == 'nightly' && github.sha || needs.info.outputs.tag }}
+            echo "**Full Changelog:** https://github.com/${{ github.repository }}/compare/$PREVIOUS_RELEASE...$COMPARE_TARGET" >> changelog.md
+          fi
+
+          if [[ "$BUILD_TYPE" == "nightly" ]]; then
+            cat >> changelog.md <<-EOF
+
+          ---
+
+          📅 **Build Date:** $(date -u "+%Y-%m-%d %H:%M:%S UTC")
+          🔧 **Build Number:** ${{ github.run_number }}
+          📝 **Commit:** ${{ github.sha }}
+          🌿 **Branch:** develop
+          EOF
+          fi
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.app }}-*
+          path: dist
+
+      - name: Collect release assets
+        run: |
+          mkdir release
+          for artifact in android windows-installer ios macos linux-appimage linux-flatpak; do
+            [ -d "dist/$APP-$artifact" ] && mv "dist/$APP-$artifact"/* release/
+          done
+          (cd "dist/$APP-windows-portable" && zip -r "../../release/$ASSET_PREFIX-Windows-$VERSION.zip" .)
+          (cd "dist/$APP-linux" && zip -r "../../release/$ASSET_PREFIX-Linux-$VERSION.zip" .)
+          if [ -d "dist/$APP-web" ]; then
+            (cd "dist/$APP-web" && zip -r "../../release/$ASSET_PREFIX-Web-$VERSION.zip" .)
+          fi
+          ls -l release
+
+      - name: Write update manifest
+        if: inputs.desktop_updates
+        working-directory: release
+        run: |
+          ../scripts/update-manifest.sh \
+            ${{ needs.info.outputs.channel }} \
+            "$VERSION" \
+            ${{ github.run_number }} \
+            "$TAG" \
+            "$ASSET_PREFIX-macOS-$VERSION.zip" \
+            "$ASSET_PREFIX-Windows-$VERSION-Setup.exe" \
+            "$ASSET_PREFIX-Linux-$VERSION.AppImage"
+        env:
+          UPDATE_SIGNING_KEY: ${{ secrets.UPDATE_SIGNING_KEY }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.2.2
+        with:
+          tag_name: ${{ needs.info.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ needs.info.outputs.build_type == 'nightly' && format('🌙 {0} Nightly Build - {1}', inputs.name, needs.info.outputs.version) || format('{0} {1}', inputs.name, needs.info.outputs.version) }}
+          body_path: changelog.md
+          draft: true
+          prerelease: ${{ needs.info.outputs.build_type == 'nightly' }}
+          make_latest: ${{ inputs.make_latest && needs.info.outputs.build_type == 'release' }}
+          fail_on_unmatched_files: true
+          files: release/*
+
+      - name: Publish nightly release
+        if: needs.info.outputs.build_type == 'nightly'
+        run: gh release edit "$NIGHTLY_TAG" --draft=false --prerelease
+
+  release-play-console:
+    name: Upload AAB to Google Play Console
+    needs:
+      - info
+      - create-release
+    runs-on: ubuntu-latest
+    if: inputs.play_store && (needs.info.outputs.build_type == 'release' || needs.info.outputs.build_type == 'nightly')
+    steps:
+      - name: Download Android artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.app }}-android
+          path: android
+
+      - name: Upload AAB to Google Play Console
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ inputs.app_id }}
+          releaseFiles: android/${{ inputs.asset_prefix }}-Android-${{ needs.info.outputs.version }}.aab
+          track: ${{ needs.info.outputs.build_type == 'nightly' && 'internal' || 'production' }}
+          status: ${{ needs.info.outputs.build_type == 'nightly' && 'completed' || 'draft' }}
+          releaseName: "${{ github.run_number }} (${{ needs.info.outputs.version_name }})"

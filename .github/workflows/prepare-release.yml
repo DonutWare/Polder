@@ -2,10 +2,20 @@ name: Prepare Release
 
 on:
   workflow_dispatch:
+    inputs:
+      app:
+        description: "App to release"
+        required: true
+        default: "polder"
+        type: choice
+        options:
+          - polder
+          - notes
+          - calendar
 
 jobs:
   prepare-release:
-    name: Tag Release
+    name: Tag ${{ inputs.app }} Release
     runs-on: ubuntu-latest
     steps:
       # A tag pushed with the bot token triggers the build workflow; one pushed with GITHUB_TOKEN would not.
@@ -28,15 +38,19 @@ jobs:
 
       - name: Extract Version
         id: version
+        env:
+          APP: ${{ inputs.app }}
         run: |
-          FULL_VERSION=$(grep '^version: ' client/apps/polder/pubspec.yaml | sed 's/version: //')
+          PUBSPEC="client/apps/$APP/pubspec.yaml"
+          FULL_VERSION=$(grep '^version: ' "$PUBSPEC" | sed 's/version: //')
           VERSION_NAME=$(echo "$FULL_VERSION" | cut -d'+' -f1)
-          echo "version=${VERSION_NAME}" >> "$GITHUB_OUTPUT"
-          echo "Version: $VERSION_NAME"
+          if [[ "$APP" == "polder" ]]; then TAG="v${VERSION_NAME}"; else TAG="${APP}-v${VERSION_NAME}"; fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Tag: $TAG"
 
-          if git rev-parse "v${VERSION_NAME}" >/dev/null 2>&1; then
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "is_new_version=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::v${VERSION_NAME} is already tagged, bump the version in client/apps/polder/pubspec.yaml first"
+            echo "::warning::$TAG is already tagged, bump the version in $PUBSPEC first"
           else
             echo "is_new_version=true" >> "$GITHUB_OUTPUT"
           fi
@@ -47,6 +61,6 @@ jobs:
           git config user.name "Fladder Bot"
           git config user.email "fladder-bot[bot]@users.noreply.github.com"
 
-          VERSION="v${{ steps.version.outputs.version }}"
-          git tag "$VERSION"
-          git push --atomic origin main "$VERSION"
+          TAG="${{ steps.version.outputs.tag }}"
+          git tag "$TAG"
+          git push --atomic origin main "$TAG"

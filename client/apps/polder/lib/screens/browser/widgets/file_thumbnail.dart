@@ -9,9 +9,9 @@ import "package:polder_core/models/file_space.dart";
 import "package:polder_core/models/file_version.dart";
 import "package:polder_core/models/thumbnail_request.dart";
 import "package:polder_core/models/trash.dart";
-import "package:polder/providers/browser/thumbnail_provider.dart";
-import "package:polder/providers/sharing/file_space_providers.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_core/providers/browser/thumbnail_provider.dart";
+import "package:polder_core/providers/sharing/file_space_providers.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder_ui/theme/app_theme.dart";
 

@@ -3,8 +3,8 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/screens/notes/widgets/note_node_interactions.dart";
 
 void main() {
   final node = NoteTreeNode(

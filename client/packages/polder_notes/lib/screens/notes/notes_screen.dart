@@ -7,38 +7,40 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/app/navigation_history_provider.dart";
-import "package:polder/providers/notes/last_note_provider.dart";
-import "package:polder/providers/notes/note_document_provider.dart";
-import "package:polder/providers/notes/notes_folder_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/providers/notes/notes_view_provider.dart";
-import "package:polder/providers/notes/renamed_note_provider.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/browser/widgets/file_open_action.dart";
-import "package:polder/screens/notes/notes_actions.dart";
-import "package:polder/screens/notes/widgets/links_panel.dart";
-import "package:polder/screens/notes/widgets/note_node_interactions.dart";
-import "package:polder/screens/notes/widgets/note_pane.dart";
-import "package:polder/screens/notes/widgets/notes_family_panel.dart";
-import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
-import "package:polder/screens/notes/widgets/notes_sidebar.dart";
+import "package:polder_ui/providers/app/navigation_history_provider.dart";
+import "package:polder_notes/providers/notes/last_note_provider.dart";
+import "package:polder_notes/providers/notes/note_document_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_search_focus_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_view_provider.dart";
+import "package:polder_notes/providers/notes/renamed_note_provider.dart";
+import "package:polder_notes/notes_locations.dart";
+import "package:polder_notes/notes_host.dart";
+import "package:polder_notes/screens/notes/notes_actions.dart";
+import "package:polder_notes/screens/notes/widgets/links_panel.dart";
+import "package:polder_notes/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder_notes/screens/notes/widgets/note_pane.dart";
+import "package:polder_notes/screens/notes/widgets/notes_family_panel.dart";
+import "package:polder_notes/screens/notes/widgets/notes_setup_dialog.dart";
+import "package:polder_notes/screens/notes/widgets/notes_add_button.dart";
+import "package:polder_notes/screens/notes/widgets/notes_sidebar.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/layout/dual_pane.dart";
 import "package:polder_ui/widgets/shared/async_value_view.dart";
-import "package:polder_ui/widgets/shared/fab_menu.dart";
 import "package:polder_ui/widgets/shared/message_view.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_core/models/user_tag.dart";
-import "package:polder/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder_core/providers/tags/tags_provider.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
 import "package:polder_ui/routes/up_scope.dart";
 
 class NotesScreen extends ConsumerStatefulWidget {
-  const NotesScreen({this.notePath, super.key});
+  const NotesScreen({this.notePath, this.showSidebar = true, super.key});
 
   final String? notePath;
+  final bool showSidebar;
 
   @override
   ConsumerState<NotesScreen> createState() => _NotesScreenState();
@@ -96,7 +98,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   void _toggleSourceMode() => setState(() => _sourceMode = !_sourceMode);
 
-  void _open(FileEntry entry) => context.go(AppRoutes.noteAt(entry.path));
+  void _open(FileEntry entry) => context.go(notesLocationsOf(context).noteAt(entry.path));
 
   void _openInFamily(String root, FileEntry entry) {
     final holder = notesGridFolderFor(root, entry.path);
@@ -108,7 +110,12 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     final noteCovers =
         widget.notePath != null &&
         (ref.read(notesViewModeProvider) == NotesViewMode.grid || AdaptiveLayout.isSingle(context));
-    if (!noteCovers) _searchFocus.requestFocus();
+    if (noteCovers) return;
+    if (_searchFocus.context == null) {
+      ref.read(notesSearchFocusRequestProvider.notifier).request();
+    } else {
+      _searchFocus.requestFocus();
+    }
   }
 
   Future<void> _changeFolder() async {
@@ -131,7 +138,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     if (start == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || widget.notePath != null) return;
-      ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.noteAt(start));
+      ref.read(navigationHistoryProvider.notifier).replace(ref.read(notesLocationsProvider).noteAt(start));
     });
   }
 
@@ -158,29 +165,21 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     final tag = ref.read(tagsByKeyProvider)[tagKey(name)];
     if (tag == null) return false;
     ref.read(notesTagFilterProvider.notifier).only(tag.id);
-    if (widget.notePath != null && AdaptiveLayout.isSingle(context)) _closeNote(AppRoutes.notes);
+    if (widget.notePath != null && AdaptiveLayout.isSingle(context)) _closeNote(notesLocationsOf(context).root);
     return true;
   }
 
+  bool get _listInShell => !widget.showSidebar && !AdaptiveLayout.isSingle(context);
+
   Widget? _sidebar(String? root) => root == null
       ? null
-      : NotesSidebar(root: root, selectedPath: widget.notePath, onOpen: _open, searchFocus: _searchFocus);
-
-  void _createPage(String? root, {NewNoteKind kind = NewNoteKind.page}) {
-    if (root == null) {
-      NotesActions.createInNotesFolder(context, kind: kind);
-    } else {
-      NotesActions.createPage(context, folder: notesLevel(ref, root), kind: kind);
-    }
-  }
-
-  void _addRecipe(String? root) {
-    if (root == null) {
-      NotesActions.addRecipeInNotesFolder(context);
-    } else {
-      NotesActions.addRecipe(context, folder: notesLevel(ref, root));
-    }
-  }
+      : NotesSidebar(
+          root: root,
+          selectedPath: widget.notePath,
+          onOpen: _open,
+          searchFocus: _searchFocus,
+          showSearch: !_listInShell,
+        );
 
   void _closeNote(String location) {
     ref.read(lastNoteProvider.notifier).set(null);
@@ -199,42 +198,20 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     return DualPane(
       title: NotesTitle(root: root, selectedPath: notePath),
       listActions: [
-        if (root != null) NotesHeaderActions(root: root, selectedPath: notePath, onChangeFolder: _changeFolder),
+        if (root != null && (widget.showSidebar || AdaptiveLayout.isPhone(context)))
+          NotesHeaderActions(root: root, selectedPath: notePath, onChangeFolder: _changeFolder),
       ],
-      listLocation: AppRoutes.notes,
+      listLocation: notesLocationsOf(context).root,
       maxListWidth: _listWidth,
       forceSingle: grid,
+      showList: widget.showSidebar,
       listScrollsUnderBars: true,
       list: _sidebar(root) ?? _NoFolder(onSetUp: _changeFolder),
-      listFloatingActionButton: FabMenu(
-        icon: IconsaxPlusLinear.add,
-        tooltip: context.localized.add,
-        groups: [
-          [
-            FabMenuItem(
-              icon: IconsaxPlusLinear.note_add,
-              label: context.localized.noteNewPage,
-              onPressed: () => _createPage(root),
-            ),
-            FabMenuItem(
-              icon: IconsaxPlusLinear.task_square,
-              label: context.localized.noteNewChecklist,
-              onPressed: () => _createPage(root, kind: NewNoteKind.checklist),
-            ),
-          ],
-          [
-            FabMenuItem(
-              icon: IconsaxPlusLinear.cake,
-              label: context.localized.recipeAdd,
-              onPressed: () => _addRecipe(root),
-            ),
-          ],
-        ],
-      ),
+      listFloatingActionButton: _listInShell ? null : NotesAddButton(root: root),
       onPop: _closeNote,
       placeholder: SafeArea(
         left: false,
-        child: _NothingOpen(onCreate: () => NotesActions.createInNotesFolder(context)),
+        child: _NothingOpen(onCreate: _listInShell ? null : () => NotesActions.createInNotesFolder(context)),
       ),
       detail: switch (notePath) {
         null => null,
@@ -259,7 +236,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 left: false,
                 child: LinksPanel(
                   entry: entry,
-                  onOpen: (target) => openEntry(context, target, gallery: [target]),
+                  onOpen: (target) => notesHostOf(context).openFile(context, target, gallery: [target]),
                 ),
               ),
             )
@@ -350,7 +327,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           entry: entry,
           onOpen: (target) {
             Navigator.pop(sheetContext);
-            openEntry(context, target, gallery: [target]);
+            notesHostOf(context).openFile(context, target, gallery: [target]);
           },
         ),
       ),
@@ -374,12 +351,15 @@ class _NoFolder extends StatelessWidget {
 class _NothingOpen extends StatelessWidget {
   const _NothingOpen({required this.onCreate});
 
-  final VoidCallback onCreate;
+  final VoidCallback? onCreate;
 
   @override
   Widget build(BuildContext context) => MessageView(
     icon: IconsaxPlusLinear.note_2,
     message: context.localized.notesNothingOpenMessage,
-    action: FilledButton.tonal(onPressed: onCreate, child: Text(context.localized.noteNewPage)),
+    action: switch (onCreate) {
+      null => null,
+      final onCreate => FilledButton.tonal(onPressed: onCreate, child: Text(context.localized.noteNewPage)),
+    },
   );
 }

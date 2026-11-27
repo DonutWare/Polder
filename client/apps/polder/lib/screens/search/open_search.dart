@@ -10,8 +10,8 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/search.dart";
-import "package:polder/providers/notes/notes_folder_provider.dart";
-import "package:polder/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/screens/search/search_view.dart";

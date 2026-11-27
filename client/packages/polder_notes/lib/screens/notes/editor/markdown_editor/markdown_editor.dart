@@ -10,12 +10,12 @@ import "package:cross_file/cross_file.dart";
 import "package:desktop_drop/desktop_drop.dart";
 
 import "package:polder_core/models/user_tag.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_commands.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_projection.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_commands.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_projection.dart";
 import "package:polder_core/services/notes/markdown_source.dart";
-import "package:polder/screens/notes/editor/markdown_editor/tag_autocomplete.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/tag_autocomplete.dart";
 
 class MarkdownEditor extends StatefulWidget {
   const MarkdownEditor({

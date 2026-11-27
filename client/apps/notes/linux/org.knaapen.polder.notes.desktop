@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Polder Notes
+Exec=polder_notes
+Icon=polder_notes_icon_desktop
+Terminal=false
+Categories=Office;
+Comment=Notes and checklists for a self-hosted Polder server

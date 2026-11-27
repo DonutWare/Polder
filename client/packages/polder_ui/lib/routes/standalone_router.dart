@@ -17,10 +17,13 @@ GoRouter createStandaloneRouter(
   required String settings,
   required String Function(BuildContext context) title,
   required LocationBuilder home,
-  required LocationBuilder sidebar,
-  required LocationBuilder rail,
+  LocationBuilder? sidebar,
+  LocationBuilder? rail,
+  LocationBuilder? railFooter,
+  double sidebarWidth = 300,
   List<Widget> settingsGroups = const [],
   List<GoRoute> routes = const [],
+  List<RouteBase> fullScreenRoutes = const [],
 }) {
   final state = SignInState(ref);
   final router = GoRouter(
@@ -30,12 +33,15 @@ GoRouter createStandaloneRouter(
     routes: [
       standalonePage(signIn.login, (_) => const LoginScreen()),
       standalonePage(signIn.twoFactorSetup, (_) => const TwoFactorSetupScreen()),
+      ...fullScreenRoutes,
       ShellRoute(
         builder: (context, route, child) => StandaloneShell(
           title: title(context),
           location: route.uri,
-          sidebar: sidebar(route.uri),
-          rail: rail(route.uri),
+          sidebar: sidebar?.call(route.uri),
+          rail: rail?.call(route.uri),
+          railFooter: railFooter?.call(route.uri),
+          sidebarWidth: sidebarWidth,
           child: child,
         ),
         routes: [

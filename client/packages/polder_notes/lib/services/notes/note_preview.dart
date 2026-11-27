@@ -1,7 +1,7 @@
 import "package:markdown/markdown.dart" as md;
 import "package:polder_core/models/user_tag.dart";
-import "package:polder/services/notes/note_checklist.dart";
-import "package:polder/services/notes/note_markdown.dart";
+import "package:polder_notes/services/notes/note_checklist.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
 
 class NotePreview {
   const NotePreview({this.image, this.excerpt, this.links = const [], this.checklist});

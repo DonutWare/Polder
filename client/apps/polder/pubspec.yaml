@@ -54,12 +54,9 @@ dependencies:
   flutter_inappwebview_linux: ^0.1.0-beta.1
   web: ^1.1.1
   cached_network_image: ^4.0.4
-  markdown: ^7.3.1
-  re_highlight: ^0.0.3
   font_awesome_flutter: ^11.0.0
   app_links: ^7.2.2
   desktop_drop: ^0.8.4
-  cross_file: ^0.3.5+5
   wakelock_plus: ^1.8.0
   ffi: ^2.2.0
   media_kit: ^1.2.2
@@ -67,10 +64,14 @@ dependencies:
   media_kit_libs_video: ^1.0.7
   media_viewer:
     path: ../../packages/media_viewer
+  polder_media:
+    path: ../../packages/polder_media
   calendar_views:
     path: ../../packages/calendar_views
   polder_calendar:
     path: ../../packages/polder_calendar
+  polder_notes:
+    path: ../../packages/polder_notes
   polder_core:
     path: ../../packages/polder_core
   polder_ui:

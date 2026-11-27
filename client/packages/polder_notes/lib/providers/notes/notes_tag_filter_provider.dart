@@ -6,7 +6,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/user_tag.dart";
-import "package:polder/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/providers/realtime/files_changed_provider.dart";

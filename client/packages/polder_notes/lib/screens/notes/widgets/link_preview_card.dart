@@ -6,9 +6,9 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/link_preview.dart";
-import "package:polder/providers/notes/link_preview_provider.dart";
+import "package:polder_notes/providers/notes/link_preview_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
-import "package:polder/screens/notes/editor/note_image_provider.dart";
+import "package:polder_notes/screens/notes/editor/note_image_provider.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/external_link.dart";

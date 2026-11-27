@@ -5,9 +5,9 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
-import "package:polder/screens/notes/cooking/cooking_timer_bar.dart";
-import "package:polder/screens/notes/editor/note_embeds.dart";
-import "package:polder/services/notes/note_recipe.dart";
+import "package:polder_notes/screens/notes/cooking/cooking_timer_bar.dart";
+import "package:polder_notes/screens/notes/editor/note_embeds.dart";
+import "package:polder_notes/services/notes/note_recipe.dart";
 import "package:polder_ui/util/localization_helper.dart";
 
 const _readableWidth = 720.0;

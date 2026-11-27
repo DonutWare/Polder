@@ -2,7 +2,7 @@ import "dart:async";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder_core/providers/realtime/files_changed_provider.dart";
 

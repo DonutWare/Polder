@@ -1,9 +1,9 @@
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/notes/notes_folder_provider.dart";
-import "package:polder/providers/notes/notes_tag_filter_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/util/remote_path.dart";
 

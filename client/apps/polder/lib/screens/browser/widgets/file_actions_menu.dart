@@ -6,7 +6,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_mount.dart";
 import "package:polder_core/models/sharing.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder_core/providers/offline/offline_availability_provider.dart";
@@ -22,9 +22,9 @@ import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/file_dialogs.dart";
 import "package:polder_ui/widgets/shared/icon_menu_item.dart";
 import "package:polder_core/util/remote_path.dart";
-import "package:polder/widgets/files/remote_folder_picker_dialog.dart";
+import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
 import "package:polder/widgets/sharing/share_panel.dart";
-import "package:polder/widgets/tags/tag_picker.dart";
+import "package:polder_ui/widgets/tags/tag_picker.dart";
 import "package:polder_core/services/api/polder_api.dart";
 
 enum FileAction {

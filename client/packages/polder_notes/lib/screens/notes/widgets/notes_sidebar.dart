@@ -8,15 +8,15 @@ import "package:flutter/services.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/notes/note_selection_provider.dart";
-import "package:polder/providers/notes/notes_search_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/providers/notes/notes_view_provider.dart";
-import "package:polder/screens/notes/widgets/note_node_interactions.dart";
-import "package:polder/screens/notes/widgets/notes_grid.dart";
-import "package:polder/screens/notes/widgets/notes_tag_filter.dart";
-import "package:polder/screens/notes/widgets/notes_tree.dart";
-import "package:polder/providers/notes/notes_tag_filter_provider.dart";
+import "package:polder_notes/providers/notes/note_selection_provider.dart";
+import "package:polder_notes/providers/notes/notes_search_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_view_provider.dart";
+import "package:polder_notes/screens/notes/widgets/note_node_interactions.dart";
+import "package:polder_notes/screens/notes/widgets/notes_grid.dart";
+import "package:polder_notes/screens/notes/widgets/notes_tag_filter.dart";
+import "package:polder_notes/screens/notes/widgets/notes_tree.dart";
+import "package:polder_notes/providers/notes/notes_tag_filter_provider.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
@@ -34,6 +34,8 @@ class NotesSidebar extends ConsumerStatefulWidget {
     required this.selectedPath,
     required this.onOpen,
     required this.searchFocus,
+    this.allowGrid = true,
+    this.showSearch = true,
     super.key,
   });
 
@@ -41,6 +43,8 @@ class NotesSidebar extends ConsumerStatefulWidget {
   final String? selectedPath;
   final ValueChanged<FileEntry> onOpen;
   final FocusNode searchFocus;
+  final bool allowGrid;
+  final bool showSearch;
 
   @override
   ConsumerState<NotesSidebar> createState() => _NotesSidebarState();
@@ -58,7 +62,7 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
     super.dispose();
   }
 
-  bool get _grid => ref.watch(notesViewModeProvider) == NotesViewMode.grid;
+  bool get _grid => widget.allowGrid && ref.watch(notesViewModeProvider) == NotesViewMode.grid;
 
   final _scrolled = ValueNotifier<double>(0);
   double _headerHeight = 0;
@@ -83,6 +87,7 @@ class _NotesSidebarState extends ConsumerState<NotesSidebar> {
       (false, AllNotes()) => _allNotes(),
       _ => _taggedNotes(),
     };
+    if (!widget.showSearch) return content;
     return Stack(
       children: [
         Positioned.fill(
@@ -462,7 +467,50 @@ class NotesOptionsMenu extends ConsumerWidget {
     ref.read(notesRevealProvider.notifier).reveal(path);
   }
 
-  void _choose(WidgetRef ref, Object choice) {
+  static Future<void> showFrom(
+    BuildContext context,
+    WidgetRef ref, {
+    required String root,
+    String? selectedPath,
+  }) async {
+    final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
+    final tile = context.findRenderObject()! as RenderBox;
+    final topRight = tile.localToGlobal(tile.size.topRight(Offset.zero), ancestor: overlay);
+    final choice = await showMenu<Object>(
+      context: context,
+      position: RelativeRect.fromRect(topRight & Size.zero, Offset.zero & overlay.size),
+      items: items(context, ref, selectedPath: selectedPath),
+    );
+    if (choice != null) choose(ref, choice, root: root, selectedPath: selectedPath);
+  }
+
+  static List<PopupMenuEntry<Object>> items(BuildContext context, WidgetRef ref, {String? selectedPath}) {
+    final localized = context.localized;
+    final sort = ref.read(notesSortProvider);
+    final tree = ref.read(notesViewModeProvider) == NotesViewMode.tree;
+    return [
+      for (final field in NotesSortField.values)
+        CheckedPopupMenuItem(
+          value: field,
+          checked: sort.field == field,
+          child: Text(switch (field) {
+            NotesSortField.name => localized.name,
+            NotesSortField.modified => localized.modified,
+          }),
+        ),
+      const PopupMenuDivider(),
+      CheckedPopupMenuItem(value: true, checked: sort.ascending, child: Text(localized.sortAscending)),
+      CheckedPopupMenuItem(value: false, checked: !sort.ascending, child: Text(localized.sortDescending)),
+      if (tree) ...[
+        const PopupMenuDivider(),
+        PopupMenuItem(value: _TreeAction.expandAll, child: Text(localized.notesExpandAll)),
+        PopupMenuItem(value: _TreeAction.collapseAll, child: Text(localized.notesCollapseAll)),
+        if (selectedPath != null) PopupMenuItem(value: _TreeAction.reveal, child: Text(localized.notesRevealCurrent)),
+      ],
+    ];
+  }
+
+  static void choose(WidgetRef ref, Object choice, {required String root, String? selectedPath}) {
     final sort = ref.read(notesSortProvider.notifier);
     switch (choice) {
       case final NotesSortField field:
@@ -480,34 +528,15 @@ class NotesOptionsMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localized = context.localized;
-    final sort = ref.watch(notesSortProvider);
-    final tree = ref.watch(notesViewModeProvider) == NotesViewMode.tree;
+    ref
+      ..watch(notesSortProvider)
+      ..watch(notesViewModeProvider);
     return PopupMenuButton<Object>(
-      tooltip: localized.notesViewOptions,
+      tooltip: context.localized.notesViewOptions,
       icon: const Icon(IconsaxPlusLinear.sort),
       style: IconButton.styleFrom(visualDensity: density),
-      onSelected: (choice) => _choose(ref, choice),
-      itemBuilder: (_) => [
-        for (final field in NotesSortField.values)
-          CheckedPopupMenuItem(
-            value: field,
-            checked: sort.field == field,
-            child: Text(switch (field) {
-              NotesSortField.name => localized.name,
-              NotesSortField.modified => localized.modified,
-            }),
-          ),
-        const PopupMenuDivider(),
-        CheckedPopupMenuItem(value: true, checked: sort.ascending, child: Text(localized.sortAscending)),
-        CheckedPopupMenuItem(value: false, checked: !sort.ascending, child: Text(localized.sortDescending)),
-        if (tree) ...[
-          const PopupMenuDivider(),
-          PopupMenuItem(value: _TreeAction.expandAll, child: Text(localized.notesExpandAll)),
-          PopupMenuItem(value: _TreeAction.collapseAll, child: Text(localized.notesCollapseAll)),
-          if (selectedPath != null) PopupMenuItem(value: _TreeAction.reveal, child: Text(localized.notesRevealCurrent)),
-        ],
-      ],
+      onSelected: (choice) => choose(ref, choice, root: root, selectedPath: selectedPath),
+      itemBuilder: (context) => items(context, ref, selectedPath: selectedPath),
     );
   }
 }

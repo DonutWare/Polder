@@ -3,9 +3,9 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
-import "package:polder/screens/notes/editor/note_editor.dart";
-import "package:polder/services/notes/note_checklist.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/note_editor.dart";
+import "package:polder_notes/services/notes/note_checklist.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/escape_cancels_drag.dart";
 

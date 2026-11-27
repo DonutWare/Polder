@@ -8,7 +8,7 @@ import "package:pdfrx/pdfrx.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_space.dart";
-import "package:polder/providers/browser/file_content_provider.dart";
+import "package:polder_core/providers/browser/file_content_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder/screens/browser/widgets/file_details_sheet.dart";
 import "package:polder_ui/util/localization_helper.dart";

@@ -3,15 +3,15 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/notes/file_links_provider.dart";
-import "package:polder/providers/versions/file_versions_provider.dart";
+import "package:polder_notes/providers/notes/file_links_provider.dart";
+import "package:polder_core/providers/versions/file_versions_provider.dart";
 import "package:polder/screens/browser/widgets/capture_detail_rows.dart";
 import "package:polder/screens/browser/widgets/file_actions_row.dart";
 import "package:polder/screens/browser/widgets/file_history_sheet.dart";
 import "package:polder/screens/browser/widgets/mount_details_sheet.dart";
 import "package:polder/screens/browser/widgets/file_open_action.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder_ui/util/byte_format.dart";
 import "package:polder_ui/util/date_format_extension.dart";
 import "package:polder_ui/util/duration_format.dart";

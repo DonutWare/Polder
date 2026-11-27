@@ -10,6 +10,7 @@ class PolderUiConfig {
     required this.isTopLevel,
     this.pageActions = const [],
     this.menuButton,
+    this.openSearch,
   });
 
   final String Function(Uri loginLocation) afterSignIn;
@@ -18,6 +19,7 @@ class PolderUiConfig {
   final bool Function(String location) isTopLevel;
   final List<Widget> pageActions;
   final Widget? menuButton;
+  final void Function(BuildContext context, String query)? openSearch;
 }
 
 final polderUiConfigProvider = Provider<PolderUiConfig>(

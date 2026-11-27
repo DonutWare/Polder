@@ -2,7 +2,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/note_item.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
 
 NoteItem _note(String name) => NoteItem(
   entry: FileEntry(path: "/Notes/$name", name: name, mtime: DateTime.utc(2026), mime: markdownMime),

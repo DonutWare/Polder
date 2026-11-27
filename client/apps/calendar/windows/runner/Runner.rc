@@ -52,7 +52,11 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
+#ifdef POLDER_DEV
+IDI_APP_ICON            ICON                    "resources\\app_icon_dev.ico"
+#else
 IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
+#endif
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -72,6 +76,12 @@ IDI_APP_ICON            ICON                    "resources\\app_icon.ico"
 #define VERSION_AS_STRING "1.0.0"
 #endif
 
+#ifdef POLDER_DEV
+#define APP_TITLE "Polder Calendar Dev"
+#else
+#define APP_TITLE "Polder Calendar"
+#endif
+
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VERSION_AS_NUMBER
  PRODUCTVERSION VERSION_AS_NUMBER
@@ -89,13 +99,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "org.knaapen.polder" "\0"
-            VALUE "FileDescription", "polder_calendar_app" "\0"
+            VALUE "CompanyName", "org.knaapen" "\0"
+            VALUE "FileDescription", APP_TITLE "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "polder_calendar_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 org.knaapen.polder. All rights reserved." "\0"
-            VALUE "OriginalFilename", "polder_calendar_app.exe" "\0"
-            VALUE "ProductName", "polder_calendar_app" "\0"
+            VALUE "InternalName", "polder_calendar" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 org.knaapen. All rights reserved." "\0"
+            VALUE "OriginalFilename", "polder_calendar.exe" "\0"
+            VALUE "ProductName", APP_TITLE "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

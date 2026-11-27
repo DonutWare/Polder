@@ -2,10 +2,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_version.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
-import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder_core/providers/sync/sync_request_provider.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_core/util/guarded_refresh.dart";
 import "package:polder_core/util/remote_path.dart";
@@ -32,7 +32,7 @@ class FileVersionsNotifier extends AsyncNotifier<VersionListing> with GuardedRef
     final restored = await _api.restoreVersion(version.id);
     ref.invalidate(directoryProvider(RemotePath.parent(restored.path)));
     ref.invalidate(currentUserProvider);
-    ref.read(syncSchedulerProvider)?.requestRun();
+    ref.read(syncRequestProvider)();
     await refresh();
     return restored;
   }

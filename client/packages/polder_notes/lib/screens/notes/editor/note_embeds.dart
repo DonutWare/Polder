@@ -6,18 +6,18 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_space.dart";
-import "package:polder/providers/notes/file_links_provider.dart";
+import "package:polder_notes/providers/notes/file_links_provider.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
-import "package:polder/providers/sharing/file_space_providers.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
-import "package:polder/screens/notes/editor/note_image_provider.dart";
+import "package:polder_core/providers/sharing/file_space_providers.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
+import "package:polder_notes/screens/notes/editor/note_image_provider.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_core/services/offline/offline_files.dart";
-import "package:polder/services/notes/note_link.dart";
-import "package:polder/services/notes/note_markdown.dart";
-import "package:polder/services/sharing/file_space_api.dart";
+import "package:polder_notes/services/notes/note_link.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
+import "package:polder_core/services/sharing/file_space_api.dart";
 
 class NoteTargets {
   const NoteTargets({required this.notePath, required this.byId, this.space});

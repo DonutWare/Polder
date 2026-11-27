@@ -10,33 +10,32 @@ import "package:go_router/go_router.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_version.dart";
-import "package:polder/providers/app/navigation_history_provider.dart";
-import "package:polder/providers/notes/file_links_provider.dart";
-import "package:polder/providers/notes/note_document_provider.dart";
-import "package:polder/providers/notes/renamed_note_provider.dart";
+import "package:polder_ui/providers/app/navigation_history_provider.dart";
+import "package:polder_notes/providers/notes/file_links_provider.dart";
+import "package:polder_notes/providers/notes/note_document_provider.dart";
+import "package:polder_notes/providers/notes/renamed_note_provider.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/providers/service_providers.dart";
-import "package:polder/providers/versions/file_versions_provider.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/browser/widgets/file_history_sheet.dart";
-import "package:polder/screens/browser/widgets/file_open_action.dart";
-import "package:polder/screens/notes/editor/checklist_editor.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
-import "package:polder/screens/notes/editor/markdown_view.dart";
-import "package:polder/screens/notes/editor/note_editor.dart";
-import "package:polder/screens/notes/editor/note_embeds.dart";
-import "package:polder/screens/notes/editor/note_toolbar.dart";
-import "package:polder/screens/notes/editor/source_editor.dart";
-import "package:polder/screens/notes/notes_actions.dart";
-import "package:polder/screens/notes/widgets/link_preview_card.dart";
-import "package:polder/screens/notes/widgets/note_breadcrumbs.dart";
-import "package:polder/screens/notes/widgets/note_subpages.dart";
-import "package:polder/services/notes/format_actions.dart";
-import "package:polder/services/notes/note_checklist.dart";
-import "package:polder/services/notes/note_link.dart";
-import "package:polder/services/notes/note_preview.dart";
-import "package:polder/services/notes/note_recipe.dart";
+import "package:polder_core/providers/versions/file_versions_provider.dart";
+import "package:polder_notes/notes_locations.dart";
+import "package:polder_notes/notes_host.dart";
+import "package:polder_notes/screens/notes/editor/checklist_editor.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/markdown_view.dart";
+import "package:polder_notes/screens/notes/editor/note_editor.dart";
+import "package:polder_notes/screens/notes/editor/note_embeds.dart";
+import "package:polder_notes/screens/notes/editor/note_toolbar.dart";
+import "package:polder_notes/screens/notes/editor/source_editor.dart";
+import "package:polder_notes/screens/notes/notes_actions.dart";
+import "package:polder_notes/screens/notes/widgets/link_preview_card.dart";
+import "package:polder_notes/screens/notes/widgets/note_breadcrumbs.dart";
+import "package:polder_notes/screens/notes/widgets/note_subpages.dart";
+import "package:polder_notes/services/notes/format_actions.dart";
+import "package:polder_notes/services/notes/note_checklist.dart";
+import "package:polder_notes/services/notes/note_link.dart";
+import "package:polder_notes/services/notes/note_preview.dart";
+import "package:polder_notes/services/notes/note_recipe.dart";
 import "package:polder_core/services/transfer/file_picker_service.dart";
 import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/api_error_localization.dart";
@@ -50,7 +49,7 @@ import "package:polder_ui/widgets/layout/window_centered.dart";
 import "package:polder_ui/widgets/shared/app_bar_fade.dart";
 import "package:polder_ui/widgets/shared/centered_progress.dart";
 import "package:polder_ui/widgets/shared/error_view.dart";
-import "package:polder/widgets/files/file_link_picker_dialog.dart";
+import "package:polder_notes/screens/notes/widgets/file_link_picker_dialog.dart";
 
 const attachmentsFolder = "attachments";
 
@@ -100,7 +99,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
 
   void _follow(String renamed) {
     ref.read(renamedNoteProvider.notifier).record(widget.path, renamed);
-    ref.read(navigationHistoryProvider.notifier).replace(AppRoutes.noteAt(renamed));
+    ref.read(navigationHistoryProvider.notifier).replace(ref.read(notesLocationsProvider).noteAt(renamed));
   }
 
   @override
@@ -165,7 +164,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.localized.noteLinkMissing)));
       return;
     }
-    await openEntry(context, entry, gallery: targets.mediaIn(source, opened: entry));
+    await notesHostOf(context).openFile(context, entry, gallery: targets.mediaIn(source, opened: entry));
   }
 
   Future<FileEntry?> _linkTarget(NoteLink link, NoteTargets targets) async {
@@ -240,7 +239,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     );
   }
 
-  Future<void> _showHistory(NoteDocument document) async {
+  Future<void> _showHistory(NoteDocument document, FileHistoryViewer showFileHistory) async {
     await _notifier.save();
     if (!mounted) return;
     await showFileHistory(
@@ -271,11 +270,12 @@ class _NotePaneState extends ConsumerState<NotePane> {
 
   Future<void> _delete(NoteDocument document) async {
     final navigation = ref.read(navigationHistoryProvider.notifier);
+    final locations = ref.read(notesLocationsProvider);
     final offline = await NotesActions.offlineFor(ref.read(offlineFilesProvider.future), document.entry.path);
     final node = await NotesActions.nodeFor(ref.read(polderApiProvider), document.entry, offline: offline);
     if (!mounted) return;
     final deleted = await NotesActions.delete(context, node);
-    if (deleted) navigation.replace(AppRoutes.notes);
+    if (deleted) navigation.replace(locations.root);
   }
 
   Future<void> _resolveConflict(NoteDocument document, _ConflictChoice choice) async {
@@ -339,6 +339,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
     final recipe = !checklist && NoteRecipe.isRecipe(controller.text);
     final colors = Theme.of(context).colorScheme;
     final banners = _banners(document, localized);
+    final host = ref.watch(notesHostProvider);
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -377,7 +378,7 @@ class _NotePaneState extends ConsumerState<NotePane> {
             IconButton(
               tooltip: localized.recipeStartCooking,
               icon: const Icon(IconsaxPlusLinear.cake),
-              onPressed: () => context.push(AppRoutes.cookAt(document.entry.path)),
+              onPressed: () => context.push(notesLocationsOf(context).cookAt(document.entry.path)),
             ),
           if (widget.onShowFamily case final onShowFamily?)
             IconButton(
@@ -402,10 +403,8 @@ class _NotePaneState extends ConsumerState<NotePane> {
             ),
           PopupMenuButton<_NoteMenu>(
             onSelected: (choice) => switch (choice) {
-              _NoteMenu.history => _showHistory(document),
-              _NoteMenu.showInFiles => context.go(
-                AppRoutes.filesAt(RemotePath.parent(document.entry.path), select: document.entry.name),
-              ),
+              _NoteMenu.history => _showHistory(document, host.showFileHistory!),
+              _NoteMenu.showInFiles => host.showInFiles!(context, document.entry),
               _NoteMenu.rename => _rename(document),
               _NoteMenu.delete => _delete(document),
               _NoteMenu.checkboxes => _toggleCheckboxes(controller),
@@ -420,8 +419,10 @@ class _NotePaneState extends ConsumerState<NotePane> {
                         : localized.noteShowCheckboxes,
                   ),
                 ),
-              PopupMenuItem(value: _NoteMenu.history, child: Text(localized.versionHistory)),
-              PopupMenuItem(value: _NoteMenu.showInFiles, child: Text(localized.noteShowInFiles)),
+              if (host.showFileHistory != null)
+                PopupMenuItem(value: _NoteMenu.history, child: Text(localized.versionHistory)),
+              if (host.showInFiles != null)
+                PopupMenuItem(value: _NoteMenu.showInFiles, child: Text(localized.noteShowInFiles)),
               PopupMenuItem(value: _NoteMenu.rename, child: Text(localized.rename)),
               PopupMenuItem(value: _NoteMenu.delete, child: Text(localized.delete)),
             ],
@@ -568,8 +569,9 @@ class _NoteHistoryArrows extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(navigationHistoryProvider);
-    final canGoBack = AppRoutes.isNoteLocation(history.previous);
-    final canGoForward = AppRoutes.isNoteLocation(history.next);
+    final locations = ref.watch(notesLocationsProvider);
+    final canGoBack = locations.isNoteLocation(history.previous);
+    final canGoForward = locations.isNoteLocation(history.next);
     if (!canGoBack && !canGoForward) return const SizedBox.shrink();
     final localized = context.localized;
     final notifier = ref.read(navigationHistoryProvider.notifier);

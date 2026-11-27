@@ -5,12 +5,12 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/notes/note_document_provider.dart";
-import "package:polder/screens/notes/editor/checklist_editor.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor.dart";
-import "package:polder/screens/notes/widgets/link_preview_card.dart";
-import "package:polder/screens/notes/widgets/note_pane.dart";
-import "package:polder/widgets/files/file_link_picker_dialog.dart";
+import "package:polder_notes/providers/notes/note_document_provider.dart";
+import "package:polder_notes/screens/notes/editor/checklist_editor.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor.dart";
+import "package:polder_notes/screens/notes/widgets/link_preview_card.dart";
+import "package:polder_notes/screens/notes/widgets/note_pane.dart";
+import "package:polder_notes/screens/notes/widgets/file_link_picker_dialog.dart";
 
 import "../../support/fake_server.dart";
 import "../../support/localized_app.dart";

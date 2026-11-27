@@ -19,7 +19,7 @@ import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/escape_cancels_drag.dart";
 import "package:polder_ui/widgets/shared/confirm_dialog.dart";
-import "package:polder/widgets/files/remote_folder_picker_dialog.dart";
+import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
 
 Future<List<String>?> scanDocument(BuildContext context) async {
   final container = ProviderScope.containerOf(context, listen: false);

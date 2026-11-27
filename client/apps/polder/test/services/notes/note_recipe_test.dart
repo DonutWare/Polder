@@ -1,6 +1,6 @@
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/services/notes/note_recipe.dart";
+import "package:polder_notes/services/notes/note_recipe.dart";
 
 const _imported = r"""![Pasta / Pesto](attachments/pasta-pesto.png?fileId=2)
 

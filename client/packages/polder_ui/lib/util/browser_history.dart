@@ -1,2 +1,2 @@
-export "package:polder/util/browser_history_native.dart"
-    if (dart.library.js_interop) "package:polder/util/browser_history_web.dart";
+export "package:polder_ui/util/browser_history_native.dart"
+    if (dart.library.js_interop) "package:polder_ui/util/browser_history_web.dart";

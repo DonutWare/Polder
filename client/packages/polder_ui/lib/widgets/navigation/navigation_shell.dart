@@ -29,7 +29,9 @@ class NavigationShell extends ConsumerWidget {
     this.sidebarFooter,
     this.sidebar,
     this.rail,
+    this.railFooter,
     this.sidebarWidth = 224,
+    this.canExpand = true,
     super.key,
   });
 
@@ -45,7 +47,9 @@ class NavigationShell extends ConsumerWidget {
   final Widget? sidebarFooter;
   final Widget? sidebar;
   final Widget? rail;
+  final Widget? railFooter;
   final double sidebarWidth;
+  final bool canExpand;
 
   final Widget child;
 
@@ -106,8 +110,8 @@ class NavigationShell extends ConsumerWidget {
       );
     }
 
-    final canExpand = !AdaptiveLayout.isSingle(context);
-    final extended = canExpand && ref.watch(sidebarExpandedProvider);
+    final expandable = canExpand && !AdaptiveLayout.isSingle(context);
+    final extended = expandable && ref.watch(sidebarExpandedProvider);
     final rtl = Directionality.of(context) == TextDirection.rtl;
     final Widget navigation = extended
         ? _Sidebar(
@@ -130,7 +134,8 @@ class NavigationShell extends ConsumerWidget {
                 ?rail,
                 const Spacer(),
                 if (launchers.isNotEmpty && onLaunch != null) _railGroup(launchers, selectedLauncher, onLaunch!),
-                if (canExpand) const SidebarToggle(expanded: false),
+                ?railFooter,
+                if (expandable) const SidebarToggle(expanded: false),
                 const SizedBox(height: 16),
               ],
             ),

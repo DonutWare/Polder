@@ -1,3 +1,5 @@
+import "package:flutter/widgets.dart";
+
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder_ui/polder_ui_config.dart";
@@ -11,5 +13,8 @@ final polderUiConfigOverride = polderUiConfigProvider.overrideWithValue(
     isTopLevel: AppRoutes.isTab,
     pageActions: const [SearchButton()],
     menuButton: const MoreOptionsButton(),
+    openSearch: _openSearch,
   ),
 );
+
+void _openSearch(BuildContext context, String query) => openSearch(context, initialQuery: query);

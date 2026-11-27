@@ -1,0 +1,29 @@
+name: polder_media
+description: "Full-screen photo and video viewer for Polder files."
+publish_to: "none"
+
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.4
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.4.3
+  flutter_svg: ^2.3.0
+  iconsax_plus: ^1.0.0
+  media_kit: ^1.2.2
+  media_kit_video: ^2.0.0
+  wakelock_plus: ^1.8.0
+  media_viewer:
+    path: ../media_viewer
+  polder_core:
+    path: ../polder_core
+  polder_ui:
+    path: ../polder_ui
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

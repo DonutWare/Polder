@@ -8,7 +8,7 @@ import "package:polder_core/models/document_editor.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_space.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
-import "package:polder/providers/sharing/file_space_providers.dart";
+import "package:polder_core/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/browser/widgets/file_metadata_text.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/screens/shared/widgets/space_file_opener.dart";

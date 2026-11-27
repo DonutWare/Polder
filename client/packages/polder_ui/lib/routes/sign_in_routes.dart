@@ -8,11 +8,12 @@ import "package:polder_core/providers/current_user_provider.dart";
 class SignInRoutes {
   const SignInRoutes({
     required this.home,
-    this.login = "/login",
+    this.login = defaultLogin,
     this.twoFactorSetup = "/two-factor-setup",
     this.isPublic = _nothingIsPublic,
   });
 
+  static const defaultLogin = "/login";
   static const fromParameter = "from";
 
   final String home;

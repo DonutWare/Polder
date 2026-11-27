@@ -5,7 +5,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:path/path.dart" as p;
 
 import "package:polder_core/models/scan_session.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/services/transfer/file_picker_service.dart";

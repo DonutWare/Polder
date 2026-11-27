@@ -1,0 +1,63 @@
+app-id: org.knaapen.polder.calendar
+runtime: org.gnome.Platform
+runtime-version: "51"
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.llvm22
+command: polder_calendar
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --filesystem=xdg-run/pipewire-0:ro
+  - --device=dri
+  - --filesystem=home
+  - --talk-name=org.freedesktop.secrets
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.PowerManagement
+  - --talk-name=org.freedesktop.ScreenSaver
+  - --talk-name=org.freedesktop.portal.*
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --system-talk-name=org.freedesktop.NetworkManager
+  - --system-talk-name=org.freedesktop.UPower
+build-options:
+  cflags: -g0
+  cxxflags: -g0
+  no-debuginfo: true
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - /share/doc
+  - /share/man
+  - "*.a"
+  - "*.la"
+modules:
+  - modules/zenity.yml
+
+  - name: polder_calendar
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/llvm22/bin
+      prepend-ld-library-path: /usr/lib/sdk/llvm22/lib
+      build-args:
+        - --share=network
+    build-commands:
+      - sh flatpak/build-app.sh calendar polder_calendar assets/icon/desktop_icon.svg
+    sources:
+      - type: dir
+        path: ..
+        skip:
+          - build
+          - .dart_tool
+          - apps/polder/build
+          - apps/polder/.dart_tool
+          - apps/notes/build
+          - apps/notes/.dart_tool
+          - apps/calendar/build
+          - apps/calendar/.dart_tool
+          - .flutter-sdk
+          - .pub-cache
+          - flatpak/.flatpak-builder
+          - flatpak/build-dir

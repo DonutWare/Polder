@@ -3,7 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/models/activity.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/transfer.dart";
-import "package:polder/providers/browser/file_operations_provider.dart";
+import "package:polder_core/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
 import "package:polder_core/providers/offline/offline_changes_provider.dart";

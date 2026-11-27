@@ -23,6 +23,7 @@ class DualPane extends StatelessWidget {
     this.maxListWidth = defaultMaxListWidth,
     this.forceSingle = false,
     this.listScrollsUnderBars = false,
+    this.showList = true,
     super.key,
   });
 
@@ -41,6 +42,7 @@ class DualPane extends StatelessWidget {
   final double maxListWidth;
   final bool forceSingle;
   final bool listScrollsUnderBars;
+  final bool showList;
 
   static bool isDetail(BuildContext context) => context.getInheritedWidgetOfExactType<_DualDetail>() != null;
 
@@ -98,28 +100,30 @@ class DualPane extends StatelessWidget {
         builder: (context, constraints) => Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(
-              width: math.min(maxListWidth, constraints.maxWidth * 2 / 5),
-              child: Material(
-                color: colors.surfaceContainerLow,
-                child: SafeArea(
-                  right: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (title case final title?)
-                        _ListHeader(
-                          title: title,
-                          actions: listActions,
-                          showUp: location != null && !readPolderUiConfig(context).isTopLevel(location),
-                        ),
-                      Expanded(child: _withFloatingButton(list)),
-                    ],
+            if (showList) ...[
+              SizedBox(
+                width: math.min(maxListWidth, constraints.maxWidth * 2 / 5),
+                child: Material(
+                  color: colors.surfaceContainerLow,
+                  child: SafeArea(
+                    right: false,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (title case final title?)
+                          ListPaneHeader(
+                            title: title,
+                            actions: listActions,
+                            showUp: location != null && !readPolderUiConfig(context).isTopLevel(location),
+                          ),
+                        Expanded(child: _withFloatingButton(list)),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            const VerticalDivider(width: 1),
+              const VerticalDivider(width: 1),
+            ],
             Expanded(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 180),
@@ -144,8 +148,8 @@ class _DualDetail extends InheritedWidget {
   bool updateShouldNotify(_DualDetail oldWidget) => false;
 }
 
-class _ListHeader extends StatelessWidget {
-  const _ListHeader({required this.title, required this.actions, required this.showUp});
+class ListPaneHeader extends StatelessWidget {
+  const ListPaneHeader({required this.title, this.actions = const [], this.showUp = false, super.key});
 
   final Widget title;
   final List<Widget> actions;

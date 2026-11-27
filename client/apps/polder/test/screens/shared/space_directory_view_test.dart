@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_space.dart";
-import "package:polder/providers/sharing/public_link_session_provider.dart";
+import "package:polder_core/providers/sharing/public_link_session_provider.dart";
 import "package:polder/screens/shared/widgets/space_directory_view.dart";
 import "package:polder/screens/viewer/shared_note_screen.dart";
 

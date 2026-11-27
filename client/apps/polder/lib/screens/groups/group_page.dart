@@ -10,7 +10,7 @@ import "package:polder/providers/groups/groups_provider.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder_ui/routes/up_scope.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder/screens/groups/widgets/add_member_dialog.dart";
 import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/api_error_localization.dart";

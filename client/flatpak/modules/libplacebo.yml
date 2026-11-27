@@ -1,0 +1,14 @@
+name: libplacebo
+buildsystem: meson
+config-opts:
+  - -Dvulkan=disabled
+  - -Dshaderc=disabled
+  - -Dglslang=disabled
+  - -Dopengl=enabled
+  - -Ddemos=false
+  - -Dtests=false
+sources:
+  - type: git
+    url: https://code.videolan.org/videolan/libplacebo.git
+    tag: v7.387.0
+    commit: 275f7dea27924cdd34ab2e6c20e448b6bc4fab65

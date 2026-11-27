@@ -10,7 +10,7 @@ import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/widgets/shared/icon_badge.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
 import "package:calendar_views/calendar_views.dart" as cal;
 
 class SearchHitTile extends StatelessWidget {

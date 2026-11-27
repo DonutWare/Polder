@@ -5,9 +5,8 @@ import "package:flutter/foundation.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
-import "package:polder/routes/app_router.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/util/browser_history.dart";
+import "package:polder_ui/routes/sign_in_routes.dart";
+import "package:polder_ui/util/browser_history.dart";
 
 @immutable
 class NavigationHistory {
@@ -29,7 +28,7 @@ class NavigationHistory {
 
   NavigationHistory visit(String location, {bool followAdjacent = false, bool replace = false}) {
     if (location == current) return this;
-    if (location == AppRoutes.login) return const NavigationHistory();
+    if (location == SignInRoutes.defaultLogin) return const NavigationHistory();
     if (followAdjacent && location == previous) return moveTo(index - 1);
     if (followAdjacent && location == next) return moveTo(index + 1);
     final visited = [...locations.take(replace ? index : index + 1), location];
@@ -38,17 +37,21 @@ class NavigationHistory {
   }
 }
 
+final historyRouterProvider = Provider<GoRouter>(
+  (ref) => throw UnimplementedError("Each app that keeps a navigation history overrides historyRouterProvider"),
+);
+
 final navigationHistoryProvider = NotifierProvider<NavigationHistoryNotifier, NavigationHistory>(
   NavigationHistoryNotifier.new,
 );
 
 class NavigationHistoryNotifier extends Notifier<NavigationHistory> {
-  GoRouter get _router => ref.read(routerProvider);
+  GoRouter get _router => ref.read(historyRouterProvider);
   var _replacing = false;
 
   @override
   NavigationHistory build() {
-    final delegate = ref.watch(routerProvider).routerDelegate;
+    final delegate = ref.watch(historyRouterProvider).routerDelegate;
     void record() {
       final configuration = delegate.currentConfiguration;
       final replace = _replacing;

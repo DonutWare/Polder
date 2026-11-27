@@ -6,9 +6,9 @@ import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
 
 const _style = MarkdownEditorStyle(
   body: TextStyle(fontSize: 16, height: 1.5, color: Colors.black),

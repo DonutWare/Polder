@@ -5,7 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder/providers/browser/browser_selection_provider.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder_ui/widgets/navigation/intercept_back.dart";
 import "package:polder/screens/browser/widgets/breadcrumbs.dart";
 import "package:polder/screens/browser/widgets/browser_add_button.dart";

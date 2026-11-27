@@ -9,7 +9,7 @@ import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_version.dart";
 import "package:polder/providers/browser/editor_capabilities_provider.dart";
 import "package:polder/providers/browser/transfers_provider.dart";
-import "package:polder/providers/versions/file_versions_provider.dart";
+import "package:polder_core/providers/versions/file_versions_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder_ui/util/action_feedback.dart";

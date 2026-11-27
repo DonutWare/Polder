@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import "package:polder_core/models/activity.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/browser/file_operations_provider.dart";
+import "package:polder_core/providers/browser/file_operations_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/screens/browser/widgets/browser_selection.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
@@ -13,7 +13,7 @@ import "package:polder/screens/browser/widgets/offline_mark.dart";
 import "package:polder/screens/browser/widgets/share_marks.dart";
 import "package:polder/screens/browser/widgets/pending_upload_widgets.dart";
 import "package:polder_ui/theme/app_theme.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
 
 class FileGridTile extends StatelessWidget {
   const FileGridTile({

@@ -5,7 +5,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 

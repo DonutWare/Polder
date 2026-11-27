@@ -4,7 +4,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/providers/account_provider.dart";
 import "package:polder_core/providers/offline/offline_sync_provider.dart";
-import "package:polder/widgets/tags/tag_picker.dart";
+import "package:polder_ui/widgets/tags/tag_picker.dart";
 
 import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";

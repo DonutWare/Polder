@@ -100,7 +100,7 @@ jobs:
           fi
           {
             echo "### $ASSET"
-            echo "Set this in client/flatpak/org.knaapen.polder.yml:"
+            echo "Set this in client/flatpak/modules/wpewebkit.yml:"
             echo '```yaml'
             echo "sha256: $SHA"
             echo '```'

@@ -5,7 +5,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/providers/account_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/notes/notes_actions.dart";
+import "package:polder_notes/screens/notes/notes_actions.dart";
 import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
 import "package:polder/services/shortcuts/app_shortcut.dart";

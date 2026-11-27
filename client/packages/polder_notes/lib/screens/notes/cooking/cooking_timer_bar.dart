@@ -3,8 +3,8 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:polder/providers/notes/cooking_timers_provider.dart";
-import "package:polder/services/notes/note_recipe.dart";
+import "package:polder_notes/providers/notes/cooking_timers_provider.dart";
+import "package:polder_notes/services/notes/note_recipe.dart";
 import "package:polder_ui/util/duration_format.dart";
 import "package:polder_ui/util/localization_helper.dart";
 

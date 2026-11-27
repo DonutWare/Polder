@@ -15,7 +15,7 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder/services/sharing/shared_content.dart";
 import "package:polder_core/services/transfer/file_picker_service.dart";
 import "package:polder_ui/util/localization_helper.dart";
-import "package:polder/widgets/files/remote_folder_picker_dialog.dart";
+import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
 
 const _channel = MethodChannel("polder/share");
 

@@ -3,13 +3,13 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
-import "package:polder/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_ui/util/api_error_localization.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
-import "package:polder/widgets/files/remote_folder_picker_dialog.dart";
+import "package:polder_ui/widgets/files/remote_folder_picker_dialog.dart";
 
 Future<String?> showNotesSetupDialog(BuildContext context, {String? suggestion}) => showDialog<String>(
   context: context,

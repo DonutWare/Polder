@@ -1,0 +1,8 @@
+name: wpewebkit
+buildsystem: simple
+build-commands:
+  - cp -a . /app/
+sources:
+  - type: archive
+    url: https://github.com/DonutWare/Polder/releases/download/flatpak-wpewebkit-2.52.6-gnome51/wpewebkit-2.52.6-gnome51-x86_64.tar.xz
+    sha256: 6ef5eaea1207299d695323804653e06d1d0b2b1a804f5be703b8d6b481976d72

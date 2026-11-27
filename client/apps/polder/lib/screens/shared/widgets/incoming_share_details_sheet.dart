@@ -5,7 +5,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/sharing.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder/screens/shared/mounted_share_screen.dart";
 import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/date_format_extension.dart";

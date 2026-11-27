@@ -2,7 +2,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder/providers/browser/browser_view_provider.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 
 final mediaSiblingsProvider = Provider.autoDispose.family<List<FileEntry>?, String>((ref, folder) {
   final listing = ref.watch(directoryProvider(folder)).value;

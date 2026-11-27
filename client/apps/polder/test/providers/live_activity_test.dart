@@ -7,7 +7,7 @@ import "package:polder_core/providers/account_provider.dart";
 import "package:polder_core/providers/activity/activity_scope_provider.dart";
 import "package:polder/providers/activity/live_transfers_provider.dart";
 import "package:polder/providers/activity/now_groups_provider.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder/providers/browser/pending_uploads_provider.dart";
 import "package:polder/providers/realtime/directory_refresher_provider.dart";
 import "package:polder/providers/sync/sync_activity_provider.dart";

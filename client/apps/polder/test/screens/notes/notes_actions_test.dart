@@ -3,8 +3,8 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/screens/notes/notes_actions.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/screens/notes/notes_actions.dart";
 
 import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";

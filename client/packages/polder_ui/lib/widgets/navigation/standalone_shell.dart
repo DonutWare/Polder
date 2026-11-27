@@ -10,9 +10,10 @@ class StandaloneShell extends StatelessWidget {
   const StandaloneShell({
     required this.title,
     required this.location,
-    required this.sidebar,
-    required this.rail,
     required this.child,
+    this.sidebar,
+    this.rail,
+    this.railFooter,
     this.sheet = const AccountSheet(),
     this.sidebarWidth = 300,
     super.key,
@@ -20,8 +21,9 @@ class StandaloneShell extends StatelessWidget {
 
   final String title;
   final Uri location;
-  final Widget sidebar;
-  final Widget rail;
+  final Widget? sidebar;
+  final Widget? rail;
+  final Widget? railFooter;
   final Widget sheet;
   final double sidebarWidth;
   final Widget child;
@@ -41,6 +43,8 @@ class StandaloneShell extends StatelessWidget {
         sidebarWidth: sidebarWidth,
         sidebar: sidebar,
         rail: rail,
+        railFooter: railFooter,
+        canExpand: sidebar != null,
         child: child,
       ),
     );

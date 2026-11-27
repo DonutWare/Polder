@@ -3,14 +3,14 @@ import "dart:typed_data";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import "package:polder/providers/browser/file_operations_provider.dart";
+import "package:polder_core/providers/browser/file_operations_provider.dart";
 import "package:polder_core/models/directory_listing.dart";
 import "package:polder_core/models/document_editor.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_space.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
-import "package:polder/providers/sharing/public_link_session_provider.dart";
-import "package:polder/services/sharing/file_space_api.dart";
+import "package:polder_core/providers/sharing/public_link_session_provider.dart";
+import "package:polder_core/services/sharing/file_space_api.dart";
 import "package:polder_core/util/guarded_refresh.dart";
 import "package:polder_core/util/ref_cache.dart";
 import "package:polder_core/util/remote_path.dart";

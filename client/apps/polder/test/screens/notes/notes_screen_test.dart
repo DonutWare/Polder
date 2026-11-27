@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
-import "package:polder/screens/notes/notes_screen.dart";
-import "package:polder/screens/notes/widgets/notes_setup_dialog.dart";
+import "package:polder_notes/screens/notes/notes_screen.dart";
+import "package:polder_notes/screens/notes/widgets/notes_setup_dialog.dart";
 
 import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";

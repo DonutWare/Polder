@@ -2,12 +2,12 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
-import "package:polder/providers/notes/note_preview_provider.dart";
-import "package:polder/providers/notes/notes_folder_provider.dart";
-import "package:polder/providers/notes/notes_tree_provider.dart";
-import "package:polder/providers/notes/notes_view_provider.dart";
-import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/notes/note_navigation.dart";
+import "package:polder_notes/providers/notes/note_preview_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_notes/providers/notes/notes_view_provider.dart";
+import "package:polder_notes/notes_locations.dart";
+import "package:polder_notes/screens/notes/note_navigation.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/widgets/layout/window_centered.dart";
@@ -92,7 +92,7 @@ class _SubpageTile extends ConsumerWidget {
   final double width;
 
   void _open(BuildContext context, WidgetRef ref) => switch (node.page) {
-    final page? => context.go(AppRoutes.noteAt(page.path)),
+    final page? => context.go(notesLocationsOf(context).noteAt(page.path)),
     null => NoteNavigation.openFolder(context, ref, root, node.childrenPath),
   };
 

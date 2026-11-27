@@ -10,7 +10,7 @@ import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/util/tag_filter.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
 
 Future<void> showTagPicker(BuildContext context, List<FileEntry> entries) {
   if (AdaptiveLayout.isPhone(context)) {

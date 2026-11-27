@@ -123,6 +123,15 @@
 			"presentation": { "group": "2 Apps", "order": 4 }
 		},
 		{
+			"name": "Notes (Dev)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client/apps/notes",
+			"args": ["--flavor", "dev"],
+			"presentation": { "group": "2 Apps", "order": 5 }
+		},
+		{
 			"name": "Server tests (end-to-end)",
 			"type": "go",
 			"request": "launch",

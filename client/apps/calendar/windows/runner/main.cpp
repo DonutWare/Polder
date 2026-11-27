@@ -27,7 +27,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"polder_calendar_app", origin, size)) {
+#ifdef POLDER_DEV
+  const wchar_t *title = L"Polder Calendar Dev";
+#else
+  const wchar_t *title = L"Polder Calendar";
+#endif
+  if (!window.Create(title, origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

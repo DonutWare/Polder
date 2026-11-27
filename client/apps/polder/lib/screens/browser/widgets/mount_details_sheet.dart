@@ -5,7 +5,7 @@ import "package:go_router/go_router.dart";
 import "package:polder_ui/routes/history_back.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_mount.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder/providers/sharing/shares_provider.dart";

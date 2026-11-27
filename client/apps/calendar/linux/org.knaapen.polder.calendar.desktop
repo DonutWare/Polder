@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Polder Calendar
+Exec=polder_calendar
+Icon=polder_calendar_icon_desktop
+Terminal=false
+Categories=Office;Calendar;
+Comment=Calendars for a self-hosted Polder server

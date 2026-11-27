@@ -5,10 +5,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/models/document_editor.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_space.dart";
-import "package:polder/providers/sharing/file_space_providers.dart";
+import "package:polder_core/providers/sharing/file_space_providers.dart";
 import "package:polder/screens/shared/widgets/space_directory_view.dart";
 import "package:polder/screens/viewer/document_editor_screen.dart";
-import "package:polder/screens/viewer/media/media_viewer_screen.dart";
+import "package:polder/screens/viewer/media/polder_media_viewer.dart";
 import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/viewer/shared_note_screen.dart";
 
@@ -47,7 +47,7 @@ Widget _viewer(FileSpace space, FileEntry entry, List<FileEntry> siblings) {
         if (sibling.isViewableMedia) sibling,
     ];
     final gallery = media.any((item) => item.path == entry.path) ? media : [entry];
-    return MediaViewerScreen(entry: entry, gallery: gallery, space: space);
+    return PolderMediaViewer(entry: entry, gallery: gallery, space: space);
   }
   return DocumentEditorScreen(target: EditorTarget(entry, space: space));
 }

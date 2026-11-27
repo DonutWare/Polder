@@ -1,0 +1,20 @@
+version: 1
+script:
+  - rm -rf AppDir || true
+  - cp -r build/linux/x64/prod/release/bundle AppDir
+  - mkdir -p AppDir/usr/share/icons/
+  - cp assets/icon/desktop_icon.png AppDir/usr/share/icons/polder_notes_icon_desktop.png
+  - mkdir -p AppDir/usr/share/applications/
+  - cp linux/org.knaapen.polder.notes.desktop AppDir/usr/share/applications/
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: org.knaapen.polder.notes
+    name: Polder Notes
+    icon: polder_notes_icon_desktop
+    version: latest
+    exec: polder_notes
+    exec_args: $@
+AppImage:
+  arch: x86_64
+  file_name: Polder_Notes_x86_64.AppImage

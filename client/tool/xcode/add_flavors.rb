@@ -17,6 +17,7 @@ BUILD_TYPES = %w[Debug Release Profile].freeze
 project = Xcodeproj::Project.open(project_path)
 runner = project.targets.find { |target| target.name == "Runner" }
 lists = [project.build_configuration_list] + project.targets.map(&:build_configuration_list)
+ios = project.build_configuration_list["Release"].build_settings["SDKROOT"] == "iphoneos"
 
 def copy_configuration(project, list, source_name, name)
   return list[name] if list[name]
@@ -36,7 +37,11 @@ BUILD_TYPES.each do |build_type|
     lists.each { |list| copy_configuration(project, list, build_type, name) }
     settings = runner.build_configuration_list[name].build_settings
     settings["PRODUCT_BUNDLE_IDENTIFIER"] = values[:bundle_id]
-    settings["PRODUCT_NAME"] = values[:product_name]
+    if ios
+      settings["APP_DISPLAY_NAME"] = values[:product_name]
+    else
+      settings["PRODUCT_NAME"] = values[:product_name]
+    end
     settings["ASSETCATALOG_COMPILER_APPICON_NAME"] = values[:icon]
     settings["DEEP_LINK_SCHEME"] = values[:scheme]
   end

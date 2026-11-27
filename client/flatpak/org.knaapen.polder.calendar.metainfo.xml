@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.knaapen.polder.calendar</id>
+  <name>Polder Calendar</name>
+  <summary>Calendars for a self-hosted Polder server</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <developer id="org.knaapen">
+    <name>DonutWare</name>
+  </developer>
+  <description>
+    <p>Polder Calendar shows and edits the calendars stored on a self-hosted Polder server.</p>
+  </description>
+  <launchable type="desktop-id">org.knaapen.polder.calendar.desktop</launchable>
+  <url type="homepage">https://github.com/DonutWare/Polder</url>
+  <url type="bugtracker">https://github.com/DonutWare/Polder/issues</url>
+  <content_rating type="oars-1.1"/>
+</component>

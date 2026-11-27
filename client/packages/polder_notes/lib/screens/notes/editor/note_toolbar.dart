@@ -1,9 +1,9 @@
 import "package:flutter/material.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
 
-import "package:polder/services/notes/format_actions.dart";
+import "package:polder_notes/services/notes/format_actions.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/layout/window_centered.dart";
 

@@ -4,8 +4,8 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_links.dart";
-import "package:polder/providers/notes/file_links_provider.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_notes/providers/notes/file_links_provider.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/widgets/shared/async_value_view.dart";

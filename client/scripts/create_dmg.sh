@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-APP_NAME="Polder"
-APP_PATH="build/macos/Build/Products/Release-prod/Polder.app"
+APP_NAME="${1:-Polder}"
+APP_PATH="build/macos/Build/Products/Release-prod/$APP_NAME.app"
 DMG_PATH="build/macos/Build/Products/Release-prod/macOS.dmg"
 TEMP_DMG_DIR="dmg_temp"
 

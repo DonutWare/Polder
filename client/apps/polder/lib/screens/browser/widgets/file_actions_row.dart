@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder/screens/browser/widgets/file_actions_menu.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_core/util/remote_path.dart";

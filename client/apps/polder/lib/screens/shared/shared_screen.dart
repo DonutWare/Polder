@@ -9,7 +9,7 @@ import "package:polder/providers/federation/federation_providers.dart";
 import "package:polder/providers/sharing/shares_in_files_provider.dart";
 import "package:polder/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
-import "package:polder/screens/browser/widgets/file_type_icon.dart";
+import "package:polder_ui/widgets/files/file_type_icon.dart";
 import "package:polder/screens/shared/mounted_share_screen.dart";
 import "package:polder/screens/shared/widgets/federation_invite_dialogs.dart";
 import "package:polder/screens/shared/widgets/incoming_share_details_sheet.dart";

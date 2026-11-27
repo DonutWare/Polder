@@ -5,14 +5,14 @@ import "package:cross_file/cross_file.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/providers/tags/tags_provider.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor.dart";
-import "package:polder/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
-import "package:polder/screens/notes/editor/markdown_view.dart";
-import "package:polder/screens/notes/editor/note_embeds.dart";
-import "package:polder/services/notes/note_markdown.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor.dart";
+import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editor_style.dart";
+import "package:polder_notes/screens/notes/editor/markdown_view.dart";
+import "package:polder_notes/screens/notes/editor/note_embeds.dart";
+import "package:polder_notes/services/notes/note_markdown.dart";
 import "package:polder_ui/util/localization_helper.dart";
-import "package:polder/widgets/tags/tag_chip.dart";
+import "package:polder_ui/widgets/tags/tag_chip.dart";
 
 const noteFieldDecoration = InputDecoration(
   isCollapsed: true,

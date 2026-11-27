@@ -273,7 +273,7 @@ class _MediaGestureViewerState<T> extends State<MediaGestureViewer<T>>
     final delta = details.primaryDelta ?? 0;
     if (_dismiss.value > 0 || (_sheet.value == 0 && delta > 0)) {
       _dismiss.value = math.max(0, _dismiss.value + delta);
-    } else if (!widget.sideInfo) {
+    } else if (!widget.sideInfo && widget.infoBuilder != null) {
       _sheet.value -= delta / _sheetHeight;
     }
   }
@@ -288,6 +288,7 @@ class _MediaGestureViewerState<T> extends State<MediaGestureViewer<T>>
       }
       return;
     }
+    if (widget.infoBuilder == null) return;
     if (widget.sideInfo) {
       if (velocity < -_flingVelocity) setState(() => _sideInfoOpen = true);
       return;
