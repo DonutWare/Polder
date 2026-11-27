@@ -2,6 +2,7 @@ import "package:material_ui/material_ui.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:polder_ui/routes/route_extra_codec.dart";
 import "package:polder_ui/routes/sign_in_routes.dart";
 import "package:polder_ui/routes/up_scope.dart";
 import "package:polder_ui/screens/login/login_screen.dart";
@@ -33,6 +34,7 @@ GoRouter createStandaloneRouter(
   final state = SignInState(ref);
   final router = GoRouter(
     initialLocation: signIn.home,
+    extraCodec: const RouteExtraCodec(),
     refreshListenable: state,
     redirect: (_, route) => signIn.redirect(state.snapshot, route.uri),
     routes: [

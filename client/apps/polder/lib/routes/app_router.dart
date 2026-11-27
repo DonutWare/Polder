@@ -11,7 +11,7 @@ import "package:polder/providers/shell/shell_destinations_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder_drive/routes/drive_router_routes.dart";
 import "package:polder/services/features/feature_modes.dart";
-import "package:polder/routes/route_extra_codec.dart";
+import "package:polder_ui/routes/route_extra_codec.dart";
 import "package:polder_ui/routes/up_scope.dart";
 import "package:polder/screens/admin/admin_screen.dart";
 import "package:polder_ui/screens/login/login_screen.dart";

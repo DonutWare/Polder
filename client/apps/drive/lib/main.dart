@@ -9,12 +9,11 @@ import "package:polder_core/util/flavor.dart";
 import "package:polder_drive/desktop/sync_tray.dart";
 import "package:polder_drive/services/background/notification_action_handler.dart";
 import "package:polder_drive/services/sync/sync_platform_factory.dart";
-import "package:polder_ui/providers/notifications/notification_providers.dart";
-import "package:polder_ui/services/notifications/plugin_notification_service.dart";
-
 import "package:polder_drive_app/drive_app.dart";
 import "package:polder_drive_app/drive_app_overrides.dart";
 import "package:polder_drive_app/services/drive_background_dispatcher.dart";
+import "package:polder_ui/providers/notifications/notification_providers.dart";
+import "package:polder_ui/services/notifications/plugin_notification_service.dart";
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -7,7 +7,7 @@ import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_version.dart";
 import "package:polder_core/models/media_gallery.dart";
 import "package:polder_core/models/scan_session.dart";
-import "package:polder/routes/route_extra_codec.dart";
+import "package:polder_ui/routes/route_extra_codec.dart";
 
 void main() {
   const codec = RouteExtraCodec();
