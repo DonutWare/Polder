@@ -9,6 +9,7 @@ import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder_ui/routes/up_scope.dart";
 import "package:polder/screens/settings/about_screen.dart";
+import "package:polder/screens/settings/apps_settings_screen.dart";
 import "package:polder/screens/settings/account_screen.dart";
 import "package:polder/screens/settings/general_settings_screen.dart";
 import "package:polder/screens/settings/notification_settings_screen.dart";
@@ -39,6 +40,7 @@ class SettingsScreen extends StatelessWidget {
 
   static Widget _pageFor(SettingsPage page) => switch (page) {
     SettingsPage.general => const GeneralSettingsScreen(key: ValueKey(SettingsPage.general)),
+    SettingsPage.apps => const AppsSettingsScreen(key: ValueKey(SettingsPage.apps)),
     SettingsPage.notifications => const NotificationSettingsScreen(key: ValueKey(SettingsPage.notifications)),
     SettingsPage.account => const AccountScreen(key: ValueKey(SettingsPage.account)),
     SettingsPage.about => const AboutScreen(key: ValueKey(SettingsPage.about)),
@@ -79,6 +81,13 @@ class _SettingsList extends ConsumerWidget {
               subtitle: localized.generalSettingsHint,
               selected: selected == SettingsPage.general,
               onTap: () => open(SettingsPage.general),
+            ),
+            NavEntry(
+              icon: IconsaxPlusLinear.element_3,
+              title: localized.settingsApps,
+              subtitle: localized.settingsAppsHint,
+              selected: selected == SettingsPage.apps,
+              onTap: () => open(SettingsPage.apps),
             ),
             NavEntry(
               icon: IconsaxPlusLinear.notification,

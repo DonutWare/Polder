@@ -1,6 +1,6 @@
 import "package:polder_core/models/account.dart";
 import "package:polder_core/models/token_pair.dart";
-import "package:polder/services/mount/file_browser_location.dart";
+import "package:polder_drive/services/mount/file_browser_location.dart";
 
 class FakeFileBrowserLocation implements FileBrowserLocation {
   String? accountId;

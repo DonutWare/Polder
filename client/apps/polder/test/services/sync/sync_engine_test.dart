@@ -9,8 +9,8 @@ import "package:polder_core/models/sync/sync_entry.dart";
 import "package:polder_core/models/sync/sync_root.dart";
 import "package:polder_core/services/api/api_client_factory.dart";
 import "package:polder_core/services/api/polder_api.dart";
-import "package:polder/services/sync/in_memory_sync_state_store.dart";
-import "package:polder/services/sync/sync_engine.dart";
+import "package:polder_drive/services/sync/in_memory_sync_state_store.dart";
+import "package:polder_drive/services/sync/sync_engine.dart";
 
 import "../../support/fake_server.dart";
 import "../../support/random_bytes.dart";

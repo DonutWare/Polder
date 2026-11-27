@@ -17,7 +17,7 @@ Future<void> main() async {
     callbackScheme: isDevFlavor ? "polder-calendar-dev" : "polder-calendar",
   );
   final deviceName = await DeviceName.resolve();
-  final notifications = await PluginNotificationService.initialize();
+  final notifications = await PluginNotificationService.initialize(windows: WindowsNotificationIdentity.calendar);
   runApp(
     ProviderScope(
       retry: (_, _) => null,

@@ -21,8 +21,8 @@ import "package:polder_core/models/user.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_core/services/realtime/events_client.dart";
-import "package:polder/services/sync/in_memory_sync_state_store.dart";
-import "package:polder/services/sync/sync_engine.dart";
+import "package:polder_drive/services/sync/in_memory_sync_state_store.dart";
+import "package:polder_drive/services/sync/sync_engine.dart";
 
 import "../support/random_bytes.dart";
 import "../support/real_server.dart";

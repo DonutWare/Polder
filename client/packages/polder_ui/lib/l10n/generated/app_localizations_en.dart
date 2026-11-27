@@ -4483,4 +4483,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get extendTwoFactorDeadline => 'Give more time for 2FA';
+
+  @override
+  String get settingsApps => 'Apps';
+
+  @override
+  String get settingsAppsHint => 'How Files, Notes and Calendar show up';
+
+  @override
+  String get settingsAppsIntro =>
+      'Choose per part of Polder whether it lives inside this app, opens its own app, or stays out of the way. Polder only sends notifications for the parts that are built in.';
+
+  @override
+  String get featureModeAutomatic => 'Automatic';
+
+  @override
+  String featureModeAutomaticOpens(String app) {
+    return 'Opens $app, which is installed on this device';
+  }
+
+  @override
+  String featureModeAutomaticBuiltIn(String app) {
+    return 'Built in, until $app is installed on this device';
+  }
+
+  @override
+  String get featureModeBuiltIn => 'Built in';
+
+  @override
+  String get featureModeBuiltInHint => 'Shown inside Polder, with its notifications';
+
+  @override
+  String get featureModeOpenApp => 'Open app';
+
+  @override
+  String featureModeOpenAppHint(String app) {
+    return 'Opens $app; Polder sends no notifications for it';
+  }
+
+  @override
+  String get featureModeHidden => 'Hidden';
+
+  @override
+  String get featureModeHiddenHint => 'Not shown in Polder, and no notifications';
+
+  @override
+  String get companionAppUnavailable => 'That app could not be opened';
 }

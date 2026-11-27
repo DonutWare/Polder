@@ -8,7 +8,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
-import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder_drive/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/screens/shell/shell_destination_labels.dart";
 import "package:polder_ui/util/localization_helper.dart";

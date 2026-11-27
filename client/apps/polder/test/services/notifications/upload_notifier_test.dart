@@ -8,8 +8,8 @@ import "package:polder_ui/l10n/generated/app_localizations.dart";
 import "package:polder_core/models/notifications/notification_preferences.dart";
 import "package:polder_core/models/sync/sync_status.dart";
 import "package:polder_core/services/notifications/local_notification.dart";
-import "package:polder/services/notifications/upload_notifier.dart";
-import "package:polder/services/sync/sync_activity.dart";
+import "package:polder_drive/services/notifications/upload_notifier.dart";
+import "package:polder_drive/services/sync/sync_activity.dart";
 
 import "../../support/fake_notification_service.dart";
 

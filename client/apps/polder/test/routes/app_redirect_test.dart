@@ -5,6 +5,7 @@ import "package:polder_core/models/account.dart";
 import "package:polder_core/models/user.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder/services/features/feature_modes.dart";
 
 import "../support/provider_harness.dart";
 
@@ -84,5 +85,39 @@ void main() {
     expect(resolve(signedIn(UserRole.user), AppRoutes.twoFactorSetup, twoFactorSetup: true), isNull);
     expect(resolve(signedIn(UserRole.user), AppRoutes.twoFactorSetup), AppRoutes.files);
     expect(resolve(const AsyncData(null), AppRoutes.twoFactorSetup), startsWith(AppRoutes.login));
+  });
+
+  group("feature modes", () {
+    const calendarOnly = FeatureModes({
+      PolderFeature.drive: FeatureMode.hidden,
+      PolderFeature.notes: FeatureMode.openApp,
+      PolderFeature.calendar: FeatureMode.builtIn,
+    });
+    const nothing = FeatureModes({
+      PolderFeature.drive: FeatureMode.hidden,
+      PolderFeature.notes: FeatureMode.hidden,
+      PolderFeature.calendar: FeatureMode.hidden,
+    });
+    String? resolveWith(FeatureModes features, String location) =>
+        AppRedirect.resolve(signedIn(UserRole.user), Uri.parse(location), features: features);
+
+    test("routes of a feature that is not built in go to the first built-in one", () {
+      expect(resolveWith(calendarOnly, AppRoutes.files), AppRoutes.calendar);
+      expect(resolveWith(calendarOnly, AppRoutes.trash), AppRoutes.calendar);
+      expect(resolveWith(calendarOnly, AppRoutes.notes), AppRoutes.calendar);
+      expect(resolveWith(calendarOnly, AppRoutes.cook), AppRoutes.calendar);
+      expect(resolveWith(calendarOnly, AppRoutes.calendar), isNull);
+    });
+
+    test("settings and shared routes stay reachable", () {
+      expect(resolveWith(calendarOnly, AppRoutes.settings), isNull);
+      expect(resolveWith(calendarOnly, AppRoutes.groups), isNull);
+      expect(resolveWith(calendarOnly, AppRoutes.media), isNull);
+    });
+
+    test("with every feature hidden the user lands on the apps settings to bring them back", () {
+      expect(resolveWith(nothing, AppRoutes.files), AppRoutes.settingsPage(SettingsPage.apps));
+      expect(resolveWith(nothing, AppRoutes.settingsPage(SettingsPage.apps)), isNull);
+    });
   });
 }

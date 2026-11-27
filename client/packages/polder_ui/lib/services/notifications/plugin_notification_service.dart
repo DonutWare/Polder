@@ -18,18 +18,19 @@ class PluginNotificationService implements NotificationService {
 
   static Future<PluginNotificationService> initialize({
     DidReceiveBackgroundNotificationResponseCallback? onBackgroundResponse,
+    WindowsNotificationIdentity windows = WindowsNotificationIdentity.polder,
   }) async {
     final strings = deviceLocalizations();
     final service = PluginNotificationService._(FlutterLocalNotificationsPlugin(), strings);
     await service._plugin.initialize(
-      settings: _settings(strings),
+      settings: _settings(strings, windows),
       onDidReceiveNotificationResponse: service._receive,
       onDidReceiveBackgroundNotificationResponse: onBackgroundResponse,
     );
     return service;
   }
 
-  static InitializationSettings _settings(AppLocalizations strings) {
+  static InitializationSettings _settings(AppLocalizations strings, WindowsNotificationIdentity windows) {
     final darwin = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -53,10 +54,10 @@ class PluginNotificationService implements NotificationService {
       iOS: darwin,
       macOS: darwin,
       linux: LinuxInitializationSettings(defaultActionName: strings.open),
-      windows: const WindowsInitializationSettings(
-        appName: "Polder",
-        appUserModelId: "Knaapen.Polder.Desktop",
-        guid: "948b0967-808d-46b1-86b7-3faf78a37231",
+      windows: WindowsInitializationSettings(
+        appName: windows.appName,
+        appUserModelId: windows.appUserModelId,
+        guid: windows.guid,
       ),
       web: const WebInitializationSettings(),
     );
@@ -240,4 +241,30 @@ class PluginNotificationService implements NotificationService {
       NotificationChannel.security => InterruptionLevel.timeSensitive,
     },
   );
+}
+
+class WindowsNotificationIdentity {
+  const WindowsNotificationIdentity({required this.appName, required this.appUserModelId, required this.guid});
+
+  static const polder = WindowsNotificationIdentity(
+    appName: "Polder",
+    appUserModelId: "Knaapen.Polder.Desktop",
+    guid: "948b0967-808d-46b1-86b7-3faf78a37231",
+  );
+
+  static const calendar = WindowsNotificationIdentity(
+    appName: "Polder Calendar",
+    appUserModelId: "Knaapen.Polder.Calendar",
+    guid: "b084adf8-ed01-4153-9b80-c3787f7c921f",
+  );
+
+  static const drive = WindowsNotificationIdentity(
+    appName: "Polder Drive",
+    appUserModelId: "Knaapen.Polder.Drive",
+    guid: "6f1d2b8e-3c4a-4e57-9a0b-7d5e2c1f8a93",
+  );
+
+  final String appName;
+  final String appUserModelId;
+  final String guid;
 }

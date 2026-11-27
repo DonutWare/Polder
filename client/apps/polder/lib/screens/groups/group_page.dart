@@ -7,7 +7,7 @@ import "package:polder_core/models/group.dart";
 import "package:polder_core/models/sharing.dart";
 import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder/providers/groups/groups_provider.dart";
-import "package:polder/providers/sharing/shares_provider.dart";
+import "package:polder_drive/providers/sharing/shares_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder_ui/routes/up_scope.dart";
 import "package:polder_ui/widgets/files/file_type_icon.dart";
@@ -21,8 +21,8 @@ import "package:polder_ui/widgets/shared/async_value_view.dart";
 import "package:polder_ui/widgets/shared/confirm_dialog.dart";
 import "package:polder_ui/widgets/shared/nav_group.dart";
 import "package:polder_ui/widgets/shared/text_input_dialog.dart";
-import "package:polder/widgets/sharing/share_labels.dart";
-import "package:polder/widgets/sharing/share_settings.dart";
+import "package:polder_drive/widgets/sharing/share_labels.dart";
+import "package:polder_drive/widgets/sharing/share_settings.dart";
 import "package:polder_ui/widgets/sharing/share_target_avatar.dart";
 
 enum _GroupAction { rename, leave, delete }

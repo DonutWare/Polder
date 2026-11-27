@@ -20,6 +20,8 @@ dependencies:
   media_kit_libs_video: ^1.0.7
   calendar_views:
     path: ../../packages/calendar_views
+  polder_account_link:
+    path: ../../packages/polder_account_link
   polder_core:
     path: ../../packages/polder_core
   polder_media:

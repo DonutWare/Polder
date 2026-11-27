@@ -3,7 +3,7 @@ import "dart:async";
 import "package:polder_core/models/sync/conflict.dart";
 import "package:polder_core/models/sync/sync_root.dart";
 import "package:polder_core/models/sync/sync_status.dart";
-import "package:polder/services/sync/sync_service.dart";
+import "package:polder_drive/services/sync/sync_service.dart";
 
 class FakeSyncService implements SyncService {
   final List<(String, ConflictResolution)> resolved = [];

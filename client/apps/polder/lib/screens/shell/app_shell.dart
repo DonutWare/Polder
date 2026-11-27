@@ -4,9 +4,12 @@ import "package:flutter/material.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:polder_account_link/companion_app.dart";
 import "package:polder_core/providers/branding/branding_provider.dart";
+import "package:polder_core/util/flavor.dart";
+import "package:polder/providers/features/feature_modes_provider.dart";
 import "package:polder/providers/shell/shell_destinations_provider.dart";
-import "package:polder/providers/sync/conflict_queue_provider.dart";
+import "package:polder_drive/providers/sync/conflict_queue_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder_ui/routes/history_back.dart";
 import "package:polder_ui/routes/up_scope.dart";
@@ -59,7 +62,10 @@ class AppShell extends ConsumerWidget {
               AppRoutes.isTabRoot(router.state.uri, single: AdaptiveLayout.isSingle(context)),
           child: NavigationShell(
             showNavigation: AppRoutes.isTab(top.toString()) || !AdaptiveLayout.isSingle(context),
-            items: [for (final destination in destinations) destination.item(context)],
+            items: [
+              for (final destination in destinations)
+                destination.item(context, opensApp: ref.watch(opensCompanionProvider(destination))),
+            ],
             launchers: [
               for (final destination in stacked)
                 destination.item(
@@ -75,6 +81,9 @@ class AppShell extends ConsumerWidget {
             selectedLauncher: stacked.indexWhere(showsDestination),
             onSelected: (index) {
               final destination = destinations[index];
+              if (ref.read(opensCompanionProvider(destination))) {
+                return unawaited(_openCompanion(context, ref, destination));
+              }
               final reselectedFiles = destination == ShellDestination.files && showsDestination(destination);
               context.go(reselectedFiles ? AppRoutes.filesAt(RemotePath.root) : destination.route);
             },
@@ -99,4 +108,13 @@ class AppShell extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<void> _openCompanion(BuildContext context, WidgetRef ref, ShellDestination destination) async {
+  final feature = destination.feature!;
+  if (await CompanionApps.open(feature.companion, dev: isDevFlavor)) return;
+  await ref.read(installedCompanionsProvider.notifier).refresh();
+  if (!context.mounted) return;
+  if (ref.read(resolvedFeatureModesProvider).isBuiltIn(feature)) return context.go(destination.route);
+  ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(context.localized.companionAppUnavailable)));
 }

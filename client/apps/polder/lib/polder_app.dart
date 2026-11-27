@@ -7,6 +7,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_ui/l10n/generated/app_localizations.dart";
 import "package:polder_core/providers/account_provider.dart";
+import "package:polder/providers/features/feature_modes_provider.dart";
 import "package:polder/providers/app/app_location_provider.dart";
 import "package:polder/providers/app/browser_favicon_provider.dart";
 import "package:polder_ui/providers/appearance/appearance_provider.dart";
@@ -22,7 +23,7 @@ import "package:polder_core/providers/offline/offline_sync_provider.dart";
 import "package:polder_core/providers/branding/branding_provider.dart";
 import "package:polder/providers/deep_link/deep_link_provider.dart";
 import "package:polder/providers/notifications/notification_coordinator.dart";
-import "package:polder/providers/file_browser/file_browser_location_provider.dart";
+import "package:polder_drive/providers/file_browser/file_browser_location_provider.dart";
 import "package:polder/providers/sharing/share_target_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder_ui/theme/app_theme.dart";
@@ -54,6 +55,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
 
   void _onResume() {
     ref.read(appearanceProvider.notifier).refreshSystemAccent();
+    unawaited(ref.read(installedCompanionsProvider.notifier).refresh());
     if (ref.read(currentAccountProvider) == null || ref.read(sessionEndedProvider)) return;
     unawaited(ref.read(serverConnectionProvider.notifier).check());
     ref.read(offlineSyncProvider.notifier).kickAll();

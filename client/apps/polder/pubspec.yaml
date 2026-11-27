@@ -72,8 +72,12 @@ dependencies:
     path: ../../packages/polder_calendar
   polder_notes:
     path: ../../packages/polder_notes
+  polder_account_link:
+    path: ../../packages/polder_account_link
   polder_core:
     path: ../../packages/polder_core
+  polder_drive:
+    path: ../../packages/polder_drive
   polder_ui:
     path: ../../packages/polder_ui
   polder_window:

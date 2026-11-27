@@ -1,6 +1,6 @@
 import "package:flutter/widgets.dart";
 
-import "package:polder/services/deep_link/share_link_target.dart";
+import "package:polder_drive/services/deep_link/share_link_target.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:calendar_views/calendar_views.dart";
 

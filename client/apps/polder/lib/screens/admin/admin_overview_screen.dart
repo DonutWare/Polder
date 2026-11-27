@@ -3,7 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/user.dart";
-import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder_core/providers/admin/admin_users_provider.dart";
 import "package:polder/screens/admin/widgets/admin_stats_grid.dart";
 import "package:polder/screens/admin/widgets/storage_by_user_card.dart";
 import "package:polder_ui/util/localization_helper.dart";

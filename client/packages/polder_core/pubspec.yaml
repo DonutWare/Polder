@@ -41,6 +41,8 @@ dependencies:
   uuid: ^4.6.0
   web: ^1.1.1
   web_socket_channel: ^3.0.3
+  polder_account_link:
+    path: ../polder_account_link
   calendar_views:
     path: ../calendar_views
 

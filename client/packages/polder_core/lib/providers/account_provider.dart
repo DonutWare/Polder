@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/account.dart";
@@ -35,7 +37,25 @@ class AccountNotifier extends AsyncNotifier<Account?> {
   CredentialsStore get _store => ref.read(credentialsStoreProvider);
 
   @override
-  Future<Account?> build() => _store.load();
+  Future<Account?> build() async {
+    final store = _store;
+    final changes = store.changes.listen((_) => _followStore());
+    ref.onDispose(changes.cancel);
+    final account = await store.load();
+    if (store case final SharedAccountCredentialsStore shared) unawaited(_revokeSuperseded(shared));
+    return account;
+  }
+
+  Future<void> _followStore() async {
+    if (state.isLoading) return;
+    final stored = await _store.load();
+    if (ref.mounted && stored != state.value) state = AsyncData(stored);
+  }
+
+  Future<void> _revokeSuperseded(SharedAccountCredentialsStore store) async {
+    final superseded = await store.takeSuperseded();
+    if (superseded != null && !superseded.sessionEnded) await _revokeQuietly(superseded);
+  }
 
   Future<void> signIn(Account account) async {
     // Let the stored account load first, or it would overwrite this one when it arrives.

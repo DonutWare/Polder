@@ -11,14 +11,17 @@ import "package:polder_notes/notes_host.dart";
 import "package:polder_notes/notes_locations.dart";
 import "package:polder_ui/providers/app/navigation_history_provider.dart";
 import "package:polder_ui/providers/notifications/notification_providers.dart";
-import "package:polder/providers/sync/sync_platform_provider.dart";
-import "package:polder/providers/sync/sync_scheduler_provider.dart";
+import "package:polder/providers/features/feature_modes_provider.dart";
+import "package:polder/services/features/feature_modes.dart";
+import "package:polder_drive/drive_host.dart";
+import "package:polder_drive/providers/sync/sync_platform_provider.dart";
+import "package:polder_drive/providers/sync/sync_scheduler_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder/routes/polder_ui_config_override.dart";
-import "package:polder/screens/browser/widgets/file_history_sheet.dart";
-import "package:polder/screens/browser/widgets/file_open_action.dart";
-import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder_drive/screens/browser/widgets/file_history_sheet.dart";
+import "package:polder_drive/screens/browser/widgets/file_open_action.dart";
+import "package:polder_drive/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder/screens/search/search_view.dart";
 
 final List<Override> polderPackageOverrides = [
@@ -32,7 +35,18 @@ final List<Override> polderPackageOverrides = [
         () => ref.read(syncSchedulerProvider)?.requestRun(),
   ),
   notificationChecksSchedulerProvider.overrideWith((ref) => ref.watch(syncPlatformProvider).scheduleNotificationChecks),
+  driveHostProvider.overrideWith(
+    (ref) => ref.watch(resolvedFeatureModesProvider).isBuiltIn(PolderFeature.notes)
+        ? const DriveHost(openNote: _openNote)
+        : const DriveHost(),
+  ),
+  deliveredNotificationPreferencesProvider.overrideWith(
+    (ref) async =>
+        ref.watch(resolvedFeatureModesProvider).restrict(await ref.watch(notificationPreferencesProvider.future)),
+  ),
 ];
+
+void _openNote(BuildContext context, String path) => context.go(AppRoutes.noteAt(path));
 
 const _notesHost = NotesHost(
   openFile: openEntry,

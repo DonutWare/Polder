@@ -114,6 +114,15 @@
 			"presentation": { "group": "2 Apps", "order": 3 }
 		},
 		{
+			"name": "Drive (Dev)",
+			"type": "dart",
+			"request": "launch",
+			"program": "lib/main.dart",
+			"cwd": "${workspaceFolder}/client/apps/drive",
+			"args": ["--flavor", "dev"],
+			"presentation": { "group": "2 Apps", "order": 4 }
+		},
+		{
 			"name": "Calendar (Dev)",
 			"type": "dart",
 			"request": "launch",
@@ -185,6 +194,12 @@
 			"configurations": ["Server", "Polder (Dev)"],
 			"stopAll": true,
 			"presentation": { "group": "3 Server + app", "order": 1 }
+		},
+		{
+			"name": "Server + Drive",
+			"configurations": ["Server", "Drive (Dev)"],
+			"stopAll": true,
+			"presentation": { "group": "3 Server + app", "order": 2 }
 		},
 		{
 			"name": "Server + Calendar",

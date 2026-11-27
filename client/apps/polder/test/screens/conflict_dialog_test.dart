@@ -5,9 +5,9 @@ import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/sync/conflict.dart";
 import "package:polder_core/models/sync/sync_root.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/sync/conflict_queue_provider.dart";
-import "package:polder/screens/sync/widgets/apply_to_all_checkbox.dart";
-import "package:polder/screens/sync/widgets/conflict_dialog.dart";
+import "package:polder_drive/providers/sync/conflict_queue_provider.dart";
+import "package:polder_drive/screens/sync/widgets/apply_to_all_checkbox.dart";
+import "package:polder_drive/screens/sync/widgets/conflict_dialog.dart";
 
 import "../support/fixtures.dart";
 import "../support/localized_app.dart";

@@ -49,6 +49,10 @@ extension ShellDestinationPresentation on ShellDestination {
     ShellDestination.settings => IconsaxPlusBold.setting_2,
   };
 
-  NavItem item(BuildContext context, {String? badge}) =>
-      NavItem(icon: icon, selectedIcon: selectedIcon, label: label(context), badge: badge);
+  NavItem item(BuildContext context, {String? badge, bool opensApp = false}) => NavItem(
+    icon: icon,
+    selectedIcon: selectedIcon,
+    label: opensApp ? "${label(context)} ↗" : label(context),
+    badge: badge,
+  );
 }

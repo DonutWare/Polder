@@ -5,9 +5,11 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:polder_core/models/notifications/notification_preferences.dart";
+import "package:polder/providers/features/feature_modes_provider.dart";
+import "package:polder/services/features/feature_modes.dart";
 import "package:polder/providers/notifications/email_preferences_provider.dart";
 import "package:polder_ui/providers/notifications/notification_providers.dart";
-import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder_drive/providers/sync/sync_platform_provider.dart";
 import "package:polder/routes/app_routes.dart";
 import "package:polder_ui/routes/up_scope.dart";
 import "package:polder_core/services/notifications/notification_service.dart";
@@ -108,7 +110,10 @@ class _TopicsGroup extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final localized = context.localized;
     final notifier = ref.read(notificationPreferencesProvider.notifier);
-    final autoUpload = ref.watch(syncPlatformProvider).supportsAutoUpload;
+    final features = ref.watch(resolvedFeatureModesProvider);
+    final drive = features.isBuiltIn(PolderFeature.drive);
+    final calendar = features.isBuiltIn(PolderFeature.calendar);
+    final autoUpload = drive && ref.watch(syncPlatformProvider).supportsAutoUpload;
     final enabled = preferences.enabled;
     SwitchListTile toggle(String title, String hint, bool value, Future<void> Function(bool) change) => SwitchListTile(
       contentPadding: _tilePadding,
@@ -120,18 +125,20 @@ class _TopicsGroup extends ConsumerWidget {
     return NavGroup(
       title: localized.notificationsAbout,
       children: [
-        toggle(
-          localized.notificationsShares,
-          localized.notificationsSharesHint,
-          preferences.shares,
-          notifier.setShares,
-        ),
-        toggle(
-          localized.notificationsCalendar,
-          localized.notificationsCalendarHint,
-          preferences.calendarReminders,
-          notifier.setCalendarReminders,
-        ),
+        if (drive)
+          toggle(
+            localized.notificationsShares,
+            localized.notificationsSharesHint,
+            preferences.shares,
+            notifier.setShares,
+          ),
+        if (calendar)
+          toggle(
+            localized.notificationsCalendar,
+            localized.notificationsCalendarHint,
+            preferences.calendarReminders,
+            notifier.setCalendarReminders,
+          ),
         if (autoUpload) ...[
           toggle(
             localized.notificationsUploadProgress,

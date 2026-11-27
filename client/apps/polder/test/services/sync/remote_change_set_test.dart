@@ -2,7 +2,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/change.dart";
 import "package:polder_core/models/sync/remote_state.dart";
-import "package:polder/services/sync/remote_change_set.dart";
+import "package:polder_drive/services/sync/remote_change_set.dart";
 
 import "../../support/fixtures.dart";
 

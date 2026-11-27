@@ -3,7 +3,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/models/group.dart";
 import "package:polder_core/models/sharing.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
-import "package:polder/providers/sharing/shares_provider.dart";
+import "package:polder_drive/providers/sharing/shares_provider.dart";
 import "package:polder_core/services/api/polder_api.dart";
 
 final groupsProvider = AsyncNotifierProvider.autoDispose.family<GroupsNotifier, List<Group>, GroupScope>(

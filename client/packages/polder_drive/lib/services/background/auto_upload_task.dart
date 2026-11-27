@@ -1,0 +1,55 @@
+import "package:polder_core/models/sync/sync_root.dart";
+import "package:polder_core/models/sync/sync_status.dart";
+import "package:polder_drive/services/background/background_session.dart";
+import "package:polder_ui/services/notifications/device_localizations.dart";
+import "package:polder_core/services/notifications/notification_preferences_store.dart";
+import "package:polder_core/services/notifications/notification_service.dart";
+import "package:polder_drive/services/notifications/upload_notifier.dart";
+import "package:polder_core/services/storage/credentials_store.dart";
+import "package:polder_core/services/storage/preferences_store.dart";
+import "package:polder_drive/services/sync/drift/drift_sync_state_store.dart";
+import "package:polder_drive/services/sync/native_sync_platform.dart";
+import "package:polder_drive/services/sync/sync_activity.dart";
+import "package:polder_drive/services/sync/sync_engine.dart";
+import "package:polder_drive/services/sync/sync_pause.dart";
+import "package:polder_drive/services/sync/sync_state_store.dart";
+
+class AutoUploadTask {
+  const AutoUploadTask({required this.credentials, required this.notifications, required this.preferences});
+
+  final CredentialsStore credentials;
+  final NotificationService notifications;
+  final PreferencesStore preferences;
+
+  Future<void> run() async {
+    final store = DriftSyncStateStore(NativeSyncPlatform.openDatabase());
+    try {
+      final session = await BackgroundSession.open(credentials);
+      if (session == null || await SyncPause.read(preferences)) return;
+      final roots = [
+        for (final root in await _autoUploadRoots(store))
+          if (root.accountId == session.account.id) root,
+      ];
+      if (roots.isEmpty) return;
+      final activity = SyncActivity();
+      final notifier = UploadNotifier(
+        notifications: notifications,
+        preferences: await NotificationPreferencesStore.read(preferences),
+        strings: deviceLocalizations(),
+      );
+      await notifier.checking();
+      notifier.watch(activity.changes);
+      final engine = SyncEngine(api: session.api, store: store, deviceName: session.deviceName, activity: activity);
+      var report = const SyncRunReport();
+      for (final root in roots) {
+        report += await engine.run(root);
+      }
+      await notifier.finish(report);
+    } finally {
+      await store.close();
+    }
+  }
+
+  Future<List<SyncRoot>> _autoUploadRoots(SyncStateStore store) async =>
+      (await store.roots()).where((root) => root.enabled && root.mode == SyncMode.autoUpload).toList();
+}

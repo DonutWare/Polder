@@ -4,7 +4,7 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/providers/browser/file_operations_provider.dart";
-import "package:polder/screens/browser/widgets/file_operation_widgets.dart";
+import "package:polder_drive/screens/browser/widgets/file_operation_widgets.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";

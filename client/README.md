@@ -9,12 +9,15 @@ for every app and package.
 
 | Path | What |
 | --- | --- |
-| `apps/polder` | Polder: file browser, folder sync, conflict resolution, auto-upload on mobile, notes, calendar and an admin area |
+| `apps/polder` | Polder: files, notes and calendar in one app, plus groups, settings and an admin area |
+| `apps/drive` | Polder Drive: the files on their own |
 | `apps/calendar` | Polder Calendar: the calendar on its own |
 | `apps/notes` | Polder Notes: the notes on its own |
 | `packages/polder_core` | Data layer shared by the apps: API client, models, sign-in, offline storage and sync, realtime events |
 | `packages/polder_ui` | Shared look and building blocks: theme, strings, layout, navigation, sign-in screens and common widgets |
 | `packages/media_viewer` | Gesture layer for full-screen photo and video viewers |
+| `packages/polder_drive` | Files: browser, viewers, sharing, trash, activity, folder sync, conflict resolution and auto-upload |
+| `packages/polder_account_link` | One sign-in shared by every Polder app on a device, and launching the other Polder apps |
 | `packages/polder_calendar` | Calendar views and state over pluggable calendar sources |
 | `packages/polder_notes` | Notes: tree, editor, links, checklists, recipes and tag filters |
 | `packages/flutter_web_auth_2_desktop_webview_stub` | Override that leaves out flutter_web_auth_2's desktop webview |
@@ -24,8 +27,10 @@ because Flutter only generates them for the app being built.
 
 Dependencies point one way: apps → feature packages → `polder_ui` → `polder_core`. Each app tells `polder_ui`
 about its routes by overriding `polderUiConfigProvider`, and each feature package through its own providers:
-`calendarLocationsProvider`, and `notesLocationsProvider` plus `notesHostProvider` for what notes hand off to the
-file browser (opening files, version history, showing a note in its folder).
+`calendarLocationsProvider`, `notesLocationsProvider` plus `notesHostProvider` for what notes hand off to the
+file browser (opening files, version history, showing a note in its folder), and `driveHostProvider` for what the
+file browser hands off to notes. Drive uses the same paths in every app, so its routes are shared through
+`DriveRoutes` and the route builders in `polder_drive/lib/routes`.
 
 Strings shared by the apps are in `packages/polder_ui/lib/l10n`, and the data layer's few strings (notifications,
 the browser sign-in page) are in `packages/polder_core/lib/l10n`. After editing an `.arb` file, run

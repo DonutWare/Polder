@@ -9,7 +9,7 @@ import "package:polder/providers/groups/groups_provider.dart";
 import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/async_value_view.dart";
-import "package:polder/widgets/sharing/share_labels.dart";
+import "package:polder_drive/widgets/sharing/share_labels.dart";
 import "package:polder_ui/widgets/sharing/share_target_avatar.dart";
 import "package:polder_core/providers/sharing/share_target_search_provider.dart";
 

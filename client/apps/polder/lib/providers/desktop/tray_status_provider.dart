@@ -2,10 +2,10 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder_core/models/sync/sync_status.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/sync/sync_activity_provider.dart";
-import "package:polder/providers/sync/sync_paused_provider.dart";
-import "package:polder/providers/sync/sync_status_provider.dart";
-import "package:polder/services/sync/sync_activity.dart";
+import "package:polder_drive/providers/sync/sync_activity_provider.dart";
+import "package:polder_drive/providers/sync/sync_paused_provider.dart";
+import "package:polder_drive/providers/sync/sync_status_provider.dart";
+import "package:polder_drive/services/sync/sync_activity.dart";
 
 enum TrayPhase { signedOut, idle, syncing, paused, error }
 

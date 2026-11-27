@@ -3,10 +3,10 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/sync/sync_entry.dart";
 import "package:polder_core/models/sync/sync_root.dart";
-import "package:polder/services/sync/drift/drift_sync_state_store.dart";
-import "package:polder/services/sync/drift/sync_database.dart";
-import "package:polder/services/sync/in_memory_sync_state_store.dart";
-import "package:polder/services/sync/sync_state_store.dart";
+import "package:polder_drive/services/sync/drift/drift_sync_state_store.dart";
+import "package:polder_drive/services/sync/drift/sync_database.dart";
+import "package:polder_drive/services/sync/in_memory_sync_state_store.dart";
+import "package:polder_drive/services/sync/sync_state_store.dart";
 
 import "../../support/fixtures.dart";
 

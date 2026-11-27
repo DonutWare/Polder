@@ -20,6 +20,7 @@ import media_kit_libs_macos_video
 import media_kit_video
 import package_info_plus
 import pdfium_flutter
+import polder_account_link
 import polder_window
 import screen_retriever_macos
 import shared_preferences_foundation
@@ -46,6 +47,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   MediaKitVideoPlugin.register(with: registry.registrar(forPlugin: "MediaKitVideoPlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
   PDFiumFlutterPlugin.register(with: registry.registrar(forPlugin: "PDFiumFlutterPlugin"))
+  PolderAccountLinkPlugin.register(with: registry.registrar(forPlugin: "PolderAccountLinkPlugin"))
   PolderWindowPlugin.register(with: registry.registrar(forPlugin: "PolderWindowPlugin"))
   ScreenRetrieverMacosPlugin.register(with: registry.registrar(forPlugin: "ScreenRetrieverMacosPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))

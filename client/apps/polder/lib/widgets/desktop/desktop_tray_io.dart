@@ -12,7 +12,7 @@ import "package:polder_ui/l10n/generated/app_localizations.dart";
 import "package:polder/providers/desktop/tray_status_provider.dart";
 import "package:polder/providers/platform_service_providers.dart";
 import "package:polder/providers/shortcuts/app_shortcut_runner.dart";
-import "package:polder/providers/sync/sync_paused_provider.dart";
+import "package:polder_drive/providers/sync/sync_paused_provider.dart";
 import "package:polder/providers/update/update_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/routes/app_routes.dart";

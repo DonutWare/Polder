@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 
-import "package:polder/screens/settings/widgets/file_browser_settings_group.dart";
+import "package:polder_drive/screens/settings/widgets/file_browser_settings_group.dart";
 import "package:polder/screens/settings/widgets/startup_settings_group.dart";
-import "package:polder/screens/settings/widgets/trash_settings_group.dart";
+import "package:polder_drive/screens/settings/widgets/trash_settings_group.dart";
 import "package:polder/screens/settings/widgets/update_settings_group.dart";
 import "package:polder/screens/settings/widgets/version_settings_group.dart";
 import "package:polder_ui/util/localization_helper.dart";

@@ -6,7 +6,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_core/models/directory_listing.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/providers/browser/directory_provider.dart";
-import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder_drive/screens/browser/widgets/file_thumbnail.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/widgets/shared/app_checkbox.dart";

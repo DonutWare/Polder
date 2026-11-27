@@ -30,6 +30,8 @@ dependencies:
   web: ^1.1.1
   calendar_views:
     path: ../calendar_views
+  polder_window:
+    path: ../polder_window
   polder_core:
     path: ../polder_core
 

@@ -1,30 +1,32 @@
+import "package:polder_drive/routes/drive_routes.dart";
 import "package:polder_core/models/group.dart";
-import "package:polder_core/util/remote_path.dart";
 import "package:calendar_views/calendar_views.dart";
 import "package:polder_calendar/calendar_locations.dart";
 import "package:polder_notes/notes_locations.dart";
 import "package:polder_ui/routes/sign_in_routes.dart";
 
+export "package:polder_drive/routes/drive_routes.dart" show SharedSection;
+
 abstract final class AppRoutes {
   static const login = "/login";
-  static const files = "/files";
+  static const files = DriveRoutes.files;
   static const notes = "/notes";
   static const calendar = "/calendar";
   static const search = "/search";
-  static const scan = "/scan";
-  static const pdf = "/pdf";
-  static const media = "/media";
-  static const editor = "/editor";
+  static const scan = DriveRoutes.scan;
+  static const pdf = DriveRoutes.pdf;
+  static const media = DriveRoutes.media;
+  static const editor = DriveRoutes.editor;
   static const cook = "/cook";
-  static const activity = "/activity";
-  static const sync = "/sync";
-  static const conflicts = "/sync/conflicts";
-  static const autoUpload = "/auto-upload";
-  static const trash = "/trash";
-  static const shared = "/shared";
+  static const activity = DriveRoutes.activity;
+  static const sync = DriveRoutes.sync;
+  static const conflicts = DriveRoutes.conflicts;
+  static const autoUpload = DriveRoutes.autoUpload;
+  static const trash = DriveRoutes.trash;
+  static const shared = DriveRoutes.shared;
   static const groups = "/groups";
-  static const tags = "/tags";
-  static const publicShare = "/share";
+  static const tags = DriveRoutes.tags;
+  static const publicShare = DriveRoutes.publicShare;
   static const settings = "/settings";
   static const generalSettings = "/settings/general";
   static const about = "/settings/about";
@@ -39,14 +41,13 @@ abstract final class AppRoutes {
   static const adminServer = "/admin/server";
 
   static const pathParameter = NotesLocations.pathParameter;
-  static const selectParameter = "select";
+  static const selectParameter = DriveRoutes.selectParameter;
   static const queryParameter = "q";
   static const scopeParameter = "scope";
-  static const serverParameter = "server";
+  static const serverParameter = DriveRoutes.serverParameter;
   static const fromParameter = SignInRoutes.fromParameter;
 
-  static String filesAt(String path, {String? select}) =>
-      Uri(path: files, queryParameters: {pathParameter: path, selectParameter: ?select}).toString();
+  static String filesAt(String path, {String? select}) => DriveRoutes.filesAt(path, select: select);
 
   static const notesLocations = NotesLocations(notes, cook: cook);
 
@@ -65,17 +66,11 @@ abstract final class AppRoutes {
   static String searchFor(String query) =>
       Uri(path: search, queryParameters: query.isEmpty ? null : {queryParameter: query}).toString();
 
-  static String sharedSection(String section) => "$shared/$section";
+  static String sharedSection(String section) => DriveRoutes.sharedSection(section);
 
-  static String sharedAt(int shareId, {String path = "/"}) => Uri(
-    path: "$shared/${SharedSection.withMe.segment}/$shareId",
-    queryParameters: path == "/" ? null : {pathParameter: path},
-  ).toString();
+  static String sharedAt(int shareId, {String path = "/"}) => DriveRoutes.sharedAt(shareId, path: path);
 
-  static String federatedAt(int shareId, {String path = "/"}) => Uri(
-    path: "$shared/${SharedSection.federated.segment}/$shareId",
-    queryParameters: path == "/" ? null : {pathParameter: path},
-  ).toString();
+  static String federatedAt(int shareId, {String path = "/"}) => DriveRoutes.federatedAt(shareId, path: path);
 
   static String groupAt(int groupId, {GroupScope scope = GroupScope.mine}) =>
       Uri(path: "$groups/$groupId", queryParameters: _scopeQuery(scope)).toString();
@@ -89,12 +84,10 @@ abstract final class AppRoutes {
   static Map<String, String>? _scopeQuery(GroupScope scope) =>
       scope == GroupScope.mine ? null : {scopeParameter: scope.name};
 
-  static String publicShareAt(String code, {String? server, String path = "/"}) {
-    final parameters = {serverParameter: ?server, if (path != "/") pathParameter: path};
-    return Uri(path: "$publicShare/$code", queryParameters: parameters.isEmpty ? null : parameters).toString();
-  }
+  static String publicShareAt(String code, {String? server, String path = "/"}) =>
+      DriveRoutes.publicShareAt(code, server: server, path: path);
 
-  static bool isPublic(String location) => location.startsWith("$publicShare/");
+  static bool isPublic(String location) => DriveRoutes.isPublic(location);
 
   static const signIn = SignInRoutes(home: files, login: login, twoFactorSetup: twoFactorSetup, isPublic: isPublic);
 
@@ -110,14 +103,10 @@ abstract final class AppRoutes {
 
   static String? upFrom(Uri location, {required bool single}) {
     final segments = location.pathSegments;
-    final path = location.queryParameters[pathParameter] ?? RemotePath.root;
     return switch ("/${segments.firstOrNull ?? ""}") {
-      files => path == RemotePath.root ? null : filesAt(RemotePath.parent(path)),
-      shared => _sharedUp(segments, path, single: single),
       groups when segments.length > 1 => single ? groupsScope(scope: groupScopeOf(location)) : files,
       settings || admin when segments.length > 1 => single ? "/${segments.first}" : files,
-      sync when segments.length > 1 => sync,
-      _ => files,
+      _ => DriveRoutes.upFrom(location, single: single),
     };
   }
 
@@ -128,36 +117,11 @@ abstract final class AppRoutes {
     final up = upFrom(location, single: single);
     return up == null || Uri.parse(up).pathSegments.firstOrNull != location.pathSegments.firstOrNull;
   }
-
-  static String _sharedUp(List<String> segments, String path, {required bool single}) {
-    final section = SharedSection.fromSegment(segments.elementAtOrNull(1));
-    final shareId = int.tryParse(segments.elementAtOrNull(2) ?? "");
-    if (section == null) return files;
-    if (shareId == null) return single ? shared : files;
-    final federated = section == SharedSection.federated;
-    final rootSection = federated ? SharedSection.federated : SharedSection.withMe;
-    if (path == RemotePath.root) return sharedSection(rootSection.segment);
-    final parent = RemotePath.parent(path);
-    return federated ? federatedAt(shareId, path: parent) : sharedAt(shareId, path: parent);
-  }
-}
-
-enum SharedSection {
-  withMe("with-me"),
-  byMe("by-me"),
-  links("links"),
-  federated("other-servers");
-
-  const SharedSection(this.segment);
-
-  final String segment;
-
-  static SharedSection? fromSegment(String? segment) =>
-      SharedSection.values.where((section) => section.segment == segment).firstOrNull;
 }
 
 enum SettingsPage {
   general,
+  apps,
   notifications,
   account,
   about;

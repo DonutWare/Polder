@@ -5,7 +5,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 
 import "package:polder_core/models/federation.dart";
 import "package:polder/providers/admin/server_settings_provider.dart";
-import "package:polder/providers/federation/federation_providers.dart";
+import "package:polder_drive/providers/federation/federation_providers.dart";
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_ui/util/action_feedback.dart";
 import "package:polder_ui/util/api_error_localization.dart";

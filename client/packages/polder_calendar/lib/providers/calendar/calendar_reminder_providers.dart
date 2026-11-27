@@ -35,13 +35,13 @@ final calendarReminderRefreshProvider = Provider<void>((ref) {
   void refresh({Duration delay = const Duration(seconds: 2)}) {
     pending?.cancel();
     pending = Timer(delay, () async {
-      final preferences = await ref.read(notificationPreferencesProvider.future);
+      final preferences = await ref.read(deliveredNotificationPreferencesProvider.future);
       await scheduler.reschedule(enabled: preferences.wantsCalendarReminders).catchError((_) {});
     });
   }
 
   ref.listen(
-    notificationPreferencesProvider.select((preferences) => preferences.value?.wantsCalendarReminders),
+    deliveredNotificationPreferencesProvider.select((preferences) => preferences.value?.wantsCalendarReminders),
     (_, _) => refresh(delay: Duration.zero),
   );
   ref.listen(cal.calendarChangesProvider, (_, _) => refresh());
@@ -63,7 +63,7 @@ final liveCalendarReminderProvider = Provider<void>((ref) {
   final strings = ref.watch(notificationStringsProvider);
   final subscription = client.events.listen((event) async {
     if (event case CalendarReminderEvent(userId: final owner, :final reminder) when owner == userId) {
-      final preferences = await ref.read(notificationPreferencesProvider.future);
+      final preferences = await ref.read(deliveredNotificationPreferencesProvider.future);
       if (!preferences.wantsCalendarReminders) return;
       await service.show(
         _reminderNotification(

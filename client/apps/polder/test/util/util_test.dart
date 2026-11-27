@@ -1,7 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_ui/util/byte_format.dart";
-import "package:polder/util/conflict_file_name.dart";
+import "package:polder_drive/util/conflict_file_name.dart";
 import "package:polder_core/util/quota_unit.dart";
 import "package:polder_core/util/remote_path.dart";
 

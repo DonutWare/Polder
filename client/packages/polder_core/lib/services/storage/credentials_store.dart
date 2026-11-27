@@ -1,10 +1,13 @@
 import "dart:convert";
 
 import "package:flutter/foundation.dart";
+import "package:flutter/services.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:polder_account_link/shared_account.dart";
 
 import "package:polder_core/models/account.dart";
 import "package:polder_core/services/storage/preferences_store.dart";
+import "package:polder_core/util/flavor.dart";
 
 abstract interface class CredentialsStore {
   Future<Account?> load();
@@ -12,13 +15,100 @@ abstract interface class CredentialsStore {
   Future<void> save(Account account);
 
   Future<void> clear();
+
+  Stream<void> get changes;
 }
 
 const _accountKey = "polder.account";
 
-CredentialsStore platformCredentialsStore() => !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS
+const sharedAccountNamespace = isDevFlavor ? "org.knaapen.polder.dev" : "org.knaapen.polder";
+
+CredentialsStore platformCredentialsStore() {
+  final appStore = _appCredentialsStore();
+  return SharedAccount.isSupported
+      ? SharedAccountCredentialsStore(const SharedAccount(sharedAccountNamespace), appStore)
+      : appStore;
+}
+
+CredentialsStore _appCredentialsStore() => !kIsWeb && defaultTargetPlatform == TargetPlatform.macOS
     ? PreferencesCredentialsStore(SharedPreferencesStore())
     : const SecureCredentialsStore();
+
+class SharedAccountCredentialsStore implements CredentialsStore {
+  const SharedAccountCredentialsStore(this._shared, this._appStore);
+
+  final SharedAccount _shared;
+  final CredentialsStore _appStore;
+
+  @override
+  Future<Account?> load() async {
+    final String? stored;
+    try {
+      stored = await _shared.read();
+    } on Exception catch (error) {
+      if (!_isPlatformFailure(error)) rethrow;
+      return _appStore.load();
+    }
+    if (stored != null) return _decode(stored);
+    return _promoteAppAccount();
+  }
+
+  @override
+  Future<void> save(Account account) async {
+    try {
+      await _shared.write(name: account.handle, json: jsonEncode(account.toJson()));
+    } on Exception catch (error) {
+      if (!_isPlatformFailure(error)) rethrow;
+      await _appStore.save(account);
+    }
+  }
+
+  @override
+  Future<void> clear() async {
+    await _appStore.clear();
+    try {
+      await _shared.remove();
+    } on Exception catch (error) {
+      if (!_isPlatformFailure(error)) rethrow;
+    }
+  }
+
+  @override
+  Stream<void> get changes => _shared.changes;
+
+  Future<Account?> takeSuperseded() async {
+    final appAccount = await _appStore.load();
+    if (appAccount == null) return null;
+    final Account? shared;
+    try {
+      final stored = await _shared.read();
+      shared = stored == null ? null : _decode(stored);
+    } on Exception catch (error) {
+      if (!_isPlatformFailure(error)) rethrow;
+      return null;
+    }
+    if (shared == null) return null;
+    await _appStore.clear();
+    return appAccount.refreshToken == shared.refreshToken ? null : appAccount;
+  }
+
+  Future<Account?> _promoteAppAccount() async {
+    final appAccount = await _appStore.load();
+    if (appAccount == null) return null;
+    try {
+      await _shared.write(name: appAccount.handle, json: jsonEncode(appAccount.toJson()));
+    } on Exception catch (error) {
+      if (!_isPlatformFailure(error)) rethrow;
+      return appAccount;
+    }
+    await _appStore.clear();
+    return appAccount;
+  }
+
+  static Account _decode(String stored) => Account.fromJson(jsonDecode(stored) as Map<String, dynamic>);
+
+  static bool _isPlatformFailure(Exception error) => error is PlatformException || error is MissingPluginException;
+}
 
 class SecureCredentialsStore implements CredentialsStore {
   const SecureCredentialsStore([this._storage = const FlutterSecureStorage()]);
@@ -37,6 +127,9 @@ class SecureCredentialsStore implements CredentialsStore {
 
   @override
   Future<void> clear() => _storage.delete(key: _accountKey);
+
+  @override
+  Stream<void> get changes => const Stream.empty();
 }
 
 class PreferencesCredentialsStore implements CredentialsStore {
@@ -55,6 +148,9 @@ class PreferencesCredentialsStore implements CredentialsStore {
 
   @override
   Future<void> clear() => _preferences.remove(_accountKey);
+
+  @override
+  Stream<void> get changes => const Stream.empty();
 }
 
 class InMemoryCredentialsStore implements CredentialsStore {
@@ -70,4 +166,7 @@ class InMemoryCredentialsStore implements CredentialsStore {
 
   @override
   Future<void> clear() async => _account = null;
+
+  @override
+  Stream<void> get changes => const Stream.empty();
 }

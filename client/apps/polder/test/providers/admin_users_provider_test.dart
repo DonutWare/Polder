@@ -2,7 +2,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:http/http.dart" as http;
 
 import "package:polder_core/models/user.dart";
-import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder_core/providers/admin/admin_users_provider.dart";
 import "package:polder/providers/admin/user_form_provider.dart";
 import "package:polder_core/util/quota_unit.dart";
 

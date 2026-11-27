@@ -22,7 +22,7 @@ import "package:polder_core/models/user.dart";
 import "package:polder_ui/providers/appearance/appearance_provider.dart";
 import "package:polder_core/providers/service_providers.dart";
 import "package:polder/providers/platform_service_providers.dart";
-import "package:polder/providers/sync/sync_platform_provider.dart";
+import "package:polder_drive/providers/sync/sync_platform_provider.dart";
 import "package:polder/app_overrides.dart";
 import "package:polder_core/services/device/device_conditions.dart";
 import "package:polder_core/services/realtime/events_client.dart";

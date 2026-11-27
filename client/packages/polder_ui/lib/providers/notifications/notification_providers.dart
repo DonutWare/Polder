@@ -56,6 +56,10 @@ class NotificationPreferencesNotifier extends AsyncNotifier<NotificationPreferen
   }
 }
 
+final deliveredNotificationPreferencesProvider = FutureProvider<NotificationPreferences>(
+  (ref) => ref.watch(notificationPreferencesProvider.future),
+);
+
 final notificationPermissionProvider = FutureProvider.autoDispose<NotificationPermission>(
   (ref) => ref.watch(notificationServiceProvider).permission(),
 );

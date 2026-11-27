@@ -61,6 +61,8 @@ modules:
           - apps/notes/.dart_tool
           - apps/calendar/build
           - apps/calendar/.dart_tool
+          - apps/drive/build
+          - apps/drive/.dart_tool
           - .flutter-sdk
           - .pub-cache
           - flatpak/.flatpak-builder

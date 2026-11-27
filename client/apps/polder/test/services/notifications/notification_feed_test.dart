@@ -9,7 +9,7 @@ import "package:polder/routes/app_routes.dart";
 import "package:polder_core/services/api/api_client_factory.dart";
 import "package:polder_core/services/api/polder_api.dart";
 import "package:polder_core/services/notifications/local_notification.dart";
-import "package:polder/services/notifications/notification_feed.dart";
+import "package:polder_drive/services/notifications/notification_feed.dart";
 import "package:polder_core/services/notifications/notification_preferences_store.dart";
 import "package:polder_core/services/storage/preferences_store.dart";
 

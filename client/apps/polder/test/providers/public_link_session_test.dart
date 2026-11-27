@@ -3,7 +3,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/models/file_space.dart";
 import "package:polder_core/models/sharing.dart";
-import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder_drive/providers/browser/transfers_provider.dart";
 import "package:polder_core/providers/sharing/file_space_providers.dart";
 import "package:polder_core/providers/sharing/public_link_session_provider.dart";
 import "package:polder_core/services/api/api_exceptions.dart";

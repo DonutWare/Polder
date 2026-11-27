@@ -1,0 +1,60 @@
+name: Build Polder Drive
+
+on:
+  push:
+    tags:
+      - "drive-v*"
+    branches:
+      - develop
+    paths:
+      - client/apps/drive/**
+      - client/packages/**
+      - client/pubspec.yaml
+      - client/pubspec.lock
+      - client/.fvmrc
+      - client/flatpak/**
+      - client/scripts/**
+      - .github/workflows/build-app.yml
+      - .github/workflows/build-drive.yml
+  pull_request:
+    paths:
+      - client/pubspec.yaml
+      - client/apps/drive/pubspec.yaml
+      - client/.fvmrc
+      - .github/workflows/build-app.yml
+      - .github/workflows/build-drive.yml
+    types:
+      - opened
+      - reopened
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Build type (release, nightly)"
+        required: false
+        default: "nightly"
+        type: choice
+        options:
+          - release
+          - nightly
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-app.yml
+    permissions:
+      contents: write
+      packages: write
+    secrets: inherit
+    with:
+      build_type: ${{ github.event.inputs.build_type }}
+      app: drive
+      name: Polder Drive
+      asset_prefix: Polder-Drive
+      binary: polder_drive
+      app_id: org.knaapen.polder.drive
+      tag_prefix: "drive-v"
+      nightly_tag: drive-nightly
+      changelog_paths: "client/apps/drive client/packages client/pubspec.yaml"

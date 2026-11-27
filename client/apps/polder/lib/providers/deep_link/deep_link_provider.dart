@@ -9,7 +9,7 @@ import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder/providers/shortcuts/app_shortcut_runner.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder/services/deep_link/app_location_link.dart";
-import "package:polder/services/deep_link/share_link_target.dart";
+import "package:polder_drive/services/deep_link/share_link_target.dart";
 import "package:polder/services/shortcuts/app_shortcut.dart";
 
 final incomingLinksProvider = Provider<Stream<Uri>>((ref) => kIsWeb ? const Stream.empty() : AppLinks().uriLinkStream);

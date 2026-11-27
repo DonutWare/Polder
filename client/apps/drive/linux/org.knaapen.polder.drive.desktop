@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Polder Drive
+Exec=polder_drive
+Icon=polder_drive_icon_desktop
+Terminal=false
+Categories=Utility;FileTools;Network;
+Comment=Files for a self-hosted Polder server

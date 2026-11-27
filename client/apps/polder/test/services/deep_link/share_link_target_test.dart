@@ -1,7 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder/routes/app_routes.dart";
-import "package:polder/services/deep_link/share_link_target.dart";
+import "package:polder_drive/services/deep_link/share_link_target.dart";
 
 void main() {
   test("app links name the server and the code", () {

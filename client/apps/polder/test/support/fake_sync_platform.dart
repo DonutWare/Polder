@@ -1,10 +1,10 @@
 import "package:polder_core/models/sync/auto_upload_settings.dart";
 import "package:polder_core/services/api/polder_api.dart";
-import "package:polder/services/sync/in_memory_sync_state_store.dart";
-import "package:polder/services/sync/sync_activity.dart";
-import "package:polder/services/sync/sync_platform.dart";
-import "package:polder/services/sync/sync_service.dart";
-import "package:polder/services/sync/sync_state_store.dart";
+import "package:polder_drive/services/sync/in_memory_sync_state_store.dart";
+import "package:polder_drive/services/sync/sync_activity.dart";
+import "package:polder_drive/services/sync/sync_platform.dart";
+import "package:polder_drive/services/sync/sync_service.dart";
+import "package:polder_drive/services/sync/sync_state_store.dart";
 
 import "fake_sync_service.dart";
 

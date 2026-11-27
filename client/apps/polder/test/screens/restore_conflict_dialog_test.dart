@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/trash.dart";
-import "package:polder/screens/trash/widgets/restore_conflict_dialog.dart";
+import "package:polder_drive/screens/trash/widgets/restore_conflict_dialog.dart";
 
 import "../support/fixtures.dart";
 import "../support/localized_app.dart";

@@ -5,7 +5,7 @@ import "package:iconsax_plus/iconsax_plus.dart";
 import "package:intl/intl.dart";
 
 import "package:polder_core/models/user.dart";
-import "package:polder/providers/admin/admin_users_provider.dart";
+import "package:polder_core/providers/admin/admin_users_provider.dart";
 import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder/screens/admin/widgets/user_form_dialog.dart";
 import "package:polder_ui/theme/app_theme.dart";

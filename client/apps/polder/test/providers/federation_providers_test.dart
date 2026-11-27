@@ -3,7 +3,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:polder_core/models/federation.dart";
 import "package:polder_core/models/sharing.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/federation/federation_providers.dart";
+import "package:polder_drive/providers/federation/federation_providers.dart";
 import "package:polder_calendar/util/dav_addresses.dart";
 
 import "../support/provider_harness.dart";

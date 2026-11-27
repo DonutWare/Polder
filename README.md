@@ -22,6 +22,7 @@
 <div align="center">
   
   [![Build Polder](https://github.com/DonutWare/Polder/actions/workflows/build-polder.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build-polder.yml)
+  [![Build Polder Drive](https://github.com/DonutWare/Polder/actions/workflows/build-drive.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build-drive.yml)
   [![Build Polder Notes](https://github.com/DonutWare/Polder/actions/workflows/build-notes.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build-notes.yml)
   [![Build Polder Calendar](https://github.com/DonutWare/Polder/actions/workflows/build-calendar.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Polder/actions/workflows/build-calendar.yml)
   [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/DonutWare/Polder/total)](https://github.com/DonutWare/Polder/releases/latest)

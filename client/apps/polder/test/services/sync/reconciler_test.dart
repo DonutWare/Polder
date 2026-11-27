@@ -6,7 +6,7 @@ import "package:polder_core/models/sync/remote_state.dart";
 import "package:polder_core/models/sync/sync_action.dart";
 import "package:polder_core/models/sync/sync_entry.dart";
 import "package:polder_core/models/sync/sync_root.dart";
-import "package:polder/services/sync/reconciler.dart";
+import "package:polder_drive/services/sync/reconciler.dart";
 
 import "../../support/fixtures.dart";
 

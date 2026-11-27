@@ -1,4 +1,4 @@
-import "package:polder/services/transfer/document_scanner_service.dart";
+import "package:polder_drive/services/transfer/document_scanner_service.dart";
 
 class FakeDocumentScannerService implements DocumentScannerService {
   List<String>? result;

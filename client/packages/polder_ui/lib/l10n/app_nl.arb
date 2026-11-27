@@ -1285,5 +1285,18 @@
 	"resetTwoFactor": "Tweestapsverificatie resetten",
 	"resetTwoFactorTitle": "Tweestapsverificatie van {username} resetten?",
 	"resetTwoFactorMessage": "Gebruik dit als ze hun authenticator-app kwijt zijn. Ze worden overal uitgelogd en kunnen het opnieuw instellen.",
-	"extendTwoFactorDeadline": "Meer tijd geven voor 2FA"
+	"extendTwoFactorDeadline": "Meer tijd geven voor 2FA",
+	"settingsApps": "Apps",
+	"settingsAppsHint": "Hoe Bestanden, Notities en Agenda verschijnen",
+	"settingsAppsIntro": "Kies per onderdeel van Polder of het in deze app zit, een eigen app opent of uit beeld blijft. Polder stuurt alleen meldingen voor de onderdelen die ingebouwd zijn.",
+	"featureModeAutomatic": "Automatisch",
+	"featureModeAutomaticOpens": "Opent {app}, dat op dit apparaat is geïnstalleerd",
+	"featureModeAutomaticBuiltIn": "Ingebouwd, totdat {app} op dit apparaat is geïnstalleerd",
+	"featureModeBuiltIn": "Ingebouwd",
+	"featureModeBuiltInHint": "Zichtbaar in Polder, met meldingen",
+	"featureModeOpenApp": "App openen",
+	"featureModeOpenAppHint": "Opent {app}; Polder stuurt er geen meldingen voor",
+	"featureModeHidden": "Verborgen",
+	"featureModeHiddenHint": "Niet zichtbaar in Polder en geen meldingen",
+	"companionAppUnavailable": "Die app kon niet worden geopend"
 }

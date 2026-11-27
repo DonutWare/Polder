@@ -1,7 +1,7 @@
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
-import "package:polder/util/capture_format.dart";
+import "package:polder_drive/util/capture_format.dart";
 
 FileEntry _photo(Map<String, dynamic> meta) =>
     FileEntry(path: "/photo.jpg", name: "photo.jpg", mtime: DateTime(2024), meta: meta);

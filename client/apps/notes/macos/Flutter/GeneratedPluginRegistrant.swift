@@ -17,6 +17,7 @@ import flutter_web_auth_2
 import media_kit_libs_macos_video
 import media_kit_video
 import package_info_plus
+import polder_account_link
 import polder_window
 import shared_preferences_foundation
 import sqflite_darwin
@@ -37,6 +38,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   MediaKitLibsMacosVideoPlugin.register(with: registry.registrar(forPlugin: "MediaKitLibsMacosVideoPlugin"))
   MediaKitVideoPlugin.register(with: registry.registrar(forPlugin: "MediaKitVideoPlugin"))
   FPPPackageInfoPlusPlugin.register(with: registry.registrar(forPlugin: "FPPPackageInfoPlusPlugin"))
+  PolderAccountLinkPlugin.register(with: registry.registrar(forPlugin: "PolderAccountLinkPlugin"))
   PolderWindowPlugin.register(with: registry.registrar(forPlugin: "PolderWindowPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))

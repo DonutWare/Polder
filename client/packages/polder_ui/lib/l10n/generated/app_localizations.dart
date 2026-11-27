@@ -7723,6 +7723,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Give more time for 2FA'**
   String get extendTwoFactorDeadline;
+
+  /// No description provided for @settingsApps.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps'**
+  String get settingsApps;
+
+  /// No description provided for @settingsAppsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How Files, Notes and Calendar show up'**
+  String get settingsAppsHint;
+
+  /// No description provided for @settingsAppsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose per part of Polder whether it lives inside this app, opens its own app, or stays out of the way. Polder only sends notifications for the parts that are built in.'**
+  String get settingsAppsIntro;
+
+  /// No description provided for @featureModeAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get featureModeAutomatic;
+
+  /// No description provided for @featureModeAutomaticOpens.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens {app}, which is installed on this device'**
+  String featureModeAutomaticOpens(String app);
+
+  /// No description provided for @featureModeAutomaticBuiltIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Built in, until {app} is installed on this device'**
+  String featureModeAutomaticBuiltIn(String app);
+
+  /// No description provided for @featureModeBuiltIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Built in'**
+  String get featureModeBuiltIn;
+
+  /// No description provided for @featureModeBuiltInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown inside Polder, with its notifications'**
+  String get featureModeBuiltInHint;
+
+  /// No description provided for @featureModeOpenApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open app'**
+  String get featureModeOpenApp;
+
+  /// No description provided for @featureModeOpenAppHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens {app}; Polder sends no notifications for it'**
+  String featureModeOpenAppHint(String app);
+
+  /// No description provided for @featureModeHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get featureModeHidden;
+
+  /// No description provided for @featureModeHiddenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not shown in Polder, and no notifications'**
+  String get featureModeHiddenHint;
+
+  /// No description provided for @companionAppUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'That app could not be opened'**
+  String get companionAppUnavailable;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

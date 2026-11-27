@@ -6,7 +6,7 @@ import "dart:typed_data";
 import "package:crypto/crypto.dart";
 import "package:http/http.dart" as http;
 
-import "package:polder/services/sync/chunker.dart";
+import "package:polder_drive/services/sync/chunker.dart";
 import "package:polder_core/util/remote_path.dart";
 
 import "scripted_client.dart";

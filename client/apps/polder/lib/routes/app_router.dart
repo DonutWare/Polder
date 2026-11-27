@@ -4,39 +4,26 @@ import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
 
 import "package:polder_core/models/account.dart";
-import "package:polder_core/models/document_editor.dart";
-import "package:polder_core/models/file_entry.dart";
-import "package:polder_core/models/media_gallery.dart";
-import "package:polder_core/models/scan_session.dart";
 import "package:polder_core/providers/account_provider.dart";
 import "package:polder_core/providers/current_user_provider.dart";
+import "package:polder/providers/features/feature_modes_provider.dart";
+import "package:polder/providers/shell/shell_destinations_provider.dart";
 import "package:polder/routes/app_routes.dart";
+import "package:polder_drive/routes/drive_router_routes.dart";
+import "package:polder/services/features/feature_modes.dart";
 import "package:polder/routes/route_extra_codec.dart";
 import "package:polder_ui/routes/up_scope.dart";
-import "package:polder/screens/activity/activity_screen.dart";
 import "package:polder/screens/admin/admin_screen.dart";
-import "package:polder/screens/auto_upload/auto_upload_screen.dart";
-import "package:polder/screens/browser/browser_stack.dart";
 import "package:polder_ui/screens/login/login_screen.dart";
 import "package:polder_notes/screens/notes/cooking/cooking_screen.dart";
 import "package:polder_notes/screens/notes/notes_screen.dart";
 import "package:polder_calendar/screens/calendar/calendar_screen.dart";
-import "package:polder/screens/scan/scan_review_screen.dart";
 import "package:polder/screens/search/open_search.dart";
-import "package:polder/screens/viewer/document_editor_screen.dart";
-import "package:polder/screens/viewer/media/polder_media_viewer.dart";
-import "package:polder/screens/viewer/pdf_viewer_screen.dart";
 import "package:polder/screens/settings/settings_screen.dart";
 import "package:polder_ui/screens/two_factor/two_factor_setup_screen.dart";
-import "package:polder/screens/public_share/public_share_screen.dart";
 import "package:polder/screens/groups/groups_screen.dart";
-import "package:polder/screens/tags/tags_screen.dart";
-import "package:polder/screens/shared/shared_screen.dart";
 import "package:polder/screens/shell/app_shell.dart";
 import "package:polder/screens/shell/sync_background_activator.dart";
-import "package:polder/screens/sync/conflict_resolver_screen.dart";
-import "package:polder/screens/sync/sync_folders_screen.dart";
-import "package:polder/screens/trash/trash_screen.dart";
 import "package:polder_core/util/remote_path.dart";
 import "package:polder_ui/routes/sign_in_routes.dart";
 
@@ -45,64 +32,32 @@ final routerProvider = Provider<GoRouter>((ref) {
   final isAdmin = ValueNotifier<bool>(ref.read(isAdminProvider));
   final continueOffline = ValueNotifier<bool>(ref.read(continueOfflineProvider));
   final twoFactorSetup = ValueNotifier<bool>(ref.read(twoFactorSetupRequiredProvider));
-  var lastBrowsedPath = RemotePath.root;
+  final features = ValueNotifier<FeatureModes>(ref.read(resolvedFeatureModesProvider));
+  final browsed = BrowsedPathMemory();
   ref.listen(accountProvider, (previous, next) {
-    if (previous?.value?.id != next.value?.id) lastBrowsedPath = RemotePath.root;
+    if (previous?.value?.id != next.value?.id) browsed.path = RemotePath.root;
     account.value = next;
   });
   ref.listen(isAdminProvider, (_, next) => isAdmin.value = next);
   ref.listen(continueOfflineProvider, (_, next) => continueOffline.value = next);
   ref.listen(twoFactorSetupRequiredProvider, (_, next) => twoFactorSetup.value = next);
+  ref.listen(resolvedFeatureModesProvider, (_, next) => features.value = next);
   final router = GoRouter(
     initialLocation: AppRoutes.files,
     extraCodec: const RouteExtraCodec(),
-    refreshListenable: Listenable.merge([account, isAdmin, continueOffline, twoFactorSetup]),
+    refreshListenable: Listenable.merge([account, isAdmin, continueOffline, twoFactorSetup, features]),
     redirect: (_, state) => AppRedirect.resolve(
       account.value,
       state.uri,
       isAdmin: isAdmin.value,
       continueOffline: continueOffline.value,
       twoFactorSetupRequired: twoFactorSetup.value,
+      features: features.value,
     ),
     routes: [
       _route(path: AppRoutes.login, page: (_) => const LoginScreen()),
       _route(path: AppRoutes.twoFactorSetup, page: (_) => const TwoFactorSetupScreen()),
-      _route(
-        path: "${AppRoutes.publicShare}/:code",
-        page: (state) => PublicShareScreen(
-          code: state.pathParameters["code"]!,
-          server: state.uri.queryParameters[AppRoutes.serverParameter],
-          path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
-        ),
-      ),
-      _route(
-        path: AppRoutes.scan,
-        redirect: (_, state) => state.extra is ScanRequest ? null : AppRoutes.files,
-        page: (state) => ScanReviewScreen(request: state.extra! as ScanRequest),
-      ),
-      _route(
-        path: AppRoutes.pdf,
-        redirect: (_, state) => state.extra is FileEntry ? null : AppRoutes.files,
-        page: (state) => PdfViewerScreen(entry: state.extra! as FileEntry),
-      ),
-      _route(
-        path: AppRoutes.media,
-        redirect: (_, state) => state.extra is FileEntry || state.extra is MediaGallery ? null : AppRoutes.files,
-        page: (state) => switch (state.extra) {
-          final MediaGallery gallery => PolderMediaViewer(entry: gallery.entry, gallery: gallery.items),
-          final extra => PolderMediaViewer(entry: extra! as FileEntry),
-        },
-      ),
-      _route(
-        path: AppRoutes.editor,
-        redirect: (_, state) => state.extra is FileEntry || state.extra is EditorTarget ? null : AppRoutes.files,
-        page: (state) => DocumentEditorScreen(
-          target: switch (state.extra) {
-            final EditorTarget target => target,
-            final extra => EditorTarget(extra! as FileEntry),
-          },
-        ),
-      ),
+      ...driveFullScreenRoutes(),
       _route(
         path: AppRoutes.cook,
         redirect: (_, state) => state.uri.queryParameters.containsKey(AppRoutes.pathParameter) ? null : AppRoutes.notes,
@@ -111,21 +66,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (_, _, child) => AppShell(child: child),
         routes: [
-          _tab(
-            path: AppRoutes.files,
-            redirect: (_, state) {
-              final path = state.uri.queryParameters[AppRoutes.pathParameter];
-              if (path == null) return AppRoutes.filesAt(lastBrowsedPath);
-              lastBrowsedPath = path;
-              return null;
-            },
-            page: (state) => UpScope(
-              child: BrowserStack(
-                path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
-                select: state.uri.queryParameters[AppRoutes.selectParameter],
-              ),
-            ),
-          ),
+          ...driveShellRoutes(browsed),
           _tab(
             path: AppRoutes.notes,
             page: (state) => UpScope(child: NotesScreen(notePath: state.uri.queryParameters[AppRoutes.pathParameter])),
@@ -133,58 +74,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           _tab(
             path: AppRoutes.calendar,
             page: (state) => UpScope(child: CalendarScreen.at(state.uri)),
-          ),
-          _route(
-            path: AppRoutes.sync,
-            page: (_) => const UpScope(child: SyncFoldersScreen()),
-            routes: [
-              _route(
-                path: "conflicts",
-                page: (_) => const UpScope(child: ConflictResolverScreen()),
-              ),
-            ],
-          ),
-          _tab(
-            path: AppRoutes.shared,
-            page: (_) => const UpScope(child: SharedScreen()),
-          ),
-          _tab(
-            path: "${AppRoutes.shared}/:section",
-            redirect: (_, state) =>
-                SharedSection.fromSegment(state.pathParameters["section"]) == null ? AppRoutes.shared : null,
-            page: (state) =>
-                UpScope(child: SharedScreen(section: SharedSection.fromSegment(state.pathParameters["section"]))),
-          ),
-          _tab(
-            path: "${AppRoutes.shared}/:section/:shareId",
-            redirect: (_, state) =>
-                !_browsableSections.contains(SharedSection.fromSegment(state.pathParameters["section"])) ||
-                    int.tryParse(state.pathParameters["shareId"] ?? "") == null
-                ? AppRoutes.shared
-                : null,
-            page: (state) => UpScope(
-              child: SharedScreen(
-                section: SharedSection.fromSegment(state.pathParameters["section"]),
-                shareId: int.parse(state.pathParameters["shareId"]!),
-                path: state.uri.queryParameters[AppRoutes.pathParameter] ?? RemotePath.root,
-              ),
-            ),
-          ),
-          _route(
-            path: AppRoutes.activity,
-            page: (_) => const UpScope(child: ActivityScreen()),
-          ),
-          _route(
-            path: AppRoutes.autoUpload,
-            page: (_) => const UpScope(child: AutoUploadScreen()),
-          ),
-          _route(
-            path: AppRoutes.trash,
-            page: (_) => const UpScope(child: TrashScreen()),
-          ),
-          _route(
-            path: AppRoutes.tags,
-            page: (_) => const UpScope(child: TagsScreen()),
           ),
           _route(
             path: AppRoutes.groups,
@@ -253,6 +142,7 @@ abstract final class AppRedirect {
     bool isAdmin = false,
     bool continueOffline = false,
     bool twoFactorSetupRequired = false,
+    FeatureModes features = FeatureModes.everythingBuiltIn,
   }) {
     final snapshot = SignInSnapshot(
       account: account,
@@ -262,7 +152,26 @@ abstract final class AppRedirect {
     final signInRedirect = AppRoutes.signIn.redirect(snapshot, location);
     if (signInRedirect != null) return signInRedirect;
     if (account.isLoading && !account.hasValue) return null;
-    if (account.value != null && !isAdmin && AppRoutes.isAdmin(location.path)) return AppRoutes.files;
+    if (account.value == null) return null;
+    if (!isAdmin && AppRoutes.isAdmin(location.path)) return home(features);
+    final feature = featureOf(location.path);
+    if (feature != null && !features.isBuiltIn(feature)) return home(features);
+    return null;
+  }
+
+  static String home(FeatureModes features) => switch (features) {
+    _ when features.isBuiltIn(PolderFeature.drive) => AppRoutes.files,
+    _ when features.isBuiltIn(PolderFeature.notes) => AppRoutes.notes,
+    _ when features.isBuiltIn(PolderFeature.calendar) => AppRoutes.calendar,
+    _ => AppRoutes.settingsPage(SettingsPage.apps),
+  };
+
+  static PolderFeature? featureOf(String path) {
+    bool under(String route) => path == route || path.startsWith("$route/");
+    if (under(AppRoutes.cook)) return PolderFeature.notes;
+    for (final destination in ShellDestination.values) {
+      if (destination.feature != null && under(destination.route)) return destination.feature;
+    }
     return null;
   }
 }
@@ -301,5 +210,3 @@ GoRoute _tab({
 Widget _standalone(Widget page) => SyncBackgroundActivator(
   child: SearchShortcut(child: UpScope(child: page)),
 );
-
-const _browsableSections = {SharedSection.withMe, SharedSection.federated};

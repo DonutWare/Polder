@@ -6,7 +6,7 @@ import "package:http/http.dart" as http;
 
 import "package:polder_core/models/scan_session.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/browser/document_scan_provider.dart";
+import "package:polder_drive/providers/browser/document_scan_provider.dart";
 
 import "../support/fake_server.dart";
 import "../support/provider_harness.dart";

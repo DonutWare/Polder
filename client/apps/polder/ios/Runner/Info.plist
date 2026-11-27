@@ -96,5 +96,16 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>PolderKeychainGroup</key>
+	<string>$(AppIdentifierPrefix)org.knaapen.polder.shared</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>polder-drive-open</string>
+		<string>polder-drive-dev-open</string>
+		<string>polder-notes-open</string>
+		<string>polder-notes-dev-open</string>
+		<string>polder-calendar-open</string>
+		<string>polder-calendar-dev-open</string>
+	</array>
 </dict>
 </plist>

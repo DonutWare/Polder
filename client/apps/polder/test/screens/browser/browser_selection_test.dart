@@ -4,9 +4,9 @@ import "package:flutter/services.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/browser/browser_selection_provider.dart";
-import "package:polder/screens/browser/widgets/directory_view.dart";
-import "package:polder/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder_drive/providers/browser/browser_selection_provider.dart";
+import "package:polder_drive/screens/browser/widgets/directory_view.dart";
+import "package:polder_drive/screens/browser/widgets/file_thumbnail.dart";
 
 import "../../support/fake_server.dart";
 import "../../support/localized_app.dart";

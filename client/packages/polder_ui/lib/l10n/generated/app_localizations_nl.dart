@@ -4512,4 +4512,50 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get extendTwoFactorDeadline => 'Meer tijd geven voor 2FA';
+
+  @override
+  String get settingsApps => 'Apps';
+
+  @override
+  String get settingsAppsHint => 'Hoe Bestanden, Notities en Agenda verschijnen';
+
+  @override
+  String get settingsAppsIntro =>
+      'Kies per onderdeel van Polder of het in deze app zit, een eigen app opent of uit beeld blijft. Polder stuurt alleen meldingen voor de onderdelen die ingebouwd zijn.';
+
+  @override
+  String get featureModeAutomatic => 'Automatisch';
+
+  @override
+  String featureModeAutomaticOpens(String app) {
+    return 'Opent $app, dat op dit apparaat is geïnstalleerd';
+  }
+
+  @override
+  String featureModeAutomaticBuiltIn(String app) {
+    return 'Ingebouwd, totdat $app op dit apparaat is geïnstalleerd';
+  }
+
+  @override
+  String get featureModeBuiltIn => 'Ingebouwd';
+
+  @override
+  String get featureModeBuiltInHint => 'Zichtbaar in Polder, met meldingen';
+
+  @override
+  String get featureModeOpenApp => 'App openen';
+
+  @override
+  String featureModeOpenAppHint(String app) {
+    return 'Opent $app; Polder stuurt er geen meldingen voor';
+  }
+
+  @override
+  String get featureModeHidden => 'Verborgen';
+
+  @override
+  String get featureModeHiddenHint => 'Niet zichtbaar in Polder en geen meldingen';
+
+  @override
+  String get companionAppUnavailable => 'Die app kon niet worden geopend';
 }

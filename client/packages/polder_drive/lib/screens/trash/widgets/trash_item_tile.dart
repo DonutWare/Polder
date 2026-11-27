@@ -1,0 +1,116 @@
+import "package:flutter/material.dart";
+
+import "package:flutter_riverpod/flutter_riverpod.dart";
+import "package:iconsax_plus/iconsax_plus.dart";
+import "package:polder_core/models/file_entry.dart";
+import "package:polder_core/models/trash.dart";
+import "package:polder_drive/providers/browser/transfers_provider.dart";
+import "package:polder_drive/providers/trash/trash_provider.dart";
+import "package:polder_drive/screens/browser/widgets/file_thumbnail.dart";
+import "package:polder_drive/screens/trash/widgets/restore_conflict_dialog.dart";
+import "package:polder_core/services/api/api_exceptions.dart";
+import "package:polder_ui/util/action_feedback.dart";
+import "package:polder_ui/util/byte_format.dart";
+import "package:polder_ui/util/date_format_extension.dart";
+import "package:polder_ui/util/localization_helper.dart";
+import "package:polder_core/util/remote_path.dart";
+import "package:polder_ui/widgets/shared/confirm_dialog.dart";
+import "package:polder_ui/widgets/shared/icon_menu_item.dart";
+
+enum _TrashAction { restore, download, deletePermanently }
+
+class TrashItemTile extends ConsumerWidget {
+  const TrashItemTile({required this.item, super.key});
+
+  final TrashItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localized = context.localized;
+    final expiresAt = item.expiresAt;
+    return ListTile(
+      contentPadding: const EdgeInsetsDirectional.only(start: 12, end: 4),
+      isThreeLine: true,
+      leading: FileThumbnail.trashed(item: item, dimension: 40),
+      title: Text(item.name, overflow: TextOverflow.ellipsis),
+      subtitle: Text(
+        [
+          [
+            localized.trashItemDeleted(item.deletedAt.formatted(context)),
+            ByteFormat.format(item.size, locale: context.localeName),
+          ].join(" · "),
+          [
+            localized.trashItemFrom(RemotePath.parent(item.originalPath)),
+            if (expiresAt != null) localized.trashItemExpires(expiresAt.formatted(context)),
+          ].join(" · "),
+        ].join("\n"),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: _TrashActionsMenu(item: item),
+    );
+  }
+}
+
+class _TrashActionsMenu extends ConsumerWidget {
+  const _TrashActionsMenu({required this.item});
+
+  final TrashItem item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final error = Theme.of(context).colorScheme.error;
+    final localized = context.localized;
+    return PopupMenuButton<_TrashAction>(
+      icon: const Icon(IconsaxPlusLinear.more),
+      onSelected: (action) => _handle(context, ref, action),
+      itemBuilder: (context) => [
+        iconMenuItem(_TrashAction.restore, IconsaxPlusLinear.rotate_left, localized.restore),
+        iconMenuItem(_TrashAction.download, IconsaxPlusLinear.document_download, localized.download),
+        iconMenuItem(
+          _TrashAction.deletePermanently,
+          IconsaxPlusLinear.trash,
+          localized.deletePermanently,
+          color: error,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _handle(BuildContext context, WidgetRef ref, _TrashAction action) async {
+    switch (action) {
+      case _TrashAction.restore:
+        await context.runWithFeedback(_restore(context, ref, item));
+      case _TrashAction.download:
+        await ref.read(transfersProvider.notifier).downloadFromTrash(item);
+      case _TrashAction.deletePermanently:
+        final confirmed = await showConfirmDialog(
+          context,
+          title: context.localized.deletePermanentlyTitle(item.name),
+          message: context.localized.deletePermanentlyMessage,
+          confirmLabel: context.localized.deletePermanently,
+          destructive: true,
+        );
+        if (confirmed && context.mounted) {
+          await context.runWithFeedback(ref.read(trashProvider.notifier).delete(item));
+        }
+    }
+  }
+}
+
+Future<void> _restore(BuildContext context, WidgetRef ref, TrashItem item) async {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  final localized = context.localized;
+  final restored = await _restoreResolvingConflict(context, ref.read(trashProvider.notifier), item);
+  if (restored != null) messenger?.showSnackBar(SnackBar(content: Text(localized.restoredTo(restored.path))));
+}
+
+Future<FileEntry?> _restoreResolvingConflict(BuildContext context, TrashNotifier trash, TrashItem item) async {
+  try {
+    return await trash.restore(item);
+  } on AlreadyExistsException {
+    if (!context.mounted) return null;
+    final mode = await showRestoreConflictDialog(context, item);
+    return mode == null ? null : trash.restore(item, onConflict: mode);
+  }
+}

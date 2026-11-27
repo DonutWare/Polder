@@ -66,5 +66,18 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>PolderKeychainGroup</key>
+	<string>$(AppIdentifierPrefix)org.knaapen.polder.shared</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER).open</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(DEEP_LINK_SCHEME)-open</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

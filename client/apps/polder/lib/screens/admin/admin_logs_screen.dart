@@ -8,7 +8,7 @@ import "package:intl/intl.dart";
 
 import "package:polder_core/models/server_log.dart";
 import "package:polder/providers/admin/server_logs_provider.dart";
-import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder_drive/providers/browser/transfers_provider.dart";
 import "package:polder_core/providers/polder_api_provider.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/byte_format.dart";

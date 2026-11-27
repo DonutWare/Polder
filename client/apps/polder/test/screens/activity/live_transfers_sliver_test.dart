@@ -3,10 +3,10 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/sync/sync_root.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/activity/now_groups_provider.dart";
-import "package:polder/providers/sync/sync_activity_provider.dart";
-import "package:polder/screens/activity/widgets/live_transfers_card.dart";
-import "package:polder/services/sync/sync_activity.dart";
+import "package:polder_drive/providers/activity/now_groups_provider.dart";
+import "package:polder_drive/providers/sync/sync_activity_provider.dart";
+import "package:polder_drive/screens/activity/widgets/live_transfers_card.dart";
+import "package:polder_drive/services/sync/sync_activity.dart";
 
 import "../../support/localized_app.dart";
 import "../../support/provider_harness.dart";

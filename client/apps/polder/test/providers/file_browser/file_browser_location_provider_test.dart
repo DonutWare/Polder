@@ -2,7 +2,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/file_browser/file_browser_location_provider.dart";
+import "package:polder_drive/providers/file_browser/file_browser_location_provider.dart";
 import "package:polder_core/services/storage/preferences_store.dart";
 
 import "../../support/provider_harness.dart";

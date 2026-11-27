@@ -1,5 +1,5 @@
 import "package:polder/routes/app_routes.dart";
-import "package:polder/services/deep_link/share_link_target.dart";
+import "package:polder_drive/services/deep_link/share_link_target.dart";
 
 abstract final class AppLocationLink {
   static const host = "open";

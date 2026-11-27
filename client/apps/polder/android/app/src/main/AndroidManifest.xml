@@ -94,5 +94,11 @@
 			<action android:name="android.intent.action.PROCESS_TEXT"/>
 			<data android:mimeType="text/plain"/>
 		</intent>
+		<package android:name="org.knaapen.polder.drive"/>
+		<package android:name="org.knaapen.polder.drive.dev"/>
+		<package android:name="org.knaapen.polder.notes"/>
+		<package android:name="org.knaapen.polder.notes.dev"/>
+		<package android:name="org.knaapen.polder.calendar"/>
+		<package android:name="org.knaapen.polder.calendar.dev"/>
 	</queries>
 </manifest>

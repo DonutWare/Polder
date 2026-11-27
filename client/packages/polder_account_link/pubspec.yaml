@@ -1,0 +1,41 @@
+name: polder_account_link
+description: "One Polder sign-in shared by every Polder app on a device, and launching the companion apps."
+publish_to: "none"
+
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.4
+  flutter: ">=3.3.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ffi: ^2.2.0
+  path: ^1.9.1
+  url_launcher: ^6.3.3
+  win32: ^6.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: org.knaapen.polder.account_link
+        pluginClass: PolderAccountLinkPlugin
+      ios:
+        pluginClass: PolderAccountLinkPlugin
+        sharedDarwinSource: true
+      macos:
+        pluginClass: PolderAccountLinkPlugin
+        sharedDarwinSource: true
+      linux:
+        pluginClass: PolderAccountLinkPlugin
+      windows:
+        dartPluginClass: WindowsSharedAccountPlatform

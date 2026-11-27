@@ -2,8 +2,8 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/sync/conflict.dart";
 import "package:polder_core/models/sync/sync_root.dart";
-import "package:polder/providers/sync/conflict_queue_provider.dart";
-import "package:polder/providers/sync/sync_roots_provider.dart";
+import "package:polder_drive/providers/sync/conflict_queue_provider.dart";
+import "package:polder_drive/providers/sync/sync_roots_provider.dart";
 
 import "../support/provider_harness.dart";
 

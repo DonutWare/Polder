@@ -6,7 +6,7 @@ import "package:flutter_test/flutter_test.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_core/providers/browser/file_operations_provider.dart";
-import "package:polder/providers/browser/pending_uploads_provider.dart";
+import "package:polder_drive/providers/browser/pending_uploads_provider.dart";
 
 FileOperationItem _item(String path, {bool isDir = false}) => FileOperationItem(path: path, isDir: isDir);
 

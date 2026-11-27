@@ -5,7 +5,7 @@ import "package:flutter_test/flutter_test.dart";
 import "package:polder_core/models/offline_models.dart";
 import "package:polder_core/models/transfer.dart";
 import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/browser/transfers_provider.dart";
+import "package:polder_drive/providers/browser/transfers_provider.dart";
 import "package:polder_core/providers/current_user_provider.dart";
 import "package:polder_core/providers/offline/offline_storage_provider.dart";
 import "package:polder_core/services/api/api_exceptions.dart";

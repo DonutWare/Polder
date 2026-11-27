@@ -8,7 +8,7 @@ import "package:polder_core/models/account.dart";
 import "package:polder_core/models/user.dart";
 import "package:polder_core/providers/account_provider.dart";
 import "package:polder_core/providers/current_user_provider.dart";
-import "package:polder/providers/federation/federation_providers.dart";
+import "package:polder_drive/providers/federation/federation_providers.dart";
 import "package:polder/screens/settings/widgets/app_passwords_group.dart";
 import "package:polder_calendar/screens/settings/widgets/calendars_group.dart";
 import "package:polder/screens/settings/widgets/connected_accounts_group.dart";

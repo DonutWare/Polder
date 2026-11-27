@@ -2646,5 +2646,39 @@
 		}
 	},
 	"resetTwoFactorMessage": "Use this when they lost their authenticator app. They're signed out everywhere and can set it up again.",
-	"extendTwoFactorDeadline": "Give more time for 2FA"
+	"extendTwoFactorDeadline": "Give more time for 2FA",
+	"settingsApps": "Apps",
+	"settingsAppsHint": "How Files, Notes and Calendar show up",
+	"settingsAppsIntro": "Choose per part of Polder whether it lives inside this app, opens its own app, or stays out of the way. Polder only sends notifications for the parts that are built in.",
+	"featureModeAutomatic": "Automatic",
+	"featureModeAutomaticOpens": "Opens {app}, which is installed on this device",
+	"@featureModeAutomaticOpens": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
+	"featureModeAutomaticBuiltIn": "Built in, until {app} is installed on this device",
+	"@featureModeAutomaticBuiltIn": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
+	"featureModeBuiltIn": "Built in",
+	"featureModeBuiltInHint": "Shown inside Polder, with its notifications",
+	"featureModeOpenApp": "Open app",
+	"featureModeOpenAppHint": "Opens {app}; Polder sends no notifications for it",
+	"@featureModeOpenAppHint": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
+	"featureModeHidden": "Hidden",
+	"featureModeHiddenHint": "Not shown in Polder, and no notifications",
+	"companionAppUnavailable": "That app could not be opened"
 }
