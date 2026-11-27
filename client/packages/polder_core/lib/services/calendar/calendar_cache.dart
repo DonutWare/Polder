@@ -1,7 +1,7 @@
 import "dart:convert";
 
 import "package:drift/drift.dart";
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 import "package:polder_core/services/offline/offline_database.dart";
 import "package:calendar_views/calendar_views.dart";
 

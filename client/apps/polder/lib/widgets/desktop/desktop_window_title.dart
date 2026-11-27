@@ -2,7 +2,7 @@ import "dart:async";
 
 import "package:flutter/widgets.dart";
 
-import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder_drive/desktop/sync_tray.dart";
 
 class DesktopWindowTitle extends StatefulWidget {
   const DesktopWindowTitle({required this.title, required this.child, super.key});

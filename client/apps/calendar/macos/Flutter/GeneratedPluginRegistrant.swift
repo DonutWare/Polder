@@ -12,13 +12,13 @@ import dynamic_color
 import file_picker_darwin
 import flutter_local_notifications
 import flutter_secure_storage_darwin
-import flutter_web_auth_2
 import polder_account_link
 import polder_window
 import shared_preferences_foundation
 import sqflite_darwin
 import url_launcher_macos
 import window_to_front
+import flutter_web_auth_2
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   BatteryPlusMacosPlugin.register(with: registry.registrar(forPlugin: "BatteryPlusMacosPlugin"))
@@ -28,11 +28,11 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))
   FlutterSecureStorageDarwinPlugin.register(with: registry.registrar(forPlugin: "FlutterSecureStorageDarwinPlugin"))
-  FlutterWebAuth2Plugin.register(with: registry.registrar(forPlugin: "FlutterWebAuth2Plugin"))
   PolderAccountLinkPlugin.register(with: registry.registrar(forPlugin: "PolderAccountLinkPlugin"))
   PolderWindowPlugin.register(with: registry.registrar(forPlugin: "PolderWindowPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
   WindowToFrontPlugin.register(with: registry.registrar(forPlugin: "WindowToFrontPlugin"))
+  FlutterWebAuth2Plugin.register(with: registry.registrar(forPlugin: "FlutterWebAuth2Plugin"))
 }

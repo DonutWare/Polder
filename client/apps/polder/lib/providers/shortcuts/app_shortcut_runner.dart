@@ -10,7 +10,7 @@ import "package:polder_drive/screens/scan/scan_review_screen.dart";
 import "package:polder_drive/screens/search/open_search.dart";
 import "package:polder/services/shortcuts/app_shortcut.dart";
 import "package:polder_core/util/remote_path.dart";
-import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder_drive/desktop/sync_tray.dart";
 import "package:calendar_views/calendar_views.dart";
 
 final appShortcutRunnerProvider = Provider<AppShortcutRunner>(AppShortcutRunner.new);

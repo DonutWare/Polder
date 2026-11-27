@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:iconsax_plus/iconsax_plus.dart";
 import "package:polder_notes/screens/notes/editor/markdown_editor/markdown_editing_controller.dart";

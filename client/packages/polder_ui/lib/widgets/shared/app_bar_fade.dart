@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 /// Fades page content out under a transparent app bar.
 class AppBarFade extends StatelessWidget {

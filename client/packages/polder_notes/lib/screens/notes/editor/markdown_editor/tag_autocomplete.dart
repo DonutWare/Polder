@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_core/models/user_tag.dart";
 import "package:polder_core/services/notes/markdown_source.dart";

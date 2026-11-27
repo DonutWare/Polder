@@ -1,5 +1,5 @@
 import "package:flutter/foundation.dart";
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_ui/util/adaptive_layout/adaptive_layout_model.dart";
 import "package:polder_ui/util/adaptive_layout/input_detector.dart";

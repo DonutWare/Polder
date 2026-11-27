@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder/screens/admin/widgets/federation_settings_group.dart";
 import "package:polder/screens/admin/widgets/preview_settings_group.dart";

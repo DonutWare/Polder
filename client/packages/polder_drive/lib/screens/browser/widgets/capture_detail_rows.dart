@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_core/models/file_entry.dart";
 import "package:polder_drive/util/capture_format.dart";

@@ -83,7 +83,10 @@ dependencies:
   background_downloader: ^9.6.4
   qr_flutter: ^4.1.0
   flutter_web_auth_2: ^6.1.0
+  tray_manager: ^0.7.0
+  window_manager: ^0.5.2
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

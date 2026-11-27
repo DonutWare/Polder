@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_core/services/api/polder_api.dart";
 import "package:calendar_views/calendar_views.dart";

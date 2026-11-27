@@ -35,6 +35,8 @@ dependencies:
   polder_core:
     path: ../polder_core
 
+  material_ui: any
+  cupertino_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

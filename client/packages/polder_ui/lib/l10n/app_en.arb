@@ -70,6 +70,7 @@
 		}
 	},
 	"appTitle": "Polder",
+	"driveAppTitle": "Polder Drive",
 	"autoUploadDescription": "Upload new photos and files from the chosen folders automatically.",
 	"autoUploadEnabled": "Auto-upload",
 	"cancel": "Cancel",
@@ -755,12 +756,26 @@
 	"traySyncPaused": "Sync paused",
 	"traySyncFailed": "Sync failed",
 	"traySignedOut": "Not signed in",
-	"trayOpenApp": "Open Polder",
+	"trayOpenApp": "Open {app}",
+	"@trayOpenApp": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
 	"trayOpenSyncedFolders": "Open synced folders",
 	"trayOpenFiles": "Open files",
 	"trayOpenCalendar": "Open calendar",
 	"trayOpenNotes": "Open notes",
-	"trayQuit": "Quit Polder",
+	"trayQuit": "Quit {app}",
+	"@trayQuit": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
 	"trayNew": "New",
 	"shortcutNewNote": "New note",
 	"shortcutEvent": "Event",
@@ -768,7 +783,14 @@
 	"shortcutSearch": "Search",
 	"quit": "Quit",
 	"quitWhileSyncingTitle": "Quit while syncing?",
-	"quitWhileSyncingMessage": "Polder is still syncing. Unfinished transfers continue the next time you open Polder.",
+	"quitWhileSyncingMessage": "{app} is still syncing. Unfinished transfers continue the next time you open {app}.",
+	"@quitWhileSyncingMessage": {
+		"placeholders": {
+			"app": {
+				"type": "String"
+			}
+		}
+	},
 	"newDocument": "New document",
 	"reviewScan": "Review scan",
 	"addPages": "Add pages",

@@ -9,7 +9,7 @@ import "package:calendar_views/src/source/calendar_source.dart";
 import "package:calendar_views/src/state/calendar_actions.dart";
 import "package:calendar_views/src/time/calendar_view_mode.dart";
 import "package:calendar_views/src/time/date_math.dart";
-import "package:flutter/material.dart" show DateTimeRange, Widget;
+import "package:material_ui/material_ui.dart" show DateTimeRange, Widget;
 
 final calendarSourcesProvider = Provider<List<CalendarSource>>((ref) => const []);
 

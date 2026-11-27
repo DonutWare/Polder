@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_core/services/api/api_exceptions.dart";
 import "package:polder_ui/util/api_error_localization.dart";

@@ -25,6 +25,7 @@ dependencies:
   polder_ui:
     path: ../polder_ui
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

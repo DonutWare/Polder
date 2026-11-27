@@ -6,6 +6,7 @@ import "package:polder_core/providers/service_providers.dart";
 import "package:polder_core/services/auth/single_sign_on.dart";
 import "package:polder_core/util/device_name.dart";
 import "package:polder_core/util/flavor.dart";
+import "package:polder_drive/desktop/sync_tray.dart";
 import "package:polder_drive/services/background/notification_action_handler.dart";
 import "package:polder_drive/services/sync/sync_platform_factory.dart";
 import "package:polder_ui/providers/notifications/notification_providers.dart";
@@ -21,8 +22,10 @@ Future<void> main() async {
   SingleSignOn.config = const SingleSignOnConfig(
     appName: "Polder Drive",
     callbackScheme: isDevFlavor ? "polder-drive-dev" : "polder-drive",
+    onBrowserReturn: showDesktopWindow,
   );
   await initializeBackgroundSync(driveBackgroundDispatcher);
+  await initializeDesktopWindow();
   final deviceName = await DeviceName.resolve();
   final notifications = await PluginNotificationService.initialize(
     onBackgroundResponse: notificationActionDispatcher,

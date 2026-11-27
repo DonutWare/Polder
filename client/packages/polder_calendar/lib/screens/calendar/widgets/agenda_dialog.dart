@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_calendar/screens/calendar/widgets/calendar_panel.dart";
 import "package:polder_ui/util/localization_helper.dart";

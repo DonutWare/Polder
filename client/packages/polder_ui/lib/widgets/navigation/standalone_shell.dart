@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_ui/polder_ui_config.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";

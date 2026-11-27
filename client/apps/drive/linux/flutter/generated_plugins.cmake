@@ -9,13 +9,16 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_inappwebview_linux
   flutter_secure_storage_linux
   media_kit_libs_linux
-  media_kit_video
   polder_account_link
+  screen_retriever_linux
   url_launcher_linux
+  media_kit_video
+  window_manager
   window_to_front
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  cnativeapi
   jni
 )
 

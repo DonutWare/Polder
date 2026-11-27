@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_core/models/activity.dart";
 import "package:polder_core/models/admin_user_requests.dart";

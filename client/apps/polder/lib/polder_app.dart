@@ -1,7 +1,7 @@
 import "dart:async";
 
 import "package:flutter/foundation.dart";
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -27,7 +27,7 @@ import "package:polder_drive/providers/file_browser/file_browser_location_provid
 import "package:polder_drive/providers/sharing/share_target_provider.dart";
 import "package:polder/routes/app_router.dart";
 import "package:polder_ui/theme/app_theme.dart";
-import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder/widgets/desktop/polder_tray.dart";
 import "package:polder/widgets/desktop/desktop_window_title.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";
 import "package:polder/widgets/navigation/navigation_history_scope.dart";
@@ -129,7 +129,7 @@ class _PolderAppState extends ConsumerState<PolderApp> {
               child: (_) => DesktopWindowTitle(
                 title: titleIn(context),
                 child: LauncherShortcuts(
-                  child: DesktopTray(
+                  child: PolderTray(
                     child: WindowTitlebar(
                       child: MouseNavigation(
                         child: NavigationHistoryScope(

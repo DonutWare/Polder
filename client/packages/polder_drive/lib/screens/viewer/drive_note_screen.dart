@@ -1,6 +1,6 @@
 import "dart:async";
 
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_notes/screens/notes/widgets/note_pane.dart";
 import "package:polder_ui/routes/up_scope.dart";

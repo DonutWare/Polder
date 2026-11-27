@@ -137,6 +137,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get appTitle => 'Polder';
 
   @override
+  String get driveAppTitle => 'Polder Drive';
+
+  @override
   String get autoUploadDescription => 'Nieuwe foto\'s en bestanden uit de gekozen mappen automatisch uploaden.';
 
   @override
@@ -1229,7 +1232,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get traySignedOut => 'Niet aangemeld';
 
   @override
-  String get trayOpenApp => 'Polder openen';
+  String trayOpenApp(String app) {
+    return '$app openen';
+  }
 
   @override
   String get trayOpenSyncedFolders => 'Gesynchroniseerde mappen openen';
@@ -1244,7 +1249,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get trayOpenNotes => 'Notities openen';
 
   @override
-  String get trayQuit => 'Polder afsluiten';
+  String trayQuit(String app) {
+    return '$app afsluiten';
+  }
 
   @override
   String get trayNew => 'Nieuw';
@@ -1268,8 +1275,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get quitWhileSyncingTitle => 'Afsluiten tijdens synchronisatie?';
 
   @override
-  String get quitWhileSyncingMessage =>
-      'Polder is nog aan het synchroniseren. Onvoltooide overdrachten gaan verder zodra je Polder weer opent.';
+  String quitWhileSyncingMessage(String app) {
+    return '$app is nog aan het synchroniseren. Onvoltooide overdrachten gaan verder zodra je $app weer opent.';
+  }
 
   @override
   String get newDocument => 'Nieuw document';

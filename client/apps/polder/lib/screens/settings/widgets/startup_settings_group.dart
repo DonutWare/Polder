@@ -1,8 +1,10 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
 import "package:polder/providers/desktop/launch_at_login_provider.dart";
+import "package:polder/providers/features/feature_modes_provider.dart";
+import "package:polder/services/features/feature_modes.dart";
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/nav_group.dart";
 
@@ -15,6 +17,7 @@ class StartupSettingsGroup extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(launchAtLoginSettingsProvider).value;
     if (settings == null) return const SizedBox.shrink();
+    final hasTray = ref.watch(resolvedFeatureModesProvider.select((modes) => modes.isBuiltIn(PolderFeature.drive)));
     final localized = context.localized;
     final notifier = ref.read(launchAtLoginSettingsProvider.notifier);
     return NavGroup(
@@ -27,7 +30,7 @@ class StartupSettingsGroup extends ConsumerWidget {
           value: settings.enabled,
           onChanged: notifier.setEnabled,
         ),
-        if (settings.enabled)
+        if (settings.enabled && hasTray)
           SwitchListTile(
             contentPadding: _padding,
             title: Text(localized.launchMinimized),

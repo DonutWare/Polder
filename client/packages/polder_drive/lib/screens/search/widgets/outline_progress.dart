@@ -1,7 +1,7 @@
 import "dart:async";
 import "dart:math" as math;
 
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 class OutlineProgress extends StatefulWidget {
   const OutlineProgress({required this.active, required this.shape, required this.child, super.key});

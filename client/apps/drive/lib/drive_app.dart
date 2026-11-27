@@ -9,13 +9,16 @@ import "package:polder_account_link/companion_app.dart";
 import "package:polder_core/util/flavor.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:polder_core/services/notifications/local_notification.dart";
+import "package:polder_drive/desktop/sync_tray.dart";
 import "package:polder_drive/providers/file_browser/file_browser_location_provider.dart";
 import "package:polder_drive/providers/notifications/drive_notification_providers.dart";
 import "package:polder_drive/providers/realtime/directory_refresher_provider.dart";
 import "package:polder_drive/providers/sharing/share_target_provider.dart";
 import "package:polder_drive/providers/sync/sync_platform_provider.dart";
 import "package:polder_drive/providers/sync/sync_scheduler_provider.dart";
+import "package:polder_drive/routes/drive_routes.dart";
 import "package:polder_ui/providers/notifications/notification_providers.dart";
+import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/app/standalone_app.dart";
 
 import "package:polder_drive_app/routes/drive_app_router.dart";
@@ -32,7 +35,29 @@ class DriveApp extends ConsumerWidget {
       ..watch(_incomingLinksProvider)
       ..watch(shareTargetHandlerProvider)
       ..watch(showInFileBrowserProvider);
-    return StandaloneApp(title: (localized) => localized.navFiles, router: ref.watch(driveRouterProvider));
+    final router = ref.watch(driveRouterProvider);
+    final platform = ref.watch(syncPlatformProvider);
+    TrayEntry route(String route, String Function(BuildContext context) label) => TrayEntry(
+      label: label,
+      onSelected: () {
+        router.go(route);
+        return showDesktopWindow();
+      },
+    );
+
+    return StandaloneApp(
+      title: (localized) => localized.navFiles,
+      router: router,
+      wrap: (child) => SyncTray(
+        appName: (localized) => localized.driveAppTitle,
+        router: router,
+        openEntries: [
+          if (platform.supportsFolderSync) route(DriveRoutes.sync, (context) => context.localized.trayOpenSyncedFolders),
+          route(DriveRoutes.files, (context) => context.localized.trayOpenFiles),
+        ],
+        child: child,
+      ),
+    );
   }
 }
 

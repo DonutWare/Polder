@@ -17,10 +17,11 @@ import "package:polder_ui/services/notifications/plugin_notification_service.dar
 import "package:polder_drive/services/sync/sync_platform_factory.dart";
 import "package:polder_core/util/device_name.dart";
 import "package:polder_core/util/flavor.dart";
-import "package:polder/widgets/desktop/desktop_tray.dart";
+import "package:polder_drive/desktop/sync_tray.dart";
 import "package:polder_ui/widgets/shared/polder_logo.dart";
 import "package:polder/app_overrides.dart";
 import "package:polder/services/background/background_dispatcher.dart";
+import "package:polder/services/desktop/launch_minimized.dart";
 import "package:polder/providers/features/feature_modes_provider.dart";
 import "package:polder/services/features/feature_modes.dart";
 import "package:polder_core/services/storage/preferences_store.dart";
@@ -37,11 +38,12 @@ Future<void> main(List<String> arguments) async {
   );
   if (kIsWeb) await BrowserContextMenu.disableContextMenu();
   await initializeBackgroundSync(backgroundCallbackDispatcher);
-  await initializeDesktopWindow(arguments);
-  unawaited(precachePolderIcon());
-  final deviceName = await DeviceName.resolve();
   final featureModes = await FeatureModes.read(SharedPreferencesStore());
   final installedCompanions = featureModes.needsDetection ? await FeatureModes.detectInstalled() : <PolderFeature>{};
+  final hasTray = featureModes.resolve(installedCompanions).isBuiltIn(PolderFeature.drive);
+  await initializeDesktopWindow(startHidden: hasTray && await launchedMinimized(arguments));
+  unawaited(precachePolderIcon());
+  final deviceName = await DeviceName.resolve();
   final notifications = await PluginNotificationService.initialize(onBackgroundResponse: notificationActionDispatcher);
   runApp(
     ProviderScope(

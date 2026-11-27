@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_drive/screens/settings/widgets/file_browser_settings_group.dart";
 import "package:polder/screens/settings/widgets/startup_settings_group.dart";

@@ -1,6 +1,6 @@
 import "dart:math" as math;
 
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 class WindowCentered extends StatefulWidget {
   const WindowCentered({required this.contentWidth, required this.builder, this.minGutter = 16, super.key});

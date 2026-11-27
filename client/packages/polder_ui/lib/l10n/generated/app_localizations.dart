@@ -326,6 +326,12 @@ abstract class AppLocalizations {
   /// **'Polder'**
   String get appTitle;
 
+  /// No description provided for @driveAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Polder Drive'**
+  String get driveAppTitle;
+
   /// No description provided for @autoUploadDescription.
   ///
   /// In en, this message translates to:
@@ -2171,8 +2177,8 @@ abstract class AppLocalizations {
   /// No description provided for @trayOpenApp.
   ///
   /// In en, this message translates to:
-  /// **'Open Polder'**
-  String get trayOpenApp;
+  /// **'Open {app}'**
+  String trayOpenApp(String app);
 
   /// No description provided for @trayOpenSyncedFolders.
   ///
@@ -2201,8 +2207,8 @@ abstract class AppLocalizations {
   /// No description provided for @trayQuit.
   ///
   /// In en, this message translates to:
-  /// **'Quit Polder'**
-  String get trayQuit;
+  /// **'Quit {app}'**
+  String trayQuit(String app);
 
   /// No description provided for @trayNew.
   ///
@@ -2249,8 +2255,8 @@ abstract class AppLocalizations {
   /// No description provided for @quitWhileSyncingMessage.
   ///
   /// In en, this message translates to:
-  /// **'Polder is still syncing. Unfinished transfers continue the next time you open Polder.'**
-  String get quitWhileSyncingMessage;
+  /// **'{app} is still syncing. Unfinished transfers continue the next time you open {app}.'**
+  String quitWhileSyncingMessage(String app);
 
   /// No description provided for @newDocument.
   ///

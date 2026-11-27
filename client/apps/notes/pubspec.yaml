@@ -33,6 +33,7 @@ dependencies:
   polder_window:
     path: ../../packages/polder_window
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

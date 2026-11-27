@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:material_ui/material_ui.dart";
 
 import "package:polder_ui/util/localization_helper.dart";
 import "package:polder_ui/widgets/shared/text_input_dialog.dart";
