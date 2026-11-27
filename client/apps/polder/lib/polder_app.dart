@@ -1,41 +1,40 @@
 import "dart:async";
 
 import "package:flutter/foundation.dart";
-import "package:material_ui/material_ui.dart";
 
+import "package:calendar_views/calendar_views.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
-
-import "package:polder_ui/l10n/generated/app_localizations.dart";
-import "package:polder_core/providers/account_provider.dart";
-import "package:polder/providers/features/feature_modes_provider.dart";
+import "package:material_ui/material_ui.dart";
 import "package:polder/providers/app/app_location_provider.dart";
 import "package:polder/providers/app/browser_favicon_provider.dart";
-import "package:polder_ui/providers/appearance/appearance_provider.dart";
-import "package:polder_core/providers/browser/directory_provider.dart";
 import "package:polder/providers/calendar/calendar_insert_provider.dart";
-import "package:polder_calendar/providers/calendar/week_layout_provider.dart";
-import "package:polder_core/providers/connection/server_connection_provider.dart";
-import "package:polder_core/providers/current_user_provider.dart";
-import "package:polder_notes/providers/notes/notes_folder_provider.dart";
-import "package:polder_notes/providers/notes/notes_tree_provider.dart";
-import "package:polder_core/providers/offline/offline_availability_provider.dart";
-import "package:polder_core/providers/offline/offline_sync_provider.dart";
-import "package:polder_core/providers/branding/branding_provider.dart";
 import "package:polder/providers/deep_link/deep_link_provider.dart";
+import "package:polder/providers/features/feature_modes_provider.dart";
 import "package:polder/providers/notifications/notification_coordinator.dart";
-import "package:polder_drive/providers/file_browser/file_browser_location_provider.dart";
-import "package:polder_drive/providers/sharing/share_target_provider.dart";
 import "package:polder/routes/app_router.dart";
-import "package:polder_ui/theme/app_theme.dart";
-import "package:polder/widgets/desktop/polder_tray.dart";
+import "package:polder/util/app_title.dart";
 import "package:polder/widgets/desktop/desktop_window_title.dart";
+import "package:polder/widgets/desktop/polder_tray.dart";
 import "package:polder/widgets/layout/mouse_navigation.dart";
 import "package:polder/widgets/navigation/navigation_history_scope.dart";
-import "package:polder_window/window_titlebar.dart";
 import "package:polder/widgets/shortcuts/launcher_shortcuts.dart";
+import "package:polder_calendar/providers/calendar/week_layout_provider.dart";
+import "package:polder_core/providers/account_provider.dart";
+import "package:polder_core/providers/branding/branding_provider.dart";
+import "package:polder_core/providers/browser/directory_provider.dart";
+import "package:polder_core/providers/connection/server_connection_provider.dart";
+import "package:polder_core/providers/current_user_provider.dart";
+import "package:polder_core/providers/offline/offline_availability_provider.dart";
+import "package:polder_core/providers/offline/offline_sync_provider.dart";
+import "package:polder_drive/providers/file_browser/file_browser_location_provider.dart";
+import "package:polder_drive/providers/sharing/share_target_provider.dart";
+import "package:polder_notes/providers/notes/notes_folder_provider.dart";
+import "package:polder_notes/providers/notes/notes_tree_provider.dart";
+import "package:polder_ui/l10n/generated/app_localizations.dart";
+import "package:polder_ui/providers/appearance/appearance_provider.dart";
+import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
-import "package:polder/util/app_title.dart";
-import "package:calendar_views/calendar_views.dart";
+import "package:polder_window/window_titlebar.dart";
 
 class PolderApp extends ConsumerStatefulWidget {
   const PolderApp({super.key});
@@ -121,7 +120,11 @@ class _PolderAppState extends ConsumerState<PolderApp> {
       theme: AppTheme.build(seed, Brightness.light),
       darkTheme: AppTheme.build(seed, Brightness.dark),
       themeMode: appearance.mode,
-      localizationsDelegates: [...AppLocalizations.localizationsDelegates, CalendarLocalizations.delegate],
+      localizationsDelegates: [
+        ...GlobalMaterialLocalizations.delegates,
+        ...AppLocalizations.localizationsDelegates,
+        CalendarLocalizations.delegate,
+      ],
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => restoringAccount
           ? ColoredBox(color: Theme.of(context).colorScheme.surface)

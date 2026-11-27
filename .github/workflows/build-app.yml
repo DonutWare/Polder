@@ -273,6 +273,14 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      # SwiftPM clones plugin dependencies (e.g. swift-collections) from GitHub; anonymous clones
+      # get refused on shared runners ("could not read Username"), so authenticate them.
+      - name: Authenticate GitHub clones for Swift Package Manager
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64)"
+
       - name: Build iOS app
         run: flutter build ipa --no-codesign --build-number=${{ github.run_number }}
 
@@ -314,6 +322,13 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      # See build-ios: authenticate SwiftPM's GitHub clones.
+      - name: Authenticate GitHub clones for Swift Package Manager
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic $(printf 'x-access-token:%s' "$TOKEN" | base64)"
 
       - name: Build macOS app
         run: flutter build macos --build-number=${{ github.run_number }} --dart-define=POLDER_CHANNEL=${{ needs.info.outputs.channel }} --dart-define=POLDER_UPDATE_PUBLIC_KEY=${{ secrets.UPDATE_PUBLIC_KEY }}

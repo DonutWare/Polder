@@ -1,19 +1,17 @@
 import "dart:async";
 
-import "package:material_ui/material_ui.dart";
-
 import "package:flutter_riverpod/flutter_riverpod.dart";
 import "package:go_router/go_router.dart";
+import "package:material_ui/material_ui.dart";
 import "package:polder_core/providers/account_provider.dart";
 import "package:polder_core/providers/branding/branding_provider.dart";
 import "package:polder_core/providers/connection/server_connection_provider.dart";
 import "package:polder_core/providers/offline/offline_sync_provider.dart";
-import "package:polder_window/window_titlebar.dart";
-
 import "package:polder_ui/l10n/generated/app_localizations.dart";
 import "package:polder_ui/providers/appearance/appearance_provider.dart";
 import "package:polder_ui/theme/app_theme.dart";
 import "package:polder_ui/util/adaptive_layout/adaptive_layout.dart";
+import "package:polder_window/window_titlebar.dart";
 
 class StandaloneApp extends ConsumerStatefulWidget {
   const StandaloneApp({
@@ -69,7 +67,11 @@ class _StandaloneAppState extends ConsumerState<StandaloneApp> {
       theme: AppTheme.build(seed, Brightness.light),
       darkTheme: AppTheme.build(seed, Brightness.dark),
       themeMode: appearance.mode,
-      localizationsDelegates: [...AppLocalizations.localizationsDelegates, ...widget.localizationsDelegates],
+      localizationsDelegates: [
+        ...GlobalMaterialLocalizations.delegates,
+        ...AppLocalizations.localizationsDelegates,
+        ...widget.localizationsDelegates,
+      ],
       supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => restoringAccount
           ? ColoredBox(color: Theme.of(context).colorScheme.surface)

@@ -15,3 +15,4 @@ client/flatpak/build.env
 .flatpak-builder/
 flatpak_app/
 client/apps/*/build/
+.idea/*
